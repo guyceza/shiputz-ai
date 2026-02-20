@@ -204,8 +204,8 @@ export async function POST(request: NextRequest) {
       contents: [{
         parts: [
           {
-            inline_data: {
-              mime_type: mimeType,
+            inlineData: {
+              mimeType: mimeType,
               data: imageBase64
             }
           },
@@ -254,8 +254,8 @@ export async function POST(request: NextRequest) {
       contents: [{
         parts: [
           {
-            inline_data: {
-              mime_type: mimeType,
+            inlineData: {
+              mimeType: mimeType,
               data: imageBase64
             }
           },

@@ -247,8 +247,17 @@ export async function POST(request: NextRequest) {
     // Step 3: Edit image with Nano Banana Pro (gemini-3-pro-image-preview)
     const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Create edit prompt
-    const editPrompt = `Edit this room image: ${description}. Make it look professionally renovated and modern. Keep the same room structure and perspective but apply the requested changes.`;
+    // Create edit prompt - be very specific about what to change and what NOT to change
+    const editPrompt = `IMPORTANT: Make ONLY the following change to this room image: ${description}
+
+DO NOT change:
+- The room layout and structure
+- The camera angle and perspective  
+- Furniture positions (unless specifically requested)
+- Window and door locations
+- The overall room shape
+
+ONLY modify what was specifically requested. Keep everything else exactly as it appears in the original image.`;
 
     const editPayload = {
       contents: [{

@@ -43,7 +43,7 @@ const searchOptions: SearchOption[] = [
   },
   {
     name: "Home Center",
-    logo: "/logos/homecenter.svg",
+    logo: "/logos/homecenter.jpg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:homecenter.co.il " + query)}`,
     bgColor: "bg-[#00A650]",
     hoverColor: "hover:bg-[#008542]",

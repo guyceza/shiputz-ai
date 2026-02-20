@@ -289,7 +289,9 @@ ONLY modify what was specifically requested. Keep everything else exactly as it 
 
       if (editResponse.ok) {
         const editData = await editResponse.json();
-        console.log("Nano Banana response:", JSON.stringify(editData).slice(0, 500));
+        console.log("Nano Banana full response:", JSON.stringify(editData).slice(0, 1500));
+        console.log("Candidates:", editData.candidates?.length || 0);
+        console.log("Content:", JSON.stringify(editData.candidates?.[0]?.content).slice(0, 500));
         // Look for image in response parts
         const parts = editData.candidates?.[0]?.content?.parts || [];
         console.log("Found parts:", parts.length);

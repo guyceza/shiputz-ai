@@ -1,0 +1,354 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+
+interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  imageUrl?: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  budget: number;
+  spent: number;
+  createdAt: string;
+  expenses?: Expense[];
+}
+
+const CATEGORIES = [
+  "חומרי בניין",
+  "עבודה",
+  "חשמל",
+  "אינסטלציה",
+  "ריצוף",
+  "צבע",
+  "מטבח",
+  "אמבטיה",
+  "אחר",
+];
+
+export default function ProjectPage() {
+  const router = useRouter();
+  const params = useParams();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [project, setProject] = useState<Project | null>(null);
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  
+  // Expense form
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      router.push("/login");
+      return;
+    }
+
+    const savedProjects = localStorage.getItem("projects");
+    if (savedProjects) {
+      const projects: Project[] = JSON.parse(savedProjects);
+      const found = projects.find((p) => p.id === params.id);
+      if (found) {
+        setProject(found);
+      } else {
+        router.push("/dashboard");
+      }
+    }
+  }, [params.id, router]);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Convert to base64 for display
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      setSelectedImage(base64);
+      
+      // Scan with AI
+      setScanning(true);
+      try {
+        const response = await fetch("/api/scan-receipt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64 }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.description) setDescription(data.description);
+          if (data.amount) setAmount(data.amount.toString());
+          if (data.category && CATEGORIES.includes(data.category)) {
+            setCategory(data.category);
+          }
+        }
+      } catch (error) {
+        console.error("Scan error:", error);
+      }
+      setScanning(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddExpense = () => {
+    if (!project || !description || !amount) return;
+
+    const newExpense: Expense = {
+      id: Date.now().toString(),
+      description,
+      amount: parseFloat(amount),
+      category,
+      date: new Date().toISOString(),
+      imageUrl: selectedImage || undefined,
+    };
+
+    const updatedProject = {
+      ...project,
+      expenses: [...(project.expenses || []), newExpense],
+      spent: project.spent + parseFloat(amount),
+    };
+
+    // Update in localStorage
+    const savedProjects = localStorage.getItem("projects");
+    if (savedProjects) {
+      const projects: Project[] = JSON.parse(savedProjects);
+      const updatedProjects = projects.map((p) =>
+        p.id === project.id ? updatedProject : p
+      );
+      localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    }
+
+    setProject(updatedProject);
+    setShowAddExpense(false);
+    setDescription("");
+    setAmount("");
+    setCategory(CATEGORIES[0]);
+    setSelectedImage(null);
+  };
+
+  if (!project) return null;
+
+  const budgetPercentage = (project.spent / project.budget) * 100;
+  const remaining = project.budget - project.spent;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="h-11 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
+              ‹ חזרה
+            </Link>
+            <span className="text-base font-semibold text-gray-900">
+              {project.name}
+            </span>
+          </div>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Budget Overview */}
+        <div className="bg-white rounded-2xl p-8 mb-6">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">תקציב</p>
+              <p className="text-3xl font-semibold">₪{project.budget.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">הוצאות</p>
+              <p className="text-3xl font-semibold">₪{project.spent.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">נותר</p>
+              <p className={`text-3xl font-semibold ${remaining < 0 ? "text-red-600" : ""}`}>
+                ₪{remaining.toLocaleString()}
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  budgetPercentage > 100
+                    ? "bg-red-500"
+                    : budgetPercentage > 80
+                    ? "bg-yellow-500"
+                    : "bg-green-500"
+                }`}
+                style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              {budgetPercentage.toFixed(0)}% מהתקציב נוצל
+            </p>
+          </div>
+        </div>
+
+        {/* Expenses */}
+        <div className="bg-white rounded-2xl p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">הוצאות</h2>
+            <button
+              onClick={() => setShowAddExpense(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition-colors"
+            >
+              הוסף הוצאה
+            </button>
+          </div>
+
+          {!project.expenses || project.expenses.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">אין הוצאות עדיין</p>
+          ) : (
+            <div className="space-y-3">
+              {project.expenses.map((expense) => (
+                <div
+                  key={expense.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                >
+                  <div className="flex items-center gap-4">
+                    {expense.imageUrl && (
+                      <img
+                        src={expense.imageUrl}
+                        alt=""
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                    )}
+                    <div>
+                      <p className="font-medium">{expense.description}</p>
+                      <p className="text-sm text-gray-500">
+                        {expense.category} • {new Date(expense.date).toLocaleDateString("he-IL")}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-semibold">₪{expense.amount.toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Add Expense Modal */}
+      {showAddExpense && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-semibold mb-6">הוסף הוצאה</h2>
+            
+            {/* Image Upload */}
+            <div className="mb-6">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              {selectedImage ? (
+                <div className="relative">
+                  <img
+                    src={selectedImage}
+                    alt="קבלה"
+                    className="w-full h-48 object-cover rounded-xl"
+                  />
+                  <button
+                    onClick={() => setSelectedImage(null)}
+                    className="absolute top-2 left-2 bg-black/50 text-white w-8 h-8 rounded-full"
+                  >
+                    ✕
+                  </button>
+                  {scanning && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
+                      <p className="text-gray-600">סורק קבלה...</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-blue-600 hover:text-blue-600 transition-colors"
+                >
+                  <span className="text-2xl mb-1">📷</span>
+                  <span className="text-sm">צלם קבלה או העלה תמונה</span>
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">תיאור</label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="לדוגמה: חומרי בניין מאייס"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">סכום (₪)</label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">קטגוריה</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600 bg-white"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={handleAddExpense}
+                disabled={!description || !amount}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-full text-base font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                הוסף
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddExpense(false);
+                  setDescription("");
+                  setAmount("");
+                  setSelectedImage(null);
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-full text-base font-medium hover:bg-gray-200 transition-colors"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

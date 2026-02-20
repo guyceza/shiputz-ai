@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-function HomeContent() {
-  const searchParams = useSearchParams();
-  const isAdmin = searchParams.get("admin") === "true";
+export default function Home() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsAdmin(params.get("admin") === "true");
+  }, []);
   
   const [calcSize, setCalcSize] = useState("80");
   const [calcType, setCalcType] = useState("קומפלט");
@@ -679,14 +682,6 @@ function HomeContent() {
         </div>
       </footer>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen" />}>
-      <HomeContent />
-    </Suspense>
   );
 }
 

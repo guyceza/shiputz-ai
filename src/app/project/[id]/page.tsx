@@ -4,6 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 
+// Check for admin mode
+const getIsAdmin = () => {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("admin") === "true";
+};
+
 interface Expense {
   id: string;
   description: string;
@@ -148,6 +155,14 @@ export default function ProjectPage() {
   // Quote comparison
   const [showQuoteComparison, setShowQuoteComparison] = useState(false);
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
+  
+  // Admin mode
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  
+  useEffect(() => {
+    setIsAdmin(getIsAdmin());
+  }, []);
   
   // איך השיפוץ שלי יראה?
   const [showAIVision, setShowAIVision] = useState(false);
@@ -556,8 +571,8 @@ export default function ProjectPage() {
     if (!visionImage || !visionDescription.trim()) return;
     
     const usage = getVisionUsageToday();
-    if (usage >= 10) {
-      alert('הגעת למגבלת 10 הדמיות ליום. נסה שוב מחר.');
+    if (usage >= 10 && !isAdmin) {
+      setShowLimitModal(true);
       return;
     }
     
@@ -1708,6 +1723,53 @@ export default function ProjectPage() {
               </>
             )}
             <button onClick={() => setShowQuoteAnalysis(false)} className="w-full border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">סגור</button>
+          </div>
+        </div>
+      )}
+
+      {/* Limit Modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🎨</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">נגמרו ההדמיות להיום</h3>
+            <p className="text-gray-500 mb-6">
+              השתמשת ב-10 ההדמיות היומיות שלך. רוצה להמשיך לדמיין את השיפוץ?
+            </p>
+            
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 mb-6">
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪29.90</div>
+              <div className="text-sm text-gray-500 mb-4">עבור 20 הדמיות נוספות</div>
+              <ul className="text-sm text-gray-600 space-y-2 text-right">
+                <li className="flex items-center gap-2 justify-end">
+                  <span>הדמיות באיכות גבוהה</span>
+                  <span className="text-green-500">✓</span>
+                </li>
+                <li className="flex items-center gap-2 justify-end">
+                  <span>הערכת עלויות מדויקת</span>
+                  <span className="text-green-500">✓</span>
+                </li>
+                <li className="flex items-center gap-2 justify-end">
+                  <span>תקף ל-30 יום</span>
+                  <span className="text-green-500">✓</span>
+                </li>
+              </ul>
+            </div>
+            
+            <button
+              onClick={() => window.location.href = '/signup?plan=vision-pack'}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-full font-medium hover:from-purple-700 hover:to-blue-700 transition-all mb-3"
+            >
+              רכוש עכשיו
+            </button>
+            <button
+              onClick={() => setShowLimitModal(false)}
+              className="w-full text-gray-500 py-2 hover:text-gray-700"
+            >
+              אנסה שוב מחר
+            </button>
           </div>
         </div>
       )}

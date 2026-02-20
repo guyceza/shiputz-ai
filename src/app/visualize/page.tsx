@@ -6,6 +6,8 @@ import Link from "next/link";
 interface ExampleCard {
   id: number;
   title: string;
+  beforeImg: string;
+  afterImg: string;
   beforeDesc: string;
   afterDesc: string;
   changes: string;
@@ -17,7 +19,9 @@ const EXAMPLES: ExampleCard[] = [
   {
     id: 1,
     title: "סלון מודרני",
-    beforeDesc: "סלון ישן עם קירות לבנים ורצפת שיש",
+    beforeImg: "/examples/living-before.jpg",
+    afterImg: "/examples/living-after.jpg",
+    beforeDesc: "סלון ישן עם טפט מיושן, שטיח ישן ורהיטים מיושנים",
     afterDesc: "סלון מעוצב עם פרקט, תאורה שקועה ופינת ישיבה מודרנית",
     changes: "החלפת ריצוף לפרקט, התקנת 8 ספוטים שקועים, צביעה בגוון אפור-כחלחל",
     costs: [
@@ -31,7 +35,9 @@ const EXAMPLES: ExampleCard[] = [
   {
     id: 2,
     title: "מטבח כפרי",
-    beforeDesc: "מטבח ישן עם ארונות לבנים וחיפוי קרמיקה",
+    beforeImg: "/examples/kitchen-before.jpg",
+    afterImg: "/examples/kitchen-after.jpg",
+    beforeDesc: "מטבח ישן עם ארונות אלון מיושנים ותאורה פלורסנטית",
     afterDesc: "מטבח כפרי עם ארונות עץ, משטח שיש וחיפוי אריחים מעוצבים",
     changes: "החלפת חזיתות לעץ אלון, משטח שיש קיסר, חיפוי קרמיקה מרוקאית",
     costs: [
@@ -45,7 +51,9 @@ const EXAMPLES: ExampleCard[] = [
   {
     id: 3,
     title: "חדר שינה מינימליסטי",
-    beforeDesc: "חדר שינה עם ארון ישן וצבע צהבהב",
+    beforeImg: "/examples/bedroom-before.jpg",
+    afterImg: "/examples/bedroom-after.jpg",
+    beforeDesc: "חדר שינה עם שטיח בז׳, וילונות ישנים ומאוורר תקרה מיושן",
     afterDesc: "חדר שינה מינימליסטי עם ארון קיר מלא, גבס דקורטיבי ותאורה עקיפה",
     changes: "ארון קיר מלא 3 מטר, תקרת גבס עם תאורה עקיפה, צביעה לבנה",
     costs: [
@@ -59,36 +67,38 @@ const EXAMPLES: ExampleCard[] = [
   },
 ];
 
-function BeforeAfterSlider({ beforeDesc, afterDesc }: { beforeDesc: string; afterDesc: string }) {
+function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterImg: string }) {
   const [sliderPosition, setSliderPosition] = useState(50);
 
   return (
-    <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-      {/* Before side */}
+    <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100">
+      {/* Before image (full width, clipped from right) */}
       <div 
-        className="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center p-6"
+        className="absolute inset-0"
         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
-        <div className="text-center">
-          <div className="w-16 h-16 bg-amber-200 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-3xl">🏠</span>
-          </div>
-          <p className="text-amber-800 font-medium text-sm">לפני</p>
-          <p className="text-amber-700 text-xs mt-1 max-w-[200px]">{beforeDesc}</p>
+        <img 
+          src={beforeImg} 
+          alt="לפני" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+          לפני
         </div>
       </div>
       
-      {/* After side */}
+      {/* After image (full width, clipped from left) */}
       <div 
-        className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center p-6"
+        className="absolute inset-0"
         style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
       >
-        <div className="text-center">
-          <div className="w-16 h-16 bg-emerald-200 rounded-full flex items-center justify-center mx-auto mb-3">
-            <span className="text-3xl">✨</span>
-          </div>
-          <p className="text-emerald-800 font-medium text-sm">אחרי</p>
-          <p className="text-emerald-700 text-xs mt-1 max-w-[200px]">{afterDesc}</p>
+        <img 
+          src={afterImg} 
+          alt="אחרי" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-3 left-3 bg-emerald-600/80 text-white text-xs px-2 py-1 rounded">
+          אחרי
         </div>
       </div>
       
@@ -120,7 +130,7 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300">
-      <BeforeAfterSlider beforeDesc={example.beforeDesc} afterDesc={example.afterDesc} />
+      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} />
       
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.title}</h3>

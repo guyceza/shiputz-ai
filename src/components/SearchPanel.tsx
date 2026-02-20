@@ -59,7 +59,7 @@ const searchOptions: SearchOption[] = [
   },
   {
     name: "IDdesign",
-    logo: "/logos/iddesign.svg",
+    logo: "/logos/iddesign.jpg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:iddesign.co.il " + query)}`,
     bgColor: "bg-gray-900",
     hoverColor: "hover:bg-gray-800",

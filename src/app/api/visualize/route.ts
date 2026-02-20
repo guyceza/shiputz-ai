@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
     console.log("API key found, length:", apiKey.length);
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     // Extract base64 data if it's a data URL
     let imageBase64 = image;

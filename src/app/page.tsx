@@ -730,3 +730,4 @@ function TestimonialCard({ quote, name, city, rating }: { quote: string; name: s
     </div>
   );
 }
+

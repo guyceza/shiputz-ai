@@ -179,7 +179,7 @@ export default function VisualizePage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full mb-6">
             <span className="text-lg">✨</span>
-            <span className="text-sm font-medium text-purple-700">חדש! AI Vision</span>
+            <span className="text-sm font-medium text-purple-700">חדש! ראה איך השיפוץ שלך יראה</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6 text-gray-900">
@@ -273,7 +273,7 @@ export default function VisualizePage() {
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
               רוצה לנסות בעצמך?
             </h2>
-            <p className="text-gray-500">הירשם לתוכנית AI Vision</p>
+            <p className="text-gray-500">הירשם לשירות ההדמיה</p>
           </div>
           
           <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
@@ -286,7 +286,7 @@ export default function VisualizePage() {
               <div className="inline-flex items-center gap-2 mb-4">
                 <span className="text-4xl">🎨</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">AI Vision</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">איך השיפוץ שלי יראה?</h3>
               <p className="text-sm text-gray-500">תוסף לחשבון ShiputzAI קיים</p>
             </div>
             
@@ -358,7 +358,7 @@ export default function VisualizePage() {
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
               </summary>
               <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                עם מנוי AI Vision אפשר ליצור עד 10 הדמיות ביום. המכסה מתאפסת בחצות.
+                עם מנוי לשירות ההדמיה אפשר ליצור עד 10 הדמיות ביום. המכסה מתאפסת בחצות.
               </p>
             </details>
             
@@ -392,7 +392,7 @@ export default function VisualizePage() {
             מוכן לראות את השיפוץ שלך?
           </h2>
           <p className="text-gray-400 mb-8">
-            הצטרף לאלפי משפצים שכבר משתמשים ב-AI Vision
+            הצטרף לאלפי משפצים שכבר משתמשים בשירות ההדמיה
           </p>
           <div className="flex gap-4 flex-wrap justify-center">
             <Link

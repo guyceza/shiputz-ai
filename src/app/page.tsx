@@ -312,7 +312,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AI Vision Teaser */}
+      {/* איך השיפוץ שלי יראה? Teaser */}
       <section className="py-20 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12">
@@ -359,7 +359,7 @@ export default function Home() {
                 href="/visualize"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-base font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
               >
-                נסה את AI Vision
+                נסה את שירות ההדמיה
                 <span>←</span>
               </Link>
             </div>

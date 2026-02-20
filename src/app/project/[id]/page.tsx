@@ -149,7 +149,7 @@ export default function ProjectPage() {
   const [showQuoteComparison, setShowQuoteComparison] = useState(false);
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
   
-  // AI Vision
+  // איך השיפוץ שלי יראה?
   const [showAIVision, setShowAIVision] = useState(false);
   const [visionImage, setVisionImage] = useState<string | null>(null);
   const [visionDescription, setVisionDescription] = useState("");
@@ -516,7 +516,7 @@ export default function ProjectPage() {
     URL.revokeObjectURL(url);
   };
 
-  // AI Vision handlers
+  // איך השיפוץ שלי יראה? handlers
   const getVisionUsageToday = (): number => {
     const today = new Date().toISOString().split('T')[0];
     const stored = localStorage.getItem('aiVisionUsage');
@@ -815,13 +815,13 @@ export default function ProjectPage() {
               )}
             </div>
 
-            {/* AI Vision */}
+            {/* איך השיפוץ שלי יראה? */}
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden bg-gradient-to-br from-purple-50 to-blue-50">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">✨</span>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">AI Vision</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה?</h2>
                     <p className="text-sm text-gray-500">ראה את השיפוץ לפני שמתחיל</p>
                   </div>
                 </div>
@@ -1476,14 +1476,14 @@ export default function ProjectPage() {
         </div>
       )}
 
-      {/* AI Vision Modal */}
+      {/* איך השיפוץ שלי יראה? Modal */}
       {showAIVision && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
           <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">✨</span>
-                <h2 className="text-lg font-semibold text-gray-900">AI Vision - הדמיית שיפוץ</h2>
+                <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה? - הדמיית שיפוץ</h2>
               </div>
               <button onClick={() => { setShowAIVision(false); resetVision(); }} className="text-gray-500 hover:text-gray-900">✕</button>
             </div>

@@ -329,16 +329,21 @@ export default function Home() {
                     לפני
                   </div>
                 </div>
-                <div className="relative aspect-[4/3]">
+                <Link href="/shop-look" className="relative aspect-[4/3] group">
                   <img 
                     src="/after-room.jpg" 
                     alt="אחרי השיפוץ - נוצר ע״י AI"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
                     אחרי
                   </div>
-                </div>
+                  {/* Shop the Look indicator */}
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span>🛒</span>
+                    <span>Shop the Look</span>
+                  </div>
+                </Link>
               </div>
               <div className="absolute -top-3 -right-3 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-full">
                 חדש
@@ -358,12 +363,21 @@ export default function Home() {
                 <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הערכת עלויות</span>
                 <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">תוך שניות</span>
               </div>
-              <Link
-                href="/visualize"
-                className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-              >
-                נסה עכשיו
-              </Link>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <Link
+                  href="/visualize"
+                  className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                >
+                  נסה עכשיו
+                </Link>
+                <Link
+                  href="/shop-look"
+                  className="inline-flex items-center gap-2 border border-gray-200 text-gray-900 px-6 py-4 rounded-full text-base hover:bg-gray-50 transition-colors"
+                >
+                  <span>🛒</span>
+                  <span>Shop the Look</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

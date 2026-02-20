@@ -151,12 +151,27 @@ export default function Home() {
       </section>
 
       {/* Trust Bar */}
-      <section className="py-6 px-6 border-b border-gray-100">
+      <section className="py-8 px-6 border-b border-gray-100">
         <div className="max-w-3xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 text-sm text-gray-500">
-            <span className="flex items-center gap-2">🔒 מאובטח ופרטי</span>
-            <span className="flex items-center gap-2">💰 ללא עלות לנסות</span>
-            <span className="flex items-center gap-2">🤖 מבוסס AI</span>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
+            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-emerald-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>מאובטח ופרטי</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>ללא עלות לנסות</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-full text-purple-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              <span>מבוסס AI</span>
+            </div>
           </div>
         </div>
       </section>

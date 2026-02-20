@@ -9,47 +9,61 @@ interface SearchPanelProps {
 
 interface SearchOption {
   name: string;
-  icon: string;
+  logo: string;
   getUrl: (query: string) => string;
-  color: string;
+  bgColor: string;
+  hoverColor: string;
+  textColor: string;
 }
 
 const searchOptions: SearchOption[] = [
   {
     name: "Google",
-    icon: "🔍",
+    logo: "/logos/google.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent(query + " לקנייה בישראל")}`,
-    color: "bg-white hover:bg-gray-50 border-gray-200",
+    bgColor: "bg-white",
+    hoverColor: "hover:bg-gray-50",
+    textColor: "text-gray-900",
   },
   {
     name: "IKEA",
-    icon: "🏠",
+    logo: "/logos/ikea.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:ikea.co.il " + query)}`,
-    color: "bg-[#0058A3] hover:bg-[#004280] text-white border-[#0058A3]",
+    bgColor: "bg-[#0058A3]",
+    hoverColor: "hover:bg-[#004280]",
+    textColor: "text-white",
   },
   {
     name: "ACE",
-    icon: "🔧",
+    logo: "/logos/ace.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:ace.co.il " + query)}`,
-    color: "bg-[#E31837] hover:bg-[#C41430] text-white border-[#E31837]",
+    bgColor: "bg-[#E31837]",
+    hoverColor: "hover:bg-[#C41430]",
+    textColor: "text-white",
   },
   {
     name: "Home Center",
-    icon: "🛋️",
+    logo: "/logos/homecenter.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:homecenter.co.il " + query)}`,
-    color: "bg-[#00A650] hover:bg-[#008542] text-white border-[#00A650]",
+    bgColor: "bg-[#00A650]",
+    hoverColor: "hover:bg-[#008542]",
+    textColor: "text-white",
   },
   {
     name: "עמינח",
-    icon: "🛏️",
+    logo: "/logos/aminach.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:aminach.co.il " + query)}`,
-    color: "bg-[#1E3A5F] hover:bg-[#152A45] text-white border-[#1E3A5F]",
+    bgColor: "bg-[#1E3A5F]",
+    hoverColor: "hover:bg-[#152A45]",
+    textColor: "text-white",
   },
   {
     name: "IDdesign",
-    icon: "✨",
+    logo: "/logos/iddesign.svg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:iddesign.co.il " + query)}`,
-    color: "bg-gray-900 hover:bg-gray-800 text-white border-gray-900",
+    bgColor: "bg-gray-900",
+    hoverColor: "hover:bg-gray-800",
+    textColor: "text-white",
   },
 ];
 
@@ -104,13 +118,16 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
                 <button
                   key={option.name}
                   onClick={() => handleSearch(option)}
-                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border transition-all duration-200 ${option.color}`}
+                  className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border border-gray-200 transition-all duration-200 ${option.bgColor} ${option.hoverColor}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{option.icon}</span>
-                    <span className="font-medium">{option.name}</span>
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={option.logo} 
+                      alt={option.name}
+                      className="h-8 w-auto object-contain"
+                    />
                   </div>
-                  <svg className="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-5 h-5 opacity-60 ${option.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </button>

@@ -313,54 +313,56 @@ export default function Home() {
       </section>
 
       {/* איך השיפוץ שלי יראה? Teaser */}
-      <section className="py-20 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            {/* Preview */}
+      <section className="py-24 px-6 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-16">
+            {/* Preview - Real Before/After Images */}
             <div className="flex-1 relative">
-              <div className="relative">
-                {/* Before/After visual */}
-                <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden shadow-xl">
-                  <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <span className="text-5xl">🏠</span>
-                      <p className="text-amber-700 font-medium mt-2">לפני</p>
-                    </div>
-                  </div>
-                  <div className="aspect-square bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                    <div className="text-center p-4">
-                      <span className="text-5xl">✨</span>
-                      <p className="text-emerald-700 font-medium mt-2">אחרי</p>
-                    </div>
+              <div className="grid grid-cols-2 gap-3 rounded-2xl overflow-hidden">
+                <div className="relative aspect-[4/3]">
+                  <img 
+                    src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop" 
+                    alt="לפני השיפוץ"
+                    className="w-full h-full object-cover grayscale"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm py-2 text-center">
+                    לפני
                   </div>
                 </div>
-                {/* Badge */}
-                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
-                  חדש!
+                <div className="relative aspect-[4/3]">
+                  <img 
+                    src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&h=300&fit=crop" 
+                    alt="אחרי השיפוץ"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
+                    אחרי
+                  </div>
                 </div>
+              </div>
+              <div className="absolute -top-3 -right-3 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-full">
+                חדש
               </div>
             </div>
             
             {/* Content */}
             <div className="flex-1 text-center md:text-right">
               <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
-                ראה את השיפוץ<br />
-                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">לפני שמתחיל.</span>
+                איך השיפוץ שלי יראה?
               </h2>
-              <p className="text-gray-500 mb-6 leading-relaxed">
-                העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך הדמיה של התוצאה הסופית עם הערכת עלויות מדויקת.
+              <p className="text-gray-500 mb-8 leading-relaxed">
+                העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וקבל הדמיה של התוצאה הסופית עם הערכת עלויות.
               </p>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
-                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">🎨 הדמיה ב-AI</span>
-                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">💰 הערכת עלויות</span>
-                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">⚡ תוך שניות</span>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-8">
+                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הדמיה חכמה</span>
+                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הערכת עלויות</span>
+                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">תוך שניות</span>
               </div>
               <Link
                 href="/visualize"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-base font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+                className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
               >
-                נסה את שירות ההדמיה
-                <span>←</span>
+                נסה עכשיו
               </Link>
             </div>
           </div>

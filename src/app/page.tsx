@@ -321,9 +321,9 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-3 rounded-2xl overflow-hidden">
                 <div className="relative aspect-[4/3]">
                   <img 
-                    src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop" 
+                    src="/before-room.jpg" 
                     alt="לפני השיפוץ"
-                    className="w-full h-full object-cover grayscale"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm py-2 text-center">
                     לפני
@@ -331,8 +331,8 @@ export default function Home() {
                 </div>
                 <div className="relative aspect-[4/3]">
                   <img 
-                    src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&h=300&fit=crop" 
-                    alt="אחרי השיפוץ"
+                    src="/after-room.jpg" 
+                    alt="אחרי השיפוץ - נוצר ע״י AI"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">

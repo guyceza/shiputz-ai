@@ -148,6 +148,24 @@ export default function ProjectPage() {
   // Quote comparison
   const [showQuoteComparison, setShowQuoteComparison] = useState(false);
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
+  
+  // AI Vision
+  const [showAIVision, setShowAIVision] = useState(false);
+  const [visionImage, setVisionImage] = useState<string | null>(null);
+  const [visionDescription, setVisionDescription] = useState("");
+  const [visionLoading, setVisionLoading] = useState(false);
+  const [visionResult, setVisionResult] = useState<{
+    analysis: string;
+    generatedImage: string | null;
+    costs: {
+      items: { description: string; quantity: string; unitPrice: number; total: number }[];
+      subtotal: number;
+      labor: number;
+      total: number;
+      confidence: string;
+    };
+  } | null>(null);
+  const visionInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -498,6 +516,88 @@ export default function ProjectPage() {
     URL.revokeObjectURL(url);
   };
 
+  // AI Vision handlers
+  const getVisionUsageToday = (): number => {
+    const today = new Date().toISOString().split('T')[0];
+    const stored = localStorage.getItem('aiVisionUsage');
+    if (stored) {
+      const data = JSON.parse(stored);
+      if (data.date === today) {
+        return data.count;
+      }
+    }
+    return 0;
+  };
+
+  const incrementVisionUsage = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const stored = localStorage.getItem('aiVisionUsage');
+    let count = 1;
+    if (stored) {
+      const data = JSON.parse(stored);
+      if (data.date === today) {
+        count = data.count + 1;
+      }
+    }
+    localStorage.setItem('aiVisionUsage', JSON.stringify({ date: today, count }));
+  };
+
+  const handleVisionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setVisionImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVisionGenerate = async () => {
+    if (!visionImage || !visionDescription.trim()) return;
+    
+    const usage = getVisionUsageToday();
+    if (usage >= 10) {
+      alert('הגעת למגבלת 10 הדמיות ליום. נסה שוב מחר.');
+      return;
+    }
+    
+    setVisionLoading(true);
+    setVisionResult(null);
+    
+    try {
+      const response = await fetch('/api/visualize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: visionImage,
+          description: visionDescription
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setVisionResult({
+          analysis: data.analysis,
+          generatedImage: data.generatedImage,
+          costs: data.costs
+        });
+        incrementVisionUsage();
+      } else {
+        alert('שגיאה ביצירת ההדמיה. נסה שוב.');
+      }
+    } catch {
+      alert('שגיאה בתקשורת. נסה שוב.');
+    }
+    
+    setVisionLoading(false);
+  };
+
+  const resetVision = () => {
+    setVisionImage(null);
+    setVisionDescription("");
+    setVisionResult(null);
+  };
+
   const exportFullReport = () => {
     if (!project) return;
     
@@ -713,6 +813,28 @@ export default function ProjectPage() {
                   })}
                 </div>
               )}
+            </div>
+
+            {/* AI Vision */}
+            <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden bg-gradient-to-br from-purple-50 to-blue-50">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">✨</span>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">AI Vision</h2>
+                    <p className="text-sm text-gray-500">ראה את השיפוץ לפני שמתחיל</p>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500">
+                  נשארו לך <span className="font-semibold text-gray-900">{10 - getVisionUsageToday()}</span> עריכות היום
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIVision(true)}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+              >
+                צור הדמיה חדשה
+              </button>
             </div>
 
             {/* AI Tools */}
@@ -1350,6 +1472,178 @@ export default function ProjectPage() {
             </div>
 
             <button onClick={() => setShowQuoteComparison(false)} className="w-full mt-6 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">סגור</button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Vision Modal */}
+      {showAIVision && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">✨</span>
+                <h2 className="text-lg font-semibold text-gray-900">AI Vision - הדמיית שיפוץ</h2>
+              </div>
+              <button onClick={() => { setShowAIVision(false); resetVision(); }} className="text-gray-500 hover:text-gray-900">✕</button>
+            </div>
+            
+            <div className="p-6">
+              <input ref={visionInputRef} type="file" accept="image/*" onChange={handleVisionImageSelect} className="hidden" />
+              
+              {!visionResult ? (
+                <div className="space-y-6">
+                  {/* Image Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">1. העלה תמונה של החדר</label>
+                    {visionImage ? (
+                      <div className="relative">
+                        <img src={visionImage} alt="Selected room" className="w-full h-64 object-cover rounded-xl" />
+                        <button 
+                          onClick={() => setVisionImage(null)}
+                          className="absolute top-3 left-3 bg-black/50 text-white w-8 h-8 rounded-full hover:bg-black/70"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => visionInputRef.current?.click()}
+                        className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 transition-colors"
+                      >
+                        <span className="text-4xl mb-2">📷</span>
+                        <span>לחץ להעלאת תמונה</span>
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">2. תאר את השינויים שאתה רוצה</label>
+                    <textarea
+                      value={visionDescription}
+                      onChange={(e) => setVisionDescription(e.target.value)}
+                      placeholder="לדוגמה: רוצה להחליף את הריצוף לפרקט עץ, להוסיף תאורה שקועה בתקרה, ולצבוע את הקירות באפור כהה..."
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 resize-none"
+                    />
+                  </div>
+                  
+                  {/* Generate Button */}
+                  <button
+                    onClick={handleVisionGenerate}
+                    disabled={!visionImage || !visionDescription.trim() || visionLoading}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {visionLoading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        יוצר הדמיה...
+                      </>
+                    ) : (
+                      <>
+                        <span>✨</span>
+                        תן לי לראות
+                      </>
+                    )}
+                  </button>
+                  
+                  {visionLoading && (
+                    <div className="text-center text-sm text-gray-500">
+                      <p>מנתח את התמונה ויוצר הדמיה...</p>
+                      <p>זה יכול לקחת עד 30 שניות</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Before/After Comparison */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-2 text-center">לפני</p>
+                      <img src={visionImage!} alt="Before" className="w-full h-64 object-cover rounded-xl border border-gray-200" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 mb-2 text-center">אחרי (הדמיה)</p>
+                      {visionResult.generatedImage ? (
+                        <img src={visionResult.generatedImage} alt="After" className="w-full h-64 object-cover rounded-xl border-2 border-purple-300" />
+                      ) : (
+                        <div className="w-full h-64 rounded-xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+                          <div className="text-center p-4">
+                            <span className="text-4xl mb-2 block">🎨</span>
+                            <p className="text-purple-700 font-medium">ההדמיה מבוססת על הניתוח</p>
+                            <p className="text-purple-600 text-sm">ראה פירוט למטה</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Analysis */}
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <h3 className="font-semibold text-gray-900 mb-3">ניתוח AI</h3>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{visionResult.analysis}</p>
+                  </div>
+                  
+                  {/* Cost Breakdown */}
+                  <div className="border border-gray-200 rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">הערכת עלויות</h3>
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                        רמת ביטחון: {visionResult.costs.confidence}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3 mb-4">
+                      {visionResult.costs.items.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-sm">
+                          <div>
+                            <span className="text-gray-900">{item.description}</span>
+                            <span className="text-gray-400 mr-2">({item.quantity})</span>
+                          </div>
+                          <span className="text-gray-700">₪{item.total.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="border-t border-gray-200 pt-3 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">סה״כ חומרים</span>
+                        <span className="text-gray-700">₪{visionResult.costs.subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">עבודה (25%)</span>
+                        <span className="text-gray-700">₪{visionResult.costs.labor.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-lg pt-2 border-t border-gray-200">
+                        <span className="text-gray-900">סה״כ משוער</span>
+                        <span className="text-purple-600">₪{visionResult.costs.total.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-gray-400 mt-4 text-center">
+                      * ההערכה מבוססת על מחירי שוק ממוצעים. המחיר הסופי תלוי בספקים, חומרים ואזור
+                    </p>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={resetVision}
+                      className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      צור הדמיה חדשה
+                    </button>
+                    <button
+                      onClick={() => setShowAIVision(false)}
+                      className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-xl hover:bg-gray-50"
+                    >
+                      סגור
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

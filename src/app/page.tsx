@@ -312,6 +312,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AI Vision Teaser */}
+      <section className="py-20 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            {/* Preview */}
+            <div className="flex-1 relative">
+              <div className="relative">
+                {/* Before/After visual */}
+                <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <span className="text-5xl">🏠</span>
+                      <p className="text-amber-700 font-medium mt-2">לפני</p>
+                    </div>
+                  </div>
+                  <div className="aspect-square bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <span className="text-5xl">✨</span>
+                      <p className="text-emerald-700 font-medium mt-2">אחרי</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Badge */}
+                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                  חדש!
+                </div>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 text-center md:text-right">
+              <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
+                ראה את השיפוץ<br />
+                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">לפני שמתחיל.</span>
+              </h2>
+              <p className="text-gray-500 mb-6 leading-relaxed">
+                העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך הדמיה של התוצאה הסופית עם הערכת עלויות מדויקת.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
+                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">🎨 הדמיה ב-AI</span>
+                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">💰 הערכת עלויות</span>
+                <span className="text-sm bg-white border border-gray-200 rounded-full px-4 py-2">⚡ תוך שניות</span>
+              </div>
+              <Link
+                href="/visualize"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-base font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+              >
+                נסה את AI Vision
+                <span>←</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="py-20 px-6 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">

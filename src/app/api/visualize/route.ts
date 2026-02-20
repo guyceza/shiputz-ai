@@ -251,43 +251,56 @@ export async function POST(request: NextRequest) {
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Generate image with Imagen
-    const imagenUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+    // Step 3: Edit image with Nano Banana Pro (gemini-3-pro-image-preview)
+    const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Create a prompt for Imagen based on the analysis
-    const expectedResultMatch = analysisText.match(/===תוצאה צפויה===\s*([\s\S]*?)(?:===|$)/);
-    const expectedResult = expectedResultMatch ? expectedResultMatch[1].trim() : description;
-    
-    const imagenPrompt = `Professional interior design photo of a renovated room. ${description}. ${expectedResult}. High quality, realistic lighting, modern design, 4K quality.`;
+    // Create edit prompt
+    const editPrompt = `Edit this room image: ${description}. Make it look professionally renovated and modern. Keep the same room structure and perspective but apply the requested changes.`;
 
-    const imagenPayload = {
-      instances: [{ prompt: imagenPrompt }],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio: "16:9",
-        personGeneration: "dont_allow"
+    const editPayload = {
+      contents: [{
+        parts: [
+          {
+            inline_data: {
+              mime_type: mimeType,
+              data: imageBase64
+            }
+          },
+          {
+            text: editPrompt
+          }
+        ]
+      }],
+      generationConfig: {
+        responseModalities: ["image", "text"]
       }
     };
 
     let generatedImage: string | null = null;
     
     try {
-      const imagenResponse = await fetch(imagenUrl, {
+      const editResponse = await fetch(nanoBananaUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(imagenPayload)
+        body: JSON.stringify(editPayload)
       });
 
-      if (imagenResponse.ok) {
-        const imagenData = await imagenResponse.json();
-        if (imagenData.predictions?.[0]?.bytesBase64Encoded) {
-          generatedImage = `data:image/png;base64,${imagenData.predictions[0].bytesBase64Encoded}`;
+      if (editResponse.ok) {
+        const editData = await editResponse.json();
+        // Look for image in response parts
+        const parts = editData.candidates?.[0]?.content?.parts || [];
+        for (const part of parts) {
+          if (part.inline_data?.mime_type?.startsWith("image/")) {
+            generatedImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
+            break;
+          }
         }
       } else {
-        console.error("Imagen error:", await imagenResponse.text());
+        const errorText = await editResponse.text();
+        console.error("Nano Banana edit error:", editResponse.status, errorText);
       }
-    } catch (imagenError) {
-      console.error("Imagen generation failed:", imagenError);
+    } catch (editError) {
+      console.error("Image edit failed:", editError);
       // Continue without generated image - will use placeholder
     }
 
@@ -297,7 +310,7 @@ export async function POST(request: NextRequest) {
       analysis: analysisText,
       generatedImage: generatedImage,
       costs: costEstimate,
-      prompt: imagenPrompt,
+      prompt: editPrompt,
       description: description
     });
 

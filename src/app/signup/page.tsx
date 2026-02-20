@@ -18,7 +18,9 @@ export default function SignupPage() {
     setError("");
 
     if (name && email && password) {
-      localStorage.setItem("user", JSON.stringify({ name, email }));
+      // Check for admin credentials
+      const isAdmin = email === "guyceza@gmail.com" && password === "guyyug1";
+      localStorage.setItem("user", JSON.stringify({ name, email, isAdmin }));
       router.push("/dashboard");
     } else {
       setError("נא למלא את כל השדות");

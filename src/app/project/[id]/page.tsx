@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 
-// Check for admin mode
+// Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
   if (typeof window === 'undefined') return false;
-  const params = new URLSearchParams(window.location.search);
-  return params.get("admin") === "true";
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.isAdmin === true;
+  } catch {
+    return false;
+  }
 };
 
 interface Expense {

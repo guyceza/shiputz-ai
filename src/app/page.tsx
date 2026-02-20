@@ -7,8 +7,13 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setIsAdmin(params.get("admin") === "true");
+    // Check localStorage for admin status (set during login)
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setIsAdmin(user.isAdmin === true);
+    } catch {
+      setIsAdmin(false);
+    }
   }, []);
   
   const [calcSize, setCalcSize] = useState("80");

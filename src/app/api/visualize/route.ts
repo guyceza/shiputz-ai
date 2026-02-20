@@ -175,16 +175,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Read API key
-    let apiKey: string;
-    try {
-      const fs = await import("fs/promises");
-      const credPath = "/home/ubuntu/clawd/config/gemini-credentials.json";
-      const creds = JSON.parse(await fs.readFile(credPath, "utf-8"));
-      apiKey = creds.apiKey;
-    } catch {
+    // Read API key from environment
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "Failed to load API credentials" },
+        { error: "API key not configured" },
         { status: 500 }
       );
     }

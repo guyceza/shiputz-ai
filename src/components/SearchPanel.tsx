@@ -35,7 +35,7 @@ const searchOptions: SearchOption[] = [
   },
   {
     name: "ACE",
-    logo: "/logos/ace.svg",
+    logo: "/logos/ace.png",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:ace.co.il " + query)}`,
     bgColor: "bg-[#E31837]",
     hoverColor: "hover:bg-[#C41430]",

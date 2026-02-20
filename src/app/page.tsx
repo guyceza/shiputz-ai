@@ -6,20 +6,70 @@ import Link from "next/link";
 export default function Home() {
   const [calcSize, setCalcSize] = useState("80");
   const [calcType, setCalcType] = useState("קומפלט");
+  const [calcLocation, setCalcLocation] = useState("מרכז");
+  const [calcBathrooms, setCalcBathrooms] = useState("1");
+  const [calcKitchen, setCalcKitchen] = useState("חדש");
+  const [calcInfrastructure, setCalcInfrastructure] = useState("חלקי");
   const [estimate, setEstimate] = useState<number | null>(null);
+  const [estimateBreakdown, setEstimateBreakdown] = useState<{base: number, bathrooms: number, kitchen: number, infrastructure: number} | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const pricePerSqm: Record<string, number> = {
-    "קוסמטי": 450,
-    "קומפלט": 1600,
-    "יוקרתי": 3500,
-  };
-
   const calculateEstimate = () => {
     const size = parseInt(calcSize);
-    const price = pricePerSqm[calcType] || 1600;
-    setEstimate(size * price);
+    const bathrooms = parseInt(calcBathrooms);
+    
+    // Base price per sqm by type
+    const basePrices: Record<string, number> = {
+      "קוסמטי": 400,
+      "קומפלט": 1400,
+      "יוקרתי": 2800,
+    };
+    
+    // Location multiplier
+    const locationMultiplier: Record<string, number> = {
+      "תל אביב": 1.25,
+      "מרכז": 1.0,
+      "שרון/שפלה": 0.95,
+      "חיפה/צפון": 0.85,
+      "דרום": 0.80,
+    };
+    
+    // Kitchen prices
+    const kitchenPrices: Record<string, number> = {
+      "ללא": 0,
+      "רענון": 8000,
+      "חדש": 35000,
+      "יוקרתי": 70000,
+    };
+    
+    // Infrastructure prices
+    const infraPrices: Record<string, number> = {
+      "ללא": 0,
+      "חלקי": 8000,
+      "מלא": 25000,
+    };
+    
+    // Bathroom price (per bathroom)
+    const bathroomPrice = calcType === "יוקרתי" ? 22000 : calcType === "קומפלט" ? 14000 : 5000;
+    
+    const basePrice = basePrices[calcType] || 1400;
+    const locMultiplier = locationMultiplier[calcLocation] || 1.0;
+    
+    const baseEstimate = Math.round(size * basePrice * locMultiplier);
+    const bathroomEstimate = bathrooms * bathroomPrice;
+    const kitchenEstimate = kitchenPrices[calcKitchen] || 0;
+    const infraEstimate = infraPrices[calcInfrastructure] || 0;
+    
+    const total = baseEstimate + bathroomEstimate + kitchenEstimate + infraEstimate;
+    
+    setEstimate(total);
+    setEstimateBreakdown({
+      base: baseEstimate,
+      bathrooms: bathroomEstimate,
+      kitchen: kitchenEstimate,
+      infrastructure: infraEstimate
+    });
   };
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -120,13 +170,13 @@ export default function Home() {
           </div>
           
           <div className="bg-gray-50 rounded-3xl p-8 md:p-10">
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm text-gray-600 mb-2">גודל הדירה (מ״ר)</label>
                 <select 
                   value={calcSize}
                   onChange={(e) => setCalcSize(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
                 >
                   <option value="50">50 מ״ר</option>
                   <option value="60">60 מ״ר</option>
@@ -143,11 +193,68 @@ export default function Home() {
                 <select 
                   value={calcType}
                   onChange={(e) => setCalcType(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
                 >
                   <option value="קוסמטי">קוסמטי (צבע, תיקונים קלים)</option>
                   <option value="קומפלט">קומפלט (שינויים משמעותיים)</option>
                   <option value="יוקרתי">יוקרתי (גמר גבוה)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">מיקום</label>
+                <select 
+                  value={calcLocation}
+                  onChange={(e) => setCalcLocation(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                >
+                  <option value="תל אביב">תל אביב (+25%)</option>
+                  <option value="מרכז">מרכז (בסיס)</option>
+                  <option value="שרון/שפלה">שרון / שפלה (-5%)</option>
+                  <option value="חיפה/צפון">חיפה / צפון (-15%)</option>
+                  <option value="דרום">דרום (-20%)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">חדרי רחצה</label>
+                <select 
+                  value={calcBathrooms}
+                  onChange={(e) => setCalcBathrooms(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                >
+                  <option value="1">1 חדר רחצה</option>
+                  <option value="2">2 חדרי רחצה</option>
+                  <option value="3">3 חדרי רחצה</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">מטבח</label>
+                <select 
+                  value={calcKitchen}
+                  onChange={(e) => setCalcKitchen(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                >
+                  <option value="ללא">ללא שינוי</option>
+                  <option value="רענון">רענון (חזיתות, משטח)</option>
+                  <option value="חדש">מטבח חדש סטנדרטי</option>
+                  <option value="יוקרתי">מטבח יוקרתי</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-2">תשתיות (חשמל/אינסטלציה)</label>
+                <select 
+                  value={calcInfrastructure}
+                  onChange={(e) => setCalcInfrastructure(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                >
+                  <option value="ללא">ללא שינוי</option>
+                  <option value="חלקי">שדרוג חלקי</option>
+                  <option value="מלא">החלפה מלאה</option>
                 </select>
               </div>
             </div>
@@ -159,15 +266,42 @@ export default function Home() {
               חשב עכשיו
             </button>
             
-            {estimate && (
-              <div className="mt-8 text-center animate-fadeIn">
+            {estimate && estimateBreakdown && (
+              <div className="mt-8 animate-fadeIn">
                 <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                  <p className="text-sm text-gray-500 mb-2">הערכת עלות משוערת</p>
-                  <p className="text-4xl font-bold text-gray-900 mb-1">₪{estimate.toLocaleString()}</p>
-                  <p className="text-xs text-gray-400 mb-6">±15% תלוי בפרטי הפרויקט</p>
+                  <p className="text-sm text-gray-500 mb-2 text-center">הערכת עלות משוערת</p>
+                  <p className="text-4xl font-bold text-gray-900 mb-4 text-center">₪{estimate.toLocaleString()}</p>
+                  
+                  <div className="border-t border-gray-100 pt-4 mb-4">
+                    <p className="text-xs text-gray-500 mb-2">פירוט:</p>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">עבודות בסיס ({calcSize} מ״ר)</span>
+                        <span className="text-gray-900">₪{estimateBreakdown.base.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">חדרי רחצה ({calcBathrooms})</span>
+                        <span className="text-gray-900">₪{estimateBreakdown.bathrooms.toLocaleString()}</span>
+                      </div>
+                      {estimateBreakdown.kitchen > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">מטבח</span>
+                          <span className="text-gray-900">₪{estimateBreakdown.kitchen.toLocaleString()}</span>
+                        </div>
+                      )}
+                      {estimateBreakdown.infrastructure > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">תשתיות</span>
+                          <span className="text-gray-900">₪{estimateBreakdown.infrastructure.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-gray-400 mb-6 text-center">±10% תלוי בספקים ובחומרים שתבחר</p>
                   <Link
                     href="/signup"
-                    className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="block text-center bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors"
                   >
                     רוצה לנהל את התקציב? התחל פרויקט ←
                   </Link>

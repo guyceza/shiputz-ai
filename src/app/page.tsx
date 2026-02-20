@@ -184,6 +184,26 @@ export default function Home() {
             <p className="text-gray-500">קבל הערכה מיידית על בסיס מחירי שוק מאומתים</p>
           </div>
           
+          <div className="relative">
+            {/* Blur overlay with lock */}
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 rounded-3xl flex flex-col items-center justify-center">
+              <div className="bg-white rounded-2xl p-8 shadow-xl text-center max-w-sm mx-4">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">מחשבון עלויות מתקדם</h3>
+                <p className="text-gray-500 text-sm mb-6">שדרג לחשבון פרימיום כדי לקבל הערכת עלויות מדויקת לשיפוץ שלך</p>
+                <Link
+                  href="/signup?plan=premium"
+                  className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  שדרג עכשיו
+                </Link>
+              </div>
+            </div>
+            
           <div className="bg-gray-50 rounded-3xl p-8 md:p-10">
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -323,6 +343,7 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       </section>

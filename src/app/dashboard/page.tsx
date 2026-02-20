@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +12,17 @@ interface Project {
   createdAt: string;
 }
 
+const TIPS = [
+  "בקש מהקבלן אחריות בכתב על העבודה - רוב הקבלנים הטובים נותנים שנה לפחות.",
+  "תמיד השאר 10-15% מהתקציב לבלת״מים - הם תמיד מגיעים בשיפוץ.",
+  "צלם כל שלב בעבודה - זה יעזור אם יהיו בעיות בעתיד.",
+  "אל תשלם יותר מ-30% מראש - עדיף לשלם לפי התקדמות.",
+  "בדוק שהקבלן רשום בפנקס הקבלנים לפני שסוגרים.",
+  "קבל לפחות 3 הצעות מחיר לפני שמחליטים - ההבדלים יפתיעו אותך.",
+  "וודא שיש לקבלן ביטוח צד ג׳ - זה חובה חוקית.",
+  "תכנן את לוח הזמנים עם באפר של 20% - עיכובים הם נורמה בשיפוצים."
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
@@ -19,6 +30,9 @@ export default function DashboardPage() {
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
+
+  // Random tip that changes on refresh
+  const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -61,6 +75,7 @@ export default function DashboardPage() {
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
   const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0);
   const totalRemaining = totalBudget - totalSpent;
+  const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
   if (!user) return null;
 
@@ -72,19 +87,24 @@ export default function DashboardPage() {
           <Link href="/dashboard" className="text-base font-semibold text-gray-900">
             ShiputzAI
           </Link>
-          <button
-            onClick={handleLogout}
-            className="text-xs text-gray-500 hover:text-gray-900"
-          >
-            התנתקות
-          </button>
+          <div className="flex items-center gap-6">
+            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
+              מאמרים וטיפים
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-xs text-gray-500 hover:text-gray-900"
+            >
+              התנתקות
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-semibold text-gray-900">
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
@@ -98,23 +118,59 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Stats Overview */}
+        {/* Mini Stats Overview - Enhanced */}
         {projects.length > 0 && (
-          <div className="grid md:grid-cols-3 gap-px bg-gray-100 rounded-2xl overflow-hidden mb-12">
-            <div className="bg-white p-8">
-              <p className="text-sm text-gray-500 mb-1">סה״כ תקציב</p>
-              <p className="text-2xl font-semibold text-gray-900">₪{totalBudget.toLocaleString()}</p>
+          <div className="mb-8">
+            <div className="grid md:grid-cols-4 gap-px bg-gray-100 rounded-2xl overflow-hidden">
+              <div className="bg-white p-6">
+                <p className="text-xs text-gray-500 mb-1">סה״כ תקציב</p>
+                <p className="text-2xl font-bold text-gray-900">₪{totalBudget.toLocaleString()}</p>
+              </div>
+              <div className="bg-white p-6">
+                <p className="text-xs text-gray-500 mb-1">סה״כ הוצאות</p>
+                <p className="text-2xl font-bold text-gray-900">₪{totalSpent.toLocaleString()}</p>
+              </div>
+              <div className="bg-white p-6">
+                <p className="text-xs text-gray-500 mb-1">נותר</p>
+                <p className={`text-2xl font-bold ${totalRemaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  ₪{totalRemaining.toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-white p-6">
+                <p className="text-xs text-gray-500 mb-1">פרויקטים</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              </div>
             </div>
-            <div className="bg-white p-8">
-              <p className="text-sm text-gray-500 mb-1">סה״כ הוצאות</p>
-              <p className="text-2xl font-semibold text-gray-900">₪{totalSpent.toLocaleString()}</p>
+            {/* Progress bar */}
+            <div className="mt-4 bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  spentPercentage > 90 ? 'bg-red-500' : 
+                  spentPercentage > 70 ? 'bg-amber-500' : 'bg-green-500'
+                }`}
+                style={{ width: `${Math.min(spentPercentage, 100)}%` }}
+              />
             </div>
-            <div className="bg-white p-8">
-              <p className="text-sm text-gray-500 mb-1">סה״כ נותר</p>
-              <p className="text-2xl font-semibold text-gray-900">₪{totalRemaining.toLocaleString()}</p>
-            </div>
+            <p className="text-xs text-gray-400 mt-2 text-center">{spentPercentage.toFixed(0)}% מהתקציב נוצל</p>
           </div>
         )}
+
+        {/* Did You Know? Tip Box */}
+        <div className="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+          <div className="flex items-start gap-4">
+            <span className="text-2xl">💡</span>
+            <div className="flex-1">
+              <p className="text-xs font-medium text-blue-600 mb-1">הידעת?</p>
+              <p className="text-gray-700 text-sm leading-relaxed">{randomTip}</p>
+            </div>
+            <Link 
+              href="/tips"
+              className="text-xs text-blue-600 hover:text-blue-700 whitespace-nowrap"
+            >
+              עוד טיפים ←
+            </Link>
+          </div>
+        </div>
 
         {/* Projects */}
         {projects.length === 0 ? (
@@ -160,16 +216,24 @@ export default function DashboardPage() {
             {projects.map((project) => {
               const percentage = (project.spent / project.budget) * 100;
               const remaining = project.budget - project.spent;
+              const isOverBudget = remaining < 0;
+              const isNearLimit = percentage > 80 && !isOverBudget;
               
               return (
                 <Link
                   key={project.id}
                   href={`/project/${project.id}`}
-                  className="block border border-gray-100 rounded-2xl p-8 hover:border-gray-300 transition-colors"
+                  className="block border border-gray-100 rounded-2xl p-8 hover:border-gray-300 hover:shadow-md transition-all duration-200"
                 >
                   <div className="flex items-start justify-between mb-6">
                     <h3 className="text-xl font-semibold text-gray-900">{project.name}</h3>
-                    <span className="text-sm text-gray-500">{percentage.toFixed(0)}% נוצל</span>
+                    <span className={`text-sm px-3 py-1 rounded-full ${
+                      isOverBudget ? 'bg-red-100 text-red-700' :
+                      isNearLimit ? 'bg-amber-100 text-amber-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {percentage.toFixed(0)}% נוצל
+                    </span>
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     <div>
@@ -182,12 +246,18 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">נותר</p>
-                      <p className="text-lg font-medium text-gray-900">₪{remaining.toLocaleString()}</p>
+                      <p className={`text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
+                        ₪{remaining.toLocaleString()}
+                      </p>
                     </div>
                   </div>
-                  <div className="mt-6 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="mt-6 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className={`h-full rounded-full transition-all ${
+                        isOverBudget ? 'bg-red-500' :
+                        isNearLimit ? 'bg-amber-500' :
+                        'bg-gray-900'
+                      }`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     />
                   </div>

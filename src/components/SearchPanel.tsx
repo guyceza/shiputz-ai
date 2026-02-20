@@ -51,7 +51,7 @@ const searchOptions: SearchOption[] = [
   },
   {
     name: "עמינח",
-    logo: "/logos/aminach.svg",
+    logo: "/logos/aminach.jpg",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:aminach.co.il " + query)}`,
     bgColor: "bg-[#1E3A5F]",
     hoverColor: "hover:bg-[#152A45]",

@@ -17,7 +17,6 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
-    // For now, simple demo signup
     if (name && email && password) {
       localStorage.setItem("user", JSON.stringify({ name, email }));
       router.push("/dashboard");
@@ -29,70 +28,56 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Navigation */}
-      <nav className="h-11 border-b border-gray-200/50">
+      <nav className="h-11 border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
+          <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
         </div>
       </nav>
 
-      {/* Form */}
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
-          <h1 className="text-3xl font-semibold text-center mb-8">הרשמה</h1>
+          <h1 className="text-3xl font-semibold text-gray-900 text-center mb-8">הרשמה</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="שם מלא"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600"
-                required
-              />
-            </div>
-            <div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="אימייל"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600"
-                required
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="סיסמה"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-600"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="שם מלא"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+              required
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="אימייל"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+              required
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="סיסמה"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+              required
+            />
 
-            {error && (
-              <p className="text-red-600 text-sm text-center">{error}</p>
-            )}
+            {error && <p className="text-gray-900 text-sm text-center">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-full text-base font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="w-full bg-gray-900 text-white py-3 rounded-full text-base hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
               {loading ? "נרשם..." : "הרשמה"}
             </button>
           </form>
 
-          <p className="text-center text-gray-500 mt-6">
+          <p className="text-center text-gray-500 mt-8">
             יש לך חשבון?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              התחברות
-            </Link>
+            <Link href="/login" className="text-gray-900 hover:underline">התחברות</Link>
           </p>
         </div>
       </div>

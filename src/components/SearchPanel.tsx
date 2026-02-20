@@ -10,6 +10,7 @@ interface SearchPanelProps {
 interface SearchOption {
   name: string;
   logo: string;
+  logoHeight?: string;
   getUrl: (query: string) => string;
   bgColor: string;
   hoverColor: string;
@@ -36,6 +37,7 @@ const searchOptions: SearchOption[] = [
   {
     name: "ACE",
     logo: "/logos/ace.png",
+    logoHeight: "h-12",
     getUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent("site:ace.co.il " + query)}`,
     bgColor: "bg-white",
     hoverColor: "hover:bg-gray-50",
@@ -124,7 +126,7 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
                     <img 
                       src={option.logo} 
                       alt={option.name}
-                      className="h-8 w-auto object-contain"
+                      className={`${option.logoHeight || 'h-8'} w-auto object-contain`}
                     />
                   </div>
                   <svg className={`w-5 h-5 opacity-60 ${option.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

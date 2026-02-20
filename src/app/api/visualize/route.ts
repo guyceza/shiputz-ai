@@ -287,11 +287,20 @@ export async function POST(request: NextRequest) {
 
       if (editResponse.ok) {
         const editData = await editResponse.json();
+        console.log("Nano Banana response:", JSON.stringify(editData).slice(0, 500));
         // Look for image in response parts
         const parts = editData.candidates?.[0]?.content?.parts || [];
+        console.log("Found parts:", parts.length);
         for (const part of parts) {
+          console.log("Part keys:", Object.keys(part));
           if (part.inline_data?.mime_type?.startsWith("image/")) {
             generatedImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
+            console.log("Found image!");
+            break;
+          } else if (part.inlineData?.mimeType?.startsWith("image/")) {
+            // Alternative format
+            generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            console.log("Found image (alt format)!");
             break;
           }
         }

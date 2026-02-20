@@ -185,6 +185,31 @@ export default function ProjectPage() {
     };
   } | null>(null);
   const visionInputRef = useRef<HTMLInputElement>(null);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  
+  // Tips to show during loading
+  const loadingTips = [
+    "💡 טיפ: קבל לפחות 3 הצעות מחיר לפני שמתחילים",
+    "📋 טיפ: תעד הכל בכתב - זה יחסוך לך כאבי ראש",
+    "🔍 טיפ: בדוק המלצות על קבלנים לפני שסוגרים",
+    "💰 טיפ: השאר 15% מהתקציב לבלת\"מים",
+    "📅 טיפ: שיפוץ תמיד לוקח יותר זמן מהצפוי",
+    "🏠 טיפ: צלם את המצב הקיים לפני שמתחילים",
+    "⚡ טיפ: החשמל והאינסטלציה - לא חוסכים עליהם",
+    "🎨 טיפ: בחר צבעים ניטרליים - קל לשנות אחר כך",
+    "📦 טיפ: הזמן חומרים מראש - יש עיכובים באספקה",
+    "✅ טיפ: בדוק שהקבלן מבוטח ורשום",
+  ];
+  
+  // Rotate tips during loading
+  useEffect(() => {
+    if (visionLoading) {
+      const interval = setInterval(() => {
+        setCurrentTipIndex((prev) => (prev + 1) % loadingTips.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [visionLoading]);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -1568,9 +1593,8 @@ export default function ProjectPage() {
                   </button>
                   
                   {visionLoading && (
-                    <div className="text-center text-sm text-gray-500">
-                      <p>מנתח את התמונה ויוצר הדמיה...</p>
-                      <p>זה יכול לקחת עד 30 שניות</p>
+                    <div className="text-center text-sm text-gray-500 transition-all duration-500">
+                      <p className="text-purple-600 font-medium animate-pulse">{loadingTips[currentTipIndex]}</p>
                     </div>
                   )}
                 </div>

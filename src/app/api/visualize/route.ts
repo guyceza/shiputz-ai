@@ -178,11 +178,13 @@ export async function POST(request: NextRequest) {
     // Read API key from environment
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error("GEMINI_API_KEY not found in environment");
       return NextResponse.json(
-        { error: "API key not configured" },
+        { error: "API key not configured. Please add GEMINI_API_KEY to Vercel environment variables." },
         { status: 500 }
       );
     }
+    console.log("API key found, length:", apiKey.length);
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -236,9 +238,9 @@ export async function POST(request: NextRequest) {
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error("Gemini error:", errorText);
+      console.error("Gemini API error:", geminiResponse.status, errorText);
       return NextResponse.json(
-        { error: "Failed to analyze image" },
+        { error: `Gemini API error: ${geminiResponse.status}` },
         { status: 500 }
       );
     }

@@ -92,7 +92,7 @@ export default function CheckoutPage() {
 
     // Build Whop checkout URL
     // Format: https://whop.com/checkout/[plan_id]?email=[email]&d=[discount_code]
-    const WHOP_CHECKOUT_BASE = "https://whop.com/checkout/plan_UOojekDuiaLof";
+    const WHOP_CHECKOUT_BASE = "https://whop.com/checkout/plan_UJlVQRBAuFu1t";
     
     let whopUrl = `${WHOP_CHECKOUT_BASE}?email=${encodeURIComponent(email)}`;
     

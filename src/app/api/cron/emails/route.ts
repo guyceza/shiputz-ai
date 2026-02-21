@@ -17,11 +17,11 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 1, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 3, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
-  { day: 5, subject: '📊 ראה איך זה עובד', template: 'demo' },
+  { day: 3, subject: '🎁 מתנה בשבילך — 20% הנחה', template: 'discount_offer' },
+  { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
-  { day: 10, subject: '🎁 מתנה בשבילך', template: 'discount_offer' },
-  { day: 12, subject: '⏰ נשארו 24 שעות', template: 'urgency' },
+  { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
+  { day: 11, subject: '📊 ראה איך זה עובד', template: 'demo' },
   { day: 14, subject: '🤝 אולי לא בשבילך?', template: 'last_chance' },
 ];
 

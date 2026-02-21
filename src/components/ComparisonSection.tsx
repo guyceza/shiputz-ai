@@ -271,14 +271,14 @@ export default function ComparisonSection() {
                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E")`,
                  }} />
             
-            <div className="absolute top-6 left-0 right-0 text-center z-10">
-              <span className="text-2xl font-black text-stone-700">
+            <div className="relative z-10 text-center pt-6 pb-4 mb-2">
+              <span className="text-2xl font-black text-stone-700 bg-stone-200/60 px-6 py-2 rounded-full">
                 בלי Shipazti
               </span>
             </div>
 
             {/* Scattered elements */}
-            <div className="relative h-full p-6 pt-14">
+            <div className="relative h-[380px] p-4">
               {chaosItems.map((item, i) => (
                 <motion.div
                   key={i}
@@ -327,14 +327,14 @@ export default function ComparisonSection() {
             <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl" />
             <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
             
-            <div className="absolute top-6 left-0 right-0 text-center z-10">
-              <span className="text-2xl font-black text-white">
+            <div className="relative z-10 text-center pt-6 pb-4">
+              <span className="text-2xl font-black text-white bg-white/10 px-6 py-2 rounded-full">
                 עם Shipazti
               </span>
             </div>
 
             {/* Organized grid */}
-            <div className="p-5 pt-12 grid grid-cols-2 gap-3 h-full content-start">
+            <div className="p-5 pt-2 grid grid-cols-2 gap-3 content-start">
               {organizedCards.map((card, i) => (
                 <motion.div
                   key={i}

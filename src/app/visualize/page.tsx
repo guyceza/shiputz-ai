@@ -146,8 +146,8 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
           </div>
         </div>
         
-        {/* Shop the Look Button */}
-        {showShopLook && (
+        {/* Shop the Look Button - only show when after image is visible */}
+        {showShopLook && sliderPosition > 20 && (
           <button
             onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
             className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors z-10 pointer-events-auto"

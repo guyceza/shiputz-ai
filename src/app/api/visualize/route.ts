@@ -244,26 +244,30 @@ export async function POST(request: NextRequest) {
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Edit image with Nano Banana Pro
+    // Step 3: Edit image with Nano Banana Pro (matching official Clawdbot SDK format)
     const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Simple English prompt for better results
-    const editPrompt = `Transform this room: ${description}. Generate a new version of this room with the requested changes.`;
+    // Simple English prompt for editing
+    const editPrompt = `Edit this room image: ${description}`;
 
+    // Image BEFORE text (as per official SDK), with imageConfig
     const editPayload = {
       contents: [{
         parts: [
-          { text: editPrompt },
           {
             inlineData: {
               mimeType: mimeType,
               data: imageBase64
             }
-          }
+          },
+          { text: editPrompt }
         ]
       }],
       generationConfig: {
-        responseModalities: ["IMAGE"]
+        responseModalities: ["TEXT", "IMAGE"],
+        imageConfig: {
+          imageSize: "1K"
+        }
       }
     };
 

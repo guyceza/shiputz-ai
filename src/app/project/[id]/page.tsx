@@ -187,6 +187,7 @@ export default function ProjectPage() {
   const visionInputRef = useRef<HTMLInputElement>(null);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [countdown, setCountdown] = useState(30);
+  const [visionError, setVisionError] = useState<string | null>(null);
   
   // Tips to show during loading (no emojis)
   const loadingTips = [
@@ -621,6 +622,7 @@ export default function ProjectPage() {
     
     setVisionLoading(true);
     setVisionResult(null);
+    setVisionError(null);
     
     try {
       const response = await fetch('/api/visualize', {
@@ -642,21 +644,13 @@ export default function ProjectPage() {
         });
         incrementVisionUsage();
       } else if (data.error === "IMAGE_NOT_SUPPORTED") {
-        // Image couldn't be processed - show friendly error
-        alert(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
-        // Still show analysis and costs if available
-        if (data.analysis && data.costs) {
-          setVisionResult({
-            analysis: data.analysis,
-            generatedImage: null,
-            costs: data.costs
-          });
-        }
+        // Image couldn't be processed - show friendly error in UI
+        setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
       } else {
-        alert('שגיאה ביצירת ההדמיה. נסה שוב.');
+        setVisionError('שגיאה ביצירת ההדמיה. נסה שוב.');
       }
     } catch {
-      alert('שגיאה בתקשורת. נסה שוב.');
+      setVisionError('שגיאה בתקשורת. נסה שוב.');
     }
     
     setVisionLoading(false);
@@ -1626,6 +1620,19 @@ export default function ProjectPage() {
                       ) : (
                         <p className="text-orange-600">לוקח יותר זמן מהרגיל, עוד רגע...</p>
                       )}
+                    </div>
+                  )}
+                  
+                  {visionError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                      <p className="text-red-600 font-medium mb-2">⚠️ לא הצלחנו לעבד את התמונה</p>
+                      <p className="text-red-500 text-sm">{visionError}</p>
+                      <button
+                        onClick={() => { setVisionError(null); setVisionImage(null); }}
+                        className="mt-3 text-sm text-red-600 hover:text-red-700 underline"
+                      >
+                        נסה תמונה אחרת
+                      </button>
                     </div>
                   )}
                 </div>

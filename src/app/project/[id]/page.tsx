@@ -186,28 +186,42 @@ export default function ProjectPage() {
   } | null>(null);
   const visionInputRef = useRef<HTMLInputElement>(null);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [countdown, setCountdown] = useState(30);
   
-  // Tips to show during loading
+  // Tips to show during loading (no emojis)
   const loadingTips = [
-    "💡 טיפ: קבל לפחות 3 הצעות מחיר לפני שמתחילים",
-    "📋 טיפ: תעד הכל בכתב - זה יחסוך לך כאבי ראש",
-    "🔍 טיפ: בדוק המלצות על קבלנים לפני שסוגרים",
-    "💰 טיפ: השאר 15% מהתקציב לבלת\"מים",
-    "📅 טיפ: שיפוץ תמיד לוקח יותר זמן מהצפוי",
-    "🏠 טיפ: צלם את המצב הקיים לפני שמתחילים",
-    "⚡ טיפ: החשמל והאינסטלציה - לא חוסכים עליהם",
-    "🎨 טיפ: בחר צבעים ניטרליים - קל לשנות אחר כך",
-    "📦 טיפ: הזמן חומרים מראש - יש עיכובים באספקה",
-    "✅ טיפ: בדוק שהקבלן מבוטח ורשום",
+    "טיפ: קבל לפחות 3 הצעות מחיר לפני שמתחילים",
+    "טיפ: תעד הכל בכתב - זה יחסוך לך כאבי ראש",
+    "טיפ: בדוק המלצות על קבלנים לפני שסוגרים",
+    "טיפ: השאר 15% מהתקציב לבלת\"מים",
+    "טיפ: שיפוץ תמיד לוקח יותר זמן מהצפוי",
+    "טיפ: צלם את המצב הקיים לפני שמתחילים",
+    "טיפ: החשמל והאינסטלציה - לא חוסכים עליהם",
+    "טיפ: בחר צבעים ניטרליים - קל לשנות אחר כך",
+    "טיפ: הזמן חומרים מראש - יש עיכובים באספקה",
+    "טיפ: בדוק שהקבלן מבוטח ורשום",
   ];
   
-  // Rotate tips during loading
+  // Rotate tips and countdown during loading
   useEffect(() => {
     if (visionLoading) {
-      const interval = setInterval(() => {
+      setCountdown(30);
+      setCurrentTipIndex(0);
+      
+      // Countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => Math.max(0, prev - 1));
+      }, 1000);
+      
+      // Rotate tips every 3 seconds
+      const tipInterval = setInterval(() => {
         setCurrentTipIndex((prev) => (prev + 1) % loadingTips.length);
       }, 3000);
-      return () => clearInterval(interval);
+      
+      return () => {
+        clearInterval(countdownInterval);
+        clearInterval(tipInterval);
+      };
     }
   }, [visionLoading]);
 
@@ -1593,8 +1607,13 @@ export default function ProjectPage() {
                   </button>
                   
                   {visionLoading && (
-                    <div className="text-center text-sm text-gray-500 transition-all duration-500">
-                      <p className="text-purple-600 font-medium animate-pulse">{loadingTips[currentTipIndex]}</p>
+                    <div className="text-center text-sm space-y-2">
+                      <p className="text-gray-900">{loadingTips[currentTipIndex]}</p>
+                      {countdown > 0 ? (
+                        <p className="text-gray-500">עוד {countdown} שניות...</p>
+                      ) : (
+                        <p className="text-orange-600">לוקח יותר זמן מהרגיל, עוד רגע...</p>
+                      )}
                     </div>
                   )}
                 </div>

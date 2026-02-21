@@ -616,7 +616,7 @@ export default function Home() {
             </div>
             <div className="text-6xl font-semibold text-gray-900 mb-2">₪149.99</div>
             <p className="text-gray-500 mb-2">תשלום חד פעמי</p>
-            <p className="text-xs text-green-600 mb-8">🔥 מבצע לזמן מוגבל</p>
+            <p className="text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-8">מבצע לזמן מוגבל</p>
             
             <ul className="text-right space-y-4 mb-10 text-sm text-gray-600">
               <li className="flex items-center gap-3">

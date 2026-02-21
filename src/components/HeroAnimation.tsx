@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Camera, Receipt, TrendingUp, MessageSquare, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Camera, Receipt, TrendingUp, MessageSquare, CheckCircle, AlertTriangle, Home, Wallet, FileText, MoreHorizontal } from 'lucide-react';
 
 export default function HeroAnimation() {
   const [step, setStep] = useState(0);
@@ -112,19 +112,19 @@ export default function HeroAnimation() {
             {/* Bottom Navigation Mock */}
             <div className="mt-3 pt-2 border-t border-gray-100 flex justify-around">
               <div className="text-center">
-                <div className="w-5 h-5 mx-auto mb-0.5 bg-emerald-500 rounded"></div>
+                <Home className="w-5 h-5 mx-auto mb-0.5 text-emerald-500" />
                 <span className="text-[9px] text-emerald-600 font-medium">בית</span>
               </div>
               <div className="text-center">
-                <div className="w-5 h-5 mx-auto mb-0.5 bg-gray-200 rounded"></div>
+                <Wallet className="w-5 h-5 mx-auto mb-0.5 text-gray-400" />
                 <span className="text-[9px] text-gray-400">הוצאות</span>
               </div>
               <div className="text-center">
-                <div className="w-5 h-5 mx-auto mb-0.5 bg-gray-200 rounded"></div>
+                <FileText className="w-5 h-5 mx-auto mb-0.5 text-gray-400" />
                 <span className="text-[9px] text-gray-400">מסמכים</span>
               </div>
               <div className="text-center">
-                <div className="w-5 h-5 mx-auto mb-0.5 bg-gray-200 rounded"></div>
+                <MoreHorizontal className="w-5 h-5 mx-auto mb-0.5 text-gray-400" />
                 <span className="text-[9px] text-gray-400">עוד</span>
               </div>
             </div>

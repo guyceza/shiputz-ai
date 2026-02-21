@@ -2,7 +2,7 @@ export const runtime = "edge";
 
 import { NextRequest, NextResponse } from "next/server";
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === "placeholder") {
+    if (!GEMINI_API_KEY) {
       // Demo mode - return mock data
       return NextResponse.json({
         description: "קבלה לדוגמה",
@@ -23,33 +23,27 @@ export async function POST(request: NextRequest) {
 
     // Extract base64 data
     const base64Data = image.split(",")[1] || image;
-    const mediaType = image.includes("image/png") ? "image/png" : "image/jpeg";
+    const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 500,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType,
-                  data: base64Data,
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType,
+                    data: base64Data,
+                  },
                 },
-              },
-              {
-                type: "text",
-                text: `אתה מנתח קבלות וחשבוניות בעברית. נתח את התמונה והחזר JSON בפורמט הבא בלבד (ללא טקסט נוסף):
+                {
+                  text: `אתה מנתח קבלות וחשבוניות בעברית. נתח את התמונה והחזר JSON בפורמט הבא בלבד (ללא טקסט נוסף, ללא markdown):
 {
   "description": "תיאור קצר של הקבלה/העסקה",
   "amount": מספר (הסכום הסופי לתשלום),
@@ -57,21 +51,26 @@ export async function POST(request: NextRequest) {
 }
 
 אם לא ניתן לזהות - החזר null לשדה הרלוונטי.`,
-              },
-            ],
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 500,
           },
-        ],
-      }),
-    });
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Claude API error:", error);
+      console.error("Gemini API error:", error);
       return NextResponse.json({ error: "AI scan failed" }, { status: 500 });
     }
 
     const data = await response.json();
-    const content = data.content?.[0]?.text || "";
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // Parse JSON from response
     try {

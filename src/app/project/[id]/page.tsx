@@ -1420,7 +1420,7 @@ export default function ProjectPage() {
       {/* Add Expense Modal */}
       {showAddExpense && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">הוסף הוצאה</h2>
             
             <div className="mb-6">
@@ -1430,7 +1430,7 @@ export default function ProjectPage() {
                   <button onClick={() => setSelectedImage(null)} className="absolute top-2 left-2 bg-black/50 text-white w-8 h-8 rounded-full">✕</button>
                   {scanning && (
                     <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
-                      <p className="text-gray-600">סורק...</p>
+                      <p className="text-gray-600 animate-pulse">סורק קבלה...</p>
                     </div>
                   )}
                 </div>
@@ -1443,6 +1443,54 @@ export default function ProjectPage() {
                 </button>
               )}
             </div>
+
+            {/* AI Analysis Results */}
+            {selectedImage && !scanning && (scannedVendor || scannedItems.length > 0 || scannedFullText) && (
+              <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <img src="/icons/sparkles.png" alt="" className="w-4 h-4" />
+                  <p className="text-sm font-medium text-purple-900">ניתוח AI</p>
+                </div>
+                
+                {scannedVendor && (
+                  <div className="mb-2">
+                    <span className="text-xs text-gray-500">בעל מקצוע / עסק:</span>
+                    <p className="text-sm font-medium text-gray-900">{scannedVendor}</p>
+                  </div>
+                )}
+                
+                {scannedItems.length > 0 && (
+                  <div className="mb-2">
+                    <span className="text-xs text-gray-500">פריטים שזוהו:</span>
+                    <div className="mt-1 space-y-1">
+                      {scannedItems.slice(0, 5).map((item, i) => (
+                        <div key={i} className="flex justify-between text-sm">
+                          <span className="text-gray-700">{item.name} {item.quantity && `(${item.quantity})`}</span>
+                          {item.price && <span className="text-gray-600">₪{item.price}</span>}
+                        </div>
+                      ))}
+                      {scannedItems.length > 5 && (
+                        <p className="text-xs text-gray-400">+ {scannedItems.length - 5} פריטים נוספים</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {scannedVatAmount && (
+                  <div className="mb-2">
+                    <span className="text-xs text-gray-500">מע״מ:</span>
+                    <p className="text-sm font-medium text-gray-900">₪{scannedVatAmount}</p>
+                  </div>
+                )}
+                
+                {scannedFullText && !scannedItems.length && (
+                  <div>
+                    <span className="text-xs text-gray-500">טקסט שזוהה:</span>
+                    <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap line-clamp-3">{scannedFullText}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -1462,8 +1510,17 @@ export default function ProjectPage() {
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={handleAddExpense} disabled={!description || !amount} className="flex-1 bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 disabled:opacity-30">הוסף</button>
-              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+              <button onClick={handleAddExpense} disabled={!description || !amount || scanning} className="flex-1 bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 disabled:opacity-30 flex items-center justify-center gap-2">
+                {scanning ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    ממתין לסריקה...
+                  </>
+                ) : (
+                  "הוסף"
+                )}
+              </button>
+              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
             </div>
           </div>
         </div>

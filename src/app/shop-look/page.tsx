@@ -179,7 +179,7 @@ export default function ShopLookPage() {
               <p className="text-sm text-gray-600">מציאת מוצרים דומים בחנויות ישראליות</p>
             </div>
             <div className="text-center p-6 bg-purple-50 rounded-2xl">
-              <span className="text-3xl mb-3 block">💰</span>
+              <img src="/icons/money.png" alt="" className="w-8 h-8 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-900 mb-2">השוואת מחירים</h4>
               <p className="text-sm text-gray-600">מצאו את המחיר הטוב ביותר</p>
             </div>

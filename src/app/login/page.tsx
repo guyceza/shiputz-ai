@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn, getSession } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,22 +11,67 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await getSession();
+        if (session) {
+          router.push("/dashboard");
+        }
+      } catch (e) {
+        console.error("Auth check error:", e);
+      }
+      setCheckingAuth(false);
+    };
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    if (email && password) {
-      // Check for admin credentials
-      const isAdmin = email === "guyceza@gmail.com" && password === "guyyug1";
-      localStorage.setItem("user", JSON.stringify({ email, isAdmin }));
-      router.push("/dashboard");
-    } else {
+    if (!email || !password) {
       setError("נא למלא את כל השדות");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const data = await signIn(email, password);
+      
+      if (data.user) {
+        // Store user info in localStorage for quick access
+        localStorage.setItem("user", JSON.stringify({ 
+          email: data.user.email,
+          id: data.user.id,
+          isAdmin: data.user.email === "guyceza@gmail.com"
+        }));
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.message?.includes("Invalid login credentials")) {
+        setError("אימייל או סיסמה לא נכונים");
+      } else if (err.message?.includes("Email not confirmed")) {
+        setError("נא לאשר את האימייל שנשלח אליך");
+      } else {
+        setError("שגיאה בהתחברות. נסה שוב.");
+      }
     }
     setLoading(false);
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-500">טוען...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -47,6 +93,7 @@ export default function LoginPage() {
               placeholder="אימייל"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
               required
+              dir="ltr"
             />
             <input
               type="password"
@@ -55,9 +102,12 @@ export default function LoginPage() {
               placeholder="סיסמה"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
               required
+              dir="ltr"
             />
 
-            {error && <p className="text-gray-900 text-sm text-center">{error}</p>}
+            {error && (
+              <p className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</p>
+            )}
 
             <button
               type="submit"

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getSession, signOut } from "@/lib/auth";
 
 interface Project {
   id: string;
@@ -36,18 +37,34 @@ export default function DashboardPage() {
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
 
   useEffect(() => {
-    // Wait for client-side hydration
-    const checkAuth = () => {
-      const userData = localStorage.getItem("user");
-      if (!userData) {
+    // Check for real auth session
+    const checkAuth = async () => {
+      try {
+        const session = await getSession();
+        if (session?.user) {
+          // Real authenticated user
+          setUser({ 
+            email: session.user.email || "", 
+            name: session.user.user_metadata?.name 
+          });
+        } else {
+          // Fallback to localStorage for backward compatibility
+          const userData = localStorage.getItem("user");
+          if (!userData) {
+            router.push("/login");
+            return;
+          }
+          setUser(JSON.parse(userData));
+        }
+
+        const savedProjects = localStorage.getItem("projects");
+        if (savedProjects) {
+          setProjects(JSON.parse(savedProjects));
+        }
+      } catch (e) {
+        console.error("Auth check error:", e);
         router.push("/login");
         return;
-      }
-      setUser(JSON.parse(userData));
-
-      const savedProjects = localStorage.getItem("projects");
-      if (savedProjects) {
-        setProjects(JSON.parse(savedProjects));
       }
       setIsLoading(false);
     };
@@ -74,7 +91,12 @@ export default function DashboardPage() {
     setNewProjectBudget("");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
     localStorage.removeItem("user");
     router.push("/");
   };

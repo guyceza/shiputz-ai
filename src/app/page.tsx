@@ -667,7 +667,7 @@ export default function Home() {
               href="/signup"
               className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
             >
-              נצל את ההנחה
+              התחל עכשיו
             </Link>
           </div>
         </div>

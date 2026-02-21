@@ -505,21 +505,18 @@ export default function Home() {
       <section className="py-16 px-6 border-t border-gray-100">
         <div className="max-w-2xl mx-auto">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-10 border border-amber-100">
-            <div className="flex items-start gap-4">
-              <img src="/icons/lightbulb.png" alt="" className="w-10 h-10" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">הטיפ השבוע</h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  לפני שסוגרים עם קבלן, בקשו ממנו כתב כמויות מפורט - זה יחסוך לכם הפתעות בהמשך ויאפשר השוואה אמיתית בין הצעות.
-                </p>
-                <Link 
-                  href="/tips"
-                  className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 group"
-                >
-                  עוד טיפים 
-                  <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                </Link>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">הטיפ השבוע</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                לפני שסוגרים עם קבלן, בקשו ממנו כתב כמויות מפורט - זה יחסוך לכם הפתעות בהמשך ויאפשר השוואה אמיתית בין הצעות.
+              </p>
+              <Link 
+                href="/tips"
+                className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 group"
+              >
+                עוד טיפים 
+                <span className="group-hover:-translate-x-1 transition-transform">←</span>
+              </Link>
             </div>
           </div>
         </div>

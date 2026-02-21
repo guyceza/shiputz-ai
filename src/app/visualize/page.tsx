@@ -138,7 +138,7 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
         
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="text-sm text-gray-900 hover:text-gray-600 font-medium"
         >
           {showDetails ? "הסתר פירוט עלויות ↑" : "הצג פירוט עלויות ↓"}
         </button>
@@ -187,14 +187,14 @@ export default function VisualizePage() {
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full mb-6">
             <span className="text-lg">✨</span>
-            <span className="text-sm font-medium text-purple-700">חדש! ראה איך השיפוץ שלך יראה</span>
+            <span className="text-sm font-medium text-gray-700">חדש! ראה איך השיפוץ שלך יראה</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6 text-gray-900">
             ראה את השיפוץ<br />
-            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">לפני שמתחיל.</span>
+            <span className="text-gray-900">לפני שמתחיל.</span>
           </h1>
           
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -244,8 +244,8 @@ export default function VisualizePage() {
           
           <div className="space-y-8">
             <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xl font-semibold text-purple-600">1</span>
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xl font-semibold text-gray-900">1</span>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">צלם את החדר</h3>
@@ -254,8 +254,8 @@ export default function VisualizePage() {
             </div>
             
             <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xl font-semibold text-blue-600">2</span>
+              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xl font-semibold text-gray-900">2</span>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">תאר את השינויים</h3>
@@ -264,8 +264,8 @@ export default function VisualizePage() {
             </div>
             
             <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-xl font-semibold text-emerald-600">3</span>
+              <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xl font-semibold text-white">3</span>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">קבל הדמיה + עלויות</h3>
@@ -277,7 +277,7 @@ export default function VisualizePage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-purple-50 to-blue-50">
+      <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
@@ -288,7 +288,7 @@ export default function VisualizePage() {
           
           <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
             {/* Premium badge */}
-            <div className="absolute top-4 left-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+            <div className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">
               Premium
             </div>
             
@@ -330,7 +330,7 @@ export default function VisualizePage() {
             
             <Link
               href="/signup?plan=vision"
-              className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-full text-base font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+              className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
             >
               התחל עכשיו
             </Link>

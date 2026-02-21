@@ -140,19 +140,19 @@ export default function Home() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl">
           <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-blue-600">+</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-gray-400">+</span></p>
             <p className="text-sm text-gray-500">תקציבים נוהלו</p>
           </div>
           <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-blue-600">+</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-gray-400">+</span></p>
             <p className="text-sm text-gray-500">משפצים פעילים</p>
           </div>
           <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">500<span className="text-blue-600">+</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">500<span className="text-gray-400">+</span></p>
             <p className="text-sm text-gray-500">הצעות מחיר נותחו</p>
           </div>
           <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">10,000<span className="text-blue-600">+</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">10,000<span className="text-gray-400">+</span></p>
             <p className="text-sm text-gray-500">טיפים נקראו</p>
           </div>
         </div>
@@ -340,7 +340,7 @@ export default function Home() {
                   <p className="text-xs text-gray-400 mb-6 text-center">±10% תלוי בספקים ובחומרים שתבחר</p>
                   <Link
                     href="/signup"
-                    className="block text-center bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="block text-center bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
                   >
                     רוצה לנהל את התקציב? התחל פרויקט ←
                   </Link>
@@ -682,7 +682,7 @@ export default function Home() {
 function Feature({ title, description }: { title: string; description: string }) {
   return (
     <div className="group">
-      <h3 className="text-lg font-semibold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">{title}</h3>
+      <h3 className="text-lg font-semibold mb-2 text-gray-900 group-hover:text-gray-600 transition-colors">{title}</h3>
       <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
     </div>
   );

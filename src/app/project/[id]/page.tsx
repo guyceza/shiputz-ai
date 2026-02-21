@@ -1224,45 +1224,97 @@ export default function ProjectPage() {
 
         {/* Photos Tab */}
         {activeTab === "photos" && (
-          <div className="border border-gray-100 rounded-2xl p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">גלריית התקדמות</h2>
-              <button
-                onClick={() => photoInputRef.current?.click()}
-                className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800"
-              >
-                הוסף תמונה
-              </button>
-              <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+          <div className="space-y-6">
+            {/* AI Visualizations History */}
+            <div className="border border-purple-200 rounded-2xl p-8 bg-gradient-to-br from-purple-50/50 to-white">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">✨</span>
+                  <h2 className="text-lg font-semibold text-gray-900">הדמיות AI</h2>
+                  {visionHistory.length > 0 && (
+                    <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">{visionHistory.length}</span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowAIVision(true)}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full text-sm hover:from-purple-700 hover:to-blue-700"
+                >
+                  צור הדמיה חדשה
+                </button>
+              </div>
+
+              {visionHistory.length === 0 ? (
+                <div className="text-center py-12">
+                  <span className="text-5xl mb-4 block">🎨</span>
+                  <p className="text-gray-500 mb-2">אין הדמיות עדיין</p>
+                  <p className="text-sm text-gray-400">העלה תמונה של החדר וקבל הדמיה של איך השיפוץ יראה</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {visionHistory.map((item) => (
+                    <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">לפני</p>
+                          <img src={item.beforeImage} alt="Before" className="w-full h-28 object-cover rounded-lg" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">אחרי</p>
+                          <img src={item.afterImage} alt="After" className="w-full h-28 object-cover rounded-lg" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2 line-clamp-2">{item.description}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{item.date}</span>
+                        <span className="font-medium text-purple-600">₪{item.costs.total.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {!project.photos || project.photos.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-gray-500 mb-4">אין תמונות עדיין</p>
-                <p className="text-sm text-gray-400">תעד את התקדמות השיפוץ בתמונות</p>
+            {/* Progress Gallery */}
+            <div className="border border-gray-100 rounded-2xl p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">גלריית התקדמות</h2>
+                <button
+                  onClick={() => photoInputRef.current?.click()}
+                  className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-800"
+                >
+                  הוסף תמונה
+                </button>
+                <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
               </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {project.photos.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(photo => (
-                  <div 
-                    key={photo.id} 
-                    className="relative group cursor-pointer"
-                    onClick={() => setViewPhoto(photo)}
-                  >
-                    <img 
-                      src={photo.imageUrl} 
-                      alt={photo.description} 
-                      className="w-full h-40 object-cover rounded-xl"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors rounded-xl" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent rounded-b-xl">
-                      <p className="text-white text-xs">{new Date(photo.date).toLocaleDateString("he-IL")}</p>
-                      {photo.description && <p className="text-white text-sm truncate">{photo.description}</p>}
+
+              {!project.photos || project.photos.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-gray-500 mb-4">אין תמונות עדיין</p>
+                  <p className="text-sm text-gray-400">תעד את התקדמות השיפוץ בתמונות</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {project.photos.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(photo => (
+                    <div 
+                      key={photo.id} 
+                      className="relative group cursor-pointer"
+                      onClick={() => setViewPhoto(photo)}
+                    >
+                      <img 
+                        src={photo.imageUrl} 
+                        alt={photo.description} 
+                        className="w-full h-40 object-cover rounded-xl"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors rounded-xl" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent rounded-b-xl">
+                        <p className="text-white text-xs">{new Date(photo.date).toLocaleDateString("he-IL")}</p>
+                        {photo.description && <p className="text-white text-sm truncate">{photo.description}</p>}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

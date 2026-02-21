@@ -474,13 +474,13 @@ export default function Home() {
             חריגות בתקציב, קבלנים שנעלמים, הצעות מחיר מנופחות, ותיעוד באקסל שמתבלגן.
           </p>
           <div className="grid md:grid-cols-2 gap-8 text-right">
-            <div className="border border-gray-200 rounded-2xl p-8">
-              <p className="font-semibold text-gray-900 mb-4">הדרך הישנה</p>
-              <ul className="text-gray-500 space-y-3 text-sm">
-                <li>אקסל מבולגן שאף אחד לא מעדכן</li>
-                <li>קבלות בארנק שהולכות לאיבוד</li>
-                <li>הצעות מחיר שאי אפשר להשוות</li>
-                <li>הפתעות בסוף החודש</li>
+            <div className="border-2 border-red-200 rounded-2xl p-8 bg-red-50/50">
+              <p className="font-semibold text-red-700 mb-4">❌ הדרך הישנה</p>
+              <ul className="text-red-600/80 space-y-3 text-sm">
+                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> אקסל מבולגן שאף אחד לא מעדכן</li>
+                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> קבלות בארנק שהולכות לאיבוד</li>
+                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> הצעות מחיר שאי אפשר להשוות</li>
+                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> הפתעות בסוף החודש</li>
               </ul>
             </div>
             <div className="border border-gray-900 rounded-2xl p-8 bg-gray-900 text-white">

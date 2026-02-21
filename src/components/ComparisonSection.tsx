@@ -45,13 +45,6 @@ export default function ComparisonSection() {
     },
   ];
 
-  const newWayItems = [
-    { title: 'מעקב אוטומטי', desc: 'כל ההוצאות במקום אחד, בזמן אמת' },
-    { title: 'צילום = תיעוד', desc: 'מצלמים קבלה והיא נוספת אוטומטית' },
-    { title: 'השוואת מחירים', desc: 'AI שמזהה אם גובים ממך יותר מדי' },
-    { title: 'התראות חכמות', desc: 'יודעים על בעיות לפני שהן קורות' },
-  ];
-
   const getItemContent = (item: typeof chaosItems[0]) => {
     switch (item.type) {
       case 'receipt':
@@ -123,6 +116,13 @@ export default function ComparisonSection() {
         return <div className="p-3 bg-white shadow-md rounded text-sm">{item.text}</div>;
     }
   };
+
+  // Dashboard transactions
+  const transactions = [
+    { name: 'אינסטלטור - תיקון צנרת', amount: '₪1,200', category: 'אינסטלציה' },
+    { name: 'חומרי בניין - קרמיקה', amount: '₪3,450', category: 'חומרים' },
+    { name: 'חשמלאי - נקודות חשמל', amount: '₪2,800', category: 'חשמל' },
+  ];
 
   return (
     <section className="py-32 px-6" ref={ref}>
@@ -202,44 +202,109 @@ export default function ComparisonSection() {
             </div>
           </motion.div>
 
-          {/* New Way - Clean and organized */}
+          {/* New Way - Clean Dashboard */}
           <motion.div 
-            className="relative rounded-2xl bg-gray-900 p-8 md:p-10"
+            className="relative rounded-2xl overflow-hidden bg-[#0c0c0f]"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-widest mb-8 text-center">
-              עם Shipazti
-            </h3>
-            
-            <ul className="space-y-6">
-              {newWayItems.map((item, i) => (
-                <motion.li 
-                  key={i}
-                  className="flex items-start gap-4"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
-                >
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg 
-                      className="w-3 h-3 text-emerald-400" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor" 
-                      strokeWidth={3}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
+            <div className="absolute top-5 left-0 right-0 text-center z-10">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">
+                עם Shipazti
+              </span>
+            </div>
+
+            {/* App mockup */}
+            <div className="p-6 pt-14">
+              {/* Budget card */}
+              <motion.div 
+                className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur rounded-xl p-5 mb-4 border border-gray-700/50"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <div className="text-white font-medium">{item.title}</div>
-                    <div className="text-gray-400 text-sm mt-0.5">{item.desc}</div>
+                    <div className="text-gray-400 text-xs mb-1">תקציב שיפוץ</div>
+                    <div className="text-2xl font-semibold text-white">₪150,000</div>
                   </div>
-                </motion.li>
-              ))}
-            </ul>
+                  <div className="text-left">
+                    <div className="text-gray-400 text-xs mb-1">נותר</div>
+                    <div className="text-lg font-medium text-emerald-400">₪67,550</div>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={isInView ? { width: '55%' } : {}}
+                    transition={{ duration: 1, delay: 0.8, ease: 'easeOut' }}
+                  />
+                </div>
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <span>55% נוצל</span>
+                  <span>₪82,450 הוצאות</span>
+                </div>
+              </motion.div>
+
+              {/* Recent transactions */}
+              <motion.div 
+                className="bg-gray-800/50 backdrop-blur rounded-xl border border-gray-700/50 overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <div className="px-4 py-3 border-b border-gray-700/50">
+                  <div className="text-sm font-medium text-gray-300">הוצאות אחרונות</div>
+                </div>
+                <div className="divide-y divide-gray-700/30">
+                  {transactions.map((tx, i) => (
+                    <motion.div 
+                      key={i}
+                      className="px-4 py-3 flex items-center justify-between"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={isInView ? { opacity: 1, x: 0 } : {}}
+                      transition={{ duration: 0.4, delay: 0.9 + i * 0.1 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
+                          <div className="w-3 h-3 rounded-full bg-emerald-500/60"></div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-200">{tx.name}</div>
+                          <div className="text-xs text-gray-500">{tx.category}</div>
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-gray-300">{tx.amount}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Quick stats */}
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <motion.div 
+                  className="bg-gray-800/40 rounded-xl p-4 border border-gray-700/30"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ duration: 0.4, delay: 1.2 }}
+                >
+                  <div className="text-xs text-gray-500 mb-1">קבלות השבוע</div>
+                  <div className="text-xl font-semibold text-white">12</div>
+                </motion.div>
+                <motion.div 
+                  className="bg-gray-800/40 rounded-xl p-4 border border-gray-700/30"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ duration: 0.4, delay: 1.3 }}
+                >
+                  <div className="text-xs text-gray-500 mb-1">חיסכון זוהה</div>
+                  <div className="text-xl font-semibold text-emerald-400">₪4,200</div>
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>

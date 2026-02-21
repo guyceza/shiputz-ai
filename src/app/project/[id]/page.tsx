@@ -202,6 +202,12 @@ export default function ProjectPage() {
   }
   const [visionHistory, setVisionHistory] = useState<VisionHistoryItem[]>([]);
   
+  // Product search from image
+  const [showProductSearch, setShowProductSearch] = useState(false);
+  const [productSearchImage, setProductSearchImage] = useState<string | null>(null);
+  const [productSearchLoading, setProductSearchLoading] = useState(false);
+  const [detectedProducts, setDetectedProducts] = useState<{name: string; description: string; searchQuery: string}[]>([]);
+  
   // Tips to show during loading (no emojis)
   const loadingTips = [
     "טיפ: קבל לפחות 3 הצעות מחיר לפני שמתחילים",
@@ -696,6 +702,30 @@ export default function ProjectPage() {
     setVisionImage(null);
     setVisionDescription("");
     setVisionResult(null);
+  };
+
+  const handleProductSearch = async (imageUrl: string) => {
+    setProductSearchImage(imageUrl);
+    setShowProductSearch(true);
+    setProductSearchLoading(true);
+    setDetectedProducts([]);
+    
+    try {
+      const response = await fetch('/api/detect-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageUrl })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setDetectedProducts(data.products || []);
+      }
+    } catch {
+      console.error('Product detection failed');
+    }
+    
+    setProductSearchLoading(false);
   };
 
   const exportFullReport = () => {
@@ -1258,7 +1288,19 @@ export default function ProjectPage() {
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 mb-1">אחרי</p>
-                          <img src={item.afterImage} alt="After" className="w-full h-28 object-cover rounded-lg" />
+                          <div 
+                            className="relative cursor-pointer group"
+                            onClick={() => {
+                              // Save image to localStorage for shop-look page
+                              localStorage.setItem('shopLookImage', item.afterImage);
+                              window.open('/shop-look', '_blank');
+                            }}
+                          >
+                            <img src={item.afterImage} alt="After" className="w-full h-28 object-cover rounded-lg" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors rounded-lg flex items-center justify-center">
+                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium">🛒 קנה את הסגנון</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <p className="text-sm text-gray-700 mb-2 line-clamp-2">{item.description}</p>

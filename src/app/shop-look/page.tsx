@@ -169,7 +169,7 @@ export default function ShopLookPage() {
           {/* Info */}
           <div className="mt-8 grid md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-blue-50 rounded-2xl">
-              <span className="text-3xl mb-3 block">🔍</span>
+              <img src="/icons/search.png" alt="" className="w-8 h-8 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-900 mb-2">זיהוי אוטומטי</h4>
               <p className="text-sm text-gray-600">AI מזהה כל מוצר בתמונה</p>
             </div>

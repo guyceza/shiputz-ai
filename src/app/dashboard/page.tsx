@@ -171,7 +171,7 @@ export default function DashboardPage() {
         {/* Did You Know? Tip Box */}
         <div className="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
           <div className="flex items-start gap-4">
-            <span className="text-2xl">💡</span>
+            <img src="/icons/lightbulb.png" alt="" className="w-7 h-7" />
             <div className="flex-1">
               <p className="text-xs font-medium text-blue-600 mb-1">הידעת?</p>
               <p className="text-gray-700 text-sm leading-relaxed">{randomTip}</p>

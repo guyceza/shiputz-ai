@@ -146,7 +146,7 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
           {/* Footer */}
           <div className="p-6 border-t border-gray-100 bg-gray-50">
             <p className="text-xs text-gray-500 text-center">
-              💡 טיפ: השווה מחירים במספר חנויות לפני הקנייה
+              <img src="/icons/lightbulb.png" alt="" className="w-4 h-4 inline mr-1" /> טיפ: השווה מחירים במספר חנויות לפני הקנייה
             </p>
           </div>
         </div>

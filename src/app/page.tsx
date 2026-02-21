@@ -532,7 +532,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-10 border border-amber-100">
             <div className="flex items-start gap-4">
-              <span className="text-4xl">💡</span>
+              <img src="/icons/lightbulb.png" alt="" className="w-10 h-10" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">הטיפ השבוע</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">

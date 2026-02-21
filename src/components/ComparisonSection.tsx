@@ -117,42 +117,24 @@ export default function ComparisonSection() {
     }
   };
 
-  // Organized floating cards for "with Shipazti"
+  // Organized cards for "with Shipazti" - clean grid
   const organizedCards = [
-    {
-      type: 'budget',
-      style: { top: '8%', left: '10%', rotate: -2, zIndex: 4 },
-    },
-    {
-      type: 'receipt-clean',
-      style: { top: '5%', right: '8%', rotate: 3, zIndex: 3 },
-    },
-    {
-      type: 'chart',
-      style: { top: '38%', left: '5%', rotate: 2, zIndex: 5 },
-    },
-    {
-      type: 'alert-good',
-      style: { top: '42%', right: '10%', rotate: -3, zIndex: 4 },
-    },
-    {
-      type: 'savings',
-      style: { top: '68%', left: '15%', rotate: -2, zIndex: 3 },
-    },
-    {
-      type: 'check',
-      style: { top: '72%', right: '12%', rotate: 4, zIndex: 2 },
-    },
+    { type: 'budget' },
+    { type: 'receipt-clean' },
+    { type: 'chart' },
+    { type: 'alert-good' },
+    { type: 'savings' },
+    { type: 'check' },
   ];
 
   const getOrganizedContent = (type: string) => {
     switch (type) {
       case 'budget':
         return (
-          <div className="w-[160px] bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 shadow-[0_8px_30px_rgba(16,185,129,0.3),0_2px_8px_rgba(0,0,0,0.1)]">
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 shadow-[0_8px_30px_rgba(16,185,129,0.3),0_2px_8px_rgba(0,0,0,0.1)] h-full">
             <div className="text-emerald-100 text-[10px] mb-1">תקציב כולל</div>
             <div className="text-white text-xl font-bold">₪150,000</div>
-            <div className="mt-2 h-1.5 bg-white/30 rounded-full overflow-hidden">
+            <div className="mt-3 h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div className="h-full w-[55%] bg-white rounded-full"></div>
             </div>
             <div className="text-emerald-100 text-[9px] mt-1">55% נוצל</div>
@@ -160,7 +142,7 @@ export default function ComparisonSection() {
         );
       case 'receipt-clean':
         return (
-          <div className="w-[130px] bg-white rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100">
+          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] h-full">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -169,15 +151,15 @@ export default function ComparisonSection() {
               </div>
               <span className="text-[10px] text-emerald-600 font-medium">נסרקה</span>
             </div>
-            <div className="text-gray-800 text-sm font-semibold">₪1,200</div>
-            <div className="text-gray-400 text-[10px]">אינסטלטור</div>
+            <div className="text-gray-800 text-base font-semibold">₪1,200</div>
+            <div className="text-gray-400 text-xs">אינסטלטור</div>
           </div>
         );
       case 'chart':
         return (
-          <div className="w-[140px] bg-white rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100">
-            <div className="text-gray-400 text-[10px] mb-2">הוצאות לפי קטגוריה</div>
-            <div className="flex items-end gap-1 h-12">
+          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] h-full">
+            <div className="text-gray-400 text-[10px] mb-3">הוצאות לפי קטגוריה</div>
+            <div className="flex items-end gap-1.5 h-14">
               <div className="flex-1 bg-emerald-200 rounded-t" style={{ height: '60%' }}></div>
               <div className="flex-1 bg-emerald-300 rounded-t" style={{ height: '85%' }}></div>
               <div className="flex-1 bg-emerald-400 rounded-t" style={{ height: '45%' }}></div>
@@ -188,29 +170,29 @@ export default function ComparisonSection() {
         );
       case 'alert-good':
         return (
-          <div className="bg-white border-r-4 border-r-emerald-500 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-3">
-            <div className="text-[10px] text-emerald-600 font-semibold mb-0.5">התראה חכמה</div>
-            <div className="text-xs text-gray-700">הצעת מחיר גבוהה ב-15%</div>
-            <div className="text-[10px] text-gray-400">מהמחיר הממוצע</div>
+          <div className="bg-white border-r-4 border-r-emerald-500 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-4 h-full">
+            <div className="text-[10px] text-emerald-600 font-semibold mb-1">התראה חכמה</div>
+            <div className="text-sm text-gray-700">הצעת מחיר גבוהה ב-15%</div>
+            <div className="text-xs text-gray-400">מהמחיר הממוצע</div>
           </div>
         );
       case 'savings':
         return (
-          <div className="w-[120px] bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl p-3 shadow-[0_8px_30px_rgba(251,191,36,0.3)]">
+          <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl p-4 shadow-[0_8px_30px_rgba(251,191,36,0.3)] h-full">
             <div className="text-white/80 text-[10px] mb-1">חסכת עד היום</div>
-            <div className="text-white text-lg font-bold">₪4,200</div>
+            <div className="text-white text-xl font-bold">₪4,200</div>
           </div>
         );
       case 'check':
         return (
-          <div className="w-[100px] bg-white rounded-xl p-3 shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 text-center">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-2">
-              <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] text-center h-full flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mb-2">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <div className="text-gray-700 text-xs font-medium">12 קבלות</div>
-            <div className="text-gray-400 text-[10px]">השבוע</div>
+            <div className="text-gray-700 text-sm font-medium">12 קבלות</div>
+            <div className="text-gray-400 text-xs">השבוע</div>
           </div>
         );
       default:
@@ -316,35 +298,22 @@ export default function ComparisonSection() {
               </span>
             </div>
 
-            {/* Organized floating cards */}
-            <div className="relative h-full p-6 pt-14">
+            {/* Organized grid */}
+            <div className="p-5 pt-12 grid grid-cols-2 gap-3 h-full content-start">
               {organizedCards.map((card, i) => (
                 <motion.div
                   key={i}
-                  className="absolute cursor-pointer"
-                  style={{
-                    top: card.style.top,
-                    left: card.style.left,
-                    right: card.style.right,
-                    zIndex: card.style.zIndex,
-                  }}
-                  initial={{ opacity: 0, scale: 0.8, rotate: 0, y: 20 }}
-                  animate={isInView ? { 
-                    opacity: 1, 
-                    scale: 1,
-                    rotate: card.style.rotate,
-                    y: 0,
-                  } : {}}
+                  className="cursor-pointer"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ 
-                    duration: 0.6, 
-                    delay: 0.5 + i * 0.1,
+                    duration: 0.5, 
+                    delay: 0.5 + i * 0.08,
                     ease: [0.22, 1, 0.36, 1],
                   }}
                   whileHover={{ 
-                    scale: 1.05, 
-                    rotate: 0,
-                    y: -5,
-                    zIndex: 20,
+                    scale: 1.03,
+                    y: -3,
                     transition: { duration: 0.2 }
                   }}
                 >

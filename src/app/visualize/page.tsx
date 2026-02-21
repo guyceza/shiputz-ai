@@ -72,32 +72,32 @@ function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterIm
 
   return (
     <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100">
-      {/* Before image (full width, clipped from right) */}
+      {/* Before image (RTL: shows on RIGHT side, clipped from left) */}
       <div 
         className="absolute inset-0"
-        style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+        style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
       >
         <img 
           src={beforeImg} 
           alt="לפני" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+        <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
           לפני
         </div>
       </div>
       
-      {/* After image (full width, clipped from left) */}
+      {/* After image (RTL: shows on LEFT side, clipped from right) */}
       <div 
         className="absolute inset-0"
-        style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+        style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
         <img 
           src={afterImg} 
           alt="אחרי" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute bottom-3 left-3 bg-emerald-600/80 text-white text-xs px-2 py-1 rounded">
+        <div className="absolute bottom-3 right-3 bg-gray-900 text-white text-xs px-2 py-1 rounded">
           אחרי
         </div>
       </div>

@@ -21,7 +21,7 @@ export default function HeroAnimation() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-2xl z-10" />
         
         {/* Screen */}
-        <div className="bg-white rounded-[2.5rem] overflow-hidden h-[500px] relative">
+        <div className="bg-white rounded-[2.5rem] overflow-hidden h-[600px] relative">
           {/* Status Bar */}
           <div className="bg-emerald-600 text-white px-6 py-3 pt-8">
             <div className="text-sm font-medium">ShiputzAI</div>
@@ -106,6 +106,26 @@ export default function HeroAnimation() {
               <div className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className="text-lg font-bold text-gray-800">12</div>
                 <div className="text-xs text-gray-500">קבלות נסרקו</div>
+              </div>
+            </div>
+            
+            {/* Bottom Navigation Mock */}
+            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-around">
+              <div className="text-center">
+                <div className="w-6 h-6 mx-auto mb-1 bg-emerald-500 rounded-lg"></div>
+                <span className="text-xs text-emerald-600 font-medium">בית</span>
+              </div>
+              <div className="text-center">
+                <div className="w-6 h-6 mx-auto mb-1 bg-gray-200 rounded-lg"></div>
+                <span className="text-xs text-gray-400">הוצאות</span>
+              </div>
+              <div className="text-center">
+                <div className="w-6 h-6 mx-auto mb-1 bg-gray-200 rounded-lg"></div>
+                <span className="text-xs text-gray-400">מסמכים</span>
+              </div>
+              <div className="text-center">
+                <div className="w-6 h-6 mx-auto mb-1 bg-gray-200 rounded-lg"></div>
+                <span className="text-xs text-gray-400">עוד</span>
               </div>
             </div>
           </div>

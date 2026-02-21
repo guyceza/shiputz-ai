@@ -162,7 +162,7 @@ export default function ComparisonSection() {
             
             <div className="absolute top-5 left-0 right-0 text-center z-10">
               <span className="text-xs font-medium text-stone-500 uppercase tracking-widest">
-                בלי ShiputzAI
+                בלי Shipazti
               </span>
             </div>
 
@@ -210,7 +210,7 @@ export default function ComparisonSection() {
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <h3 className="text-xs font-medium text-gray-500 uppercase tracking-widest mb-8 text-center">
-              עם ShiputzAI
+              עם Shipazti
             </h3>
             
             <ul className="space-y-6">

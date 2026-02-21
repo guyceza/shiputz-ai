@@ -1,8 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
+
+// Fun loading messages
+const loadingMessages = [
+  "מזהה מוצרים בתמונה...",
+  "אתם יכולים להביא קפה בינתיים ☕",
+  "סורקים כל פינה בחדר...",
+  "מחפשים את הספה המושלמת...",
+  "הבינה המלאכותית עובדת בשבילכם 🤖",
+  "עוד רגע מסיימים...",
+  "בודקים אם יש מבצעים...",
+  "סופרים כריות על הספה...",
+  "מודדים את המזנון...",
+  "כמעט שם! 🎯",
+];
 
 // Default demo items for fallback
 const demoItems: ShoppableItem[] = [
@@ -21,6 +35,29 @@ export default function ShopLookPage() {
   const [items, setItems] = useState<ShoppableItem[]>(demoItems);
   const [loading, setLoading] = useState(false);
   const [isCustomImage, setIsCustomImage] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  // Countdown and message rotation during loading
+  useEffect(() => {
+    if (loading) {
+      setCountdown(30);
+      setMessageIndex(0);
+      
+      const countdownInterval = setInterval(() => {
+        setCountdown(prev => Math.max(0, prev - 1));
+      }, 1000);
+      
+      const messageInterval = setInterval(() => {
+        setMessageIndex(prev => (prev + 1) % loadingMessages.length);
+      }, 3000);
+      
+      return () => {
+        clearInterval(countdownInterval);
+        clearInterval(messageInterval);
+      };
+    }
+  }, [loading]);
 
   useEffect(() => {
     // Check for custom image from localStorage
@@ -97,10 +134,15 @@ export default function ShopLookPage() {
       <section className="px-6 pb-16">
         <div className="max-w-5xl mx-auto">
           {loading ? (
-            <div className="relative overflow-hidden rounded-2xl bg-gray-100 aspect-video flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-gray-600">מזהה מוצרים בתמונה...</p>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 aspect-video flex items-center justify-center">
+              <div className="text-center max-w-md px-6">
+                <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-6"></div>
+                <p className="text-lg text-gray-800 font-medium mb-2">{loadingMessages[messageIndex]}</p>
+                {countdown > 0 ? (
+                  <p className="text-gray-500">עוד {countdown} שניות...</p>
+                ) : (
+                  <p className="text-orange-600">לוקח קצת יותר זמן, עוד רגע...</p>
+                )}
               </div>
             </div>
           ) : (

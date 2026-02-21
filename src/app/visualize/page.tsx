@@ -78,17 +78,26 @@ const EXAMPLES: ExampleCard[] = [
     title: "חדר שינה מינימליסטי",
     beforeImg: "/examples/bedroom-before.jpg",
     afterImg: "/examples/bedroom-after.jpg",
-    beforeDesc: "חדר שינה עם שטיח בז׳, וילונות ישנים ומאוורר תקרה מיושן",
-    afterDesc: "חדר שינה מינימליסטי עם ארון קיר מלא, גבס דקורטיבי ותאורה עקיפה",
-    changes: "ארון קיר מלא 3 מטר, תקרת גבס עם תאורה עקיפה, צביעה לבנה",
+    beforeDesc: "חדר שינה ישן עם ארון עץ כהה, מיטת יחיד ותאורה פלורסנטית",
+    afterDesc: "חדר שינה מינימליסטי עם ארון לבן ומראה, מיטה זוגית אפורה ופרקט עץ",
+    changes: "ארון הזזה לבן עם מראה, מיטה זוגית מרופדת, פרקט אלון, תאורה שקועה",
     costs: [
-      { item: "ארון קיר (3 מטר)", price: 7500 },
-      { item: "תקרת גבס (15 מ״ר)", price: 2700 },
-      { item: "תאורה עקיפה LED", price: 1200 },
-      { item: "צביעה (45 מ״ר)", price: 1800 },
-      { item: "עבודה", price: 3200 },
+      { item: "ארון הזזה עם מראה (3 מטר)", price: 9500 },
+      { item: "פרקט אלון (15 מ״ר)", price: 3750 },
+      { item: "תאורה שקועה (6 ספוטים)", price: 1800 },
+      { item: "צביעה אפור (45 מ״ר)", price: 1800 },
+      { item: "עבודה", price: 3500 },
     ],
-    total: 16400,
+    total: 20350,
+    shopItems: [
+      { x: 15, y: 45, title: "ארון הזזה עם מראה", price: "₪9,500" },
+      { x: 70, y: 50, title: "מיטה זוגית מרופדת", price: "₪4,200" },
+      { x: 88, y: 45, title: "מנורת שולחן מודרנית", price: "₪380" },
+      { x: 85, y: 55, title: "שידת לילה עגולה", price: "₪650" },
+      { x: 75, y: 25, title: "תמונת אבסטרקט", price: "₪890" },
+      { x: 12, y: 75, title: "כורסת עץ סקנדינבית", price: "₪1,800" },
+      { x: 50, y: 85, title: "שטיח גיאומטרי", price: "₪1,200" },
+    ],
   },
 ];
 
@@ -278,7 +287,7 @@ function ShopHotspot({ x, y, title, price }: { x: number; y: number; title: stri
 
 function ExampleCardComponent({ example }: { example: ExampleCard }) {
   const [showDetails, setShowDetails] = useState(false);
-  const showShopFeature = example.id === 1 || example.id === 2; // Enable Shop the Look for living room and rustic kitchen
+  const showShopFeature = example.id === 1 || example.id === 2 || example.id === 3; // Enable Shop the Look for all rooms
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300">

@@ -210,14 +210,15 @@ export async function POST(request: NextRequest) {
             }
           },
           {
-            text: `אתה מומחה שיפוצים. בקשת השינוי: "${description}"
+            text: `You are a renovation expert. Analyze this room image and provide TWO things:
 
-כתוב ניתוח טכני קצר בעברית (3-4 משפטים):
-- תיאור המצב הקיים בתמונה
-- פירוט העבודות הנדרשות לביצוע השינוי
-- הערות מקצועיות רלוונטיות (אם יש)
+1. ROOM_DESCRIPTION: A detailed description of the room IN ENGLISH - describe the layout, furniture, colors, flooring, walls, lighting, windows, doors. Be specific and detailed.
 
-כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.`
+2. HEBREW_ANALYSIS: A short professional analysis in Hebrew (3-4 sentences) about the current state and what changes are needed for: "${description}"
+
+Format your response exactly like this:
+ROOM_DESCRIPTION: [detailed English description here]
+HEBREW_ANALYSIS: [Hebrew text here]`
           }
         ]
       }]
@@ -239,27 +240,35 @@ export async function POST(request: NextRequest) {
     }
 
     const geminiData = await geminiResponse.json();
-    const analysisText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const fullResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+    // Parse room description and Hebrew analysis
+    const roomDescMatch = fullResponse.match(/ROOM_DESCRIPTION:\s*([\s\S]*?)(?=HEBREW_ANALYSIS:|$)/i);
+    const hebrewMatch = fullResponse.match(/HEBREW_ANALYSIS:\s*([\s\S]*?)$/i);
+    
+    const roomDescription = roomDescMatch?.[1]?.trim() || "A room interior";
+    const analysisText = hebrewMatch?.[1]?.trim() || fullResponse;
+    
+    console.log("Room description:", roomDescription.slice(0, 200));
+    console.log("Hebrew analysis:", analysisText.slice(0, 200));
 
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Edit image with Nano Banana Pro (matching official Clawdbot SDK format)
+    // Step 3: Generate NEW image with Nano Banana (text only - no reference image)
     const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Simple English prompt for editing
-    const editPrompt = `Edit this room image: ${description}`;
+    // Create a prompt that describes the renovated room
+    const editPrompt = `Generate a photorealistic interior design image: ${roomDescription}. 
+    
+IMPORTANT CHANGES TO APPLY: ${description}
 
-    // Image BEFORE text (as per official SDK), with imageConfig
+Style: Professional interior photography, natural lighting, high quality render.`;
+
+    // Text-only request (no reference image - this works!)
     const editPayload = {
       contents: [{
         parts: [
-          {
-            inlineData: {
-              mimeType: mimeType,
-              data: imageBase64
-            }
-          },
           { text: editPrompt }
         ]
       }],

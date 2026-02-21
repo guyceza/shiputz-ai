@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import HeroAnimation from "@/components/HeroAnimation";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -113,32 +114,44 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-11 min-h-screen flex flex-col justify-center items-center text-center px-6">
-        <p className="text-sm text-gray-500 mb-4">ניהול שיפוצים חכם</p>
-        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-4 text-gray-900">
-          שיפוץ בשליטה מלאה.
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mb-8 leading-relaxed">
-          בינה מלאכותית שמנהלת את התקציב, מנתחת הצעות מחיר, ומתריעה לפני שנכנסים לבעיה.
-        </p>
-        <div className="flex gap-4 flex-wrap justify-center">
-          <Link
-            href="/signup"
-            className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-          >
-            התחל בחינם
-          </Link>
-          <Link
-            href="#features"
-            className="text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
-          >
-            גלה עוד
-          </Link>
+      <section className="pt-11 min-h-screen flex flex-col justify-center px-6">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            {/* Text Content */}
+            <div className="flex-1 text-center lg:text-right">
+              <p className="text-sm text-gray-500 mb-4">ניהול שיפוצים חכם</p>
+              <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-4 text-gray-900">
+                שיפוץ בשליטה מלאה.
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mb-8 leading-relaxed mx-auto lg:mx-0">
+                בינה מלאכותית שמנהלת את התקציב, מנתחת הצעות מחיר, ומתריעה לפני שנכנסים לבעיה.
+              </p>
+              <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
+                <Link
+                  href="/signup"
+                  className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                >
+                  התחל בחינם
+                </Link>
+                <Link
+                  href="#features"
+                  className="text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
+                >
+                  גלה עוד
+                </Link>
+              </div>
+              <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
+            </div>
+            
+            {/* Phone Animation */}
+            <div className="flex-1 hidden lg:block">
+              <HeroAnimation />
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
         
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl mx-auto">
           <div className="group">
             <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-gray-400">+</span></p>
             <p className="text-sm text-gray-500">תקציבים נוהלו</p>

@@ -141,11 +141,21 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
             alt="אחרי" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+          <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded">
             אחרי
-            {showShopLook && <span className="opacity-70">• לחץ לקנות 🛒</span>}
           </div>
         </div>
+        
+        {/* Shop the Look Button */}
+        {showShopLook && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+            className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors z-10 pointer-events-auto"
+          >
+            <span>🛒</span>
+            <span>לחץ לקנות</span>
+          </button>
+        )}
         
         {/* Before image (RIGHT side) */}
         <div 

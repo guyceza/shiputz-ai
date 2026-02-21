@@ -1229,8 +1229,7 @@ export default function ProjectPage() {
             <div className="border border-purple-200 rounded-2xl p-8 bg-gradient-to-br from-purple-50/50 to-white">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">✨</span>
-                  <h2 className="text-lg font-semibold text-gray-900">הדמיות AI</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">איך זה יראה?</h2>
                   {visionHistory.length > 0 && (
                     <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">{visionHistory.length}</span>
                   )}
@@ -1245,7 +1244,6 @@ export default function ProjectPage() {
 
               {visionHistory.length === 0 ? (
                 <div className="text-center py-12">
-                  <span className="text-5xl mb-4 block">🎨</span>
                   <p className="text-gray-500 mb-2">אין הדמיות עדיין</p>
                   <p className="text-sm text-gray-400">העלה תמונה של החדר וקבל הדמיה של איך השיפוץ יראה</p>
                 </div>

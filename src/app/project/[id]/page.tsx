@@ -188,6 +188,19 @@ export default function ProjectPage() {
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [countdown, setCountdown] = useState(30);
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [showVisionHistory, setShowVisionHistory] = useState(false);
+  
+  // Vision history type
+  interface VisionHistoryItem {
+    id: string;
+    date: string;
+    beforeImage: string;
+    afterImage: string;
+    description: string;
+    analysis: string;
+    costs: { total: number };
+  }
+  const [visionHistory, setVisionHistory] = useState<VisionHistoryItem[]>([]);
   
   // Tips to show during loading (no emojis)
   const loadingTips = [
@@ -246,6 +259,12 @@ export default function ProjectPage() {
       } else {
         router.push("/dashboard");
       }
+    }
+    
+    // Load vision history for this project
+    const savedHistory = localStorage.getItem(`visionHistory-${params.id}`);
+    if (savedHistory) {
+      setVisionHistory(JSON.parse(savedHistory));
     }
   }, [params.id, router]);
 
@@ -643,6 +662,22 @@ export default function ProjectPage() {
           costs: data.costs
         });
         incrementVisionUsage();
+        
+        // Save to history
+        if (data.generatedImage && visionImage) {
+          const historyItem: VisionHistoryItem = {
+            id: Date.now().toString(),
+            date: new Date().toLocaleString('he-IL'),
+            beforeImage: visionImage,
+            afterImage: data.generatedImage,
+            description: visionDescription,
+            analysis: data.analysis,
+            costs: { total: data.costs.total }
+          };
+          const newHistory = [historyItem, ...visionHistory];
+          setVisionHistory(newHistory);
+          localStorage.setItem(`visionHistory-${params.id}`, JSON.stringify(newHistory));
+        }
       } else if (data.error === "IMAGE_NOT_SUPPORTED") {
         // Image couldn't be processed - show friendly error in UI, no analysis
         setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
@@ -1550,12 +1585,68 @@ export default function ProjectPage() {
                 <span className="text-2xl">✨</span>
                 <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה? - הדמיית שיפוץ</h2>
               </div>
-              <button onClick={() => { setShowAIVision(false); resetVision(); }} className="text-gray-500 hover:text-gray-900">✕</button>
+              <div className="flex items-center gap-3">
+                {visionHistory.length > 0 && (
+                  <button 
+                    onClick={() => setShowVisionHistory(!showVisionHistory)}
+                    className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${showVisionHistory ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  >
+                    <span>🕐</span>
+                    <span>היסטוריה ({visionHistory.length})</span>
+                  </button>
+                )}
+                <button onClick={() => { setShowAIVision(false); resetVision(); setShowVisionHistory(false); }} className="text-gray-500 hover:text-gray-900">✕</button>
+              </div>
             </div>
             
             <div className="p-6">
               <input ref={visionInputRef} type="file" accept="image/*" onChange={handleVisionImageSelect} className="hidden" />
               
+              {/* History View */}
+              {showVisionHistory ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">היסטוריית הדמיות</h3>
+                    <button 
+                      onClick={() => setShowVisionHistory(false)}
+                      className="text-purple-600 hover:text-purple-700 text-sm"
+                    >
+                      ← חזור להדמיה חדשה
+                    </button>
+                  </div>
+                  
+                  {visionHistory.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">אין עדיין הדמיות</p>
+                  ) : (
+                    <div className="grid gap-4">
+                      {visionHistory.map((item) => (
+                        <div key={item.id} className="border border-gray-200 rounded-xl p-4 hover:border-purple-300 transition-colors">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1">
+                              <div className="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                  <p className="text-xs text-gray-500 mb-1">לפני</p>
+                                  <img src={item.beforeImage} alt="Before" className="w-full h-32 object-cover rounded-lg" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 mb-1">אחרי</p>
+                                  <img src={item.afterImage} alt="After" className="w-full h-32 object-cover rounded-lg" />
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">{item.description}</p>
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>{item.date}</span>
+                                <span className="font-medium text-purple-600">₪{item.costs.total.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+              <>
               {!visionResult ? (
                 <div className="space-y-6">
                   {/* Image Upload */}
@@ -1730,6 +1821,8 @@ export default function ProjectPage() {
                     </button>
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
           </div>

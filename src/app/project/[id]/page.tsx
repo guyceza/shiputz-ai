@@ -2005,7 +2005,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">🎨</span>
+              <img src="/icons/palette.png" alt="" className="w-10 h-10" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">נגמרו ההדמיות להיום</h3>
             <p className="text-gray-500 mb-6">

@@ -454,7 +454,7 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 mb-4">
-                <span className="text-4xl">🎨</span>
+                <img src="/icons/palette.png" alt="" className="w-10 h-10" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">איך השיפוץ שלי יראה?</h3>
               <p className="text-sm text-gray-500">תוסף לחשבון ShiputzAI קיים</p>

@@ -272,7 +272,7 @@ export default function ComparisonSection() {
                  }} />
             
             <div className="absolute top-5 left-0 right-0 text-center z-10">
-              <span className="text-xs font-medium text-stone-500 uppercase tracking-widest">
+              <span className="text-lg font-bold text-stone-600">
                 בלי Shipazti
               </span>
             </div>
@@ -328,7 +328,7 @@ export default function ComparisonSection() {
             <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
             
             <div className="absolute top-5 left-0 right-0 text-center z-10">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">
+              <span className="text-lg font-bold text-gray-300">
                 עם Shipazti
               </span>
             </div>

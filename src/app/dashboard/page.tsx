@@ -30,22 +30,29 @@ export default function DashboardPage() {
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      router.push("/login");
-      return;
-    }
-    setUser(JSON.parse(userData));
+    // Wait for client-side hydration
+    const checkAuth = () => {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        router.push("/login");
+        return;
+      }
+      setUser(JSON.parse(userData));
 
-    const savedProjects = localStorage.getItem("projects");
-    if (savedProjects) {
-      setProjects(JSON.parse(savedProjects));
-    }
+      const savedProjects = localStorage.getItem("projects");
+      if (savedProjects) {
+        setProjects(JSON.parse(savedProjects));
+      }
+      setIsLoading(false);
+    };
+    
+    checkAuth();
   }, [router]);
 
   const handleCreateProject = () => {
@@ -77,7 +84,13 @@ export default function DashboardPage() {
   const totalRemaining = totalBudget - totalSpent;
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
-  if (!user) return null;
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">טוען...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

@@ -105,6 +105,7 @@ export default function ProjectPage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   
   const [project, setProject] = useState<Project | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "suppliers" | "photos">("overview");
   
   // Expense modal
@@ -247,32 +248,39 @@ export default function ProjectPage() {
   }, [visionLoading]);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      router.push("/login");
-      return;
-    }
-
-    const savedProjects = localStorage.getItem("projects");
-    if (savedProjects) {
-      const projects: Project[] = JSON.parse(savedProjects);
-      const found = projects.find((p) => p.id === params.id);
-      if (found) {
-        // Initialize phases if not present
-        if (!found.phases || found.phases.length === 0) {
-          found.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
-        }
-        setProject(found);
-      } else {
-        router.push("/dashboard");
+    const loadData = () => {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        router.push("/login");
+        return;
       }
-    }
+
+      const savedProjects = localStorage.getItem("projects");
+      if (savedProjects) {
+        const projects: Project[] = JSON.parse(savedProjects);
+        const found = projects.find((p) => p.id === params.id);
+        if (found) {
+          // Initialize phases if not present
+          if (!found.phases || found.phases.length === 0) {
+            found.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
+          }
+          setProject(found);
+        } else {
+          router.push("/dashboard");
+          return;
+        }
+      }
+      
+      // Load vision history for this project
+      const savedHistory = localStorage.getItem(`visionHistory-${params.id}`);
+      if (savedHistory) {
+        setVisionHistory(JSON.parse(savedHistory));
+      }
+      
+      setIsLoading(false);
+    };
     
-    // Load vision history for this project
-    const savedHistory = localStorage.getItem(`visionHistory-${params.id}`);
-    if (savedHistory) {
-      setVisionHistory(JSON.parse(savedHistory));
-    }
+    loadData();
   }, [params.id, router]);
 
   const saveProject = (updatedProject: Project) => {
@@ -768,7 +776,13 @@ export default function ProjectPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (!project) return null;
+  if (isLoading || !project) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">טוען...</div>
+      </div>
+    );
+  }
 
   const budgetPercentage = (project.spent / project.budget) * 100;
   const remaining = project.budget - project.spent;

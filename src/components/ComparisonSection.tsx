@@ -128,71 +128,106 @@ export default function ComparisonSection() {
   ];
 
   const getOrganizedContent = (type: string) => {
+    // Base card style - all cards are white with consistent padding
+    const baseCard = "bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]";
+    
     switch (type) {
       case 'budget':
         return (
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 shadow-[0_8px_30px_rgba(16,185,129,0.3),0_2px_8px_rgba(0,0,0,0.1)] h-full">
-            <div className="text-emerald-100 text-[10px] mb-1">תקציב כולל</div>
-            <div className="text-white text-xl font-bold">₪150,000</div>
-            <div className="mt-3 h-1.5 bg-white/30 rounded-full overflow-hidden">
-              <div className="h-full w-[55%] bg-white rounded-full"></div>
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">תקציב כולל</span>
             </div>
-            <div className="text-emerald-100 text-[9px] mt-1">55% נוצל</div>
+            <div className="text-gray-900 text-xl font-bold mb-2">₪150,000</div>
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full w-[55%] bg-emerald-500 rounded-full"></div>
+            </div>
+            <div className="text-gray-400 text-[10px] mt-1">55% נוצל</div>
           </div>
         );
       case 'receipt-clean':
         return (
-          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] h-full">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span className="text-[10px] text-emerald-600 font-medium">נסרקה</span>
+              <span className="text-xs text-gray-500">קבלה נסרקה</span>
             </div>
-            <div className="text-gray-800 text-base font-semibold">₪1,200</div>
-            <div className="text-gray-400 text-xs">אינסטלטור</div>
+            <div className="text-gray-900 text-xl font-bold">₪1,200</div>
+            <div className="text-gray-400 text-xs">אינסטלטור - תיקון צנרת</div>
           </div>
         );
       case 'chart':
         return (
-          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] h-full">
-            <div className="text-gray-400 text-[10px] mb-3">הוצאות לפי קטגוריה</div>
-            <div className="flex items-end gap-1.5 h-14">
-              <div className="flex-1 bg-emerald-200 rounded-t" style={{ height: '60%' }}></div>
-              <div className="flex-1 bg-emerald-300 rounded-t" style={{ height: '85%' }}></div>
-              <div className="flex-1 bg-emerald-400 rounded-t" style={{ height: '45%' }}></div>
-              <div className="flex-1 bg-emerald-500 rounded-t" style={{ height: '70%' }}></div>
-              <div className="flex-1 bg-emerald-600 rounded-t" style={{ height: '55%' }}></div>
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">הוצאות לפי קטגוריה</span>
+            </div>
+            <div className="flex items-end gap-1.5 h-12">
+              <div className="flex-1 bg-emerald-200 rounded" style={{ height: '50%' }}></div>
+              <div className="flex-1 bg-emerald-300 rounded" style={{ height: '80%' }}></div>
+              <div className="flex-1 bg-emerald-400 rounded" style={{ height: '35%' }}></div>
+              <div className="flex-1 bg-emerald-500 rounded" style={{ height: '65%' }}></div>
+              <div className="flex-1 bg-emerald-600 rounded" style={{ height: '100%' }}></div>
             </div>
           </div>
         );
       case 'alert-good':
         return (
-          <div className="bg-white border-r-4 border-r-emerald-500 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-4 h-full">
-            <div className="text-[10px] text-emerald-600 font-semibold mb-1">התראה חכמה</div>
-            <div className="text-sm text-gray-700">הצעת מחיר גבוהה ב-15%</div>
-            <div className="text-xs text-gray-400">מהמחיר הממוצע</div>
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">התראה חכמה</span>
+            </div>
+            <div className="text-gray-900 text-sm font-medium">הצעת מחיר גבוהה ב-15%</div>
+            <div className="text-gray-400 text-xs">מהמחיר הממוצע באזור</div>
           </div>
         );
       case 'savings':
         return (
-          <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl p-4 shadow-[0_8px_30px_rgba(251,191,36,0.3)] h-full">
-            <div className="text-white/80 text-[10px] mb-1">חסכת עד היום</div>
-            <div className="text-white text-xl font-bold">₪4,200</div>
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">חסכת עד היום</span>
+            </div>
+            <div className="text-emerald-600 text-xl font-bold">₪4,200</div>
+            <div className="text-gray-400 text-xs">בזכות השוואת מחירים</div>
           </div>
         );
       case 'check':
         return (
-          <div className="bg-white rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] text-center h-full flex flex-col items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mb-2">
-              <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+          <div className={baseCard}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">קבלות השבוע</span>
             </div>
-            <div className="text-gray-700 text-sm font-medium">12 קבלות</div>
-            <div className="text-gray-400 text-xs">השבוע</div>
+            <div className="text-gray-900 text-xl font-bold">12</div>
+            <div className="text-gray-400 text-xs">נסרקו ותועדו אוטומטית</div>
           </div>
         );
       default:

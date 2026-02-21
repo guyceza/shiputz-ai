@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 
 interface ExampleCard {
@@ -69,12 +69,56 @@ const EXAMPLES: ExampleCard[] = [
 
 function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterImg: string }) {
   const [sliderPosition, setSliderPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMove = (clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(percentage);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    handleMove(e.clientX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    handleMove(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    handleMove(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    handleMove(e.touches[0].clientX);
+  };
 
   return (
-    <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100" dir="ltr">
-      {/* After image (LEFT side in LTR) */}
+    <div 
+      ref={containerRef}
+      className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 select-none touch-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
+    >
+      {/* After image (LEFT side) */}
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
         <img 
@@ -87,9 +131,9 @@ function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterIm
         </div>
       </div>
       
-      {/* Before image (RIGHT side in LTR) */}
+      {/* Before image (RIGHT side) */}
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
       >
         <img 
@@ -104,23 +148,13 @@ function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterIm
       
       {/* Slider handle */}
       <div 
-        className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize"
+        className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none"
         style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
           <span className="text-gray-400">↔</span>
         </div>
       </div>
-      
-      {/* Slider input */}
-      <input
-        type="range"
-        min="0"
-        max="100"
-        value={sliderPosition}
-        onChange={(e) => setSliderPosition(Number(e.target.value))}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize"
-      />
     </div>
   );
 }

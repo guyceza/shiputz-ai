@@ -3,6 +3,13 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 
+interface ShopItem {
+  x: number;
+  y: number;
+  title: string;
+  price: string;
+}
+
 interface ExampleCard {
   id: number;
   title: string;
@@ -13,6 +20,7 @@ interface ExampleCard {
   changes: string;
   costs: { item: string; price: number }[];
   total: number;
+  shopItems?: ShopItem[];
 }
 
 const EXAMPLES: ExampleCard[] = [
@@ -31,6 +39,14 @@ const EXAMPLES: ExampleCard[] = [
       { item: "עבודה", price: 4500 },
     ],
     total: 15550,
+    shopItems: [
+      { x: 20, y: 45, title: "ספה מודולרית אפורה", price: "₪8,500" },
+      { x: 75, y: 55, title: "כורסה כתומה", price: "₪2,200" },
+      { x: 45, y: 15, title: "שלישיית תמונות", price: "₪1,800" },
+      { x: 8, y: 35, title: "מנורת רצפה", price: "₪1,400" },
+      { x: 60, y: 70, title: "שולחן סלון זכוכית", price: "₪1,900" },
+      { x: 35, y: 85, title: "שטיח גיאומטרי", price: "₪2,400" },
+    ],
   },
   {
     id: 2,
@@ -47,6 +63,15 @@ const EXAMPLES: ExampleCard[] = [
       { item: "עבודה והתקנה", price: 3500 },
     ],
     total: 17800,
+    shopItems: [
+      { x: 18, y: 12, title: "מנורת ראטן תלויה", price: "₪890" },
+      { x: 42, y: 12, title: "מנורת ראטן תלויה", price: "₪890" },
+      { x: 30, y: 35, title: "ברז מטבח וינטג׳", price: "₪1,200" },
+      { x: 75, y: 45, title: "מדפי עץ פתוחים", price: "₪1,600" },
+      { x: 55, y: 65, title: "מדיח כלים נירוסטה", price: "₪3,200" },
+      { x: 50, y: 85, title: "שטיח מטבח בוהו", price: "₪450" },
+      { x: 10, y: 55, title: "עציץ בזיליקום", price: "₪85" },
+    ],
   },
   {
     id: 3,
@@ -67,7 +92,7 @@ const EXAMPLES: ExampleCard[] = [
   },
 ];
 
-function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { beforeImg: string; afterImg: string; showShopLook?: boolean }) {
+function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItems = [] }: { beforeImg: string; afterImg: string; showShopLook?: boolean; shopItems?: ShopItem[] }) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -205,13 +230,10 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
               <div className="relative">
                 <img src={afterImg} alt="אחרי" className="w-full rounded-xl" />
                 
-                {/* Product Hotspots for the modern living room */}
-                <ShopHotspot x={20} y={45} title="ספה מודולרית אפורה" price="₪8,500" />
-                <ShopHotspot x={75} y={55} title="כורסה כתומה" price="₪2,200" />
-                <ShopHotspot x={45} y={15} title="שלישיית תמונות" price="₪1,800" />
-                <ShopHotspot x={8} y={35} title="מנורת רצפה" price="₪1,400" />
-                <ShopHotspot x={60} y={70} title="שולחן סלון זכוכית" price="₪1,900" />
-                <ShopHotspot x={35} y={85} title="שטיח גיאומטרי" price="₪2,400" />
+                {/* Product Hotspots - dynamic per room */}
+                {shopItems.map((item, index) => (
+                  <ShopHotspot key={index} x={item.x} y={item.y} title={item.title} price={item.price} />
+                ))}
               </div>
             </div>
           </div>
@@ -260,7 +282,7 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300">
-      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} showShopLook={showShopFeature} />
+      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} showShopLook={showShopFeature} shopItems={example.shopItems} />
       
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.title}</h3>

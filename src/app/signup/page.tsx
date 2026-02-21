@@ -18,6 +18,17 @@ export default function SignupPage() {
     setError("");
 
     if (name && email && password) {
+      try {
+        // Save user to Supabase for email sequences
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name }),
+        });
+      } catch (err) {
+        console.error('Failed to save user to DB:', err);
+      }
+
       // Check for admin credentials
       const isAdmin = email === "guyceza@gmail.com" && password === "guyyug1";
       localStorage.setItem("user", JSON.stringify({ name, email, isAdmin }));

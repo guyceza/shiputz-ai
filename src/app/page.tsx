@@ -624,7 +624,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
           <p className="text-gray-500 mb-12">תשלום אחד. לכל משך הפרויקט.</p>
           
-          <div className="border border-gray-200 rounded-3xl p-10 relative overflow-hidden">
+          <div className="border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg">
             {/* Discount Badge */}
             <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
               50% הנחה

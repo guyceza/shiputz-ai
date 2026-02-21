@@ -964,7 +964,7 @@ export default function ProjectPage() {
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden bg-gradient-to-br from-purple-50 to-blue-50">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">✨</span>
+                  <img src="/icons/sparkles.png" alt="" className="w-6 h-6" />
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה?</h2>
                     <p className="text-sm text-gray-500">ראה את השיפוץ לפני שמתחיל</p>
@@ -1689,7 +1689,7 @@ export default function ProjectPage() {
           <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">✨</span>
+                <img src="/icons/sparkles.png" alt="" className="w-6 h-6" />
                 <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה? - הדמיית שיפוץ</h2>
               </div>
               <div className="flex items-center gap-3">
@@ -1805,7 +1805,7 @@ export default function ProjectPage() {
                       </>
                     ) : (
                       <>
-                        <span>✨</span>
+                        <img src="/icons/sparkles.png" alt="" className="w-4 h-4 inline" />
                         תן לי לראות
                       </>
                     )}

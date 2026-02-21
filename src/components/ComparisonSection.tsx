@@ -271,8 +271,8 @@ export default function ComparisonSection() {
                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E")`,
                  }} />
             
-            <div className="absolute top-5 left-0 right-0 text-center z-10">
-              <span className="text-lg font-bold text-stone-600">
+            <div className="absolute top-6 left-0 right-0 text-center z-10">
+              <span className="text-2xl font-black text-stone-700">
                 בלי Shipazti
               </span>
             </div>
@@ -327,8 +327,8 @@ export default function ComparisonSection() {
             <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl" />
             <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
             
-            <div className="absolute top-5 left-0 right-0 text-center z-10">
-              <span className="text-lg font-bold text-gray-300">
+            <div className="absolute top-6 left-0 right-0 text-center z-10">
+              <span className="text-2xl font-black text-white">
                 עם Shipazti
               </span>
             </div>

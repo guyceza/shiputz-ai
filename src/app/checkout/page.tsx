@@ -90,17 +90,24 @@ export default function CheckoutPage() {
       });
     }
 
-    // Mark user as purchased
-    await fetch("/api/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.toLowerCase() }),
-    });
-
-    // TODO: Integrate actual payment (Stripe/PayPlus)
-    // For now, just redirect to dashboard
-    alert("תודה על הרכישה! 🎉");
-    router.push("/dashboard");
+    // Build Whop checkout URL
+    // Format: https://whop.com/checkout/[plan_id]?email=[email]&d=[discount_code]
+    const WHOP_CHECKOUT_BASE = "https://whop.com/shipazti-ai/checkout/plan_XXXXX"; // TODO: Update with actual plan ID
+    
+    let whopUrl = `${WHOP_CHECKOUT_BASE}?email=${encodeURIComponent(email)}`;
+    
+    // Add discount code if valid
+    if (discountValid) {
+      whopUrl += "&d=SHIPUTZ20"; // The general Whop coupon
+    }
+    
+    // Store discount code in localStorage so webhook can mark it as used
+    if (discountCode) {
+      localStorage.setItem("pending_discount_code", discountCode.toUpperCase());
+    }
+    
+    // Redirect to Whop checkout
+    window.location.href = whopUrl;
   };
 
   return (
@@ -227,12 +234,9 @@ export default function CheckoutPage() {
           התשלום מאובטח · ביטול תוך 14 יום
         </p>
 
-        {/* Note about payment integration */}
-        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-          <p className="text-sm text-yellow-800 text-center">
-            ⚠️ שילוב תשלום (Stripe/PayPlus) עדיין לא מחובר
-          </p>
-        </div>
+        <p className="text-center text-xs text-gray-400 mt-6">
+          תשלום מאובטח באמצעות Whop
+        </p>
       </div>
     </div>
   );

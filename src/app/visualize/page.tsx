@@ -187,8 +187,7 @@ export default function VisualizePage() {
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full mb-6">
-            <span className="text-lg">✨</span>
+          <div className="inline-flex items-center bg-gray-100 px-4 py-2 rounded-full mb-6">
             <span className="text-sm font-medium text-gray-700">חדש! ראה איך השיפוץ שלך יראה</span>
           </div>
           

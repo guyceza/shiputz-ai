@@ -153,8 +153,8 @@ export default function Home() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl mx-auto">
           <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500">תקציבים נוהלו</p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪10,000,000<span className="text-gray-400">+</span></p>
+            <p className="text-sm text-gray-500">תקציבים הוזנו ב-24 שעות</p>
           </div>
           <div className="group">
             <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-gray-400">+</span></p>
@@ -663,6 +663,43 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="py-24 px-6 border-t border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">שאלות ששאלתי את עצמי</h2>
+            <p className="text-gray-500">לפני ששפצתי. אולי גם אתה שואל.</p>
+          </div>
+          
+          <div className="space-y-6">
+            <FaqItem 
+              question="אני מרגיש שהקבלן מנפח לי את המחיר. איך אני בודק?"
+              answer="גם אני הרגשתי ככה. בניתי את ShiputzAI בדיוק בגלל זה - העלה הצעת מחיר והמערכת תגיד לך אם המחיר סביר לאזור שלך, ומה בדרך כלל חסר בהצעות כאלה."
+            />
+            <FaqItem 
+              question="התחלתי עם אקסל אבל אחרי שבוע כבר לא עדכנתי..."
+              answer="קלאסי. לי קרה בדיוק אותו דבר. לכן פה את רק מצלם קבלה והמערכת עושה את השאר - מזהה סכום, תאריך, קטגוריה, ומוסיפה לתקציב. אפס מאמץ."
+            />
+            <FaqItem 
+              question="אני מפחד להגיע לסוף השיפוץ ולגלות שאין לי כסף"
+              answer="הפחד הזה שמר אותי ער בלילות. המערכת מתריעה ברגע שמתקרבים לחריגה - לא בסוף כשכבר מאוחר, אלא באמצע כשעוד אפשר לעשות משהו."
+            />
+            <FaqItem 
+              question="יש לי 3 הצעות מחיר ואני לא מצליח להשוות ביניהן"
+              answer="כי כל קבלן כותב אחרת. אחד מפרט, אחד כולל הכל בשורה אחת, והשלישי שכח חצי מהדברים. ה-AI מנתח את ההצעות ומראה לך בדיוק מה כל אחד כולל ומה חסר."
+            />
+            <FaqItem 
+              question="זה לא יקר מדי לעוד אפליקציה?"
+              answer="₪149 חד פעמי. אם זה חוסך לך טעות אחת של ₪500 בהצעת מחיר - כבר הרווחת. ורוב המשתמשים שלנו חוסכים הרבה יותר."
+            />
+            <FaqItem 
+              question="מה אם אני לא מבין בטכנולוגיה?"
+              answer="אם אתה יודע לצלם תמונה בטלפון, אתה יודע להשתמש ב-ShiputzAI. רציני. זה פשוט."
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 px-6 bg-gray-900 text-white">
         <div className="max-w-3xl mx-auto text-center">
@@ -728,6 +765,25 @@ function TestimonialCard({ quote, name, city, rating }: { quote: string; name: s
             <span key={i} className="text-amber-400">★</span>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-5 text-right flex items-center justify-between hover:bg-gray-50 transition-colors"
+      >
+        <span className="text-base font-medium text-gray-900">{question}</span>
+        <span className={`text-2xl text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>+</span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
+        <p className="px-6 pb-5 text-gray-600 leading-relaxed">{answer}</p>
       </div>
     </div>
   );

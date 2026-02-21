@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroAnimation from "@/components/HeroAnimation";
+import ComparisonSection from "@/components/ComparisonSection";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -466,59 +467,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Problem */}
-      <section className="py-24 px-6 border-t border-gray-100">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-gray-900">שיפוץ בישראל זה כאב ראש.</h2>
-          <p className="text-lg text-gray-500 mb-16">
-            חריגות בתקציב, קבלנים שנעלמים, הצעות מחיר מנופחות, ותיעוד באקסל שמתבלגן.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8 text-right">
-            <div className="rounded-2xl p-8 bg-gray-900 text-white">
-              <p className="font-semibold mb-5 text-lg text-gray-100">הדרך הישנה</p>
-              <ul className="text-gray-400 space-y-3 text-[15px]">
-                <li className="flex items-center gap-3">
-                  <span className="text-gray-500">✕</span>
-                  <span>אקסל מבולגן שאף אחד לא מעדכן</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-gray-500">✕</span>
-                  <span>קבלות בארנק שהולכות לאיבוד</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-gray-500">✕</span>
-                  <span>הצעות מחיר שאי אפשר להשוות</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-gray-500">✕</span>
-                  <span>הפתעות בסוף החודש</span>
-                </li>
-              </ul>
-            </div>
-            <div className="rounded-2xl p-8 bg-white border border-gray-200 shadow-sm">
-              <p className="font-semibold mb-5 text-lg text-gray-900">עם ShiputzAI</p>
-              <ul className="text-gray-600 space-y-3 text-[15px]">
-                <li className="flex items-center gap-3">
-                  <span className="text-emerald-500">✓</span>
-                  <span>מעקב אוטומטי בזמן אמת</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-emerald-500">✓</span>
-                  <span>צילום קבלה = הוספה מיידית</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-emerald-500">✓</span>
-                  <span>AI שמנתח ומשווה מחירים</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-emerald-500">✓</span>
-                  <span>התראות לפני שיש בעיה</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Problem/Comparison */}
+      <ComparisonSection />
 
       {/* Testimonials */}
       <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">

@@ -16,6 +16,12 @@ const getIsAdmin = () => {
   }
 };
 
+interface ExpenseItem {
+  name: string;
+  quantity?: number;
+  price?: number;
+}
+
 interface Expense {
   id: string;
   description: string;
@@ -23,6 +29,11 @@ interface Expense {
   category: string;
   date: string;
   imageUrl?: string;
+  vendor?: string;
+  items?: ExpenseItem[];
+  fullText?: string;
+  vatIncluded?: boolean;
+  vatAmount?: number;
 }
 
 interface CategoryBudget {
@@ -115,6 +126,15 @@ export default function ProjectPage() {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // Expense details modal
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  
+  // Additional receipt scan data
+  const [scannedVendor, setScannedVendor] = useState<string>("");
+  const [scannedItems, setScannedItems] = useState<ExpenseItem[]>([]);
+  const [scannedFullText, setScannedFullText] = useState<string>("");
+  const [scannedVatAmount, setScannedVatAmount] = useState<number | null>(null);
   
   // AI Chat
   const [showAIChat, setShowAIChat] = useState(false);
@@ -337,6 +357,10 @@ export default function ProjectPage() {
           if (data.description) setDescription(data.description);
           if (data.amount) setAmount(data.amount.toString());
           if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
+          if (data.vendor) setScannedVendor(data.vendor);
+          if (data.items) setScannedItems(data.items);
+          if (data.fullText) setScannedFullText(data.fullText);
+          if (data.vatAmount) setScannedVatAmount(data.vatAmount);
         }
       } catch (error) {
         console.error("Scan error:", error);
@@ -429,6 +453,10 @@ export default function ProjectPage() {
       category,
       date: new Date().toISOString(),
       imageUrl: selectedImage || undefined,
+      vendor: scannedVendor || undefined,
+      items: scannedItems.length > 0 ? scannedItems : undefined,
+      fullText: scannedFullText || undefined,
+      vatAmount: scannedVatAmount || undefined,
     };
     const updatedProject = {
       ...project,
@@ -441,6 +469,10 @@ export default function ProjectPage() {
     setAmount("");
     setCategory(CATEGORIES[0]);
     setSelectedImage(null);
+    setScannedVendor("");
+    setScannedItems([]);
+    setScannedFullText("");
+    setScannedVatAmount(null);
   };
 
   const handleSaveBudgets = () => {
@@ -1038,17 +1070,28 @@ export default function ProjectPage() {
               ) : (
                 <div className="divide-y divide-gray-100">
                   {project.expenses.map((expense) => (
-                    <div key={expense.id} className="flex items-center justify-between py-4">
+                    <div 
+                      key={expense.id} 
+                      className="flex items-center justify-between py-4 cursor-pointer hover:bg-gray-50 -mx-4 px-4 rounded-lg transition-colors"
+                      onClick={() => setSelectedExpense(expense)}
+                    >
                       <div className="flex items-center gap-4">
                         {expense.imageUrl && (
                           <img src={expense.imageUrl} alt="" className="w-10 h-10 object-cover rounded-lg print:hidden" />
                         )}
                         <div>
                           <p className="font-medium text-gray-900">{expense.description}</p>
-                          <p className="text-sm text-gray-500">{expense.category} · {new Date(expense.date).toLocaleDateString("he-IL")}</p>
+                          <p className="text-sm text-gray-500">
+                            {expense.vendor ? `${expense.vendor} · ` : ""}{expense.category} · {new Date(expense.date).toLocaleDateString("he-IL")}
+                          </p>
                         </div>
                       </div>
-                      <p className="font-medium text-gray-900">₪{expense.amount.toLocaleString()}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900">₪{expense.amount.toLocaleString()}</p>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1421,6 +1464,114 @@ export default function ProjectPage() {
             <div className="flex gap-3 mt-8">
               <button onClick={handleAddExpense} disabled={!description || !amount} className="flex-1 bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 disabled:opacity-30">הוסף</button>
               <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expense Details Modal */}
+      {selectedExpense && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedExpense(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">פרטי הוצאה</h2>
+              <button 
+                onClick={() => setSelectedExpense(null)} 
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Receipt Image */}
+              {selectedExpense.imageUrl && (
+                <div className="rounded-xl overflow-hidden border border-gray-100">
+                  <img 
+                    src={selectedExpense.imageUrl} 
+                    alt="קבלה" 
+                    className="w-full object-contain max-h-64"
+                  />
+                </div>
+              )}
+              
+              {/* Main Info */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-500">תיאור</p>
+                    <p className="text-lg font-medium text-gray-900">{selectedExpense.description}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm text-gray-500">סכום</p>
+                    <p className="text-2xl font-bold text-gray-900">₪{selectedExpense.amount.toLocaleString()}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedExpense.vendor && (
+                    <div>
+                      <p className="text-sm text-gray-500">בעל מקצוע / עסק</p>
+                      <p className="font-medium text-gray-900">{selectedExpense.vendor}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-gray-500">קטגוריה</p>
+                    <p className="font-medium text-gray-900">{selectedExpense.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">תאריך</p>
+                    <p className="font-medium text-gray-900">{new Date(selectedExpense.date).toLocaleDateString("he-IL")}</p>
+                  </div>
+                  {selectedExpense.vatAmount && (
+                    <div>
+                      <p className="text-sm text-gray-500">מע״מ</p>
+                      <p className="font-medium text-gray-900">₪{selectedExpense.vatAmount.toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Items Breakdown */}
+              {selectedExpense.items && selectedExpense.items.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-3">פירוט פריטים</p>
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                    {selectedExpense.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span className="text-gray-700">
+                          {item.name}
+                          {item.quantity && item.quantity > 1 && ` (×${item.quantity})`}
+                        </span>
+                        {item.price && (
+                          <span className="text-gray-900 font-medium">₪{item.price.toLocaleString()}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Full Text from Receipt */}
+              {selectedExpense.fullText && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-3">טקסט מלא מהקבלה</p>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedExpense.fullText}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4">
+              <button 
+                onClick={() => setSelectedExpense(null)}
+                className="w-full bg-gray-900 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+              >
+                סגור
+              </button>
             </div>
           </div>
         </div>

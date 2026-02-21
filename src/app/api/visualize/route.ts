@@ -244,28 +244,26 @@ export async function POST(request: NextRequest) {
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Edit image with Nano Banana Pro (gemini-3-pro-image-preview)
+    // Step 3: Edit image with Nano Banana Pro
     const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Create edit prompt - simple and direct for Nano Banana
-    const editPrompt = `Edit this room photo to show: ${description}`;
+    // Simple English prompt for better results
+    const editPrompt = `Transform this room: ${description}. Generate a new version of this room with the requested changes.`;
 
     const editPayload = {
       contents: [{
         parts: [
+          { text: editPrompt },
           {
             inlineData: {
               mimeType: mimeType,
               data: imageBase64
             }
-          },
-          {
-            text: editPrompt
           }
         ]
       }],
       generationConfig: {
-        responseModalities: ["IMAGE"]
+        responseModalities: ["TEXT", "IMAGE"]
       }
     };
 
@@ -280,40 +278,31 @@ export async function POST(request: NextRequest) {
 
       if (editResponse.ok) {
         const editData = await editResponse.json();
-        console.log("Nano Banana full response:", JSON.stringify(editData).slice(0, 2000));
-        console.log("Candidates:", editData.candidates?.length || 0);
+        console.log("Nano Banana response:", JSON.stringify(editData).slice(0, 2000));
         
-        // Check for blocks or safety issues
         const candidate = editData.candidates?.[0];
-        if (candidate?.finishReason && candidate.finishReason !== "STOP") {
-          console.log("Finish reason:", candidate.finishReason);
-        }
-        if (editData.promptFeedback?.blockReason) {
-          console.log("Block reason:", editData.promptFeedback.blockReason);
-        }
+        console.log("Finish reason:", candidate?.finishReason);
         
-        console.log("Content:", JSON.stringify(candidate?.content).slice(0, 500));
         // Look for image in response parts
         const parts = candidate?.content?.parts || [];
         console.log("Found parts:", parts.length);
+        
         for (const part of parts) {
-          console.log("Part keys:", Object.keys(part), "Part preview:", JSON.stringify(part).slice(0, 200));
-          if (part.inline_data?.mime_type?.startsWith("image/")) {
+          console.log("Part:", JSON.stringify(part).slice(0, 300));
+          // Try all possible formats
+          if (part.inlineData?.mimeType?.startsWith("image/")) {
+            generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            console.log("Found image!");
+            break;
+          } else if (part.inline_data?.mime_type?.startsWith("image/")) {
             generatedImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
             console.log("Found image (snake_case)!");
             break;
-          } else if (part.inlineData?.mimeType?.startsWith("image/")) {
-            generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            console.log("Found image (camelCase)!");
-            break;
-          } else if (part.fileData?.mimeType?.startsWith("image/")) {
-            // Sometimes returned as fileData
-            console.log("Found fileData format - need to fetch:", part.fileData);
           }
         }
       } else {
         const errorText = await editResponse.text();
-        console.error("Nano Banana edit error:", editResponse.status, errorText);
+        console.error("Nano Banana error:", editResponse.status, errorText);
       }
     } catch (editError) {
       console.error("Image edit failed:", editError);

@@ -81,14 +81,18 @@ export default function SignupPage() {
       }
     } catch (err: any) {
       console.error("Signup error:", err);
-      if (err.message?.includes("already registered")) {
+      const errorMsg = err.message || err.toString();
+      if (errorMsg.includes("already registered")) {
         setError("משתמש עם אימייל זה כבר קיים");
-      } else if (err.message?.includes("valid email")) {
+      } else if (errorMsg.includes("valid email")) {
         setError("כתובת אימייל לא תקינה");
-      } else if (err.message?.includes("password")) {
+      } else if (errorMsg.includes("password")) {
         setError("הסיסמה חייבת להכיל לפחות 6 תווים");
+      } else if (errorMsg.includes("not initialized")) {
+        setError("שגיאת חיבור - נסה לרענן את הדף");
       } else {
-        setError("שגיאה בהרשמה. נסה שוב.");
+        // Show actual error for debugging
+        setError(`שגיאה: ${errorMsg}`);
       }
     }
     setLoading(false);

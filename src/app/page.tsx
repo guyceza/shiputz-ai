@@ -136,28 +136,24 @@ export default function Home() {
           </Link>
         </div>
         <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
-      </section>
-
-      {/* Social Proof Stats Banner */}
-      <section className="py-12 px-6 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="group">
-              <p className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-blue-600">+</span></p>
-              <p className="text-sm text-gray-500">תקציבים נוהלו</p>
-            </div>
-            <div className="group">
-              <p className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-blue-600">+</span></p>
-              <p className="text-sm text-gray-500">משפצים פעילים</p>
-            </div>
-            <div className="group">
-              <p className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">500<span className="text-blue-600">+</span></p>
-              <p className="text-sm text-gray-500">הצעות מחיר נותחו</p>
-            </div>
-            <div className="group">
-              <p className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">10,000<span className="text-blue-600">+</span></p>
-              <p className="text-sm text-gray-500">טיפים נקראו</p>
-            </div>
+        
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl">
+          <div className="group">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪50,000,000<span className="text-blue-600">+</span></p>
+            <p className="text-sm text-gray-500">תקציבים נוהלו</p>
+          </div>
+          <div className="group">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-blue-600">+</span></p>
+            <p className="text-sm text-gray-500">משפצים פעילים</p>
+          </div>
+          <div className="group">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">500<span className="text-blue-600">+</span></p>
+            <p className="text-sm text-gray-500">הצעות מחיר נותחו</p>
+          </div>
+          <div className="group">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">10,000<span className="text-blue-600">+</span></p>
+            <p className="text-sm text-gray-500">טיפים נקראו</p>
           </div>
         </div>
       </section>

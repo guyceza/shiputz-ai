@@ -106,7 +106,7 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
             {/* Item Info */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🛒</span>
+                <img src="/icons/cart.png" alt="" className="w-10 h-10" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-2">{item.name}</h3>
               <p className="text-gray-500 text-sm">בחר חנות לחיפוש הפריט</p>

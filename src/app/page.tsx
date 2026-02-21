@@ -403,7 +403,7 @@ export default function Home() {
                   
                   {/* Shop the Look badge */}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                    <span>🛒</span>
+                    <img src="/icons/cart.png" alt="" className="w-4 h-4" />
                     <span>לחץ לצפייה גדולה</span>
                   </div>
                 </Link>
@@ -437,7 +437,7 @@ export default function Home() {
                   href="/shop-look"
                   className="inline-flex items-center gap-2 border border-gray-200 text-gray-900 px-6 py-4 rounded-full text-base hover:bg-gray-50 transition-colors"
                 >
-                  <span>🛒</span>
+                  <img src="/icons/cart.png" alt="" className="w-5 h-5" />
                   <span>Shop the Look</span>
                 </Link>
               </div>

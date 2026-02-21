@@ -181,7 +181,7 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
             onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
             className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors z-10 pointer-events-auto"
           >
-            <span>🛒</span>
+            <img src="/icons/cart.png" alt="" className="w-5 h-5" />
             <span>לחץ לקנות</span>
           </button>
         )}
@@ -233,7 +233,7 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
             </button>
             
             <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">🛒 Shop the Look</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center flex items-center justify-center gap-2"><img src="/icons/cart.png" alt="" className="w-6 h-6" /> Shop the Look</h3>
               <p className="text-sm text-gray-500 text-center mb-4">לחץ על המוצרים בתמונה לקנייה</p>
               
               <div className="relative">

@@ -1313,7 +1313,7 @@ export default function ProjectPage() {
                           >
                             <img src={item.afterImage} alt="After" className="w-full h-28 object-cover rounded-lg" />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors rounded-lg flex items-center justify-center">
-                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium">🛒 קנה את הסגנון</span>
+                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium flex items-center gap-1"><img src="/icons/cart.png" alt="" className="w-4 h-4" /> קנה את הסגנון</span>
                             </div>
                           </div>
                         </div>

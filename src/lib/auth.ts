@@ -1,17 +1,17 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-// Browser client for auth - only create if we have the URL
+// Browser client for auth - lazy initialization
 let supabase: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
-  if (!supabase && supabaseUrl && supabaseAnonKey) {
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
-  }
   if (!supabase) {
-    throw new Error('Supabase client not initialized - missing environment variables');
+    // Read env vars at runtime, not at module load time
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 
+      'https://vghfcdtzywbmlacltnjp.supabase.co';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaGZjZHR6eXdibWxhY2x0bmpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE3MTcsImV4cCI6MjA4NzIzNzcxN30.EUwH73NbfQ3eeAbu32YicJlHrxngf4WGgi2E6mNOnhw';
+    
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
   }
   return supabase;
 }

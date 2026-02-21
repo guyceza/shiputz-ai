@@ -1031,7 +1031,7 @@ export default function ProjectPage() {
                 </div>
               </div>
 
-              <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageSelect} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
 
               {!project.expenses || project.expenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-12">אין הוצאות עדיין</p>

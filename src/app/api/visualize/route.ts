@@ -244,20 +244,18 @@ export async function POST(request: NextRequest) {
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Edit image with Nano Banana Pro (gemini-3-pro-image-preview)
-    const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+    // Step 3: Edit image with Gemini 2.0 Flash (supports image generation)
+    const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     
-    // Create edit prompt - be very specific about what to change and what NOT to change
-    const editPrompt = `IMPORTANT: Make ONLY the following change to this room image: ${description}
+    // Create edit prompt - generate a renovated version of the room
+    const editPrompt = `Generate a photorealistic image showing this room AFTER renovation with these changes: ${description}
 
-DO NOT change:
-- The room layout and structure
-- The camera angle and perspective  
-- Furniture positions (unless specifically requested)
-- Window and door locations
-- The overall room shape
+Keep the same:
+- Room layout and dimensions
+- Camera angle and perspective
+- Window and door positions
 
-ONLY modify what was specifically requested. Keep everything else exactly as it appears in the original image.`;
+The result should look like a professional interior design rendering showing the renovated room.`;
 
     const editPayload = {
       contents: [{

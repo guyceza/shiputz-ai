@@ -18,6 +18,10 @@ export async function POST(request: NextRequest) {
         description: "קבלה לדוגמה",
         amount: Math.floor(Math.random() * 1000) + 100,
         category: "חומרי בניין",
+        vendor: "חנות לדוגמה",
+        date: new Date().toISOString().split('T')[0],
+        items: [],
+        fullText: "מצב דמו - אין API key",
       });
     }
 
@@ -43,21 +47,29 @@ export async function POST(request: NextRequest) {
                   },
                 },
                 {
-                  text: `אתה מנתח קבלות וחשבוניות בעברית. נתח את התמונה והחזר JSON בפורמט הבא בלבד (ללא טקסט נוסף, ללא markdown):
+                  text: `אתה מנתח קבלות וחשבוניות בעברית. נתח את התמונה והחזר JSON בפורמט הבא בלבד (ללא טקסט נוסף, ללא markdown, ללא \`\`\`):
 {
-  "description": "תיאור קצר של הקבלה/העסקה",
-  "amount": מספר (הסכום הסופי לתשלום),
-  "category": "אחת מהקטגוריות: חומרי בניין, עבודה, חשמל, אינסטלציה, ריצוף, צבע, מטבח, אמבטיה, אחר"
+  "description": "תיאור קצר של הקבלה/העסקה (2-5 מילים)",
+  "amount": מספר (הסכום הסופי לתשלום, ללא מע"מ אם מצוין בנפרד),
+  "category": "אחת מהקטגוריות: חומרי בניין, עבודה, חשמל, אינסטלציה, ריצוף, צבע, מטבח, אמבטיה, אחר",
+  "vendor": "שם העסק/בעל המקצוע",
+  "date": "תאריך בפורמט YYYY-MM-DD אם מצוין",
+  "items": [
+    {"name": "שם פריט", "quantity": כמות, "price": מחיר ליחידה}
+  ],
+  "fullText": "כל הטקסט הקריא מהקבלה",
+  "vatIncluded": true/false,
+  "vatAmount": סכום מע"מ אם מצוין
 }
 
-אם לא ניתן לזהות - החזר null לשדה הרלוונטי.`,
+אם לא ניתן לזהות שדה - החזר null. החזר JSON תקין בלבד.`,
                 },
               ],
             },
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 500,
+            maxOutputTokens: 1000,
           },
         }),
       }

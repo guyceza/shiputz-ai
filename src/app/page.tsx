@@ -382,48 +382,31 @@ export default function Home() {
                     לפני
                   </div>
                 </div>
-                <div className="relative aspect-[4/3] group">
+                <Link 
+                  href="/shop-look"
+                  className="relative aspect-[4/3] group cursor-pointer"
+                >
                   <img 
                     src="/after-room.jpg" 
                     alt="אחרי השיפוץ"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:brightness-110 transition-all"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
                     אחרי
                   </div>
                   
-                  {/* Product Hotspots */}
-                  <ProductHotspot 
-                    x={15} y={40} 
-                    title="ספה מודולרית" 
-                    price="₪8,500"
-                    link="/shop-look?item=sofa"
-                  />
-                  <ProductHotspot 
-                    x={75} y={35} 
-                    title="כורסה כתומה" 
-                    price="₪2,200"
-                    link="/shop-look?item=chair"
-                  />
-                  <ProductHotspot 
-                    x={45} y={20} 
-                    title="תמונות דקורטיביות" 
-                    price="₪1,800"
-                    link="/shop-look?item=art"
-                  />
-                  <ProductHotspot 
-                    x={8} y={55} 
-                    title="מנורת רצפה" 
-                    price="₪1,400"
-                    link="/shop-look?item=lamp"
-                  />
+                  {/* Product Hotspots - visual only, click goes to shop-look */}
+                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '15%', top: '40%'}} />
+                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '75%', top: '35%'}} />
+                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '45%', top: '20%'}} />
+                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '8%', top: '55%'}} />
                   
                   {/* Shop the Look badge */}
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                     <span>🛒</span>
-                    <span>לחץ על המוצרים</span>
+                    <span>לחץ לצפייה גדולה</span>
                   </div>
-                </div>
+                </Link>
               </div>
               <div className="absolute -top-3 -right-3 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-full">
                 חדש

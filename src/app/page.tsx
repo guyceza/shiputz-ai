@@ -382,21 +382,48 @@ export default function Home() {
                     לפני
                   </div>
                 </div>
-                <Link href="/shop-look" className="relative aspect-[4/3] group">
+                <div className="relative aspect-[4/3] group">
                   <img 
                     src="/after-room.jpg" 
-                    alt="אחרי השיפוץ - נוצר ע״י AI"
-                    className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300"
+                    alt="אחרי השיפוץ"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
                     אחרי
                   </div>
-                  {/* Shop the Look indicator */}
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  
+                  {/* Product Hotspots */}
+                  <ProductHotspot 
+                    x={15} y={40} 
+                    title="ספה מודולרית" 
+                    price="₪8,500"
+                    link="/shop-look?item=sofa"
+                  />
+                  <ProductHotspot 
+                    x={75} y={35} 
+                    title="כורסה כתומה" 
+                    price="₪2,200"
+                    link="/shop-look?item=chair"
+                  />
+                  <ProductHotspot 
+                    x={45} y={20} 
+                    title="תמונות דקורטיביות" 
+                    price="₪1,800"
+                    link="/shop-look?item=art"
+                  />
+                  <ProductHotspot 
+                    x={8} y={55} 
+                    title="מנורת רצפה" 
+                    price="₪1,400"
+                    link="/shop-look?item=lamp"
+                  />
+                  
+                  {/* Shop the Look badge */}
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
                     <span>🛒</span>
-                    <span>Shop the Look</span>
+                    <span>לחץ על המוצרים</span>
                   </div>
-                </Link>
+                </div>
               </div>
               <div className="absolute -top-3 -right-3 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-full">
                 חדש
@@ -785,6 +812,36 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
         <p className="px-6 pb-5 text-gray-600 leading-relaxed">{answer}</p>
       </div>
+    </div>
+  );
+}
+
+function ProductHotspot({ x, y, title, price, link }: { x: number; y: number; title: string; price: string; link: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div 
+      className="absolute"
+      style={{ left: `${x}%`, top: `${y}%` }}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-gray-900 animate-pulse"
+      >
+        <span className="text-xs font-bold">+</span>
+      </button>
+      
+      {isOpen && (
+        <Link
+          href={link}
+          className="absolute top-7 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[140px] z-10 border border-gray-100 hover:border-gray-300 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-sm font-medium text-gray-900 mb-1">{title}</p>
+          <p className="text-sm text-emerald-600 font-bold">{price}</p>
+          <p className="text-xs text-gray-400 mt-1">לחץ לפרטים ←</p>
+        </Link>
+      )}
     </div>
   );
 }

@@ -1649,11 +1649,17 @@ export default function ProjectPage() {
                       {visionResult.generatedImage ? (
                         <img src={visionResult.generatedImage} alt="After" className="w-full h-64 object-cover rounded-xl border-2 border-purple-300" />
                       ) : (
-                        <div className="w-full h-64 rounded-xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+                        <div className="w-full h-64 rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50 flex items-center justify-center">
                           <div className="text-center p-4">
-                            <span className="text-4xl mb-2 block">🎨</span>
-                            <p className="text-purple-700 font-medium">ההדמיה מבוססת על הניתוח</p>
-                            <p className="text-purple-600 text-sm">ראה פירוט למטה</p>
+                            <span className="text-4xl mb-2 block">📷</span>
+                            <p className="text-orange-700 font-medium">לא הצלחנו ליצור הדמיה לתמונה זו</p>
+                            <p className="text-orange-600 text-sm">נסה להעלות תמונה אחרת באיכות טובה יותר</p>
+                            <button
+                              onClick={() => resetVision()}
+                              className="mt-2 text-sm text-orange-600 hover:text-orange-700 underline"
+                            >
+                              נסה שוב
+                            </button>
                           </div>
                         </div>
                       )}

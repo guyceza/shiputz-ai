@@ -650,7 +650,6 @@ export default function Home() {
             >
               נצל את ההנחה
             </Link>
-            <p className="text-xs text-gray-400 mt-4">ללא התחייבות</p>
           </div>
         </div>
       </section>

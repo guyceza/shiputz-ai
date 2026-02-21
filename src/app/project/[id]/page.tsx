@@ -632,14 +632,26 @@ export default function ProjectPage() {
         })
       });
       
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
         setVisionResult({
           analysis: data.analysis,
           generatedImage: data.generatedImage,
           costs: data.costs
         });
         incrementVisionUsage();
+      } else if (data.error === "IMAGE_NOT_SUPPORTED") {
+        // Image couldn't be processed - show friendly error
+        alert(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
+        // Still show analysis and costs if available
+        if (data.analysis && data.costs) {
+          setVisionResult({
+            analysis: data.analysis,
+            generatedImage: null,
+            costs: data.costs
+          });
+        }
       } else {
         alert('שגיאה ביצירת ההדמיה. נסה שוב.');
       }

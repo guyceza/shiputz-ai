@@ -210,15 +210,14 @@ export async function POST(request: NextRequest) {
             }
           },
           {
-            text: `You are a renovation expert. Analyze this room image and provide TWO things:
+            text: `אתה מומחה שיפוצים. בקשת השינוי: "${description}"
 
-1. ROOM_DESCRIPTION: A detailed description of the room IN ENGLISH - describe the layout, furniture, colors, flooring, walls, lighting, windows, doors. Be specific and detailed.
+כתוב ניתוח טכני קצר בעברית (3-4 משפטים):
+- תיאור המצב הקיים בתמונה
+- פירוט העבודות הנדרשות לביצוע השינוי
+- הערות מקצועיות רלוונטיות (אם יש)
 
-2. HEBREW_ANALYSIS: A short professional analysis in Hebrew (3-4 sentences) about the current state and what changes are needed for: "${description}"
-
-Format your response exactly like this:
-ROOM_DESCRIPTION: [detailed English description here]
-HEBREW_ANALYSIS: [Hebrew text here]`
+כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.`
           }
         ]
       }]
@@ -240,43 +239,32 @@ HEBREW_ANALYSIS: [Hebrew text here]`
     }
 
     const geminiData = await geminiResponse.json();
-    const fullResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    
-    // Parse room description and Hebrew analysis
-    const roomDescMatch = fullResponse.match(/ROOM_DESCRIPTION:\s*([\s\S]*?)(?=HEBREW_ANALYSIS:|$)/i);
-    const hebrewMatch = fullResponse.match(/HEBREW_ANALYSIS:\s*([\s\S]*?)$/i);
-    
-    const roomDescription = roomDescMatch?.[1]?.trim() || "A room interior";
-    const analysisText = hebrewMatch?.[1]?.trim() || fullResponse;
-    
-    console.log("Room description:", roomDescription.slice(0, 200));
-    console.log("Hebrew analysis:", analysisText.slice(0, 200));
+    const analysisText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // Step 2: Calculate cost estimate from the analysis
     const costEstimate = calculateCosts(analysisText + " " + description);
 
-    // Step 3: Generate NEW image with Nano Banana (text only - no reference image)
+    // Step 3: Edit image with Nano Banana Pro
     const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
     
-    // Create a prompt that describes the renovated room
-    const editPrompt = `Generate a photorealistic interior design image: ${roomDescription}. 
-    
-IMPORTANT CHANGES TO APPLY: ${description}
+    // Edit prompt
+    const editPrompt = `Edit this room image: ${description}`;
 
-Style: Professional interior photography, natural lighting, high quality render.`;
-
-    // Text-only request (no reference image - this works!)
+    // Send image + text to Nano Banana
     const editPayload = {
       contents: [{
         parts: [
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: imageBase64
+            }
+          },
           { text: editPrompt }
         ]
       }],
       generationConfig: {
-        responseModalities: ["TEXT", "IMAGE"],
-        imageConfig: {
-          imageSize: "1K"
-        }
+        responseModalities: ["TEXT", "IMAGE"]
       }
     };
 
@@ -294,7 +282,19 @@ Style: Professional interior photography, natural lighting, high quality render.
         console.log("Nano Banana response:", JSON.stringify(editData).slice(0, 2000));
         
         const candidate = editData.candidates?.[0];
-        console.log("Finish reason:", candidate?.finishReason);
+        const finishReason = candidate?.finishReason;
+        console.log("Finish reason:", finishReason);
+        
+        // Check if model refused to process the image
+        if (finishReason === "OTHER" || finishReason === "SAFETY") {
+          return NextResponse.json({
+            success: false,
+            error: "IMAGE_NOT_SUPPORTED",
+            message: "לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.",
+            analysis: analysisText,
+            costs: costEstimate
+          });
+        }
         
         // Look for image in response parts
         const parts = candidate?.content?.parts || [];
@@ -313,16 +313,40 @@ Style: Professional interior photography, natural lighting, high quality render.
             break;
           }
         }
+        
+        // If no image was found in parts
+        if (!generatedImage) {
+          return NextResponse.json({
+            success: false,
+            error: "IMAGE_NOT_SUPPORTED",
+            message: "לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.",
+            analysis: analysisText,
+            costs: costEstimate
+          });
+        }
       } else {
         const errorText = await editResponse.text();
         console.error("Nano Banana error:", editResponse.status, errorText);
+        return NextResponse.json({
+          success: false,
+          error: "API_ERROR",
+          message: "שגיאה בעיבוד התמונה. נסה שוב.",
+          analysis: analysisText,
+          costs: costEstimate
+        });
       }
     } catch (editError) {
       console.error("Image edit failed:", editError);
-      // Continue without generated image - will use placeholder
+      return NextResponse.json({
+        success: false,
+        error: "IMAGE_NOT_SUPPORTED",
+        message: "לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.",
+        analysis: analysisText,
+        costs: costEstimate
+      });
     }
 
-    // Step 4: Return the results
+    // Step 4: Return the results (only if we have a generated image)
     return NextResponse.json({
       success: true,
       analysis: analysisText,

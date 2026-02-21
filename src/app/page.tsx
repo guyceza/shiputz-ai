@@ -474,14 +474,45 @@ export default function Home() {
             חריגות בתקציב, קבלנים שנעלמים, הצעות מחיר מנופחות, ותיעוד באקסל שמתבלגן.
           </p>
           <div className="grid md:grid-cols-2 gap-8 text-right">
-            <div className="border-2 border-red-200 rounded-2xl p-8 bg-red-50/50">
-              <p className="font-semibold text-red-700 mb-4">❌ הדרך הישנה</p>
-              <ul className="text-red-600/80 space-y-3 text-sm">
-                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> אקסל מבולגן שאף אחד לא מעדכן</li>
-                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> קבלות בארנק שהולכות לאיבוד</li>
-                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> הצעות מחיר שאי אפשר להשוות</li>
-                <li className="flex items-center gap-2"><span className="text-red-400">✗</span> הפתעות בסוף החודש</li>
-              </ul>
+            <div className="relative rounded-2xl p-8 bg-gradient-to-br from-stone-100 via-stone-50 to-amber-50/30 border border-stone-200/60 shadow-sm overflow-hidden">
+              {/* Subtle paper texture overlay */}
+              <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmZmYiPjwvcmVjdD4KPC9zdmc+')]"></div>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-8 h-8 rounded-lg bg-stone-200/80 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <p className="font-semibold text-stone-600 text-lg">הדרך הישנה</p>
+                </div>
+                <ul className="text-stone-500 space-y-3 text-[15px]">
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 w-5 h-5 rounded-full bg-stone-200/60 flex items-center justify-center flex-shrink-0">
+                      <span className="text-stone-400 text-xs">✕</span>
+                    </span>
+                    <span className="line-through decoration-stone-300">אקסל מבולגן שאף אחד לא מעדכן</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 w-5 h-5 rounded-full bg-stone-200/60 flex items-center justify-center flex-shrink-0">
+                      <span className="text-stone-400 text-xs">✕</span>
+                    </span>
+                    <span className="line-through decoration-stone-300">קבלות בארנק שהולכות לאיבוד</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 w-5 h-5 rounded-full bg-stone-200/60 flex items-center justify-center flex-shrink-0">
+                      <span className="text-stone-400 text-xs">✕</span>
+                    </span>
+                    <span className="line-through decoration-stone-300">הצעות מחיר שאי אפשר להשוות</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 w-5 h-5 rounded-full bg-stone-200/60 flex items-center justify-center flex-shrink-0">
+                      <span className="text-stone-400 text-xs">✕</span>
+                    </span>
+                    <span className="line-through decoration-stone-300">הפתעות בסוף החודש</span>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div className="border border-gray-900 rounded-2xl p-8 bg-gray-900 text-white">
               <p className="font-semibold mb-4">עם ShiputzAI</p>

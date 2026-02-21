@@ -81,9 +81,8 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
     setSliderPosition(percentage);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = () => {
     setIsDragging(true);
-    handleMove(e.clientX);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -95,9 +94,8 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
     setIsDragging(false);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = () => {
     setIsDragging(true);
-    handleMove(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {

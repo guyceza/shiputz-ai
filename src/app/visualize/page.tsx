@@ -256,11 +256,11 @@ function ShopHotspot({ x, y, title, price }: { x: number; y: number; title: stri
 
 function ExampleCardComponent({ example }: { example: ExampleCard }) {
   const [showDetails, setShowDetails] = useState(false);
-  const isLivingRoom = example.id === 1; // Enable Shop the Look for living room
+  const showShopFeature = example.id === 1 || example.id === 2; // Enable Shop the Look for living room and rustic kitchen
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300">
-      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} showShopLook={isLivingRoom} />
+      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} showShopLook={showShopFeature} />
       
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.title}</h3>

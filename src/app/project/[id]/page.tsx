@@ -644,8 +644,9 @@ export default function ProjectPage() {
         });
         incrementVisionUsage();
       } else if (data.error === "IMAGE_NOT_SUPPORTED") {
-        // Image couldn't be processed - show friendly error in UI
+        // Image couldn't be processed - show friendly error in UI, no analysis
         setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
+        setVisionResult(null);  // Don't show any results
       } else {
         setVisionError('שגיאה ביצירת ההדמיה. נסה שוב.');
       }

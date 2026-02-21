@@ -354,13 +354,14 @@ export default function ProjectPage() {
         });
         if (response.ok) {
           const data = await response.json();
+          console.log("Scan result:", data);
           if (data.description) setDescription(data.description);
           if (data.amount) setAmount(data.amount.toString());
           if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
-          if (data.vendor) setScannedVendor(data.vendor);
-          if (data.items) setScannedItems(data.items);
-          if (data.fullText) setScannedFullText(data.fullText);
-          if (data.vatAmount) setScannedVatAmount(data.vatAmount);
+          setScannedVendor(data.vendor || "");
+          setScannedItems(Array.isArray(data.items) ? data.items : []);
+          setScannedFullText(data.fullText || "");
+          setScannedVatAmount(data.vatAmount || null);
         }
       } catch (error) {
         console.error("Scan error:", error);
@@ -1445,7 +1446,7 @@ export default function ProjectPage() {
             </div>
 
             {/* AI Analysis Results */}
-            {selectedImage && !scanning && (scannedVendor || scannedItems.length > 0 || scannedFullText) && (
+            {selectedImage && !scanning && (scannedVendor || (scannedItems && scannedItems.length > 0) || scannedFullText) && (
               <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
                 <div className="flex items-center gap-2 mb-3">
                   <img src="/icons/sparkles.png" alt="" className="w-4 h-4" />
@@ -1459,7 +1460,7 @@ export default function ProjectPage() {
                   </div>
                 )}
                 
-                {scannedItems.length > 0 && (
+                {scannedItems && scannedItems.length > 0 && (
                   <div className="mb-2">
                     <span className="text-xs text-gray-500">פריטים שזוהו:</span>
                     <div className="mt-1 space-y-1">
@@ -1483,7 +1484,7 @@ export default function ProjectPage() {
                   </div>
                 )}
                 
-                {scannedFullText && !scannedItems.length && (
+                {scannedFullText && (!scannedItems || scannedItems.length === 0) && (
                   <div>
                     <span className="text-xs text-gray-500">טקסט שזוהה:</span>
                     <p className="text-xs text-gray-600 mt-1 whitespace-pre-wrap line-clamp-3">{scannedFullText}</p>

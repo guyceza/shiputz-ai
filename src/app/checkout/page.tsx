@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const ORIGINAL_PRICE = 299.99;
 const SALE_PRICE = 149.99;
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -239,5 +239,18 @@ export default function CheckoutPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// Wrap in Suspense for useSearchParams
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
+        <p className="text-gray-500">טוען...</p>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }

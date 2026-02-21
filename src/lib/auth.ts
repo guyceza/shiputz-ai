@@ -1,14 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Browser client for auth
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Browser client for auth - only create if we have the URL
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase && supabaseUrl && supabaseAnonKey) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+  if (!supabase) {
+    throw new Error('Supabase client not initialized - missing environment variables');
+  }
+  return supabase;
+}
 
 // Sign up with email and password
 export async function signUp(email: string, password: string, name?: string) {
-  const { data, error } = await supabase.auth.signUp({
+  const client = getSupabase();
+  const { data, error } = await client.auth.signUp({
     email,
     password,
     options: {
@@ -22,7 +33,8 @@ export async function signUp(email: string, password: string, name?: string) {
 
 // Sign in with email and password
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const client = getSupabase();
+  const { data, error } = await client.auth.signInWithPassword({
     email,
     password,
   });
@@ -33,23 +45,31 @@ export async function signIn(email: string, password: string) {
 
 // Sign out
 export async function signOut() {
-  const { error } = await supabase.auth.signOut();
+  const client = getSupabase();
+  const { error } = await client.auth.signOut();
   if (error) throw error;
 }
 
 // Get current user
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const client = getSupabase();
+  const { data: { user } } = await client.auth.getUser();
   return user;
 }
 
 // Get current session
 export async function getSession() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
+  try {
+    const client = getSupabase();
+    const { data: { session } } = await client.auth.getSession();
+    return session;
+  } catch {
+    return null;
+  }
 }
 
 // Listen to auth state changes
 export function onAuthStateChange(callback: (event: string, session: any) => void) {
-  return supabase.auth.onAuthStateChange(callback);
+  const client = getSupabase();
+  return client.auth.onAuthStateChange(callback);
 }

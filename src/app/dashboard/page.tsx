@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getSession, signOut } from "@/lib/auth";
 
 interface Project {
   id: string;
@@ -37,9 +36,11 @@ export default function DashboardPage() {
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
 
   useEffect(() => {
-    // Check for real auth session
+    // Check for auth session
     const checkAuth = async () => {
       try {
+        // Dynamic import to avoid SSR issues
+        const { getSession } = await import("@/lib/auth");
         const session = await getSession();
         if (session?.user) {
           // Real authenticated user
@@ -63,8 +64,18 @@ export default function DashboardPage() {
         }
       } catch (e) {
         console.error("Auth check error:", e);
-        router.push("/login");
-        return;
+        // Fallback to localStorage
+        const userData = localStorage.getItem("user");
+        if (!userData) {
+          router.push("/login");
+          return;
+        }
+        setUser(JSON.parse(userData));
+        
+        const savedProjects = localStorage.getItem("projects");
+        if (savedProjects) {
+          setProjects(JSON.parse(savedProjects));
+        }
       }
       setIsLoading(false);
     };
@@ -93,6 +104,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
+      const { signOut } = await import("@/lib/auth");
       await signOut();
     } catch (e) {
       console.error("Logout error:", e);

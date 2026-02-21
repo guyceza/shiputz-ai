@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUp, getSession } from "@/lib/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +18,7 @@ export default function SignupPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const { getSession } = await import("@/lib/auth");
         const session = await getSession();
         if (session) {
           router.push("/dashboard");
@@ -49,6 +49,7 @@ export default function SignupPage() {
     }
 
     try {
+      const { signUp } = await import("@/lib/auth");
       const data = await signUp(email, password, name);
       
       // Also save to users table for email sequences

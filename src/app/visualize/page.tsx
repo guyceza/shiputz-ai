@@ -362,7 +362,7 @@ export default function VisualizePage() {
             </ul>
             
             <Link
-              href="/signup?plan=vision"
+              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
               className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
             >
               התחל עכשיו
@@ -439,7 +439,7 @@ export default function VisualizePage() {
           </p>
           <div className="flex gap-4 flex-wrap justify-center">
             <Link
-              href="/signup?plan=vision"
+              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
               className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
             >
               התחל עכשיו

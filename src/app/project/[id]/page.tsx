@@ -2109,7 +2109,7 @@ export default function ProjectPage() {
               )}
               {chatHistory.map((msg, i) => (
                 <div key={i} className={`p-4 rounded-xl ${msg.role === "user" ? "bg-gray-900 text-white mr-8" : "border border-gray-100 ml-8"}`}>
-                  {msg.content}
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                 </div>
               ))}
               {chatLoading && <div className="border border-gray-100 ml-8 p-4 rounded-xl text-gray-500">חושב...</div>}

@@ -141,7 +141,7 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
             alt="אחרי" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded">
             אחרי
           </div>
         </div>

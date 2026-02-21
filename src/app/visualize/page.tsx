@@ -120,14 +120,11 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
       <div 
         ref={containerRef}
         className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 select-none touch-none"
-        onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUp}
-        onClick={handleAfterClick}
       >
         {/* After image (LEFT side) */}
         <div 
@@ -170,11 +167,14 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { befo
           </div>
         </div>
         
-        {/* Slider handle */}
+        {/* Slider handle - only this is draggable */}
         <div 
-          className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none"
+          className="absolute top-0 bottom-0 w-6 cursor-ew-resize z-10"
           style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
+          <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-white shadow-lg -translate-x-1/2" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
             <span className="text-gray-400">↔</span>
           </div>

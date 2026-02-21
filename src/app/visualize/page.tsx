@@ -67,9 +67,10 @@ const EXAMPLES: ExampleCard[] = [
   },
 ];
 
-function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterImg: string }) {
+function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false }: { beforeImg: string; afterImg: string; showShopLook?: boolean }) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMove = (clientX: number) => {
@@ -104,67 +105,154 @@ function BeforeAfterSlider({ beforeImg, afterImg }: { beforeImg: string; afterIm
     handleMove(e.touches[0].clientX);
   };
 
+  const handleAfterClick = (e: React.MouseEvent) => {
+    if (!isDragging && showShopLook) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+        if (clickX < sliderPosition) {
+          setShowModal(true);
+        }
+      }
+    }
+  };
+
+  return (
+    <>
+      <div 
+        ref={containerRef}
+        className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 select-none touch-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+        onClick={handleAfterClick}
+      >
+        {/* After image (LEFT side) */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+        >
+          <img 
+            src={afterImg} 
+            alt="אחרי" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+            אחרי
+            {showShopLook && <span className="opacity-70">• לחץ לקנות 🛒</span>}
+          </div>
+        </div>
+        
+        {/* Before image (RIGHT side) */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
+        >
+          <img 
+            src={beforeImg} 
+            alt="לפני" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+            לפני
+          </div>
+        </div>
+        
+        {/* Slider handle */}
+        <div 
+          className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none"
+          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
+            <span className="text-gray-400">↔</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Shop the Look Modal */}
+      {showModal && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="relative bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100"
+            >
+              ✕
+            </button>
+            
+            <div className="p-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">🛒 Shop the Look</h3>
+              <p className="text-sm text-gray-500 text-center mb-4">לחץ על המוצרים בתמונה לקנייה</p>
+              
+              <div className="relative">
+                <img src={afterImg} alt="אחרי" className="w-full rounded-xl" />
+                
+                {/* Product Hotspots for the modern living room */}
+                <ShopHotspot x={20} y={45} title="ספה מודולרית אפורה" price="₪8,500" />
+                <ShopHotspot x={75} y={55} title="כורסה כתומה" price="₪2,200" />
+                <ShopHotspot x={45} y={15} title="שלישיית תמונות" price="₪1,800" />
+                <ShopHotspot x={8} y={35} title="מנורת רצפה" price="₪1,400" />
+                <ShopHotspot x={60} y={70} title="שולחן סלון זכוכית" price="₪1,900" />
+                <ShopHotspot x={35} y={85} title="שטיח גיאומטרי" price="₪2,400" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function ShopHotspot({ x, y, title, price }: { x: number; y: number; title: string; price: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
   return (
     <div 
-      ref={containerRef}
-      className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 select-none touch-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleMouseUp}
+      className="absolute"
+      style={{ left: `${x}%`, top: `${y}%` }}
     >
-      {/* After image (LEFT side) */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse"
       >
-        <img 
-          src={afterImg} 
-          alt="אחרי" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute bottom-3 left-3 bg-gray-900 text-white text-xs px-2 py-1 rounded">
-          אחרי
-        </div>
-      </div>
+        <span className="text-xs font-bold text-emerald-600">+</span>
+      </button>
       
-      {/* Before image (RIGHT side) */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
-      >
-        <img 
-          src={beforeImg} 
-          alt="לפני" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
-          לפני
+      {isOpen && (
+        <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100">
+          <p className="text-sm font-medium text-gray-900 mb-1">{title}</p>
+          <p className="text-sm text-emerald-600 font-bold mb-2">{price}</p>
+          <a 
+            href={`https://www.google.com/search?q=${encodeURIComponent(title + ' לקנות בישראל')}&tbm=shop`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-600 hover:underline"
+          >
+            חפש בגוגל שופינג ←
+          </a>
         </div>
-      </div>
-      
-      {/* Slider handle */}
-      <div 
-        className="absolute top-0 bottom-0 w-1 bg-white shadow-lg pointer-events-none"
-        style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
-      >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
-          <span className="text-gray-400">↔</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
 function ExampleCardComponent({ example }: { example: ExampleCard }) {
   const [showDetails, setShowDetails] = useState(false);
+  const isLivingRoom = example.id === 1; // Enable Shop the Look for living room
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300">
-      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} />
+      <BeforeAfterSlider beforeImg={example.beforeImg} afterImg={example.afterImg} showShopLook={isLivingRoom} />
       
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.title}</h3>

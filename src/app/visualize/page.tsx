@@ -19,11 +19,11 @@ const EXAMPLES: ExampleCard[] = [
   {
     id: 1,
     title: "סלון מודרני",
-    beforeImg: "/examples/living-before.jpg",
-    afterImg: "/examples/living-after.jpg",
-    beforeDesc: "סלון ישן עם טפט מיושן, שטיח ישן ורהיטים מיושנים",
-    afterDesc: "סלון מעוצב עם פרקט, תאורה שקועה ופינת ישיבה מודרנית",
-    changes: "החלפת ריצוף לפרקט, התקנת 8 ספוטים שקועים, צביעה בגוון אפור-כחלחל",
+    beforeImg: "/before-room.jpg",
+    afterImg: "/after-room.jpg",
+    beforeDesc: "סלון קלאסי עם ריהוט מסורתי, שטיח פרסי ותאורה ישנה",
+    afterDesc: "סלון מודרני עם ספה אפורה, כורסה כתומה, תמונות גרפיות ותאורת LED",
+    changes: "ריהוט מודרני חדש, תאורת LED, תמונות דקורטיביות, שטיח גיאומטרי",
     costs: [
       { item: "פרקט עץ אלון (25 מ״ר)", price: 6250 },
       { item: "תאורה שקועה (8 ספוטים)", price: 2400 },

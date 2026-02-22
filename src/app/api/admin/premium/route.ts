@@ -148,7 +148,20 @@ export async function POST(request: NextRequest) {
     // Send welcome premium email
     await sendWelcomePremiumEmail(email, user.name);
     
-    return NextResponse.json({ success: true, message: 'Premium added and email sent' });
+    // Get updated list for admin panel
+    const { data: allPremium } = await supabase
+      .from('users')
+      .select('email, name, purchased_at')
+      .eq('purchased', true);
+    
+    const list = (allPremium || []).map(u => ({
+      email: u.email,
+      days: u.purchased_at ? Math.floor((Date.now() - new Date(u.purchased_at).getTime()) / (1000*60*60*24)) : 0,
+      until: 'lifetime',
+      addedAt: u.purchased_at
+    }));
+    
+    return NextResponse.json({ success: true, list });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Failed to add premium' }, { status: 500 });
@@ -179,7 +192,20 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to remove premium' }, { status: 500 });
     }
     
-    return NextResponse.json({ success: true });
+    // Get updated list for admin panel
+    const { data: allPremium } = await supabase
+      .from('users')
+      .select('email, name, purchased_at')
+      .eq('purchased', true);
+    
+    const list = (allPremium || []).map(u => ({
+      email: u.email,
+      days: u.purchased_at ? Math.floor((Date.now() - new Date(u.purchased_at).getTime()) / (1000*60*60*24)) : 0,
+      until: 'lifetime',
+      addedAt: u.purchased_at
+    }));
+    
+    return NextResponse.json({ success: true, list });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to remove premium' }, { status: 500 });
   }

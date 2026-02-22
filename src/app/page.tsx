@@ -63,11 +63,11 @@ export default function Home() {
     const size = parseInt(calcSize);
     const bathrooms = parseInt(calcBathrooms);
     
-    // Base price per sqm by type
+    // Base price per sqm by type (2026 market data)
     const basePrices: Record<string, number> = {
-      "קוסמטי": 400,
-      "קומפלט": 1400,
-      "יוקרתי": 2800,
+      "קוסמטי": 500,    // ₪400-600/מ"ר
+      "קומפלט": 1750,   // ₪1,500-2,000/מ"ר
+      "יוקרתי": 3750,   // ₪3,000-4,500/מ"ר
     };
     
     // Location multiplier
@@ -94,8 +94,8 @@ export default function Home() {
       "מלא": 25000,
     };
     
-    // Bathroom price (per bathroom)
-    const bathroomPrice = calcType === "יוקרתי" ? 22000 : calcType === "קומפלט" ? 14000 : 5000;
+    // Bathroom price (per bathroom) - 2026 market: ₪8.5K-15K
+    const bathroomPrice = calcType === "יוקרתי" ? 18000 : calcType === "קומפלט" ? 12000 : 8500;
     
     const basePrice = basePrices[calcType] || 1400;
     const locMultiplier = locationMultiplier[calcLocation] || 1.0;
@@ -273,7 +273,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">כמה יעלה לך השיפוץ?</h2>
-            <p className="text-gray-500">קבלו הערכה מיידית על בסיס מחירי שוק מאומתים</p>
+            <p className="text-gray-500">קבלו הערכה מיידית על בסיס נתוני שוק 2026</p>
           </div>
           
           <div className="relative">
@@ -427,7 +427,7 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-400 mb-6 text-center">±10% תלוי בספקים ובחומרים שתבחר</p>
+                  <p className="text-xs text-gray-400 mb-6 text-center">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
                   <Link
                     href={isLoggedIn ? "/dashboard" : "/signup"}
                     className="block text-center bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"

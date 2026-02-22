@@ -61,16 +61,18 @@ export default function DashboardPage() {
           }
           
           // Check if premium user (purchased)
-          try {
-            const res = await fetch(`/api/users?email=${encodeURIComponent(session.user.email)}`);
-            if (res.ok) {
-              const userData = await res.json();
-              if (userData.purchased) {
-                setIsPremium(true);
+          if (session.user.email) {
+            try {
+              const res = await fetch(`/api/users?email=${encodeURIComponent(session.user.email)}`);
+              if (res.ok) {
+                const userData = await res.json();
+                if (userData.purchased) {
+                  setIsPremium(true);
+                }
               }
+            } catch (e) {
+              console.error("Premium check error:", e);
             }
-          } catch (e) {
-            console.error("Premium check error:", e);
           }
         } else {
           // Fallback to localStorage for backward compatibility

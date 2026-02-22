@@ -53,21 +53,32 @@ export default function SignupPage() {
       const data = await signUp(email, password, name);
       
       // Save to users table AND send welcome email
-      // Always send welcome email - don't rely on /api/users
-      const emailPromise = fetch('/api/send-welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      }).catch(e => console.error('Welcome email failed:', e));
+      console.log('🚀 Signup success, sending welcome email to:', email);
+      alert('נרשמת בהצלחה! שולח מייל...'); // Debug alert
+      
+      try {
+        const emailRes = await fetch('/api/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name }),
+        });
+        const emailData = await emailRes.json();
+        console.log('📧 Welcome email result:', emailData);
+      } catch (e) {
+        console.error('❌ Welcome email failed:', e);
+      }
 
-      const userPromise = fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      }).catch(e => console.error('User save failed:', e));
-
-      // Wait for both to complete
-      await Promise.all([emailPromise, userPromise]);
+      try {
+        const userRes = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name }),
+        });
+        const userData = await userRes.json();
+        console.log('👤 User save result:', userData);
+      } catch (e) {
+        console.error('❌ User save failed:', e);
+      }
 
       if (data.user && !data.user.identities?.length) {
         // User already exists

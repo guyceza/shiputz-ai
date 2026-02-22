@@ -13,18 +13,30 @@ export default function Home() {
     // Check for auth session
     const checkAuth = async () => {
       try {
+        // First check localStorage (faster)
+        const userData = localStorage.getItem("user");
+        console.log("DEBUG: userData from localStorage:", userData);
+        if (userData) {
+          const user = JSON.parse(userData);
+          console.log("DEBUG: parsed user:", user);
+          if (user.id) {
+            console.log("DEBUG: setting isLoggedIn to true");
+            setIsLoggedIn(true);
+            setIsAdmin(user.isAdmin === true);
+            return; // Don't need to check session if we have localStorage
+          }
+        }
+        
+        // Fallback to Supabase session
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
+        console.log("DEBUG: session:", session);
         if (session?.user) {
           setIsLoggedIn(true);
           setIsAdmin(session.user.email === "guyceza@gmail.com");
-        } else {
-          // Fallback to localStorage
-          const user = JSON.parse(localStorage.getItem("user") || "{}");
-          setIsLoggedIn(!!user.id);
-          setIsAdmin(user.isAdmin === true);
         }
-      } catch {
+      } catch (e) {
+        console.error("DEBUG: auth check error:", e);
         // Fallback to localStorage
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);

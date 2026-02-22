@@ -43,6 +43,22 @@ export async function signIn(email: string, password: string) {
   return data;
 }
 
+// Sign in with Google
+export async function signInWithGoogle() {
+  const client = getSupabase();
+  const { data, error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : 'https://shipazti.com/auth/callback',
+    },
+  });
+  
+  if (error) throw error;
+  return data;
+}
+
 // Sign out
 export async function signOut() {
   const client = getSupabase();

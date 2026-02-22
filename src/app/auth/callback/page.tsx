@@ -7,6 +7,29 @@ export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const handleUserSession = (session: any) => {
+    // Store user info
+    localStorage.setItem("user", JSON.stringify({ 
+      email: session.user.email,
+      id: session.user.id,
+      isAdmin: session.user.email === "guyceza@gmail.com"
+    }));
+    
+    // Check if new user (created in last 60 seconds) → send to onboarding
+    const createdAt = new Date(session.user.created_at).getTime();
+    const now = Date.now();
+    const isNewUser = (now - createdAt) < 60000; // 60 seconds
+    
+    // Also check if they've completed onboarding (stored in metadata)
+    const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
+    
+    if (isNewUser && !hasCompletedOnboarding) {
+      router.push('/onboarding');
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
   useEffect(() => {
     const handleCallback = async () => {
       try {
@@ -16,26 +39,15 @@ export default function AuthCallbackPage() {
         // Check if we already have a session (tokens processed from URL)
         const session = await getSession();
         if (session) {
-          // Store user info
-          localStorage.setItem("user", JSON.stringify({ 
-            email: session.user.email,
-            id: session.user.id,
-            isAdmin: session.user.email === "guyceza@gmail.com"
-          }));
-          router.push('/dashboard');
+          handleUserSession(session);
           return;
         }
 
         // Wait for auth state change (Supabase processing the hash)
         const { data: { subscription } } = onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session) {
-            localStorage.setItem("user", JSON.stringify({ 
-              email: session.user.email,
-              id: session.user.id,
-              isAdmin: session.user.email === "guyceza@gmail.com"
-            }));
             subscription.unsubscribe();
-            router.push('/dashboard');
+            handleUserSession(session);
           }
         });
 

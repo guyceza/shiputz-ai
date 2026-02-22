@@ -789,71 +789,73 @@ export default function VisualizePage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
-              רוצה לנסות בעצמך?
-            </h2>
-            <p className="text-gray-500">הירשם לשירות ההדמיה</p>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
-            {/* Premium badge */}
-            <div className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">
-              Premium
+      {/* Pricing Section - Hide if logged in with subscription */}
+      {!(isLoggedIn && hasSubscription) && (
+        <section className="py-20 px-6 bg-gray-50">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
+                רוצה לנסות בעצמך?
+              </h2>
+              <p className="text-gray-500">הירשם לשירות ההדמיה</p>
             </div>
             
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <img src="/icons/palette.png" alt="" className="w-10 h-10" />
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
+              {/* Premium badge */}
+              <div className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">
+                Premium
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">איך השיפוץ שלי יראה?</h3>
-              <p className="text-sm text-gray-500">תוסף לחשבון ShiputzAI קיים</p>
+              
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 mb-4">
+                  <img src="/icons/palette.png" alt="" className="w-10 h-10" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">איך השיפוץ שלי יראה?</h3>
+                <p className="text-sm text-gray-500">תוסף לחשבון ShiputzAI קיים</p>
+              </div>
+              
+              <div className="text-center mb-6">
+                <div className="text-5xl font-bold text-gray-900">₪39.99</div>
+                <p className="text-gray-500">לחודש</p>
+              </div>
+              
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-gray-700">10 הדמיות ביום</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-gray-700">הערכת עלויות AI מדויקת</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-gray-700">שמירת היסטוריית הדמיות</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-gray-700">השוואה לפני/אחרי</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-gray-700">שיתוף עם קבלנים</span>
+                </li>
+              </ul>
+              
+              <Link
+                href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+              >
+                התחל עכשיו
+              </Link>
+              
+              <p className="text-center text-xs text-gray-400 mt-4">
+                דורש חשבון ShiputzAI פעיל · ביטול בכל עת
+              </p>
             </div>
-            
-            <div className="text-center mb-6">
-              <div className="text-5xl font-bold text-gray-900">₪39.99</div>
-              <p className="text-gray-500">לחודש</p>
-            </div>
-            
-            <ul className="space-y-4 mb-8">
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-gray-700">10 הדמיות ביום</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-gray-700">הערכת עלויות AI מדויקת</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-gray-700">שמירת היסטוריית הדמיות</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-gray-700">השוואה לפני/אחרי</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-gray-700">שיתוף עם קבלנים</span>
-              </li>
-            </ul>
-            
-            <Link
-              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
-              className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
-            >
-              התחל עכשיו
-            </Link>
-            
-            <p className="text-center text-xs text-gray-400 mt-4">
-              דורש חשבון ShiputzAI פעיל · ביטול בכל עת
-            </p>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* FAQ */}
       <section className="py-20 px-6">

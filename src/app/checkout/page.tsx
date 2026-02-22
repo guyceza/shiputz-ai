@@ -81,30 +81,37 @@ function CheckoutContent() {
 
     setLoading(true);
 
-    // Mark discount code as used if valid
-    if (discountValid && discountCode) {
-      await fetch("/api/discount", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: discountCode.toUpperCase() }),
-      });
-    }
-
     // Build Whop checkout URL
     // Use discounted plan if discount code is valid
     const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
     const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $31.99 (20% off)
     
     const planId = discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
-    let whopUrl = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
     
-    // Store discount code in localStorage so webhook can mark it as used
-    if (discountCode) {
-      localStorage.setItem("pending_discount_code", discountCode.toUpperCase());
+    // Create checkout session with metadata (discount code will be marked as used by webhook)
+    try {
+      const sessionRes = await fetch("/api/whop/checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId,
+          email,
+          discountCode: discountValid ? discountCode.toUpperCase() : null,
+        }),
+      });
+      
+      const session = await sessionRes.json();
+      
+      if (session.purchase_url) {
+        window.location.href = session.purchase_url;
+      } else {
+        // Fallback to direct URL if session creation fails
+        window.location.href = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
+      }
+    } catch (error) {
+      // Fallback to direct URL
+      window.location.href = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
     }
-    
-    // Redirect to Whop checkout
-    window.location.href = whopUrl;
   };
 
   return (

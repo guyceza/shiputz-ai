@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           console.log(`✅ User ${email} marked as purchased`);
         }
 
-        // Mark discount code as used (if provided)
+        // Mark discount code as used (if provided in metadata)
         if (discountCode) {
           const { error: codeError } = await supabase
             .from('discount_codes')
@@ -115,6 +115,29 @@ export async function POST(request: NextRequest) {
 
           if (!codeError) {
             console.log(`✅ Discount code ${discountCode} marked as used`);
+          }
+        } else {
+          // Fallback: If user paid with discounted plan, mark any unused code for this email
+          const planId = data?.plan?.id || data?.plan_id;
+          const DISCOUNTED_PLAN = 'plan_9kPvCqLkwwmUc';
+          
+          if (planId === DISCOUNTED_PLAN) {
+            const { data: unusedCode } = await supabase
+              .from('discount_codes')
+              .select('code')
+              .eq('user_email', email.toLowerCase())
+              .is('used_at', null)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+
+            if (unusedCode) {
+              await supabase
+                .from('discount_codes')
+                .update({ used_at: new Date().toISOString() })
+                .eq('code', unusedCode.code);
+              console.log(`✅ Discount code ${unusedCode.code} marked as used (fallback by email)`);
+            }
           }
         }
 

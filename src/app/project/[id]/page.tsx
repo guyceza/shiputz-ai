@@ -964,15 +964,15 @@ export default function ProjectPage() {
     <div className="min-h-screen bg-white print:bg-white">
       {/* Navigation */}
       <nav className="h-11 border-b border-gray-100 print:hidden">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600">ShiputzAI</Link>
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">דף הבית</Link>
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900">לוח בקרה</Link>
-            <span className="text-gray-300">|</span>
-            <span className="text-sm text-gray-900">{project.name}</span>
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-6 min-w-0">
+            <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600 flex-shrink-0">ShiputzAI</Link>
+            <Link href="/" className="hidden md:block text-sm text-gray-500 hover:text-gray-900">דף הבית</Link>
+            <Link href="/dashboard" className="text-xs md:text-sm text-gray-500 hover:text-gray-900 flex-shrink-0">לוח בקרה</Link>
+            <span className="hidden md:inline text-gray-300">|</span>
+            <span className="text-xs md:text-sm text-gray-900 truncate max-w-[100px] md:max-w-none">{project.name}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2">
             <button onClick={exportToPDF} className="text-sm text-gray-500 hover:text-gray-900 px-3 py-1 border border-gray-200 rounded-lg">
               PDF ייצוא
             </button>
@@ -984,9 +984,9 @@ export default function ProjectPage() {
       </nav>
 
       {/* Tabs */}
-      <div className="border-b border-gray-100 print:hidden">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="flex gap-6">
+      <div className="border-b border-gray-100 print:hidden overflow-x-auto">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
+          <div className="flex gap-4 md:gap-6">
             {[
               { id: "overview", label: "סקירה" },
               { id: "timeline", label: "ציר זמן" },

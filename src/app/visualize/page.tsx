@@ -350,6 +350,7 @@ export default function VisualizePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -415,6 +416,7 @@ export default function VisualizePage() {
             setUserId(user.id);
             userEmail = user.email;
             currentUserId = user.id;
+            setHasPurchased(user.purchased === true);
           }
         } else {
           const { getSession } = await import("@/lib/auth");
@@ -463,6 +465,7 @@ export default function VisualizePage() {
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
+        setHasPurchased(user.purchased === true);
         if (user.id) {
           setUserId(user.id);
           const trialKey = `visualize_trial_${user.id}`;
@@ -806,15 +809,15 @@ export default function VisualizePage() {
         </div>
       </section>
 
-      {/* Pricing Section - Hide if logged in with subscription */}
-      {!(isLoggedIn && hasSubscription) && (
+      {/* Pricing Section - Show only if has main subscription but not vision */}
+      {hasPurchased && !hasSubscription && (
         <section className="py-20 px-6 bg-gray-50">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
                 רוצה לנסות בעצמך?
               </h2>
-              <p className="text-gray-500">הירשם לשירות ההדמיה</p>
+              <p className="text-gray-500">הוסף את שירות ההדמיה לחשבון שלך</p>
             </div>
             
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
@@ -867,8 +870,32 @@ export default function VisualizePage() {
               </Link>
               
               <p className="text-center text-xs text-gray-400 mt-4">
-                דורש חשבון ShiputzAI פעיל · ביטול בכל עת
+                ביטול בכל עת
               </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Upsell to main subscription - show if logged in without main subscription */}
+      {isLoggedIn && !hasPurchased && !hasSubscription && (
+        <section className="py-20 px-6 bg-gray-50">
+          <div className="max-w-md mx-auto text-center">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+              <div className="text-4xl mb-4">🔒</div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                שירות ההדמיה דורש מנוי ShiputzAI
+              </h2>
+              <p className="text-gray-500 mb-6">
+                כדי להשתמש בשירות ההדמיה החכם, צריך קודם חשבון ShiputzAI פעיל
+              </p>
+              <Link
+                href="/checkout"
+                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+              >
+                הצטרף ל-ShiputzAI · ₪149.99
+              </Link>
+              <p className="text-xs text-gray-400 mt-4">תשלום חד פעמי · גישה לכל הכלים</p>
             </div>
           </div>
         </section>

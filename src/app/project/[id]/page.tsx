@@ -291,8 +291,11 @@ export default function ProjectPage() {
         router.push("/login");
         return;
       }
+      
+      const user = JSON.parse(userData);
+      const userId = user.id;
 
-      const savedProjects = localStorage.getItem("projects");
+      const savedProjects = localStorage.getItem(userId ? `projects_${userId}` : "projects");
       if (savedProjects) {
         const projects: Project[] = JSON.parse(savedProjects);
         const found = projects.find((p) => p.id === params.id);
@@ -321,11 +324,15 @@ export default function ProjectPage() {
   }, [params.id, router]);
 
   const saveProject = (updatedProject: Project) => {
-    const savedProjects = localStorage.getItem("projects");
+    const userData = localStorage.getItem("user");
+    const userId = userData ? JSON.parse(userData).id : null;
+    const storageKey = userId ? `projects_${userId}` : "projects";
+    
+    const savedProjects = localStorage.getItem(storageKey);
     if (savedProjects) {
       const projects: Project[] = JSON.parse(savedProjects);
       const updatedProjects = projects.map((p) => p.id === updatedProject.id ? updatedProject : p);
-      localStorage.setItem("projects", JSON.stringify(updatedProjects));
+      localStorage.setItem(storageKey, JSON.stringify(updatedProjects));
     }
     setProject(updatedProject);
   };

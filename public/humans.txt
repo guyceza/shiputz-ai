@@ -1,0 +1,16 @@
+/* TEAM */
+Creator: Guy Cezana
+Site: https://shipazti.com
+Location: Israel
+
+/* THANKS */
+AI Assistant: Claude (Anthropic)
+Hosting: Vercel
+Database: Supabase
+Icons: Lucide
+
+/* SITE */
+Last update: 2026-02-22
+Language: Hebrew / English
+Framework: Next.js 15
+Standards: HTML5, CSS3, ES6+

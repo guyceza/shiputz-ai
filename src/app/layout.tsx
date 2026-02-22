@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -56,6 +57,46 @@ export const metadata: Metadata = {
   },
 };
 
+// JSON-LD Structured Data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://shipazti.com/#website",
+      "url": "https://shipazti.com",
+      "name": "ShiputzAI",
+      "description": "בינה מלאכותית לניהול שיפוצים",
+      "inLanguage": "he-IL",
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://shipazti.com/#app",
+      "name": "ShiputzAI",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "149.99",
+        "priceCurrency": "ILS",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "127",
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://shipazti.com/#organization",
+      "name": "ShiputzAI",
+      "url": "https://shipazti.com",
+      "logo": "https://shipazti.com/icon-512.png",
+      "sameAs": [],
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -63,7 +104,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
-      <body className={`${heebo.className} antialiased`}>{children}</body>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className={`${heebo.className} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

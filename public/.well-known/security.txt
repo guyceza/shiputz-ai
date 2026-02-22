@@ -1,0 +1,7 @@
+# ShiputzAI Security Policy
+# https://securitytxt.org/
+
+Contact: mailto:security@shipazti.com
+Preferred-Languages: he, en
+Canonical: https://shipazti.com/.well-known/security.txt
+Expires: 2027-02-22T00:00:00.000Z

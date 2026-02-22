@@ -214,18 +214,27 @@ export default function Home() {
 
       {/* Trust Bar */}
       <section className="py-6 px-6 border-b border-gray-100">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+          }
+          .live-dot {
+            animation: livePulse 2s ease-in-out infinite;
+          }
+        `}} />
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-sm text-gray-500">
             <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50"></span>
               מאובטח ופרטי
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50" style={{ animationDelay: '0.3s' }}></span>
               ללא עלות לנסות
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50" style={{ animationDelay: '0.6s' }}></span>
               מבוסס AI
             </span>
           </div>

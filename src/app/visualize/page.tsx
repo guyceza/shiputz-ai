@@ -998,52 +998,45 @@ export default function VisualizePage() {
             </button>
             
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <span className="text-3xl">✨</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
-              <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">הניסיון החינמי נגמר</h3>
+              <p className="text-gray-500 text-sm">רוצה להמשיך ליצור הדמיות?</p>
             </div>
             
-            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-500">מנוי חודשי</span>
-                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">חסכון 30%</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-gray-900">₪39.99</span>
-                <span className="text-gray-400">/חודש</span>
+            <div className="bg-gray-50 rounded-2xl p-5 mb-6">
+              <div className="text-center">
+                <span className="text-3xl font-bold text-gray-900">₪39.99</span>
+                <span className="text-gray-500 text-sm">/חודש</span>
               </div>
             </div>
             
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-center gap-3 text-sm">
+            <ul className="space-y-3 mb-6 text-sm text-gray-600">
+              <li className="flex items-center gap-2">
                 <span className="text-green-500">✓</span>
-                <span>10 הדמיות ביום</span>
+                10 הדמיות ביום
               </li>
-              <li className="flex items-center gap-3 text-sm">
+              <li className="flex items-center gap-2">
                 <span className="text-green-500">✓</span>
-                <span>הערכת עלויות AI מדויקת</span>
+                הערכת עלויות מפורטת
               </li>
-              <li className="flex items-center gap-3 text-sm">
+              <li className="flex items-center gap-2">
                 <span className="text-green-500">✓</span>
-                <span>שמירה ושיתוף עם קבלנים</span>
+                שמירה ושיתוף
               </li>
-              <li className="flex items-center gap-3 text-sm">
+              <li className="flex items-center gap-2">
                 <span className="text-green-500">✓</span>
-                <span>ביטול בכל עת</span>
+                ביטול בכל עת
               </li>
             </ul>
             
             <Link
               href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
-              className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+              className="block w-full text-center bg-gray-900 text-white py-3 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
             >
-              🚀 שדרג עכשיו
+              המשך למנוי
             </Link>
             
-            <p className="text-center text-xs text-gray-400 mt-4">
-              תשלום מאובטח · ביטול בלחיצה
+            <p className="text-center text-xs text-gray-400 mt-3">
+              ביטול בלחיצה אחת
             </p>
           </div>
         </div>

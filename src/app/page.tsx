@@ -15,28 +15,23 @@ export default function Home() {
       try {
         // First check localStorage (faster)
         const userData = localStorage.getItem("user");
-        console.log("DEBUG: userData from localStorage:", userData);
         if (userData) {
           const user = JSON.parse(userData);
-          console.log("DEBUG: parsed user:", user);
           if (user.id) {
-            console.log("DEBUG: setting isLoggedIn to true");
             setIsLoggedIn(true);
             setIsAdmin(user.isAdmin === true);
-            return; // Don't need to check session if we have localStorage
+            return;
           }
         }
         
         // Fallback to Supabase session
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
-        console.log("DEBUG: session:", session);
         if (session?.user) {
           setIsLoggedIn(true);
           setIsAdmin(session.user.email === "guyceza@gmail.com");
         }
-      } catch (e) {
-        console.error("DEBUG: auth check error:", e);
+      } catch {
         // Fallback to localStorage
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
@@ -162,12 +157,21 @@ export default function Home() {
                 בינה מלאכותית שמנהלת את התקציב, מנתחת הצעות מחיר, ומתריעה לפני שנכנסים לבעיה.
               </p>
               <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
-                <Link
-                  href="/signup"
-                  className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-                >
-                  התחל בחינם
-                </Link>
+                {isLoggedIn ? (
+                  <Link
+                    href="/dashboard"
+                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                  >
+                    לאזור האישי
+                  </Link>
+                ) : (
+                  <Link
+                    href="/signup"
+                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                  >
+                    התחל בחינם
+                  </Link>
+                )}
                 <Link
                   href="#features"
                   className="text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
@@ -175,7 +179,9 @@ export default function Home() {
                   גלה עוד
                 </Link>
               </div>
-              <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
+              {!isLoggedIn && (
+                <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
+              )}
             </div>
             
             {/* Phone Animation */}
@@ -387,10 +393,10 @@ export default function Home() {
                   
                   <p className="text-xs text-gray-400 mb-6 text-center">±10% תלוי בספקים ובחומרים שתבחר</p>
                   <Link
-                    href="/signup"
+                    href={isLoggedIn ? "/dashboard" : "/signup"}
                     className="block text-center bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
                   >
-                    רוצה לנהל את התקציב? התחל פרויקט ←
+                    {isLoggedIn ? "התחל לנהל את התקציב ←" : "רוצה לנהל את התקציב? התחל פרויקט ←"}
                   </Link>
                 </div>
               </div>
@@ -669,10 +675,10 @@ export default function Home() {
               </li>
             </ul>
             <Link
-              href="/signup"
+              href={isLoggedIn ? "/dashboard" : "/signup"}
               className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
             >
-              התחל עכשיו
+              {isLoggedIn ? "לאזור האישי" : "התחל עכשיו"}
             </Link>
           </div>
         </div>
@@ -747,13 +753,13 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24 px-6 bg-gray-900 text-white">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-4">מוכנים?</h2>
-          <p className="text-gray-400 mb-8">התחילו לנהל את השיפוץ בצורה חכמה.</p>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4">{isLoggedIn ? "הפרויקטים שלך מחכים" : "מוכנים?"}</h2>
+          <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "התחילו לנהל את השיפוץ בצורה חכמה."}</p>
           <Link
-            href="/signup"
+            href={isLoggedIn ? "/dashboard" : "/signup"}
             className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
           >
-            התחל בחינם
+            {isLoggedIn ? "לאזור האישי" : "התחל בחינם"}
           </Link>
         </div>
       </section>
@@ -863,4 +869,3 @@ function ProductHotspot({ x, y, title, price, link }: { x: number; y: number; ti
   );
 }
 
-// trigger deploy Sun Feb 22 09:46:07 UTC 2026

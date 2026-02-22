@@ -20,7 +20,7 @@ export default function PricingCard({
       <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg ${className}`}>
         {/* Badge */}
         <div className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-          50% הנחה 🔥
+          50% הנחה
         </div>
         
         <div className="flex items-center gap-6">

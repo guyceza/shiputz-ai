@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import ChatWidget from "@/components/ChatWidget";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -112,6 +113,7 @@ export default function RootLayout({
       </head>
       <body className={`${heebo.className} antialiased`}>
         {children}
+        <ChatWidget />
         <Analytics />
       </body>
     </html>

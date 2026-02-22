@@ -790,7 +790,7 @@ export default function Home() {
 
 function Feature({ title, description }: { title: string; description: string }) {
   return (
-    <div className="group p-6 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+    <div className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
       <h3 className="text-lg font-semibold mb-2 text-gray-900">{title}</h3>
       <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
     </div>

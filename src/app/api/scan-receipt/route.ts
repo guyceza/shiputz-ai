@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -77,8 +77,12 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini API error:", error);
-      return NextResponse.json({ error: "AI scan failed" }, { status: 500 });
+      console.error("Gemini API error:", response.status, error);
+      return NextResponse.json({ 
+        error: "AI scan failed", 
+        details: error.substring(0, 200),
+        status: response.status 
+      }, { status: 500 });
     }
 
     const data = await response.json();
@@ -98,6 +102,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Could not parse receipt" }, { status: 422 });
   } catch (error) {
     console.error("Scan error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

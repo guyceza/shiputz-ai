@@ -60,7 +60,7 @@ export default function LoginPage() {
       } else if (err.message?.includes("Email not confirmed")) {
         setError("נא לאשר את האימייל שנשלח אליך");
       } else {
-        setError("שגיאה בהתחברות. נסה שוב.");
+        setError("שגיאה בהתחברות. נסו שוב.");
       }
     }
     setLoading(false);

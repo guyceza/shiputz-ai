@@ -186,14 +186,14 @@ export default function Home() {
                     href="/signup"
                     className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
                   >
-                    התחל בחינם
+                    התחילו בחינם
                   </Link>
                 )}
                 <Link
                   href="#features"
                   className="text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
                 >
-                  גלה עוד
+                  גלו עוד
                 </Link>
               </div>
               {!isLoggedIn && (
@@ -262,7 +262,7 @@ export default function Home() {
       {!isPremium && (
       <section className="py-8 px-6">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6">
-          <p className="text-gray-600 text-lg">מוכן להתחיל לנהל את השיפוץ?</p>
+          <p className="text-gray-600 text-lg">מוכנים להתחיל לנהל את השיפוץ?</p>
           <PricingCard variant="mini" isLoggedIn={isLoggedIn} />
         </div>
       </section>
@@ -273,7 +273,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">כמה יעלה לך השיפוץ?</h2>
-            <p className="text-gray-500">קבל הערכה מיידית על בסיס מחירי שוק מאומתים</p>
+            <p className="text-gray-500">קבלו הערכה מיידית על בסיס מחירי שוק מאומתים</p>
           </div>
           
           <div className="relative">
@@ -287,7 +287,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">מחשבון עלויות מתקדם</h3>
-                  <p className="text-gray-500 text-sm mb-6">שדרג לחשבון פרימיום כדי לקבל הערכת עלויות מדויקת לשיפוץ שלך</p>
+                  <p className="text-gray-500 text-sm mb-6">שדרגו לחשבון פרימיום כדי לקבל הערכת עלויות מדויקת לשיפוץ שלכם</p>
                   <Link
                     href="/signup?plan=premium"
                     className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -481,7 +481,7 @@ export default function Home() {
                   {/* Shop the Look badge */}
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                     <img src="/icons/cart.png" alt="" className="w-4 h-4" />
-                    <span>לחץ לצפייה גדולה</span>
+                    <span>לחצו לצפייה גדולה</span>
                   </div>
                 </Link>
               </div>
@@ -496,7 +496,7 @@ export default function Home() {
                 איך השיפוץ שלי יראה?
               </h2>
               <p className="text-gray-500 mb-8 leading-relaxed">
-                העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וקבל הדמיה של התוצאה הסופית עם הערכת עלויות.
+                העלו תמונה של החדר, תארו מה אתם רוצים לשנות, וקבלו הדמיה של התוצאה הסופית עם הערכת עלויות.
               </p>
               <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-8">
                 <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הדמיה חכמה</span>
@@ -508,7 +508,7 @@ export default function Home() {
                   href="/visualize"
                   className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
                 >
-                  נסה עכשיו
+                  נסו עכשיו
                 </Link>
                 <Link
                   href="/shop-look"
@@ -606,12 +606,12 @@ export default function Home() {
             <p className="text-gray-500 mt-4">ותו לא.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-12">
-            <Feature title="מעקב תקציב" description="ראה בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." />
-            <Feature title="סריקת קבלות" description="צלם קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." />
-            <Feature title="ניתוח הצעות מחיר" description="העלה הצעה ותקבל ניתוח מיידי. האם המחיר הוגן? מה חסר?" />
+            <Feature title="מעקב תקציב" description="ראו בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." />
+            <Feature title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." />
+            <Feature title="ניתוח הצעות מחיר" description="העלו הצעה ותקבלו ניתוח מיידי. האם המחיר הוגן? מה חסר?" />
             <Feature title="בדיקת חוזים" description="ה-AI סורק את החוזה ומזהה סעיפים בעייתיים או חסרים." />
             <Feature title="התראות חכמות" description="חרגת מהתקציב? תשלום חריג? המערכת מתריעה בזמן." />
-            <Feature title="עוזר AI" description="שאל כל שאלה על השיפוץ וקבל תשובה מקצועית ומותאמת." />
+            <Feature title="עוזר AI" description="שאלו כל שאלה על השיפוץ וקבלו תשובה מקצועית ומותאמת." />
           </div>
         </div>
       </section>
@@ -623,9 +623,9 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">שלושה צעדים.</h2>
           </div>
           <div className="space-y-16">
-            <Step number="01" title="הגדר פרויקט" description="תן שם, הגדר תקציב, והתחל. לוקח 30 שניות." />
-            <Step number="02" title="תעד הוצאות" description="צלם קבלות, העלה מסמכים, סמן תשלומים." />
-            <Step number="03" title="קבל שליטה" description="ראה את המצב בזמן אמת, קבל התראות, קבל החלטות." />
+            <Step number="01" title="הגדירו פרויקט" description="תנו שם, הגדירו תקציב, והתחילו. לוקח 30 שניות." />
+            <Step number="02" title="תעדו הוצאות" description="צלמו קבלות, העלו מסמכים, סמנו תשלומים." />
+            <Step number="03" title="קבלו שליטה" description="ראו את המצב בזמן אמת, קבלו התראות, קבלו החלטות." />
           </div>
         </div>
       </section>
@@ -635,7 +635,7 @@ export default function Home() {
       <section className="py-16 px-6 bg-emerald-50/50">
         <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
           <div className="text-center lg:text-right">
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">מוכן לשפץ בשליטה?</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">מוכנים לשפץ בשליטה?</h2>
             <p className="text-gray-500">הצטרף לאלפי משפצים שכבר חוסכים זמן וכסף</p>
           </div>
           <PricingCard variant="compact" isLoggedIn={isLoggedIn} />
@@ -728,7 +728,7 @@ export default function Home() {
               href={isLoggedIn ? "/dashboard" : "/signup"}
               className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
             >
-              {isLoggedIn ? "לאזור האישי" : "התחל עכשיו"}
+              {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
             </Link>
           </div>
         </div>
@@ -775,11 +775,11 @@ export default function Home() {
           <div className="space-y-6">
             <FaqItem 
               question="אני מרגיש שהקבלן מנפח לי את המחיר. איך אני בודק?"
-              answer="גם אני הרגשתי ככה. בניתי את ShiputzAI בדיוק בגלל זה - העלה הצעת מחיר והמערכת תגיד לך אם המחיר סביר לאזור שלך, ומה בדרך כלל חסר בהצעות כאלה."
+              answer="גם אני הרגשתי ככה. בניתי את ShiputzAI בדיוק בגלל זה - העלה הצעת מחיר והמערכת תגיד לכם אם המחיר סביר לאזור שלכם, ומה בדרך כלל חסר בהצעות כאלה."
             />
             <FaqItem 
               question="התחלתי עם אקסל אבל אחרי שבוע כבר לא עדכנתי..."
-              answer="קלאסי. לי קרה בדיוק אותו דבר. לכן פה את רק מצלם קבלה והמערכת עושה את השאר - מזהה סכום, תאריך, קטגוריה, ומוסיפה לתקציב. אפס מאמץ."
+              answer="קלאסי. לי קרה בדיוק אותו דבר. לכן פה את רק מצלמו קבלה והמערכת עושה את השאר - מזהה סכום, תאריך, קטגוריה, ומוסיפה לתקציב. אפס מאמץ."
             />
             <FaqItem 
               question="אני מפחד להגיע לסוף השיפוץ ולגלות שאין לי כסף"
@@ -787,15 +787,15 @@ export default function Home() {
             />
             <FaqItem 
               question="יש לי 3 הצעות מחיר ואני לא מצליח להשוות ביניהן"
-              answer="כי כל קבלן כותב אחרת. אחד מפרט, אחד כולל הכל בשורה אחת, והשלישי שכח חצי מהדברים. ה-AI מנתח את ההצעות ומראה לך בדיוק מה כל אחד כולל ומה חסר."
+              answer="כי כל קבלן כותב אחרת. אחד מפרט, אחד כולל הכל בשורה אחת, והשלישי שכח חצי מהדברים. ה-AI מנתח את ההצעות ומראה לכם בדיוק מה כל אחד כולל ומה חסר."
             />
             <FaqItem 
               question="זה לא יקר מדי לעוד אפליקציה?"
-              answer="₪149 חד פעמי. אם זה חוסך לך טעות אחת של ₪500 בהצעת מחיר - כבר הרווחת. ורוב המשתמשים שלנו חוסכים הרבה יותר."
+              answer="₪149 חד פעמי. אם זה חוסך לכם טעות אחת של ₪500 בהצעת מחיר - כבר הרווחת. ורוב המשתמשים שלנו חוסכים הרבה יותר."
             />
             <FaqItem 
               question="מה אם אני לא מבין בטכנולוגיה?"
-              answer="אם אתה יודע לצלם תמונה בטלפון, אתה יודע להשתמש ב-ShiputzAI. רציני. זה פשוט."
+              answer="אם אתם יודעים לצלם תמונה בטלפון, אתם יודעים להשתמש ב-ShiputzAI. רציני. זה פשוט."
             />
           </div>
         </div>
@@ -810,7 +810,7 @@ export default function Home() {
             href={isLoggedIn ? "/dashboard" : "/signup"}
             className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
           >
-            {isLoggedIn ? "לאזור האישי" : "התחל בחינם"}
+            {isLoggedIn ? "לאזור האישי" : "התחילו בחינם"}
           </Link>
         </div>
       </section>

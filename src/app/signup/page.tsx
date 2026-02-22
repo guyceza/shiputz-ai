@@ -71,7 +71,7 @@ export default function SignupPage() {
 
       if (data.user && !data.user.identities?.length) {
         // User already exists
-        setError("משתמש עם אימייל זה כבר קיים. נסה להתחבר.");
+        setError("משתמש עם אימייל זה כבר קיים. נסו להתחבר.");
       } else if (data.session) {
         // Auto-confirmed (if email confirmation is disabled)
         localStorage.setItem("user", JSON.stringify({ 

@@ -35,7 +35,7 @@ export default function PricingCard({
             href={isLoggedIn ? "/dashboard" : "/signup"}
             className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shadow-md hover:shadow-lg"
           >
-            התחל עכשיו ←
+            התחילו עכשיו ←
           </Link>
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function PricingCard({
           href={isLoggedIn ? "/dashboard" : "/signup"}
           className="block w-full bg-gray-900 text-white py-3 rounded-full text-center text-sm font-medium hover:bg-gray-800 transition-colors"
         >
-          {isLoggedIn ? "לאזור האישי" : "התחל עכשיו"}
+          {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
         </Link>
       </div>
     );
@@ -131,7 +131,7 @@ export default function PricingCard({
         href={isLoggedIn ? "/dashboard" : "/signup"}
         className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors text-center"
       >
-        {isLoggedIn ? "לאזור האישי" : "התחל עכשיו"}
+        {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
       </Link>
     </div>
   );

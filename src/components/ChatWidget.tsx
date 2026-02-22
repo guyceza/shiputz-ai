@@ -75,7 +75,7 @@ export default function ChatWidget() {
       if (data.error) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "מצטער, משהו השתבש. נסה שוב 🙏" },
+          { role: "assistant", content: "מצטער, משהו השתבש. נסו שוב 🙏" },
         ]);
       } else {
         setMessages((prev) => [
@@ -86,7 +86,7 @@ export default function ChatWidget() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "שגיאת חיבור. נסה שוב בעוד רגע." },
+        { role: "assistant", content: "שגיאת חיבור. נסו שוב בעוד רגע." },
       ]);
     } finally {
       setIsLoading(false);
@@ -133,7 +133,7 @@ export default function ChatWidget() {
                   יש לי תשובות לכל שאלה
                 </p>
                 <span className="mt-2 text-emerald-600 text-xs font-medium inline-block">
-                  לחץ לשיחה →
+                  לחצו לשיחה →
                 </span>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="כתוב הודעה..."
+                placeholder="כתבו הודעה..."
                 className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500 text-right"
                 dir="rtl"
               />

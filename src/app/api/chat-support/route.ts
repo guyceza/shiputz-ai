@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
-        { error: "יותר מדי בקשות. נסה שוב בעוד דקה." },
+        { error: "יותר מדי בקשות. נסו שוב בעוד דקה." },
         { status: 429 }
       );
     }
@@ -133,21 +133,21 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text();
       console.error("Gemini API error:", errorText);
       return NextResponse.json(
-        { error: "שגיאה בשרת. נסה שוב." },
+        { error: "שגיאה בשרת. נסו שוב." },
         { status: 500 }
       );
     }
 
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-      "מצטער, לא הצלחתי לעבד את ההודעה. נסה שוב.";
+      "מצטער, לא הצלחתי לעבד את ההודעה. נסו שוב.";
 
     return NextResponse.json({ response: aiResponse });
 
   } catch (error) {
     console.error("Chat error:", error);
     return NextResponse.json(
-      { error: "שגיאה בעיבוד ההודעה. נסה שוב." },
+      { error: "שגיאה בעיבוד ההודעה. נסו שוב." },
       { status: 500 }
     );
   }

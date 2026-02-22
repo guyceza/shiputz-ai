@@ -644,7 +644,7 @@ export default function VisualizePage() {
           </h1>
           
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
-            העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך תמונה של התוצאה הסופית עם הערכת עלויות מדויקת.
+            העלו תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך תמונה של התוצאה הסופית עם הערכת עלויות מדויקת.
           </p>
           
           <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-8">
@@ -671,7 +671,7 @@ export default function VisualizePage() {
                   onClick={handleTryNow}
                   className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
                 >
-                  {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסה עכשיו בחינם'}
+                  {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם'}
                 </button>
                 {!hasSubscription && !trialUsed && (
                   <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
@@ -779,7 +779,7 @@ export default function VisualizePage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">צלם את החדר</h3>
-                <p className="text-gray-500">העלה תמונה של החדר שאתה רוצה לשפץ. עובד עם כל חדר - סלון, מטבח, חדר שינה, חדר רחצה.</p>
+                <p className="text-gray-500">העלו תמונה של החדר שאתה רוצה לשפץ. עובד עם כל חדר - סלון, מטבח, חדר שינה, חדר רחצה.</p>
               </div>
             </div>
             
@@ -863,7 +863,7 @@ export default function VisualizePage() {
                 href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
                 className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
               >
-                התחל עכשיו
+                התחילו עכשיו
               </Link>
               
               <p className="text-center text-xs text-gray-400 mt-4">
@@ -942,7 +942,7 @@ export default function VisualizePage() {
                 href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
                 className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
               >
-                התחל עכשיו
+                התחילו עכשיו
               </Link>
               <Link
                 href="/login"
@@ -1078,7 +1078,7 @@ export default function VisualizePage() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
                 {hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
               </h3>
-              <p className="text-gray-500">העלה תמונה של החדר ותאר מה אתה רוצה לשנות</p>
+              <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
             </div>
             
             {/* Image Upload */}

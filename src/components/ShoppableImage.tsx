@@ -83,7 +83,7 @@ export function ShoppableImage({ imageSrc, imageAlt, items }: ShoppableImageProp
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-20 pointer-events-none">
                 <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-xl">
                   {item.name}
-                  <div className="text-xs text-emerald-400 mt-1">לחץ לחיפוש ב-Google Shopping</div>
+                  <div className="text-xs text-emerald-400 mt-1">לחצו לחיפוש ב-Google Shopping</div>
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                     <div className="border-4 border-transparent border-t-gray-900" />
                   </div>

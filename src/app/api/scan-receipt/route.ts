@@ -96,9 +96,11 @@ export async function POST(request: NextRequest) {
       }, { status: 422 });
     }
 
-    // Parse JSON from response
+    // Parse JSON from response - strip markdown code blocks first
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      // Remove markdown code blocks if present
+      let cleanContent = content.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         return NextResponse.json(parsed);

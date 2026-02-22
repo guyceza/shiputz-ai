@@ -237,9 +237,10 @@ export default function ProjectPage() {
     afterImage: string;
     description: string;
     analysis: string;
-    costs: { total: number };
+    costs: { total: number; items?: { description: string; total: number }[] };
   }
   const [visionHistory, setVisionHistory] = useState<VisionHistoryItem[]>([]);
+  const [selectedVisionItem, setSelectedVisionItem] = useState<VisionHistoryItem | null>(null);
   
   // Product search from image
   const [showProductSearch, setShowProductSearch] = useState(false);
@@ -1518,10 +1519,16 @@ export default function ProjectPage() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-700 mb-2 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                         <span>{item.date}</span>
                         <span className="font-medium text-purple-600">₪{item.costs.total.toLocaleString()}</span>
                       </div>
+                      <button
+                        onClick={() => setSelectedVisionItem(item)}
+                        className="w-full bg-gray-900 text-white text-xs py-2 rounded-full hover:bg-gray-800 transition-colors"
+                      >
+                        📋 ראה פירוט עלויות
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -2499,6 +2506,82 @@ export default function ProjectPage() {
               className="w-full text-gray-500 py-2 hover:text-gray-700"
             >
               אנסה שוב מחר
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Vision Item Detail Modal */}
+      {selectedVisionItem && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
+          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full relative max-h-[95vh] overflow-auto">
+            <button
+              onClick={() => setSelectedVisionItem(null)}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">📋 פירוט הדמיה</h3>
+              <p className="text-sm text-gray-500">{selectedVisionItem.date}</p>
+            </div>
+            
+            {/* Before/After */}
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div className="relative">
+                <img src={selectedVisionItem.beforeImage} alt="לפני" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
+              </div>
+              <div className="relative">
+                <img src={selectedVisionItem.afterImage} alt="אחרי" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+              <h4 className="font-semibold text-gray-900 mb-2">📝 מה ביקשת</h4>
+              <p className="text-gray-700 text-sm">{selectedVisionItem.description}</p>
+            </div>
+            
+            {/* Analysis */}
+            {selectedVisionItem.analysis && (
+              <div className="bg-blue-50 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">🔍 ניתוח מקצועי</h4>
+                <p className="text-gray-700 text-sm leading-relaxed">{selectedVisionItem.analysis}</p>
+              </div>
+            )}
+            
+            {/* Cost Breakdown */}
+            <div className="bg-purple-50 rounded-2xl p-4 mb-6">
+              <h4 className="font-semibold text-gray-900 mb-3">💰 הערכת עלויות</h4>
+              {selectedVisionItem.costs.items && selectedVisionItem.costs.items.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedVisionItem.costs.items.map((item, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{item.description}</span>
+                      <span className="font-medium">₪{item.total?.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-purple-200 pt-2 mt-2 flex justify-between font-bold">
+                    <span>סה״כ משוער</span>
+                    <span className="text-purple-600">₪{selectedVisionItem.costs.total?.toLocaleString()}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-2xl font-bold text-purple-600 mb-1">₪{selectedVisionItem.costs.total?.toLocaleString()}</p>
+                  <p className="text-sm text-gray-500">סה״כ משוער</p>
+                </div>
+              )}
+            </div>
+            
+            <button
+              onClick={() => setSelectedVisionItem(null)}
+              className="w-full bg-gray-900 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+            >
+              סגור
             </button>
           </div>
         </div>

@@ -6,11 +6,11 @@ let supabase: SupabaseClient | null = null;
 function getSupabase(): SupabaseClient {
   if (!supabase) {
     // Read env vars at runtime, not at module load time
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
     
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase environment variables');
+      console.warn('Missing Supabase environment variables');
     }
     
     supabase = createClient(supabaseUrl, supabaseAnonKey);

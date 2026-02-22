@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
+import PricingCard from "@/components/PricingCard";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -256,6 +257,16 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Floating Pricing - Compact */}
+      {!isPremium && (
+      <section className="py-8 px-6">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6">
+          <p className="text-gray-600 text-lg">מוכן להתחיל לנהל את השיפוץ?</p>
+          <PricingCard variant="mini" isLoggedIn={isLoggedIn} />
+        </div>
+      </section>
+      )}
 
       {/* Quick Calculator */}
       <section className="py-20 px-6 border-t border-gray-100">
@@ -618,6 +629,19 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Pricing Card - Compact version */}
+      {!isPremium && (
+      <section className="py-16 px-6 bg-emerald-50/50">
+        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
+          <div className="text-center lg:text-right">
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">מוכן לשפץ בשליטה?</h2>
+            <p className="text-gray-500">הצטרף לאלפי משפצים שכבר חוסכים זמן וכסף</p>
+          </div>
+          <PricingCard variant="compact" isLoggedIn={isLoggedIn} />
+        </div>
+      </section>
+      )}
 
       {/* Newsletter */}
       <section className="py-20 px-6 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">

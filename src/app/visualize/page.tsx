@@ -3,6 +3,25 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
+// Add keyframes for animations
+const animationStyles = `
+@keyframes bounce-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes progress-bar {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+.animate-bounce-in {
+  animation: bounce-in 0.4s ease-out;
+}
+.animate-progress-bar {
+  animation: progress-bar 2s ease-in-out;
+}
+`;
+
 interface ShopItem {
   x: number;
   y: number;
@@ -327,6 +346,11 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
 
 export default function VisualizePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [trialUsed, setTrialUsed] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [showTrialSuccess, setShowTrialSuccess] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -336,6 +360,13 @@ export default function VisualizePage() {
           const user = JSON.parse(userData);
           if (user.id) {
             setIsLoggedIn(true);
+            setUserId(user.id);
+            // Check trial status
+            const trialKey = `visualize_trial_${user.id}`;
+            setTrialUsed(localStorage.getItem(trialKey) === 'used');
+            // Check subscription status (stored when user subscribes)
+            const subKey = `visualize_subscription_${user.id}`;
+            setHasSubscription(localStorage.getItem(subKey) === 'active');
             return;
           }
         }
@@ -343,17 +374,64 @@ export default function VisualizePage() {
         const session = await getSession();
         if (session?.user) {
           setIsLoggedIn(true);
+          setUserId(session.user.id);
+          // Check trial status
+          const trialKey = `visualize_trial_${session.user.id}`;
+          setTrialUsed(localStorage.getItem(trialKey) === 'used');
+          // Check subscription
+          const subKey = `visualize_subscription_${session.user.id}`;
+          setHasSubscription(localStorage.getItem(subKey) === 'active');
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
+        if (user.id) {
+          setUserId(user.id);
+          const trialKey = `visualize_trial_${user.id}`;
+          setTrialUsed(localStorage.getItem(trialKey) === 'used');
+          const subKey = `visualize_subscription_${user.id}`;
+          setHasSubscription(localStorage.getItem(subKey) === 'active');
+        }
       }
     };
     checkAuth();
   }, []);
 
+  const handleTryNow = () => {
+    if (!isLoggedIn) {
+      // Redirect to login
+      window.location.href = '/login?redirect=/visualize';
+      return;
+    }
+    
+    if (hasSubscription) {
+      // Has subscription - go to shop-look
+      window.location.href = '/shop-look';
+      return;
+    }
+    
+    if (trialUsed) {
+      // Trial already used - show paywall
+      setShowPaywall(true);
+      return;
+    }
+    
+    // Use trial
+    if (userId) {
+      const trialKey = `visualize_trial_${userId}`;
+      localStorage.setItem(trialKey, 'used');
+      setTrialUsed(true);
+      setShowTrialSuccess(true);
+      // After 2 seconds, redirect to shop-look
+      setTimeout(() => {
+        window.location.href = '/shop-look';
+      }, 2000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white" dir="rtl">
+      <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
@@ -393,7 +471,7 @@ export default function VisualizePage() {
             העלה תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך תמונה של התוצאה הסופית עם הערכת עלויות מדויקת.
           </p>
           
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-8">
             <span className="flex items-center gap-1">
               <span className="text-green-500">✓</span> תמונה תוך שניות
             </span>
@@ -403,6 +481,22 @@ export default function VisualizePage() {
             <span className="flex items-center gap-1">
               <span className="text-green-500">✓</span> מבוסס מחירי שוק
             </span>
+          </div>
+          
+          {/* Trial CTA */}
+          <div className="flex flex-col items-center gap-3">
+            <button
+              onClick={handleTryNow}
+              className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+            >
+              {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסה עכשיו בחינם'}
+            </button>
+            {!hasSubscription && !trialUsed && (
+              <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
+            )}
+            {!hasSubscription && trialUsed && (
+              <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
+            )}
           </div>
         </div>
       </section>
@@ -624,6 +718,86 @@ export default function VisualizePage() {
           </div>
         </div>
       </footer>
+
+      {/* Trial Success Modal */}
+      {showTrialSuccess && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center animate-bounce-in">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🎉</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">מעולה!</h3>
+            <p className="text-gray-600 mb-4">הניסיון החינמי שלך מופעל</p>
+            <p className="text-sm text-gray-400">מעביר אותך להדמיה...</p>
+            <div className="mt-4 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div className="bg-green-500 h-full animate-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative">
+            <button
+              onClick={() => setShowPaywall(false)}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-3xl">✨</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
+              <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-gray-500">מנוי חודשי</span>
+                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">חסכון 30%</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-gray-900">₪39.99</span>
+                <span className="text-gray-400">/חודש</span>
+              </div>
+            </div>
+            
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>10 הדמיות ביום</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>הערכת עלויות AI מדויקת</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>שמירה ושיתוף עם קבלנים</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>ביטול בכל עת</span>
+              </li>
+            </ul>
+            
+            <Link
+              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+              className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+            >
+              🚀 שדרג עכשיו
+            </Link>
+            
+            <p className="text-center text-xs text-gray-400 mt-4">
+              תשלום מאובטח · ביטול בלחיצה
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

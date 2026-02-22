@@ -22,6 +22,25 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
   }
 }
 
+// Verify user has main subscription (purchased) - required for Vision
+// Returns { hasPurchased: boolean, hasVision: boolean, trialAllowed: boolean }
+async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean }> {
+  if (!userEmail) return { hasPurchased: false };
+  
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('purchased')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    
+    return { hasPurchased: data?.purchased === true };
+  } catch {
+    return { hasPurchased: false };
+  }
+}
+
 // Cost estimation logic
 interface CostItem {
   description: string;
@@ -205,13 +224,22 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json();
-    const { image, description } = body;
+    const { image, description, userEmail } = body;
 
     if (!image || !description) {
       return NextResponse.json(
         { error: "Missing required fields: image and description" },
         { status: 400 }
       );
+    }
+
+    // Server-side subscription check - require main subscription for Vision
+    const subscription = await verifySubscription(userEmail);
+    if (!subscription.hasPurchased) {
+      return NextResponse.json({ 
+        error: "שירות זה דורש מנוי ShiputzAI פעיל",
+        code: "SUBSCRIPTION_REQUIRED"
+      }, { status: 403 });
     }
 
     // Read API key from environment

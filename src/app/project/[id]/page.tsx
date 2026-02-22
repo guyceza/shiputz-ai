@@ -835,12 +835,16 @@ export default function ProjectPage() {
     setVisionError(null);
     
     try {
+      // Get user email for server-side subscription validation
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      
       const response = await fetch('/api/visualize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: visionImage,
-          description: visionDescription
+          description: visionDescription,
+          userEmail: userData.email || null
         })
       });
       

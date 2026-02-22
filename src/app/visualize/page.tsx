@@ -348,6 +348,7 @@ export default function VisualizePage() {
   const [authLoading, setAuthLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
@@ -414,6 +415,7 @@ export default function VisualizePage() {
           if (user.id) {
             setIsLoggedIn(true);
             setUserId(user.id);
+            setUserEmail(user.email);
             userEmail = user.email;
             currentUserId = user.id;
             setHasPurchased(user.purchased === true);
@@ -424,6 +426,7 @@ export default function VisualizePage() {
           if (session?.user) {
             setIsLoggedIn(true);
             setUserId(session.user.id);
+            setUserEmail(session.user.email || null);
             userEmail = session.user.email || "";
             currentUserId = session.user.id;
             // Check purchased from localStorage
@@ -468,6 +471,7 @@ export default function VisualizePage() {
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
+        setUserEmail(user.email || null);
         setHasPurchased(user.purchased === true);
         if (user.id) {
           setUserId(user.id);
@@ -554,7 +558,7 @@ export default function VisualizePage() {
       const res = await fetch('/api/visualize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: uploadedImage, description })
+        body: JSON.stringify({ image: uploadedImage, description, userEmail })
       });
       
       const data = await res.json();
@@ -1222,7 +1226,7 @@ export default function VisualizePage() {
               )}
             </button>
             
-            {!hasSubscription && (
+            {!hasSubscription && !trialUsed && (
               <p className="text-center text-xs text-gray-400 mt-4">
                 זהו הניסיון החינמי היחיד שלך
               </p>

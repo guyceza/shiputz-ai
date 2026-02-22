@@ -156,10 +156,14 @@ function CheckoutContent() {
           </ul>
 
           {discountValid && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-              <div className="flex justify-between items-center">
-                <span className="text-green-700 font-medium">🎉 הנחה {discountPercent}%</span>
-                <span className="text-green-700 font-bold">-₪{(SALE_PRICE * discountPercent / 100).toFixed(2)}</span>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+              <div className="text-center">
+                <div className="text-green-700 font-bold text-lg mb-2">🎉 הקוד תקף!</div>
+                <div className="flex justify-center items-center gap-3">
+                  <span className="text-gray-400 line-through text-lg">$39.99</span>
+                  <span className="text-green-700 font-bold text-2xl">$31.99</span>
+                </div>
+                <div className="text-green-600 text-sm mt-1">חסכת {discountPercent}%!</div>
               </div>
             </div>
           )}

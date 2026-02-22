@@ -357,6 +357,43 @@ export default function VisualizePage() {
   const [generating, setGenerating] = useState(false);
   const [generatedResult, setGeneratedResult] = useState<{image: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
+  const [countdown, setCountdown] = useState(45);
+  const [currentTip, setCurrentTip] = useState(0);
+  
+  const LOADING_TIPS = [
+    "💡 קבל לפחות 3 הצעות מחיר לפני שמתחילים",
+    "📋 תעד הכל בכתב - זה יחסוך לך כאבי ראש",
+    "🔍 בדוק המלצות על קבלנים לפני שסוגרים",
+    "💰 השאר 15% מהתקציב לבלת\"מים",
+    "📅 שיפוץ תמיד לוקח יותר זמן מהצפוי",
+    "🏠 צלם את המצב הקיים לפני שמתחילים",
+    "⚡️ החשמל והאינסטלציה - לא חוסכים עליהם",
+    "🎨 בחר צבעים ניטרליים - קל לשנות אחר כך",
+    "📦 הזמן חומרים מראש - יש עיכובים באספקה",
+    "✅ בדוק שהקבלן מבוטח ורשום"
+  ];
+  
+  // Countdown and tips rotation when generating
+  useEffect(() => {
+    if (!generating) {
+      setCountdown(45);
+      setCurrentTip(0);
+      return;
+    }
+    
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    const tipInterval = setInterval(() => {
+      setCurrentTip(prev => (prev + 1) % LOADING_TIPS.length);
+    }, 3000);
+    
+    return () => {
+      clearInterval(countdownInterval);
+      clearInterval(tipInterval);
+    };
+  }, [generating]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -932,6 +969,17 @@ export default function VisualizePage() {
               </div>
             )}
             
+            {generating && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
+                <div className="text-2xl font-bold text-gray-900 mb-2">
+                  {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
+                </div>
+                <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
+                  {LOADING_TIPS[currentTip]}
+                </div>
+              </div>
+            )}
+            
             <button
               onClick={handleGenerate}
               disabled={!uploadedImage || !description || generating}
@@ -940,7 +988,7 @@ export default function VisualizePage() {
               {generating ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="animate-spin">⏳</span>
-                  יוצר הדמיה... (עד 30 שניות)
+                  יוצר הדמיה...
                 </span>
               ) : (
                 '🪄 צור הדמיה'

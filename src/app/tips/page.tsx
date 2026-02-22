@@ -5,12 +5,12 @@ import Link from "next/link";
 import { articles } from "./articles";
 
 const categoryColors: Record<string, string> = {
-  "תקציב": "bg-emerald-50 text-emerald-700",
-  "טיפים": "bg-amber-50 text-amber-700",
-  "קבלנים": "bg-blue-50 text-blue-700",
-  "חדרים": "bg-purple-50 text-purple-700",
-  "תכנון": "bg-rose-50 text-rose-700",
-  "תשתיות": "bg-orange-50 text-orange-700",
+  "תקציב": "bg-gray-900 text-white",
+  "טיפים": "bg-gray-900 text-white",
+  "קבלנים": "bg-gray-900 text-white",
+  "חדרים": "bg-gray-900 text-white",
+  "תכנון": "bg-gray-900 text-white",
+  "תשתיות": "bg-gray-900 text-white",
 };
 
 export default function TipsPage() {

@@ -49,30 +49,47 @@ export default function ShopLookPage() {
     const checkAuth = async () => {
       try {
         const userData = localStorage.getItem("user");
+        let userEmail = "";
+        let currentUserId = "";
+        
         if (userData) {
           const user = JSON.parse(userData);
           if (user.id) {
             setIsLoggedIn(true);
             setUserId(user.id);
-            // Check trial & subscription
-            const trialKey = `visualize_trial_${user.id}`;
-            const subKey = `visualize_subscription_${user.id}`;
-            const trialWasUsed = localStorage.getItem(trialKey) === 'used';
-            const hasSub = localStorage.getItem(subKey) === 'active';
-            setTrialUsed(trialWasUsed);
-            setHasSubscription(hasSub);
-            // User has access if: subscribed OR trial not used yet
-            setHasAccess(hasSub || !trialWasUsed);
-            return;
+            userEmail = user.email;
+            currentUserId = user.id;
+          }
+        } else {
+          const { getSession } = await import("@/lib/auth");
+          const session = await getSession();
+          if (session?.user) {
+            setIsLoggedIn(true);
+            setUserId(session.user.id);
+            userEmail = session.user.email || "";
+            currentUserId = session.user.id;
           }
         }
-        const { getSession } = await import("@/lib/auth");
-        const session = await getSession();
-        if (session?.user) {
-          setIsLoggedIn(true);
-          setUserId(session.user.id);
-          const trialKey = `visualize_trial_${session.user.id}`;
-          const subKey = `visualize_subscription_${session.user.id}`;
+        
+        // Check if user should have trial reset
+        if (userEmail) {
+          try {
+            const res = await fetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
+            const data = await res.json();
+            if (data.shouldReset && currentUserId) {
+              // Clear trial data
+              localStorage.removeItem(`visualize_trial_${currentUserId}`);
+              console.log("Trial reset for user:", userEmail);
+            }
+          } catch (e) {
+            console.error("Failed to check trial reset:", e);
+          }
+        }
+        
+        // Check trial & subscription status
+        if (currentUserId) {
+          const trialKey = `visualize_trial_${currentUserId}`;
+          const subKey = `visualize_subscription_${currentUserId}`;
           const trialWasUsed = localStorage.getItem(trialKey) === 'used';
           const hasSub = localStorage.getItem(subKey) === 'active';
           setTrialUsed(trialWasUsed);

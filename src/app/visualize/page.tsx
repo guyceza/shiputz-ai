@@ -912,25 +912,35 @@ export default function VisualizePage() {
       <section className="py-20 px-6 bg-gray-900">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-white">
-            מוכן לראות את השיפוץ שלך?
+            {isLoggedIn ? 'מוכן ליצור הדמיה?' : 'מוכן לראות את השיפוץ שלך?'}
           </h2>
           <p className="text-gray-400 mb-8">
-            הצטרף לאלפי משפצים שכבר משתמשים בשירות ההדמיה
+            {isLoggedIn ? 'לחץ על הכפתור למעלה והתחל ליצור הדמיות' : 'הצטרף לאלפי משפצים שכבר משתמשים בשירות ההדמיה'}
           </p>
-          <div className="flex gap-4 flex-wrap justify-center">
-            <Link
-              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+          {!isLoggedIn && (
+            <div className="flex gap-4 flex-wrap justify-center">
+              <Link
+                href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+                className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
+              >
+                התחל עכשיו
+              </Link>
+              <Link
+                href="/login"
+                className="text-white px-8 py-4 rounded-full text-base border border-gray-700 hover:bg-gray-800 transition-colors"
+              >
+                יש לי כבר חשבון
+              </Link>
+            </div>
+          )}
+          {isLoggedIn && (
+            <button
+              onClick={handleTryNow}
               className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
             >
-              התחל עכשיו
-            </Link>
-            <Link
-              href="/login"
-              className="text-white px-8 py-4 rounded-full text-base border border-gray-700 hover:bg-gray-800 transition-colors"
-            >
-              יש לי כבר חשבון
-            </Link>
-          </div>
+              ✨ צור הדמיה חדשה
+            </button>
+          )}
         </div>
       </section>
 

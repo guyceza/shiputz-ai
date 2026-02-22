@@ -359,6 +359,9 @@ export default function VisualizePage() {
   const [generateError, setGenerateError] = useState("");
   const [countdown, setCountdown] = useState(45);
   const [currentTip, setCurrentTip] = useState(0);
+  const [showShopModal, setShowShopModal] = useState(false);
+  const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
+  const [detectingProducts, setDetectingProducts] = useState(false);
   
   const LOADING_TIPS = [
     "💡 קבל לפחות 3 הצעות מחיר לפני שמתחילים",
@@ -531,6 +534,30 @@ export default function VisualizePage() {
     }
     
     setGenerating(false);
+  };
+
+  const handleShopTheLook = async () => {
+    if (!generatedResult?.image) return;
+    
+    setShowShopModal(true);
+    setDetectingProducts(true);
+    
+    try {
+      const res = await fetch('/api/detect-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: generatedResult.image })
+      });
+      
+      const data = await res.json();
+      if (data.items && data.items.length > 0) {
+        setDetectedProducts(data.items);
+      }
+    } catch (err) {
+      console.error("Failed to detect products:", err);
+    }
+    
+    setDetectingProducts(false);
   };
 
   return (
@@ -1025,9 +1052,16 @@ export default function VisualizePage() {
                 <img src={uploadedImage || ''} alt="לפני" className="w-full rounded-2xl" />
                 <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
               </div>
-              <div className="relative">
-                <img src={generatedResult.image} alt="אחרי" className="w-full rounded-2xl" />
+              <div 
+                className="relative cursor-pointer group"
+                onClick={handleShopTheLook}
+              >
+                <img src={generatedResult.image} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
                 <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
+                  <span>🛒</span>
+                  <span>Shop the Look</span>
+                </button>
               </div>
             </div>
             
@@ -1081,6 +1115,74 @@ export default function VisualizePage() {
                 >
                   ⭐ שדרג להדמיות נוספות
                 </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shop the Look Modal */}
+      {showShopModal && generatedResult && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4"
+          onClick={() => { setShowShopModal(false); setDetectedProducts([]); }}
+        >
+          <div 
+            className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => { setShowShopModal(false); setDetectedProducts([]); }}
+              className="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100"
+            >
+              ✕
+            </button>
+            
+            <div className="p-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center flex items-center justify-center gap-2">
+                🛒 Shop the Look
+              </h3>
+              <p className="text-sm text-gray-500 text-center mb-4">לחץ על המוצרים בתמונה לחיפוש בגוגל שופינג</p>
+              
+              <div className="relative">
+                <img src={generatedResult.image} alt="אחרי" className="w-full rounded-xl" />
+                
+                {detectingProducts && (
+                  <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <div className="animate-spin text-3xl mb-2">⏳</div>
+                      <p>מזהה מוצרים...</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Product Hotspots */}
+                {detectedProducts.map((product, index) => (
+                  <div
+                    key={product.id || index}
+                    className="absolute"
+                    style={{ left: `${product.position.left}%`, top: `${product.position.top}%` }}
+                  >
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(product.searchQuery + ' לקנות בישראל')}&tbm=shop`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group"
+                    >
+                      <div className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse">
+                        <span className="text-xs font-bold text-emerald-600">+</span>
+                      </div>
+                      <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                        <p className="text-sm font-medium text-gray-900 mb-2">{product.name}</p>
+                        <span className="text-xs text-emerald-600 font-medium">חפש בגוגל שופינג ←</span>
+                      </div>
+                    </a>
+                  </div>
+                ))}
+              </div>
+              
+              {!detectingProducts && detectedProducts.length === 0 && (
+                <p className="text-center text-gray-500 text-sm mt-4">לא זוהו מוצרים בתמונה</p>
               )}
             </div>
           </div>

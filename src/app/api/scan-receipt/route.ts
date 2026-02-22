@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   "items": [
     {"name": "שם פריט", "quantity": כמות, "price": מחיר}
   ],
-  "fullText": "כל הטקסט הקריא כולל כתב יד - העתק הכל!",
+  "fullText": "כל הטקסט הקריא - מסודר בשורות נפרדות עם ירידת שורה (\\n) בין חלקים שונים",
   "vatIncluded": true/false,
   "vatAmount": סכום מע"מ אם מצוין
 }

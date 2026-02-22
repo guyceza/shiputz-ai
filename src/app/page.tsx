@@ -184,7 +184,7 @@ export default function Home() {
                 ) : (
                   <Link
                     href="/signup"
-                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 hover-bounce hover-shine"
                   >
                     התחילו בחינם
                   </Link>
@@ -210,21 +210,21 @@ export default function Home() {
         
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl mx-auto">
-          <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">₪10,000,000<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500">תקציבים הוזנו ב-24 שעות</p>
+          <div className="group p-4 rounded-2xl hover-lift cursor-default">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">₪10,000,000<span className="text-gray-400">+</span></p>
+            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">תקציבים הוזנו ב-24 שעות</p>
           </div>
-          <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">100<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500">משפצים פעילים</p>
+          <div className="group p-4 rounded-2xl hover-lift cursor-default">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">100<span className="text-gray-400">+</span></p>
+            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">משפצים פעילים</p>
           </div>
-          <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">500<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500">הצעות מחיר נותחו</p>
+          <div className="group p-4 rounded-2xl hover-lift cursor-default">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">500<span className="text-gray-400">+</span></p>
+            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">הצעות מחיר נותחו</p>
           </div>
-          <div className="group">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform">10,000<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500">טיפים נקראו</p>
+          <div className="group p-4 rounded-2xl hover-lift cursor-default">
+            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">10,000<span className="text-gray-400">+</span></p>
+            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">טיפים נקראו</p>
           </div>
         </div>
       </section>
@@ -390,7 +390,7 @@ export default function Home() {
             
             <button
               onClick={calculateEstimate}
-              className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
+              className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 hover-bounce hover-shine"
             >
               חשב עכשיו
             </button>
@@ -507,7 +507,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <Link
                   href="/visualize"
-                  className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                  className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 hover-bounce hover-shine"
                 >
                   נסו עכשיו
                 </Link>
@@ -669,7 +669,7 @@ export default function Home() {
               />
               <button
                 type="submit"
-                className="bg-gray-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors whitespace-nowrap"
+                className="bg-gray-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-gray-800 hover-bounce hover-shine whitespace-nowrap"
               >
                 הרשמה
               </button>
@@ -686,7 +686,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
           <p className="text-gray-500 mb-12">תשלום אחד. לכל משך הפרויקט.</p>
           
-          <div className="border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg">
+          <div className="border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg hover-scale hover-glow">
             {/* Discount Badge */}
             <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
               50% הנחה
@@ -809,7 +809,7 @@ export default function Home() {
           <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "התחילו לנהל את השיפוץ בצורה חכמה."}</p>
           <Link
             href={isLoggedIn ? "/dashboard" : "/signup"}
-            className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
+            className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 hover-bounce hover-shine"
           >
             {isLoggedIn ? "לאזור האישי" : "התחילו בחינם"}
           </Link>
@@ -833,7 +833,7 @@ export default function Home() {
 
 function Feature({ title, description }: { title: string; description: string }) {
   return (
-    <div className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
+    <div className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover-lift hover-glow">
       <h3 className="text-lg font-semibold mb-2 text-gray-900">{title}</h3>
       <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
     </div>
@@ -854,7 +854,7 @@ function Step({ number, title, description }: { number: string; title: string; d
 
 function TestimonialCard({ quote, name, city, rating }: { quote: string; name: string; city: string; rating: number }) {
   return (
-    <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300">
+    <div className="bg-white rounded-2xl p-8 border border-gray-100 hover-lift hover-glow">
       <div className="text-4xl text-gray-200 mb-4 leading-none">"</div>
       <p className="text-gray-700 mb-6 leading-relaxed">{quote}</p>
       <div className="flex items-center justify-between">

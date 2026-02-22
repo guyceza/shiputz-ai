@@ -17,7 +17,7 @@ export default function PricingCard({
   // Mini variant - compact but clear pricing card
   if (variant === "mini") {
     return (
-      <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg ${className}`}>
+      <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg hover-scale hover-glow ${className}`}>
         {/* Badge */}
         <div className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
           50% הנחה
@@ -33,7 +33,7 @@ export default function PricingCard({
           </div>
           <Link
             href={isLoggedIn ? "/dashboard" : "/checkout"}
-            className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shadow-md hover:shadow-lg"
+            className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 whitespace-nowrap shadow-md hover:shadow-lg hover-bounce hover-shine"
           >
             התחילו עכשיו ←
           </Link>
@@ -45,7 +45,7 @@ export default function PricingCard({
   // Compact variant - medium size, key info only
   if (variant === "compact") {
     return (
-      <div className={`bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-lg max-w-xs ${className}`}>
+      <div className={`bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-lg max-w-xs hover-lift hover-glow ${className}`}>
         {/* Badge */}
         <div className="flex justify-between items-start mb-4">
           <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -88,7 +88,7 @@ export default function PricingCard({
 
   // Full variant - original design
   return (
-    <div className={`border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg max-w-sm mx-auto ${className}`}>
+    <div className={`border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg max-w-sm mx-auto hover-scale hover-glow ${className}`}>
       {/* Discount Badge */}
       <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
         50% הנחה

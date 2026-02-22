@@ -313,6 +313,19 @@ export default function ProjectPage() {
     setProject(updatedProject);
   };
 
+  const deleteExpense = (expenseId: string) => {
+    if (!project || !confirm("האם למחוק את ההוצאה?")) return;
+    const expenseToDelete = project.expenses?.find(e => e.id === expenseId);
+    if (!expenseToDelete) return;
+    const updatedProject = {
+      ...project,
+      expenses: project.expenses?.filter(e => e.id !== expenseId) || [],
+      spent: project.spent - expenseToDelete.amount,
+    };
+    saveProject(updatedProject);
+    setSelectedExpense(null);
+  };
+
   // Calculate expenses by category
   const getExpensesByCategory = () => {
     if (!project?.expenses) return {};
@@ -1623,7 +1636,13 @@ export default function ProjectPage() {
             </div>
             
             {/* Footer */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4">
+            <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 space-y-2">
+              <button 
+                onClick={() => deleteExpense(selectedExpense.id)}
+                className="w-full bg-red-500 text-white py-3 rounded-full font-medium hover:bg-red-600 transition-colors"
+              >
+                🗑️ מחק הוצאה
+              </button>
               <button 
                 onClick={() => setSelectedExpense(null)}
                 className="w-full bg-gray-900 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"

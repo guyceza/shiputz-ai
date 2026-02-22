@@ -390,7 +390,7 @@ export default function ProjectPage() {
         } else {
           const errorData = await response.json().catch(() => ({}));
           console.error("Scan failed:", response.status, errorData);
-          alert("שגיאה בסריקה - נסה שוב");
+          alert(`שגיאה בסריקה (${response.status}): ${errorData.error || errorData.details || 'נסה שוב'}`);
         }
       } catch (error: any) {
         console.error("Scan error:", error);

@@ -1,4 +1,5 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const maxDuration = 60; // 60 second timeout
 
 import { NextRequest, NextResponse } from "next/server";
 

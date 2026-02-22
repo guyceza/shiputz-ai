@@ -6,6 +6,11 @@ const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
 
 // Send welcome email immediately
 async function sendWelcomeEmail(email: string, name: string) {
+  if (!RESEND_KEY) {
+    console.warn('RESEND_API_KEY not configured, skipping welcome email');
+    return null;
+  }
+
   const displayName = name || 'משפץ יקר';
   
   const html = `

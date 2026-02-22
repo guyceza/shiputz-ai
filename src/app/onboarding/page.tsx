@@ -49,10 +49,8 @@ export default function OnboardingPage() {
     setLoading(true);
     
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaGZjZHR6eXdibWxhY2x0bmpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE3MTcsImV4cCI6MjA4NzIzNzcxN30.EUwH73NbfQ3eeAbu32YicJlHrxngf4WGgi2E6mNOnhw';
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      const { getSupabaseClient } = await import('@/lib/supabase');
+      const supabase = getSupabaseClient();
       
       // Update user metadata with name and onboarding complete flag
       const { error } = await supabase.auth.updateUser({

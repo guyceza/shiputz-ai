@@ -2,6 +2,43 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
+const WHOP_WEBHOOK_SECRET = process.env.WHOP_WEBHOOK_SECRET;
+
+// Verify Whop webhook signature
+async function verifyWebhookSignature(request: NextRequest, body: string): Promise<boolean> {
+  // If no secret configured, log warning but allow (for dev/testing)
+  if (!WHOP_WEBHOOK_SECRET) {
+    console.warn('WHOP_WEBHOOK_SECRET not configured - webhook signature not verified!');
+    return true;
+  }
+  
+  const signature = request.headers.get('whop-signature');
+  if (!signature) {
+    console.error('Missing whop-signature header');
+    return false;
+  }
+  
+  try {
+    // Whop uses HMAC SHA256
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(WHOP_WEBHOOK_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
+    const expectedSignature = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    return signature === expectedSignature;
+  } catch (error) {
+    console.error('Webhook signature verification failed:', error);
+    return false;
+  }
+}
 
 // Send welcome email after purchase
 async function sendWelcomeEmail(email: string, name?: string) {
@@ -81,7 +118,17 @@ async function sendWelcomeEmail(email: string, name?: string) {
 // Whop Webhook Handler
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Get raw body for signature verification
+    const rawBody = await request.text();
+    
+    // Verify webhook signature
+    const isValid = await verifyWebhookSignature(request, rawBody);
+    if (!isValid) {
+      console.error('Invalid webhook signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+    
+    const body = JSON.parse(rawBody);
     
     console.log('Whop webhook received:', JSON.stringify(body, null, 2));
 

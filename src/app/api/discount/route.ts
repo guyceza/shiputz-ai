@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { checkRateLimit, getClientId } from '@/lib/rate-limit';
 
 // Validate discount code
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - 10 attempts per minute to prevent brute force
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 10, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ 
+        valid: false,
+        reason: 'יותר מדי ניסיונות. נסה שוב בעוד דקה.' 
+      }, { status: 429 });
+    }
+
     const { code, email } = await request.json();
 
     if (!code || !email) {

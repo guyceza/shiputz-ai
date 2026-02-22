@@ -1,31 +1,38 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Simple rate limit map for edge runtime
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string, limit = 20, windowMs = 60000): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  
-  if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
-    return true;
+// Verify user is authenticated
+async function verifyAuth(request: NextRequest): Promise<boolean> {
+  try {
+    const authCookie = request.cookies.get('sb-vghfcdtzywbmlacltnjp-auth-token');
+    if (authCookie) return true;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) return true;
+    return false;
+  } catch {
+    return false;
   }
-  
-  if (entry.count >= limit) return false;
-  entry.count++;
-  return true;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-    if (!checkRateLimit(ip)) {
+    // Auth check - require logged in user
+    const isAuthenticated = await verifyAuth(request);
+    if (!isAuthenticated) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+
+    // Rate limiting - 20 requests per minute
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 20, 60000);
+    if (!rateLimit.success) {
       return NextResponse.json({ 
         error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
       }, { status: 429 });

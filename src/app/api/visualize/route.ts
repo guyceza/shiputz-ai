@@ -3,6 +3,24 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { createServiceClient } from "@/lib/supabase";
+
+// Verify user is authenticated (has valid Supabase session via cookie)
+async function verifyAuth(request: NextRequest): Promise<boolean> {
+  try {
+    // Check for Supabase auth cookie
+    const authCookie = request.cookies.get('sb-vghfcdtzywbmlacltnjp-auth-token');
+    if (authCookie) return true;
+    
+    // Also check for auth header (for API clients)
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) return true;
+    
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 // Cost estimation logic
 interface CostItem {
@@ -169,6 +187,14 @@ function calculateCosts(analysisText: string, roomSize: number = 20): CostEstima
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth check - require logged in user
+    const isAuthenticated = await verifyAuth(request);
+    if (!isAuthenticated) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+
     // Rate limiting - 10 requests per minute (expensive operation)
     const clientId = getClientId(request);
     const rateLimit = checkRateLimit(clientId, 10, 60000);
@@ -197,7 +223,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    console.log("API key found, length:", apiKey.length);
+    // API key verified
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
@@ -292,11 +318,9 @@ export async function POST(request: NextRequest) {
 
       if (editResponse.ok) {
         const editData = await editResponse.json();
-        console.log("Nano Banana response:", JSON.stringify(editData).slice(0, 2000));
         
         const candidate = editData.candidates?.[0];
         const finishReason = candidate?.finishReason;
-        console.log("Finish reason:", finishReason);
         
         // Check if model refused to process the image
         if (finishReason === "OTHER" || finishReason === "SAFETY") {
@@ -311,18 +335,14 @@ export async function POST(request: NextRequest) {
         
         // Look for image in response parts
         const parts = candidate?.content?.parts || [];
-        console.log("Found parts:", parts.length);
         
         for (const part of parts) {
-          console.log("Part:", JSON.stringify(part).slice(0, 300));
           // Try all possible formats
           if (part.inlineData?.mimeType?.startsWith("image/")) {
             generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            console.log("Found image!");
             break;
           } else if (part.inline_data?.mime_type?.startsWith("image/")) {
             generatedImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
-            console.log("Found image (snake_case)!");
             break;
           }
         }

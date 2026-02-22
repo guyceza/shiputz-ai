@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const WHOP_API_KEY = process.env.WHOP_API_KEY || 'apik_tR2AgicmyYyuX_C4452549_C_a790e2075322e366d45eb7bf92833006fe6774abd805e931fd0f5ae327e8b2';
+const WHOP_API_KEY = process.env.WHOP_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { planId, email, discountCode, redirectUrl } = body;
+
+    if (!WHOP_API_KEY) {
+      console.error('WHOP_API_KEY not configured');
+      return NextResponse.json({ error: 'Payment service not configured' }, { status: 500 });
+    }
 
     // Create checkout session via Whop API
     const sessionData: any = {

@@ -14,21 +14,30 @@ export default function PricingCard({
   className = ""
 }: PricingCardProps) {
   
-  // Mini variant - very small, inline
+  // Mini variant - compact but clear pricing card
   if (variant === "mini") {
     return (
-      <div className={`inline-flex items-center gap-4 bg-white border border-gray-200 rounded-2xl px-6 py-4 shadow-sm ${className}`}>
-        <div className="text-right">
-          <span className="text-sm text-gray-400 line-through">₪299.99</span>
-          <div className="text-2xl font-bold text-gray-900">₪149.99</div>
-          <span className="text-xs text-gray-500">חד פעמי</span>
+      <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg ${className}`}>
+        {/* Badge */}
+        <div className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+          50% הנחה 🔥
         </div>
-        <Link
-          href={isLoggedIn ? "/dashboard" : "/signup"}
-          className="bg-emerald-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-emerald-700 transition-colors whitespace-nowrap"
-        >
-          התחל עכשיו
-        </Link>
+        
+        <div className="flex items-center gap-6">
+          <div className="text-right">
+            <div className="flex items-baseline gap-2 justify-end">
+              <span className="text-sm text-gray-400 line-through">₪299.99</span>
+              <div className="text-3xl font-bold text-gray-900">₪149.99</div>
+            </div>
+            <span className="text-sm text-emerald-600 font-medium">תשלום חד פעמי לכל הפרויקט</span>
+          </div>
+          <Link
+            href={isLoggedIn ? "/dashboard" : "/signup"}
+            className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shadow-md hover:shadow-lg"
+          >
+            התחל עכשיו ←
+          </Link>
+        </div>
       </div>
     );
   }

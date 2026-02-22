@@ -8,10 +8,10 @@ const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
 const PURCHASED_SEQUENCE = [
   { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI!', template: 'welcome_purchased' },
   { day: 1, subject: '💡 3 דברים לעשות עכשיו', template: 'getting_started' },
-  { day: 3, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
-  { day: 5, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
-  { day: 7, subject: '❓ איך הולך?', template: 'checkin' },
-  { day: 10, subject: '🔥 הכלי שרוב המשפצים לא מכירים', template: 'quote_analysis' },
+  { day: 3, subject: '🎨 רוצה לראות איך השיפוץ יראה?', template: 'vision_offer' },
+  { day: 5, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
+  { day: 7, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
+  { day: 10, subject: '❓ איך הולך?', template: 'checkin' },
   { day: 14, subject: '⭐ 30 שניות מזמנך?', template: 'feedback_request' },
 ];
 
@@ -275,6 +275,34 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
       `,
       cta: 'לשתף פידבק',
       url: 'mailto:help@shipazti.com?subject=פידבק על ShiputzAI'
+    },
+
+    vision_offer: {
+      title: '🎨 רוצה לראות איך השיפוץ יראה?',
+      subtitle: 'הצצה לעתיד — לפני שמתחילים',
+      content: `
+        ${greeting}
+        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
+          מתלבט איך לשפץ את הסלון? לא בטוח איזה סגנון מתאים למטבח?
+        </p>
+        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
+          עכשיו אפשר <strong>לראות את השיפוץ לפני שמתחילים</strong> — פשוט מעלים תמונה של החדר, וה-AI שלנו מדמיין איך זה יראה אחרי.
+        </p>
+        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
+          <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
+            ✨ <strong>הדמיות ויזואליות</strong> של איך השיפוץ יראה<br>
+            💰 <strong>הערכת עלויות</strong> מדויקת לפי התמונה<br>
+            🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק
+          </p>
+        </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px;">
+          <p style="font-size: 14px; color: rgba(255,255,255,0.9); margin: 0 0 8px;">מחיר מיוחד למנויי ShiputzAI</p>
+          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0;">₪30<span style="font-size: 16px; font-weight: 400;">/חודש</span></p>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 8px 0 0; text-decoration: line-through;">במקום ₪40</p>
+        </div>
+      `,
+      cta: 'לנסות עכשיו',
+      url: 'https://whop.com/checkout/plan_CEViCUDUhJnZ2'
     },
 
     // === NON-PURCHASED SEQUENCE ===

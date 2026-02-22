@@ -35,6 +35,14 @@ export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [hasVisionSub, setHasVisionSub] = useState(false);
+  const [visionSubInfo, setVisionSubInfo] = useState<{
+    cancelAtPeriodEnd: boolean;
+    periodEnd: string | null;
+  } | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
@@ -75,6 +83,19 @@ export default function DashboardPage() {
                   ...storedUser,
                   purchased: purchased
                 }));
+              }
+              
+              // Check Vision subscription (monthly AI)
+              const visionRes = await fetch(`/api/whop/cancel-subscription?email=${encodeURIComponent(session.user.email)}`);
+              if (visionRes.ok) {
+                const visionData = await visionRes.json();
+                setHasVisionSub(visionData.hasSubscription);
+                if (visionData.hasSubscription) {
+                  setVisionSubInfo({
+                    cancelAtPeriodEnd: visionData.cancelAtPeriodEnd,
+                    periodEnd: visionData.periodEnd
+                  });
+                }
               }
             } catch (e) {
               console.error("Premium check error:", e);
@@ -123,6 +144,40 @@ export default function DashboardPage() {
     
     checkAuth();
   }, [router]);
+
+  const handleCancelSubscription = async () => {
+    if (!user?.email) return;
+    
+    setIsCanceling(true);
+    try {
+      const res = await fetch('/api/whop/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setCancelSuccess(true);
+        setVisionSubInfo({
+          cancelAtPeriodEnd: true,
+          periodEnd: data.periodEnd
+        });
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setShowCancelModal(false);
+          setCancelSuccess(false);
+        }, 2000);
+      } else {
+        const error = await res.json();
+        alert(error.error || 'שגיאה בביטול המנוי');
+      }
+    } catch (e) {
+      console.error('Cancel error:', e);
+      alert('שגיאה בביטול המנוי');
+    }
+    setIsCanceling(false);
+  };
 
   const handleCreateProject = async () => {
     if (!newProjectName || !newProjectBudget) return;
@@ -303,7 +358,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Subscription Management - Only for premium users */}
+        {/* Premium Status - One time purchase (no cancel needed) */}
         {isPremium && (
           <div className="mb-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
             <div className="flex items-center justify-between">
@@ -311,14 +366,35 @@ export default function DashboardPage() {
                 <p className="text-sm font-medium text-purple-900 mb-1">✨ מנוי פרימיום פעיל</p>
                 <p className="text-xs text-purple-600">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
               </div>
-              <a
-                href="https://whop.com/@me/settings/orders/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-purple-700 hover:text-purple-900 border border-purple-200 px-4 py-2 rounded-full hover:bg-purple-100 transition-colors"
-              >
-                ניהול מנוי
-              </a>
+              <span className="text-xs text-purple-500 bg-purple-100 px-3 py-1 rounded-full">
+                רכישה חד-פעמית
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Vision AI Subscription - Monthly (can cancel) */}
+        {hasVisionSub && (
+          <div className="mb-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-emerald-900 mb-1">🎨 מנוי הדמיות AI פעיל</p>
+                {visionSubInfo?.cancelAtPeriodEnd ? (
+                  <p className="text-xs text-amber-600">
+                    יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
+                  </p>
+                ) : (
+                  <p className="text-xs text-emerald-600">מתחדש אוטומטית כל חודש</p>
+                )}
+              </div>
+              {!visionSubInfo?.cancelAtPeriodEnd && (
+                <button
+                  onClick={() => setShowCancelModal(true)}
+                  className="text-sm text-red-600 hover:text-red-700 border border-red-200 px-4 py-2 rounded-full hover:bg-red-50 transition-colors"
+                >
+                  בטל מנוי
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -463,6 +539,54 @@ export default function DashboardPage() {
                 ביטול
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Subscription Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center">
+            {cancelSuccess ? (
+              <>
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">✓</span>
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">המנוי בוטל בהצלחה</h2>
+                <p className="text-gray-500">
+                  תוכל להמשיך להשתמש בשירות עד {visionSubInfo?.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">בטל מנוי הדמיות AI?</h2>
+                <p className="text-gray-500 mb-6">
+                  המנוי יבוטל בסוף תקופת החיוב הנוכחית.
+                  <br />
+                  לא יחויב תשלום נוסף.
+                </p>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelSubscription}
+                    disabled={isCanceling}
+                    className="flex-1 bg-red-600 text-white py-3 rounded-full text-base hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {isCanceling ? 'מבטל...' : 'כן, בטל מנוי'}
+                  </button>
+                  <button
+                    onClick={() => setShowCancelModal(false)}
+                    disabled={isCanceling}
+                    className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full text-base hover:bg-gray-50 transition-colors"
+                  >
+                    חזור
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

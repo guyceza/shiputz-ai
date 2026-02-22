@@ -149,11 +149,15 @@ export async function POST(request: NextRequest) {
     await sendWelcomePremiumEmail(email, user.name);
     
     // Mark day 0 of purchased sequence as sent (to avoid duplicate welcome email from cron)
-    await supabase.from('email_sequences').insert({
-      user_email: email.toLowerCase(),
-      sequence_type: 'purchased',
-      day_number: 0,
-    }).catch(() => {}); // Ignore if already exists
+    try {
+      await supabase.from('email_sequences').insert({
+        user_email: email.toLowerCase(),
+        sequence_type: 'purchased',
+        day_number: 0,
+      });
+    } catch (e) {
+      // Ignore if already exists
+    }
     
     // Get updated list for admin panel
     const { data: allPremium } = await supabase

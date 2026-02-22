@@ -122,11 +122,15 @@ export async function POST(request: NextRequest) {
         await sendWelcomeEmail(email, name);
         
         // Mark day 0 of purchased sequence as sent (to avoid duplicate from cron)
-        await supabase.from('email_sequences').insert({
-          user_email: email.toLowerCase(),
-          sequence_type: 'purchased',
-          day_number: 0,
-        }).catch(() => {});
+        try {
+          await supabase.from('email_sequences').insert({
+            user_email: email.toLowerCase(),
+            sequence_type: 'purchased',
+            day_number: 0,
+          });
+        } catch (e) {
+          // Ignore if already exists
+        }
       }
     }
 

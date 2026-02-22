@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 const REGULAR_PRICE = 40;
 const PROMO_PRICE = 19.99;
 const PROMO_CODE = "LAUNCH50";
-const WHOP_PLAN_ID = "plan_CEViCUDUhJnZ2"; // AI Vision monthly plan
+const WHOP_PLAN_ID = "plan_6RAptSlrFl31x"; // AI Vision monthly plan - $6.99/month
 
 function CheckoutVisionContent() {
   const searchParams = useSearchParams();

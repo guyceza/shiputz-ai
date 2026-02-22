@@ -302,7 +302,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
         </div>
       `,
       cta: 'לנסות עכשיו',
-      url: 'https://whop.com/checkout/plan_CEViCUDUhJnZ2'
+      url: 'https://shipazti.com/checkout-vision'
     },
 
     // === NON-PURCHASED SEQUENCE ===

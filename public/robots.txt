@@ -1,0 +1,14 @@
+# https://shipazti.com robots.txt
+User-agent: *
+Allow: /
+
+# Disallow admin/private paths
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /project/
+Disallow: /onboarding/
+Disallow: /checkout/
+Disallow: /checkout-vision/
+
+# Sitemap
+Sitemap: https://shipazti.com/sitemap.xml

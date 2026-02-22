@@ -148,6 +148,8 @@ export default function ProjectPage() {
   const [scannedDate, setScannedDate] = useState<string>("");
   const [scanTimer, setScanTimer] = useState<number>(0);
   const [scanTip, setScanTip] = useState<string>("");
+  const [editingExpense, setEditingExpense] = useState(false);
+  const [editExpenseData, setEditExpenseData] = useState<Partial<Expense>>({});
   
   // AI Chat
   const [showAIChat, setShowAIChat] = useState(false);
@@ -337,6 +339,21 @@ export default function ProjectPage() {
     };
     saveProject(updatedProject);
     setSelectedExpense(null);
+  };
+
+  const saveEditedExpense = () => {
+    if (!project || !selectedExpense || !editExpenseData.description || !editExpenseData.amount) return;
+    const oldAmount = selectedExpense.amount;
+    const newAmount = editExpenseData.amount;
+    const updatedExpense = { ...selectedExpense, ...editExpenseData };
+    const updatedProject = {
+      ...project,
+      expenses: project.expenses?.map(e => e.id === selectedExpense.id ? updatedExpense : e) || [],
+      spent: project.spent - oldAmount + newAmount,
+    };
+    saveProject(updatedProject);
+    setSelectedExpense(updatedExpense);
+    setEditingExpense(false);
   };
 
   // Calculate expenses by category
@@ -1607,13 +1624,13 @@ export default function ProjectPage() {
 
       {/* Expense Details Modal */}
       {selectedExpense && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedExpense(null)}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => { setSelectedExpense(null); setEditingExpense(false); }}>
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">פרטי הוצאה</h2>
               <button 
-                onClick={() => setSelectedExpense(null)} 
+                onClick={() => { setSelectedExpense(null); setEditingExpense(false); }} 
                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200"
               >
                 ✕
@@ -1634,45 +1651,92 @@ export default function ProjectPage() {
               
               {/* Main Info */}
               <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-500">תיאור</p>
-                    <p className="text-lg font-medium text-gray-900">{selectedExpense.description}</p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm text-gray-500">סכום</p>
-                    <p className="text-2xl font-bold text-gray-900">₪{selectedExpense.amount.toLocaleString()}</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  {selectedExpense.vendor && (
+                {editingExpense ? (
+                  <>
                     <div>
-                      <p className="text-sm text-gray-500">בעל מקצוע / עסק</p>
-                      <p className="font-medium text-gray-900">{selectedExpense.vendor}</p>
+                      <label className="text-sm text-gray-500 block mb-1">תיאור</label>
+                      <input
+                        type="text"
+                        value={editExpenseData.description || ''}
+                        onChange={(e) => setEditExpenseData({...editExpenseData, description: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-900"
+                      />
                     </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-gray-500">קטגוריה</p>
-                    <p className="font-medium text-gray-900">{selectedExpense.category}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">תאריך הוספה</p>
-                    <p className="font-medium text-gray-900">{new Date(selectedExpense.date).toLocaleDateString("he-IL")}</p>
-                  </div>
-                  {selectedExpense.invoiceDate && (
                     <div>
-                      <p className="text-sm text-gray-500">תאריך חשבונית</p>
-                      <p className="font-medium text-gray-900">{new Date(selectedExpense.invoiceDate).toLocaleDateString("he-IL")}</p>
+                      <label className="text-sm text-gray-500 block mb-1">סכום (₪)</label>
+                      <input
+                        type="number"
+                        value={editExpenseData.amount || ''}
+                        onChange={(e) => setEditExpenseData({...editExpenseData, amount: parseFloat(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-900"
+                        dir="ltr"
+                      />
                     </div>
-                  )}
-                  {selectedExpense.vatAmount && (
                     <div>
-                      <p className="text-sm text-gray-500">מע״מ</p>
-                      <p className="font-medium text-gray-900">₪{selectedExpense.vatAmount.toLocaleString()}</p>
+                      <label className="text-sm text-gray-500 block mb-1">בעל מקצוע / עסק</label>
+                      <input
+                        type="text"
+                        value={editExpenseData.vendor || ''}
+                        onChange={(e) => setEditExpenseData({...editExpenseData, vendor: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-900"
+                      />
                     </div>
-                  )}
-                </div>
+                    <div>
+                      <label className="text-sm text-gray-500 block mb-1">קטגוריה</label>
+                      <select
+                        value={editExpenseData.category || ''}
+                        onChange={(e) => setEditExpenseData({...editExpenseData, category: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-900"
+                      >
+                        {CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm text-gray-500">תיאור</p>
+                        <p className="text-lg font-medium text-gray-900">{selectedExpense.description}</p>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm text-gray-500">סכום</p>
+                        <p className="text-2xl font-bold text-gray-900">₪{selectedExpense.amount.toLocaleString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedExpense.vendor && (
+                        <div>
+                          <p className="text-sm text-gray-500">בעל מקצוע / עסק</p>
+                          <p className="font-medium text-gray-900">{selectedExpense.vendor}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm text-gray-500">קטגוריה</p>
+                        <p className="font-medium text-gray-900">{selectedExpense.category}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">תאריך הוספה</p>
+                        <p className="font-medium text-gray-900">{new Date(selectedExpense.date).toLocaleDateString("he-IL")}</p>
+                      </div>
+                      {selectedExpense.invoiceDate && (
+                        <div>
+                          <p className="text-sm text-gray-500">תאריך חשבונית</p>
+                          <p className="font-medium text-gray-900">{new Date(selectedExpense.invoiceDate).toLocaleDateString("he-IL")}</p>
+                        </div>
+                      )}
+                      {selectedExpense.vatAmount && (
+                        <div>
+                          <p className="text-sm text-gray-500">מע״מ</p>
+                          <p className="font-medium text-gray-900">₪{selectedExpense.vatAmount.toLocaleString()}</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
               
               {/* Items Breakdown */}
@@ -1708,18 +1772,43 @@ export default function ProjectPage() {
             
             {/* Footer */}
             <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 space-y-2">
-              <button 
-                onClick={() => deleteExpense(selectedExpense.id)}
-                className="w-full bg-red-500 text-white py-3 rounded-full font-medium hover:bg-red-600 transition-colors"
-              >
-                🗑️ מחק הוצאה
-              </button>
-              <button 
-                onClick={() => setSelectedExpense(null)}
-                className="w-full bg-gray-900 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
-              >
-                סגור
-              </button>
+              {editingExpense ? (
+                <>
+                  <button 
+                    onClick={saveEditedExpense}
+                    className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    💾 שמור שינויים
+                  </button>
+                  <button 
+                    onClick={() => setEditingExpense(false)}
+                    className="w-full bg-gray-200 text-gray-700 py-3 rounded-full font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    ביטול
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => { setEditingExpense(true); setEditExpenseData(selectedExpense); }}
+                    className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    ✏️ ערוך פרטים
+                  </button>
+                  <button 
+                    onClick={() => deleteExpense(selectedExpense.id)}
+                    className="w-full bg-red-500 text-white py-3 rounded-full font-medium hover:bg-red-600 transition-colors"
+                  >
+                    🗑️ מחק הוצאה
+                  </button>
+                  <button 
+                    onClick={() => { setSelectedExpense(null); setEditingExpense(false); }}
+                    className="w-full bg-gray-900 text-white py-3 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                  >
+                    סגור
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -10,6 +10,8 @@ interface Message {
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showBubble, setShowBubble] = useState(false);
+  const [bubbleDismissed, setBubbleDismissed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -22,6 +24,24 @@ export default function ChatWidget() {
     `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Show bubble after 3 seconds
+  useEffect(() => {
+    if (!bubbleDismissed && !isOpen) {
+      const timer = setTimeout(() => {
+        setShowBubble(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [bubbleDismissed, isOpen]);
+
+  // Hide bubble when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowBubble(false);
+      setBubbleDismissed(true);
+    }
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -82,20 +102,65 @@ export default function ChatWidget() {
 
   return (
     <>
+      {/* Popup Bubble */}
+      {showBubble && !isOpen && (
+        <div className="fixed bottom-24 left-6 z-50 animate-in slide-in-from-bottom-2 duration-500">
+          <div className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[280px] border border-gray-100">
+            {/* Close button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowBubble(false);
+                setBubbleDismissed(true);
+              }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs"
+            >
+              ✕
+            </button>
+            {/* Arrow */}
+            <div className="absolute -bottom-2 left-8 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+            {/* Content */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">👋</span>
+              </div>
+              <div>
+                <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
+                <p className="text-gray-500 text-xs leading-relaxed">
+                  יש לי תשובות לכל שאלה על שיפוצים ועל ShiputzAI
+                </p>
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className="mt-2 text-emerald-600 text-xs font-medium hover:text-emerald-700"
+                >
+                  התחל שיחה ←
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isOpen
             ? "bg-gray-600 hover:bg-gray-700"
-            : "bg-emerald-600 hover:bg-emerald-700 hover:scale-110"
+            : "bg-emerald-600 hover:bg-emerald-700 hover:scale-110 animate-pulse"
         }`}
         aria-label={isOpen ? "סגור צ'אט" : "פתח צ'אט"}
       >
         {isOpen ? (
           <X className="w-6 h-6 text-white" />
         ) : (
-          <MessageCircle className="w-6 h-6 text-white" />
+          <>
+            <MessageCircle className="w-6 h-6 text-white" />
+            {/* Notification dot */}
+            {!bubbleDismissed && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></span>
+            )}
+          </>
         )}
       </button>
 

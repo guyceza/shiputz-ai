@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-static";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getArticle, getRelatedArticles } from "../articles";
@@ -227,6 +227,31 @@ export default function ArticlePage() {
   const params = useParams();
   const slug = params.slug as string;
   const article = getArticle(slug);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.id) {
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user) {
+          setIsLoggedIn(true);
+        }
+      } catch {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoggedIn(!!user.id);
+      }
+    };
+    checkAuth();
+  }, []);
 
   if (!article) {
     notFound();
@@ -246,9 +271,15 @@ export default function ArticlePage() {
             <Link href="/tips" className="text-xs text-gray-900 font-medium">
               מאמרים וטיפים
             </Link>
-            <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-900">
-              כניסה
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-900">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-gray-500 hover:text-gray-900">
+                כניסה
+              </Link>
+            )}
           </div>
         </div>
       </nav>

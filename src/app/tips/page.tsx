@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { articles } from "./articles";
 
@@ -13,6 +14,32 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function TipsPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.id) {
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user) {
+          setIsLoggedIn(true);
+        }
+      } catch {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoggedIn(!!user.id);
+      }
+    };
+    checkAuth();
+  }, []);
+
   const featuredArticle = articles[0];
   const otherArticles = articles.slice(1);
 
@@ -28,9 +55,15 @@ export default function TipsPage() {
             <Link href="/tips" className="text-xs text-gray-900 font-medium">
               מאמרים וטיפים
             </Link>
-            <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-900">
-              כניסה
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-900">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-gray-500 hover:text-gray-900">
+                כניסה
+              </Link>
+            )}
           </div>
         </div>
       </nav>

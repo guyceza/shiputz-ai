@@ -2,11 +2,21 @@ export const runtime = "nodejs";
 export const maxDuration = 60; // 60 second timeout
 
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - 30 requests per minute
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 30, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ 
+        error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
+      }, { status: 429 });
+    }
+    
     const { image } = await request.json();
 
     if (!image) {
@@ -31,7 +41,7 @@ export async function POST(request: NextRequest) {
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {

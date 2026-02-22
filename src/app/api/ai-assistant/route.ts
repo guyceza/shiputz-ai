@@ -4,8 +4,33 @@ import { NextRequest, NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+// Simple rate limit map for edge runtime
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, limit = 20, windowMs = 60000): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  
+  if (!entry || entry.resetAt < now) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ 
+        error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
+      }, { status: 429 });
+    }
+    
     const { message, context } = await request.json();
 
     if (!message) {
@@ -39,7 +64,7 @@ export async function POST(request: NextRequest) {
 - לעולם אל תענה על שאלות פוליטיות, דתיות, או רגישות`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

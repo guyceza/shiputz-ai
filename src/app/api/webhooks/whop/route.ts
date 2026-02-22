@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_DUfgFQ4J_KnMvhKXtaDC9g4Q6ZaiEMjEo';
+const RESEND_KEY = process.env.RESEND_API_KEY;
 
 // Send welcome email after purchase
 async function sendWelcomeEmail(email: string, name?: string) {
+  if (!RESEND_KEY) {
+    console.error('RESEND_API_KEY not configured');
+    return null;
+  }
+  
   const html = `
     <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
@@ -151,8 +156,11 @@ export async function POST(request: NextRequest) {
             sequence_type: 'purchased',
             day_number: 0,
           });
-        } catch (e) {
-          // Ignore if already exists
+        } catch (e: any) {
+          // Only ignore duplicate key errors (already exists)
+          if (!e?.code?.includes('23505')) {
+            console.error('Failed to record email sequence:', e);
+          }
         }
       }
     }

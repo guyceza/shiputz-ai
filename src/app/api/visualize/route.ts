@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 // Cost estimation logic
 interface CostItem {
@@ -168,6 +169,15 @@ function calculateCosts(analysisText: string, roomSize: number = 20): CostEstima
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - 10 requests per minute (expensive operation)
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 10, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ 
+        error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
+      }, { status: 429 });
+    }
+    
     const body = await request.json();
     const { image, description } = body;
 
@@ -190,7 +200,7 @@ export async function POST(request: NextRequest) {
     console.log("API key found, length:", apiKey.length);
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     
     // Extract base64 data if it's a data URL
     let imageBase64 = image;

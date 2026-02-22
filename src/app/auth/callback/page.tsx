@@ -15,12 +15,22 @@ export default function AuthCallbackPage() {
     const email = session.user.email;
     const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
     
+    // Check admin status from server
+    let isAdmin = false;
+    try {
+      const adminRes = await fetch(`/api/admin/check?email=${encodeURIComponent(email)}`);
+      const adminData = await adminRes.json();
+      isAdmin = adminData.isAdmin;
+    } catch (e) {
+      console.error('Admin check failed:', e);
+    }
+    
     // Store user info
     localStorage.setItem("user", JSON.stringify({ 
       email,
       id: session.user.id,
       name,
-      isAdmin: email === "guyceza@gmail.com"
+      isAdmin
     }));
     
     // Check if new user (created in last 60 seconds)
@@ -31,13 +41,16 @@ export default function AuthCallbackPage() {
     // Also check if they've completed onboarding (stored in metadata)
     const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
     
-    // Save to users table - this also sends welcome email for NEW users only
-    // (if user already exists in DB, no email will be sent)
-    fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name }),
-    }).catch(e => console.error('User save failed:', e));
+    // Save to users table - await before redirecting
+    try {
+      await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      });
+    } catch (e) {
+      console.error('User save failed:', e);
+    }
     
     if (isNewUser && !hasCompletedOnboarding) {
       router.push('/onboarding');

@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-static";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -842,7 +841,8 @@ export default function ProjectPage() {
             analysis: data.analysis,
             costs: { total: data.costs.total }
           };
-          const newHistory = [historyItem, ...visionHistory];
+          // Limit history to 20 items to prevent localStorage overflow
+          const newHistory = [historyItem, ...visionHistory].slice(0, 20);
           setVisionHistory(newHistory);
           localStorage.setItem(`visionHistory-${params.id}`, JSON.stringify(newHistory));
         }

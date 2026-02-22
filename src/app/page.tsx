@@ -115,12 +115,22 @@ export default function Home() {
     });
   };
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      console.log("Newsletter subscription:", email);
-      setSubscribed(true);
-      setEmail("");
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        if (res.ok) {
+          setSubscribed(true);
+          setEmail("");
+        }
+      } catch (error) {
+        console.error("Newsletter subscription failed:", error);
+      }
     }
   };
 
@@ -856,33 +866,5 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-function ProductHotspot({ x, y, title, price, link }: { x: number; y: number; title: string; price: string; link: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <div 
-      className="absolute"
-      style={{ left: `${x}%`, top: `${y}%` }}
-    >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-gray-900 animate-pulse"
-      >
-        <span className="text-xs font-bold">+</span>
-      </button>
-      
-      {isOpen && (
-        <Link
-          href={link}
-          className="absolute top-7 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[140px] z-10 border border-gray-100 hover:border-gray-300 transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className="text-sm font-medium text-gray-900 mb-1">{title}</p>
-          <p className="text-sm text-emerald-600 font-bold">{price}</p>
-          <p className="text-xs text-gray-400 mt-1">לחץ לפרטים ←</p>
-        </Link>
-      )}
-    </div>
-  );
-}
+// ProductHotspot component removed - was unused
 

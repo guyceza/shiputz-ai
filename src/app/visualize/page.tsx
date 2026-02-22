@@ -1342,9 +1342,29 @@ export default function VisualizePage() {
                 <img src={selectedHistoryItem.beforeImage} alt="לפני" className="w-full rounded-2xl" />
                 <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
               </div>
-              <div className="relative">
-                <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl" />
+              <div 
+                className="relative cursor-pointer group"
+                onClick={() => {
+                  // Set the generated result to the history item so Shop the Look works
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
+                  setShowShopModal(true);
+                  setDetectingProducts(true);
+                  fetch('/api/detect-products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: selectedHistoryItem.afterImage })
+                  }).then(res => res.json()).then(data => {
+                    if (data.items?.length > 0) setDetectedProducts(data.items);
+                    setDetectingProducts(false);
+                  }).catch(() => setDetectingProducts(false));
+                }}
+              >
+                <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
                 <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
+                  <span>🛒</span>
+                  <span>Shop the Look</span>
+                </button>
               </div>
             </div>
             

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const mimeType = imageFile.type;
 
     // Use Gemini Vision to detect items
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
 
     const prompt = `אתה מומחה לזיהוי רהיטים ופריטי עיצוב בתמונות.
 

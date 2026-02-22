@@ -1,13 +1,9 @@
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createClient } from "@supabase/supabase-js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI - מערכת לניהול שיפוצים עם בינה מלאכותית.
 
@@ -44,14 +40,43 @@ const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI 
 הנחיות:
 1. ענה בעברית, בצורה ידידותית ומקצועית
 2. התמקד בערך שהמוצר נותן
-3. אם מישהו מתעניין, נסה לאסוף את המייל שלו
+3. אם מישהו מתעניין, עודד אותו להירשם
 4. אם יש שאלה שאתה לא יודע - הפנה ל-support@shipazti.com
 5. תשובות קצרות וממוקדות (2-3 משפטים מקסימום)
 6. השתמש באימוג'ים במידה 👍`;
 
+// Simple rate limiting (10 requests per minute per IP)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const limit = rateLimitMap.get(ip);
+  
+  if (!limit || now > limit.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
+    return true;
+  }
+  
+  if (limit.count >= 10) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId, history } = await request.json();
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: "יותר מדי בקשות. נסה שוב בעוד דקה." },
+        { status: 429 }
+      );
+    }
+
+    const { message, history } = await request.json();
 
     if (!message) {
       return NextResponse.json(
@@ -60,67 +85,64 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build conversation history for context
-    const chatHistory = history?.map((msg: { role: string; content: string }) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
-    })) || [];
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: "שירות הצ'אט לא זמין כרגע" },
+        { status: 500 }
+      );
+    }
 
-    // Create chat with history
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    const chat = model.startChat({
-      history: chatHistory,
-    });
-
-    const result = await chat.sendMessage(message);
-    const response = result.response.text();
-
-    // Check if this looks like a lead (contains email pattern or phone)
-    const emailMatch = message.match(/[\w.-]+@[\w.-]+\.\w+/);
-    const phoneMatch = message.match(/0\d{8,9}|05\d{8}/);
+    // Build conversation for Gemini
+    const contents = [];
     
-    if (emailMatch || phoneMatch) {
-      // Save lead to Supabase
-      try {
-        await supabase.from("chat_leads").insert({
-          email: emailMatch?.[0] || null,
-          phone: phoneMatch?.[0] || null,
-          conversation_id: conversationId,
-          message: message,
-          created_at: new Date().toISOString(),
+    // Add history if exists
+    if (history && Array.isArray(history)) {
+      for (const msg of history) {
+        contents.push({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text: msg.content }]
         });
-      } catch (e) {
-        console.error("Failed to save lead:", e);
       }
     }
+    
+    // Add current message
+    contents.push({
+      role: "user",
+      parts: [{ text: message }]
+    });
 
-    // Save conversation to Supabase (optional, for analytics)
-    try {
-      await supabase.from("chat_messages").insert({
-        conversation_id: conversationId,
-        role: "user",
-        content: message,
-        created_at: new Date().toISOString(),
-      });
-      await supabase.from("chat_messages").insert({
-        conversation_id: conversationId,
-        role: "assistant", 
-        content: response,
-        created_at: new Date().toISOString(),
-      });
-    } catch (e) {
-      // Silently fail - chat still works without logging
-      console.error("Failed to log chat:", e);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT }]
+          },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 500,
+          }
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gemini API error:", errorText);
+      return NextResponse.json(
+        { error: "שגיאה בשרת. נסה שוב." },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ 
-      response,
-      conversationId 
-    });
+    const data = await response.json();
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+      "מצטער, לא הצלחתי לעבד את ההודעה. נסה שוב.";
+
+    return NextResponse.json({ response: aiResponse });
 
   } catch (error) {
     console.error("Chat error:", error);

@@ -7,21 +7,44 @@ export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
-  const handleUserSession = (session: any) => {
+  const handleUserSession = async (session: any) => {
+    const email = session.user.email;
+    const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
+    
     // Store user info
     localStorage.setItem("user", JSON.stringify({ 
-      email: session.user.email,
+      email,
       id: session.user.id,
-      isAdmin: session.user.email === "guyceza@gmail.com"
+      name,
+      isAdmin: email === "guyceza@gmail.com"
     }));
     
-    // Check if new user (created in last 60 seconds) → send to onboarding
+    // Check if new user (created in last 60 seconds)
     const createdAt = new Date(session.user.created_at).getTime();
     const now = Date.now();
     const isNewUser = (now - createdAt) < 60000; // 60 seconds
     
     // Also check if they've completed onboarding (stored in metadata)
     const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
+    
+    // For new users: send welcome email and save to users table
+    if (isNewUser) {
+      console.log('🚀 New Google user, sending welcome email to:', email);
+      
+      // Send welcome email
+      fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      }).catch(e => console.error('Welcome email failed:', e));
+      
+      // Save to users table
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      }).catch(e => console.error('User save failed:', e));
+    }
     
     if (isNewUser && !hasCompletedOnboarding) {
       router.push('/onboarding');

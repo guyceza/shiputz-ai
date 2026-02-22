@@ -427,7 +427,8 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-400 mb-6 text-center">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
+                  <p className="text-xs text-gray-400 mb-2 text-center">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
+                  <p className="text-xs text-gray-400 mb-6 text-center">מקורות: top-renovations.co.il, renovations-israel.co.il</p>
                   <Link
                     href={isLoggedIn ? "/dashboard" : "/signup"}
                     className="block text-center bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"

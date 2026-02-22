@@ -41,6 +41,7 @@ export default function ShopLookPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
   const [showPaywall, setShowPaywall] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
 
@@ -59,6 +60,7 @@ export default function ShopLookPage() {
             setUserId(user.id);
             userEmail = user.email;
             currentUserId = user.id;
+            setHasPurchased(user.purchased === true);
           }
         } else {
           const { getSession } = await import("@/lib/auth");
@@ -68,6 +70,9 @@ export default function ShopLookPage() {
             setUserId(session.user.id);
             userEmail = session.user.email || "";
             currentUserId = session.user.id;
+            // Check purchased from localStorage
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            setHasPurchased(storedUser.purchased === true);
           }
         }
         
@@ -99,6 +104,7 @@ export default function ShopLookPage() {
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
+        setHasPurchased(user.purchased === true);
         if (user.id) {
           setUserId(user.id);
           const trialKey = `visualize_trial_${user.id}`;
@@ -353,54 +359,91 @@ export default function ShopLookPage() {
               ✕
             </button>
             
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <span className="text-3xl">✨</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
-              <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
-            </div>
-            
-            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-500">מנוי חודשי</span>
-                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">חסכון 30%</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-gray-900">₪39.99</span>
-                <span className="text-gray-400">/חודש</span>
-              </div>
-            </div>
-            
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-center gap-3 text-sm">
-                <span className="text-green-500">✓</span>
-                <span>העלאת תמונות ללא הגבלה</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm">
-                <span className="text-green-500">✓</span>
-                <span>זיהוי מוצרים AI מתקדם</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm">
-                <span className="text-green-500">✓</span>
-                <span>קישורים ישירים לקנייה</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm">
-                <span className="text-green-500">✓</span>
-                <span>ביטול בכל עת</span>
-              </li>
-            </ul>
-            
-            <Link
-              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
-              className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
-            >
-              🚀 שדרג עכשיו
-            </Link>
-            
-            <p className="text-center text-xs text-gray-400 mt-4">
-              תשלום מאובטח · ביטול בלחיצה
-            </p>
+            {hasPurchased ? (
+              // User has main subscription - show Vision upgrade
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span className="text-3xl">✨</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
+                  <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500">מנוי Vision</span>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-gray-900">₪39.99</span>
+                    <span className="text-gray-400">/חודש</span>
+                  </div>
+                </div>
+                
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center gap-3 text-sm">
+                    <span className="text-green-500">✓</span>
+                    <span>העלאת תמונות ללא הגבלה</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <span className="text-green-500">✓</span>
+                    <span>זיהוי מוצרים AI מתקדם</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <span className="text-green-500">✓</span>
+                    <span>קישורים ישירים לקנייה</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm">
+                    <span className="text-green-500">✓</span>
+                    <span>ביטול בכל עת</span>
+                  </li>
+                </ul>
+                
+                <Link
+                  href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+                  className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+                >
+                  🚀 שדרג עכשיו
+                </Link>
+                
+                <p className="text-center text-xs text-gray-400 mt-4">
+                  תשלום מאובטח · ביטול בלחיצה
+                </p>
+              </>
+            ) : (
+              // User doesn't have main subscription - redirect to main checkout
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span className="text-3xl">🔒</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">שירות זה דורש מנוי ShiputzAI</h3>
+                  <p className="text-gray-500">כדי להמשיך, צריך קודם חשבון ShiputzAI פעיל</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500">ShiputzAI</span>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חד פעמי</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-gray-900">₪149.99</span>
+                  </div>
+                </div>
+                
+                <Link
+                  href="/checkout"
+                  className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-bold hover:bg-gray-800 transition-all shadow-lg"
+                >
+                  הצטרף ל-ShiputzAI
+                </Link>
+                
+                <p className="text-center text-xs text-gray-400 mt-4">
+                  תשלום חד פעמי · גישה לכל הכלים
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}

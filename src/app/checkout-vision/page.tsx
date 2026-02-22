@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const REGULAR_PRICE = 40;  // ₪40
 const PROMO_PRICE = 19.99; // ₪19.99 (displayed) = $6.99 in Whop
@@ -11,20 +11,31 @@ const WHOP_PLAN_ID = "plan_6RAptSlrFl31x"; // AI Vision monthly plan - $6.99/mon
 
 function CheckoutVisionContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const [email, setEmail] = useState("");
   const [discountCode, setDiscountCode] = useState(PROMO_CODE);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState<boolean | null>(null); // null = loading
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Pre-fill email from localStorage
+  // Check if user has main subscription
   useEffect(() => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
+      
+      // Check if user has main subscription
+      if (user.purchased === true) {
+        setHasPurchased(true);
+      } else {
+        setHasPurchased(false);
+      }
     } catch {
-      // Ignore localStorage errors (private browsing, etc.)
+      setHasPurchased(false);
     }
+    setCheckingAuth(false);
   }, []);
 
   const copyPromoCode = async () => {
@@ -45,6 +56,55 @@ function CheckoutVisionContent() {
     const checkoutUrl = `https://whop.com/checkout/${WHOP_PLAN_ID}?email=${encodeURIComponent(email)}`;
     window.location.href = checkoutUrl;
   };
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
+        <div className="text-gray-500">טוען...</div>
+      </div>
+    );
+  }
+
+  // If user doesn't have main subscription, show message to buy main first
+  if (!hasPurchased) {
+    return (
+      <div className="min-h-screen bg-gray-50" dir="rtl">
+        <nav className="h-11 bg-white border-b border-gray-100">
+          <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
+            <Link href="/" className="text-base font-semibold text-gray-900">
+              ShiputzAI
+            </Link>
+          </div>
+        </nav>
+        
+        <div className="max-w-md mx-auto px-6 py-12">
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 text-center">
+            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">🔒</span>
+            </div>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              שירות Vision דורש מנוי ShiputzAI
+            </h1>
+            <p className="text-gray-500 mb-8">
+              כדי לרכוש את מנוי Vision, צריך קודם חשבון ShiputzAI פעיל
+            </p>
+            
+            <Link
+              href="/checkout"
+              className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mb-4"
+            >
+              הצטרף ל-ShiputzAI · ₪149.99
+            </Link>
+            
+            <p className="text-xs text-gray-400">
+              תשלום חד פעמי · אחרי זה תוכל להוסיף Vision
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">

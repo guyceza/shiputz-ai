@@ -313,7 +313,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
         </div>
       `,
       cta: 'לממש את ההנחה',
-      url: `https://shipazti.com/signup?code=${discountCode || ''}`
+      url: `https://shipazti.com/checkout?code=${discountCode || ''}`
     },
     
     problem_highlight: {
@@ -370,12 +370,12 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
           קוד ההנחה שלך <strong>עומד לפוג</strong>.
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 40px; font-weight: 700; color: #1d1d1f; margin: 0;">20%</p>
-          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;">הנחה · <strong>רק עד מחר</strong></p>
+          <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || ''}</p>
+          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;"><strong>20% הנחה</strong> · רק עד מחר</p>
         </div>
       `,
       cta: 'לממש עכשיו',
-      url: 'https://shipazti.com/signup'
+      url: `https://shipazti.com/checkout?code=${discountCode || ''}`
     },
     
     demo: {
@@ -477,6 +477,7 @@ export async function GET(request: NextRequest) {
             let html: string;
             
             if (step.template === 'discount_offer') {
+              // Create new discount code
               const code = generateDiscountCode(user.email);
               const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
               
@@ -488,6 +489,18 @@ export async function GET(request: NextRequest) {
               });
               
               html = getEmailHTML(step.template, user, code);
+            } else if (step.template === 'urgency') {
+              // Fetch existing discount code for urgency reminder
+              const { data: discountData } = await supabase
+                .from('discount_codes')
+                .select('code')
+                .eq('user_email', user.email)
+                .is('used_at', null)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+              
+              html = getEmailHTML(step.template, user, discountData?.code);
             } else {
               html = getEmailHTML(step.template, user);
             }

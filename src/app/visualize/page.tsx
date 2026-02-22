@@ -362,6 +362,8 @@ export default function VisualizePage() {
   const [showShopModal, setShowShopModal] = useState(false);
   const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
   const [detectingProducts, setDetectingProducts] = useState(false);
+  const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string}[]>([]);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string} | null>(null);
   
   const LOADING_TIPS = [
     "💡 קבל לפחות 3 הצעות מחיר לפני שמתחילים",
@@ -472,6 +474,41 @@ export default function VisualizePage() {
     checkAuth();
   }, []);
 
+  // Load visualization history from localStorage
+  useEffect(() => {
+    if (userId) {
+      const historyKey = `visualize_history_${userId}`;
+      const savedHistory = localStorage.getItem(historyKey);
+      if (savedHistory) {
+        try {
+          setVisualizationHistory(JSON.parse(savedHistory));
+        } catch (e) {
+          console.error("Failed to load history:", e);
+        }
+      }
+    }
+  }, [userId]);
+
+  // Save visualization to history
+  const saveToHistory = (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any) => {
+    if (!userId) return;
+    
+    const newItem = {
+      id: Date.now().toString(),
+      beforeImage,
+      afterImage,
+      description,
+      analysis,
+      costs,
+      createdAt: new Date().toISOString()
+    };
+    
+    const historyKey = `visualize_history_${userId}`;
+    const updatedHistory = [newItem, ...visualizationHistory].slice(0, 50); // Keep max 50 items
+    setVisualizationHistory(updatedHistory);
+    localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
+  };
+
   const handleTryNow = () => {
     if (!isLoggedIn) {
       window.location.href = '/login?redirect=/visualize';
@@ -528,6 +565,11 @@ export default function VisualizePage() {
           analysis: data.analysis,
           costs: data.costEstimate
         });
+        
+        // Save to history
+        if (uploadedImage && data.generatedImage) {
+          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate);
+        }
       }
     } catch (err) {
       setGenerateError("שגיאה בחיבור לשרת");
@@ -631,6 +673,60 @@ export default function VisualizePage() {
           </div>
         </div>
       </section>
+
+      {/* History Section - Only show if logged in and has history */}
+      {isLoggedIn && visualizationHistory.length > 0 && (
+        <section className="py-16 px-6 border-b border-gray-100">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+                🕐 ההדמיות שלי
+              </h2>
+              <p className="text-gray-500">{visualizationHistory.length} הדמיות נשמרו</p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {visualizationHistory.slice(0, 6).map((item) => (
+                <div 
+                  key={item.id}
+                  className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all cursor-pointer"
+                  onClick={() => setSelectedHistoryItem(item)}
+                >
+                  <div className="grid grid-cols-2 gap-1 p-2">
+                    <div className="relative aspect-square">
+                      <img src={item.beforeImage} alt="לפני" className="w-full h-full object-cover rounded-lg" />
+                      <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">לפני</span>
+                    </div>
+                    <div className="relative aspect-square">
+                      <img src={item.afterImage} alt="אחרי" className="w-full h-full object-cover rounded-lg" />
+                      <span className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded">אחרי</span>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm text-gray-900 font-medium truncate">{item.description}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs text-gray-400">
+                        {new Date(item.createdAt).toLocaleDateString('he-IL')}
+                      </span>
+                      {item.costs?.total && (
+                        <span className="text-xs text-green-600 font-medium">
+                          ₪{item.costs.total.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {visualizationHistory.length > 6 && (
+              <p className="text-center text-sm text-gray-400 mt-6">
+                מציג 6 מתוך {visualizationHistory.length} הדמיות
+              </p>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Examples Section */}
       <section className="py-16 px-6 bg-gray-50">
@@ -1184,6 +1280,91 @@ export default function VisualizePage() {
               {!detectingProducts && detectedProducts.length === 0 && (
                 <p className="text-center text-gray-500 text-sm mt-4">לא זוהו מוצרים בתמונה</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* History Item Modal */}
+      {selectedHistoryItem && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
+          <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
+            <button
+              onClick={() => setSelectedHistoryItem(null)}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl z-10"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">🕐 הדמיה מהיסטוריה</h3>
+              <p className="text-sm text-gray-500">
+                {new Date(selectedHistoryItem.createdAt).toLocaleDateString('he-IL', { 
+                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                })}
+              </p>
+            </div>
+            
+            {/* Before/After Comparison */}
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div className="relative">
+                <img src={selectedHistoryItem.beforeImage} alt="לפני" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
+              </div>
+              <div className="relative">
+                <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+              <h4 className="font-semibold text-gray-900 mb-2">📝 מה ביקשת</h4>
+              <p className="text-gray-700 text-sm">{selectedHistoryItem.description}</p>
+            </div>
+            
+            {/* Analysis */}
+            {selectedHistoryItem.analysis && (
+              <div className="bg-blue-50 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">📋 ניתוח מקצועי</h4>
+                <p className="text-gray-700 text-sm leading-relaxed">{selectedHistoryItem.analysis}</p>
+              </div>
+            )}
+            
+            {/* Cost Estimate */}
+            {selectedHistoryItem.costs?.total > 0 && (
+              <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-3">💰 הערכת עלויות</h4>
+                <div className="space-y-2">
+                  {selectedHistoryItem.costs.items?.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{item.description}</span>
+                      <span className="font-medium">₪{item.total?.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  <div className="border-t pt-2 mt-2 flex justify-between font-bold">
+                    <span>סה״כ משוער</span>
+                    <span className="text-green-600">₪{selectedHistoryItem.costs.total?.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Actions */}
+            <div className="flex gap-4">
+              <a
+                href={selectedHistoryItem.afterImage}
+                download="shiputzai-visualization.png"
+                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all"
+              >
+                📥 הורד תמונה
+              </a>
+              <button
+                onClick={() => setSelectedHistoryItem(null)}
+                className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
+              >
+                סגור
+              </button>
             </div>
           </div>
         </div>

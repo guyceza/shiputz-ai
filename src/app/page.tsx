@@ -10,6 +10,7 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [hasVisionSubscription, setHasVisionSubscription] = useState(false);
   
   useEffect(() => {
     // Check for auth session
@@ -23,6 +24,9 @@ export default function Home() {
             setIsLoggedIn(true);
             setIsAdmin(user.isAdmin === true);
             setIsPremium(user.purchased === true);
+            // Check vision subscription
+            const visionSub = localStorage.getItem(`visualize_subscription_${user.id}`);
+            setHasVisionSubscription(visionSub === 'active');
             return;
           }
         }
@@ -36,6 +40,11 @@ export default function Home() {
           // Check premium status from localStorage user data
           const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
           setIsPremium(storedUser.purchased === true);
+          // Check vision subscription
+          if (storedUser.id) {
+            const visionSub = localStorage.getItem(`visualize_subscription_${storedUser.id}`);
+            setHasVisionSubscription(visionSub === 'active');
+          }
         }
       } catch {
         // Fallback to localStorage
@@ -43,6 +52,11 @@ export default function Home() {
         setIsLoggedIn(!!user.id);
         setIsAdmin(user.isAdmin === true);
         setIsPremium(user.purchased === true);
+        // Check vision subscription
+        if (user.id) {
+          const visionSub = localStorage.getItem(`visualize_subscription_${user.id}`);
+          setHasVisionSubscription(visionSub === 'active');
+        }
       }
     };
     checkAuth();

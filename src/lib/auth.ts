@@ -46,12 +46,19 @@ export async function signIn(email: string, password: string) {
 // Sign in with Google
 export async function signInWithGoogle() {
   const client = getSupabase();
+  
+  // Sign out first to clear any existing session
+  await client.auth.signOut();
+  
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: typeof window !== 'undefined' 
         ? `${window.location.origin}/auth/callback`
         : 'https://shipazti.com/auth/callback',
+      queryParams: {
+        prompt: 'select_account', // Force Google to show account picker
+      },
     },
   });
   

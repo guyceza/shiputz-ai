@@ -53,27 +53,21 @@ export default function SignupPage() {
       const data = await signUp(email, password, name);
       
       // Save to users table AND send welcome email
-      try {
-        const userRes = await fetch('/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name }),
-        });
-        const userResult = await userRes.json();
-        console.log('User API result:', userResult);
-      } catch (err) {
-        console.error('Failed to save user to DB:', err);
-        // Fallback: send welcome email directly
-        try {
-          await fetch('/api/send-welcome', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, name }),
-          });
-        } catch (e) {
-          console.error('Fallback email also failed:', e);
-        }
-      }
+      // Always send welcome email - don't rely on /api/users
+      const emailPromise = fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      }).catch(e => console.error('Welcome email failed:', e));
+
+      const userPromise = fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      }).catch(e => console.error('User save failed:', e));
+
+      // Wait for both to complete
+      await Promise.all([emailPromise, userPromise]);
 
       if (data.user && !data.user.identities?.length) {
         // User already exists

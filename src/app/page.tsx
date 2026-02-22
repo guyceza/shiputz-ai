@@ -631,19 +631,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Card - Compact version */}
-      {!isPremium && (
-      <section className="py-16 px-6 bg-emerald-50/50">
-        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
-          <div className="text-center lg:text-right">
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">מוכנים לשפץ בשליטה?</h2>
-            <p className="text-gray-500">הצטרף לאלפי משפצים שכבר חוסכים זמן וכסף</p>
-          </div>
-          <PricingCard variant="compact" isLoggedIn={isLoggedIn} />
-        </div>
-      </section>
-      )}
-
       {/* Newsletter */}
       <section className="py-20 px-6 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-xl mx-auto text-center">

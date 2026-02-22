@@ -167,23 +167,25 @@ export default function TipsPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-6 bg-gray-50 mt-12">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
-            מוכנים להתחיל לתכנן?
-          </h2>
-          <p className="text-gray-500 mb-8">
-            ShiputzAI יעזור לכם לנהל את התקציב, לנתח הצעות מחיר ולהישאר בשליטה.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-          >
-            התחל בחינם
-          </Link>
-        </div>
-      </section>
+      {/* CTA Section - hide when logged in */}
+      {!isLoggedIn && (
+        <section className="py-16 px-6 bg-gray-50 mt-12">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+              מוכנים להתחיל לתכנן?
+            </h2>
+            <p className="text-gray-500 mb-8">
+              ShiputzAI יעזור לכם לנהל את התקציב, לנתח הצעות מחיר ולהישאר בשליטה.
+            </p>
+            <Link
+              href="/signup"
+              className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+            >
+              התחל בחינם
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-gray-100">

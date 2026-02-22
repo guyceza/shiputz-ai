@@ -52,22 +52,9 @@ export default function SignupPage() {
       const { signUp } = await import("@/lib/auth");
       const data = await signUp(email, password, name);
       
-      // Save to users table AND send welcome email
-      console.log('🚀 Signup success, sending welcome email to:', email);
-      alert('נרשמת בהצלחה! שולח מייל...'); // Debug alert
+      // Save to users table (welcome email will be sent after email verification in callback)
+      console.log('🚀 Signup success, saving user:', email);
       
-      try {
-        const emailRes = await fetch('/api/send-welcome', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name }),
-        });
-        const emailData = await emailRes.json();
-        console.log('📧 Welcome email result:', emailData);
-      } catch (e) {
-        console.error('❌ Welcome email failed:', e);
-      }
-
       try {
         const userRes = await fetch('/api/users', {
           method: 'POST',
@@ -79,6 +66,8 @@ export default function SignupPage() {
       } catch (e) {
         console.error('❌ User save failed:', e);
       }
+      
+      // Note: Welcome email is sent AFTER user verifies email (in /auth/callback)
 
       if (data.user && !data.user.identities?.length) {
         // User already exists

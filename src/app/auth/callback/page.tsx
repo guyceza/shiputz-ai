@@ -27,9 +27,16 @@ export default function AuthCallbackPage() {
     // Also check if they've completed onboarding (stored in metadata)
     const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
     
-    // For new users: send welcome email and save to users table
-    if (isNewUser) {
-      console.log('🚀 New Google user, sending welcome email to:', email);
+    // Check if we already sent welcome email to this user
+    const welcomeSentKey = `welcome_sent_${email}`;
+    const alreadySentWelcome = localStorage.getItem(welcomeSentKey);
+    
+    // For new users OR first time verified: send welcome email
+    if (isNewUser || !alreadySentWelcome) {
+      console.log('🚀 Sending welcome email to:', email, isNewUser ? '(new user)' : '(first verification)');
+      
+      // Mark as sent BEFORE sending to avoid duplicates
+      localStorage.setItem(welcomeSentKey, 'true');
       
       // Send welcome email
       fetch('/api/send-welcome', {
@@ -38,7 +45,7 @@ export default function AuthCallbackPage() {
         body: JSON.stringify({ email, name }),
       }).catch(e => console.error('Welcome email failed:', e));
       
-      // Save to users table
+      // Save to users table (in case not saved yet)
       fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

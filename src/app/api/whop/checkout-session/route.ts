@@ -4,27 +4,27 @@ const WHOP_API_KEY = process.env.WHOP_API_KEY || 'apik_tR2AgicmyYyuX_C4452549_C_
 
 export async function POST(request: NextRequest) {
   try {
-    const { planId, email, discountCode } = await request.json();
+    const body = await request.json();
+    const { planId, email, discountCode, redirectUrl } = body;
 
-    if (!planId || !email) {
-      return NextResponse.json({ error: 'Missing planId or email' }, { status: 400 });
+    // Create checkout session via Whop API
+    const sessionData: any = {
+      plan_id: planId,
+      redirect_url: redirectUrl || 'https://shipazti.com/dashboard',
+    };
+
+    // Add metadata if needed
+    if (discountCode) {
+      sessionData.metadata = { discount_code: discountCode };
     }
 
-    // Create Whop checkout session with metadata
     const response = await fetch('https://api.whop.com/api/v2/checkout_sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${WHOP_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        plan_id: planId,
-        redirect_url: 'https://shipazti.com/dashboard?welcome=true',
-        metadata: {
-          email: email,
-          discount_code: discountCode || null,
-        },
-      }),
+      body: JSON.stringify(sessionData),
     });
 
     const session = await response.json();
@@ -34,14 +34,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: session.error.message }, { status: 400 });
     }
 
-    // Add email to the purchase URL
+    // Construct purchase URL with email if provided
     let purchaseUrl = session.purchase_url;
-    if (purchaseUrl && email) {
-      purchaseUrl += (purchaseUrl.includes('?') ? '&' : '?') + `email=${encodeURIComponent(email)}`;
+    if (email) {
+      const separator = purchaseUrl.includes('?') ? '&' : '?';
+      purchaseUrl = `${purchaseUrl}${separator}email=${encodeURIComponent(email)}`;
     }
 
     return NextResponse.json({
-      id: session.id,
+      session_id: session.id,
       purchase_url: purchaseUrl,
     });
   } catch (error) {

@@ -700,8 +700,8 @@ export default function VisualizePage() {
               {visualizationHistory.slice(0, 6).map((item) => (
                 <div 
                   key={item.id}
-                  className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all cursor-pointer"
-                  onClick={() => setSelectedHistoryItem(item)}
+                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 hover:shadow-xl transition-all cursor-pointer active:scale-95"
+                  onClick={() => { console.log('History item clicked:', item.id); setSelectedHistoryItem(item); }}
                 >
                   <div className="grid grid-cols-2 gap-1 p-2">
                     <div className="relative aspect-square">
@@ -724,6 +724,9 @@ export default function VisualizePage() {
                           ₪{item.costs.total.toLocaleString()}
                         </span>
                       )}
+                    </div>
+                    <div className="text-center mt-3 pt-3 border-t border-gray-100">
+                      <span className="text-xs text-blue-600 font-medium">👆 לחץ לפרטים המלאים</span>
                     </div>
                   </div>
                 </div>

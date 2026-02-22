@@ -78,7 +78,8 @@ export default function SignupPage() {
           email: data.user?.email,
           id: data.user?.id,
           name,
-          isAdmin: email === "guyceza@gmail.com"
+          isAdmin: email === "guyceza@gmail.com",
+          purchased: false  // New users are not premium yet
         }));
         router.push("/dashboard");
       } else {

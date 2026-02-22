@@ -44,12 +44,25 @@ export default function LoginPage() {
       const { signIn } = await import("@/lib/auth");
       const data = await signIn(email, password);
       
-      if (data.user) {
+      if (data.user && data.user.email) {
+        // Fetch user data including purchase status from DB
+        let purchased = false;
+        try {
+          const userRes = await fetch(`/api/users?email=${encodeURIComponent(data.user.email)}`);
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            purchased = userData.purchased === true;
+          }
+        } catch (e) {
+          console.error("Failed to fetch user data:", e);
+        }
+        
         // Store user info in localStorage for quick access
         localStorage.setItem("user", JSON.stringify({ 
           email: data.user.email,
           id: data.user.id,
-          isAdmin: data.user.email === "guyceza@gmail.com"
+          isAdmin: data.user.email === "guyceza@gmail.com",
+          purchased: purchased
         }));
         router.push("/dashboard");
       }

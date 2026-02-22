@@ -60,15 +60,21 @@ export default function DashboardPage() {
             setIsAdmin(true);
           }
           
-          // Check if premium user (purchased)
+          // Check if premium user (purchased) and update localStorage
           if (session.user.email) {
             try {
               const res = await fetch(`/api/users?email=${encodeURIComponent(session.user.email)}`);
               if (res.ok) {
                 const userData = await res.json();
-                if (userData.purchased) {
-                  setIsPremium(true);
-                }
+                const purchased = userData.purchased === true;
+                setIsPremium(purchased);
+                
+                // Update localStorage with fresh data so other pages see it
+                const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+                localStorage.setItem("user", JSON.stringify({
+                  ...storedUser,
+                  purchased: purchased
+                }));
               }
             } catch (e) {
               console.error("Premium check error:", e);

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import AdminPanel from "./admin-panel";
 
 interface Project {
   id: string;
@@ -33,60 +34,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetList, setResetList] = useState<string[]>([]);
-  const [adminMessage, setAdminMessage] = useState("");
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
-
-  // Admin functions
-  const loadResetList = async () => {
-    try {
-      const res = await fetch("/api/admin/trial-reset");
-      const data = await res.json();
-      setResetList(data.list || []);
-    } catch (e) {
-      console.error("Failed to load reset list:", e);
-    }
-  };
-
-  const addToResetList = async () => {
-    if (!resetEmail || !user?.email) return;
-    try {
-      const res = await fetch("/api/admin/trial-reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resetEmail, adminEmail: user.email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResetList(data.list);
-        setAdminMessage(`✅ ${resetEmail} נוסף - הניסיון יתאפס בכניסה הבאה`);
-        setResetEmail("");
-      }
-    } catch (e) {
-      setAdminMessage("❌ שגיאה");
-    }
-    setTimeout(() => setAdminMessage(""), 3000);
-  };
-
-  const removeFromResetList = async (email: string) => {
-    if (!user?.email) return;
-    try {
-      const res = await fetch("/api/admin/trial-reset", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, adminEmail: user.email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResetList(data.list);
-      }
-    } catch (e) {
-      console.error("Failed to remove:", e);
-    }
-  };
 
   useEffect(() => {
     // Check for auth session
@@ -107,7 +57,6 @@ export default function DashboardPage() {
           // Check if admin
           if (session.user.email === "guyceza@gmail.com") {
             setIsAdmin(true);
-            loadResetList();
           }
         } else {
           // Fallback to localStorage for backward compatibility
@@ -248,66 +197,12 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      {/* Admin Panel */}
-      {isAdmin && showAdminPanel && (
-        <div className="bg-gray-900 text-white">
-          <div className="max-w-5xl mx-auto px-6 py-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">🔧 פאנל ניהול</h2>
-              <button onClick={() => setShowAdminPanel(false)} className="text-gray-400 hover:text-white">✕</button>
-            </div>
-            
-            {adminMessage && (
-              <div className={`mb-4 p-3 rounded-lg text-sm ${adminMessage.startsWith('✅') ? 'bg-green-900/50' : 'bg-red-900/50'}`}>
-                {adminMessage}
-              </div>
-            )}
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Reset Trial */}
-              <div className="bg-gray-800 rounded-xl p-4">
-                <h3 className="font-medium mb-3">איפוס ניסיון חינמי</h3>
-                <div className="flex gap-2 mb-3">
-                  <input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="email@example.com"
-                    className="flex-1 px-3 py-2 bg-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    dir="ltr"
-                  />
-                  <button
-                    onClick={addToResetList}
-                    disabled={!resetEmail}
-                    className="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    אפס
-                  </button>
-                </div>
-                {resetList.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-400 mb-2">ממתינים ({resetList.length}):</p>
-                    {resetList.map(email => (
-                      <div key={email} className="flex items-center justify-between bg-gray-700 px-3 py-2 rounded text-sm">
-                        <span dir="ltr">{email}</span>
-                        <button onClick={() => removeFromResetList(email)} className="text-red-400 hover:text-red-300">✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* Quick Stats */}
-              <div className="bg-gray-800 rounded-xl p-4">
-                <h3 className="font-medium mb-3">סטטיסטיקות</h3>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <p>ממתינים לאיפוס: {resetList.length}</p>
-                  <p>פרויקטים שלך: {projects.length}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Admin Panel - Full Screen */}
+      {isAdmin && showAdminPanel && user?.email && (
+        <AdminPanel 
+          onClose={() => setShowAdminPanel(false)} 
+          adminEmail={user.email} 
+        />
       )}
 
       {/* Content */}

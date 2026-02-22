@@ -77,11 +77,12 @@ export default function Home() {
     const size = parseInt(calcSize);
     const bathrooms = parseInt(calcBathrooms);
     
-    // Base price per sqm by type (2026 market data)
+    // Base price per sqm by type (2026 market data - based on Midrag.co.il real transactions)
+    // Midrag data: Full renovation 90 sqm = ₪120,000-190,000 (avg ₪1,333-2,111/sqm)
     const basePrices: Record<string, number> = {
-      "קוסמטי": 500,    // ₪400-600/מ"ר
-      "קומפלט": 1750,   // ₪1,500-2,000/מ"ר
-      "יוקרתי": 3750,   // ₪3,000-4,500/מ"ר
+      "קוסמטי": 550,    // ₪450-700/מ"ר - צביעה, תיקונים קטנים (Midrag: ריצוף ₪450-700/מ"ר)
+      "קומפלט": 1700,   // ₪1,400-2,000/מ"ר - שיפוץ מלא (Midrag avg: ₪1,722/מ"ר)
+      "יוקרתי": 3500,   // ₪3,000-4,000/מ"ר - חומרים וגימורים יוקרתיים
     };
     
     // Location multiplier
@@ -93,23 +94,26 @@ export default function Home() {
       "דרום": 0.80,
     };
     
-    // Kitchen prices
+    // Kitchen prices (based on Midrag.co.il real transactions)
+    // Midrag: חידוש מטבח ₪5,000-15,000, מטבח חדש ₪35,000-50,000, יוקרתי ₪70,000-100,000
     const kitchenPrices: Record<string, number> = {
       "ללא": 0,
-      "רענון": 8000,
-      "חדש": 35000,
-      "יוקרתי": 70000,
+      "רענון": 10000,   // חידוש דלתות/פרזול (Midrag: ₪5,000-15,000)
+      "חדש": 45000,     // מטבח חדש איכותי (Midrag: ₪41,400-50,600)
+      "יוקרתי": 85000,  // מטבח יוקרתי עם שיש קוריאן (Midrag: ₪70,000-100,000)
     };
     
-    // Infrastructure prices
+    // Infrastructure prices (based on Midrag.co.il real transactions)
+    // Midrag: אינסטלציה ₪18,670-22,820, חשמל ₪9,400-11,500
     const infraPrices: Record<string, number> = {
       "ללא": 0,
-      "חלקי": 8000,
-      "מלא": 25000,
+      "חלקי": 12000,    // חשמל או אינסטלציה חלקית (Midrag: ₪9,400-11,500)
+      "מלא": 32000,     // חשמל + אינסטלציה מלאה (Midrag: ~₪28,000-34,000 combined)
     };
     
-    // Bathroom price (per bathroom) - 2026 market: ₪8.5K-15K
-    const bathroomPrice = calcType === "יוקרתי" ? 18000 : calcType === "קומפלט" ? 12000 : 8500;
+    // Bathroom price (per bathroom) - based on Midrag.co.il real transactions
+    // Midrag: שיפוץ אמבטיה ₪16,000-32,000 (standard), ₪25,000-32,000 (high-end)
+    const bathroomPrice = calcType === "יוקרתי" ? 28000 : calcType === "קומפלט" ? 22000 : 12000;
     
     const basePrice = basePrices[calcType] || 1400;
     const locMultiplier = locationMultiplier[calcLocation] || 1.0;

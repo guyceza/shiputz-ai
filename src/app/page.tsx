@@ -281,7 +281,7 @@ export default function Home() {
       <section className="py-8 px-6">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6">
           <p className="text-gray-600 text-lg">מוכנים להתחיל לנהל את השיפוץ?</p>
-          <PricingCard variant="mini" isLoggedIn={isLoggedIn} />
+          <PricingCard variant="mini" />
         </div>
       </section>
       )}
@@ -731,10 +731,10 @@ export default function Home() {
               </li>
             </ul>
             <Link
-              href={isLoggedIn ? "/dashboard" : "/checkout"}
+              href="/checkout"
               className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
             >
-              {isLoggedIn ? "לאזור האישי" : "לרכישה"}
+              לרכישה
             </Link>
           </div>
         </div>

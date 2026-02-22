@@ -4,17 +4,16 @@ import Link from "next/link";
 
 interface PricingCardProps {
   variant?: "full" | "compact" | "mini";
-  isLoggedIn?: boolean;
   className?: string;
 }
 
 export default function PricingCard({ 
   variant = "full", 
-  isLoggedIn = false,
   className = ""
 }: PricingCardProps) {
   
   // Mini variant - compact but clear pricing card
+  // Note: This card only shows for non-premium users, so always link to checkout
   if (variant === "mini") {
     return (
       <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg hover-scale hover-glow ${className}`}>
@@ -32,10 +31,10 @@ export default function PricingCard({
             <span className="text-sm text-emerald-600 font-medium">תשלום חד פעמי לכל הפרויקט</span>
           </div>
           <Link
-            href={isLoggedIn ? "/dashboard" : "/checkout"}
+            href="/checkout"
             className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 whitespace-nowrap shadow-md hover:shadow-lg hover-bounce hover-shine"
           >
-            התחילו עכשיו ←
+            לרכישה ←
           </Link>
         </div>
       </div>
@@ -43,6 +42,7 @@ export default function PricingCard({
   }
 
   // Compact variant - medium size, key info only
+  // Note: This card only shows for non-premium users, so always link to checkout
   if (variant === "compact") {
     return (
       <div className={`bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-lg max-w-xs hover-lift hover-glow ${className}`}>
@@ -77,16 +77,17 @@ export default function PricingCard({
         </ul>
         
         <Link
-          href={isLoggedIn ? "/dashboard" : "/checkout"}
+          href="/checkout"
           className="block w-full bg-gray-900 text-white py-3 rounded-full text-center text-sm font-medium hover:bg-gray-800 transition-colors"
         >
-          {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
+          לרכישה
         </Link>
       </div>
     );
   }
 
   // Full variant - original design
+  // Note: This card only shows for non-premium users, so always link to checkout
   return (
     <div className={`border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg max-w-sm mx-auto hover-scale hover-glow ${className}`}>
       {/* Discount Badge */}
@@ -128,10 +129,10 @@ export default function PricingCard({
         </li>
       </ul>
       <Link
-        href={isLoggedIn ? "/dashboard" : "/checkout"}
+        href="/checkout"
         className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors text-center"
       >
-        {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
+        לרכישה
       </Link>
     </div>
   );

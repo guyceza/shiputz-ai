@@ -52,15 +52,27 @@ export default function SignupPage() {
       const { signUp } = await import("@/lib/auth");
       const data = await signUp(email, password, name);
       
-      // Also save to users table for email sequences
+      // Save to users table AND send welcome email
       try {
-        await fetch('/api/users', {
+        const userRes = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, name }),
         });
+        const userResult = await userRes.json();
+        console.log('User API result:', userResult);
       } catch (err) {
         console.error('Failed to save user to DB:', err);
+        // Fallback: send welcome email directly
+        try {
+          await fetch('/api/send-welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, name }),
+          });
+        } catch (e) {
+          console.error('Fallback email also failed:', e);
+        }
       }
 
       if (data.user && !data.user.identities?.length) {

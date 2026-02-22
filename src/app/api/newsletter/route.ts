@@ -48,42 +48,59 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase();
-    const supabase = createServiceClient();
+    
+    let supabaseSuccess = false;
+    let resendSuccess = false;
 
-    // Check if already subscribed in Supabase
-    const { data: existing } = await supabase
-      .from('newsletter_subscribers')
-      .select('id')
-      .eq('email', normalizedEmail)
-      .single();
+    // Try to add to Supabase
+    try {
+      const supabase = createServiceClient();
+      
+      // Check if already subscribed
+      const { data: existing } = await supabase
+        .from('newsletter_subscribers')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .single();
 
-    if (existing) {
-      return NextResponse.json({ success: true, message: 'Already subscribed' });
-    }
+      if (!existing) {
+        const { error } = await supabase
+          .from('newsletter_subscribers')
+          .insert({
+            email: normalizedEmail,
+            subscribed_at: new Date().toISOString(),
+          });
 
-    // Add to Supabase
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .insert({
-        email: normalizedEmail,
-        subscribed_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      // Table might not exist
-      if (error.code === '42P01') {
-        console.log('Newsletter table does not exist yet');
+        if (!error) {
+          supabaseSuccess = true;
+        } else {
+          console.error('Supabase insert error:', error);
+        }
       } else {
-        console.error('Newsletter subscription error:', error);
+        supabaseSuccess = true; // Already exists
       }
+    } catch (supabaseError) {
+      console.error('Supabase error:', supabaseError);
     }
 
-    // Also add to Resend audience for email broadcasts
-    await addToResendAudience(normalizedEmail);
+    // Try to add to Resend audience
+    try {
+      const result = await addToResendAudience(normalizedEmail);
+      if (result) {
+        resendSuccess = true;
+      }
+    } catch (resendError) {
+      console.error('Resend error:', resendError);
+    }
 
-    return NextResponse.json({ success: true });
+    // Return success if at least one succeeded
+    return NextResponse.json({ 
+      success: supabaseSuccess || resendSuccess,
+      supabase: supabaseSuccess,
+      resend: resendSuccess
+    });
   } catch (error) {
     console.error('Newsletter error:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error', details: String(error) }, { status: 500 });
   }
 }

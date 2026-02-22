@@ -851,3 +851,4 @@ function ProductHotspot({ x, y, title, price, link }: { x: number; y: number; ti
   );
 }
 
+// trigger deploy Sun Feb 22 09:46:07 UTC 2026

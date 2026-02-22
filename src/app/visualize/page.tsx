@@ -997,46 +997,61 @@ export default function VisualizePage() {
               ✕
             </button>
             
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">הניסיון החינמי נגמר</h3>
-              <p className="text-gray-500 text-sm">רוצה להמשיך ליצור הדמיות?</p>
+            <div className="text-center mb-8">
+              <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-white text-lg">✦</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">הניסיון החינמי נגמר</h3>
+              <p className="text-gray-500 text-sm">שדרג כדי להמשיך ליצור הדמיות</p>
             </div>
             
-            <div className="bg-gray-50 rounded-2xl p-5 mb-6">
-              <div className="text-center">
-                <span className="text-3xl font-bold text-gray-900">₪39.99</span>
-                <span className="text-gray-500 text-sm">/חודש</span>
+            <div className="border border-gray-200 rounded-2xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-gray-900">מנוי Pro</span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-semibold text-gray-900">₪39.99</span>
+                <span className="text-gray-400">/חודש</span>
               </div>
             </div>
             
-            <ul className="space-y-3 mb-6 text-sm text-gray-600">
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                10 הדמיות ביום
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center gap-3 text-sm">
+                <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <span className="text-gray-700">10 הדמיות ביום</span>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                הערכת עלויות מפורטת
+              <li className="flex items-center gap-3 text-sm">
+                <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <span className="text-gray-700">הערכת עלויות מפורטת</span>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                שמירה ושיתוף
+              <li className="flex items-center gap-3 text-sm">
+                <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <span className="text-gray-700">שמירה ושיתוף עם קבלנים</span>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span>
-                ביטול בכל עת
+              <li className="flex items-center gap-3 text-sm">
+                <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <span className="text-gray-700">ביטול בכל עת</span>
               </li>
             </ul>
             
             <Link
               href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
-              className="block w-full text-center bg-gray-900 text-white py-3 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+              className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
             >
-              המשך למנוי
+              שדרג עכשיו
             </Link>
             
-            <p className="text-center text-xs text-gray-400 mt-3">
-              ביטול בלחיצה אחת
+            <p className="text-center text-xs text-gray-400 mt-4">
+              תשלום מאובטח · ביטול בלחיצה
             </p>
           </div>
         </div>

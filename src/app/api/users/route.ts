@@ -79,12 +79,16 @@ export async function POST(request: NextRequest) {
     // Send welcome email immediately
     await sendWelcomeEmail(email, name);
 
-    // Mark Day 0 as sent
-    await supabase.from('email_sequences').insert({
-      user_email: email,
-      sequence_type: 'non_purchased',
-      day_number: 0,
-    }).catch(() => {}); // Ignore if table doesn't exist yet
+    // Mark Day 0 as sent (ignore errors if table doesn't exist)
+    try {
+      await supabase.from('email_sequences').insert({
+        user_email: email,
+        sequence_type: 'non_purchased',
+        day_number: 0,
+      });
+    } catch (e) {
+      // Ignore
+    }
 
     return NextResponse.json({ message: 'User created', id: data.id });
   } catch (error) {

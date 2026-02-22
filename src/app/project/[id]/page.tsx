@@ -353,6 +353,8 @@ export default function ProjectPage() {
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Reset input so same file can be selected again
+    e.target.value = '';
 
     const reader = new FileReader();
     reader.onloadend = async () => {
@@ -1534,7 +1536,7 @@ export default function ProjectPage() {
                   "הוסף"
                 )}
               </button>
-              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
             </div>
           </div>
         </div>

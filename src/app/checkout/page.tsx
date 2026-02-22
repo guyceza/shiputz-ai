@@ -98,7 +98,7 @@ function CheckoutContent() {
     
     // Add discount code if valid
     if (discountValid) {
-      whopUrl += "&d=SHIPUTZ20"; // The general Whop coupon
+      whopUrl += "&d=shiputz20"; // The general Whop coupon (lowercase!)
     }
     
     // Store discount code in localStorage so webhook can mark it as used

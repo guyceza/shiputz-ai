@@ -289,7 +289,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">מחשבון עלויות מתקדם</h3>
                   <p className="text-gray-500 text-sm mb-6">שדרגו לחשבון פרימיום כדי לקבל הערכת עלויות מדויקת לשיפוץ שלכם</p>
                   <Link
-                    href="/signup?plan=premium"
+                    href="/checkout"
                     className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
                   >
                     שדרג עכשיו
@@ -726,10 +726,10 @@ export default function Home() {
               </li>
             </ul>
             <Link
-              href={isLoggedIn ? "/dashboard" : "/signup"}
+              href={isLoggedIn ? "/dashboard" : "/checkout"}
               className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
             >
-              {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
+              {isLoggedIn ? "לאזור האישי" : "לרכישה"}
             </Link>
           </div>
         </div>

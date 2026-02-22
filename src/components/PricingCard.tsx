@@ -32,7 +32,7 @@ export default function PricingCard({
             <span className="text-sm text-emerald-600 font-medium">תשלום חד פעמי לכל הפרויקט</span>
           </div>
           <Link
-            href={isLoggedIn ? "/dashboard" : "/signup"}
+            href={isLoggedIn ? "/dashboard" : "/checkout"}
             className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shadow-md hover:shadow-lg"
           >
             התחילו עכשיו ←
@@ -77,7 +77,7 @@ export default function PricingCard({
         </ul>
         
         <Link
-          href={isLoggedIn ? "/dashboard" : "/signup"}
+          href={isLoggedIn ? "/dashboard" : "/checkout"}
           className="block w-full bg-gray-900 text-white py-3 rounded-full text-center text-sm font-medium hover:bg-gray-800 transition-colors"
         >
           {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}
@@ -128,7 +128,7 @@ export default function PricingCard({
         </li>
       </ul>
       <Link
-        href={isLoggedIn ? "/dashboard" : "/signup"}
+        href={isLoggedIn ? "/dashboard" : "/checkout"}
         className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors text-center"
       >
         {isLoggedIn ? "לאזור האישי" : "התחילו עכשיו"}

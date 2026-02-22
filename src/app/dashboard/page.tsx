@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
@@ -57,6 +58,19 @@ export default function DashboardPage() {
           // Check if admin
           if (session.user.email === "guyceza@gmail.com") {
             setIsAdmin(true);
+          }
+          
+          // Check if premium user (purchased)
+          try {
+            const res = await fetch(`/api/users?email=${encodeURIComponent(session.user.email)}`);
+            if (res.ok) {
+              const userData = await res.json();
+              if (userData.purchased) {
+                setIsPremium(true);
+              }
+            }
+          } catch (e) {
+            console.error("Premium check error:", e);
           }
         } else {
           // Fallback to localStorage for backward compatibility
@@ -274,6 +288,26 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Subscription Management - Only for premium users */}
+        {isPremium && (
+          <div className="mb-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-900 mb-1">✨ מנוי פרימיום פעיל</p>
+                <p className="text-xs text-purple-600">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
+              </div>
+              <a
+                href="https://whop.com/@me/settings/orders/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-purple-700 hover:text-purple-900 border border-purple-200 px-4 py-2 rounded-full hover:bg-purple-100 transition-colors"
+              >
+                ניהול מנוי
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Projects */}
         {projects.length === 0 ? (

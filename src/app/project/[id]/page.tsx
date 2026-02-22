@@ -224,7 +224,7 @@ export default function ProjectPage() {
   } | null>(null);
   const visionInputRef = useRef<HTMLInputElement>(null);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
-  const [countdown, setCountdown] = useState(30);
+  const [countdown, setCountdown] = useState(60);
   const [visionError, setVisionError] = useState<string | null>(null);
   const [showVisionHistory, setShowVisionHistory] = useState(false);
   
@@ -264,7 +264,7 @@ export default function ProjectPage() {
   // Rotate tips and countdown during loading
   useEffect(() => {
     if (visionLoading) {
-      setCountdown(30);
+      setCountdown(60);
       setCurrentTipIndex(0);
       
       // Countdown timer

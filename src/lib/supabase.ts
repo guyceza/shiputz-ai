@@ -1,40 +1,49 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Lazy initialization to avoid build-time errors
-let _supabase: SupabaseClient | null = null;
+// Lazy-initialized clients to avoid build-time errors
+let _supabaseClient: SupabaseClient | null = null;
+let _serviceClient: SupabaseClient | null = null;
 
-function getSupabaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+function getEnvVars() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return { url, anonKey, serviceKey };
 }
 
-function getSupabaseAnonKey(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-}
-
-// Export a getter that initializes on first use
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_, prop) {
-    if (!_supabase) {
-      const url = getSupabaseUrl();
-      const key = getSupabaseAnonKey();
-      if (!url || !key) {
-        console.warn('Missing Supabase environment variables');
-      }
-      _supabase = createClient(url, key);
+// Get public Supabase client (lazy init)
+export function getSupabaseClient(): SupabaseClient {
+  if (!_supabaseClient) {
+    const { url, anonKey } = getEnvVars();
+    if (!url || !anonKey) {
+      throw new Error('Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY');
     }
-    return (_supabase as any)[prop];
+    _supabaseClient = createClient(url, anonKey);
   }
-});
-
-// Server-side client with service role (for API routes)
-export function createServiceClient() {
-  const url = getSupabaseUrl();
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-  if (!serviceKey) {
-    console.warn('Missing SUPABASE_SERVICE_ROLE_KEY');
-  }
-  return createClient(url, serviceKey);
+  return _supabaseClient;
 }
+
+// Server-side client with service role (for API routes) - lazy init
+export function createServiceClient(): SupabaseClient {
+  if (!_serviceClient) {
+    const { url, serviceKey } = getEnvVars();
+    if (!url || !serviceKey) {
+      throw new Error('Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
+    }
+    _serviceClient = createClient(url, serviceKey);
+  }
+  return _serviceClient;
+}
+
+// For backward compatibility - use getSupabaseClient() instead
+export const supabase = {
+  get from() { return getSupabaseClient().from.bind(getSupabaseClient()); },
+  get auth() { return getSupabaseClient().auth; },
+  get storage() { return getSupabaseClient().storage; },
+  get functions() { return getSupabaseClient().functions; },
+  get realtime() { return getSupabaseClient().realtime; },
+  get rpc() { return getSupabaseClient().rpc.bind(getSupabaseClient()); },
+};
 
 // Types
 export interface User {

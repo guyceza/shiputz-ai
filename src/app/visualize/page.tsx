@@ -725,9 +725,12 @@ export default function VisualizePage() {
                         </span>
                       )}
                     </div>
-                    <div className="text-center mt-3 pt-3 border-t border-gray-100">
-                      <span className="text-xs text-blue-600 font-medium">👆 לחץ לפרטים המלאים</span>
-                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedHistoryItem(item); }}
+                      className="w-full mt-3 bg-gray-900 text-white text-xs py-2 rounded-full hover:bg-gray-800 transition-colors"
+                    >
+                      📋 ראה פירוט עלויות
+                    </button>
                   </div>
                 </div>
               ))}

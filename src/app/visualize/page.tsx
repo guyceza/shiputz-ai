@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 interface ShopItem {
@@ -326,6 +326,32 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
 }
 
 export default function VisualizePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.id) {
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user) {
+          setIsLoggedIn(true);
+        }
+      } catch {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoggedIn(!!user.id);
+      }
+    };
+    checkAuth();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       {/* Navigation */}
@@ -338,9 +364,15 @@ export default function VisualizePage() {
             <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
               מאמרים וטיפים
             </Link>
-            <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
-              התחברות
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
+                התחברות
+              </Link>
+            )}
           </div>
         </div>
       </nav>

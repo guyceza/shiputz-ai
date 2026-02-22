@@ -37,6 +37,32 @@ export default function ShopLookPage() {
   const [isCustomImage, setIsCustomImage] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Auth check
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.id) {
+            setIsLoggedIn(true);
+            return;
+          }
+        }
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user) {
+          setIsLoggedIn(true);
+        }
+      } catch {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoggedIn(!!user.id);
+      }
+    };
+    checkAuth();
+  }, []);
 
   // Countdown and message rotation during loading
   useEffect(() => {
@@ -107,9 +133,15 @@ export default function ShopLookPage() {
             <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
               מאמרים וטיפים
             </Link>
-            <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
-              התחברות
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
+                התחברות
+              </Link>
+            )}
           </div>
         </div>
       </nav>

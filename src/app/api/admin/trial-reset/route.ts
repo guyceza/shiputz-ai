@@ -1,41 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { createServiceClient } from '@/lib/supabase';
 
-const RESET_FILE = '/tmp/trial-reset-list.json';
-
-async function getResetList(): Promise<string[]> {
-  try {
-    const data = await fs.readFile(RESET_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function saveResetList(list: string[]): Promise<void> {
-  await fs.writeFile(RESET_FILE, JSON.stringify(list), 'utf-8');
-}
-
-// GET - Check if email is in reset list
+// GET - Check if email should have trial reset
 export async function GET(request: NextRequest) {
-  const email = request.nextUrl.searchParams.get('email');
-  
-  if (!email) {
-    const list = await getResetList();
-    return NextResponse.json({ list });
+  try {
+    const email = request.nextUrl.searchParams.get('email');
+    const supabase = createServiceClient();
+    
+    if (!email) {
+      // Get all pending resets
+      const { data, error } = await supabase
+        .from('trial_resets')
+        .select('email, created_at')
+        .eq('used', false);
+      
+      if (error) return NextResponse.json({ list: [] });
+      return NextResponse.json({ list: data?.map(r => r.email) || [] });
+    }
+    
+    // Check specific user
+    const { data } = await supabase
+      .from('trial_resets')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .eq('used', false)
+      .single();
+    
+    if (data) {
+      // Mark as used
+      await supabase
+        .from('trial_resets')
+        .update({ used: true, used_at: new Date().toISOString() })
+        .eq('id', data.id);
+      
+      return NextResponse.json({ shouldReset: true });
+    }
+    
+    return NextResponse.json({ shouldReset: false });
+  } catch {
+    return NextResponse.json({ list: [], shouldReset: false });
   }
-  
-  const list = await getResetList();
-  const shouldReset = list.includes(email.toLowerCase());
-  
-  if (shouldReset) {
-    // Remove from list after checking
-    const newList = list.filter(e => e !== email.toLowerCase());
-    await saveResetList(newList);
-  }
-  
-  return NextResponse.json({ shouldReset });
 }
 
 // POST - Add email to reset list (admin only)
@@ -44,7 +48,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, adminEmail } = body;
     
-    // Simple admin check
     if (adminEmail !== 'guyceza@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
@@ -53,13 +56,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
     }
     
-    const list = await getResetList();
-    if (!list.includes(email.toLowerCase())) {
-      list.push(email.toLowerCase());
-      await saveResetList(list);
+    const supabase = createServiceClient();
+    
+    // Check if already exists
+    const { data: existing } = await supabase
+      .from('trial_resets')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .eq('used', false)
+      .single();
+    
+    if (!existing) {
+      await supabase
+        .from('trial_resets')
+        .insert({ email: email.toLowerCase() });
     }
     
-    return NextResponse.json({ success: true, list });
+    // Get updated list
+    const { data } = await supabase
+      .from('trial_resets')
+      .select('email')
+      .eq('used', false);
+    
+    return NextResponse.json({ success: true, list: data?.map(r => r.email) || [] });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to add email' }, { status: 500 });
   }
@@ -75,11 +94,20 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     
-    const list = await getResetList();
-    const newList = list.filter(e => e !== email.toLowerCase());
-    await saveResetList(newList);
+    const supabase = createServiceClient();
     
-    return NextResponse.json({ success: true, list: newList });
+    await supabase
+      .from('trial_resets')
+      .delete()
+      .eq('email', email.toLowerCase());
+    
+    // Get updated list
+    const { data } = await supabase
+      .from('trial_resets')
+      .select('email')
+      .eq('used', false);
+    
+    return NextResponse.json({ success: true, list: data?.map(r => r.email) || [] });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to remove email' }, { status: 500 });
   }

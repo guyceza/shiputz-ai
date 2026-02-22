@@ -1,12 +1,44 @@
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+// Verify user is authenticated
+async function verifyAuth(request: NextRequest): Promise<boolean> {
+  try {
+    const authCookie = request.cookies.get('sb-vghfcdtzywbmlacltnjp-auth-token');
+    if (authCookie) return true;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Auth check
+    const isAuthenticated = await verifyAuth(request);
+    if (!isAuthenticated) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+
+    // Rate limiting - 20 requests per minute
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 20, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ 
+        error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
+      }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const imageFile = formData.get("image") as File;
     
@@ -71,12 +103,15 @@ export async function POST(request: NextRequest) {
     // Parse the JSON response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error("Could not parse response");
+      return NextResponse.json({ items: [] });
     }
     
-    const parsedResponse = JSON.parse(jsonMatch[0]);
-    
-    return NextResponse.json(parsedResponse);
+    try {
+      const parsedResponse = JSON.parse(jsonMatch[0]);
+      return NextResponse.json(parsedResponse);
+    } catch {
+      return NextResponse.json({ items: [] });
+    }
   } catch (error) {
     console.error("Error detecting items:", error);
     return NextResponse.json(

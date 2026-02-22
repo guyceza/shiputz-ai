@@ -7,7 +7,7 @@ const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID; // Create 
 // Add contact to Resend audience
 async function addToResendAudience(email: string) {
   if (!RESEND_API_KEY || !RESEND_AUDIENCE_ID) {
-    console.log('Resend audience not configured, skipping');
+    // Resend audience not configured
     return null;
   }
 
@@ -26,7 +26,7 @@ async function addToResendAudience(email: string) {
 
     if (response.ok) {
       const result = await response.json();
-      console.log('Added to Resend audience:', result);
+      // Added to Resend audience
       return result;
     } else {
       const error = await response.text();

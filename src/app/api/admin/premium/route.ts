@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_DUfgFQ4J_KnMvhKXtaDC9g4Q6ZaiEMjEo';
+const RESEND_KEY = process.env.RESEND_API_KEY;
 
 // Send welcome premium email
 async function sendWelcomePremiumEmail(email: string, name?: string) {

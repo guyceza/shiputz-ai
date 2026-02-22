@@ -108,7 +108,7 @@ async function sendWelcomeEmail(email: string, name?: string) {
       }),
     });
     const result = await response.json();
-    console.log(`✅ Welcome email sent to ${email}:`, result.id);
+    // Email sent to ${email}:`, result.id);
     return result;
   } catch (error) {
     console.error('Failed to send welcome email:', error);
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     
     const body = JSON.parse(rawBody);
     
-    console.log('Whop webhook received:', JSON.stringify(body, null, 2));
+    // Webhook received - action logged for debugging
 
     const { action, data } = body;
 
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
         if (userError) {
           console.error('Error updating user:', userError);
         } else {
-          console.log(`✅ User ${email} marked as purchased`);
+          // User ${email} marked as purchased`);
         }
 
         // Mark discount code as used (if provided in metadata)
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
             .eq('code', discountCode.toUpperCase());
 
           if (!codeError) {
-            console.log(`✅ Discount code ${discountCode} marked as used`);
+            // Discount code ${discountCode} marked as used`);
           }
         } else {
           // Fallback: If user paid with discounted plan, mark any unused code for this email
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
                 .from('discount_codes')
                 .update({ used_at: new Date().toISOString() })
                 .eq('code', unusedCode.code);
-              console.log(`✅ Discount code ${unusedCode.code} marked as used (fallback by email)`);
+              // Discount code ${unusedCode.code} marked as used (fallback by email)`);
             }
           }
         }

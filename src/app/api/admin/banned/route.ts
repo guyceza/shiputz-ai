@@ -1,39 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-
-const BANNED_FILE = '/tmp/banned-list.json';
-
-async function getBannedList(): Promise<string[]> {
-  try {
-    const data = await fs.readFile(BANNED_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function saveBannedList(list: string[]): Promise<void> {
-  await fs.writeFile(BANNED_FILE, JSON.stringify(list), 'utf-8');
-}
+import { createServiceClient } from '@/lib/supabase';
 
 // GET - Get banned list or check if email is banned
 export async function GET(request: NextRequest) {
-  const email = request.nextUrl.searchParams.get('email');
-  const list = await getBannedList();
-  
-  if (!email) {
-    return NextResponse.json({ list });
+  try {
+    const email = request.nextUrl.searchParams.get('email');
+    const supabase = createServiceClient();
+    
+    if (!email) {
+      // Get all banned users
+      const { data, error } = await supabase
+        .from('banned_users')
+        .select('email, reason, created_at');
+      
+      if (error) return NextResponse.json({ list: [] });
+      return NextResponse.json({ list: data?.map(u => u.email) || [] });
+    }
+    
+    // Check specific user
+    const { data } = await supabase
+      .from('banned_users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single();
+    
+    return NextResponse.json({ isBanned: !!data });
+  } catch {
+    return NextResponse.json({ list: [], isBanned: false });
   }
-  
-  const isBanned = list.includes(email.toLowerCase());
-  return NextResponse.json({ isBanned });
 }
 
 // POST - Ban user
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, adminEmail } = body;
+    const { email, adminEmail, reason } = body;
     
     if (adminEmail !== 'guyceza@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -43,14 +44,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
     }
     
-    const list = await getBannedList();
+    const supabase = createServiceClient();
     
-    if (!list.includes(email.toLowerCase())) {
-      list.push(email.toLowerCase());
-      await saveBannedList(list);
+    // Check if already banned
+    const { data: existing } = await supabase
+      .from('banned_users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single();
+    
+    if (!existing) {
+      await supabase
+        .from('banned_users')
+        .insert({ 
+          email: email.toLowerCase(),
+          reason: reason || 'Banned by admin'
+        });
     }
     
-    return NextResponse.json({ success: true, list });
+    // Get updated list
+    const { data } = await supabase
+      .from('banned_users')
+      .select('email');
+    
+    return NextResponse.json({ success: true, list: data?.map(u => u.email) || [] });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to ban user' }, { status: 500 });
   }
@@ -66,11 +83,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     
-    const list = await getBannedList();
-    const newList = list.filter(e => e !== email.toLowerCase());
-    await saveBannedList(newList);
+    const supabase = createServiceClient();
     
-    return NextResponse.json({ success: true, list: newList });
+    await supabase
+      .from('banned_users')
+      .delete()
+      .eq('email', email.toLowerCase());
+    
+    // Get updated list
+    const { data } = await supabase
+      .from('banned_users')
+      .select('email');
+    
+    return NextResponse.json({ success: true, list: data?.map(u => u.email) || [] });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to unban user' }, { status: 500 });
   }

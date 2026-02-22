@@ -7,15 +7,31 @@ import ComparisonSection from "@/components/ComparisonSection";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   useEffect(() => {
-    // Check localStorage for admin status (set during login)
-    try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      setIsAdmin(user.isAdmin === true);
-    } catch {
-      setIsAdmin(false);
-    }
+    // Check for auth session
+    const checkAuth = async () => {
+      try {
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user) {
+          setIsLoggedIn(true);
+          setIsAdmin(session.user.email === "guyceza@gmail.com");
+        } else {
+          // Fallback to localStorage
+          const user = JSON.parse(localStorage.getItem("user") || "{}");
+          setIsLoggedIn(!!user.id);
+          setIsAdmin(user.isAdmin === true);
+        }
+      } catch {
+        // Fallback to localStorage
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoggedIn(!!user.id);
+        setIsAdmin(user.isAdmin === true);
+      }
+    };
+    checkAuth();
   }, []);
   
   const [calcSize, setCalcSize] = useState("80");
@@ -107,9 +123,15 @@ export default function Home() {
             <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
               מאמרים וטיפים
             </Link>
-            <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
-              התחברות
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
+                התחברות
+              </Link>
+            )}
           </div>
         </div>
       </nav>

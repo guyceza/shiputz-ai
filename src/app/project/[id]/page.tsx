@@ -27,7 +27,8 @@ interface Expense {
   description: string;
   amount: number;
   category: string;
-  date: string;
+  date: string; // תאריך הוספה
+  invoiceDate?: string; // תאריך חשבונית (מהסריקה)
   imageUrl?: string;
   vendor?: string;
   items?: ExpenseItem[];
@@ -97,6 +98,15 @@ interface Project {
 
 const CATEGORIES = ["חומרי בניין", "עבודה", "חשמל", "אינסטלציה", "ריצוף", "צבע", "מטבח", "אמבטיה", "אחר"];
 
+const SCAN_TIPS = [
+  "💡 טיפ: שמור על כל הקבלות במקום אחד",
+  "💡 טיפ: צלם קבלות מיד אחרי קבלתן",
+  "💡 טיפ: בדוק שהסכום בקבלה תואם למה שסוכם",
+  "💡 טיפ: בקש חשבונית מס אם אתה עוסק",
+  "💡 טיפ: השווה מחירים בין ספקים שונים",
+  "💡 טיפ: תכנן מראש 10-15% תקציב לבלת״מים",
+];
+
 const DEFAULT_PHASES: Omit<Phase, "id">[] = [
   { name: "הריסה", status: "pending", order: 1 },
   { name: "שלד", status: "pending", order: 2 },
@@ -135,6 +145,9 @@ export default function ProjectPage() {
   const [scannedItems, setScannedItems] = useState<ExpenseItem[]>([]);
   const [scannedFullText, setScannedFullText] = useState<string>("");
   const [scannedVatAmount, setScannedVatAmount] = useState<number | null>(null);
+  const [scannedDate, setScannedDate] = useState<string>("");
+  const [scanTimer, setScanTimer] = useState<number>(0);
+  const [scanTip, setScanTip] = useState<string>("");
   
   // AI Chat
   const [showAIChat, setShowAIChat] = useState(false);
@@ -361,6 +374,24 @@ export default function ProjectPage() {
       const base64 = reader.result as string;
       setSelectedImage(base64);
       setScanning(true);
+      setScanTimer(60);
+      setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+      
+      // Start countdown timer
+      const timerInterval = setInterval(() => {
+        setScanTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timerInterval);
+            return 0;
+          }
+          // Change tip every 10 seconds
+          if (prev % 10 === 0) {
+            setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
@@ -386,6 +417,7 @@ export default function ProjectPage() {
             setScannedItems(Array.isArray(data.items) ? data.items : []);
             setScannedFullText(data.fullText || "");
             setScannedVatAmount(data.vatAmount || null);
+            setScannedDate(data.date || "");
           }
         } else {
           const errorData = await response.json().catch(() => ({}));
@@ -401,6 +433,7 @@ export default function ProjectPage() {
         }
       }
       setScanning(false);
+      setScanTimer(0);
     };
     reader.readAsDataURL(file);
   };
@@ -487,6 +520,7 @@ export default function ProjectPage() {
       amount: parseFloat(amount),
       category,
       date: new Date().toISOString(),
+      invoiceDate: scannedDate || undefined,
       imageUrl: selectedImage || undefined,
       vendor: scannedVendor || undefined,
       items: scannedItems.length > 0 ? scannedItems : undefined,
@@ -508,6 +542,7 @@ export default function ProjectPage() {
     setScannedItems([]);
     setScannedFullText("");
     setScannedVatAmount(null);
+    setScannedDate("");
   };
 
   const handleSaveBudgets = () => {
@@ -1464,8 +1499,17 @@ export default function ProjectPage() {
                   <img src={selectedImage} alt="" className="w-full h-40 object-cover rounded-xl" />
                   <button onClick={() => setSelectedImage(null)} className="absolute top-2 left-2 bg-black/50 text-white w-8 h-8 rounded-full">✕</button>
                   {scanning && (
-                    <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
-                      <p className="text-gray-600 animate-pulse">סורק קבלה...</p>
+                    <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center rounded-xl p-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+                      <p className="text-gray-800 font-medium mb-1">סורק קבלה...</p>
+                      {scanTimer > 0 ? (
+                        <p className="text-gray-500 text-sm">עד {scanTimer} שניות</p>
+                      ) : (
+                        <p className="text-orange-500 text-sm">לוקח יותר זמן מהרגיל...</p>
+                      )}
+                      {scanTip && (
+                        <p className="text-blue-600 text-xs mt-3 text-center">{scanTip}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1555,7 +1599,7 @@ export default function ProjectPage() {
                   "הוסף"
                 )}
               </button>
-              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); setScannedDate(""); setScanTimer(0); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
             </div>
           </div>
         </div>
@@ -1613,9 +1657,15 @@ export default function ProjectPage() {
                     <p className="font-medium text-gray-900">{selectedExpense.category}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">תאריך</p>
+                    <p className="text-sm text-gray-500">תאריך הוספה</p>
                     <p className="font-medium text-gray-900">{new Date(selectedExpense.date).toLocaleDateString("he-IL")}</p>
                   </div>
+                  {selectedExpense.invoiceDate && (
+                    <div>
+                      <p className="text-sm text-gray-500">תאריך חשבונית</p>
+                      <p className="font-medium text-gray-900">{new Date(selectedExpense.invoiceDate).toLocaleDateString("he-IL")}</p>
+                    </div>
+                  )}
                   {selectedExpense.vatAmount && (
                     <div>
                       <p className="text-sm text-gray-500">מע״מ</p>

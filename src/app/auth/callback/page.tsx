@@ -31,31 +31,13 @@ export default function AuthCallbackPage() {
     // Also check if they've completed onboarding (stored in metadata)
     const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
     
-    // Check if we already sent welcome email to this user
-    const welcomeSentKey = `welcome_sent_${email}`;
-    const alreadySentWelcome = localStorage.getItem(welcomeSentKey);
-    
-    // Send welcome email only if not already sent
-    if (!alreadySentWelcome) {
-      console.log('🚀 Sending welcome email to:', email, isNewUser ? '(new user)' : '(first verification)');
-      
-      // Mark as sent BEFORE sending to avoid duplicates
-      localStorage.setItem(welcomeSentKey, 'true');
-      
-      // Send welcome email
-      fetch('/api/send-welcome', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      }).catch(e => console.error('Welcome email failed:', e));
-      
-      // Save to users table (in case not saved yet)
-      fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      }).catch(e => console.error('User save failed:', e));
-    }
+    // Save to users table - this also sends welcome email for NEW users only
+    // (if user already exists in DB, no email will be sent)
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name }),
+    }).catch(e => console.error('User save failed:', e));
     
     if (isNewUser && !hasCompletedOnboarding) {
       router.push('/onboarding');

@@ -345,6 +345,7 @@ function ExampleCardComponent({ example }: { example: ExampleCard }) {
 }
 
 export default function VisualizePage() {
+  const [authLoading, setAuthLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [trialUsed, setTrialUsed] = useState(false);
@@ -469,6 +470,8 @@ export default function VisualizePage() {
           const subKey = `visualize_subscription_${user.id}`;
           setHasSubscription(localStorage.getItem(subKey) === 'active');
         }
+      } finally {
+        setAuthLoading(false);
       }
     };
     checkAuth();
@@ -658,17 +661,25 @@ export default function VisualizePage() {
           
           {/* Trial CTA */}
           <div className="flex flex-col items-center gap-3">
-            <button
-              onClick={handleTryNow}
-              className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
-            >
-              {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסה עכשיו בחינם'}
-            </button>
-            {!hasSubscription && !trialUsed && (
-              <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
-            )}
-            {!hasSubscription && trialUsed && (
-              <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
+            {authLoading ? (
+              <div className="bg-gray-200 text-gray-200 px-10 py-4 rounded-full text-lg font-medium animate-pulse">
+                טוען...
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={handleTryNow}
+                  className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+                >
+                  {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסה עכשיו בחינם'}
+                </button>
+                {!hasSubscription && !trialUsed && (
+                  <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
+                )}
+                {!hasSubscription && trialUsed && (
+                  <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
+                )}
+              </>
             )}
           </div>
         </div>

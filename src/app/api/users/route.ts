@@ -42,6 +42,35 @@ async function sendWelcomeEmail(email: string, name: string) {
   }
 }
 
+// Get user by email
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    const supabase = createServiceClient();
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, email, name, purchased, purchased_at, created_at')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 // Register a new user
 export async function POST(request: NextRequest) {
   try {

@@ -88,6 +88,14 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
+    // Debug: return raw content if empty
+    if (!content) {
+      return NextResponse.json({ 
+        error: "Empty AI response", 
+        debug: JSON.stringify(data).substring(0, 500) 
+      }, { status: 422 });
+    }
+
     // Parse JSON from response
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -95,11 +103,14 @@ export async function POST(request: NextRequest) {
         const parsed = JSON.parse(jsonMatch[0]);
         return NextResponse.json(parsed);
       }
-    } catch {
-      console.error("Failed to parse AI response:", content);
+    } catch (e) {
+      return NextResponse.json({ 
+        error: "JSON parse failed", 
+        content: content.substring(0, 300) 
+      }, { status: 422 });
     }
 
-    return NextResponse.json({ error: "Could not parse receipt" }, { status: 422 });
+    return NextResponse.json({ error: "No JSON in response", content: content.substring(0, 300) }, { status: 422 });
   } catch (error) {
     console.error("Scan error:", error);
     return NextResponse.json({ 

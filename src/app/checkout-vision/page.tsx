@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-const REGULAR_PRICE = 40;
-const PROMO_PRICE = 19.99;
+const REGULAR_PRICE = 40;  // ₪40
+const PROMO_PRICE = 19.99; // ₪19.99 (displayed) = $6.99 in Whop
 const PROMO_CODE = "LAUNCH50";
 const WHOP_PLAN_ID = "plan_6RAptSlrFl31x"; // AI Vision monthly plan - $6.99/month
 

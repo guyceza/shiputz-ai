@@ -1,6 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
+const RESEND_KEY = process.env.RESEND_API_KEY || 're_DUfgFQ4J_KnMvhKXtaDC9g4Q6ZaiEMjEo';
+const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
+
+// Send welcome email immediately
+async function sendWelcomeEmail(email: string, name: string) {
+  const displayName = name || 'משפץ יקר';
+  
+  const html = `
+    <div dir="rtl" style="font-family: -apple-system, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+      <h1 style="color: #111; font-size: 24px; font-weight: 600; margin-bottom: 24px;">👋 ברוך הבא ל-ShiputzAI!</h1>
+      <p style="color: #333; font-size: 16px; line-height: 1.6;">היי ${displayName},</p>
+      <p style="color: #333; font-size: 16px; line-height: 1.6;">תודה שנרשמת! אנחנו כאן כדי לעזור לך לנהל את השיפוץ בצורה חכמה.</p>
+      <p style="color: #333; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">ShiputzAI עוזר לך לעקוב אחרי התקציב, לסרוק קבלות, ולקבל התראות לפני שחורגים.</p>
+      <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #111; color: white; padding: 14px 28px; border-radius: 25px; text-decoration: none; font-weight: 500;">כניסה לאזור האישי ←</a>
+      <p style="margin-top: 40px; color: #666; font-size: 14px;">בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: email,
+        subject: '👋 ברוך הבא ל-ShiputzAI!',
+        html,
+      }),
+    });
+    const result = await response.json();
+    console.log('Welcome email sent:', result);
+    return result;
+  } catch (err) {
+    console.error('Failed to send welcome email:', err);
+    return null;
+  }
+}
+
 // Register a new user
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +75,16 @@ export async function POST(request: NextRequest) {
       console.error('Error creating user:', error);
       return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
+
+    // Send welcome email immediately
+    await sendWelcomeEmail(email, name);
+
+    // Mark Day 0 as sent
+    await supabase.from('email_sequences').insert({
+      user_email: email,
+      sequence_type: 'non_purchased',
+      day_number: 0,
+    }).catch(() => {}); // Ignore if table doesn't exist yet
 
     return NextResponse.json({ message: 'User created', id: data.id });
   } catch (error) {

@@ -42,8 +42,11 @@ export default function DashboardPage() {
         // Dynamic import to avoid SSR issues
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
+        let userId: string | null = null;
+        
         if (session?.user) {
           // Real authenticated user
+          userId = session.user.id;
           setUser({ 
             email: session.user.email || "", 
             name: session.user.user_metadata?.name 
@@ -55,12 +58,17 @@ export default function DashboardPage() {
             router.push("/login");
             return;
           }
-          setUser(JSON.parse(userData));
+          const parsedUser = JSON.parse(userData);
+          userId = parsedUser.id;
+          setUser(parsedUser);
         }
 
-        const savedProjects = localStorage.getItem("projects");
-        if (savedProjects) {
-          setProjects(JSON.parse(savedProjects));
+        // Load projects for THIS user only
+        if (userId) {
+          const savedProjects = localStorage.getItem(`projects_${userId}`);
+          if (savedProjects) {
+            setProjects(JSON.parse(savedProjects));
+          }
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -70,11 +78,15 @@ export default function DashboardPage() {
           router.push("/login");
           return;
         }
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
         
-        const savedProjects = localStorage.getItem("projects");
-        if (savedProjects) {
-          setProjects(JSON.parse(savedProjects));
+        // Load projects for THIS user only
+        if (parsedUser.id) {
+          const savedProjects = localStorage.getItem(`projects_${parsedUser.id}`);
+          if (savedProjects) {
+            setProjects(JSON.parse(savedProjects));
+          }
         }
       }
       setIsLoading(false);
@@ -83,7 +95,7 @@ export default function DashboardPage() {
     checkAuth();
   }, [router]);
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (!newProjectName || !newProjectBudget) return;
 
     const newProject: Project = {
@@ -96,7 +108,26 @@ export default function DashboardPage() {
 
     const updatedProjects = [...projects, newProject];
     setProjects(updatedProjects);
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    
+    // Save with user-specific key
+    try {
+      const { getSession } = await import("@/lib/auth");
+      const session = await getSession();
+      const userId = session?.user?.id || JSON.parse(localStorage.getItem("user") || "{}").id;
+      if (userId) {
+        localStorage.setItem(`projects_${userId}`, JSON.stringify(updatedProjects));
+      }
+    } catch {
+      // Fallback - try to get from localStorage user
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const userId = JSON.parse(userData).id;
+        if (userId) {
+          localStorage.setItem(`projects_${userId}`, JSON.stringify(updatedProjects));
+        }
+      }
+    }
+    
     setShowNewProject(false);
     setNewProjectName("");
     setNewProjectBudget("");

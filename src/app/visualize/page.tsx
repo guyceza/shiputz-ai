@@ -449,13 +449,18 @@ export default function VisualizePage() {
             console.error("Failed to check trial reset:", e);
           }
           
-          // Check premium status from server
+          // Check if user has the main ShiputzAI subscription (purchased)
+          // Note: This is separate from vision subscription (monthly AI)
           try {
             const premRes = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
             const premData = await premRes.json();
             if (premData.hasPremium) {
-              localStorage.setItem(`visualize_subscription_${currentUserId}`, 'active');
+              // User has main premium - update localStorage
+              const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+              localStorage.setItem("user", JSON.stringify({ ...storedUser, purchased: true }));
+              setHasPurchased(true);
             }
+            // Note: Vision subscription (hasSubscription) is separate and managed via Whop monthly plan
           } catch (e) {
             console.error("Failed to check premium:", e);
           }

@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
       redirect_url: redirectUrl || 'https://shipazti.com/dashboard',
     };
 
+    // Pre-fill email in checkout (more reliable than URL param)
+    if (email) {
+      sessionData.email = email;
+    }
+
     // Add metadata if needed
     if (discountCode) {
       sessionData.metadata = { discount_code: discountCode };

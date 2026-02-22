@@ -102,10 +102,13 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Popup Bubble */}
+      {/* Floating Chat Bubble - Right side, middle of screen */}
       {showBubble && !isOpen && (
-        <div className="fixed bottom-24 left-6 z-50 animate-in slide-in-from-bottom-2 duration-500">
-          <div className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[280px] border border-gray-100">
+        <div className="fixed top-1/2 right-4 -translate-y-1/2 z-50 animate-in slide-in-from-right-4 duration-500">
+          <div 
+            onClick={() => setIsOpen(true)}
+            className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[260px] border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow"
+          >
             {/* Close button */}
             <button
               onClick={(e) => {
@@ -113,12 +116,12 @@ export default function ChatWidget() {
                 setShowBubble(false);
                 setBubbleDismissed(true);
               }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs"
+              className="absolute -top-2 -left-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs"
             >
               ✕
             </button>
-            {/* Arrow */}
-            <div className="absolute -bottom-2 left-8 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+            {/* Arrow pointing right */}
+            <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-white border-t border-r border-gray-100 transform rotate-45"></div>
             {/* Content */}
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -127,28 +130,25 @@ export default function ChatWidget() {
               <div>
                 <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
                 <p className="text-gray-500 text-xs leading-relaxed">
-                  יש לי תשובות לכל שאלה על שיפוצים ועל ShiputzAI
+                  יש לי תשובות לכל שאלה
                 </p>
-                <button
-                  onClick={() => setIsOpen(true)}
-                  className="mt-2 text-emerald-600 text-xs font-medium hover:text-emerald-700"
-                >
-                  התחל שיחה ←
-                </button>
+                <span className="mt-2 text-emerald-600 text-xs font-medium inline-block">
+                  לחץ לשיחה →
+                </span>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Chat Button */}
+      {/* Chat Button - Right side, middle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`fixed top-1/2 right-4 -translate-y-1/2 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isOpen
             ? "bg-gray-600 hover:bg-gray-700"
-            : "bg-emerald-600 hover:bg-emerald-700 hover:scale-110 animate-pulse"
-        }`}
+            : "bg-emerald-600 hover:bg-emerald-700 hover:scale-110"
+        } ${showBubble ? "hidden" : ""}`}
         aria-label={isOpen ? "סגור צ'אט" : "פתח צ'אט"}
       >
         {isOpen ? (
@@ -158,15 +158,15 @@ export default function ChatWidget() {
             <MessageCircle className="w-6 h-6 text-white" />
             {/* Notification dot */}
             {!bubbleDismissed && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
             )}
           </>
         )}
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Window - Right side */}
       {isOpen && (
-        <div className="fixed bottom-24 left-6 z-50 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed top-1/2 right-4 -translate-y-1/2 z-50 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 animate-in slide-in-from-right-4 duration-300">
           {/* Header */}
           <div className="bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">

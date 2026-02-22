@@ -38,6 +38,11 @@ export default function ShopLookPage() {
   const [countdown, setCountdown] = useState(30);
   const [messageIndex, setMessageIndex] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [trialUsed, setTrialUsed] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -48,6 +53,16 @@ export default function ShopLookPage() {
           const user = JSON.parse(userData);
           if (user.id) {
             setIsLoggedIn(true);
+            setUserId(user.id);
+            // Check trial & subscription
+            const trialKey = `visualize_trial_${user.id}`;
+            const subKey = `visualize_subscription_${user.id}`;
+            const trialWasUsed = localStorage.getItem(trialKey) === 'used';
+            const hasSub = localStorage.getItem(subKey) === 'active';
+            setTrialUsed(trialWasUsed);
+            setHasSubscription(hasSub);
+            // User has access if: subscribed OR trial not used yet
+            setHasAccess(hasSub || !trialWasUsed);
             return;
           }
         }
@@ -55,14 +70,41 @@ export default function ShopLookPage() {
         const session = await getSession();
         if (session?.user) {
           setIsLoggedIn(true);
+          setUserId(session.user.id);
+          const trialKey = `visualize_trial_${session.user.id}`;
+          const subKey = `visualize_subscription_${session.user.id}`;
+          const trialWasUsed = localStorage.getItem(trialKey) === 'used';
+          const hasSub = localStorage.getItem(subKey) === 'active';
+          setTrialUsed(trialWasUsed);
+          setHasSubscription(hasSub);
+          setHasAccess(hasSub || !trialWasUsed);
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
+        if (user.id) {
+          setUserId(user.id);
+          const trialKey = `visualize_trial_${user.id}`;
+          const subKey = `visualize_subscription_${user.id}`;
+          const trialWasUsed = localStorage.getItem(trialKey) === 'used';
+          const hasSub = localStorage.getItem(subKey) === 'active';
+          setTrialUsed(trialWasUsed);
+          setHasSubscription(hasSub);
+          setHasAccess(hasSub || !trialWasUsed);
+        }
       }
     };
     checkAuth();
   }, []);
+
+  // Consume trial when user generates their first visualization
+  const consumeTrial = () => {
+    if (userId && !hasSubscription && !trialUsed) {
+      const trialKey = `visualize_trial_${userId}`;
+      localStorage.setItem(trialKey, 'used');
+      setTrialUsed(true);
+    }
+  };
 
   // Countdown and message rotation during loading
   useEffect(() => {
@@ -93,13 +135,16 @@ export default function ShopLookPage() {
       setIsCustomImage(true);
       setLoading(true);
       
+      // Consume trial when analyzing custom image
+      consumeTrial();
+      
       // Analyze image with AI to detect products
       analyzeImage(customImage);
       
       // Clear from localStorage after reading
       localStorage.removeItem('shopLookImage');
     }
-  }, []);
+  }, [userId, hasSubscription, trialUsed]);
 
   const analyzeImage = async (imageUrl: string) => {
     try {
@@ -219,12 +264,129 @@ export default function ShopLookPage() {
         </div>
       </section>
 
+      {/* Upload Your Own Image CTA */}
+      <section className="py-16 px-6 bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">רוצה לראות את החדר שלך?</h2>
+          <p className="text-gray-300 mb-8">העלה תמונה של החדר שלך וה-AI יזהה את המוצרים ויעזור לך לקנות אותם</p>
+          
+          {!isLoggedIn ? (
+            <Link
+              href="/login?redirect=/shop-look"
+              className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-all"
+            >
+              התחבר כדי להעלות תמונה
+            </Link>
+          ) : hasAccess ? (
+            <label className="inline-block cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const imageData = event.target?.result as string;
+                      localStorage.setItem('shopLookImage', imageData);
+                      window.location.reload();
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <span className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-all">
+                {hasSubscription ? '📸 העלה תמונה' : '✨ נסה עכשיו בחינם (ניסיון אחד)'}
+              </span>
+            </label>
+          ) : (
+            <button
+              onClick={() => setShowPaywall(true)}
+              className="inline-block bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+            >
+              🔓 שדרג לגישה מלאה
+            </button>
+          )}
+          
+          {!hasSubscription && !trialUsed && isLoggedIn && (
+            <p className="text-gray-400 text-sm mt-4">ניסיון אחד חינם · ללא כרטיס אשראי</p>
+          )}
+          {!hasSubscription && trialUsed && isLoggedIn && (
+            <p className="text-amber-400 text-sm mt-4">השתמשת בניסיון החינמי</p>
+          )}
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8 px-6">
         <div className="max-w-5xl mx-auto text-center text-sm text-gray-500">
           <p>חלק מ-ShiputzAI - ניהול שיפוצים חכם</p>
         </div>
       </footer>
+
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative">
+            <button
+              onClick={() => setShowPaywall(false)}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span className="text-3xl">✨</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
+              <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-gray-500">מנוי חודשי</span>
+                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">חסכון 30%</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-gray-900">₪39.99</span>
+                <span className="text-gray-400">/חודש</span>
+              </div>
+            </div>
+            
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>העלאת תמונות ללא הגבלה</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>זיהוי מוצרים AI מתקדם</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>קישורים ישירים לקנייה</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm">
+                <span className="text-green-500">✓</span>
+                <span>ביטול בכל עת</span>
+              </li>
+            </ul>
+            
+            <Link
+              href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+              className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+            >
+              🚀 שדרג עכשיו
+            </Link>
+            
+            <p className="text-center text-xs text-gray-400 mt-4">
+              תשלום מאובטח · ביטול בלחיצה
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

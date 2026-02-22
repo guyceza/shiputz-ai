@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Find active membership for this email
-    const searchUrl = `https://api.whop.com/api/v5/memberships?email=${encodeURIComponent(email)}&product_id=${WHOP_PRODUCT_ID}&status=active`;
+    const searchUrl = `https://api.whop.com/api/v2/memberships?email=${encodeURIComponent(email)}&product_id=${WHOP_PRODUCT_ID}&status=active`;
     
     const searchRes = await fetch(searchUrl, {
       headers: {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const renewalEnd = membership.renewal_period_end;
 
     // 2. Cancel the membership at period end
-    const cancelUrl = `https://api.whop.com/api/v5/memberships/${membershipId}/cancel`;
+    const cancelUrl = `https://api.whop.com/api/v2/memberships/${membershipId}/cancel`;
     
     const cancelRes = await fetch(cancelUrl, {
       method: 'POST',
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const searchUrl = `https://api.whop.com/api/v5/memberships?email=${encodeURIComponent(email)}&product_id=${WHOP_PRODUCT_ID}`;
+    const searchUrl = `https://api.whop.com/api/v2/memberships?email=${encodeURIComponent(email)}&product_id=${WHOP_PRODUCT_ID}`;
     
     const res = await fetch(searchUrl, {
       headers: {

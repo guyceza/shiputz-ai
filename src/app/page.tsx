@@ -8,6 +8,7 @@ import ComparisonSection from "@/components/ComparisonSection";
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   
   useEffect(() => {
     // Check for auth session
@@ -20,6 +21,7 @@ export default function Home() {
           if (user.id) {
             setIsLoggedIn(true);
             setIsAdmin(user.isAdmin === true);
+            setIsPremium(user.purchased === true);
             return;
           }
         }
@@ -30,12 +32,16 @@ export default function Home() {
         if (session?.user) {
           setIsLoggedIn(true);
           setIsAdmin(session.user.email === "guyceza@gmail.com");
+          // Check premium status from localStorage user data
+          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+          setIsPremium(storedUser.purchased === true);
         }
       } catch {
         // Fallback to localStorage
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
         setIsAdmin(user.isAdmin === true);
+        setIsPremium(user.purchased === true);
       }
     };
     checkAuth();
@@ -638,7 +644,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing - hide for premium users */}
+      {!isPremium && (
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-sm mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
@@ -692,6 +699,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* About / Our Story */}
       <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">

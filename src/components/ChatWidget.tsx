@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Minus } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -172,9 +172,29 @@ export default function ChatWidget() {
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
               <MessageCircle className="w-5 h-5" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold">ShiputzAI Support</h3>
               <p className="text-xs text-emerald-100">בדרך כלל עונים מיד</p>
+            </div>
+            {/* Minimize & Close buttons */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="מזער"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setBubbleDismissed(true);
+                }}
+                className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="סגור"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
 

@@ -108,11 +108,11 @@ function CheckoutContent() {
         window.location.href = session.purchase_url;
       } else {
         // Fallback to direct URL if session creation fails
-        window.location.href = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
+        window.location.href = `https://whop.com/checkout/${planId}?d[email]=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}`;
       }
     } catch (error) {
       // Fallback to direct URL
-      window.location.href = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
+      window.location.href = `https://whop.com/checkout/${planId}?d[email]=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}`;
     }
   };
 

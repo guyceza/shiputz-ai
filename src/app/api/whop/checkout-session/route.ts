@@ -45,10 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct purchase URL with email if provided
+    // Use d[email] parameter which Whop uses for prefilling (more reliable)
     let purchaseUrl = session.purchase_url;
     if (email) {
       const separator = purchaseUrl.includes('?') ? '&' : '?';
-      purchaseUrl = `${purchaseUrl}${separator}email=${encodeURIComponent(email)}`;
+      // Try both formats to ensure it works
+      purchaseUrl = `${purchaseUrl}${separator}d[email]=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}`;
     }
 
     return NextResponse.json({

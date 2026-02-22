@@ -22,7 +22,9 @@ function CheckoutVisionContent() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
-    } catch {}
+    } catch {
+      // Ignore localStorage errors (private browsing, etc.)
+    }
   }, []);
 
   const copyPromoCode = async () => {

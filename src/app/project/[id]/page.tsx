@@ -428,10 +428,11 @@ export default function ProjectPage() {
       setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
       
       // Start countdown timer
-      const timerInterval = setInterval(() => {
+      let timerInterval: NodeJS.Timeout | null = setInterval(() => {
         setScanTimer(prev => {
           if (prev <= 1) {
-            clearInterval(timerInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
             return 0;
           }
           // Change tip every 10 seconds
@@ -441,6 +442,14 @@ export default function ProjectPage() {
           return prev - 1;
         });
       }, 1000);
+      
+      // Cleanup function for when scan completes or errors
+      const cleanupTimer = () => {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      };
       
       try {
         const controller = new AbortController();
@@ -482,6 +491,7 @@ export default function ProjectPage() {
           alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
         }
       }
+      cleanupTimer();
       setScanning(false);
       setScanTimer(0);
     };
@@ -564,10 +574,17 @@ export default function ProjectPage() {
 
   const handleAddExpense = () => {
     if (!project || !description || !amount) return;
+    
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert("נא להזין סכום תקין");
+      return;
+    }
+    
     const newExpense: Expense = {
       id: Date.now().toString(),
       description,
-      amount: parseFloat(amount),
+      amount: amountNum,
       category,
       date: new Date().toISOString(),
       invoiceDate: scannedDate || undefined,
@@ -580,7 +597,7 @@ export default function ProjectPage() {
     const updatedProject = {
       ...project,
       expenses: [...(project.expenses || []), newExpense],
-      spent: project.spent + parseFloat(amount),
+      spent: project.spent + amountNum,
     };
     saveProject(updatedProject);
     setShowAddExpense(false);
@@ -709,11 +726,18 @@ export default function ProjectPage() {
 
   const saveQuote = () => {
     if (!project || !quoteSupplierName || !quoteAmount) return;
+    
+    const amountNum = parseFloat(quoteAmount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert("נא להזין סכום תקין");
+      return;
+    }
+    
     const newQuote: SavedQuote = {
       id: Date.now().toString(),
       supplierName: quoteSupplierName,
       description: quoteDescription,
-      amount: parseFloat(quoteAmount),
+      amount: amountNum,
       date: new Date().toISOString(),
       imageUrl: quoteImage || undefined,
     };

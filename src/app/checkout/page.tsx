@@ -30,7 +30,9 @@ function CheckoutContent() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
-    } catch {}
+    } catch {
+      // Ignore localStorage errors (private browsing, etc.)
+    }
   }, [searchParams]);
 
   const checkDiscountCode = async () => {

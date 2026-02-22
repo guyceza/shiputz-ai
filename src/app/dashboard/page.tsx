@@ -120,11 +120,17 @@ export default function DashboardPage() {
 
   const handleCreateProject = async () => {
     if (!newProjectName || !newProjectBudget) return;
+    
+    const budgetNum = parseInt(newProjectBudget);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("נא להזין תקציב תקין");
+      return;
+    }
 
     const newProject: Project = {
       id: Date.now().toString(),
       name: newProjectName,
-      budget: parseInt(newProjectBudget),
+      budget: budgetNum,
       spent: 0,
       createdAt: new Date().toISOString(),
     };

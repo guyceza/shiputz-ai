@@ -6,8 +6,12 @@ import { useRouter } from 'next/navigation';
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [handled, setHandled] = useState(false);
 
   const handleUserSession = async (session: any) => {
+    // Prevent double execution
+    if (handled) return;
+    setHandled(true);
     const email = session.user.email;
     const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
     
@@ -31,8 +35,8 @@ export default function AuthCallbackPage() {
     const welcomeSentKey = `welcome_sent_${email}`;
     const alreadySentWelcome = localStorage.getItem(welcomeSentKey);
     
-    // For new users OR first time verified: send welcome email
-    if (isNewUser || !alreadySentWelcome) {
+    // Send welcome email only if not already sent
+    if (!alreadySentWelcome) {
       console.log('🚀 Sending welcome email to:', email, isNewUser ? '(new user)' : '(first verification)');
       
       // Mark as sent BEFORE sending to avoid duplicates

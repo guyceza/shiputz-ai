@@ -356,30 +356,59 @@ export default function VisualizePage() {
     const checkAuth = async () => {
       try {
         const userData = localStorage.getItem("user");
+        let userEmail = "";
+        let currentUserId = "";
+        
         if (userData) {
           const user = JSON.parse(userData);
           if (user.id) {
             setIsLoggedIn(true);
             setUserId(user.id);
-            // Check trial status
-            const trialKey = `visualize_trial_${user.id}`;
-            setTrialUsed(localStorage.getItem(trialKey) === 'used');
-            // Check subscription status (stored when user subscribes)
-            const subKey = `visualize_subscription_${user.id}`;
-            setHasSubscription(localStorage.getItem(subKey) === 'active');
-            return;
+            userEmail = user.email;
+            currentUserId = user.id;
+          }
+        } else {
+          const { getSession } = await import("@/lib/auth");
+          const session = await getSession();
+          if (session?.user) {
+            setIsLoggedIn(true);
+            setUserId(session.user.id);
+            userEmail = session.user.email || "";
+            currentUserId = session.user.id;
           }
         }
-        const { getSession } = await import("@/lib/auth");
-        const session = await getSession();
-        if (session?.user) {
-          setIsLoggedIn(true);
-          setUserId(session.user.id);
-          // Check trial status
-          const trialKey = `visualize_trial_${session.user.id}`;
+        
+        // Check if user should have trial reset (from admin panel)
+        if (userEmail && currentUserId) {
+          try {
+            const res = await fetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
+            const data = await res.json();
+            if (data.shouldReset) {
+              // Clear trial data - user gets a new trial!
+              localStorage.removeItem(`visualize_trial_${currentUserId}`);
+              console.log("Trial reset for user:", userEmail);
+            }
+          } catch (e) {
+            console.error("Failed to check trial reset:", e);
+          }
+          
+          // Check premium status from server
+          try {
+            const premRes = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
+            const premData = await premRes.json();
+            if (premData.hasPremium) {
+              localStorage.setItem(`visualize_subscription_${currentUserId}`, 'active');
+            }
+          } catch (e) {
+            console.error("Failed to check premium:", e);
+          }
+        }
+        
+        // Now check local trial & subscription status
+        if (currentUserId) {
+          const trialKey = `visualize_trial_${currentUserId}`;
+          const subKey = `visualize_subscription_${currentUserId}`;
           setTrialUsed(localStorage.getItem(trialKey) === 'used');
-          // Check subscription
-          const subKey = `visualize_subscription_${session.user.id}`;
           setHasSubscription(localStorage.getItem(subKey) === 'active');
         }
       } catch {

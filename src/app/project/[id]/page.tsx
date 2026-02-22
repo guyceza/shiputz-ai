@@ -370,16 +370,26 @@ export default function ProjectPage() {
         if (response.ok) {
           const data = await response.json();
           console.log("Scan result:", data);
-          if (data.description) setDescription(data.description);
-          if (data.amount) setAmount(data.amount.toString());
-          if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
-          setScannedVendor(data.vendor || "");
-          setScannedItems(Array.isArray(data.items) ? data.items : []);
-          setScannedFullText(data.fullText || "");
-          setScannedVatAmount(data.vatAmount || null);
+          if (data.error) {
+            console.error("Scan API error:", data.error);
+            alert("שגיאה בסריקה: " + (data.error || "נסה שוב"));
+          } else {
+            if (data.description) setDescription(data.description);
+            if (data.amount) setAmount(data.amount.toString());
+            if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
+            setScannedVendor(data.vendor || "");
+            setScannedItems(Array.isArray(data.items) ? data.items : []);
+            setScannedFullText(data.fullText || "");
+            setScannedVatAmount(data.vatAmount || null);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Scan failed:", response.status, errorData);
+          alert("שגיאה בסריקה - נסה שוב");
         }
       } catch (error) {
         console.error("Scan error:", error);
+        alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
       }
       setScanning(false);
     };

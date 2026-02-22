@@ -295,8 +295,8 @@ export default function Home() {
           </div>
           
           <div className="relative">
-            {/* Blur overlay with lock - hidden for admin */}
-            {!isAdmin && (
+            {/* Blur overlay with lock - hidden for admin and premium users */}
+            {!isAdmin && !isPremium && (
               <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 rounded-3xl flex flex-col items-center justify-center">
                 <div className="bg-white rounded-2xl p-8 shadow-xl text-center max-w-sm mx-4">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

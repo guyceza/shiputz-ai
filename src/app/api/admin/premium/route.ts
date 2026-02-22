@@ -74,7 +74,16 @@ export async function GET(request: NextRequest) {
       .from('users')
       .select('email, name, purchased, purchased_at')
       .eq('purchased', true);
-    return NextResponse.json({ list: data || [] });
+    
+    // Transform to expected format for admin panel
+    const list = (data || []).map(u => ({
+      email: u.email,
+      days: u.purchased_at ? Math.floor((Date.now() - new Date(u.purchased_at).getTime()) / (1000*60*60*24)) : 0,
+      until: 'lifetime', // Premium is permanent
+      addedAt: u.purchased_at
+    }));
+    
+    return NextResponse.json({ list });
   }
   
   // Check specific user

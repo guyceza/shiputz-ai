@@ -91,15 +91,12 @@ function CheckoutContent() {
     }
 
     // Build Whop checkout URL
-    // Format: https://whop.com/checkout/[plan_id]?email=[email]&d=[discount_code]
-    const WHOP_CHECKOUT_BASE = "https://whop.com/checkout/plan_gtlFi4zoHPy80";
+    // Use discounted plan if discount code is valid
+    const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
+    const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $31.99 (20% off)
     
-    let whopUrl = `${WHOP_CHECKOUT_BASE}?email=${encodeURIComponent(email)}`;
-    
-    // Add discount code if valid
-    if (discountValid) {
-      whopUrl += "&d=shiputz20"; // The general Whop coupon (lowercase!)
-    }
+    const planId = discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
+    let whopUrl = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
     
     // Store discount code in localStorage so webhook can mark it as used
     if (discountCode) {

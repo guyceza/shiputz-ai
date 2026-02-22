@@ -362,11 +362,16 @@ export default function ProjectPage() {
       setSelectedImage(base64);
       setScanning(true);
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        
         const response = await fetch("/api/scan-receipt", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: base64 }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
         if (response.ok) {
           const data = await response.json();
           console.log("Scan result:", data);
@@ -387,9 +392,13 @@ export default function ProjectPage() {
           console.error("Scan failed:", response.status, errorData);
           alert("שגיאה בסריקה - נסה שוב");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Scan error:", error);
-        alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
+        if (error.name === 'AbortError') {
+          alert("הסריקה לקחה יותר מדי זמן - נסה שוב");
+        } else {
+          alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
+        }
       }
       setScanning(false);
     };

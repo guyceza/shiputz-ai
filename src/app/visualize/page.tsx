@@ -351,6 +351,12 @@ export default function VisualizePage() {
   const [hasSubscription, setHasSubscription] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [generatedResult, setGeneratedResult] = useState<{image: string, analysis: string, costs: any} | null>(null);
+  const [generateError, setGenerateError] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -428,34 +434,66 @@ export default function VisualizePage() {
 
   const handleTryNow = () => {
     if (!isLoggedIn) {
-      // Redirect to login
       window.location.href = '/login?redirect=/visualize';
       return;
     }
     
-    if (hasSubscription) {
-      // Has subscription - go to shop-look
-      window.location.href = '/shop-look';
-      return;
-    }
-    
-    if (trialUsed) {
-      // Trial already used - show paywall
+    if (trialUsed && !hasSubscription) {
       setShowPaywall(true);
       return;
     }
     
-    // Use trial
-    if (userId) {
-      const trialKey = `visualize_trial_${userId}`;
-      localStorage.setItem(trialKey, 'used');
-      setTrialUsed(true);
-      setShowTrialSuccess(true);
-      // After 2 seconds, redirect to shop-look
-      setTimeout(() => {
-        window.location.href = '/shop-look';
-      }, 2000);
+    // Show upload modal for trial or subscription users
+    setShowUploadModal(true);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleGenerate = async () => {
+    if (!uploadedImage || !description) return;
+    
+    setGenerating(true);
+    setGenerateError("");
+    
+    try {
+      const res = await fetch('/api/visualize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: uploadedImage, description })
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        setGenerateError(data.error);
+      } else {
+        // Consume trial if not subscribed
+        if (!hasSubscription && userId) {
+          const trialKey = `visualize_trial_${userId}`;
+          localStorage.setItem(trialKey, 'used');
+          setTrialUsed(true);
+        }
+        
+        setGeneratedResult({
+          image: data.generatedImage,
+          analysis: data.analysis,
+          costs: data.costEstimate
+        });
+      }
+    } catch (err) {
+      setGenerateError("שגיאה בחיבור לשרת");
+    }
+    
+    setGenerating(false);
   };
 
   return (
@@ -824,6 +862,179 @@ export default function VisualizePage() {
             <p className="text-center text-xs text-gray-400 mt-4">
               תשלום מאובטח · ביטול בלחיצה
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && !generatedResult && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6 overflow-auto">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative">
+            <button
+              onClick={() => { setShowUploadModal(false); setUploadedImage(null); setDescription(""); }}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
+              </h3>
+              <p className="text-gray-500">העלה תמונה של החדר ותאר מה אתה רוצה לשנות</p>
+            </div>
+            
+            {/* Image Upload */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">תמונת החדר (לפני)</label>
+              {!uploadedImage ? (
+                <label className="block cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-gray-400 transition-colors">
+                    <div className="text-4xl mb-4">📸</div>
+                    <p className="text-gray-600 font-medium">לחץ להעלאת תמונה</p>
+                    <p className="text-gray-400 text-sm mt-2">JPG, PNG עד 10MB</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="relative">
+                  <img src={uploadedImage} alt="לפני" className="w-full rounded-2xl max-h-64 object-cover" />
+                  <button
+                    onClick={() => setUploadedImage(null)}
+                    className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                  <span className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">לפני</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Description */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">מה לשנות?</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="למשל: רוצה פרקט במקום אריחים, קירות בגוון אפור, תאורה שקועה, וסגנון מודרני..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 resize-none h-24"
+              />
+            </div>
+            
+            {generateError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {generateError}
+              </div>
+            )}
+            
+            <button
+              onClick={handleGenerate}
+              disabled={!uploadedImage || !description || generating}
+              className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {generating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  יוצר הדמיה... (עד 30 שניות)
+                </span>
+              ) : (
+                '🪄 צור הדמיה'
+              )}
+            </button>
+            
+            {!hasSubscription && (
+              <p className="text-center text-xs text-gray-400 mt-4">
+                זהו הניסיון החינמי היחיד שלך
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Result Modal */}
+      {generatedResult && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
+          <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
+            <button
+              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); }}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl z-10"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">🎉 ההדמיה שלך מוכנה!</h3>
+            </div>
+            
+            {/* Before/After Comparison */}
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div className="relative">
+                <img src={uploadedImage || ''} alt="לפני" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
+              </div>
+              <div className="relative">
+                <img src={generatedResult.image} alt="אחרי" className="w-full rounded-2xl" />
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+              </div>
+            </div>
+            
+            {/* Analysis */}
+            {generatedResult.analysis && (
+              <div className="bg-blue-50 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">📝 ניתוח מקצועי</h4>
+                <p className="text-gray-700 text-sm leading-relaxed">{generatedResult.analysis}</p>
+              </div>
+            )}
+            
+            {/* Cost Estimate */}
+            {generatedResult.costs && generatedResult.costs.total > 0 && (
+              <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-3">💰 הערכת עלויות</h4>
+                <div className="space-y-2">
+                  {generatedResult.costs.items?.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{item.description}</span>
+                      <span className="font-medium">₪{item.total?.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  <div className="border-t pt-2 mt-2 flex justify-between font-bold">
+                    <span>סה״כ משוער</span>
+                    <span className="text-green-600">₪{generatedResult.costs.total?.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Actions */}
+            <div className="flex gap-4">
+              <a
+                href={generatedResult.image}
+                download="shiputzai-visualization.png"
+                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all"
+              >
+                📥 הורד תמונה
+              </a>
+              {hasSubscription ? (
+                <button
+                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); }}
+                  className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
+                >
+                  🎨 צור הדמיה נוספת
+                </button>
+              ) : (
+                <Link
+                  href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
+                >
+                  ⭐ שדרג להדמיות נוספות
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}

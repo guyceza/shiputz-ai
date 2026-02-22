@@ -259,7 +259,7 @@ export default function Home() {
       </section>
 
       {/* Floating Pricing - Compact */}
-      {!isLoggedIn && (
+      {!isPremium && (
       <section className="py-8 px-6">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6">
           <p className="text-gray-600 text-lg">מוכנים להתחיל לנהל את השיפוץ?</p>
@@ -666,8 +666,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing - hide for logged in users */}
-      {!isLoggedIn && (
+      {/* Pricing - hide for users with subscription */}
+      {!isPremium && (
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-sm mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>

@@ -150,6 +150,8 @@ export default function ProjectPage() {
   const [scanTip, setScanTip] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState(false);
   const [editExpenseData, setEditExpenseData] = useState<Partial<Expense>>({});
+  const [expenseSort, setExpenseSort] = useState<'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'>('date-desc');
+  const [expenseFilter, setExpenseFilter] = useState<string>('all');
   
   // AI Chat
   const [showAIChat, setShowAIChat] = useState(false);
@@ -354,6 +356,30 @@ export default function ProjectPage() {
     saveProject(updatedProject);
     setSelectedExpense(updatedExpense);
     setEditingExpense(false);
+  };
+
+  // Get filtered and sorted expenses
+  const getFilteredExpenses = () => {
+    if (!project?.expenses) return [];
+    let filtered = [...project.expenses];
+    
+    // Filter by category
+    if (expenseFilter !== 'all') {
+      filtered = filtered.filter(e => e.category === expenseFilter);
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      switch (expenseSort) {
+        case 'date-desc': return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case 'date-asc': return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'amount-desc': return b.amount - a.amount;
+        case 'amount-asc': return a.amount - b.amount;
+        default: return 0;
+      }
+    });
+    
+    return filtered;
   };
 
   // Calculate expenses by category
@@ -1132,7 +1158,7 @@ export default function ProjectPage() {
 
             {/* Expenses */}
             <div className="border border-gray-100 rounded-2xl p-8">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">הוצאות</h2>
                 <div className="flex gap-2 print:hidden">
                   <button
@@ -1149,14 +1175,47 @@ export default function ProjectPage() {
                   </button>
                 </div>
               </div>
+              
+              {/* Filters & Sort */}
+              {project.expenses && project.expenses.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4 print:hidden">
+                  <select
+                    value={expenseFilter}
+                    onChange={(e) => setExpenseFilter(e.target.value)}
+                    className="text-sm border border-gray-200 rounded-full px-3 py-1.5 bg-white"
+                  >
+                    <option value="all">כל הקטגוריות</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={expenseSort}
+                    onChange={(e) => setExpenseSort(e.target.value as any)}
+                    className="text-sm border border-gray-200 rounded-full px-3 py-1.5 bg-white"
+                  >
+                    <option value="date-desc">תאריך (חדש → ישן)</option>
+                    <option value="date-asc">תאריך (ישן → חדש)</option>
+                    <option value="amount-desc">סכום (גבוה → נמוך)</option>
+                    <option value="amount-asc">סכום (נמוך → גבוה)</option>
+                  </select>
+                  {expenseFilter !== 'all' && (
+                    <span className="text-sm text-gray-500 self-center">
+                      {getFilteredExpenses().length} מתוך {project.expenses.length}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
 
               {!project.expenses || project.expenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-12">אין הוצאות עדיין</p>
+              ) : getFilteredExpenses().length === 0 ? (
+                <p className="text-gray-500 text-center py-12">אין הוצאות בקטגוריה זו</p>
               ) : (
                 <div className="divide-y divide-gray-100">
-                  {project.expenses.map((expense) => (
+                  {getFilteredExpenses().map((expense) => (
                     <div 
                       key={expense.id} 
                       className="flex items-center justify-between py-4 cursor-pointer hover:bg-gray-50 -mx-4 px-4 rounded-lg transition-colors"

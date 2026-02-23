@@ -9,18 +9,18 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 import { createServiceClient } from '@/lib/supabase';
 
-// Verify user exists in database
-async function verifyUserExists(userEmail: string): Promise<boolean> {
+// Verify user exists and has premium
+async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('users')
-      .select('id')
+      .select('id, purchased')
       .eq('email', userEmail.toLowerCase())
       .single();
-    return !!data;
+    return { exists: !!data, premium: data?.purchased === true };
   } catch {
-    return false;
+    return { exists: false, premium: false };
   }
 }
 
@@ -37,11 +37,17 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    const userExists = await verifyUserExists(userEmail);
-    if (!userExists) {
+    const { exists, premium } = await verifyUserPremium(userEmail);
+    if (!exists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
+    }
+    
+    if (!premium) {
+      return NextResponse.json({ 
+        error: "זיהוי פריטים זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם." 
+      }, { status: 403 });
     }
 
     // Rate limiting - 20 requests per minute

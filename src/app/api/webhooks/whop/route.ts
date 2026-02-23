@@ -277,6 +277,29 @@ export async function POST(request: NextRequest) {
             console.log(`User ${email} Vision subscription activated`);
           }
           
+          // Mark Vision discount code as used (if discounted plan)
+          const VISION_DISCOUNTED_PLAN = 'plan_786h1Ueozm30s';
+          if (planId === VISION_DISCOUNTED_PLAN) {
+            // Find and mark the user's Vision discount code as used
+            const { data: unusedVisionCode } = await supabase
+              .from('discount_codes')
+              .select('code')
+              .eq('user_email', email.toLowerCase())
+              .like('code', 'VIS-%')
+              .is('used_at', null)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+
+            if (unusedVisionCode) {
+              await supabase
+                .from('discount_codes')
+                .update({ used_at: new Date().toISOString() })
+                .eq('code', unusedVisionCode.code);
+              console.log(`Vision discount code ${unusedVisionCode.code} marked as used`);
+            }
+          }
+          
           // Send Vision welcome email
           await sendVisionWelcomeEmail(email, name);
         } else {

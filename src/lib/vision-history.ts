@@ -1,7 +1,5 @@
 import { getSupabaseClient } from './supabase';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
-
 export interface VisionHistoryItem {
   id: string;
   project_id: string;
@@ -12,40 +10,7 @@ export interface VisionHistoryItem {
   created_at: string;
 }
 
-// Upload image to Supabase Storage
-async function uploadVisionImage(base64Data: string, userId: string, projectId: string, type: 'before' | 'after'): Promise<string | null> {
-  try {
-    const supabase = getSupabaseClient();
-    
-    // Convert base64 to blob
-    const base64Response = await fetch(base64Data);
-    const blob = await base64Response.blob();
-    
-    // Generate unique filename
-    const filename = `vision/${userId}/${projectId}/${Date.now()}-${type}.jpg`;
-    
-    // Upload to storage
-    const { data, error } = await supabase.storage
-      .from('visualizations')
-      .upload(filename, blob, {
-        contentType: 'image/jpeg',
-        upsert: true
-      });
-    
-    if (error) {
-      console.error('Vision upload error:', error);
-      return null;
-    }
-    
-    // Return public URL
-    return `${SUPABASE_URL}/storage/v1/object/public/visualizations/${filename}`;
-  } catch (e) {
-    console.error('Vision upload failed:', e);
-    return null;
-  }
-}
-
-// Save vision history item
+// Save vision history item via API (uses service role on server)
 export async function saveVisionHistory(
   projectId: string,
   userId: string,
@@ -54,36 +19,35 @@ export async function saveVisionHistory(
   description: string
 ): Promise<VisionHistoryItem | null> {
   try {
-    const supabase = getSupabaseClient();
+    console.log('saveVisionHistory: Saving via API for project:', projectId);
     
-    // Upload images
-    const beforeUrl = await uploadVisionImage(beforeImage, userId, projectId, 'before');
-    const afterUrl = await uploadVisionImage(afterImage, userId, projectId, 'after');
-    
-    if (!beforeUrl || !afterUrl) {
-      console.error('Failed to upload vision images');
-      return null;
-    }
-    
-    // Save to database
-    const { data, error } = await supabase
-      .from('vision_history')
-      .insert({
-        project_id: projectId,
-        user_id: userId,
-        before_image_url: beforeUrl,
-        after_image_url: afterUrl,
+    const response = await fetch('/api/save-vision-history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId,
+        userId,
+        beforeImage,
+        afterImage,
         description
       })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Save vision history error:', error);
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Save vision history API error:', errorData);
       return null;
     }
+
+    const result = await response.json();
     
-    return data;
+    if (!result.success || !result.item) {
+      console.error('Save vision history failed:', result);
+      return null;
+    }
+
+    console.log('saveVisionHistory: Save successful!', result.item.id);
+    return result.item;
   } catch (e) {
     console.error('Save vision history failed:', e);
     return null;

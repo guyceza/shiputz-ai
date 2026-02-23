@@ -203,8 +203,8 @@ const TEMPLATES = {
     
     <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 20px; padding: 28px; margin-bottom: 24px; text-align: center;">
       <p style="font-size: 48px; margin: 0 0 16px 0;">🏠</p>
-      <h3 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #1e3a5f;">איך השיפוץ שלך יראה?</h3>
-      <p style="margin: 0; font-size: 16px; color: #334155; line-height: 1.6;">
+      <h3 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #000000;">איך השיפוץ שלך יראה?</h3>
+      <p style="margin: 0; font-size: 16px; color: #000000; line-height: 1.6;">
         העלה תמונה של החדר → תאר מה אתה רוצה → קבל הדמיה של התוצאה
       </p>
     </div>
@@ -237,8 +237,8 @@ const TEMPLATES = {
     'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%)',
     'איך השיפוץ שלך יראה? 🏠',
     'הדמיות AI + הערכת עלויות',
-    '#1e3a5f',
-    '#334155'
+    '#000000',
+    '#000000'
   ),
 
   // ===== DAY 5: BUDGET TIPS =====

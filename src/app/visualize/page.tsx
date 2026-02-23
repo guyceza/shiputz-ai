@@ -359,6 +359,7 @@ export default function VisualizePage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'bundle' | 'separate'>('bundle');
   const [generatedResult, setGeneratedResult] = useState<{image: string, beforeImage: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
   const [countdown, setCountdown] = useState(45);
@@ -992,58 +993,71 @@ export default function VisualizePage() {
           <div className="max-w-md mx-auto text-center">
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
               <div className="text-4xl mb-4">🎨</div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                שירות ההדמיה בשני שלבים
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                בחר את המסלול שלך
               </h2>
-              <div className="text-right space-y-3 mb-6">
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
-                    <span className="font-medium text-gray-900">ShiputzAI</span>
-                    <span className="text-xs text-gray-500 mr-auto">₪149.99 חד פעמי</span>
-                  </div>
-                  <p className="text-sm text-gray-500 pr-7">ניהול תקציב, סריקת קבלות, התראות</p>
-                </div>
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">2</span>
-                    <span className="font-medium text-gray-900">מנוי הדמיות AI</span>
-                    <span className="text-xs text-gray-500 mr-auto">₪39.99/חודש</span>
-                  </div>
-                  <p className="text-sm text-gray-500 pr-7">10 הדמיות בחודש + Shop the Look</p>
-                </div>
-              </div>
-              {/* Bundle Option */}
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-4 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white font-medium">🎁 חבילה משתלמת</span>
-                  <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
-                </div>
-                <p className="text-white/90 text-sm mb-3">Premium + חודש הדמיות AI</p>
-                <Link
-                  href="/checkout?plan=bundle"
-                  className="block w-full text-center bg-white text-gray-900 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all"
-                >
-                  הכל ביחד · ₪169.99
-                </Link>
-              </div>
               
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-white px-3 text-xs text-gray-400">או בנפרד</span>
-                </div>
+              <div className="space-y-3 mb-6">
+                {/* Bundle Option - Selectable */}
+                <button
+                  onClick={() => setSelectedPlan('bundle')}
+                  className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                    selectedPlan === 'bundle' 
+                      ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === 'bundle' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                      }`}>
+                        {selectedPlan === 'bundle' && <span className="text-white text-xs">✓</span>}
+                      </div>
+                      <span className="font-medium text-gray-900">🎁 חבילה משתלמת</span>
+                    </div>
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                  </div>
+                  <div className="pr-7">
+                    <p className="text-xl font-bold text-gray-900">₪169.99</p>
+                    <p className="text-sm text-gray-500">ShiputzAI + חודש הדמיות AI</p>
+                    <p className="text-xs text-gray-400">אח״כ ₪39.99/חודש · ביטול בכל עת</p>
+                  </div>
+                </button>
+                
+                {/* Separate Option - Selectable */}
+                <button
+                  onClick={() => setSelectedPlan('separate')}
+                  className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                    selectedPlan === 'separate' 
+                      ? 'border-gray-900 bg-gray-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === 'separate' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
+                      }`}>
+                        {selectedPlan === 'separate' && <span className="text-white text-xs">✓</span>}
+                      </div>
+                      <span className="font-medium text-gray-900">ShiputzAI בלבד</span>
+                    </div>
+                  </div>
+                  <div className="pr-7">
+                    <p className="text-xl font-bold text-gray-900">₪149.99 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                    <p className="text-sm text-gray-500">ניהול תקציב, סריקת קבלות, התראות</p>
+                    <p className="text-xs text-gray-400">הדמיות AI בנפרד אח״כ</p>
+                  </div>
+                </button>
               </div>
               
               <Link
-                href="/checkout"
-                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mt-4"
+                href={selectedPlan === 'bundle' ? '/checkout?plan=bundle' : '/checkout'}
+                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
               >
-                שלב 1: הצטרף ל-ShiputzAI · ₪149.99
+                המשך לתשלום
               </Link>
-              <p className="text-xs text-gray-400 mt-4">אחרי הרכישה תוכל להוסיף מנוי הדמיות</p>
             </div>
           </div>
         </section>
@@ -1245,61 +1259,68 @@ export default function VisualizePage() {
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">🎨</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">שירות ההדמיה בשני שלבים</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">בחר את המסלול שלך</h3>
                 </div>
                 
-                <div className="space-y-3 mb-4">
-                  <div className="border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
-                      <span className="text-sm font-medium text-gray-900">ShiputzAI</span>
-                      <span className="text-xs text-gray-500 mr-auto">₪149.99 חד פעמי</span>
-                    </div>
-                    <p className="text-xs text-gray-500 pr-7">ניהול תקציב, סריקת קבלות, התראות</p>
-                  </div>
-                  <div className="border border-blue-200 bg-blue-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">2</span>
-                      <span className="text-sm font-medium text-gray-900">מנוי הדמיות AI</span>
-                      <span className="text-xs text-gray-500 mr-auto">₪39.99/חודש</span>
-                    </div>
-                    <p className="text-xs text-gray-500 pr-7">10 הדמיות + Shop the Look</p>
-                  </div>
-                </div>
-                
-                {/* Bundle Option */}
-                <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-4 mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium text-sm">🎁 חבילה משתלמת</span>
-                    <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
-                  </div>
-                  <Link
-                    href="/checkout?plan=bundle"
-                    className="block w-full text-center bg-white text-gray-900 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all"
+                <div className="space-y-3 mb-6">
+                  {/* Bundle Option - Selectable */}
+                  <button
+                    onClick={() => setSelectedPlan('bundle')}
+                    className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                      selectedPlan === 'bundle' 
+                        ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
-                    הכל ביחד · ₪169.99
-                  </Link>
-                </div>
-                
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-white px-3 text-xs text-gray-400">או בנפרד</span>
-                  </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedPlan === 'bundle' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                        }`}>
+                          {selectedPlan === 'bundle' && <span className="text-white text-xs">✓</span>}
+                        </div>
+                        <span className="font-medium text-gray-900">🎁 חבילה משתלמת</span>
+                      </div>
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                    </div>
+                    <div className="pr-7">
+                      <p className="text-lg font-bold text-gray-900">₪169.99</p>
+                      <p className="text-xs text-gray-500">ShiputzAI + חודש הדמיות AI · אח״כ ₪39.99/חודש</p>
+                    </div>
+                  </button>
+                  
+                  {/* Separate Option - Selectable */}
+                  <button
+                    onClick={() => setSelectedPlan('separate')}
+                    className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                      selectedPlan === 'separate' 
+                        ? 'border-gray-900 bg-gray-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedPlan === 'separate' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
+                        }`}>
+                          {selectedPlan === 'separate' && <span className="text-white text-xs">✓</span>}
+                        </div>
+                        <span className="font-medium text-gray-900">ShiputzAI בלבד</span>
+                      </div>
+                    </div>
+                    <div className="pr-7">
+                      <p className="text-lg font-bold text-gray-900">₪149.99 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                      <p className="text-xs text-gray-500">ניהול תקציב, סריקת קבלות, התראות · הדמיות בנפרד</p>
+                    </div>
+                  </button>
                 </div>
                 
                 <Link
-                  href="/checkout"
+                  href={selectedPlan === 'bundle' ? '/checkout?plan=bundle' : '/checkout'}
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  שלב 1: הצטרף ל-ShiputzAI
+                  המשך לתשלום
                 </Link>
-                
-                <p className="text-center text-xs text-gray-400 mt-4">
-                  אחרי הרכישה תוכל להוסיף מנוי הדמיות
-                </p>
               </>
             )}
           </div>

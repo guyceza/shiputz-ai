@@ -170,9 +170,9 @@ function CheckoutContent() {
                 <div className="text-green-700 font-bold text-lg mb-2">🎉 הקוד תקף!</div>
                 <div className="flex justify-center items-center gap-3">
                   <span className="text-gray-400 line-through text-lg">$39.99</span>
-                  <span className="text-green-700 font-bold text-2xl">$31.99</span>
+                  <span className="text-green-700 font-bold text-2xl">$35.99</span>
                 </div>
-                <div className="text-green-600 text-sm mt-1">חסכת {discountPercent}%!</div>
+                <div className="text-green-600 text-sm mt-1">חסכת 10%!</div>
               </div>
             </div>
           )}

@@ -3,6 +3,7 @@ export const maxDuration = 60; // 60 second timeout
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {

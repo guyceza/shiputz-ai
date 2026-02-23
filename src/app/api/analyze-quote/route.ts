@@ -3,6 +3,7 @@ export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -91,7 +92,7 @@ ${budget ? `התקציב הכולל של הלקוח: ₪${budget}` : ""}
 כתוב בעברית, בצורה ברורה ומעשית. היה ספציפי עם מספרים ועובדות.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

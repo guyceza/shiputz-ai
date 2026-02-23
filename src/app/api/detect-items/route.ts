@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 import { createServiceClient } from '@/lib/supabase';
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     const mimeType = imageFile.type;
 
     // Use Gemini Vision to detect items
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: AI_MODELS.VISION_PRO });
 
     const prompt = `אתה מומחה לזיהוי רהיטים ופריטי עיצוב בתמונות.
 

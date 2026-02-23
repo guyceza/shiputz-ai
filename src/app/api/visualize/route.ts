@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { createServiceClient } from "@/lib/supabase";
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 // Verify user is authenticated (has valid Supabase session via cookie)
 async function verifyAuth(request: NextRequest): Promise<boolean> {
@@ -299,7 +300,7 @@ export async function POST(request: NextRequest) {
     // API key verified
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${apiKey}`;
     
     // Extract base64 data if it's a data URL
     let imageBase64 = image;
@@ -357,7 +358,7 @@ export async function POST(request: NextRequest) {
     const costEstimate = calculateCosts(analysisText + " " + description);
 
     // Step 3: Edit image with Nano Banana Pro
-    const nanoBananaUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+    const nanoBananaUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
     
     // Edit prompt
     const editPrompt = `Edit this room image: ${description}`;

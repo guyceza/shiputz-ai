@@ -3,6 +3,7 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from '@/lib/supabase';
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 // Verify user exists and has premium
 async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use Gemini to detect products in the image
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${apiKey}`;
     
     const geminiPayload = {
       contents: [{

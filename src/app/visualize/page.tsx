@@ -450,8 +450,7 @@ export default function VisualizePage() {
             console.error("Failed to check trial reset:", e);
           }
           
-          // Check if user has the main ShiputzAI subscription (purchased)
-          // Note: This is separate from vision subscription (monthly AI)
+          // Check if user has the main ShiputzAI subscription (purchased) and Vision subscription
           try {
             const premRes = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
             const premData = await premRes.json();
@@ -461,18 +460,19 @@ export default function VisualizePage() {
               localStorage.setItem("user", JSON.stringify({ ...storedUser, purchased: true }));
               setHasPurchased(true);
             }
-            // Note: Vision subscription (hasSubscription) is separate and managed via Whop monthly plan
+            // Check Vision subscription from database
+            if (premData.hasVision) {
+              setHasSubscription(true);
+            }
           } catch (e) {
             console.error("Failed to check premium:", e);
           }
         }
         
-        // Now check local trial & subscription status
+        // Check local trial status (trial is still local, subscription is now from DB)
         if (currentUserId) {
           const trialKey = `visualize_trial_${currentUserId}`;
-          const subKey = `visualize_subscription_${currentUserId}`;
           setTrialUsed(localStorage.getItem(trialKey) === 'used');
-          setHasSubscription(localStorage.getItem(subKey) === 'active');
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -483,8 +483,11 @@ export default function VisualizePage() {
           setUserId(user.id);
           const trialKey = `visualize_trial_${user.id}`;
           setTrialUsed(localStorage.getItem(trialKey) === 'used');
+          // Vision subscription is now checked from DB via API, fallback to localStorage for offline
           const subKey = `visualize_subscription_${user.id}`;
-          setHasSubscription(localStorage.getItem(subKey) === 'active');
+          if (localStorage.getItem(subKey) === 'active') {
+            setHasSubscription(true);
+          }
         }
       } finally {
         setAuthLoading(false);

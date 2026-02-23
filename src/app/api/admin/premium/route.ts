@@ -89,12 +89,13 @@ export async function GET(request: NextRequest) {
   // Check specific user
   const { data } = await supabase
     .from('users')
-    .select('purchased, purchased_at')
+    .select('purchased, purchased_at, vision_subscription')
     .eq('email', email.toLowerCase())
     .single();
     
   return NextResponse.json({ 
     hasPremium: data?.purchased || false, 
+    hasVision: data?.vision_subscription === 'active',
     since: data?.purchased_at 
   });
 }

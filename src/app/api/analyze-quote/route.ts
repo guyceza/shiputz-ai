@@ -4,6 +4,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { getMidragPricingReference } from "@/lib/pricing-data";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -71,25 +72,42 @@ export async function POST(request: NextRequest) {
     const base64Data = image.split(",")[1] || image;
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
-    const prompt = `אתה מומחה לניתוח הצעות מחיר לשיפוצים בישראל. נתח את הצעת המחיר בתמונה.
+    // Get real market pricing data from Midrag
+    const midragPricing = getMidragPricingReference();
+    
+    const prompt = `אתה מומחה לניתוח הצעות מחיר לשיפוצים בישראל. נתח את הצעת המחיר בתמונה והשווה אותה למחירי השוק האמיתיים.
 
 ${budget ? `התקציב הכולל של הלקוח: ₪${budget}` : ""}
 
-תן ניתוח מפורט הכולל:
+=== מחירי שוק אמיתיים (מידרג) ===
+${midragPricing}
 
-1. 📊 סיכום כללי - האם ההצעה נראית סבירה?
+=== הנחיות לניתוח ===
 
-2. ✅ נקודות חיוביות - מה טוב בהצעה?
+1. 📊 סיכום כללי
+   - האם ההצעה סבירה ביחס למחירי מידרג?
+   - ציין אם המחיר הכולל גבוה/נמוך/סביר
 
-3. ⚠️ נקודות לבדיקה - מה חסר או מחשיד?
+2. 💰 השוואת מחירים (חשוב!)
+   - לכל פריט בהצעה: מה המחיר המוצע vs מחיר מידרג
+   - סמן ב-✅ מחיר סביר | ⚠️ יקר ב-10-25% | ❌ יקר מדי (25%+) | 🟢 מציאה
 
-4. 💰 ניתוח מחירים - האם המחירים בטווח הסביר לשוק הישראלי? תן השוואה למחירי שוק.
+3. ✅ נקודות חיוביות
+   - מה כלול בהצעה שזה יתרון?
+   
+4. ⚠️ חסרים או מחשידים
+   - מה לא מפורט שצריך להיות?
+   - עבודות שנראות "חבילה" בלי פירוט
 
-5. 🚩 דגלים אדומים - סימנים מדאיגים אם יש
+5. 🚩 דגלים אדומים
+   - מחירים חריגים (גבוהים או נמוכים מדי)
+   - סימנים מדאיגים
 
-6. 💡 המלצות - מה לבקש מהקבלן לפני חתימה?
+6. 💡 המלצות
+   - על מה לנהל מו"מ?
+   - מה לבקש לפני חתימה?
 
-כתוב בעברית, בצורה ברורה ומעשית. היה ספציפי עם מספרים ועובדות.`;
+כתוב בעברית, בצורה ברורה. היה ספציפי עם מספרים - השווה כל מחיר לטווח מידרג.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`,

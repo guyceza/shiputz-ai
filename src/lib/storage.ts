@@ -2,7 +2,7 @@
 export async function uploadImage(
   base64Image: string, 
   userId: string, 
-  folder: 'receipts' | 'photos' | 'vision' | 'quotes' = 'misc'
+  folder: 'receipts' | 'photos' | 'vision' | 'quotes' | 'misc' = 'misc'
 ): Promise<string | null> {
   try {
     const response = await fetch('/api/upload-image', {

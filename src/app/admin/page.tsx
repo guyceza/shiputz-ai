@@ -58,17 +58,44 @@ export default function AdminDashboard() {
   
   // Auth check
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      if (ADMIN_EMAILS.includes(user.email)) {
-        setAdminEmail(user.email);
-      } else {
-        router.push("/dashboard");
+    const checkAuth = async () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            setAdminEmail(user.email);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to parse user data:", e);
+        }
       }
-    } else {
-      router.push("/login");
-    }
+      
+      // Try to get session from Supabase
+      try {
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        if (session?.user?.email && ADMIN_EMAILS.includes(session.user.email.toLowerCase())) {
+          setAdminEmail(session.user.email);
+          // Also fix localStorage if it was broken
+          localStorage.setItem("user", JSON.stringify({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.name || "",
+            isAdmin: true
+          }));
+          return;
+        }
+      } catch (e) {
+        console.error("Session check failed:", e);
+      }
+      
+      // Not admin - redirect
+      router.push("/dashboard");
+    };
+    
+    checkAuth();
   }, [router]);
   
   // Fetch users

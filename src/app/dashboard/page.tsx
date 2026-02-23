@@ -309,12 +309,20 @@ export default function DashboardPage() {
               מאמרים וטיפים
             </Link>
             {isAdmin && (
-              <button
-                onClick={() => setShowAdminPanel(!showAdminPanel)}
-                className={`text-xs font-medium ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                🔧 Admin
-              </button>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin"
+                  className="text-xs font-medium text-purple-600 hover:text-purple-800 bg-purple-50 px-3 py-1 rounded-full"
+                >
+                  📊 CRM
+                </Link>
+                <button
+                  onClick={() => setShowAdminPanel(!showAdminPanel)}
+                  className={`text-xs font-medium ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                >
+                  🔧 Admin
+                </button>
+              </div>
             )}
             <button
               onClick={handleLogout}

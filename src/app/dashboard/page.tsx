@@ -157,6 +157,13 @@ function DashboardContent() {
             }));
             setProjects(displayProjects);
             
+            // Handle action parameter (deep links from emails)
+            if (actionParam && supabaseProjects.length > 0) {
+              const firstProject = supabaseProjects[0];
+              router.push(`/project/${firstProject.id}?action=${actionParam}`);
+              return;
+            }
+            
             // Cache locally for offline support
             cacheProjectsLocally(userId, supabaseProjects);
           } catch (err) {
@@ -174,14 +181,6 @@ function DashboardContent() {
             }
           }
           setProjectsLoading(false);
-          
-          // Handle action parameter (deep links from emails)
-          if (actionParam && supabaseProjects && supabaseProjects.length > 0) {
-            // Redirect to first project with the action
-            const firstProject = supabaseProjects[0];
-            router.push(`/project/${firstProject.id}?action=${actionParam}`);
-            return;
-          }
           
           // Check for localStorage Vision (legacy users)
           const localVision = localStorage.getItem(`visualize_subscription_${userId}`);

@@ -4,5 +4,16 @@
       "path": "/api/cron/emails",
       "schedule": "0 9 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "src/app/api/visualize/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/detect-products/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/scan-receipt/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }

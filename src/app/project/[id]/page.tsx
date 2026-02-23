@@ -455,10 +455,13 @@ export default function ProjectPage() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
         
+        const userData = localStorage.getItem("user");
+        const userEmail = userData ? JSON.parse(userData).email : null;
+        
         const response = await fetch("/api/scan-receipt", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64 }),
+          body: JSON.stringify({ image: base64, userEmail }),
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
@@ -510,10 +513,13 @@ export default function ProjectPage() {
       setAnalyzing(true);
       setQuoteAnalysis(null);
       try {
+        const userData = localStorage.getItem("user");
+        const userEmailForQuote = userData ? JSON.parse(userData).email : null;
+        
         const response = await fetch("/api/analyze-quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64, budget: project?.budget }),
+          body: JSON.stringify({ image: base64, budget: project?.budget, userEmail: userEmailForQuote }),
         });
         if (response.ok) {
           const data = await response.json();
@@ -548,11 +554,15 @@ export default function ProjectPage() {
     setChatHistory(prev => [...prev, { role: "user", content: userMessage }]);
     setChatLoading(true);
     try {
+      const userData = localStorage.getItem("user");
+      const userEmailForChat = userData ? JSON.parse(userData).email : null;
+      
       const response = await fetch("/api/ai-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: userMessage,
+          userEmail: userEmailForChat,
           context: {
             projectName: project.name,
             budget: project.budget,

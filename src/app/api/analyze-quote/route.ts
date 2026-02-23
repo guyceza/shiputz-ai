@@ -6,15 +6,18 @@ import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Verify user is authenticated
-async function verifyAuth(request: NextRequest): Promise<boolean> {
+import { createServiceClient } from '@/lib/supabase';
+
+// Verify user exists in database
+async function verifyUserExists(userEmail: string): Promise<boolean> {
   try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session')));
-    if (hasSupabaseCookie) return true;
-    const authHeader = request.headers.get('authorization');
-    if (authHeader?.startsWith('Bearer ')) return true;
-    return false;
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    return !!data;
   } catch {
     return false;
   }
@@ -22,9 +25,18 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth check - require logged in user
-    const isAuthenticated = await verifyAuth(request);
-    if (!isAuthenticated) {
+    const body = await request.json();
+    const { image, budget, userEmail } = body;
+
+    // Auth check - verify user exists in DB
+    if (!userEmail) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+    
+    const userExists = await verifyUserExists(userEmail);
+    if (!userExists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
@@ -38,8 +50,6 @@ export async function POST(request: NextRequest) {
         error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
       }, { status: 429 });
     }
-    
-    const { image, budget } = await request.json();
 
     if (!image) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });

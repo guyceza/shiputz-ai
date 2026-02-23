@@ -26,7 +26,7 @@ const TIPS = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; email: string; id?: string } | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");

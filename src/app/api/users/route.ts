@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 // Register a new user
 export async function POST(request: NextRequest) {
   try {
-    const { email, name } = await request.json();
+    const { email, name, auth_provider } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -91,18 +91,26 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email.toLowerCase();
     const { data: existing } = await supabase
       .from('users')
-      .select('id')
+      .select('id, auth_provider')
       .eq('email', normalizedEmail)
       .single();
 
     if (existing) {
+      // If user exists with a different provider, return error
+      if (existing.auth_provider && auth_provider && existing.auth_provider !== auth_provider) {
+        const providerName = existing.auth_provider === 'google' ? 'Google' : 'אימייל וסיסמה';
+        return NextResponse.json({ 
+          error: `משתמש זה כבר רשום דרך ${providerName}. נא להתחבר באותו אופן.`,
+          existing_provider: existing.auth_provider
+        }, { status: 409 });
+      }
       return NextResponse.json({ message: 'User already exists', id: existing.id });
     }
 
     // Create new user (always store email in lowercase)
     const { data, error } = await supabase
       .from('users')
-      .insert({ email: normalizedEmail, name })
+      .insert({ email: normalizedEmail, name, auth_provider: auth_provider || 'email' })
       .select()
       .single();
 

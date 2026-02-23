@@ -49,6 +49,16 @@ export default function SignupPage() {
     }
 
     try {
+      // Check if user already exists with Google
+      const providerCheck = await fetch(`/api/auth/check-provider?email=${encodeURIComponent(email)}`);
+      const providerData = await providerCheck.json();
+      
+      if (providerData.exists && providerData.provider === 'google') {
+        setError("משתמש זה כבר רשום דרך Google. נא להתחבר עם Google.");
+        setLoading(false);
+        return;
+      }
+
       const { signUp } = await import("@/lib/auth");
       const data = await signUp(email, password, name);
       
@@ -59,7 +69,7 @@ export default function SignupPage() {
         const userRes = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name }),
+          body: JSON.stringify({ email, name, auth_provider: 'email' }),
         });
         const userData = await userRes.json();
         console.log('👤 User save result:', userData);

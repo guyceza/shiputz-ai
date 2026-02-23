@@ -41,6 +41,16 @@ export default function LoginPage() {
     }
 
     try {
+      // Check if user registered with Google
+      const providerCheck = await fetch(`/api/auth/check-provider?email=${encodeURIComponent(email)}`);
+      const providerData = await providerCheck.json();
+      
+      if (providerData.exists && providerData.provider === 'google') {
+        setError("משתמש זה רשום דרך Google. נא להתחבר עם Google למטה.");
+        setLoading(false);
+        return;
+      }
+
       const { signIn } = await import("@/lib/auth");
       const data = await signIn(email, password);
       

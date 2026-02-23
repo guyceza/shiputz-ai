@@ -533,13 +533,22 @@ export default function VisualizePage() {
   }, [userId]);
 
   // Save visualization to Supabase
-  const saveToHistory = async (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any) => {
-    if (!userId) return;
+  const saveToHistory = async (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, currentUserId?: string) => {
+    // Use passed userId or fallback to state, then to localStorage
+    const effectiveUserId = currentUserId || userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+    
+    if (!effectiveUserId) {
+      console.error("saveToHistory: No userId available", { currentUserId, userId, localStorage: localStorage.getItem("user") });
+      return;
+    }
+    
+    console.log("saveToHistory: Saving with userId:", effectiveUserId);
     
     setSavingToCloud(true);
     try {
-      const saved = await saveVisualization(userId, beforeImage, afterImage, description, analysis, costs);
+      const saved = await saveVisualization(effectiveUserId, beforeImage, afterImage, description, analysis, costs);
       if (saved) {
+        console.log("saveToHistory: Save successful!", saved.id);
         // Add to local state
         const newItem = {
           id: saved.id,
@@ -551,6 +560,8 @@ export default function VisualizePage() {
           createdAt: saved.created_at
         };
         setVisualizationHistory(prev => [newItem, ...prev].slice(0, 50));
+      } else {
+        console.error("saveToHistory: Save returned null");
       }
     } catch (e) {
       console.error("Failed to save to cloud:", e);
@@ -661,9 +672,18 @@ export default function VisualizePage() {
         });
         
         // Save to history (async, don't block UI)
-        if (uploadedImage && data.generatedImage) {
-          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate)
+        // Pass userId explicitly to avoid closure issues
+        const currentUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+        if (uploadedImage && data.generatedImage && currentUserId) {
+          console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
+          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate, currentUserId)
             .catch(e => console.error('Failed to save to history:', e));
+        } else {
+          console.error("handleGenerate: Cannot save - missing data", { 
+            hasUploadedImage: !!uploadedImage, 
+            hasGeneratedImage: !!data.generatedImage, 
+            currentUserId 
+          });
         }
       }
     } catch (err) {

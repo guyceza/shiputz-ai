@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use Gemini to detect products in the image
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
     
     const geminiPayload = {
       contents: [{

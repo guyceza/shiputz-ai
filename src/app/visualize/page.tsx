@@ -359,7 +359,7 @@ export default function VisualizePage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [generatedResult, setGeneratedResult] = useState<{image: string, analysis: string, costs: any} | null>(null);
+  const [generatedResult, setGeneratedResult] = useState<{image: string, beforeImage: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
   const [countdown, setCountdown] = useState(45);
   const [currentTip, setCurrentTip] = useState(0);
@@ -628,6 +628,7 @@ export default function VisualizePage() {
         
         setGeneratedResult({
           image: data.generatedImage,
+          beforeImage: uploadedImage || '',
           analysis: data.analysis,
           costs: data.costEstimate
         });
@@ -1358,8 +1359,16 @@ export default function VisualizePage() {
             {/* Before/After Comparison */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div className="relative">
-                <img src={uploadedImage || ''} alt="לפני" className="w-full rounded-2xl" />
-                <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
+                {(generatedResult.beforeImage || uploadedImage) ? (
+                  <>
+                    <img src={generatedResult.beforeImage || uploadedImage || ''} alt="לפני" className="w-full rounded-2xl" />
+                    <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
+                  </>
+                ) : (
+                  <div className="w-full aspect-square bg-gray-100 rounded-2xl flex items-center justify-center">
+                    <span className="text-gray-400">🖼️ תמונת לפני</span>
+                  </div>
+                )}
               </div>
               <div 
                 className="relative cursor-pointer group"
@@ -1535,7 +1544,7 @@ export default function VisualizePage() {
                 className="relative cursor-pointer group"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
-                  setGeneratedResult({ image: selectedHistoryItem.afterImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
                   setShowShopModal(true);
                   setDetectingProducts(true);
                   const ud = localStorage.getItem("user");

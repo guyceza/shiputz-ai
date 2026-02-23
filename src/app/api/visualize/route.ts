@@ -41,22 +41,26 @@ async function verifyUserExists(userEmail: string): Promise<boolean> {
   }
 }
 
-// Verify user has main subscription (purchased) - required for Vision
-// Returns { hasPurchased: boolean, hasVision: boolean, trialAllowed: boolean }
-async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean }> {
-  if (!userEmail) return { hasPurchased: false };
+// Verify user has BOTH main subscription AND vision subscription
+// After trial, users need: purchased = true AND vision_subscription = true
+async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean, hasVision: boolean, trialUsed: boolean }> {
+  if (!userEmail) return { hasPurchased: false, hasVision: false, trialUsed: false };
   
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('users')
-      .select('purchased')
+      .select('purchased, vision_subscription, vision_trial_used')
       .eq('email', userEmail.toLowerCase())
       .single();
     
-    return { hasPurchased: data?.purchased === true };
+    return { 
+      hasPurchased: data?.purchased === true,
+      hasVision: data?.vision_subscription === true,
+      trialUsed: data?.vision_trial_used === true
+    };
   } catch {
-    return { hasPurchased: false };
+    return { hasPurchased: false, hasVision: false, trialUsed: false };
   }
 }
 
@@ -260,13 +264,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Server-side subscription check - require main subscription for Vision
+    // Server-side subscription check
+    // After trial: require BOTH main subscription (purchased) AND vision subscription
     const subscription = await verifySubscription(userEmail);
-    if (!subscription.hasPurchased) {
-      return NextResponse.json({ 
-        error: "שירות זה דורש מנוי ShiputzAI פעיל",
-        code: "SUBSCRIPTION_REQUIRED"
-      }, { status: 403 });
+    
+    // If trial not used yet, allow access (free trial)
+    if (!subscription.trialUsed) {
+      // Trial allowed - will be marked as used after successful generation
+    } else {
+      // Trial used - need both subscriptions
+      if (!subscription.hasPurchased) {
+        return NextResponse.json({ 
+          error: "שירות זה דורש מנוי ShiputzAI פעיל",
+          code: "SUBSCRIPTION_REQUIRED"
+        }, { status: 403 });
+      }
+      if (!subscription.hasVision) {
+        return NextResponse.json({ 
+          error: "שירות AI Vision דורש מנוי Vision פעיל בנוסף למנוי הרגיל",
+          code: "VISION_SUBSCRIPTION_REQUIRED"
+        }, { status: 403 });
+      }
     }
 
     // Read API key from environment

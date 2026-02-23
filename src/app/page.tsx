@@ -5,6 +5,7 @@ import Link from "next/link";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
 import PricingCard from "@/components/PricingCard";
+import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -81,14 +82,31 @@ export default function Home() {
   
   // Show newsletter popup after 10 seconds (if not already dismissed)
   useEffect(() => {
-    const dismissed = localStorage.getItem('newsletter_popup_dismissed');
-    if (dismissed) return;
+    const checkNewsletter = async () => {
+      // First check localStorage for quick response
+      const localDismissed = localStorage.getItem('newsletter_popup_dismissed');
+      if (localDismissed) return;
+      
+      // For logged in users, also check DB
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user.id) {
+          const dbDismissed = await isNewsletterDismissed(user.id);
+          if (dbDismissed) {
+            localStorage.setItem('newsletter_popup_dismissed', 'true'); // sync to local
+            return;
+          }
+        }
+      }
+      
+      // Show popup after delay
+      setTimeout(() => {
+        setShowNewsletterPopup(true);
+      }, 10000);
+    };
     
-    const timer = setTimeout(() => {
-      setShowNewsletterPopup(true);
-    }, 10000);
-    
-    return () => clearTimeout(timer);
+    checkNewsletter();
   }, []);
 
   const calculateEstimate = () => {
@@ -680,6 +698,12 @@ export default function Home() {
               onClick={() => {
                 setShowNewsletterPopup(false);
                 localStorage.setItem('newsletter_popup_dismissed', 'true');
+                // Also save to DB for logged in users
+                const userData = localStorage.getItem("user");
+                if (userData) {
+                  const user = JSON.parse(userData);
+                  if (user.id) dismissNewsletter(user.id);
+                }
               }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             >

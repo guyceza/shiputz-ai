@@ -15,6 +15,7 @@ import {
 } from "@/lib/projects";
 import { uploadImage, migrateProjectImages, isBase64Image } from "@/lib/storage";
 import { saveVisionHistory, loadVisionHistory, VisionHistoryItem } from "@/lib/vision-history";
+import { getVisionUsage, incrementVisionUsage as incrementVisionUsageDB } from "@/lib/user-settings";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -1208,30 +1209,37 @@ export default function ProjectPage() {
     URL.revokeObjectURL(url);
   };
 
-  // איך השיפוץ שלי יראה? handlers
-  const getVisionUsageToday = (): number => {
-    const today = new Date().toISOString().split('T')[0];
-    const stored = localStorage.getItem('aiVisionUsage');
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.date === today) {
-        return data.count;
+  // Vision usage tracking (from Supabase)
+  const [visionUsageToday, setVisionUsageToday] = useState(0);
+  
+  // Load vision usage on mount
+  useEffect(() => {
+    const loadUsage = async () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user.id) {
+          const usage = await getVisionUsage(user.id);
+          setVisionUsageToday(usage);
+        }
       }
-    }
-    return 0;
+    };
+    loadUsage();
+  }, []);
+  
+  const getVisionUsageToday = (): number => {
+    return visionUsageToday;
   };
 
-  const incrementVisionUsage = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const stored = localStorage.getItem('aiVisionUsage');
-    let count = 1;
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.date === today) {
-        count = data.count + 1;
+  const incrementVisionUsage = async () => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.id) {
+        const newCount = await incrementVisionUsageDB(user.id);
+        setVisionUsageToday(newCount);
       }
     }
-    localStorage.setItem('aiVisionUsage', JSON.stringify({ date: today, count }));
   };
 
   const handleVisionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1279,7 +1287,7 @@ export default function ProjectPage() {
           generatedImage: data.generatedImage,
           costs: data.costs
         });
-        incrementVisionUsage();
+        incrementVisionUsage(); // async, updates DB
         
         // Save to Supabase history
         const userId = userData?.id;

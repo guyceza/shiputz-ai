@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
+// Trial tracking uses /api/vision-trial endpoint
 
 // Fun loading messages
 const loadingMessages = [
@@ -91,29 +92,40 @@ export default function ShopLookPage() {
           }
         }
         
-        // Check trial & subscription status
-        if (currentUserId) {
-          const trialKey = `visualize_trial_${currentUserId}`;
+        // Check trial & subscription status from DB via API
+        if (currentUserId && userEmail) {
+          try {
+            const trialRes = await fetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
+            if (trialRes.ok) {
+              const trialData = await trialRes.json();
+              setTrialUsed(trialData.trialUsed || false);
+            }
+          } catch (e) {
+            console.error("Failed to check trial:", e);
+          }
           const subKey = `visualize_subscription_${currentUserId}`;
-          const trialWasUsed = localStorage.getItem(trialKey) === 'used';
           const hasSub = localStorage.getItem(subKey) === 'active';
-          setTrialUsed(trialWasUsed);
           setHasSubscription(hasSub);
-          setHasAccess(hasSub || !trialWasUsed);
+          setHasAccess(hasSub || !trialUsed);
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         setIsLoggedIn(!!user.id);
         setHasPurchased(user.purchased === true);
-        if (user.id) {
+        if (user.id && user.email) {
           setUserId(user.id);
-          const trialKey = `visualize_trial_${user.id}`;
-          const subKey = `visualize_subscription_${user.id}`;
-          const trialWasUsed = localStorage.getItem(trialKey) === 'used';
-          const hasSub = localStorage.getItem(subKey) === 'active';
-          setTrialUsed(trialWasUsed);
-          setHasSubscription(hasSub);
-          setHasAccess(hasSub || !trialWasUsed);
+          // Check trial from API
+          fetch(`/api/vision-trial?email=${encodeURIComponent(user.email)}`)
+            .then(res => res.json())
+            .then(data => {
+              const trialWasUsed = data.trialUsed || false;
+              const subKey = `visualize_subscription_${user.id}`;
+              const hasSub = localStorage.getItem(subKey) === 'active';
+              setTrialUsed(trialWasUsed);
+              setHasSubscription(hasSub);
+              setHasAccess(hasSub || !trialWasUsed);
+            })
+            .catch(e => console.error("Failed to check trial:", e));
         }
       }
     };
@@ -121,10 +133,17 @@ export default function ShopLookPage() {
   }, []);
 
   // Consume trial when user generates their first visualization
-  const consumeTrial = () => {
+  const consumeTrial = async () => {
     if (userId && !hasSubscription && !trialUsed) {
-      const trialKey = `visualize_trial_${userId}`;
-      localStorage.setItem(trialKey, 'used');
+      const userData = localStorage.getItem("user");
+      const userEmail = userData ? JSON.parse(userData).email : null;
+      if (userEmail) {
+        await fetch('/api/vision-trial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail })
+        });
+      }
       setTrialUsed(true);
     }
   };

@@ -171,10 +171,13 @@ export default function ShopLookPage() {
 
   const analyzeImage = async (imageUrl: string) => {
     try {
+      const userData = localStorage.getItem("user");
+      const userEmailForProducts = userData ? JSON.parse(userData).email : null;
+      
       const response = await fetch('/api/detect-products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageUrl })
+        body: JSON.stringify({ image: imageUrl, userEmail: userEmailForProducts })
       });
       
       if (response.ok) {

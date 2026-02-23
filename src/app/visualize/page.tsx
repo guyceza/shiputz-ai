@@ -651,10 +651,13 @@ export default function VisualizePage() {
     setDetectingProducts(true);
     
     try {
+      const userData = localStorage.getItem("user");
+      const userEmailForProducts = userData ? JSON.parse(userData).email : null;
+      
       const res = await fetch('/api/detect-products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: generatedResult.image })
+        body: JSON.stringify({ image: generatedResult.image, userEmail: userEmailForProducts })
       });
       
       const data = await res.json();
@@ -1534,10 +1537,12 @@ export default function VisualizePage() {
                   setGeneratedResult({ image: selectedHistoryItem.afterImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
                   setShowShopModal(true);
                   setDetectingProducts(true);
+                  const ud = localStorage.getItem("user");
+                  const ue = ud ? JSON.parse(ud).email : null;
                   fetch('/api/detect-products', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: selectedHistoryItem.afterImage })
+                    body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
                   }).then(res => res.json()).then(data => {
                     if (data.items?.length > 0) setDetectedProducts(data.items);
                     setDetectingProducts(false);

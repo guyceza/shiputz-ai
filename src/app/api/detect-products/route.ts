@@ -2,11 +2,47 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from '@/lib/supabase';
+
+// Verify user exists and has premium
+async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id, purchased')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    return { exists: !!data, premium: data?.purchased === true };
+  } catch {
+    return { exists: false, premium: false };
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { image } = body;
+    const { image, userEmail } = body;
+
+    // Auth check - verify user exists and has premium
+    if (!userEmail) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+    
+    const { exists, premium } = await verifyUserPremium(userEmail);
+    if (!exists) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+    
+    if (!premium) {
+      return NextResponse.json({ 
+        error: "Shop The Look זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם." 
+      }, { status: 403 });
+    }
 
     if (!image) {
       return NextResponse.json({ error: "Missing image" }, { status: 400 });

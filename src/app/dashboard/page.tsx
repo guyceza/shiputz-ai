@@ -4,8 +4,17 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AdminPanel from "./admin-panel";
+import { 
+  getProjects, 
+  createProject, 
+  migrateLocalStorageProjects, 
+  cacheProjectsLocally,
+  getCachedProjects,
+  type Project 
+} from "@/lib/projects";
 
-interface Project {
+// Display interface (maps from Supabase format)
+interface DisplayProject {
   id: string;
   name: string;
   budget: number;
@@ -27,7 +36,8 @@ const TIPS = [
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ name?: string; email: string; id?: string } | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<DisplayProject[]>([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
@@ -127,12 +137,41 @@ export default function DashboardPage() {
           setUser(parsedUser);
         }
 
-        // Load projects for THIS user only
+        // Load projects from Supabase (with localStorage migration & fallback)
         if (userId) {
-          const savedProjects = localStorage.getItem(`projects_${userId}`);
-          if (savedProjects) {
-            setProjects(JSON.parse(savedProjects));
+          setProjectsLoading(true);
+          try {
+            // First, migrate any localStorage projects to Supabase (one-time)
+            await migrateLocalStorageProjects(userId);
+            
+            // Load projects from Supabase
+            const supabaseProjects = await getProjects(userId);
+            const displayProjects: DisplayProject[] = supabaseProjects.map(p => ({
+              id: p.id,
+              name: p.name,
+              budget: p.budget,
+              spent: p.spent,
+              createdAt: p.created_at
+            }));
+            setProjects(displayProjects);
+            
+            // Cache locally for offline support
+            cacheProjectsLocally(userId, supabaseProjects);
+          } catch (err) {
+            console.error("Failed to load projects from Supabase:", err);
+            // Fallback to cached localStorage
+            const cached = getCachedProjects(userId);
+            if (cached) {
+              setProjects(cached.map(p => ({
+                id: p.id,
+                name: p.name,
+                budget: p.budget,
+                spent: p.spent,
+                createdAt: p.created_at
+              })));
+            }
           }
+          setProjectsLoading(false);
           
           // Check for localStorage Vision (legacy users)
           const localVision = localStorage.getItem(`visualize_subscription_${userId}`);
@@ -151,11 +190,17 @@ export default function DashboardPage() {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
         
-        // Load projects for THIS user only
+        // Load projects from localStorage (offline fallback)
         if (parsedUser.id) {
-          const savedProjects = localStorage.getItem(`projects_${parsedUser.id}`);
-          if (savedProjects) {
-            setProjects(JSON.parse(savedProjects));
+          const cached = getCachedProjects(parsedUser.id);
+          if (cached) {
+            setProjects(cached.map(p => ({
+              id: p.id,
+              name: p.name,
+              budget: p.budget,
+              spent: p.spent,
+              createdAt: p.created_at
+            })));
           }
         }
       }
@@ -223,34 +268,46 @@ export default function DashboardPage() {
       return;
     }
 
-    const newProject: Project = {
-      id: Date.now().toString(),
-      name: newProjectName,
-      budget: budgetNum,
-      spent: 0,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedProjects = [...projects, newProject];
-    setProjects(updatedProjects);
-    
-    // Save with user-specific key
     try {
+      // Get user ID
       const { getSession } = await import("@/lib/auth");
       const session = await getSession();
       const userId = session?.user?.id || JSON.parse(localStorage.getItem("user") || "{}").id;
-      if (userId) {
-        localStorage.setItem(`projects_${userId}`, JSON.stringify(updatedProjects));
+      
+      if (!userId) {
+        alert("נא להתחבר מחדש");
+        return;
       }
-    } catch {
-      // Fallback - try to get from localStorage user
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        const userId = JSON.parse(userData).id;
-        if (userId) {
-          localStorage.setItem(`projects_${userId}`, JSON.stringify(updatedProjects));
-        }
-      }
+
+      // Create project in Supabase
+      const newProject = await createProject(userId, newProjectName, budgetNum);
+      
+      // Update local state
+      const displayProject: DisplayProject = {
+        id: newProject.id,
+        name: newProject.name,
+        budget: newProject.budget,
+        spent: newProject.spent,
+        createdAt: newProject.created_at
+      };
+      
+      const updatedProjects = [...projects, displayProject];
+      setProjects(updatedProjects);
+      
+      // Update localStorage cache
+      cacheProjectsLocally(userId, updatedProjects.map(p => ({
+        id: p.id,
+        user_id: userId,
+        name: p.name,
+        budget: p.budget,
+        spent: p.spent,
+        created_at: p.createdAt
+      })));
+      
+    } catch (err) {
+      console.error("Failed to create project:", err);
+      alert("שגיאה ביצירת הפרויקט. נסה שוב.");
+      return;
     }
     
     setShowNewProject(false);
@@ -459,7 +516,12 @@ export default function DashboardPage() {
         )}
 
         {/* Projects */}
-        {projects.length === 0 ? (
+        {projectsLoading ? (
+          <div className="border border-gray-100 rounded-2xl p-16 text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-500">טוען פרויקטים...</p>
+          </div>
+        ) : projects.length === 0 ? (
           <div className="border border-gray-100 rounded-2xl p-16 text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">אין פרויקטים עדיין</h2>
             <p className="text-gray-500 mb-8">צור את הפרויקט הראשון שלך והתחל לעקוב אחרי ההוצאות</p>

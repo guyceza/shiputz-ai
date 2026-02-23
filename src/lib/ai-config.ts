@@ -10,13 +10,13 @@
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-2.5-pro",
+  VISION_PRO: "gemini-3.1-pro-preview",
   
   // For fast text tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-2.5-flash",
+  TEXT_FAST: "gemini-3-flash-preview",
   
-  // For image generation (visualize rooms)
-  IMAGE_GEN: "gemini-2.0-flash",
+  // For image generation (Nano Banana Pro)
+  IMAGE_GEN: "gemini-3-pro-image-preview",
 } as const;
 
 // Base URL for Gemini API
@@ -32,20 +32,20 @@ export const MODEL_CAPABILITIES = {
   [AI_MODELS.VISION_PRO]: {
     vision: true,
     text: true,
-    maxTokens: 8192,
-    description: "Best for complex vision tasks"
+    maxTokens: 65536,
+    description: "Gemini 3.1 Pro - best for complex vision tasks"
   },
   [AI_MODELS.TEXT_FAST]: {
     vision: true,
     text: true,
-    maxTokens: 8192,
-    description: "Fast and cheap for simple tasks"
+    maxTokens: 65536,
+    description: "Gemini 3 Flash - fast for simple tasks"
   },
   [AI_MODELS.IMAGE_GEN]: {
     vision: true,
     text: true,
     imageGeneration: true,
     maxTokens: 8192,
-    description: "Experimental - can generate images"
+    description: "Nano Banana Pro - image generation"
   },
 } as const;

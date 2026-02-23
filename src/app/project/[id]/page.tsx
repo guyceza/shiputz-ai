@@ -516,11 +516,19 @@ export default function ProjectPage() {
         base64Images.push(base64);
       }
       
-      // Start multi-scan process
+      // Start multi-scan process - set initial states first
+      setSelectedImage(base64Images[0]);
+      setScanning(true);
       setMultiScanQueue(base64Images);
       setMultiScanIndex(0);
       setMultiScanResults([]);
-      processMultiScan(base64Images, 0);
+      setScanTimer(60);
+      setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+      
+      // Small delay to ensure UI updates before starting
+      setTimeout(() => {
+        processMultiScan(base64Images, 0);
+      }, 100);
       return;
     }
     

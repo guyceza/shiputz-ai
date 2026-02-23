@@ -802,13 +802,18 @@ export default function Home() {
           </div>
           
           <div className="relative bg-gradient-to-br from-sky-50 to-indigo-50 rounded-3xl p-8 md:p-12 border border-sky-100 overflow-hidden">
-            {/* Fabric patch with stitching effect */}
-            <div className="absolute top-6 right-6 w-20 h-20 bg-amber-100 rounded-lg shadow-sm rotate-6 flex items-center justify-center"
+            {/* Fabric patch - positioned in corner, 3D effect */}
+            <div className="absolute -top-2 -right-2 w-16 h-16 rotate-12"
                  style={{
-                   border: '2px dashed #92400e',
-                   backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(251,191,36,0.1) 2px, rgba(251,191,36,0.1) 4px)'
+                   filter: 'drop-shadow(3px 3px 2px rgba(0,0,0,0.2))'
                  }}>
-              <span className="text-3xl -rotate-6">🔨</span>
+              <div className="w-full h-full bg-amber-200 rounded-md flex items-center justify-center"
+                   style={{
+                     border: '2px dashed #b45309',
+                     boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.1)'
+                   }}>
+                <span className="text-2xl -rotate-12">🔨</span>
+              </div>
             </div>
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right relative z-10">
               <p>

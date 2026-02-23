@@ -214,7 +214,7 @@ export default function Home() {
                 )}
                 <Link
                   href="#features"
-                  className="text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 transition-colors"
+                  className="text-gray-900 px-8 py-4 rounded-full text-base border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all"
                 >
                   גלו עוד
                 </Link>

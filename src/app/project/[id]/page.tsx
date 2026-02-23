@@ -131,6 +131,9 @@ export default function ProjectPage() {
   // Expense modal
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [multiScanQueue, setMultiScanQueue] = useState<string[]>([]); // Queue of base64 images
+  const [multiScanIndex, setMultiScanIndex] = useState(0); // Current processing index
+  const [multiScanResults, setMultiScanResults] = useState<Array<{image: string, data: any}>>([]);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -413,11 +416,116 @@ export default function ProjectPage() {
     }));
   };
 
+  // Process multiple receipts sequentially
+  const processMultiScan = async (images: string[], startIndex: number) => {
+    const userData = localStorage.getItem("user");
+    const userEmail = userData ? JSON.parse(userData).email : null;
+    
+    for (let i = startIndex; i < images.length; i++) {
+      setMultiScanIndex(i);
+      setSelectedImage(images[i]);
+      setScanning(true);
+      setScanTimer(60);
+      setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+      
+      try {
+        const response = await fetch("/api/scan-receipt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: images[i], userEmail }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (!data.error) {
+            // Add expense automatically
+            if (project && data.description && data.amount) {
+              const newExpense: Expense = {
+                id: Date.now().toString() + '_' + i,
+                description: data.description,
+                amount: data.amount,
+                category: CATEGORIES.includes(data.category) ? data.category : "אחר",
+                date: new Date().toISOString(),
+                imageUrl: images[i],
+                vendor: data.vendor || undefined,
+                items: data.items || undefined,
+                fullText: data.fullText || undefined,
+                vatAmount: data.vatAmount || undefined,
+                invoiceDate: data.date || undefined,
+              };
+              
+              const updatedProject = {
+                ...project,
+                expenses: [...(project.expenses || []), newExpense],
+                spent: project.spent + data.amount,
+              };
+              setProject(updatedProject);
+              
+              // Save to localStorage
+              const currentUserId = userData ? JSON.parse(userData).id : null;
+              const storageKey = currentUserId ? `projects_${currentUserId}` : "projects";
+              const savedProjects = localStorage.getItem(storageKey);
+              if (savedProjects) {
+                const projects = JSON.parse(savedProjects);
+                const updated = projects.map((p: Project) => p.id === project.id ? updatedProject : p);
+                localStorage.setItem(storageKey, JSON.stringify(updated));
+              }
+              
+              setMultiScanResults(prev => [...prev, { image: images[i], data }]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error scanning receipt ${i + 1}:`, error);
+      }
+    }
+    
+    // Reset states
+    setScanning(false);
+    setMultiScanQueue([]);
+    setMultiScanIndex(0);
+    setSelectedImage(null);
+    setScanTimer(0);
+    
+    // Show success message
+    if (multiScanResults.length > 0 || images.length > 0) {
+      alert(`נסרקו ${images.length} קבלות בהצלחה!`);
+    }
+  };
+
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     // Reset input so same file can be selected again
     e.target.value = '';
+    
+    // Limit to 3 files
+    const filesToProcess = Array.from(files).slice(0, 3);
+    
+    // If multiple files, process them sequentially
+    if (filesToProcess.length > 1) {
+      const base64Images: string[] = [];
+      
+      // Convert all files to base64
+      for (const file of filesToProcess) {
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        base64Images.push(base64);
+      }
+      
+      // Start multi-scan process
+      setMultiScanQueue(base64Images);
+      setMultiScanIndex(0);
+      setMultiScanResults([]);
+      processMultiScan(base64Images, 0);
+      return;
+    }
+    
+    // Single file - original flow
+    const file = filesToProcess[0];
 
     const reader = new FileReader();
     reader.onloadend = async () => {
@@ -1259,7 +1367,7 @@ export default function ProjectPage() {
                 </div>
               )}
 
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
 
               {!project.expenses || project.expenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-12">אין הוצאות עדיין</p>
@@ -1635,7 +1743,19 @@ export default function ProjectPage() {
                   {scanning && (
                     <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center rounded-xl p-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                      <p className="text-gray-800 font-medium mb-1">סורק קבלה...</p>
+                      {multiScanQueue.length > 1 ? (
+                        <>
+                          <p className="text-gray-800 font-medium mb-1">סורק קבלה {multiScanIndex + 1} מתוך {multiScanQueue.length}...</p>
+                          <div className="w-32 h-2 bg-gray-200 rounded-full mt-2 mb-2">
+                            <div 
+                              className="h-full bg-blue-600 rounded-full transition-all duration-300" 
+                              style={{ width: `${((multiScanIndex + 1) / multiScanQueue.length) * 100}%` }}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-gray-800 font-medium mb-1">סורק קבלה...</p>
+                      )}
                       {scanTimer > 0 ? (
                         <p className="text-gray-500 text-sm">עד {scanTimer} שניות</p>
                       ) : (
@@ -1652,7 +1772,7 @@ export default function ProjectPage() {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full h-32 border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-gray-900 hover:text-gray-900 transition-colors"
                 >
-                  <span className="text-sm">צלם קבלה או העלה תמונה</span>
+                  <span className="text-sm">צלם קבלה או העלה תמונות (עד 3)</span>
                 </button>
               )}
             </div>

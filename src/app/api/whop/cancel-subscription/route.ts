@@ -59,11 +59,12 @@ export async function POST(request: NextRequest) {
 
     const cancelData = await cancelRes.json();
 
+    const periodEndTimestamp = renewalEnd || cancelData.renewal_period_end;
     return NextResponse.json({
       success: true,
       message: 'Subscription will be canceled at period end',
       canceledAt: cancelData.canceled_at,
-      periodEnd: renewalEnd || cancelData.renewal_period_end,
+      periodEnd: periodEndTimestamp ? periodEndTimestamp * 1000 : null, // Convert to milliseconds
     });
 
   } catch (error) {
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
       hasSubscription: true,
       status: activeMembership.status,
       cancelAtPeriodEnd: activeMembership.cancel_at_period_end || false,
-      periodEnd: activeMembership.renewal_period_end,
+      periodEnd: activeMembership.renewal_period_end ? activeMembership.renewal_period_end * 1000 : null, // Convert to milliseconds
       plan: activeMembership.plan?.id,
     });
 

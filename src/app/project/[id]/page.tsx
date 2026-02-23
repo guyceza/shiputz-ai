@@ -121,7 +121,7 @@ export default function ProjectPage() {
   const router = useRouter();
   const params = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const quoteInputRef = useRef<HTMLInputElement>(null);
+  // const quoteInputRef = useRef<HTMLInputElement>(null); // Removed - using text input now
   const photoInputRef = useRef<HTMLInputElement>(null);
   
   const [project, setProject] = useState<Project | null>(null);
@@ -174,6 +174,7 @@ export default function ProjectPage() {
   const [showQuoteAnalysis, setShowQuoteAnalysis] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [quoteAnalysis, setQuoteAnalysis] = useState<string | null>(null);
+  const [quoteText, setQuoteText] = useState("");
   
   // Budget breakdown
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -656,38 +657,27 @@ export default function ProjectPage() {
     setScanTimer(0);
   };
 
-  const handleQuoteUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = reader.result as string;
-      setQuoteImage(base64);
-      setShowQuoteAnalysis(true);
-      setAnalyzing(true);
-      setQuoteAnalysis(null);
-      try {
-        const userData = localStorage.getItem("user");
-        const userEmailForQuote = userData ? JSON.parse(userData).email : null;
-        
-        const response = await fetch("/api/analyze-quote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64, budget: project?.budget, userEmail: userEmailForQuote }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setQuoteAnalysis(data.analysis);
-        } else {
-          setQuoteAnalysis(data.error || "לא הצלחתי לנתח את ההצעה. נסה שוב.");
-        }
-      } catch {
-        setQuoteAnalysis("שגיאה בניתוח. נסה שוב.");
+  const handleQuoteAnalysis = async () => {
+    if (!quoteText.trim()) return;
+    
+    setAnalyzing(true);
+    setQuoteAnalysis(null);
+    try {
+      const response = await fetch("/api/analyze-quote-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: quoteText, budget: project?.budget }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setQuoteAnalysis(data.analysis);
+      } else {
+        setQuoteAnalysis(data.error || "לא הצלחתי לנתח את ההצעה. נסה שוב.");
       }
-      setAnalyzing(false);
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setQuoteAnalysis("שגיאה בניתוח. נסה שוב.");
+    }
+    setAnalyzing(false);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1339,12 +1329,11 @@ export default function ProjectPage() {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">כלי AI</h2>
               <div className="grid md:grid-cols-3 gap-4">
                 <button
-                  onClick={() => quoteInputRef.current?.click()}
+                  onClick={() => { setShowQuoteAnalysis(true); setQuoteAnalysis(null); setQuoteText(""); }}
                   className="text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100 transition-all"
                 >
-                  <input ref={quoteInputRef} type="file" accept="image/*" onChange={handleQuoteUpload} className="hidden" />
                   <p className="font-medium text-gray-900 mb-1">ניתוח הצעת מחיר</p>
-                  <p className="text-sm text-gray-500">העלה הצעה לניתוח</p>
+                  <p className="text-sm text-gray-500">בדוק אם המחיר סביר</p>
                 </button>
                 <button
                   onClick={() => setShowAIChat(true)}
@@ -2705,19 +2694,43 @@ export default function ProjectPage() {
               <h2 className="text-xl font-semibold text-gray-900">ניתוח הצעת מחיר</h2>
               <button onClick={() => setShowQuoteAnalysis(false)} className="text-gray-500 hover:text-gray-900">✕</button>
             </div>
-            {analyzing ? (
-              <div className="text-center py-12 text-gray-500">מנתח...</div>
-            ) : (
+            
+            {!quoteAnalysis && !analyzing && (
+              <div className="mb-6">
+                <label className="block text-sm text-gray-600 mb-2">תאר את הצעת המחיר שקיבלת:</label>
+                <textarea
+                  value={quoteText}
+                  onChange={(e) => setQuoteText(e.target.value)}
+                  placeholder="לדוגמה: צביעת דירת 4 חדרים - 8,000 ש״ח&#10;החלפת ברז במטבח - 450 ש״ח&#10;התקנת מזגן כולל נקודה - 2,500 ש״ח"
+                  className="w-full border border-gray-200 rounded-xl p-4 h-32 resize-none text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 text-right"
+                  dir="rtl"
+                />
+                <button
+                  onClick={handleQuoteAnalysis}
+                  disabled={!quoteText.trim()}
+                  className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  נתח הצעה
+                </button>
+              </div>
+            )}
+            
+            {analyzing && (
+              <div className="text-center py-12 text-gray-500">מנתח ומשווה למחירי שוק...</div>
+            )}
+            
+            {quoteAnalysis && !analyzing && (
               <>
                 <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed mb-6">{quoteAnalysis}</div>
                 <button
-                  onClick={() => { setShowQuoteAnalysis(false); setShowSaveQuoteModal(true); }}
+                  onClick={() => { setQuoteAnalysis(null); setQuoteText(""); }}
                   className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 mb-3"
                 >
-                  שמור הצעה להשוואה
+                  נתח הצעה נוספת
                 </button>
               </>
             )}
+            
             <button onClick={() => setShowQuoteAnalysis(false)} className="w-full border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">סגור</button>
           </div>
         </div>

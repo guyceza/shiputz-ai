@@ -1013,9 +1013,33 @@ export default function VisualizePage() {
                   <p className="text-sm text-gray-500 pr-7">10 הדמיות בחודש + Shop the Look</p>
                 </div>
               </div>
+              {/* Bundle Option */}
+              <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white font-medium">🎁 חבילה משתלמת</span>
+                  <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                </div>
+                <p className="text-white/90 text-sm mb-3">Premium + חודש הדמיות AI</p>
+                <Link
+                  href="/checkout?plan=bundle"
+                  className="block w-full text-center bg-white text-gray-900 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all"
+                >
+                  הכל ביחד · ₪169.99
+                </Link>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-white px-3 text-xs text-gray-400">או בנפרד</span>
+                </div>
+              </div>
+              
               <Link
                 href="/checkout"
-                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mt-4"
               >
                 שלב 1: הצטרף ל-ShiputzAI · ₪149.99
               </Link>
@@ -1224,7 +1248,7 @@ export default function VisualizePage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">שירות ההדמיה בשני שלבים</h3>
                 </div>
                 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-4">
                   <div className="border border-gray-200 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
@@ -1240,6 +1264,29 @@ export default function VisualizePage() {
                       <span className="text-xs text-gray-500 mr-auto">₪39.99/חודש</span>
                     </div>
                     <p className="text-xs text-gray-500 pr-7">10 הדמיות + Shop the Look</p>
+                  </div>
+                </div>
+                
+                {/* Bundle Option */}
+                <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-4 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white font-medium text-sm">🎁 חבילה משתלמת</span>
+                    <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                  </div>
+                  <Link
+                    href="/checkout?plan=bundle"
+                    className="block w-full text-center bg-white text-gray-900 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all"
+                  >
+                    הכל ביחד · ₪169.99
+                  </Link>
+                </div>
+                
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-3 text-xs text-gray-400">או בנפרד</span>
                   </div>
                 </div>
                 

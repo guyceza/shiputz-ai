@@ -507,6 +507,17 @@ export async function GET(request: NextRequest) {
             .single();
 
           if (!existing) {
+            // Skip vision_offer email if user already has Vision subscription
+            if (step.template === 'vision_offer' && user.vision_subscription === 'active') {
+              // Mark as sent so we don't check again, but don't actually send
+              await supabase.from('email_sequences').insert({
+                user_email: user.email,
+                sequence_type: sequenceType,
+                day_number: step.day,
+              });
+              continue;
+            }
+            
             let html: string;
             
             if (step.template === 'discount_offer') {

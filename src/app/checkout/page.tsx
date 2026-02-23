@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const ORIGINAL_PRICE = 299.99;
 const SALE_PRICE = 149.99;
+const BUNDLE_PRICE = 169.99;
+const BUNDLE_ORIGINAL = 189.98; // 149.99 + 39.99
 
 function CheckoutContent() {
   const router = useRouter();
@@ -18,12 +20,19 @@ function CheckoutContent() {
   const [discountError, setDiscountError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingCode, setCheckingCode] = useState(false);
+  const [isBundle, setIsBundle] = useState(false);
 
   // Pre-fill from URL params
   useEffect(() => {
     const code = searchParams.get("code");
     if (code) {
       setDiscountCode(code);
+    }
+    
+    // Check if bundle
+    const plan = searchParams.get("plan");
+    if (plan === "bundle") {
+      setIsBundle(true);
     }
     
     // Try to get email from localStorage
@@ -71,9 +80,9 @@ function CheckoutContent() {
     setCheckingCode(false);
   };
 
-  const finalPrice = discountValid 
-    ? SALE_PRICE * (1 - discountPercent / 100) 
-    : SALE_PRICE;
+  const finalPrice = isBundle 
+    ? BUNDLE_PRICE
+    : (discountValid ? SALE_PRICE * (1 - discountPercent / 100) : SALE_PRICE);
 
   const handlePurchase = async () => {
     if (!email.trim()) {
@@ -87,8 +96,9 @@ function CheckoutContent() {
     // Use discounted plan if discount code is valid
     const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
     const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $35.99 (10% off)
+    const WHOP_PLAN_BUNDLE = "plan_BUNDLE_TODO";        // Premium + 1 month Vision - UPDATE WITH REAL ID
     
-    const planId = discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
+    const planId = isBundle ? WHOP_PLAN_BUNDLE : (discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR);
     
     // Create checkout session with metadata (discount code will be marked as used by webhook)
     try {
@@ -132,39 +142,84 @@ function CheckoutContent() {
           השלמת רכישה
         </h1>
         <p className="text-gray-500 text-center mb-8">
-          תשלום חד פעמי · גישה לכל משך הפרויקט
+          {isBundle ? "חבילה משתלמת · Premium + הדמיות AI" : "תשלום חד פעמי · גישה לכל משך הפרויקט"}
         </p>
 
         {/* Price Card */}
         <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-gray-900 font-medium">ShiputzAI Pro</span>
-            <div className="text-left">
-              <span className="text-gray-400 line-through text-sm">₪{ORIGINAL_PRICE}</span>
-              <span className="text-2xl font-bold text-gray-900 mr-2">₪{SALE_PRICE}</span>
-            </div>
-          </div>
-          
-          <ul className="text-sm text-gray-600 space-y-2 mb-4">
-            <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              מעקב תקציב ללא הגבלה
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              סריקת קבלות AI
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              ניתוח הצעות מחיר
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              עוזר AI אישי
-            </li>
-          </ul>
+          {isBundle ? (
+            <>
+              {/* Bundle Header */}
+              <div className="bg-gradient-to-r from-purple-500 to-blue-500 -m-6 mb-4 p-4 rounded-t-2xl">
+                <div className="flex justify-between items-center text-white">
+                  <span className="font-medium">🎁 חבילה משתלמת</span>
+                  <span className="bg-white/20 px-2 py-1 rounded-full text-xs">חוסך ₪20</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-900 font-medium">ShiputzAI + הדמיות AI</span>
+                <div className="text-left">
+                  <span className="text-gray-400 line-through text-sm">₪{BUNDLE_ORIGINAL}</span>
+                  <span className="text-2xl font-bold text-gray-900 mr-2">₪{BUNDLE_PRICE}</span>
+                </div>
+              </div>
+              
+              <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  <strong>ShiputzAI Premium</strong> - מעקב תקציב, קבלות, התראות
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-500">✓</span>
+                  <strong>חודש הדמיות AI</strong> - 10 הדמיות + Shop the Look
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  עוזר AI אישי
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  ניתוח הצעות מחיר
+                </li>
+              </ul>
+              
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 text-sm text-blue-700">
+                💡 אחרי החודש הראשון, מנוי הדמיות ממשיך ב-₪39.99/חודש (אפשר לבטל בכל עת)
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-900 font-medium">ShiputzAI Pro</span>
+                <div className="text-left">
+                  <span className="text-gray-400 line-through text-sm">₪{ORIGINAL_PRICE}</span>
+                  <span className="text-2xl font-bold text-gray-900 mr-2">₪{SALE_PRICE}</span>
+                </div>
+              </div>
+              
+              <ul className="text-sm text-gray-600 space-y-2 mb-4">
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  מעקב תקציב ללא הגבלה
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  סריקת קבלות AI
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  ניתוח הצעות מחיר
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  עוזר AI אישי
+                </li>
+              </ul>
+            </>
+          )}
 
-          {discountValid && (
+          {!isBundle && discountValid && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
               <div className="text-center">
                 <div className="text-green-700 font-bold text-lg mb-2">🎉 הקוד תקף!</div>
@@ -196,7 +251,8 @@ function CheckoutContent() {
           />
         </div>
 
-        {/* Discount Code */}
+        {/* Discount Code - hide for bundle */}
+        {!isBundle && (
         <div className="mb-6">
           <label className="block text-sm text-gray-600 mb-2">קוד הנחה (אופציונלי)</label>
           <div className="flex gap-2">
@@ -230,6 +286,7 @@ function CheckoutContent() {
             <p className="text-green-600 text-sm mt-2">✓ קוד הנחה הופעל!</p>
           )}
         </div>
+        )}
 
         {/* Purchase Button */}
         <button

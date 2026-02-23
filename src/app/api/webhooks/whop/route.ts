@@ -216,6 +216,7 @@ export async function POST(request: NextRequest) {
     // Plan IDs
     const PREMIUM_PLANS = ['plan_gtlFi4zoHPy80', 'plan_9kPvCqLkwwmUc']; // One-time premium
     const VISION_PLANS = ['plan_ORVfC8pmG328G', 'plan_786h1Ueozm30s'];  // Monthly Vision AI ($11.99 and $5.99 first month)
+    const BUNDLE_PLANS = ['plan_BUNDLE_TODO'];  // Premium + 1 month Vision (₪169.99) - UPDATE WITH REAL ID
 
     // Handle successful payment / membership activation
     if (action === 'membership.went_valid' || action === 'payment.succeeded' || action === 'membership_went_valid' || action === 'payment_succeeded') {
@@ -228,8 +229,42 @@ export async function POST(request: NextRequest) {
         const supabase = createServiceClient();
         const isVisionPlan = VISION_PLANS.includes(planId);
         const isPremiumPlan = PREMIUM_PLANS.includes(planId);
+        const isBundlePlan = BUNDLE_PLANS.includes(planId);
 
-        if (isVisionPlan) {
+        if (isBundlePlan) {
+          // Bundle: Premium + 1 month Vision
+          // Set both purchased AND vision_subscription
+          const { error: bundleError } = await supabase
+            .from('users')
+            .update({ 
+              purchased: true,
+              purchased_at: new Date().toISOString(),
+              vision_subscription: 'active'
+            })
+            .eq('email', email.toLowerCase());
+
+          if (bundleError) {
+            console.error('Error updating bundle purchase:', bundleError);
+          } else {
+            console.log(`User ${email} Bundle activated (Premium + Vision)`);
+          }
+          
+          // Send Premium welcome email (not Vision, since it's included)
+          await sendWelcomeEmail(email, name);
+          
+          // Mark day 0 of purchased sequence as sent
+          try {
+            await supabase.from('email_sequences').insert({
+              user_email: email.toLowerCase(),
+              sequence_type: 'purchased',
+              day_number: 0,
+            });
+          } catch (e: any) {
+            if (!e?.code?.includes('23505')) {
+              console.error('Failed to record email sequence:', e);
+            }
+          }
+        } else if (isVisionPlan) {
           // Vision AI subscription - set vision_subscription to active
           const { error: visionError } = await supabase
             .from('users')

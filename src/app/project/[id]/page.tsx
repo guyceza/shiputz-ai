@@ -13,6 +13,7 @@ import {
   type Project as SupabaseProject,
   type ProjectData
 } from "@/lib/projects";
+import { uploadImage, migrateProjectImages, isBase64Image } from "@/lib/storage";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -411,6 +412,25 @@ export default function ProjectPage() {
           }
           
           setProject(projectData);
+          
+          // Migrate base64 images to Supabase Storage in background
+          migrateProjectImages(projectData, userId).then(async (migrated) => {
+            if (migrated) {
+              console.log('Migrated base64 images to Supabase Storage');
+              // Save updated project with URLs instead of base64
+              const dataToSave: ProjectData = {
+                expenses: projectData.expenses,
+                categoryBudgets: projectData.categoryBudgets,
+                phases: projectData.phases,
+                tasks: projectData.tasks,
+                photos: projectData.photos,
+                suppliers: projectData.suppliers,
+                savedQuotes: projectData.savedQuotes
+              };
+              await saveProjectData(projectData.id, dataToSave, projectData.spent);
+              setProject({ ...projectData }); // Trigger re-render with URLs
+            }
+          }).catch(err => console.error('Image migration failed:', err));
         } else {
           // Project not found in Supabase, try localStorage
           const cachedProject = getCachedProject(userId, params.id as string);
@@ -884,13 +904,26 @@ export default function ProjectPage() {
     setChatLoading(false);
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!project || !description || !amount) return;
     
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
       alert("נא להזין סכום תקין");
       return;
+    }
+    
+    // Upload image to Supabase Storage if exists
+    let imageUrl = selectedImage || undefined;
+    if (selectedImage && isBase64Image(selectedImage)) {
+      const userData = localStorage.getItem("user");
+      const userId = userData ? JSON.parse(userData).id : null;
+      if (userId) {
+        const uploadedUrl = await uploadImage(selectedImage, userId, 'receipts');
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
     }
     
     const newExpense: Expense = {
@@ -900,7 +933,7 @@ export default function ProjectPage() {
       category,
       date: new Date().toISOString(),
       invoiceDate: scannedDate || undefined,
-      imageUrl: selectedImage || undefined,
+      imageUrl,
       vendor: scannedVendor || undefined,
       items: scannedItems.length > 0 ? scannedItems : undefined,
       fullText: scannedFullText || undefined,
@@ -968,11 +1001,25 @@ export default function ProjectPage() {
     saveProject({ ...project, tasks: project.tasks.filter(t => t.id !== taskId) });
   };
 
-  const addPhoto = () => {
+  const addPhoto = async () => {
     if (!project || !selectedPhoto) return;
+    
+    // Upload image to Supabase Storage
+    let imageUrl = selectedPhoto;
+    if (isBase64Image(selectedPhoto)) {
+      const userData = localStorage.getItem("user");
+      const userId = userData ? JSON.parse(userData).id : null;
+      if (userId) {
+        const uploadedUrl = await uploadImage(selectedPhoto, userId, 'photos');
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
+    }
+    
     const newPhoto: ProgressPhoto = {
       id: Date.now().toString(),
-      imageUrl: selectedPhoto,
+      imageUrl,
       date: new Date().toISOString(),
       description: photoDescription,
     };
@@ -1036,7 +1083,7 @@ export default function ProjectPage() {
     setSupplierNotes("");
   };
 
-  const saveQuote = () => {
+  const saveQuote = async () => {
     if (!project || !quoteSupplierName || !quoteAmount) return;
     
     const amountNum = parseFloat(quoteAmount);
@@ -1045,13 +1092,26 @@ export default function ProjectPage() {
       return;
     }
     
+    // Upload image to Supabase Storage if exists
+    let imageUrl = quoteImage || undefined;
+    if (quoteImage && isBase64Image(quoteImage)) {
+      const userData = localStorage.getItem("user");
+      const userId = userData ? JSON.parse(userData).id : null;
+      if (userId) {
+        const uploadedUrl = await uploadImage(quoteImage, userId, 'quotes');
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+        }
+      }
+    }
+    
     const newQuote: SavedQuote = {
       id: Date.now().toString(),
       supplierName: quoteSupplierName,
       description: quoteDescription,
       amount: amountNum,
       date: new Date().toISOString(),
-      imageUrl: quoteImage || undefined,
+      imageUrl,
     };
     saveProject({ ...project, savedQuotes: [...(project.savedQuotes || []), newQuote] });
     setShowSaveQuoteModal(false);

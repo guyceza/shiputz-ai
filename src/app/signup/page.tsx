@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Check if already logged in
@@ -38,6 +39,12 @@ export default function SignupPage() {
 
     if (!name || !email || !password) {
       setError("נא למלא את כל השדות");
+      setLoading(false);
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError("יש לאשר את תנאי השימוש");
       setLoading(false);
       return;
     }
@@ -201,6 +208,20 @@ export default function SignupPage() {
             {error && (
               <p className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</p>
             )}
+
+            {/* Terms checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+              />
+              <span className="text-sm text-gray-600">
+                קראתי ואני מסכים/ה ל
+                <a href="/privacy" className="text-gray-900 underline hover:no-underline" target="_blank">תנאי השימוש ומדיניות הפרטיות</a>
+              </span>
+            </label>
 
             <button
               type="submit"

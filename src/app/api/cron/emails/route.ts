@@ -300,13 +300,14 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
           </p>
         </div>
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: rgba(255,255,255,0.9); margin: 0 0 8px;">מחיר מיוחד למנויי ShiputzAI</p>
-          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0;">₪30<span style="font-size: 16px; font-weight: 400;">/חודש</span></p>
-          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 8px 0 0; text-decoration: line-through;">במקום ₪40</p>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.9); margin: 0 0 8px;">🎁 הנחה מיוחדת למנויי ShiputzAI</p>
+          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0;">₪19.99<span style="font-size: 16px; font-weight: 400;"> לחודש הראשון</span></p>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 8px 0 0; text-decoration: line-through;">במקום ₪39.99</p>
+          <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0;">אחר כך ₪39.99/חודש · ביטול בכל עת</p>
         </div>
       `,
-      cta: 'לנסות עכשיו',
-      url: 'https://shipazti.com/checkout-vision'
+      cta: 'לנסות עכשיו בהנחה',
+      url: 'https://whop.com/checkout/plan_786h1Ueozm30s'
     },
 
     // === NON-PURCHASED SEQUENCE ===

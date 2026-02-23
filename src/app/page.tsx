@@ -802,9 +802,14 @@ export default function Home() {
           </div>
           
           <div className="relative bg-gradient-to-br from-sky-50 to-indigo-50 rounded-3xl p-8 md:p-12 border border-sky-100 overflow-hidden">
-            {/* Decorative patch */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-200/40 to-indigo-200/40 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute top-4 right-4 text-4xl opacity-30">🏠</div>
+            {/* Fabric patch with stitching effect */}
+            <div className="absolute top-6 right-6 w-20 h-20 bg-amber-100 rounded-lg shadow-sm rotate-6 flex items-center justify-center"
+                 style={{
+                   border: '2px dashed #92400e',
+                   backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(251,191,36,0.1) 2px, rgba(251,191,36,0.1) 4px)'
+                 }}>
+              <span className="text-3xl -rotate-6">🔨</span>
+            </div>
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right relative z-10">
               <p>
                 <span className="text-gray-900 font-medium">בנינו את Shipazti כי עברנו את זה בעצמנו.</span> שיפוצים שיצאו משליטה, קבלות שהלכו לאיבוד, והרגשה שמישהו תמיד מנפח לנו את המחיר.

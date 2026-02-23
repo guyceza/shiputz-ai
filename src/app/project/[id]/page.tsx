@@ -316,13 +316,34 @@ export default function ProjectPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const userData = localStorage.getItem("user");
-      if (!userData) {
+      let userData = localStorage.getItem("user");
+      let user = userData ? JSON.parse(userData) : null;
+      
+      // If localStorage user is missing or incomplete, try Supabase session
+      if (!user?.id || !user?.email) {
+        try {
+          const { getSession } = await import("@/lib/auth");
+          const session = await getSession();
+          if (session?.user) {
+            user = {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.user_metadata?.name || "",
+              purchased: user?.purchased || false
+            };
+            // Fix localStorage
+            localStorage.setItem("user", JSON.stringify(user));
+          }
+        } catch (e) {
+          console.error("Session check failed:", e);
+        }
+      }
+      
+      if (!user?.id) {
         router.push("/login");
         return;
       }
       
-      const user = JSON.parse(userData);
       const userId = user.id;
       const email = user.email;
       setUserEmail(email);

@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
+const ADMIN_EMAILS = ['guyceza@gmail.com'];
+
+// Verify admin exists in database (not just string match)
+async function verifyAdmin(email: string | null): Promise<boolean> {
+  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
+    return false;
+  }
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from('users')
+    .select('email')
+    .eq('email', email.toLowerCase())
+    .single();
+  return !!data;
+}
+
 // GET - Check if email should have trial reset
 export async function GET(request: NextRequest) {
   try {
@@ -54,7 +70,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, adminEmail } = body;
     
-    if (adminEmail !== 'guyceza@gmail.com') {
+    const isAdmin = await verifyAdmin(adminEmail);
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     
@@ -96,7 +113,8 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     const { email, adminEmail } = body;
     
-    if (adminEmail !== 'guyceza@gmail.com') {
+    const isAdmin = await verifyAdmin(adminEmail);
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     

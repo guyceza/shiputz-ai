@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const WHOP_API_KEY = process.env.WHOP_API_KEY || 'apik_tR2AgicmyYyuX_C4452549_C_a790e2075322e366d45eb7bf92833006fe6774abd805e931fd0f5ae327e8b2';
+const WHOP_API_KEY = process.env.WHOP_API_KEY;
 const WHOP_PRODUCT_ID = 'prod_ymF9Of2pEXLEY'; // ShiputzAI
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_123'; // Will be set in Vercel
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 // Import email template dynamically to avoid build issues
 async function sendCancellationEmail(email: string, periodEnd: number | null) {
@@ -37,6 +37,11 @@ async function sendCancellationEmail(email: string, periodEnd: number | null) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!WHOP_API_KEY) {
+      console.error('WHOP_API_KEY not configured');
+      return NextResponse.json({ error: 'Service not configured' }, { status: 500 });
+    }
+    
     const { email } = await request.json();
     
     if (!email) {
@@ -116,6 +121,10 @@ export async function GET(request: NextRequest) {
   
   if (!email) {
     return NextResponse.json({ error: 'Email required' }, { status: 400 });
+  }
+  
+  if (!WHOP_API_KEY) {
+    return NextResponse.json({ hasSubscription: false });
   }
 
   try {

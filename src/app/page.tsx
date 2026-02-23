@@ -92,8 +92,13 @@ export default function Home() {
   }, []);
 
   const calculateEstimate = () => {
-    const size = parseInt(calcSize);
-    const bathrooms = parseInt(calcBathrooms);
+    const size = parseInt(calcSize) || 0;
+    const bathrooms = parseInt(calcBathrooms) || 0;
+    
+    if (size <= 0) {
+      setCalcResult(null);
+      return;
+    }
     
     // Base price per sqm by type (2026 market data - based on Midrag.co.il real transactions)
     // Midrag data: Full renovation 90 sqm = ₪120,000-190,000 (avg ₪1,333-2,111/sqm)

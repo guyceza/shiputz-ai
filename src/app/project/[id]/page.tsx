@@ -418,10 +418,13 @@ export default function ProjectPage() {
 
   // Process multiple receipts sequentially
   const processMultiScan = async (images: string[], startIndex: number) => {
+    console.log("processMultiScan called with", images.length, "images, starting at", startIndex);
     const userData = localStorage.getItem("user");
     const userEmail = userData ? JSON.parse(userData).email : null;
+    console.log("userEmail:", userEmail);
     
     for (let i = startIndex; i < images.length; i++) {
+      console.log("Processing image", i + 1, "of", images.length);
       setMultiScanIndex(i);
       setSelectedImage(images[i]);
       setScanning(true);
@@ -495,15 +498,18 @@ export default function ProjectPage() {
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    console.log("Files selected:", files?.length);
     if (!files || files.length === 0) return;
     // Reset input so same file can be selected again
     e.target.value = '';
     
     // Limit to 3 files
     const filesToProcess = Array.from(files).slice(0, 3);
+    console.log("Files to process:", filesToProcess.length);
     
     // If multiple files, process them sequentially
     if (filesToProcess.length > 1) {
+      console.log("Starting multi-file processing...");
       const base64Images: string[] = [];
       
       // Convert all files to base64
@@ -517,6 +523,9 @@ export default function ProjectPage() {
       }
       
       // Start multi-scan process - set initial states first
+      console.log("Converted to base64, count:", base64Images.length);
+      console.log("First image length:", base64Images[0]?.length);
+      
       setSelectedImage(base64Images[0]);
       setScanning(true);
       setMultiScanQueue(base64Images);
@@ -525,8 +534,11 @@ export default function ProjectPage() {
       setScanTimer(60);
       setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
       
+      console.log("States set, starting processMultiScan...");
+      
       // Small delay to ensure UI updates before starting
       setTimeout(() => {
+        console.log("Timeout fired, calling processMultiScan");
         processMultiScan(base64Images, 0);
       }, 100);
       return;

@@ -50,8 +50,10 @@ async function sendVisionWelcomeEmail(email: string, name?: string) {
   const html = `
     <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #111; margin: 0;">🎨 ברוך הבא למנוי הדמיות AI!</h1>
+        <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 24px; font-weight: 600; color: #111; vertical-align: middle;">ShiputzAI</span>
       </div>
+      
+      <h2 style="color: #111; text-align: center; margin-bottom: 24px;">🎨 ברוך הבא למנוי הדמיות AI!</h2>
       
       <p style="font-size: 16px; color: #333;">היי ${name || 'משפץ יקר'},</p>
       
@@ -125,8 +127,10 @@ async function sendWelcomeEmail(email: string, name?: string) {
   const html = `
     <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Premium!</h1>
+        <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 24px; font-weight: 600; color: #111; vertical-align: middle;">ShiputzAI</span>
       </div>
+      
+      <h2 style="color: #111; text-align: center; margin-bottom: 24px;">🎉 ברוך הבא ל-ShiputzAI Premium!</h2>
       
       <p style="font-size: 16px; color: #333;">היי ${name || 'משפץ יקר'},</p>
       

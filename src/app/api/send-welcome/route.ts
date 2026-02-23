@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
     
     const html = `
       <div dir="rtl" style="font-family: -apple-system, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="color: #111; font-size: 24px; font-weight: 600; margin-bottom: 24px;">👋 ברוך הבא ל-ShiputzAI!</h1>
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 24px; font-weight: 600; color: #111; vertical-align: middle;">ShiputzAI</span>
+        </div>
+        <h2 style="color: #111; font-size: 22px; font-weight: 600; margin-bottom: 24px; text-align: center;">👋 ברוך הבא!</h2>
         <p style="color: #333; font-size: 16px; line-height: 1.6;">היי ${displayName},</p>
         <p style="color: #333; font-size: 16px; line-height: 1.6;">תודה שנרשמת! אנחנו כאן כדי לעזור לך לנהל את השיפוץ בצורה חכמה.</p>
         <p style="color: #333; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">ShiputzAI עוזר לך לעקוב אחרי התקציב, לסרוק קבלות, ולקבל התראות לפני שחורגים.</p>

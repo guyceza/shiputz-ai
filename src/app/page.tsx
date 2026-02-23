@@ -18,32 +18,42 @@ export default function Home() {
       try {
         // First check localStorage (faster)
         const userData = localStorage.getItem("user");
+        let userEmail: string | null = null;
+        
         if (userData) {
           const user = JSON.parse(userData);
           if (user.id) {
             setIsLoggedIn(true);
             setIsAdmin(user.isAdmin === true);
             setIsPremium(user.purchased === true);
-            // Check vision subscription
-            const visionSub = localStorage.getItem(`visualize_subscription_${user.id}`);
-            setHasVisionSubscription(visionSub === 'active');
-            return;
+            userEmail = user.email;
           }
         }
         
         // Fallback to Supabase session
-        const { getSession } = await import("@/lib/auth");
-        const session = await getSession();
-        if (session?.user) {
-          setIsLoggedIn(true);
-          setIsAdmin(session.user.email === "guyceza@gmail.com");
-          // Check premium status from localStorage user data
-          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-          setIsPremium(storedUser.purchased === true);
-          // Check vision subscription
-          if (storedUser.id) {
-            const visionSub = localStorage.getItem(`visualize_subscription_${storedUser.id}`);
-            setHasVisionSubscription(visionSub === 'active');
+        if (!userEmail) {
+          const { getSession } = await import("@/lib/auth");
+          const session = await getSession();
+          if (session?.user) {
+            setIsLoggedIn(true);
+            setIsAdmin(session.user.email === "guyceza@gmail.com");
+            userEmail = session.user.email || null;
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            setIsPremium(storedUser.purchased === true);
+          }
+        }
+        
+        // Check premium & vision from database (most reliable)
+        if (userEmail) {
+          try {
+            const res = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
+            if (res.ok) {
+              const data = await res.json();
+              setIsPremium(data.hasPremium || false);
+              setHasVisionSubscription(data.hasVision || false);
+            }
+          } catch (e) {
+            console.error("Premium/Vision check failed:", e);
           }
         }
       } catch {
@@ -52,11 +62,6 @@ export default function Home() {
         setIsLoggedIn(!!user.id);
         setIsAdmin(user.isAdmin === true);
         setIsPremium(user.purchased === true);
-        // Check vision subscription
-        if (user.id) {
-          const visionSub = localStorage.getItem(`visualize_subscription_${user.id}`);
-          setHasVisionSubscription(visionSub === 'active');
-        }
       }
     };
     checkAuth();
@@ -527,7 +532,7 @@ export default function Home() {
                   href="/visualize"
                   className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 hover-bounce hover-shine"
                 >
-                  נסו עכשיו
+                  {hasVisionSubscription ? '🎨 צור הדמיה' : 'נסו עכשיו'}
                 </Link>
                 <Link
                   href="/shop-look"

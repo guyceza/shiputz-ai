@@ -4,6 +4,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { getMidragPricingReference } from "@/lib/pricing-data";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI - מערכת לניהול שיפוצים עם בינה מלאכותית.
@@ -43,8 +44,25 @@ const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI 
 2. התמקד בערך שהמוצר נותן
 3. אם מישהו מתעניין, עודד אותו להירשם
 4. אם יש שאלה שאתה לא יודע - הפנה ל-support@shipazti.com
-5. תשובות קצרות וממוקדות (2-3 משפטים מקסימום)
-6. השתמש באימוג'ים במידה 👍`;
+5. תשובות קצרות וממוקדות
+6. השתמש באימוג'ים במידה 👍
+
+🔍 ניתוח הצעות מחיר:
+אם מישהו מציין שקיבל הצעת מחיר או שואל אם מחיר סביר - השווה למחירי השוק למטה וענה בפורמט:
+- ✅ מחיר סביר (בטווח השוק)
+- ⚠️ יקר ב-10-25% מהשוק
+- ❌ יקר מדי! (25%+ מעל השוק)
+- 🟢 מציאה! (מתחת לטווח)
+
+ציין את מחיר השוק לפי מידרג והאחוז מעל/מתחת.`;
+
+// Dynamic prompt with pricing
+function getFullSystemPrompt(): string {
+  return SYSTEM_PROMPT + `
+
+=== מחירי שוק (מידרג) ===
+${getMidragPricingReference()}`;
+}
 
 // Simple rate limiting (10 requests per minute per IP)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -120,7 +138,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           contents,
           systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
+            parts: [{ text: getFullSystemPrompt() }]
           },
           generationConfig: {
             temperature: 0.7,

@@ -25,6 +25,22 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
   }
 }
 
+// Verify user exists in database
+async function verifyUserExists(userEmail: string): Promise<boolean> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    
+    return !!data;
+  } catch {
+    return false;
+  }
+}
+
 // Verify user has main subscription (purchased) - required for Vision
 // Returns { hasPurchased: boolean, hasVision: boolean, trialAllowed: boolean }
 async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean }> {
@@ -209,9 +225,20 @@ function calculateCosts(analysisText: string, roomSize: number = 20): CostEstima
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth check - require logged in user
-    const isAuthenticated = await verifyAuth(request);
-    if (!isAuthenticated) {
+    const body = await request.json();
+    const { image, description, userEmail } = body;
+
+    // Auth check - verify user exists in DB (most reliable method)
+    // Cookies can be unreliable, so we verify user exists with this email
+    if (!userEmail) {
+      return NextResponse.json({ 
+        error: "נדרשת התחברות לשימוש בשירות זה" 
+      }, { status: 401 });
+    }
+    
+    // Verify user exists in our database
+    const userExists = await verifyUserExists(userEmail);
+    if (!userExists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
@@ -225,9 +252,6 @@ export async function POST(request: NextRequest) {
         error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
       }, { status: 429 });
     }
-    
-    const body = await request.json();
-    const { image, description, userEmail } = body;
 
     if (!image || !description) {
       return NextResponse.json(

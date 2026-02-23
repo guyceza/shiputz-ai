@@ -2693,30 +2693,30 @@ export default function ProjectPage() {
 
       {/* Quote Analysis Modal */}
       {showQuoteAnalysis && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl">
             {/* Header */}
-            <div className="bg-white/10 backdrop-blur px-6 py-4 flex items-center justify-between border-b border-white/10">
+            <div className="bg-gray-900 px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-white">ניתוח הצעת מחיר</h2>
               <button onClick={() => setShowQuoteAnalysis(false)} className="text-white/60 hover:text-white text-2xl leading-none">&times;</button>
             </div>
             
             <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
               {/* Input State */}
-              {!quoteAnalysis && !analyzing && (
+              {!quoteAnalysis && !analyzing && !quoteError && (
                 <div>
-                  <label className="block text-sm text-purple-200 mb-3">תאר את הצעת המחיר שקיבלת:</label>
+                  <label className="block text-sm text-gray-600 mb-3">תאר את הצעת המחיר שקיבלת:</label>
                   <textarea
                     value={quoteText}
                     onChange={(e) => setQuoteText(e.target.value)}
                     placeholder="לדוגמה:&#10;צביעת דירת 4 חדרים - 8,000 ש״ח&#10;החלפת ברז במטבח - 450 ש״ח&#10;התקנת מזגן כולל נקודה - 2,500 ש״ח"
-                    className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 h-36 resize-none text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent text-right"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 h-36 resize-none text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-right"
                     dir="rtl"
                   />
                   <button
                     onClick={handleQuoteAnalysis}
                     disabled={!quoteText.trim()}
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium mt-5 hover:from-purple-600 hover:to-indigo-600 transition-all disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed shadow-lg"
+                    className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium mt-5 hover:bg-gray-800 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     נתח הצעה
                   </button>
@@ -2727,36 +2727,36 @@ export default function ProjectPage() {
               {analyzing && (
                 <div className="py-16 flex flex-col items-center justify-center">
                   <div className="relative w-20 h-20 mb-6">
-                    <div className="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
-                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-400 animate-spin"></div>
-                    <div className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-900 animate-spin"></div>
+                    <div className="absolute inset-3 rounded-full bg-gray-900 flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
                     </div>
                   </div>
-                  <p className="text-white/90 font-medium text-lg mb-2">מנתח את ההצעה</p>
-                  <p className="text-purple-300/70 text-sm">משווה למחירי שוק ממידרג...</p>
+                  <p className="text-gray-900 font-medium text-lg mb-2">מנתח את ההצעה</p>
+                  <p className="text-gray-500 text-sm">משווה למחירי שוק ממידרג...</p>
                 </div>
               )}
               
               {/* Error State */}
               {quoteError && !analyzing && (
                 <div className="py-10 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mb-5">
-                    <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-5">
+                    <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
-                  <p className="text-white font-medium text-lg mb-2">לא הצלחתי להבין את ההצעה</p>
-                  <p className="text-purple-200/70 text-sm mb-6 max-w-xs">
+                  <p className="text-gray-900 font-medium text-lg mb-2">לא הצלחתי להבין את ההצעה</p>
+                  <p className="text-gray-500 text-sm mb-6 max-w-xs">
                     כדי לנתח הצעת מחיר, כתוב את סוג העבודה והמחיר שקיבלת.
                     <br />
                     לדוגמה: &quot;צביעת דירת 3 חדרים - 5,000 ש״ח&quot;
                   </p>
                   <button
                     onClick={() => { setQuoteError(null); setQuoteText(""); }}
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium hover:from-purple-600 hover:to-indigo-600 transition-all shadow-lg"
+                    className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium hover:bg-gray-800 transition-all"
                   >
                     נסה שוב
                   </button>
@@ -2766,19 +2766,19 @@ export default function ProjectPage() {
               {/* Results State */}
               {quoteAnalysis && !analyzing && !quoteError && (
                 <>
-                  <div className="bg-white/10 backdrop-blur rounded-2xl p-5 mb-5 border border-white/10">
-                    <div className="whitespace-pre-wrap text-white/90 text-sm leading-relaxed">{quoteAnalysis}</div>
+                  <div className="bg-gray-50 rounded-2xl p-5 mb-5 border border-gray-100">
+                    <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">{quoteAnalysis}</div>
                   </div>
                   <button
                     onClick={() => { setQuoteAnalysis(null); setQuoteText(""); }}
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium hover:from-purple-600 hover:to-indigo-600 transition-all shadow-lg mb-3"
+                    className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium hover:bg-gray-800 transition-all mb-3"
                   >
                     נתח הצעה נוספת
                   </button>
                 </>
               )}
               
-              <button onClick={() => setShowQuoteAnalysis(false)} className="w-full bg-white/10 text-white/80 py-3 rounded-full hover:bg-white/20 transition-all border border-white/10">סגור</button>
+              <button onClick={() => setShowQuoteAnalysis(false)} className="w-full bg-gray-100 text-gray-700 py-3 rounded-full hover:bg-gray-200 transition-all">סגור</button>
             </div>
           </div>
         </div>

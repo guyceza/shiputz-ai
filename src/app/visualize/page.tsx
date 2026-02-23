@@ -972,7 +972,7 @@ export default function VisualizePage() {
               </ul>
               
               <Link
-                href="https://whop.com/checkout/plan_ORVfC8pmG328G"
+                href="/checkout-vision"
                 className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
               >
                 התחילו עכשיו
@@ -1189,7 +1189,7 @@ export default function VisualizePage() {
                 </ul>
                 
                 <Link
-                  href="https://whop.com/checkout/plan_ORVfC8pmG328G"
+                  href="/checkout-vision"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
                   שדרג עכשיו
@@ -1435,7 +1435,7 @@ export default function VisualizePage() {
                 </button>
               ) : hasPurchased ? (
                 <Link
-                  href="https://whop.com/checkout/plan_ORVfC8pmG328G"
+                  href="/checkout-vision"
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
                 >
                   ⭐ שדרג להדמיות נוספות

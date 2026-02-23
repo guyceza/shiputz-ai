@@ -3,6 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { 
+  getProject, 
+  saveProjectData, 
+  migrateLocalStorageProjects,
+  getCachedProject,
+  cacheProjectsLocally,
+  getProjects,
+  type Project as SupabaseProject,
+  type ProjectData
+} from "@/lib/projects";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -370,19 +380,80 @@ export default function ProjectPage() {
         }
       }
 
-      const savedProjects = localStorage.getItem(userId ? `projects_${userId}` : "projects");
-      if (savedProjects) {
-        const projects: Project[] = JSON.parse(savedProjects);
-        const found = projects.find((p) => p.id === params.id);
-        if (found) {
+      // Try to load from Supabase first, with localStorage fallback
+      try {
+        // Migrate localStorage data first (one-time)
+        await migrateLocalStorageProjects(userId);
+        
+        // Load project from Supabase
+        const supabaseProject = await getProject(params.id as string);
+        
+        if (supabaseProject) {
+          // Convert Supabase format to local format
+          const projectData: Project = {
+            id: supabaseProject.id,
+            name: supabaseProject.name,
+            budget: supabaseProject.budget,
+            spent: supabaseProject.spent,
+            createdAt: supabaseProject.created_at,
+            expenses: supabaseProject.data?.expenses || [],
+            categoryBudgets: supabaseProject.data?.categoryBudgets || [],
+            phases: supabaseProject.data?.phases || [],
+            tasks: supabaseProject.data?.tasks || [],
+            photos: supabaseProject.data?.photos || [],
+            suppliers: supabaseProject.data?.suppliers || [],
+            savedQuotes: supabaseProject.data?.savedQuotes || []
+          };
+          
           // Initialize phases if not present
-          if (!found.phases || found.phases.length === 0) {
-            found.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
+          if (!projectData.phases || projectData.phases.length === 0) {
+            projectData.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
           }
-          setProject(found);
+          
+          setProject(projectData);
         } else {
-          router.push("/dashboard");
-          return;
+          // Project not found in Supabase, try localStorage
+          const cachedProject = getCachedProject(userId, params.id as string);
+          if (cachedProject) {
+            const projectData: Project = {
+              id: cachedProject.id,
+              name: cachedProject.name,
+              budget: cachedProject.budget,
+              spent: cachedProject.spent,
+              createdAt: cachedProject.created_at,
+              expenses: cachedProject.data?.expenses || [],
+              categoryBudgets: cachedProject.data?.categoryBudgets || [],
+              phases: cachedProject.data?.phases || [],
+              tasks: cachedProject.data?.tasks || [],
+              photos: cachedProject.data?.photos || [],
+              suppliers: cachedProject.data?.suppliers || [],
+              savedQuotes: cachedProject.data?.savedQuotes || []
+            };
+            if (!projectData.phases || projectData.phases.length === 0) {
+              projectData.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
+            }
+            setProject(projectData);
+          } else {
+            router.push("/dashboard");
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load from Supabase:", err);
+        // Fallback to localStorage
+        const savedProjects = localStorage.getItem(userId ? `projects_${userId}` : "projects");
+        if (savedProjects) {
+          const projects: Project[] = JSON.parse(savedProjects);
+          const found = projects.find((p) => p.id === params.id);
+          if (found) {
+            if (!found.phases || found.phases.length === 0) {
+              found.phases = DEFAULT_PHASES.map((p, i) => ({ ...p, id: `phase-${i}` }));
+            }
+            setProject(found);
+          } else {
+            router.push("/dashboard");
+            return;
+          }
         }
       }
       
@@ -398,18 +469,38 @@ export default function ProjectPage() {
     loadData();
   }, [params.id, router]);
 
-  const saveProject = (updatedProject: Project) => {
+  const saveProject = async (updatedProject: Project) => {
     const userData = localStorage.getItem("user");
     const userId = userData ? JSON.parse(userData).id : null;
     const storageKey = userId ? `projects_${userId}` : "projects";
     
+    // Update local state immediately for responsiveness
+    setProject(updatedProject);
+    
+    // Save to localStorage (for offline cache)
     const savedProjects = localStorage.getItem(storageKey);
     if (savedProjects) {
       const projects: Project[] = JSON.parse(savedProjects);
       const updatedProjects = projects.map((p) => p.id === updatedProject.id ? updatedProject : p);
       localStorage.setItem(storageKey, JSON.stringify(updatedProjects));
     }
-    setProject(updatedProject);
+    
+    // Save to Supabase (async, non-blocking)
+    try {
+      const projectData: ProjectData = {
+        expenses: updatedProject.expenses || [],
+        categoryBudgets: updatedProject.categoryBudgets || [],
+        phases: updatedProject.phases || [],
+        tasks: updatedProject.tasks || [],
+        photos: updatedProject.photos || [],
+        suppliers: updatedProject.suppliers || [],
+        savedQuotes: updatedProject.savedQuotes || []
+      };
+      await saveProjectData(updatedProject.id, projectData, updatedProject.spent);
+    } catch (err) {
+      console.error("Failed to save to Supabase:", err);
+      // Data is still saved locally, will sync later
+    }
   };
 
   const deleteExpense = (expenseId: string) => {

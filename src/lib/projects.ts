@@ -8,6 +8,83 @@ export interface Project {
   spent: number;
   created_at: string;
   updated_at?: string;
+  data?: ProjectData;
+}
+
+// All the nested data that syncs with Supabase
+export interface ProjectData {
+  expenses?: Expense[];
+  categoryBudgets?: CategoryBudget[];
+  phases?: Phase[];
+  tasks?: Task[];
+  photos?: ProgressPhoto[];
+  suppliers?: Supplier[];
+  savedQuotes?: SavedQuote[];
+}
+
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  invoiceDate?: string;
+  imageUrl?: string;
+  vendor?: string;
+  items?: ExpenseItem[];
+  fullText?: string;
+  vatIncluded?: boolean;
+  vatAmount?: number;
+}
+
+export interface ExpenseItem {
+  name: string;
+  quantity?: number;
+  price?: number;
+}
+
+export interface CategoryBudget {
+  category: string;
+  allocated: number;
+}
+
+export interface Phase {
+  id: string;
+  name: string;
+  status: "pending" | "in-progress" | "completed";
+  order: number;
+}
+
+export interface Task {
+  id: string;
+  phaseId: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface ProgressPhoto {
+  id: string;
+  imageUrl: string;
+  date: string;
+  description: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  phone: string;
+  profession: string;
+  rating: number;
+  notes?: string;
+}
+
+export interface SavedQuote {
+  id: string;
+  supplierName: string;
+  description: string;
+  amount: number;
+  date: string;
+  imageUrl?: string;
 }
 
 // Legacy interface for localStorage migration
@@ -17,9 +94,16 @@ interface LegacyProject {
   budget: number;
   spent: number;
   createdAt: string;
+  expenses?: Expense[];
+  categoryBudgets?: CategoryBudget[];
+  phases?: Phase[];
+  tasks?: Task[];
+  photos?: ProgressPhoto[];
+  suppliers?: Supplier[];
+  savedQuotes?: SavedQuote[];
 }
 
-const MIGRATION_KEY = 'projects_migrated_to_supabase';
+const MIGRATION_KEY = 'projects_migrated_to_supabase_v2';
 
 // Get all projects for current user
 export async function getProjects(userId: string): Promise<Project[]> {
@@ -39,6 +123,25 @@ export async function getProjects(userId: string): Promise<Project[]> {
   return data || [];
 }
 
+// Get single project by ID
+export async function getProject(projectId: string): Promise<Project | null> {
+  const supabase = getSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .single();
+  
+  if (error) {
+    if (error.code === 'PGRST116') return null; // Not found
+    console.error('Error fetching project:', error);
+    throw error;
+  }
+  
+  return data;
+}
+
 // Create a new project
 export async function createProject(userId: string, name: string, budget: number = 0): Promise<Project> {
   const supabase = getSupabaseClient();
@@ -49,7 +152,8 @@ export async function createProject(userId: string, name: string, budget: number
       user_id: userId,
       name,
       budget,
-      spent: 0
+      spent: 0,
+      data: {}
     })
     .select()
     .single();
@@ -62,8 +166,8 @@ export async function createProject(userId: string, name: string, budget: number
   return data;
 }
 
-// Update a project
-export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent'>>): Promise<Project> {
+// Update a project (including nested data)
+export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent' | 'data'>>): Promise<Project> {
   const supabase = getSupabaseClient();
   
   const { data, error } = await supabase
@@ -96,25 +200,16 @@ export async function deleteProject(projectId: string): Promise<void> {
   }
 }
 
-// Add expense to project (updates spent amount)
-export async function addExpense(projectId: string, amount: number): Promise<Project> {
-  const supabase = getSupabaseClient();
-  
-  // Get current spent
-  const { data: project, error: fetchError } = await supabase
-    .from('projects')
-    .select('spent')
-    .eq('id', projectId)
-    .single();
-  
-  if (fetchError) throw fetchError;
-  
-  const newSpent = (project?.spent || 0) + amount;
-  
-  return updateProject(projectId, { spent: newSpent });
+// Save full project data (expenses, suppliers, etc.)
+export async function saveProjectData(projectId: string, data: ProjectData, spent?: number): Promise<Project> {
+  const updates: Partial<Project> = { data };
+  if (spent !== undefined) {
+    updates.spent = spent;
+  }
+  return updateProject(projectId, updates);
 }
 
-// Migrate localStorage projects to Supabase (one-time)
+// Migrate localStorage projects to Supabase (one-time, v2 with full data)
 export async function migrateLocalStorageProjects(userId: string): Promise<{ migrated: number; skipped: boolean }> {
   // Check if already migrated
   const migrationKey = `${MIGRATION_KEY}_${userId}`;
@@ -149,16 +244,16 @@ export async function migrateLocalStorageProjects(userId: string): Promise<{ mig
     // Check for existing projects to avoid duplicates
     const { data: existingProjects } = await supabase
       .from('projects')
-      .select('name')
+      .select('name, id')
       .eq('user_id', userId);
     
     const existingNames = new Set(existingProjects?.map(p => p.name) || []);
     
-    // Filter out duplicates
+    // Filter out duplicates and prepare for migration
     const projectsToMigrate = legacyProjects.filter(p => !existingNames.has(p.name));
     
     if (projectsToMigrate.length > 0) {
-      // Insert migrated projects
+      // Insert migrated projects with full data
       const { error } = await supabase
         .from('projects')
         .insert(projectsToMigrate.map(p => ({
@@ -166,7 +261,16 @@ export async function migrateLocalStorageProjects(userId: string): Promise<{ mig
           name: p.name,
           budget: p.budget || 0,
           spent: p.spent || 0,
-          created_at: p.createdAt || new Date().toISOString()
+          created_at: p.createdAt || new Date().toISOString(),
+          data: {
+            expenses: p.expenses || [],
+            categoryBudgets: p.categoryBudgets || [],
+            phases: p.phases || [],
+            tasks: p.tasks || [],
+            photos: p.photos || [],
+            suppliers: p.suppliers || [],
+            savedQuotes: p.savedQuotes || []
+          }
         })));
       
       if (error) {
@@ -175,11 +279,32 @@ export async function migrateLocalStorageProjects(userId: string): Promise<{ mig
       }
     }
     
+    // Also update existing projects with their localStorage data
+    for (const legacyProject of legacyProjects) {
+      const existing = existingProjects?.find(p => p.name === legacyProject.name);
+      if (existing && (legacyProject.expenses?.length || legacyProject.suppliers?.length)) {
+        // Update existing project with localStorage data
+        await supabase
+          .from('projects')
+          .update({
+            spent: legacyProject.spent || 0,
+            data: {
+              expenses: legacyProject.expenses || [],
+              categoryBudgets: legacyProject.categoryBudgets || [],
+              phases: legacyProject.phases || [],
+              tasks: legacyProject.tasks || [],
+              photos: legacyProject.photos || [],
+              suppliers: legacyProject.suppliers || [],
+              savedQuotes: legacyProject.savedQuotes || []
+            }
+          })
+          .eq('id', existing.id);
+      }
+    }
+    
     // Mark as migrated
     if (typeof window !== 'undefined') {
       localStorage.setItem(migrationKey, 'true');
-      // Optionally clear legacy data after successful migration
-      // localStorage.removeItem(legacyKey);
     }
     
     return { migrated: projectsToMigrate.length, skipped: false };
@@ -200,7 +325,14 @@ export function cacheProjectsLocally(userId: string, projects: Project[]): void 
     name: p.name,
     budget: p.budget,
     spent: p.spent,
-    createdAt: p.created_at
+    createdAt: p.created_at,
+    expenses: p.data?.expenses || [],
+    categoryBudgets: p.data?.categoryBudgets || [],
+    phases: p.data?.phases || [],
+    tasks: p.data?.tasks || [],
+    photos: p.data?.photos || [],
+    suppliers: p.data?.suppliers || [],
+    savedQuotes: p.data?.savedQuotes || []
   }));
   
   localStorage.setItem(`projects_${userId}`, JSON.stringify(legacyFormat));
@@ -221,9 +353,24 @@ export function getCachedProjects(userId: string): Project[] | null {
       name: p.name,
       budget: p.budget,
       spent: p.spent,
-      created_at: p.createdAt
+      created_at: p.createdAt,
+      data: {
+        expenses: p.expenses || [],
+        categoryBudgets: p.categoryBudgets || [],
+        phases: p.phases || [],
+        tasks: p.tasks || [],
+        photos: p.photos || [],
+        suppliers: p.suppliers || [],
+        savedQuotes: p.savedQuotes || []
+      }
     }));
   } catch {
     return null;
   }
+}
+
+// Get single cached project
+export function getCachedProject(userId: string, projectId: string): Project | null {
+  const projects = getCachedProjects(userId);
+  return projects?.find(p => p.id === projectId) || null;
 }

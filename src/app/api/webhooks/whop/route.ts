@@ -134,28 +134,49 @@ export async function POST(request: NextRequest) {
 
     const { action, data } = body;
 
+    // Plan IDs
+    const PREMIUM_PLANS = ['plan_gtlFi4zoHPy80', 'plan_9kPvCqLkwwmUc']; // One-time premium
+    const VISION_PLANS = ['plan_hp3ThM2ndloYF', 'plan_6RAptSlrFl31x'];  // Monthly Vision AI
+
     // Handle successful payment / membership activation
     if (action === 'membership.went_valid' || action === 'payment.succeeded' || action === 'membership_went_valid' || action === 'payment_succeeded') {
       const email = data?.user?.email || data?.email;
       const name = data?.user?.name || data?.name;
       const discountCode = data?.promo_code || data?.metadata?.discount_code;
+      const planId = data?.plan?.id || data?.plan_id;
 
       if (email) {
         const supabase = createServiceClient();
+        const isVisionPlan = VISION_PLANS.includes(planId);
+        const isPremiumPlan = PREMIUM_PLANS.includes(planId);
 
-        // Mark user as purchased
-        const { error: userError } = await supabase
-          .from('users')
-          .update({
-            purchased: true,
-            purchased_at: new Date().toISOString(),
-          })
-          .eq('email', email.toLowerCase());
+        if (isVisionPlan) {
+          // Vision AI subscription - set vision_subscription to active
+          const { error: visionError } = await supabase
+            .from('users')
+            .update({ vision_subscription: 'active' })
+            .eq('email', email.toLowerCase());
 
-        if (userError) {
-          console.error('Error updating user:', userError);
+          if (visionError) {
+            console.error('Error updating vision subscription:', visionError);
+          } else {
+            console.log(`User ${email} Vision subscription activated`);
+          }
         } else {
-          // User ${email} marked as purchased`);
+          // Premium one-time purchase (default behavior)
+          const { error: userError } = await supabase
+            .from('users')
+            .update({
+              purchased: true,
+              purchased_at: new Date().toISOString(),
+            })
+            .eq('email', email.toLowerCase());
+
+          if (userError) {
+            console.error('Error updating user:', userError);
+          } else {
+            console.log(`User ${email} marked as Premium purchased`);
+          }
         }
 
         // Mark discount code as used (if provided in metadata)
@@ -193,21 +214,44 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Send welcome email
-        await sendWelcomeEmail(email, name);
-        
-        // Mark day 0 of purchased sequence as sent (to avoid duplicate from cron)
-        try {
-          await supabase.from('email_sequences').insert({
-            user_email: email.toLowerCase(),
-            sequence_type: 'purchased',
-            day_number: 0,
-          });
-        } catch (e: any) {
-          // Only ignore duplicate key errors (already exists)
-          if (!e?.code?.includes('23505')) {
-            console.error('Failed to record email sequence:', e);
+        // Send welcome email (only for premium, not vision)
+        if (!isVisionPlan) {
+          await sendWelcomeEmail(email, name);
+          
+          // Mark day 0 of purchased sequence as sent (to avoid duplicate from cron)
+          try {
+            await supabase.from('email_sequences').insert({
+              user_email: email.toLowerCase(),
+              sequence_type: 'purchased',
+              day_number: 0,
+            });
+          } catch (e: any) {
+            // Only ignore duplicate key errors (already exists)
+            if (!e?.code?.includes('23505')) {
+              console.error('Failed to record email sequence:', e);
+            }
           }
+        }
+      }
+    }
+
+    // Handle membership cancellation/expiration (for Vision subscription)
+    if (action === 'membership.went_invalid' || action === 'membership_went_invalid' || 
+        action === 'membership.cancelled' || action === 'membership_cancelled') {
+      const email = data?.user?.email || data?.email;
+      const planId = data?.plan?.id || data?.plan_id;
+      
+      if (email && VISION_PLANS.includes(planId)) {
+        const supabase = createServiceClient();
+        
+        // Deactivate Vision subscription
+        const { error } = await supabase
+          .from('users')
+          .update({ vision_subscription: null })
+          .eq('email', email.toLowerCase());
+
+        if (!error) {
+          console.log(`User ${email} Vision subscription cancelled`);
         }
       }
     }

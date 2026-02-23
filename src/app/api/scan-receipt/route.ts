@@ -9,8 +9,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 // Verify user is authenticated
 async function verifyAuth(request: NextRequest): Promise<boolean> {
   try {
-    const authCookie = request.cookies.get('sb-vghfcdtzywbmlacltnjp-auth-token');
-    if (authCookie) return true;
+    const cookies = request.cookies.getAll();
+    const hasSupabaseCookie = cookies.some(c => c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session')));
+    if (hasSupabaseCookie) return true;
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) return true;
     return false;

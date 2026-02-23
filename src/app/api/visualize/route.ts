@@ -8,9 +8,12 @@ import { createServiceClient } from "@/lib/supabase";
 // Verify user is authenticated (has valid Supabase session via cookie)
 async function verifyAuth(request: NextRequest): Promise<boolean> {
   try {
-    // Check for Supabase auth cookie
-    const authCookie = request.cookies.get('sb-vghfcdtzywbmlacltnjp-auth-token');
-    if (authCookie) return true;
+    // Check for any Supabase auth cookie (various formats)
+    const cookies = request.cookies.getAll();
+    const hasSupabaseCookie = cookies.some(c => 
+      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+    );
+    if (hasSupabaseCookie) return true;
     
     // Also check for auth header (for API clients)
     const authHeader = request.headers.get('authorization');

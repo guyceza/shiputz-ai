@@ -87,21 +87,22 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Check if user already exists
+    // Check if user already exists (case-insensitive)
+    const normalizedEmail = email.toLowerCase();
     const { data: existing } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .single();
 
     if (existing) {
       return NextResponse.json({ message: 'User already exists', id: existing.id });
     }
 
-    // Create new user
+    // Create new user (always store email in lowercase)
     const { data, error } = await supabase
       .from('users')
-      .insert({ email, name })
+      .insert({ email: normalizedEmail, name })
       .select()
       .single();
 
@@ -111,12 +112,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Send welcome email immediately
-    await sendWelcomeEmail(email, name);
+    await sendWelcomeEmail(normalizedEmail, name);
 
     // Mark Day 0 as sent (ignore errors if table doesn't exist)
     try {
       await supabase.from('email_sequences').insert({
-        user_email: email,
+        user_email: normalizedEmail,
         sequence_type: 'non_purchased',
         day_number: 0,
       });
@@ -148,7 +149,7 @@ export async function PATCH(request: NextRequest) {
         purchased: true, 
         purchased_at: new Date().toISOString() 
       })
-      .eq('email', email);
+      .eq('email', email.toLowerCase());
 
     if (error) {
       console.error('Error updating user:', error);

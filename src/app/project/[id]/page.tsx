@@ -2688,50 +2688,70 @@ export default function ProjectPage() {
 
       {/* Quote Analysis Modal */}
       {showQuoteAnalysis && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">ניתוח הצעת מחיר</h2>
-              <button onClick={() => setShowQuoteAnalysis(false)} className="text-gray-500 hover:text-gray-900">✕</button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="bg-white/10 backdrop-blur px-6 py-4 flex items-center justify-between border-b border-white/10">
+              <h2 className="text-xl font-semibold text-white">ניתוח הצעת מחיר</h2>
+              <button onClick={() => setShowQuoteAnalysis(false)} className="text-white/60 hover:text-white text-2xl leading-none">&times;</button>
             </div>
             
-            {!quoteAnalysis && !analyzing && (
-              <div className="mb-6">
-                <label className="block text-sm text-gray-600 mb-2">תאר את הצעת המחיר שקיבלת:</label>
-                <textarea
-                  value={quoteText}
-                  onChange={(e) => setQuoteText(e.target.value)}
-                  placeholder="לדוגמה: צביעת דירת 4 חדרים - 8,000 ש״ח&#10;החלפת ברז במטבח - 450 ש״ח&#10;התקנת מזגן כולל נקודה - 2,500 ש״ח"
-                  className="w-full border border-gray-200 rounded-xl p-4 h-32 resize-none text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 text-right"
-                  dir="rtl"
-                />
-                <button
-                  onClick={handleQuoteAnalysis}
-                  disabled={!quoteText.trim()}
-                  className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 mt-4 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  נתח הצעה
-                </button>
-              </div>
-            )}
-            
-            {analyzing && (
-              <div className="text-center py-12 text-gray-500">מנתח ומשווה למחירי שוק...</div>
-            )}
-            
-            {quoteAnalysis && !analyzing && (
-              <>
-                <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed mb-6">{quoteAnalysis}</div>
-                <button
-                  onClick={() => { setQuoteAnalysis(null); setQuoteText(""); }}
-                  className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 mb-3"
-                >
-                  נתח הצעה נוספת
-                </button>
-              </>
-            )}
-            
-            <button onClick={() => setShowQuoteAnalysis(false)} className="w-full border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">סגור</button>
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
+              {/* Input State */}
+              {!quoteAnalysis && !analyzing && (
+                <div>
+                  <label className="block text-sm text-purple-200 mb-3">תאר את הצעת המחיר שקיבלת:</label>
+                  <textarea
+                    value={quoteText}
+                    onChange={(e) => setQuoteText(e.target.value)}
+                    placeholder="לדוגמה:&#10;צביעת דירת 4 חדרים - 8,000 ש״ח&#10;החלפת ברז במטבח - 450 ש״ח&#10;התקנת מזגן כולל נקודה - 2,500 ש״ח"
+                    className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 h-36 resize-none text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent text-right"
+                    dir="rtl"
+                  />
+                  <button
+                    onClick={handleQuoteAnalysis}
+                    disabled={!quoteText.trim()}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium mt-5 hover:from-purple-600 hover:to-indigo-600 transition-all disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed shadow-lg"
+                  >
+                    נתח הצעה
+                  </button>
+                </div>
+              )}
+              
+              {/* Loading State */}
+              {analyzing && (
+                <div className="py-16 flex flex-col items-center justify-center">
+                  <div className="relative w-20 h-20 mb-6">
+                    <div className="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
+                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-400 animate-spin"></div>
+                    <div className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-white/90 font-medium text-lg mb-2">מנתח את ההצעה</p>
+                  <p className="text-purple-300/70 text-sm">משווה למחירי שוק ממידרג...</p>
+                </div>
+              )}
+              
+              {/* Results State */}
+              {quoteAnalysis && !analyzing && (
+                <>
+                  <div className="bg-white/10 backdrop-blur rounded-2xl p-5 mb-5 border border-white/10">
+                    <div className="whitespace-pre-wrap text-white/90 text-sm leading-relaxed">{quoteAnalysis}</div>
+                  </div>
+                  <button
+                    onClick={() => { setQuoteAnalysis(null); setQuoteText(""); }}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium hover:from-purple-600 hover:to-indigo-600 transition-all shadow-lg mb-3"
+                  >
+                    נתח הצעה נוספת
+                  </button>
+                </>
+              )}
+              
+              <button onClick={() => setShowQuoteAnalysis(false)} className="w-full bg-white/10 text-white/80 py-3 rounded-full hover:bg-white/20 transition-all border border-white/10">סגור</button>
+            </div>
           </div>
         </div>
       )}

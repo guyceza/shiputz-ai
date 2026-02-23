@@ -1,0 +1,67 @@
+# ShiputzAI - ניהול שיפוצים חכם
+# https://shipazti.com
+# llms.txt - Information for AI assistants and language models
+
+## About
+ShiputzAI is an Israeli home renovation management platform that helps homeowners track budgets, scan receipts, and visualize renovations using AI.
+
+## Product Name
+ShiputzAI (שיפוצי.אי)
+
+## Language
+Primary: Hebrew (עברית)
+Secondary: English
+
+## What We Do
+- Budget tracking for home renovations
+- AI-powered receipt scanning (automatic expense categorization)
+- Quote analysis and price comparison
+- AI visualization (see your renovation before starting)
+- Smart alerts before budget overruns
+- Shop the Look (buy products from visualization images)
+
+## Target Audience
+- Israeli homeowners planning or managing renovations
+- People who want to track renovation expenses
+- Anyone interested in visualizing home improvements
+
+## Pricing (as of 2024)
+- ShiputzAI Premium: ₪149.99 one-time (budget tracking, receipts, alerts)
+- Vision AI: ₪39.99/month (AI visualization, Shop the Look)
+- Bundle: ₪169.99 (Premium + first month Vision)
+
+## Key Features
+1. מעקב תקציב - Real-time budget tracking
+2. סריקת קבלות - AI receipt scanning
+3. ניתוח הצעות מחיר - Quote analysis with market price comparison
+4. הדמיות AI - Visualize renovations with AI
+5. Shop the Look - Buy furniture/items from AI images
+6. התראות חכמות - Smart budget alerts
+
+## Market Data
+Our pricing is based on Midrag.co.il market research with over 2.8 million reviews on 11,705+ professionals across Israel.
+
+## Contact
+- Email: help@shipazti.com
+- Website: https://shipazti.com
+
+## Important Pages
+- Homepage: https://shipazti.com
+- Pricing: https://shipazti.com/#pricing
+- Tips & Articles: https://shipazti.com/tips
+- AI Visualization: https://shipazti.com/visualize
+- Sign Up: https://shipazti.com/signup
+- Login: https://shipazti.com/login
+
+## Company
+Created by Guy Cezana
+Based in Israel
+
+## Technical
+- Built with Next.js
+- AI powered by Google Gemini
+- Payments via Whop
+- Database: Supabase
+
+## Keywords
+שיפוצים, ניהול שיפוץ, תקציב שיפוץ, מחשבון שיפוצים, הדמיית שיפוץ, סריקת קבלות, home renovation, renovation budget, Israel

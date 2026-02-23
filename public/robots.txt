@@ -12,3 +12,6 @@ Disallow: /checkout-vision/
 
 # Sitemap
 Sitemap: https://shipazti.com/sitemap.xml
+
+# LLMs
+# Information for AI assistants: https://shipazti.com/llms.txt

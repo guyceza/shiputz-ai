@@ -497,38 +497,51 @@ export default function ProjectPage() {
   };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    console.log("Files selected:", files?.length);
-    if (!files || files.length === 0) return;
+    const fileList = e.target.files;
+    console.log("Files selected:", fileList?.length);
+    if (!fileList || fileList.length === 0) return;
     
-    // Copy files to array BEFORE resetting input
-    const filesToProcess = Array.from(files).slice(0, 3);
-    console.log("Files to process:", filesToProcess.length, filesToProcess.map(f => f.name));
+    // Read files into array immediately (FileList might become invalid after reset)
+    const fileCount = Math.min(fileList.length, 3);
+    console.log("Will process", fileCount, "files");
     
-    // Reset input so same file can be selected again (AFTER copying)
+    // Helper function to read single file as base64
+    const readFileAsBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsDataURL(file);
+      });
+    };
+    
+    // Read all files to base64 BEFORE resetting input
+    const base64Images: string[] = [];
+    for (let i = 0; i < fileCount; i++) {
+      const file = fileList[i];
+      console.log("Reading file", i + 1, ":", file?.name, file?.size, "bytes");
+      try {
+        const base64 = await readFileAsBase64(file);
+        base64Images.push(base64);
+        console.log("File", i + 1, "converted, base64 length:", base64.length);
+      } catch (err) {
+        console.error("Error reading file", i + 1, err);
+      }
+    }
+    
+    // Reset input AFTER reading all files
     e.target.value = '';
     
+    console.log("Total images converted:", base64Images.length);
+    
+    if (base64Images.length === 0) {
+      alert("לא הצלחתי לקרוא את הקבצים. נסה שוב.");
+      return;
+    }
+    
     // If multiple files, process them sequentially
-    if (filesToProcess.length > 1) {
-      console.log("Starting multi-file processing...");
-      const base64Images: string[] = [];
-      
-      // Convert all files to base64
-      for (let idx = 0; idx < filesToProcess.length; idx++) {
-        const currentFile = filesToProcess[idx];
-        console.log("Converting file", idx + 1, "type:", currentFile?.type, "size:", currentFile?.size);
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(currentFile);
-        });
-        base64Images.push(base64);
-      }
-      
-      // Start multi-scan process - set initial states first
-      console.log("Converted to base64, count:", base64Images.length);
-      console.log("First image length:", base64Images[0]?.length);
+    if (base64Images.length > 1) {
+      console.log("Starting multi-scan with", base64Images.length, "images");
       
       setSelectedImage(base64Images[0]);
       setScanning(true);
@@ -538,99 +551,55 @@ export default function ProjectPage() {
       setScanTimer(60);
       setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
       
-      console.log("States set, starting processMultiScan...");
-      
-      // Small delay to ensure UI updates before starting
       setTimeout(() => {
-        console.log("Timeout fired, calling processMultiScan");
         processMultiScan(base64Images, 0);
       }, 100);
       return;
     }
     
-    // Single file - original flow
-    const file = filesToProcess[0];
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = reader.result as string;
-      setSelectedImage(base64);
-      setScanning(true);
-      setScanTimer(60);
-      setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+    // Single file - use the already converted base64
+    const base64 = base64Images[0];
+    setSelectedImage(base64);
+    setScanning(true);
+    setScanTimer(60);
+    setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+    
+    // Continue with single file scan...
+    const userData = localStorage.getItem("user");
+    const userEmail = userData ? JSON.parse(userData).email : null;
+    
+    try {
+      const response = await fetch("/api/scan-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64, userEmail }),
+      });
       
-      // Start countdown timer
-      let timerInterval: NodeJS.Timeout | null = setInterval(() => {
-        setScanTimer(prev => {
-          if (prev <= 1) {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = null;
-            return 0;
-          }
-          // Change tip every 10 seconds
-          if (prev % 10 === 0) {
-            setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      // Cleanup function for when scan completes or errors
-      const cleanupTimer = () => {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-      };
-      
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-        
-        const userData = localStorage.getItem("user");
-        const userEmail = userData ? JSON.parse(userData).email : null;
-        
-        const response = await fetch("/api/scan-receipt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64, userEmail }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Scan result:", data);
-          if (data.error) {
-            console.error("Scan API error:", data.error);
-            alert("שגיאה בסריקה: " + (data.error || "נסה שוב"));
-          } else {
-            if (data.description) setDescription(data.description);
-            if (data.amount) setAmount(data.amount.toString());
-            if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
-            setScannedVendor(data.vendor || "");
-            setScannedItems(Array.isArray(data.items) ? data.items : []);
-            setScannedFullText(data.fullText || "");
-            setScannedVatAmount(data.vatAmount || null);
-            setScannedDate(data.date || "");
-          }
+      if (response.ok) {
+        const data = await response.json();
+        if (data.error) {
+          alert("שגיאה בסריקה: " + data.error);
         } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.error("Scan failed:", response.status, errorData);
-          alert(`שגיאה בסריקה (${response.status}): ${errorData.error || errorData.details || 'נסה שוב'}`);
+          if (data.description) setDescription(data.description);
+          if (data.amount) setAmount(data.amount.toString());
+          if (data.category && CATEGORIES.includes(data.category)) setCategory(data.category);
+          setScannedVendor(data.vendor || "");
+          setScannedItems(Array.isArray(data.items) ? data.items : []);
+          setScannedFullText(data.fullText || "");
+          setScannedVatAmount(data.vatAmount || null);
+          setScannedDate(data.date || "");
         }
-      } catch (error: any) {
-        console.error("Scan error:", error);
-        if (error.name === 'AbortError') {
-          alert("הסריקה לקחה יותר מדי זמן - נסה שוב");
-        } else {
-          alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
-        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(`שגיאה בסריקה (${response.status}): ${errorData.error || 'נסה שוב'}`);
       }
-      cleanupTimer();
-      setScanning(false);
-      setScanTimer(0);
-    };
-    reader.readAsDataURL(file);
+    } catch (error: unknown) {
+      console.error("Scan error:", error);
+      alert("שגיאה בסריקה - בדוק את החיבור לאינטרנט");
+    }
+    
+    setScanning(false);
+    setScanTimer(0);
   };
 
   const handleQuoteUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

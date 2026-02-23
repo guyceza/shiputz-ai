@@ -733,6 +733,7 @@ export default function VisualizePage() {
                 loop 
                 muted 
                 playsInline
+                preload="metadata"
                 className="w-full cursor-pointer"
                 poster="/demo-video-poster.jpg"
                 onClick={(e) => {

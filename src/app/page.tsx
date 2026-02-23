@@ -96,7 +96,7 @@ export default function Home() {
     const bathrooms = parseInt(calcBathrooms) || 0;
     
     if (size <= 0) {
-      setCalcResult(null);
+      setEstimate(null);
       return;
     }
     

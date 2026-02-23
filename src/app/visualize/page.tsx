@@ -991,20 +991,35 @@ export default function VisualizePage() {
         <section className="py-20 px-6 bg-gray-50">
           <div className="max-w-md mx-auto text-center">
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-              <div className="text-4xl mb-4">🔒</div>
+              <div className="text-4xl mb-4">🎨</div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                שירות ההדמיה דורש מנוי ShiputzAI
+                שירות ההדמיה בשני שלבים
               </h2>
-              <p className="text-gray-500 mb-6">
-                כדי להשתמש בשירות ההדמיה החכם, צריך קודם חשבון ShiputzAI פעיל
-              </p>
+              <div className="text-right space-y-3 mb-6">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
+                    <span className="font-medium text-gray-900">ShiputzAI</span>
+                    <span className="text-xs text-gray-500 mr-auto">₪149.99 חד פעמי</span>
+                  </div>
+                  <p className="text-sm text-gray-500 pr-7">ניהול תקציב, סריקת קבלות, התראות</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">2</span>
+                    <span className="font-medium text-gray-900">מנוי הדמיות AI</span>
+                    <span className="text-xs text-gray-500 mr-auto">₪39.99/חודש</span>
+                  </div>
+                  <p className="text-sm text-gray-500 pr-7">10 הדמיות בחודש + Shop the Look</p>
+                </div>
+              </div>
               <Link
                 href="/checkout"
                 className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
               >
-                הצטרף ל-ShiputzAI · ₪149.99
+                שלב 1: הצטרף ל-ShiputzAI · ₪149.99
               </Link>
-              <p className="text-xs text-gray-400 mt-4">תשלום חד פעמי · גישה לכל הכלים</p>
+              <p className="text-xs text-gray-400 mt-4">אחרי הרכישה תוכל להוסיף מנוי הדמיות</p>
             </div>
           </div>
         </section>
@@ -1202,21 +1217,29 @@ export default function VisualizePage() {
             ) : (
               // User doesn't have main subscription - redirect to main checkout
               <>
-                <div className="text-center mb-8">
-                  <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-white text-lg">🔒</span>
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🎨</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">שירות ההדמיה דורש מנוי ShiputzAI</h3>
-                  <p className="text-gray-500 text-sm">כדי להמשיך, צריך קודם חשבון ShiputzAI פעיל</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">שירות ההדמיה בשני שלבים</h3>
                 </div>
                 
-                <div className="border border-gray-200 rounded-2xl p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium text-gray-900">ShiputzAI</span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">חד פעמי</span>
+                <div className="space-y-3 mb-6">
+                  <div className="border border-gray-200 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
+                      <span className="text-sm font-medium text-gray-900">ShiputzAI</span>
+                      <span className="text-xs text-gray-500 mr-auto">₪149.99 חד פעמי</span>
+                    </div>
+                    <p className="text-xs text-gray-500 pr-7">ניהול תקציב, סריקת קבלות, התראות</p>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold text-gray-900">₪149.99</span>
+                  <div className="border border-blue-200 bg-blue-50 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">2</span>
+                      <span className="text-sm font-medium text-gray-900">מנוי הדמיות AI</span>
+                      <span className="text-xs text-gray-500 mr-auto">₪39.99/חודש</span>
+                    </div>
+                    <p className="text-xs text-gray-500 pr-7">10 הדמיות + Shop the Look</p>
                   </div>
                 </div>
                 
@@ -1224,11 +1247,11 @@ export default function VisualizePage() {
                   href="/checkout"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  הצטרף ל-ShiputzAI
+                  שלב 1: הצטרף ל-ShiputzAI
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  תשלום חד פעמי · גישה לכל הכלים
+                  אחרי הרכישה תוכל להוסיף מנוי הדמיות
                 </p>
               </>
             )}

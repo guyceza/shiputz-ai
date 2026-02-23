@@ -468,4 +468,41 @@ const SUBJECTS = {
     }
 };
 
-module.exports = { BRAND, PRICING, FLOW1, FLOW2, SUBJECTS, emailWrapper, button, p, header, bulletList, stepList, featureList, discountBox, priceBox, testimonial, grayBox, purpleCard };
+// Subscription Cancellation Email
+function subscriptionCancelled(email, periodEnd) {
+    const periodEndDate = periodEnd ? new Date(periodEnd).toLocaleDateString('he-IL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }) : 'סוף התקופה הנוכחית';
+    
+    const content = `
+        ${header('👋', 'המנוי בוטל בהצלחה', 'קיבלנו את בקשתך')}
+        
+        ${p('שלום,')}
+        
+        ${p('קיבלנו את בקשת הביטול שלך למנוי הדמיות AI.')}
+        
+        ${grayBox(`
+            <p style="margin: 0 0 8px; font-size: 14px; color: ${BRAND.muted};">פרטי הביטול:</p>
+            <p style="margin: 0 0 4px; font-size: 15px; color: ${BRAND.text};"><strong>מייל:</strong> ${email}</p>
+            <p style="margin: 0 0 4px; font-size: 15px; color: ${BRAND.text};"><strong>סטטוס:</strong> פעיל עד סוף התקופה</p>
+            <p style="margin: 0; font-size: 15px; color: ${BRAND.text};"><strong>גישה עד:</strong> ${periodEndDate}</p>
+        `)}
+        
+        ${p('תוכל להמשיך להשתמש בשירות ההדמיות עד לתאריך הנ"ל.')}
+        
+        ${p('אם תרצה לחדש את המנוי בעתיד, תמיד אפשר לעשות זאת מאזור האישי.')}
+        
+        ${p('נשמח לראות אותך שוב! 💚')}
+        
+        ${button('לאזור האישי', 'https://shipazti.com/dashboard', BRAND.black)}
+    `;
+    
+    return {
+        subject: '👋 המנוי בוטל בהצלחה — ShiputzAI',
+        html: emailWrapper(content, 'קיבלנו את בקשת הביטול שלך')
+    };
+}
+
+module.exports = { BRAND, PRICING, FLOW1, FLOW2, SUBJECTS, emailWrapper, button, p, header, bulletList, stepList, featureList, discountBox, priceBox, testimonial, grayBox, purpleCard, subscriptionCancelled };

@@ -2,6 +2,38 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const WHOP_API_KEY = process.env.WHOP_API_KEY || 'apik_tR2AgicmyYyuX_C4452549_C_a790e2075322e366d45eb7bf92833006fe6774abd805e931fd0f5ae327e8b2';
 const WHOP_PRODUCT_ID = 'prod_ymF9Of2pEXLEY'; // ShiputzAI
+const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_123'; // Will be set in Vercel
+
+// Import email template dynamically to avoid build issues
+async function sendCancellationEmail(email: string, periodEnd: number | null) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { subscriptionCancelled } = require('../../../../../emails/templates.js');
+    const emailData = subscriptionCancelled(email, periodEnd);
+    
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ShiputzAI <help@shipazti.com>',
+        to: email,
+        subject: emailData.subject,
+        html: emailData.html,
+      }),
+    });
+    
+    if (!res.ok) {
+      console.error('Failed to send cancellation email:', await res.text());
+    } else {
+      console.log('Cancellation email sent to:', email);
+    }
+  } catch (error) {
+    console.error('Error sending cancellation email:', error);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,11 +92,16 @@ export async function POST(request: NextRequest) {
     const cancelData = await cancelRes.json();
 
     const periodEndTimestamp = renewalEnd || cancelData.renewal_period_end;
+    const periodEndMs = periodEndTimestamp ? periodEndTimestamp * 1000 : null;
+    
+    // Send cancellation confirmation email
+    await sendCancellationEmail(email, periodEndMs);
+    
     return NextResponse.json({
       success: true,
       message: 'Subscription will be canceled at period end',
       canceledAt: cancelData.canceled_at,
-      periodEnd: periodEndTimestamp ? periodEndTimestamp * 1000 : null, // Convert to milliseconds
+      periodEnd: periodEndMs,
     });
 
   } catch (error) {

@@ -93,7 +93,9 @@ export async function POST(request: NextRequest) {
 2. תעדף את העבודות החשובות קודם
 3. קבל 3 הצעות מחיר לכל עבודה גדולה"
 
-תמיד סיים עם משהו מעודד או טיפ מועיל.`;
+תמיד סיים עם משהו מעודד או טיפ מועיל.
+
+חשוב מאוד: סיים כל משפט! לעולם אל תחתוך באמצע.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.TEXT_FAST}:generateContent?key=${GEMINI_API_KEY}`,
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
           ],
           generationConfig: {
             temperature: 0.8,
-            maxOutputTokens: 800,
+            maxOutputTokens: 1500,
           },
         }),
       }

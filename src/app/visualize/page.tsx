@@ -943,7 +943,7 @@ export default function VisualizePage() {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
                   <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">10 הדמיות ביום</span>
+                  <span className="text-gray-700">10 הדמיות בחודש</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="text-green-500">✓</span>
@@ -1028,7 +1028,7 @@ export default function VisualizePage() {
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
               </summary>
               <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                עם מנוי לשירות ההדמיה אפשר ליצור עד 10 הדמיות ביום. המכסה מתאפסת בחצות.
+                עם מנוי לשירות ההדמיה אפשר ליצור עד 10 הדמיות בחודש. המכסה מתאפסת בתחילת כל חודש.
               </p>
             </details>
             
@@ -1158,7 +1158,7 @@ export default function VisualizePage() {
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs">✓</span>
                     </div>
-                    <span className="text-gray-700">10 הדמיות ביום</span>
+                    <span className="text-gray-700">10 הדמיות בחודש</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm">
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">

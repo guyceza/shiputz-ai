@@ -17,9 +17,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Email sequences
 const PURCHASED_SEQUENCE = [
-  { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI!', template: 'welcome_purchased' },
+  { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI Premium!', template: 'welcome_purchased' },
   { day: 1, subject: '💡 3 דברים לעשות עכשיו', template: 'getting_started' },
-  { day: 3, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
+  { day: 3, subject: '🏠 איך השיפוץ שלך יראה? (50% הנחה)', template: 'vision_upsell' },
   { day: 5, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
   { day: 7, subject: '❓ איך הולך?', template: 'checkin' },
   { day: 10, subject: '🔥 הכלי שרוב המשפצים לא מכירים', template: 'quote_analysis' },
@@ -192,49 +192,53 @@ const TEMPLATES = {
     '#4338ca'
   ),
 
-  // ===== DAY 3: RECEIPT SCANNING =====
-  receipt_scanning: (user) => baseWrapper(`
+  // ===== DAY 3: VISION UPSELL (50% discount) =====
+  vision_upsell: (user, visionCode) => baseWrapper(`
     <p style="font-size: 17px; color: #1e293b; line-height: 1.8; margin: 0 0 16px 0; text-align: right;">
       היי ${user.name || 'משפץ יקר'},
     </p>
     <p style="font-size: 17px; color: #1e293b; line-height: 1.8; margin: 0 0 28px 0; text-align: right;">
-      הטריק הזה יחסוך לך שעות של הקלדה ידנית:
+      יש לך Premium - מעולה! 🎉 עכשיו אפשר לקחת את זה צעד קדימה:
     </p>
     
-    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 20px; padding: 28px; margin-bottom: 24px; text-align: center;">
-      <p style="font-size: 48px; margin: 0 0 16px 0;">📸</p>
-      <h3 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #1e40af;">צלם → סיים</h3>
-      <p style="margin: 0; font-size: 16px; color: #1e40af; line-height: 1.6;">
-        פשוט צלם את הקבלה.<br>ה-AI שלנו עושה את השאר.
+    <div style="background: linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%); border-radius: 20px; padding: 28px; margin-bottom: 24px; text-align: center;">
+      <p style="font-size: 48px; margin: 0 0 16px 0;">🏠</p>
+      <h3 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #86198f;">איך השיפוץ שלך יראה?</h3>
+      <p style="margin: 0; font-size: 16px; color: #a21caf; line-height: 1.6;">
+        העלה תמונה של החדר → תאר מה אתה רוצה → קבל הדמיה של התוצאה
       </p>
     </div>
     
     <p style="font-size: 16px; color: #1e293b; line-height: 1.8; margin: 0 0 16px 0; text-align: right;">
-      <strong>מה קורה כשאתה מצלם קבלה?</strong>
+      <strong>מה כלול ב-AI Vision:</strong>
     </p>
     
     <ul style="font-size: 15px; color: #475569; line-height: 2; padding-right: 20px; margin: 0 0 24px 0; text-align: right;">
-      <li>זיהוי אוטומטי של הסכום הכולל</li>
-      <li>חילוץ תאריך החשבונית</li>
-      <li>זיהוי שם העסק/ספק</li>
-      <li>קטגוריזציה חכמה (חשמל, אינסטלציה, וכו׳)</li>
-      <li>שמירה של כל הפרטים בפריט אחד</li>
+      <li>הדמיות AI של השיפוץ שלך</li>
+      <li>הערכת עלויות אוטומטית לכל הדמיה</li>
+      <li>השוואת סגנונות שונים</li>
+      <li>שמירת היסטוריה של כל ההדמיות</li>
+      <li>הדמיות ללא הגבלה (במקום 10 ביום)</li>
     </ul>
     
-    <div style="background: #f0fdf4; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; border-right: 4px solid #22c55e;">
-      <p style="margin: 0; font-size: 15px; color: #166534; text-align: right;">
-        <strong>💡 טיפ:</strong> אפשר לצלם עד 3 קבלות בבת אחת! המערכת תעבד את כולן.
+    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 32px; margin-bottom: 24px; text-align: center;">
+      <p style="font-size: 14px; color: #92400e; margin: 0 0 8px 0;">🎁 הנחה מיוחדת לחברי Premium:</p>
+      <p style="font-size: 40px; font-weight: 700; color: #1e293b; margin: 0; letter-spacing: 3px;">${visionCode || 'VIS-SPECIAL'}</p>
+      <p style="font-size: 16px; color: #92400e; margin: 16px 0 0 0;">
+        <strong>50% הנחה</strong> על החודש הראשון!<br>
+        <span style="text-decoration: line-through;">₪39.99</span> → <strong>₪19.99</strong> בלבד
       </p>
+      <p style="font-size: 13px; color: #a16207; margin: 8px 0 0 0;">תקף ל-7 ימים</p>
     </div>
     
-    ${ctaButton('לנסות עכשיו ←', 'https://shipazti.com/dashboard', '#0ea5e9')}
+    ${ctaButton('לנסות AI Vision ←', 'https://shipazti.com/checkout-vision?code=' + (visionCode || ''), '#a855f7')}
     ${signOff()}
   `,
-    'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%)',
-    'הטריק שיחסוך לך שעות',
-    'סריקת קבלות אוטומטית עם AI',
-    '#0c4a6e',
-    '#0369a1'
+    'linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 50%, #e879f9 100%)',
+    'איך השיפוץ שלך יראה? 🏠',
+    'הדמיות AI + הערכת עלויות',
+    '#86198f',
+    '#a21caf'
   ),
 
   // ===== DAY 5: BUDGET TIPS =====
@@ -697,11 +701,18 @@ const TEMPLATES = {
 // EMAIL SENDING FUNCTIONS
 // ===========================================
 
-// Generate unique discount code
+// Generate unique Premium discount code (SHIP-)
 function generateDiscountCode(email) {
   const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `SHIP-${prefix}-${random}`;
+}
+
+// Generate unique Vision discount code (VIS-)
+function generateVisionCode(email) {
+  const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `VIS-${prefix}-${random}`;
 }
 
 // Send email via Resend
@@ -743,7 +754,7 @@ async function recordEmail(email, sequenceType, dayNumber) {
   });
 }
 
-// Create discount code for user
+// Create Premium discount code for user (20% off, 48h)
 async function createDiscountCode(email) {
   const code = generateDiscountCode(email);
   const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
@@ -753,6 +764,22 @@ async function createDiscountCode(email) {
     user_email: email,
     discount_percent: 20,
     expires_at: expiresAt.toISOString(),
+  });
+  
+  return code;
+}
+
+// Create Vision discount code for Premium users (50% off first month, 7 days)
+async function createVisionCode(email) {
+  const code = generateVisionCode(email);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  
+  await supabase.from('discount_codes').insert({
+    code,
+    user_email: email,
+    discount_percent: 50,
+    expires_at: expiresAt.toISOString(),
+    code_type: 'vision', // Mark as vision code
   });
   
   return code;
@@ -791,8 +818,13 @@ async function processEmailSequences() {
           
           let html;
           if (step.template === 'discount_offer') {
+            // Premium discount for non-purchased users
             const code = await createDiscountCode(user.email);
             html = TEMPLATES[step.template](user, code);
+          } else if (step.template === 'vision_upsell') {
+            // Vision discount for Premium users
+            const visionCode = await createVisionCode(user.email);
+            html = TEMPLATES[step.template](user, visionCode);
           } else {
             html = TEMPLATES[step.template](user);
           }
@@ -854,6 +886,7 @@ module.exports = {
   validateDiscountCode,
   markCodeUsed,
   createDiscountCode,
+  createVisionCode,
   sendEmail,
   TEMPLATES,
 };

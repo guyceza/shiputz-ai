@@ -4,7 +4,6 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
-import { getMidragPricingReference } from "@/lib/pricing-data";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI - מערכת לניהול שיפוצים עם בינה מלאכותית.
@@ -44,24 +43,13 @@ const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI 
 2. התמקד בערך שהמוצר נותן
 3. אם מישהו מתעניין, עודד אותו להירשם
 4. אם יש שאלה שאתה לא יודע - הפנה ל-support@shipazti.com
-5. תשובות קצרות וממוקדות
+5. תשובות קצרות וממוקדות (2-3 משפטים)
 6. אל תשתמש בכוכביות או סימני מרקדאון להדגשה - כתוב טקסט פשוט בלבד
+7. אם שואלים על מחירי שיפוצים, הפנה להשתמש בכלי "ניתוח הצעת מחיר" שבמערכת`;
 
-🔍 ניתוח הצעות מחיר:
-אם מישהו מציין שקיבל הצעת מחיר או שואל אם מחיר סביר - השווה למחירי השוק למטה וענה בפורמט:
-- ✅ מחיר סביר (בטווח השוק)
-- ⚠️ יקר ב-10-25% מהשוק
-- ❌ יקר מדי! (25%+ מעל השוק)
-- 🟢 מציאה! (מתחת לטווח)
-
-ציין את מחיר השוק לפי מידרג והאחוז מעל/מתחת.`;
-
-// Dynamic prompt with pricing
+// Use base prompt only - pricing data is too large for chat context
 function getFullSystemPrompt(): string {
-  return SYSTEM_PROMPT + `
-
-=== מחירי שוק (מידרג) ===
-${getMidragPricingReference()}`;
+  return SYSTEM_PROMPT;
 }
 
 // Simple rate limiting (10 requests per minute per IP)
@@ -142,7 +130,7 @@ export async function POST(request: NextRequest) {
           },
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 500,
+            maxOutputTokens: 1000,
           }
         }),
       }

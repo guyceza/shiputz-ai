@@ -895,8 +895,8 @@ export default function ProjectPage() {
         setQuoteAnalysis(data.analysis);
         setQuoteVerdict(data.verdict || null);
         
-        // Auto-save quote to saved quotes
-        const amountMatch = quoteText.match(/(\d[\d,\.]*)\s*(ש"ח|שח|₪)/);
+        // Auto-save quote to saved quotes - support multiple formats
+        const amountMatch = quoteText.match(/(\d[\d,\.]*)\s*(ש"ח|שח|₪|שקל)/i) || quoteText.match(/ב-?(\d[\d,\.]+)\s*(ש|₪)?/i);
         const amount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : 0;
         
         const newQuote: SavedQuote = {

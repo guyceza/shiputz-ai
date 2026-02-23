@@ -161,6 +161,13 @@ export default function ProjectPage() {
   const [showAIChat, setShowAIChat] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<{role: string, content: string}[]>([]);
+  
+  // Auto-scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
   const [chatLoading, setChatLoading] = useState(false);
   
   // Quote Analysis
@@ -228,6 +235,7 @@ export default function ProjectPage() {
     };
   } | null>(null);
   const visionInputRef = useRef<HTMLInputElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [countdown, setCountdown] = useState(60);
   const [visionError, setVisionError] = useState<string | null>(null);
@@ -2660,7 +2668,7 @@ export default function ProjectPage() {
               <button onClick={() => setShowAIChat(false)} className="text-gray-500 hover:text-gray-900">✕</button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
               {chatHistory.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
                   <p className="mb-6">שאל שאלה על השיפוץ</p>

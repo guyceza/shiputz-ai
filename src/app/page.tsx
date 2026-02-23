@@ -795,13 +795,13 @@ export default function Home() {
       )}
 
       {/* About / Our Story */}
-      <section className="py-24 px-6 border-t border-gray-100 bg-amber-50/50">
+      <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">מי אנחנו</h2>
           </div>
           
-          <div className="bg-white rounded-3xl p-8 md:p-12 border border-amber-100/50">
+          <div className="bg-amber-50 rounded-3xl p-8 md:p-12 border border-amber-200/50">
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right">
               <p>
                 <span className="text-gray-900 font-medium">סיימתי שיפוץ של 3 חודשים.</span> בהתחלה ניסיתי לעקוב עם אקסל, אבל אחרי שבוע כבר ויתרתי.

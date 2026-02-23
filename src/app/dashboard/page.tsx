@@ -340,6 +340,9 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-semibold text-gray-900">
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
             </h1>
+            {user.email && (
+              <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+            )}
           </div>
           <button
             onClick={() => setShowNewProject(true)}

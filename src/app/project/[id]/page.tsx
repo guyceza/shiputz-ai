@@ -98,12 +98,14 @@ interface Project {
 const CATEGORIES = ["חומרי בניין", "עבודה", "חשמל", "אינסטלציה", "ריצוף", "צבע", "מטבח", "אמבטיה", "אחר"];
 
 const SCAN_TIPS = [
-  "💡 טיפ: שמור על כל הקבלות במקום אחד",
-  "💡 טיפ: צלם קבלות מיד אחרי קבלתן",
-  "💡 טיפ: בדוק שהסכום בקבלה תואם למה שסוכם",
-  "💡 טיפ: בקש חשבונית מס אם אתה עוסק",
-  "💡 טיפ: השווה מחירים בין ספקים שונים",
-  "💡 טיפ: תכנן מראש 10-15% תקציב לבלת״מים",
+  "☕ אפשר להכין קפה - אנחנו על זה",
+  "🔍 קוראים כל מילה קטנה בקבלה...",
+  "🧮 מחשבים את הסכומים בדיוק מקסימלי",
+  "📝 מנתחים את הפרטים עבורך",
+  "✨ עוד רגע מסיימים, סבלנות",
+  "🎯 מוודאים שהכל נקלט נכון",
+  "💪 עובדים קשה מאחורי הקלעים",
+  "🚀 כמעט שם! עוד שנייה...",
 ];
 
 const DEFAULT_PHASES: Omit<Phase, "id">[] = [
@@ -168,6 +170,15 @@ export default function ProjectPage() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatHistory]);
+  
+  // Rotate scan tips while scanning
+  useEffect(() => {
+    if (!scanning) return;
+    const interval = setInterval(() => {
+      setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [scanning]);
   const [chatLoading, setChatLoading] = useState(false);
   
   // Quote Analysis

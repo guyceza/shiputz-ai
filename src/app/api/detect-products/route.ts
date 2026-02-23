@@ -5,18 +5,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from '@/lib/supabase';
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
-// Verify user exists and has premium
-async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
+// Verify user exists (Shop the Look is part of the visualization experience, including trial)
+async function verifyUserExists(userEmail: string): Promise<boolean> {
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('users')
-      .select('id, purchased')
+      .select('id')
       .eq('email', userEmail.toLowerCase())
       .single();
-    return { exists: !!data, premium: data?.purchased === true };
+    return !!data;
   } catch {
-    return { exists: false, premium: false };
+    return false;
   }
 }
 
@@ -32,17 +32,12 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    const { exists, premium } = await verifyUserPremium(userEmail);
-    if (!exists) {
+    // Shop the Look is part of the visualization experience (including free trial)
+    const userExists = await verifyUserExists(userEmail);
+    if (!userExists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
-    }
-    
-    if (!premium) {
-      return NextResponse.json({ 
-        error: "Shop The Look זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם." 
-      }, { status: 403 });
     }
 
     if (!image) {

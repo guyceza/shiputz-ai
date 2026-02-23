@@ -801,8 +801,11 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">מי אנחנו</h2>
           </div>
           
-          <div className="bg-amber-50 rounded-3xl p-8 md:p-12 border border-amber-200/50">
-            <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right">
+          <div className="relative bg-gradient-to-br from-sky-50 to-indigo-50 rounded-3xl p-8 md:p-12 border border-sky-100 overflow-hidden">
+            {/* Decorative patch */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-sky-200/40 to-indigo-200/40 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute top-4 right-4 text-4xl opacity-30">🏠</div>
+            <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right relative z-10">
               <p>
                 <span className="text-gray-900 font-medium">בנינו את Shipazti כי עברנו את זה בעצמנו.</span> שיפוצים שיצאו משליטה, קבלות שהלכו לאיבוד, והרגשה שמישהו תמיד מנפח לנו את המחיר.
               </p>

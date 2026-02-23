@@ -4,6 +4,7 @@ export const maxDuration = 60; // 60 second timeout
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { trackRequest } from "@/lib/usage-monitor";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -156,21 +157,28 @@ export async function POST(request: NextRequest) {
       const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
+        trackRequest('/api/scan-receipt', false);
         return NextResponse.json(parsed);
       }
     } catch (e) {
+      trackRequest('/api/scan-receipt', true);
       return NextResponse.json({ 
-        error: "JSON parse failed", 
-        content: content.substring(0, 300) 
+        error: "לא הצלחנו לקרוא את הקבלה. נסה לצלם שוב בתאורה טובה יותר.", 
+        code: "PARSE_ERROR"
       }, { status: 422 });
     }
 
-    return NextResponse.json({ error: "No JSON in response", content: content.substring(0, 300) }, { status: 422 });
+    trackRequest('/api/scan-receipt', true);
+    return NextResponse.json({ 
+      error: "לא הצלחנו לזהות את פרטי הקבלה. נסה להעלות תמונה ברורה יותר.",
+      code: "NO_DATA"
+    }, { status: 422 });
   } catch (error) {
+    trackRequest('/api/scan-receipt', true);
     console.error("Scan error:", error);
     return NextResponse.json({ 
-      error: "Internal server error",
-      details: error instanceof Error ? error.message : String(error)
+      error: "אירעה שגיאה בסריקת הקבלה. נסה שוב מאוחר יותר.",
+      code: "SERVER_ERROR"
     }, { status: 500 });
   }
 }

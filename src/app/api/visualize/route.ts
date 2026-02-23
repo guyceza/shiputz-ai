@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { createServiceClient } from "@/lib/supabase";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { trackRequest } from "@/lib/usage-monitor";
 
 // Verify user is authenticated (has valid Supabase session via cookie)
 async function verifyAuth(request: NextRequest): Promise<boolean> {
@@ -512,7 +513,9 @@ export async function POST(request: NextRequest) {
       await incrementUsage(userEmail);
     }
 
-    // Step 5: Return the results (only if we have a generated image)
+    // Step 5: Track successful request and return results
+    trackRequest('/api/visualize', false);
+    
     return NextResponse.json({
       success: true,
       analysis: analysisText,
@@ -525,11 +528,17 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    // Track error
+    trackRequest('/api/visualize', true);
+    
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Visualize API error:", errorMessage, error);
-    return NextResponse.json(
-      { error: `Server error: ${errorMessage}` },
-      { status: 500 }
-    );
+    
+    // Return friendly error message
+    return NextResponse.json({
+      error: "אירעה שגיאה בעיבוד התמונה. נסה שוב מאוחר יותר.",
+      code: "SERVER_ERROR",
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 });
   }
 }

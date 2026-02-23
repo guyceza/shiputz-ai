@@ -130,6 +130,11 @@ export default function ProjectPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "suppliers" | "photos">("overview");
   
+  // Subscription status
+  const [isPremium, setIsPremium] = useState(false);
+  const [hasVisionSub, setHasVisionSub] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  
   // Expense modal
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -310,7 +315,7 @@ export default function ProjectPage() {
   }, [visionLoading]);
 
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       const userData = localStorage.getItem("user");
       if (!userData) {
         router.push("/login");
@@ -319,6 +324,30 @@ export default function ProjectPage() {
       
       const user = JSON.parse(userData);
       const userId = user.id;
+      const email = user.email;
+      setUserEmail(email);
+
+      // Check subscription status
+      if (email) {
+        try {
+          const [premiumRes, visionRes] = await Promise.all([
+            fetch(`/api/admin/premium?email=${encodeURIComponent(email)}`),
+            fetch(`/api/whop/check-vision?email=${encodeURIComponent(email)}`)
+          ]);
+          
+          if (premiumRes.ok) {
+            const data = await premiumRes.json();
+            setIsPremium(data.hasPremium === true);
+          }
+          
+          if (visionRes.ok) {
+            const data = await visionRes.json();
+            setHasVisionSub(data.hasSubscription === true);
+          }
+        } catch (e) {
+          console.error("Failed to check subscription:", e);
+        }
+      }
 
       const savedProjects = localStorage.getItem(userId ? `projects_${userId}` : "projects");
       if (savedProjects) {
@@ -1340,7 +1369,7 @@ export default function ProjectPage() {
               )}
             </div>
 
-            {/* איך השיפוץ שלי יראה? */}
+            {/* איך השיפוץ שלי יראה? - Requires Premium + Vision subscription */}
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden bg-gray-50">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -1354,39 +1383,60 @@ export default function ProjectPage() {
                     <p className="text-sm text-gray-500">ראה את השיפוץ לפני שמתחיל</p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
-                  נשארו לך <span className="font-semibold text-gray-900">{10 - getVisionUsageToday()}</span> עריכות היום
-                </div>
+                {hasVisionSub && (
+                  <div className="text-sm text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200">
+                    נשארו לך <span className="font-semibold text-gray-900">{10 - getVisionUsageToday()}</span> עריכות בחודש
+                  </div>
+                )}
               </div>
-              <button
-                onClick={() => setShowAIVision(true)}
-                className="w-full bg-gray-900 text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all"
-              >
-                צור הדמיה חדשה
-              </button>
+              {hasVisionSub ? (
+                <button
+                  onClick={() => setShowAIVision(true)}
+                  className="w-full bg-gray-900 text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-all"
+                >
+                  צור הדמיה חדשה
+                </button>
+              ) : (
+                <a
+                  href="/visualize"
+                  className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-center hover:from-purple-700 hover:to-indigo-700 transition-all"
+                >
+                  🔒 שדרג למנוי Vision - נסה חינם
+                </a>
+              )}
             </div>
 
-            {/* AI Tools */}
+            {/* AI Tools - Requires Premium subscription */}
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">כלי AI</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">כלי AI</h2>
+                {!isPremium && (
+                  <a href="/checkout" className="text-sm text-purple-600 hover:text-purple-700">
+                    🔒 דורש מנוי Premium
+                  </a>
+                )}
+              </div>
               <div className="grid md:grid-cols-3 gap-4">
                 <button
-                  onClick={() => { setShowQuoteAnalysis(true); setQuoteAnalysis(null); setQuoteText(""); setQuoteError(null); }}
-                  className="text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100 transition-all"
+                  onClick={() => isPremium ? (setShowQuoteAnalysis(true), setQuoteAnalysis(null), setQuoteText(""), setQuoteError(null)) : null}
+                  disabled={!isPremium}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">ניתוח הצעת מחיר</p>
                   <p className="text-sm text-gray-500">בדוק אם המחיר סביר</p>
                 </button>
                 <button
-                  onClick={() => setShowAIChat(true)}
-                  className="text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100 transition-all"
+                  onClick={() => isPremium ? setShowAIChat(true) : null}
+                  disabled={!isPremium}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">עוזר AI</p>
                   <p className="text-sm text-gray-500">שאל שאלות על השיפוץ</p>
                 </button>
                 <button
-                  onClick={() => { fileInputRef.current?.click(); setShowAddExpense(true); }}
-                  className="text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100 transition-all"
+                  onClick={() => isPremium ? (fileInputRef.current?.click(), setShowAddExpense(true)) : null}
+                  disabled={!isPremium}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">סריקת קבלה</p>
                   <p className="text-sm text-gray-500">צלם והוסף אוטומטית</p>

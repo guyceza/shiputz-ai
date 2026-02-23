@@ -657,11 +657,14 @@ export default function ProjectPage() {
     setScanTimer(0);
   };
 
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  
   const handleQuoteAnalysis = async () => {
     if (!quoteText.trim()) return;
     
     setAnalyzing(true);
     setQuoteAnalysis(null);
+    setQuoteError(null);
     try {
       const response = await fetch("/api/analyze-quote-text", {
         method: "POST",
@@ -671,11 +674,13 @@ export default function ProjectPage() {
       const data = await response.json();
       if (response.ok) {
         setQuoteAnalysis(data.analysis);
+      } else if (data.error === "INVALID_INPUT") {
+        setQuoteError("INVALID_INPUT");
       } else {
-        setQuoteAnalysis(data.error || "לא הצלחתי לנתח את ההצעה. נסה שוב.");
+        setQuoteError("GENERAL_ERROR");
       }
     } catch {
-      setQuoteAnalysis("שגיאה בניתוח. נסה שוב.");
+      setQuoteError("GENERAL_ERROR");
     }
     setAnalyzing(false);
   };
@@ -1329,7 +1334,7 @@ export default function ProjectPage() {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">כלי AI</h2>
               <div className="grid md:grid-cols-3 gap-4">
                 <button
-                  onClick={() => { setShowQuoteAnalysis(true); setQuoteAnalysis(null); setQuoteText(""); }}
+                  onClick={() => { setShowQuoteAnalysis(true); setQuoteAnalysis(null); setQuoteText(""); setQuoteError(null); }}
                   className="text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100 transition-all"
                 >
                   <p className="font-medium text-gray-900 mb-1">ניתוח הצעת מחיר</p>
@@ -2735,8 +2740,31 @@ export default function ProjectPage() {
                 </div>
               )}
               
+              {/* Error State */}
+              {quoteError && !analyzing && (
+                <div className="py-10 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mb-5">
+                    <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <p className="text-white font-medium text-lg mb-2">לא הצלחתי להבין את ההצעה</p>
+                  <p className="text-purple-200/70 text-sm mb-6 max-w-xs">
+                    כדי לנתח הצעת מחיר, כתוב את סוג העבודה והמחיר שקיבלת.
+                    <br />
+                    לדוגמה: &quot;צביעת דירת 3 חדרים - 5,000 ש״ח&quot;
+                  </p>
+                  <button
+                    onClick={() => { setQuoteError(null); setQuoteText(""); }}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-full font-medium hover:from-purple-600 hover:to-indigo-600 transition-all shadow-lg"
+                  >
+                    נסה שוב
+                  </button>
+                </div>
+              )}
+              
               {/* Results State */}
-              {quoteAnalysis && !analyzing && (
+              {quoteAnalysis && !analyzing && !quoteError && (
                 <>
                   <div className="bg-white/10 backdrop-blur rounded-2xl p-5 mb-5 border border-white/10">
                     <div className="whitespace-pre-wrap text-white/90 text-sm leading-relaxed">{quoteAnalysis}</div>

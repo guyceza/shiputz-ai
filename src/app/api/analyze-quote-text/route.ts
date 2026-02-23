@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
       }, { status: 429 });
     }
 
-    if (!text || text.trim().length < 5) {
+    if (!text || text.trim().length < 10) {
       return NextResponse.json({ 
-        error: "אנא תאר את הצעת המחיר שקיבלת" 
+        error: "INVALID_INPUT" 
       }, { status: 400 });
     }
 
@@ -36,12 +36,17 @@ export async function POST(request: NextRequest) {
 
     const midragPricing = getMidragPricingReference();
 
-    const prompt = `אתה מומחה לניתוח הצעות מחיר לשיפוצים בישראל. נתח את הצעת המחיר הבאה והשווה למחירי השוק.
+    const prompt = `אתה מומחה לניתוח הצעות מחיר לשיפוצים בישראל.
 
-=== הצעת המחיר שהתקבלה ===
+=== קלט מהמשתמש ===
 ${text}
 
 ${budget ? `תקציב הלקוח: ₪${budget}` : ""}
+
+חשוב מאוד: אם הקלט לא מכיל הצעת מחיר ברורה (עבודה + מחיר), החזר בדיוק את הטקסט הזה ותו לא:
+INVALID_QUOTE
+
+אם יש הצעת מחיר תקינה, המשך לניתוח:
 
 === מחירי שוק אמיתיים (מידרג - 2.8 מיליון ביקורות) ===
 ${midragPricing}
@@ -94,6 +99,11 @@ ${midragPricing}
 
     const data = await response.json();
     const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לנתח את ההצעה";
+
+    // Check if AI detected invalid input
+    if (analysis.trim() === "INVALID_QUOTE" || analysis.includes("INVALID_QUOTE")) {
+      return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
+    }
 
     return NextResponse.json({ analysis });
   } catch (error) {

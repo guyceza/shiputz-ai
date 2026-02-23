@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [hasVisionSub, setHasVisionSub] = useState(false);
+  const [hasLocalVision, setHasLocalVision] = useState(false); // Vision from localStorage (legacy)
   const [visionSubInfo, setVisionSubInfo] = useState<{
     cancelAtPeriodEnd: boolean;
     periodEnd: string | null;
@@ -130,6 +131,12 @@ export default function DashboardPage() {
           if (savedProjects) {
             setProjects(JSON.parse(savedProjects));
           }
+          
+          // Check for localStorage Vision (legacy users)
+          const localVision = localStorage.getItem(`visualize_subscription_${userId}`);
+          if (localVision === 'active') {
+            setHasLocalVision(true);
+          }
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -157,9 +164,24 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleCancelSubscription = async () => {
-    if (!user?.email) return;
+    if (!user?.email && !user?.id) return;
     
     setIsCanceling(true);
+    
+    // If it's a localStorage Vision (not Whop), just remove from localStorage
+    if (hasLocalVision && !hasVisionSub) {
+      localStorage.removeItem(`visualize_subscription_${user.id}`);
+      setCancelSuccess(true);
+      setHasLocalVision(false);
+      setTimeout(() => {
+        setShowCancelModal(false);
+        setCancelSuccess(false);
+      }, 2000);
+      setIsCanceling(false);
+      return;
+    }
+    
+    // Otherwise, cancel via Whop API
     try {
       const res = await fetch('/api/whop/cancel-subscription', {
         method: 'POST',
@@ -396,7 +418,7 @@ export default function DashboardPage() {
         )}
 
         {/* Vision AI Subscription - Monthly (can cancel) */}
-        {hasVisionSub && (
+        {(hasVisionSub || hasLocalVision) && (
           <div className="mb-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
             <div className="flex items-center justify-between">
               <div>
@@ -405,11 +427,13 @@ export default function DashboardPage() {
                   <p className="text-xs text-amber-600">
                     יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
                   </p>
-                ) : (
+                ) : hasVisionSub ? (
                   <p className="text-xs text-emerald-600">מתחדש אוטומטית כל חודש</p>
+                ) : (
+                  <p className="text-xs text-emerald-600">גישה מלאה להדמיות</p>
                 )}
               </div>
-              {!visionSubInfo?.cancelAtPeriodEnd && (
+              {!visionSubInfo?.cancelAtPeriodEnd && (hasLocalVision || hasVisionSub) && (
                 <button
                   onClick={() => setShowCancelModal(true)}
                   className="text-sm text-red-600 hover:text-red-700 border border-red-200 px-4 py-2 rounded-full hover:bg-red-50 transition-colors"
@@ -576,7 +600,9 @@ export default function DashboardPage() {
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">המנוי בוטל בהצלחה</h2>
                 <p className="text-gray-500">
-                  תוכל להמשיך להשתמש בשירות עד {visionSubInfo?.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
+                  {hasVisionSub && visionSubInfo?.periodEnd 
+                    ? `תוכל להמשיך להשתמש בשירות עד ${new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL')}`
+                    : 'הגישה להדמיות הוסרה'}
                 </p>
               </>
             ) : (
@@ -586,9 +612,15 @@ export default function DashboardPage() {
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">בטל מנוי הדמיות AI?</h2>
                 <p className="text-gray-500 mb-6">
-                  המנוי יבוטל בסוף תקופת החיוב הנוכחית.
-                  <br />
-                  לא יחויב תשלום נוסף.
+                  {hasVisionSub ? (
+                    <>
+                      המנוי יבוטל בסוף תקופת החיוב הנוכחית.
+                      <br />
+                      לא יחויב תשלום נוסף.
+                    </>
+                  ) : (
+                    'הגישה להדמיות תבוטל מיידית.'
+                  )}
                 </p>
                 
                 <div className="flex gap-3">

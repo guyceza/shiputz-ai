@@ -68,26 +68,37 @@ export default function DashboardPage() {
             setIsAdmin(true);
           }
           
-          // Check if premium user (purchased) and update localStorage
+          // Check premium and vision subscription in PARALLEL (faster!)
           if (session.user.email) {
-            try {
-              const res = await fetch(`/api/users?email=${encodeURIComponent(session.user.email)}`);
-              if (res.ok) {
-                const userData = await res.json();
+            const email = encodeURIComponent(session.user.email);
+            
+            // Start both requests at once
+            const [premiumRes, visionRes] = await Promise.all([
+              fetch(`/api/users?email=${email}`).catch(() => null),
+              fetch(`/api/whop/cancel-subscription?email=${email}`).catch(() => null)
+            ]);
+            
+            // Handle premium result
+            if (premiumRes?.ok) {
+              try {
+                const userData = await premiumRes.json();
                 const purchased = userData.purchased === true;
                 setIsPremium(purchased);
                 
-                // Update localStorage with fresh data so other pages see it
+                // Update localStorage with fresh data
                 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
                 localStorage.setItem("user", JSON.stringify({
                   ...storedUser,
                   purchased: purchased
                 }));
+              } catch (e) {
+                console.error("Premium parse error:", e);
               }
-              
-              // Check Vision subscription (monthly AI)
-              const visionRes = await fetch(`/api/whop/cancel-subscription?email=${encodeURIComponent(session.user.email)}`);
-              if (visionRes.ok) {
+            }
+            
+            // Handle vision result
+            if (visionRes?.ok) {
+              try {
                 const visionData = await visionRes.json();
                 setHasVisionSub(visionData.hasSubscription);
                 if (visionData.hasSubscription) {
@@ -96,9 +107,9 @@ export default function DashboardPage() {
                     periodEnd: visionData.periodEnd
                   });
                 }
+              } catch (e) {
+                console.error("Vision parse error:", e);
               }
-            } catch (e) {
-              console.error("Premium check error:", e);
             }
           }
         } else {

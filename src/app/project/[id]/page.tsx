@@ -676,11 +676,11 @@ export default function ProjectPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: base64, budget: project?.budget, userEmail: userEmailForQuote }),
         });
+        const data = await response.json();
         if (response.ok) {
-          const data = await response.json();
           setQuoteAnalysis(data.analysis);
         } else {
-          setQuoteAnalysis("לא הצלחתי לנתח את ההצעה. נסה שוב.");
+          setQuoteAnalysis(data.error || "לא הצלחתי לנתח את ההצעה. נסה שוב.");
         }
       } catch {
         setQuoteAnalysis("שגיאה בניתוח. נסה שוב.");

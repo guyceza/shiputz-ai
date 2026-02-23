@@ -722,8 +722,16 @@ export default function VisualizePage() {
                 loop 
                 muted 
                 playsInline
-                className="w-full"
+                className="w-full cursor-pointer"
                 poster="/demo-video-poster.jpg"
+                onClick={(e) => {
+                  const video = e.currentTarget;
+                  if (video.paused) {
+                    video.play();
+                  } else {
+                    video.pause();
+                  }
+                }}
               >
                 <source src="/demo-video.mp4" type="video/mp4" />
               </video>

@@ -61,20 +61,23 @@ ${midragPricing}
    - "יקר מדי" - 25%+ מעל השוק
    - "מציאה" - מתחת לשוק
 
-פורמט התשובה (ללא אימוג'ים, ללא כוכביות):
+פורמט התשובה (חובה לעקוב בדיוק!):
+
+שורה ראשונה - הערכה כללית (מילה אחת בלבד מתוך: מציאה / סביר / יקר / יקר_מדי):
+VERDICT: [מציאה/סביר/יקר/יקר_מדי]
+
+אחר כך הניתוח הקצר:
 
 סיכום
-[משפט אחד - סביר/יקר/מציאה]
+[משפט אחד]
 
 השוואת מחירים
-- [פריט]: [מחיר מוצע] ש"ח
-  מחיר שוק: [טווח] ש"ח
-  הערכה: [סביר / יקר ב-X% / יקר מדי - X% מעל / מציאה]
+- [פריט]: [מחיר] → שוק [טווח] = [הערכה]
 
 המלצה
-[משפט או שניים - מה לעשות]
+[משפט אחד]
 
-כתוב בעברית, קצר וממוקד. אל תשתמש באימוג'ים או בכוכביות להדגשה.`;
+חשוב: מקסימום 100 מילים אחרי ה-VERDICT. קצר וממוקד!`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.TEXT_FAST}:generateContent?key=${GEMINI_API_KEY}`,
@@ -85,7 +88,7 @@ ${midragPricing}
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 1000,
+            maxOutputTokens: 1500,
           },
         }),
       }
@@ -98,14 +101,30 @@ ${midragPricing}
     }
 
     const data = await response.json();
-    const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לנתח את ההצעה";
+    const rawAnalysis = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לנתח את ההצעה";
 
     // Check if AI detected invalid input
-    if (analysis.trim() === "INVALID_QUOTE" || analysis.includes("INVALID_QUOTE")) {
+    if (rawAnalysis.trim() === "INVALID_QUOTE" || rawAnalysis.includes("INVALID_QUOTE")) {
       return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
     }
 
-    return NextResponse.json({ analysis });
+    // Parse verdict from response
+    let verdict: "great" | "ok" | "expensive" | "very_expensive" = "ok";
+    let analysis = rawAnalysis;
+    
+    const verdictMatch = rawAnalysis.match(/VERDICT:\s*(מציאה|סביר|יקר|יקר_מדי)/i);
+    if (verdictMatch) {
+      const verdictText = verdictMatch[1];
+      if (verdictText === "מציאה") verdict = "great";
+      else if (verdictText === "סביר") verdict = "ok";
+      else if (verdictText === "יקר") verdict = "expensive";
+      else if (verdictText === "יקר_מדי") verdict = "very_expensive";
+      
+      // Remove the VERDICT line from analysis
+      analysis = rawAnalysis.replace(/VERDICT:\s*(מציאה|סביר|יקר|יקר_מדי)\n?/i, "").trim();
+    }
+
+    return NextResponse.json({ analysis, verdict });
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json({ error: "שגיאה פנימית. נסה שוב." }, { status: 500 });

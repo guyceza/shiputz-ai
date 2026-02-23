@@ -206,6 +206,7 @@ export default function ProjectPage() {
   const [showQuoteAnalysis, setShowQuoteAnalysis] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [quoteAnalysis, setQuoteAnalysis] = useState<string | null>(null);
+  const [quoteVerdict, setQuoteVerdict] = useState<"great" | "ok" | "expensive" | "very_expensive" | null>(null);
   const [quoteText, setQuoteText] = useState("");
   
   // Budget breakdown
@@ -877,10 +878,11 @@ export default function ProjectPage() {
   const [quoteError, setQuoteError] = useState<string | null>(null);
   
   const handleQuoteAnalysis = async () => {
-    if (!quoteText.trim()) return;
+    if (!quoteText.trim() || !project) return;
     
     setAnalyzing(true);
     setQuoteAnalysis(null);
+    setQuoteVerdict(null);
     setQuoteError(null);
     try {
       const response = await fetch("/api/analyze-quote-text", {
@@ -891,6 +893,25 @@ export default function ProjectPage() {
       const data = await response.json();
       if (response.ok) {
         setQuoteAnalysis(data.analysis);
+        setQuoteVerdict(data.verdict || null);
+        
+        // Auto-save quote to saved quotes
+        const amountMatch = quoteText.match(/(\d[\d,\.]*)\s*(ש"ח|שח|₪)/);
+        const amount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : 0;
+        
+        const newQuote: SavedQuote = {
+          id: Date.now().toString(),
+          supplierName: "הצעה מנותחת",
+          description: quoteText,
+          amount: amount,
+          date: new Date().toISOString(),
+        };
+        
+        const updatedProject = {
+          ...project,
+          savedQuotes: [...(project.savedQuotes || []), newQuote],
+        };
+        saveProject(updatedProject);
       } else if (data.error === "INVALID_INPUT") {
         setQuoteError("INVALID_INPUT");
       } else {
@@ -3116,11 +3137,33 @@ export default function ProjectPage() {
               {/* Results State */}
               {quoteAnalysis && !analyzing && !quoteError && (
                 <>
+                  {/* Verdict Badge */}
+                  {quoteVerdict && (
+                    <div className={`mb-4 p-4 rounded-2xl text-center ${
+                      quoteVerdict === "great" ? "bg-green-50 border-2 border-green-200" :
+                      quoteVerdict === "ok" ? "bg-blue-50 border-2 border-blue-200" :
+                      quoteVerdict === "expensive" ? "bg-orange-50 border-2 border-orange-200" :
+                      "bg-red-50 border-2 border-red-200"
+                    }`}>
+                      <div className={`text-2xl font-bold ${
+                        quoteVerdict === "great" ? "text-green-600" :
+                        quoteVerdict === "ok" ? "text-blue-600" :
+                        quoteVerdict === "expensive" ? "text-orange-600" :
+                        "text-red-600"
+                      }`}>
+                        {quoteVerdict === "great" && "🎉 מציאה!"}
+                        {quoteVerdict === "ok" && "👍 מחיר סביר"}
+                        {quoteVerdict === "expensive" && "⚠️ יקר"}
+                        {quoteVerdict === "very_expensive" && "🚨 יקר מדי!"}
+                      </div>
+                    </div>
+                  )}
                   <div className="bg-gray-50 rounded-2xl p-5 mb-5 border border-gray-100">
                     <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">{quoteAnalysis}</div>
                   </div>
+                  <p className="text-center text-green-600 text-sm mb-3">✓ ההצעה נשמרה אוטומטית</p>
                   <button
-                    onClick={() => { setQuoteAnalysis(null); setQuoteText(""); }}
+                    onClick={() => { setQuoteAnalysis(null); setQuoteVerdict(null); setQuoteText(""); }}
                     className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium hover:bg-gray-800 transition-all mb-3"
                   >
                     נתח הצעה נוספת

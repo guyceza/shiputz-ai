@@ -418,7 +418,26 @@ export default function ProjectPage() {
     }));
   };
 
-  // Process multiple receipts sequentially
+  /**
+   * Multi-Receipt Scan Feature (added 2026-02-23)
+   * =============================================
+   * Allows scanning up to 3 receipts at once.
+   * 
+   * Flow:
+   * 1. User selects up to 3 images via file input (multiple attribute)
+   * 2. handleImageSelect converts all to base64 BEFORE resetting input
+   * 3. processMultiScan processes them one by one (sequential, not parallel)
+   * 4. Each expense is saved to localStorage immediately
+   * 5. Nice success modal shows all added expenses
+   * 
+   * Important:
+   * - Uses local variable (currentProject) to track state between iterations
+   *   because React setState is async and would cause stale data
+   * - Saves to localStorage after EACH scan, not just at the end
+   * - Timer shows "30 שניות לכל קבלה"
+   * 
+   * DO NOT CHANGE without testing thoroughly!
+   */
   const processMultiScan = async (images: string[], startIndex: number) => {
     console.log("processMultiScan called with", images.length, "images, starting at", startIndex);
     const userData = localStorage.getItem("user");

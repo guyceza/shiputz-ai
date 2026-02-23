@@ -1,3 +1,10 @@
 [2026-02-22T09:00:02.203Z] Starting email sequence processing...
 Found 3 users
 [2026-02-22T09:00:03.349Z] Done!
+[2026-02-23T09:00:01.608Z] Starting email sequence processing...
+Found 6 users
+Sending reminder to dhtdht200@gmail.com (day 1)
+✅ Sent successfully: 8334b9bc-c840-49ea-ac34-f067419d9cac
+Sending welcome_purchased to guyceza@gmail.com (day 0)
+✅ Sent successfully: ab86744e-ddf9-4c43-af62-3dc8d2557986
+[2026-02-23T09:00:08.213Z] Done!

@@ -1810,6 +1810,18 @@ export default function ProjectPage() {
                         ))}
                       </select>
                     </div>
+                    {(editExpenseData.fullText || selectedExpense?.fullText) && (
+                      <div>
+                        <label className="text-sm text-gray-500 block mb-1">טקסט מלא מהקבלה</label>
+                        <textarea
+                          value={editExpenseData.fullText ?? selectedExpense?.fullText ?? ''}
+                          onChange={(e) => setEditExpenseData({...editExpenseData, fullText: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-900 text-sm"
+                          rows={6}
+                          dir="rtl"
+                        />
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>

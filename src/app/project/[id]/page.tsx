@@ -14,6 +14,7 @@ import {
   type ProjectData
 } from "@/lib/projects";
 import { uploadImage, migrateProjectImages, isBase64Image } from "@/lib/storage";
+import { saveVisionHistory, loadVisionHistory, VisionHistoryItem } from "@/lib/vision-history";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -480,10 +481,19 @@ export default function ProjectPage() {
         }
       }
       
-      // Load vision history for this project
-      const savedHistory = localStorage.getItem(`visionHistory-${params.id}`);
-      if (savedHistory) {
-        setVisionHistory(JSON.parse(savedHistory));
+      // Load vision history from Supabase
+      if (userId) {
+        const history = await loadVisionHistory(params.id as string, userId);
+        const mapped: VisionHistoryItem[] = history.map(h => ({
+          id: h.id,
+          date: new Date(h.created_at).toLocaleString('he-IL'),
+          beforeImage: h.before_image_url,
+          afterImage: h.after_image_url,
+          description: h.description || '',
+          analysis: '', // Analysis not stored in DB
+          costs: { total: 0 } // Costs not stored in DB
+        }));
+        setVisionHistory(mapped);
       }
       
       setIsLoading(false);
@@ -1271,21 +1281,29 @@ export default function ProjectPage() {
         });
         incrementVisionUsage();
         
-        // Save to history
-        if (data.generatedImage && visionImage) {
-          const historyItem: VisionHistoryItem = {
-            id: Date.now().toString(),
-            date: new Date().toLocaleString('he-IL'),
-            beforeImage: visionImage,
-            afterImage: data.generatedImage,
-            description: visionDescription,
-            analysis: data.analysis,
-            costs: { total: data.costs.total }
-          };
-          // Limit history to 20 items to prevent localStorage overflow
-          const newHistory = [historyItem, ...visionHistory].slice(0, 20);
-          setVisionHistory(newHistory);
-          localStorage.setItem(`visionHistory-${params.id}`, JSON.stringify(newHistory));
+        // Save to Supabase history
+        const userId = userData?.id;
+        if (data.generatedImage && visionImage && userId) {
+          saveVisionHistory(
+            params.id as string,
+            userId,
+            visionImage,
+            data.generatedImage,
+            visionDescription
+          ).then(saved => {
+            if (saved) {
+              const historyItem: VisionHistoryItem = {
+                id: saved.id,
+                date: new Date().toLocaleString('he-IL'),
+                beforeImage: saved.before_image_url,
+                afterImage: saved.after_image_url,
+                description: saved.description || '',
+                analysis: data.analysis,
+                costs: { total: data.costs.total }
+              };
+              setVisionHistory(prev => [historyItem, ...prev].slice(0, 20));
+            }
+          }).catch(e => console.error('Failed to save vision history:', e));
         }
       } else if (data.error === "IMAGE_NOT_SUPPORTED") {
         // Image couldn't be processed - show friendly error in UI, no analysis

@@ -715,7 +715,7 @@ export default function VisualizePage() {
           </div>
           
           {/* Demo Video */}
-          <div className="max-w-2xl mx-auto mb-10">
+          <div className="max-w-4xl mx-auto mb-10">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
               <video 
                 autoPlay 

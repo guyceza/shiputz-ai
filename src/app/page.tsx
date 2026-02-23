@@ -77,6 +77,19 @@ export default function Home() {
   const [estimateBreakdown, setEstimateBreakdown] = useState<{base: number, bathrooms: number, kitchen: number, infrastructure: number} | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [showNewsletterPopup, setShowNewsletterPopup] = useState(false);
+  
+  // Show newsletter popup after 10 seconds (if not already dismissed)
+  useEffect(() => {
+    const dismissed = localStorage.getItem('newsletter_popup_dismissed');
+    if (dismissed) return;
+    
+    const timer = setTimeout(() => {
+      setShowNewsletterPopup(true);
+    }, 10000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const calculateEstimate = () => {
     const size = parseInt(calcSize);
@@ -653,40 +666,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-20 px-6 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">קבלו טיפים לשיפוץ חכם</h2>
-          <p className="text-gray-500 mb-8">הצטרפו ל-500+ משפצים שמקבלים טיפים שבועיים</p>
-          
-          {subscribed ? (
-            <div className="bg-green-50 text-green-700 rounded-2xl p-6 border border-green-100">
-              <span className="text-2xl mb-2 block">✓</span>
-              <p className="font-medium">נרשמת בהצלחה!</p>
-              <p className="text-sm mt-1">הטיפ הראשון בדרך אליך</p>
+      {/* Newsletter Popup */}
+      {showNewsletterPopup && !subscribed && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in zoom-in-95 duration-300">
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setShowNewsletterPopup(false);
+                localStorage.setItem('newsletter_popup_dismissed', 'true');
+              }}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-3">קבלו טיפים לשיפוץ חכם</h2>
+              <p className="text-gray-500 mb-6">הצטרפו ל-500+ משפצים שמקבלים טיפים שבועיים</p>
+              
+              <form onSubmit={(e) => { handleSubscribe(e); setShowNewsletterPopup(false); }} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full px-5 py-4 border border-gray-200 rounded-full text-base focus:outline-none focus:border-gray-900 text-left"
+                  dir="ltr"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-gray-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
+                >
+                  הרשמה
+                </button>
+              </form>
+              <p className="text-xs text-gray-400 mt-4">ללא ספאם. אפשר להסיר בכל עת.</p>
             </div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="flex-1 px-5 py-4 border border-gray-200 rounded-full text-base focus:outline-none focus:border-gray-900 text-left"
-                dir="ltr"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-gray-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-gray-800 hover-bounce hover-shine whitespace-nowrap"
-              >
-                הרשמה
-              </button>
-            </form>
-          )}
-          <p className="text-xs text-gray-400 mt-4">ללא ספאם. אפשר להסיר בכל עת.</p>
+          </div>
         </div>
-      </section>
+      )}
 
       {/* Pricing - hide for users with subscription */}
       {!isPremium && (

@@ -1458,20 +1458,21 @@ export default function ProjectPage() {
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex gap-4 md:gap-6">
             {[
-              { id: "overview", label: "סקירה" },
-              { id: "timeline", label: "ציר זמן" },
-              { id: "suppliers", label: "ספקים" },
-              { id: "photos", label: "תמונות" },
+              { id: "overview", label: "סקירה", icon: "📊" },
+              { id: "timeline", label: "ציר זמן", icon: "📅" },
+              { id: "suppliers", label: "ספקים", icon: "👷" },
+              { id: "photos", label: "תמונות", icon: "📸" },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`py-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+                className={`py-3 px-4 text-sm font-semibold rounded-full transition-all ${
                   activeTab === tab.id 
-                    ? "border-gray-900 text-gray-900" 
-                    : "border-transparent text-gray-500 hover:text-gray-900"
+                    ? "bg-gray-900 text-white shadow-md" 
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                 }`}
               >
+                <span className="ml-1">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}

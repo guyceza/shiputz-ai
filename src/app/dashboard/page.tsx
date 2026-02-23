@@ -252,8 +252,19 @@ export default function DashboardPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">טוען...</div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">
+        {/* Logo */}
+        <div className="text-3xl font-bold text-gray-900 mb-8">ShiputzAI</div>
+        
+        {/* Animated Spinner */}
+        <div className="relative w-16 h-16 mb-6">
+          <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
+        </div>
+        
+        {/* Loading Text */}
+        <div className="text-gray-600 font-medium mb-2">טוען את האזור האישי...</div>
+        <div className="text-gray-400 text-sm">{randomTip}</div>
       </div>
     );
   }

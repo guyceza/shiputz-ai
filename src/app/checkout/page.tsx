@@ -241,7 +241,7 @@ function CheckoutContent() {
         </button>
 
         <p className="text-center text-xs text-gray-400 mt-4">
-          התשלום מאובטח · ביטול תוך 14 יום
+          התשלום מאובטח
         </p>
 
         <p className="text-center text-xs text-gray-400 mt-6">

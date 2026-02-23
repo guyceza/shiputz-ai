@@ -817,12 +817,30 @@ export default function VisualizePage() {
                     ✕
                   </button>
                   <div className="grid grid-cols-2 gap-1 p-2">
-                    <div className="relative aspect-square">
-                      <img src={item.beforeImage} alt="לפני" className="w-full h-full object-cover rounded-lg" />
+                    <div className="relative aspect-square bg-gray-100">
+                      <img 
+                        src={item.beforeImage} 
+                        alt="לפני" 
+                        className="w-full h-full object-cover rounded-lg" 
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">תמונה לא זמינה</div>';
+                        }}
+                      />
                       <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">לפני</span>
                     </div>
-                    <div className="relative aspect-square">
-                      <img src={item.afterImage} alt="אחרי" className="w-full h-full object-cover rounded-lg" />
+                    <div className="relative aspect-square bg-gray-100">
+                      <img 
+                        src={item.afterImage} 
+                        alt="אחרי" 
+                        className="w-full h-full object-cover rounded-lg" 
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">תמונה לא זמינה</div>';
+                        }}
+                      />
                       <span className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded">אחרי</span>
                     </div>
                   </div>

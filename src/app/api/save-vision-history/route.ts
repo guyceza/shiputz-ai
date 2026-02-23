@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,12 @@ export async function POST(request: NextRequest) {
 
     if (!projectId || !userId || !beforeImage || !afterImage) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    
+    // Validate image sizes (rough check on base64 length)
+    const maxBase64Size = MAX_IMAGE_SIZE * 1.4;
+    if (beforeImage.length > maxBase64Size || afterImage.length > maxBase64Size) {
+      return NextResponse.json({ error: "Image too large. Maximum size is 10MB." }, { status: 400 });
     }
 
     const supabase = createServiceClient();

@@ -603,9 +603,22 @@ export default function VisualizePage() {
   };
 
   const processImageFile = (file: File) => {
+    // Validate file type
     if (!file.type.startsWith('image/')) {
+      setGenerateError('יש להעלות קובץ תמונה בלבד');
       return;
     }
+    
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setGenerateError('התמונה גדולה מדי. גודל מקסימלי: 10MB');
+      return;
+    }
+    
+    // Clear any previous errors
+    setGenerateError('');
+    
     const reader = new FileReader();
     reader.onload = (event) => {
       setUploadedImage(event.target?.result as string);

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
 // Upload image to Supabase Storage
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +25,18 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Validate mime type
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      return NextResponse.json({ error: 'Invalid file type. Only images allowed.' }, { status: 400 });
+    }
+    
     // Convert base64 to buffer
     const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Validate file size
+    if (buffer.length > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 });
+    }
     
     // Generate unique filename
     const ext = mimeType.split('/')[1] || 'jpg';

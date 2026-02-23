@@ -758,6 +758,21 @@ export default function ProjectPage() {
     console.log("Files selected:", fileList?.length);
     if (!fileList || fileList.length === 0) return;
     
+    // Validate file sizes (max 10MB each)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    for (let i = 0; i < fileList.length; i++) {
+      if (fileList[i].size > maxSize) {
+        alert(`הקובץ "${fileList[i].name}" גדול מדי. גודל מקסימלי: 10MB`);
+        e.target.value = '';
+        return;
+      }
+      if (!fileList[i].type.startsWith('image/')) {
+        alert(`הקובץ "${fileList[i].name}" אינו תמונה`);
+        e.target.value = '';
+        return;
+      }
+    }
+    
     // Read files into array immediately (FileList might become invalid after reset)
     const fileCount = Math.min(fileList.length, 3);
     console.log("Will process", fileCount, "files");
@@ -890,6 +905,19 @@ export default function ProjectPage() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Validate file
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert('התמונה גדולה מדי. גודל מקסימלי: 10MB');
+      e.target.value = '';
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      alert('יש להעלות קובץ תמונה בלבד');
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -1245,6 +1273,20 @@ export default function ProjectPage() {
   const handleVisionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Validate file
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert('התמונה גדולה מדי. גודל מקסימלי: 10MB');
+      e.target.value = '';
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      alert('יש להעלות קובץ תמונה בלבד');
+      e.target.value = '';
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onloadend = () => {
       setVisionImage(reader.result as string);

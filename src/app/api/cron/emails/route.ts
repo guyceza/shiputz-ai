@@ -198,8 +198,8 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
           <strong>לא עוד הקלדה ידנית!</strong>
         </p>
       `,
-      cta: 'לנסות עכשיו',
-      url: 'https://shipazti.com/dashboard'
+      cta: 'לסרוק קבלה',
+      url: 'https://shipazti.com/dashboard?action=scan'
     },
     
     budget_tips: {

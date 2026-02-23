@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
 import { 
   getProjects, 
@@ -33,8 +33,10 @@ const TIPS = [
   "תכנן את לוח הזמנים עם באפר של 20% - עיכובים הם נורמה בשיפוצים."
 ];
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const actionParam = searchParams.get("action");
   const [user, setUser] = useState<{ name?: string; email: string; id?: string } | null>(null);
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
@@ -172,6 +174,14 @@ export default function DashboardPage() {
             }
           }
           setProjectsLoading(false);
+          
+          // Handle action parameter (deep links from emails)
+          if (actionParam && supabaseProjects && supabaseProjects.length > 0) {
+            // Redirect to first project with the action
+            const firstProject = supabaseProjects[0];
+            router.push(`/project/${firstProject.id}?action=${actionParam}`);
+            return;
+          }
           
           // Check for localStorage Vision (legacy users)
           const localVision = localStorage.getItem(`visualize_subscription_${userId}`);
@@ -720,5 +730,17 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-500">טוען...</p>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

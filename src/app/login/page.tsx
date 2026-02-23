@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +23,7 @@ export default function LoginPage() {
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
         if (session) {
-          router.push("/dashboard");
+          router.push(redirectTo);
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -27,7 +31,7 @@ export default function LoginPage() {
       setCheckingAuth(false);
     };
     checkAuth();
-  }, [router]);
+  }, [router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +81,7 @@ export default function LoginPage() {
           isAdmin: data.user.email === "guyceza@gmail.com",
           purchased: purchased
         }));
-        router.push("/dashboard");
+        router.push(redirectTo);
       }
     } catch (err: any) {
       console.error("Login error:", err);
@@ -177,5 +181,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-500">טוען...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

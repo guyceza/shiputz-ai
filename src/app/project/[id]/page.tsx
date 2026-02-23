@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { 
   getProject, 
   saveProjectData, 
@@ -133,6 +133,8 @@ const PROFESSIONS = ["קבלן ראשי", "חשמלאי", "אינסטלטור", 
 export default function ProjectPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const actionParam = searchParams.get("action");
   const fileInputRef = useRef<HTMLInputElement>(null);
   // const quoteInputRef = useRef<HTMLInputElement>(null); // Removed - using text input now
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -140,6 +142,7 @@ export default function ProjectPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "suppliers" | "photos">("overview");
+  const [actionHandled, setActionHandled] = useState(false);
   
   // Subscription status
   const [isPremium, setIsPremium] = useState(false);
@@ -488,6 +491,22 @@ export default function ProjectPage() {
     
     loadData();
   }, [params.id, router]);
+
+  // Handle action parameter from deep links (e.g., from emails)
+  useEffect(() => {
+    if (!isLoading && project && actionParam && !actionHandled) {
+      setActionHandled(true);
+      if (actionParam === "scan") {
+        // Open expense modal and trigger file picker
+        setShowAddExpense(true);
+        setTimeout(() => {
+          fileInputRef.current?.click();
+        }, 300);
+      }
+      // Clear the action from URL without reload
+      router.replace(`/project/${params.id}`, { scroll: false });
+    }
+  }, [isLoading, project, actionParam, actionHandled, params.id, router]);
 
   const saveProject = async (updatedProject: Project) => {
     const userData = localStorage.getItem("user");

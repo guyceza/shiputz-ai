@@ -62,7 +62,7 @@ async function sendVisionWelcomeEmail(email: string, name?: string) {
       <div style="background: #f0f9ff; border-radius: 12px; padding: 20px; margin: 24px 0; border: 1px solid #bae6fd;">
         <h3 style="color: #0369a1; margin-top: 0;">🎨 מה כלול במנוי:</h3>
         <ul style="color: #555; line-height: 1.8;">
-          <li>הדמיות AI ללא הגבלה</li>
+          <li>10 הדמיות AI בחודש</li>
           <li>עריכת תמונות של חדרים</li>
           <li>הצעות עיצוב אוטומטיות</li>
           <li>הערכת עלויות לפי שינויים</li>

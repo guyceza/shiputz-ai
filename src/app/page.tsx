@@ -627,7 +627,6 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">כל מה שצריך.</h2>
-            <p className="text-gray-500 mt-4">ותו לא.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-12">
             <Feature title="מעקב תקציב" description="ראו בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." />

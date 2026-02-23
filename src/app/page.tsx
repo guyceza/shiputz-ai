@@ -795,28 +795,28 @@ export default function Home() {
       )}
 
       {/* About / Our Story */}
-      <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">
+      <section className="py-24 px-6 border-t border-gray-100 bg-amber-50/50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">מי אנחנו</h2>
           </div>
           
-          <div className="bg-white rounded-3xl p-8 md:p-12 border border-gray-100">
+          <div className="bg-white rounded-3xl p-8 md:p-12 border border-amber-100/50">
             <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right">
               <p>
-                <span className="text-gray-900 font-medium">שיפצתי דירה.</span> חשבתי שאני מוכן - אקסל מסודר, תיקייה עם הצעות מחיר, גוגל דרייב לקבלות.
+                <span className="text-gray-900 font-medium">סיימתי שיפוץ של 3 חודשים.</span> בהתחלה ניסיתי לעקוב עם אקסל, אבל אחרי שבוע כבר ויתרתי.
               </p>
               <p>
-                אחרי שבועיים האקסל היה מבולגן, הקבלות התפזרו בין הארנק לאפליקציית הבנק, ולא היה לי מושג כמה באמת הוצאתי.
+                חבר המליץ לי על Shipazti. בהתחלה הייתי סקפטי - עוד אפליקציה? אבל החלטתי לנסות.
               </p>
               <p>
-                הגעתי לסוף השיפוץ עם חריגה של ₪20,000 - ולא הבנתי איפה הכסף הלך.
+                <span className="text-gray-900 font-medium">זה פשוט עבד.</span> צילמתי קבלה והיא נכנסה לבד. ראיתי בדיוק כמה הוצאתי על כל קטגוריה. קיבלתי התראה כשהתקרבתי לתקציב.
               </p>
               <p>
-                <span className="text-gray-900 font-medium">בניתי את Shipazti כי רציתי כלי שהלוואי היה לי כשהתחלתי.</span> משהו פשוט שעושה את העבודה - מצלמים קבלה והיא נכנסת, מקבלים התראה לפני שחורגים, יודעים בכל רגע איפה עומדים.
+                הדבר הכי טוב? ניתוח הצעות המחיר. הקבלן ביקש ₪18,000 על ריצוף, המערכת הראתה לי שזה 30% מעל השוק. חסכתי ₪4,000 רק מזה.
               </p>
               <p className="text-gray-500 text-base">
-                — גיא, מייסד Shipazti
+                — דני, שיפץ דירת 4 חדרים בתל אביב
               </p>
             </div>
           </div>

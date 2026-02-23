@@ -182,11 +182,7 @@ function DashboardContent() {
           }
           setProjectsLoading(false);
           
-          // Check for localStorage Vision (legacy users)
-          const localVision = localStorage.getItem(`visualize_subscription_${userId}`);
-          if (localVision === 'active') {
-            setHasLocalVision(true);
-          }
+          // Legacy localStorage vision removed - now using Whop API only
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -224,18 +220,7 @@ function DashboardContent() {
     
     setIsCanceling(true);
     
-    // If it's a localStorage Vision (not Whop), just remove from localStorage
-    if (hasLocalVision && !hasVisionSub) {
-      localStorage.removeItem(`visualize_subscription_${user.id}`);
-      setCancelSuccess(true);
-      setHasLocalVision(false);
-      setTimeout(() => {
-        setShowCancelModal(false);
-        setCancelSuccess(false);
-      }, 2000);
-      setIsCanceling(false);
-      return;
-    }
+    // Legacy localStorage vision removed - now using Whop API only
     
     // Otherwise, cancel via Whop API
     try {

@@ -77,23 +77,9 @@ export default function ShopLookPage() {
           }
         }
         
-        // Check if user should have trial reset
-        if (userEmail) {
-          try {
-            const res = await fetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
-            const data = await res.json();
-            if (data.shouldReset && currentUserId) {
-              // Clear trial data
-              localStorage.removeItem(`visualize_trial_${currentUserId}`);
-              console.log("Trial reset for user:", userEmail);
-            }
-          } catch (e) {
-            console.error("Failed to check trial reset:", e);
-          }
-        }
-        
-        // Check trial & subscription status from DB via API
+        // Check trial & subscription status from APIs
         if (currentUserId && userEmail) {
+          // Check trial from DB
           try {
             const trialRes = await fetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
             if (trialRes.ok) {
@@ -103,10 +89,19 @@ export default function ShopLookPage() {
           } catch (e) {
             console.error("Failed to check trial:", e);
           }
-          const subKey = `visualize_subscription_${currentUserId}`;
-          const hasSub = localStorage.getItem(subKey) === 'active';
-          setHasSubscription(hasSub);
-          setHasAccess(hasSub || !trialUsed);
+          
+          // Check Vision subscription from Whop API
+          try {
+            const visionRes = await fetch(`/api/whop/check-vision?email=${encodeURIComponent(userEmail)}`);
+            if (visionRes.ok) {
+              const visionData = await visionRes.json();
+              const hasSub = visionData.hasVision || false;
+              setHasSubscription(hasSub);
+              setHasAccess(hasSub || !trialUsed);
+            }
+          } catch (e) {
+            console.error("Failed to check vision subscription:", e);
+          }
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -118,14 +113,19 @@ export default function ShopLookPage() {
           fetch(`/api/vision-trial?email=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
-              const trialWasUsed = data.trialUsed || false;
-              const subKey = `visualize_subscription_${user.id}`;
-              const hasSub = localStorage.getItem(subKey) === 'active';
-              setTrialUsed(trialWasUsed);
-              setHasSubscription(hasSub);
-              setHasAccess(hasSub || !trialWasUsed);
+              setTrialUsed(data.trialUsed || false);
             })
             .catch(e => console.error("Failed to check trial:", e));
+          
+          // Check Vision subscription from Whop API
+          fetch(`/api/whop/check-vision?email=${encodeURIComponent(user.email)}`)
+            .then(res => res.json())
+            .then(data => {
+              const hasSub = data.hasVision || false;
+              setHasSubscription(hasSub);
+              setHasAccess(hasSub || !trialUsed);
+            })
+            .catch(e => console.error("Failed to check vision:", e));
         }
       }
     };

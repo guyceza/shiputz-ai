@@ -714,6 +714,22 @@ export default function VisualizePage() {
             </span>
           </div>
           
+          {/* Demo Video */}
+          <div className="max-w-2xl mx-auto mb-10">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="w-full"
+                poster="/demo-video-poster.jpg"
+              >
+                <source src="/demo-video.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+          
           {/* Trial CTA */}
           <div className="flex flex-col items-center gap-3">
             {authLoading ? (

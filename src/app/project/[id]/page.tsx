@@ -134,6 +134,8 @@ export default function ProjectPage() {
   const [multiScanQueue, setMultiScanQueue] = useState<string[]>([]); // Queue of base64 images
   const [multiScanIndex, setMultiScanIndex] = useState(0); // Current processing index
   const [multiScanResults, setMultiScanResults] = useState<Array<{image: string, data: any}>>([]);
+  const [showMultiScanSuccess, setShowMultiScanSuccess] = useState(false);
+  const [multiScanSuccessMessage, setMultiScanSuccessMessage] = useState<{count: number, totalAmount: number, items: Array<{description: string, amount: number, vendor?: string}>} | null>(null);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -421,14 +423,19 @@ export default function ProjectPage() {
     console.log("processMultiScan called with", images.length, "images, starting at", startIndex);
     const userData = localStorage.getItem("user");
     const userEmail = userData ? JSON.parse(userData).email : null;
+    const currentUserId = userData ? JSON.parse(userData).id : null;
     console.log("userEmail:", userEmail);
+    
+    // Keep track of current project state locally (React state is async)
+    let currentProject = project;
+    const successfulScans: Array<{description: string, amount: number, vendor?: string}> = [];
     
     for (let i = startIndex; i < images.length; i++) {
       console.log("Processing image", i + 1, "of", images.length);
       setMultiScanIndex(i);
       setSelectedImage(images[i]);
       setScanning(true);
-      setScanTimer(60);
+      setScanTimer(30);
       setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
       
       try {
@@ -440,47 +447,60 @@ export default function ProjectPage() {
         
         if (response.ok) {
           const data = await response.json();
-          if (!data.error) {
-            // Add expense automatically
-            if (project && data.description && data.amount) {
-              const newExpense: Expense = {
-                id: Date.now().toString() + '_' + i,
-                description: data.description,
-                amount: data.amount,
-                category: CATEGORIES.includes(data.category) ? data.category : "אחר",
-                date: new Date().toISOString(),
-                imageUrl: images[i],
-                vendor: data.vendor || undefined,
-                items: data.items || undefined,
-                fullText: data.fullText || undefined,
-                vatAmount: data.vatAmount || undefined,
-                invoiceDate: data.date || undefined,
-              };
-              
-              const updatedProject = {
-                ...project,
-                expenses: [...(project.expenses || []), newExpense],
-                spent: project.spent + data.amount,
-              };
-              setProject(updatedProject);
-              
-              // Save to localStorage
-              const currentUserId = userData ? JSON.parse(userData).id : null;
-              const storageKey = currentUserId ? `projects_${currentUserId}` : "projects";
-              const savedProjects = localStorage.getItem(storageKey);
-              if (savedProjects) {
-                const projects = JSON.parse(savedProjects);
-                const updated = projects.map((p: Project) => p.id === project.id ? updatedProject : p);
-                localStorage.setItem(storageKey, JSON.stringify(updated));
-              }
-              
-              setMultiScanResults(prev => [...prev, { image: images[i], data }]);
+          console.log("Scan result for image", i + 1, ":", data);
+          
+          if (!data.error && currentProject && data.description && data.amount) {
+            const newExpense: Expense = {
+              id: Date.now().toString() + '_' + i,
+              description: data.description,
+              amount: data.amount,
+              category: CATEGORIES.includes(data.category) ? data.category : "אחר",
+              date: new Date().toISOString(),
+              imageUrl: images[i],
+              vendor: data.vendor || undefined,
+              items: data.items || undefined,
+              fullText: data.fullText || undefined,
+              vatAmount: data.vatAmount || undefined,
+              invoiceDate: data.date || undefined,
+            };
+            
+            // Update local project reference
+            currentProject = {
+              ...currentProject,
+              expenses: [...(currentProject.expenses || []), newExpense],
+              spent: currentProject.spent + data.amount,
+            };
+            
+            // Save to localStorage immediately
+            const storageKey = currentUserId ? `projects_${currentUserId}` : "projects";
+            const savedProjects = localStorage.getItem(storageKey);
+            if (savedProjects) {
+              const projects = JSON.parse(savedProjects);
+              const updated = projects.map((p: Project) => p.id === currentProject!.id ? currentProject : p);
+              localStorage.setItem(storageKey, JSON.stringify(updated));
             }
+            
+            successfulScans.push({
+              description: data.description,
+              amount: data.amount,
+              vendor: data.vendor
+            });
+            
+            console.log("Expense added:", newExpense.description, newExpense.amount);
+          } else {
+            console.log("Scan returned error or missing data:", data.error);
           }
+        } else {
+          console.error("API returned error status:", response.status);
         }
       } catch (error) {
         console.error(`Error scanning receipt ${i + 1}:`, error);
       }
+    }
+    
+    // Update React state with final project
+    if (currentProject) {
+      setProject(currentProject);
     }
     
     // Reset states
@@ -489,10 +509,17 @@ export default function ProjectPage() {
     setMultiScanIndex(0);
     setSelectedImage(null);
     setScanTimer(0);
+    setShowAddExpense(false); // Close the modal
     
-    // Show success message
-    if (multiScanResults.length > 0 || images.length > 0) {
-      alert(`נסרקו ${images.length} קבלות בהצלחה!`);
+    // Show nice success message
+    if (successfulScans.length > 0) {
+      const totalAmount = successfulScans.reduce((sum, s) => sum + s.amount, 0);
+      setMultiScanSuccessMessage({
+        count: successfulScans.length,
+        totalAmount,
+        items: successfulScans
+      });
+      setShowMultiScanSuccess(true);
     }
   };
 
@@ -548,7 +575,7 @@ export default function ProjectPage() {
       setMultiScanQueue(base64Images);
       setMultiScanIndex(0);
       setMultiScanResults([]);
-      setScanTimer(60);
+      setScanTimer(30);
       setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
       
       setTimeout(() => {
@@ -561,7 +588,7 @@ export default function ProjectPage() {
     const base64 = base64Images[0];
     setSelectedImage(base64);
     setScanning(true);
-    setScanTimer(60);
+    setScanTimer(30);
     setScanTip(SCAN_TIPS[Math.floor(Math.random() * SCAN_TIPS.length)]);
     
     // Continue with single file scan...
@@ -1750,7 +1777,7 @@ export default function ProjectPage() {
                         <p className="text-gray-800 font-medium mb-1">סורק קבלה...</p>
                       )}
                       {scanTimer > 0 ? (
-                        <p className="text-gray-500 text-sm">עד {scanTimer} שניות</p>
+                        <p className="text-gray-500 text-sm">עד {scanTimer} שניות {multiScanQueue.length > 1 ? "לכל קבלה" : ""}</p>
                       ) : (
                         <p className="text-orange-500 text-sm">לוקח יותר זמן מהרגיל...</p>
                       )}
@@ -1848,6 +1875,45 @@ export default function ProjectPage() {
               </button>
               <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); setScannedDate(""); setScanTimer(0); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Multi-Scan Success Modal */}
+      {showMultiScanSuccess && multiScanSuccessMessage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowMultiScanSuccess(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">✓</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">הסריקה הושלמה!</h2>
+              <p className="text-gray-500">
+                {multiScanSuccessMessage.count} קבלות נסרקו ונוספו להוצאות
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
+                <span className="text-gray-500">סה״כ נוסף:</span>
+                <span className="text-xl font-bold text-gray-900">₪{multiScanSuccessMessage.totalAmount.toLocaleString()}</span>
+              </div>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {multiScanSuccessMessage.items.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-700 truncate flex-1">{item.description}</span>
+                    <span className="text-gray-900 font-medium mr-2">₪{item.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowMultiScanSuccess(false)}
+              className="w-full bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800"
+            >
+              סגור
+            </button>
           </div>
         </div>
       )}

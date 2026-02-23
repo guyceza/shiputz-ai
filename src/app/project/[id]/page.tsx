@@ -1870,36 +1870,39 @@ export default function ProjectPage() {
               </div>
             )}
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">תיאור</label>
-                <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="לדוגמה: חומרי בניין" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">סכום (₪)</label>
-                <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900" />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">קטגוריה</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 bg-white">
-                  {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
-            </div>
+            {!scanning && (
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-2">תיאור</label>
+                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="לדוגמה: חומרי בניין" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-2">סכום (₪)</label>
+                    <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-2">קטגוריה</label>
+                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 bg-white">
+                      {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                  </div>
+                </div>
 
-            <div className="flex gap-3 mt-8">
-              <button onClick={handleAddExpense} disabled={!description || !amount || scanning} className="flex-1 bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 disabled:opacity-30 flex items-center justify-center gap-2">
-                {scanning ? (
-                  <>
-                    <span className="animate-spin">⏳</span>
-                    ממתין לסריקה...
-                  </>
-                ) : (
-                  "הוסף"
-                )}
-              </button>
-              <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); setScannedDate(""); setScanTimer(0); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
-            </div>
+                <div className="flex gap-3 mt-8">
+                  <button onClick={handleAddExpense} disabled={!description || !amount} className="flex-1 bg-gray-900 text-white py-3 rounded-full hover:bg-gray-800 disabled:opacity-30">
+                    הוסף
+                  </button>
+                  <button onClick={() => { setShowAddExpense(false); setDescription(""); setAmount(""); setSelectedImage(null); setScannedVendor(""); setScannedItems([]); setScannedFullText(""); setScannedVatAmount(null); setScannedDate(""); setScanTimer(0); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+                </div>
+              </>
+            )}
+            
+            {scanning && (
+              <div className="flex justify-center mt-6">
+                <button onClick={() => { setShowAddExpense(false); setScanning(false); setDescription(""); setAmount(""); setSelectedImage(null); setScanTimer(0); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="border border-gray-200 text-gray-900 px-8 py-3 rounded-full hover:bg-gray-50">ביטול</button>
+              </div>
+            )}
           </div>
         </div>
       )}

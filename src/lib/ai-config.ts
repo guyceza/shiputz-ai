@@ -10,13 +10,13 @@
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-1.5-pro",
+  VISION_PRO: "gemini-2.5-pro",
   
   // For fast text tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-1.5-flash",
+  TEXT_FAST: "gemini-2.5-flash",
   
   // For image generation (visualize rooms)
-  IMAGE_GEN: "gemini-2.0-flash-exp",
+  IMAGE_GEN: "gemini-2.0-flash",
 } as const;
 
 // Base URL for Gemini API

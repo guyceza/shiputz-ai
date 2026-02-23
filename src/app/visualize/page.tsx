@@ -356,6 +356,7 @@ export default function VisualizePage() {
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedResult, setGeneratedResult] = useState<{image: string, analysis: string, costs: any} | null>(null);
@@ -555,11 +556,37 @@ export default function VisualizePage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      processImageFile(file);
+    }
+  };
+
+  const processImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadedImage(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processImageFile(file);
     }
   };
 
@@ -1184,10 +1211,21 @@ export default function VisualizePage() {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">תמונת החדר (לפני)</label>
               {!uploadedImage ? (
-                <label className="block cursor-pointer">
-                  <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-gray-400 transition-colors">
-                    <div className="text-4xl mb-4">📸</div>
-                    <p className="text-gray-600 font-medium">לחץ להעלאת תמונה</p>
+                <label 
+                  className="block cursor-pointer"
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
+                    isDragOver 
+                      ? 'border-green-500 bg-green-50 scale-[1.02]' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}>
+                    <div className="text-4xl mb-4">{isDragOver ? '📥' : '📸'}</div>
+                    <p className="text-gray-600 font-medium">
+                      {isDragOver ? 'שחרר כאן!' : 'לחץ או גרור תמונה לכאן'}
+                    </p>
                     <p className="text-gray-400 text-sm mt-2">JPG, PNG עד 10MB</p>
                   </div>
                   <input

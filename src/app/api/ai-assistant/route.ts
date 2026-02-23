@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 - לעולם אל תענה על שאלות פוליטיות, דתיות, או רגישות`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.TEXT_FAST}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

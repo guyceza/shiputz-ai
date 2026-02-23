@@ -55,13 +55,15 @@ export default function LoginPage() {
       const data = await signIn(email, password);
       
       if (data.user && data.user.email) {
-        // Fetch user data including purchase status from DB
+        // Fetch user data including purchase status and name from DB
         let purchased = false;
+        let userName = "";
         try {
           const userRes = await fetch(`/api/users?email=${encodeURIComponent(data.user.email)}`);
           if (userRes.ok) {
             const userData = await userRes.json();
             purchased = userData.purchased === true;
+            userName = userData.name || "";
           }
         } catch (e) {
           console.error("Failed to fetch user data:", e);
@@ -71,6 +73,7 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify({ 
           email: data.user.email,
           id: data.user.id,
+          name: userName,
           isAdmin: data.user.email === "guyceza@gmail.com",
           purchased: purchased
         }));

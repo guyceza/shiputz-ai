@@ -437,13 +437,13 @@ export default function VisualizePage() {
         }
         
         // Check if user should have trial reset (from admin panel)
-        if (userEmail && currentUserId) {
+        if (userEmail) {
           try {
             const res = await fetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
             const data = await res.json();
             if (data.shouldReset) {
-              // Clear trial data - user gets a new trial!
-              localStorage.removeItem(`visualize_trial_${currentUserId}`);
+              // Trial reset triggered from admin - DB already updated
+              setTrialUsed(false);
               console.log("Trial reset for user:", userEmail);
             }
           } catch (e) {
@@ -469,10 +469,17 @@ export default function VisualizePage() {
           }
         }
         
-        // Check local trial status (trial is still local, subscription is now from DB)
-        if (currentUserId) {
-          const trialKey = `visualize_trial_${currentUserId}`;
-          setTrialUsed(localStorage.getItem(trialKey) === 'used');
+        // Check trial status from database
+        if (userEmail) {
+          try {
+            const trialRes = await fetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
+            if (trialRes.ok) {
+              const trialData = await trialRes.json();
+              setTrialUsed(trialData.trialUsed || false);
+            }
+          } catch (e) {
+            console.error("Failed to check trial:", e);
+          }
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -481,13 +488,7 @@ export default function VisualizePage() {
         setHasPurchased(user.purchased === true);
         if (user.id) {
           setUserId(user.id);
-          const trialKey = `visualize_trial_${user.id}`;
-          setTrialUsed(localStorage.getItem(trialKey) === 'used');
-          // Vision subscription is now checked from DB via API, fallback to localStorage for offline
-          const subKey = `visualize_subscription_${user.id}`;
-          if (localStorage.getItem(subKey) === 'active') {
-            setHasSubscription(true);
-          }
+          // Trial and subscription are checked from DB, this is fallback
         }
       } finally {
         setAuthLoading(false);
@@ -611,11 +612,18 @@ export default function VisualizePage() {
       if (data.error) {
         setGenerateError(data.error);
       } else {
-        // Consume trial if not subscribed
-        if (!hasSubscription && userId) {
-          const trialKey = `visualize_trial_${userId}`;
-          localStorage.setItem(trialKey, 'used');
-          setTrialUsed(true);
+        // Consume trial if not subscribed - save to DB
+        if (!hasSubscription && userEmail) {
+          try {
+            await fetch('/api/vision-trial', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+            setTrialUsed(true);
+          } catch (e) {
+            console.error("Failed to mark trial as used:", e);
+          }
         }
         
         setGeneratedResult({

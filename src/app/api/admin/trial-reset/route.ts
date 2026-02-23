@@ -27,11 +27,17 @@ export async function GET(request: NextRequest) {
       .single();
     
     if (data) {
-      // Mark as used
+      // Mark as used in trial_resets table
       await supabase
         .from('trial_resets')
         .update({ used: true, used_at: new Date().toISOString() })
         .eq('id', data.id);
+      
+      // Also reset the vision_trial_used flag in users table
+      await supabase
+        .from('users')
+        .update({ vision_trial_used: false })
+        .eq('email', email.toLowerCase());
       
       return NextResponse.json({ shouldReset: true });
     }

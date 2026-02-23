@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
 
 // Add keyframes for animations
 const animationStyles = `
@@ -369,6 +370,7 @@ export default function VisualizePage() {
   const [detectingProducts, setDetectingProducts] = useState(false);
   const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string}[]>([]);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string} | null>(null);
+  const [savingToCloud, setSavingToCloud] = useState(false);
   
   const LOADING_TIPS = [
     "💡 קבל לפחות 3 הצעות מחיר לפני שמתחילים",
@@ -505,49 +507,66 @@ export default function VisualizePage() {
     checkAuth();
   }, []);
 
-  // Load visualization history from localStorage
+  // Load visualization history from Supabase
   useEffect(() => {
     if (userId) {
-      const historyKey = `visualize_history_${userId}`;
-      const savedHistory = localStorage.getItem(historyKey);
-      if (savedHistory) {
+      const loadHistory = async () => {
         try {
-          setVisualizationHistory(JSON.parse(savedHistory));
+          const data = await loadVisualizations(userId);
+          // Map Supabase format to local format
+          const mapped = data.map(v => ({
+            id: v.id,
+            beforeImage: v.before_image_url,
+            afterImage: v.after_image_url,
+            description: v.description,
+            analysis: v.analysis,
+            costs: v.costs,
+            createdAt: v.created_at
+          }));
+          setVisualizationHistory(mapped);
         } catch (e) {
           console.error("Failed to load history:", e);
         }
-      }
+      };
+      loadHistory();
     }
   }, [userId]);
 
-  // Save visualization to history
-  const saveToHistory = (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any) => {
+  // Save visualization to Supabase
+  const saveToHistory = async (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any) => {
     if (!userId) return;
     
-    const newItem = {
-      id: Date.now().toString(),
-      beforeImage,
-      afterImage,
-      description,
-      analysis,
-      costs,
-      createdAt: new Date().toISOString()
-    };
-    
-    const historyKey = `visualize_history_${userId}`;
-    const updatedHistory = [newItem, ...visualizationHistory].slice(0, 50); // Keep max 50 items
-    setVisualizationHistory(updatedHistory);
-    localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
+    setSavingToCloud(true);
+    try {
+      const saved = await saveVisualization(userId, beforeImage, afterImage, description, analysis, costs);
+      if (saved) {
+        // Add to local state
+        const newItem = {
+          id: saved.id,
+          beforeImage: saved.before_image_url,
+          afterImage: saved.after_image_url,
+          description: saved.description,
+          analysis: saved.analysis,
+          costs: saved.costs,
+          createdAt: saved.created_at
+        };
+        setVisualizationHistory(prev => [newItem, ...prev].slice(0, 50));
+      }
+    } catch (e) {
+      console.error("Failed to save to cloud:", e);
+    } finally {
+      setSavingToCloud(false);
+    }
   };
 
-  // Delete visualization from history
-  const deleteFromHistory = (itemId: string) => {
+  // Delete visualization from Supabase
+  const deleteFromHistory = async (itemId: string) => {
     if (!userId) return;
     
-    const historyKey = `visualize_history_${userId}`;
-    const updatedHistory = visualizationHistory.filter(item => item.id !== itemId);
-    setVisualizationHistory(updatedHistory);
-    localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
+    const success = await deleteVisualization(itemId, userId);
+    if (success) {
+      setVisualizationHistory(prev => prev.filter(item => item.id !== itemId));
+    }
   };
 
   const handleTryNow = () => {
@@ -641,9 +660,10 @@ export default function VisualizePage() {
           costs: data.costEstimate
         });
         
-        // Save to history
+        // Save to history (async, don't block UI)
         if (uploadedImage && data.generatedImage) {
-          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate);
+          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate)
+            .catch(e => console.error('Failed to save to history:', e));
         }
       }
     } catch (err) {

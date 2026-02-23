@@ -86,12 +86,14 @@ export default function DashboardPage() {
                 const purchased = userData.purchased === true;
                 setIsPremium(purchased);
                 
-                // Update localStorage with fresh data
+                // Update localStorage with fresh data - ONLY if we have valid user data
                 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-                localStorage.setItem("user", JSON.stringify({
-                  ...storedUser,
-                  purchased: purchased
-                }));
+                if (storedUser.id) {
+                  localStorage.setItem("user", JSON.stringify({
+                    ...storedUser,
+                    purchased: purchased
+                  }));
+                }
               } catch (e) {
                 console.error("Premium parse error:", e);
               }

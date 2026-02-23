@@ -430,9 +430,14 @@ export default function VisualizePage() {
             setUserEmail(session.user.email || null);
             userEmail = session.user.email || "";
             currentUserId = session.user.id;
-            // Check purchased from localStorage
-            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            setHasPurchased(storedUser.purchased === true);
+            // Session exists but localStorage is empty - save user data!
+            localStorage.setItem("user", JSON.stringify({
+              id: session.user.id,
+              email: session.user.email || "",
+              name: session.user.user_metadata?.name || "",
+              purchased: false
+            }));
+            setHasPurchased(false);
           }
         }
         
@@ -455,9 +460,11 @@ export default function VisualizePage() {
             const premRes = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
             const premData = await premRes.json();
             if (premData.hasPremium) {
-              // User has main premium - update localStorage
+              // User has main premium - update localStorage ONLY if we have valid user data
               const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-              localStorage.setItem("user", JSON.stringify({ ...storedUser, purchased: true }));
+              if (storedUser.id) {
+                localStorage.setItem("user", JSON.stringify({ ...storedUser, purchased: true }));
+              }
               setHasPurchased(true);
             }
             // Check Vision subscription from database

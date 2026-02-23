@@ -527,6 +527,16 @@ export default function VisualizePage() {
     localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
   };
 
+  // Delete visualization from history
+  const deleteFromHistory = (itemId: string) => {
+    if (!userId) return;
+    
+    const historyKey = `visualize_history_${userId}`;
+    const updatedHistory = visualizationHistory.filter(item => item.id !== itemId);
+    setVisualizationHistory(updatedHistory);
+    localStorage.setItem(historyKey, JSON.stringify(updatedHistory));
+  };
+
   const handleTryNow = () => {
     if (!isLoggedIn) {
       window.location.href = '/login?redirect=/visualize';
@@ -715,9 +725,22 @@ export default function VisualizePage() {
               {visualizationHistory.slice(0, 6).map((item) => (
                 <div 
                   key={item.id}
-                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 hover:shadow-xl transition-all cursor-pointer active:scale-95"
+                  className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 hover:shadow-xl transition-all cursor-pointer active:scale-95"
                   onClick={() => { console.log('History item clicked:', item.id); setSelectedHistoryItem(item); }}
                 >
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('למחוק את ההדמיה הזו?')) {
+                        deleteFromHistory(item.id);
+                      }
+                    }}
+                    className="absolute top-2 left-2 z-10 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors text-sm"
+                    title="מחק הדמיה"
+                  >
+                    ✕
+                  </button>
                   <div className="grid grid-cols-2 gap-1 p-2">
                     <div className="relative aspect-square">
                       <img src={item.beforeImage} alt="לפני" className="w-full h-full object-cover rounded-lg" />

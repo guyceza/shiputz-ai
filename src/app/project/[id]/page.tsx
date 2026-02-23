@@ -942,9 +942,31 @@ export default function ProjectPage() {
   const exportToCSV = () => {
     if (!project) return;
     
-    let csv = "תיאור,סכום,קטגוריה,תאריך\n";
+    // Header row with more details
+    let csv = "תיאור,סכום,קטגוריה,תאריך חשבונית,ספק/בעל מקצוע,מע״מ,פירוט,תאריך הוספה\n";
+    
     (project.expenses || []).forEach(exp => {
-      csv += `"${exp.description}",${exp.amount},"${exp.category}","${new Date(exp.date).toLocaleDateString("he-IL")}"\n`;
+      // Use invoice date if available, otherwise use the added date
+      const invoiceDate = exp.invoiceDate 
+        ? new Date(exp.invoiceDate).toLocaleDateString("he-IL")
+        : new Date(exp.date).toLocaleDateString("he-IL");
+      
+      const addedDate = new Date(exp.date).toLocaleDateString("he-IL");
+      const vendor = exp.vendor || "";
+      const vat = exp.vatAmount ? `₪${exp.vatAmount}` : "";
+      
+      // Build details from items or fullText
+      let details = "";
+      if (exp.items && exp.items.length > 0) {
+        details = exp.items.map(item => 
+          `${item.name}${item.quantity ? ` x${item.quantity}` : ""}${item.price ? ` ₪${item.price}` : ""}`
+        ).join(" | ");
+      } else if (exp.fullText) {
+        // Take first 100 chars of fullText
+        details = exp.fullText.substring(0, 100).replace(/\n/g, " ").replace(/"/g, "'");
+      }
+      
+      csv += `"${exp.description}",${exp.amount},"${exp.category}","${invoiceDate}","${vendor}","${vat}","${details}","${addedDate}"\n`;
     });
     
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });

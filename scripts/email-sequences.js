@@ -218,7 +218,7 @@ const TEMPLATES = {
       <li>הערכת עלויות אוטומטית לכל הדמיה</li>
       <li>השוואת סגנונות שונים</li>
       <li>שמירת היסטוריה של כל ההדמיות</li>
-      <li>הדמיות ללא הגבלה (במקום 10 ביום)</li>
+      <li>10 הדמיות בחודש (במקום 1 ניסיון בלבד)</li>
     </ul>
     
     <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 32px; margin-bottom: 24px; text-align: center;">

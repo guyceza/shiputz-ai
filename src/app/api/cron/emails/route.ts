@@ -47,7 +47,7 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom: 40px;">
-              <span style="font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px;">ShiputzAI</span>
+              <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; vertical-align: middle;">ShiputzAI</span>
             </td>
           </tr>
           

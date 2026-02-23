@@ -96,7 +96,7 @@ function CheckoutContent() {
     // Use discounted plan if discount code is valid
     const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
     const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $35.99 (10% off)
-    const WHOP_PLAN_BUNDLE = "plan_BUNDLE_TODO";        // Premium + 1 month Vision - UPDATE WITH REAL ID
+    const WHOP_PLAN_BUNDLE = "plan_bp6lgvYkgWtNE
     
     const planId = isBundle ? WHOP_PLAN_BUNDLE : (discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR);
     

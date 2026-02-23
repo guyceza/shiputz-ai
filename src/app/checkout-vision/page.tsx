@@ -4,10 +4,11 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
-const REGULAR_PRICE = 40;  // ₪40
-const PROMO_PRICE = 19.99; // ₪19.99 (displayed) = $6.99 in Whop
+const REGULAR_PRICE = 39.99;  // ₪39.99
+const PROMO_PRICE = 19.99; // ₪19.99 first month (displayed) = $5.99 in Whop
 const PROMO_CODE = "LAUNCH50";
-const WHOP_PLAN_ID = "plan_6RAptSlrFl31x"; // AI Vision monthly plan - $6.99/month
+const WHOP_PLAN_ID = "plan_ORVfC8pmG328G"; // AI Vision monthly plan - $11.99/month
+const WHOP_PLAN_DISCOUNTED = "plan_786h1Ueozm30s"; // AI Vision discounted - $5.99 first month
 
 function CheckoutVisionContent() {
   const searchParams = useSearchParams();

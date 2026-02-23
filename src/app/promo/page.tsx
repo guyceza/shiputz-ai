@@ -7,7 +7,7 @@ import Link from "next/link";
 const PROMO_CODE = "LAUNCH50";
 const FIRST_MONTH_PRICE = "₪19.99";
 const REGULAR_PRICE = "₪40";
-const WHOP_MONTHLY_PLAN = "plan_hp3ThM2ndloYF";
+const WHOP_MONTHLY_PLAN = "plan_ORVfC8pmG328G";
 
 export default function PromoPage() {
   const [email, setEmail] = useState("");

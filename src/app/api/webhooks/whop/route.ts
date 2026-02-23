@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
 
     // Plan IDs
     const PREMIUM_PLANS = ['plan_gtlFi4zoHPy80', 'plan_9kPvCqLkwwmUc']; // One-time premium
-    const VISION_PLANS = ['plan_hp3ThM2ndloYF', 'plan_6RAptSlrFl31x', 'plan_NXh1FfZxz2xky'];  // Monthly Vision AI (including test plan)
+    const VISION_PLANS = ['plan_ORVfC8pmG328G', 'plan_786h1Ueozm30s'];  // Monthly Vision AI ($11.99 and $5.99 first month)
 
     // Handle successful payment / membership activation
     if (action === 'membership.went_valid' || action === 'payment.succeeded' || action === 'membership_went_valid' || action === 'payment_succeeded') {

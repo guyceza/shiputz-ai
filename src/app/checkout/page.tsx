@@ -86,7 +86,7 @@ function CheckoutContent() {
     // Build Whop checkout URL
     // Use discounted plan if discount code is valid
     const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
-    const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $31.99 (20% off)
+    const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $35.99 (10% off)
     
     const planId = discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
     

@@ -404,7 +404,7 @@ export default function ShopLookPage() {
                 </ul>
                 
                 <Link
-                  href="https://whop.com/checkout/plan_hp3ThM2ndloYF"
+                  href="https://whop.com/checkout/plan_ORVfC8pmG328G"
                   className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
                 >
                   🚀 שדרג עכשיו

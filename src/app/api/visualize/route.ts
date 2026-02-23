@@ -44,26 +44,70 @@ async function verifyUserExists(userEmail: string): Promise<boolean> {
 
 // Verify user has BOTH main subscription AND vision subscription
 // After trial, users need: purchased = true AND vision_subscription = true
-async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean, hasVision: boolean, trialUsed: boolean }> {
-  if (!userEmail) return { hasPurchased: false, hasVision: false, trialUsed: false };
+async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean, hasVision: boolean, trialUsed: boolean, monthlyUsage: number }> {
+  if (!userEmail) return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0 };
   
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('users')
-      .select('purchased, vision_subscription, vision_trial_used')
+      .select('purchased, vision_subscription, vision_trial_used, vision_usage_count, vision_usage_month')
       .eq('email', userEmail.toLowerCase())
       .single();
+    
+    // Check if we're in a new month - reset count if so
+    const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
+    let usageCount = data?.vision_usage_count || 0;
+    
+    if (data?.vision_usage_month !== currentMonth) {
+      // New month - count should be treated as 0
+      usageCount = 0;
+    }
     
     return { 
       hasPurchased: data?.purchased === true,
       hasVision: data?.vision_subscription === true,
-      trialUsed: data?.vision_trial_used === true
+      trialUsed: data?.vision_trial_used === true,
+      monthlyUsage: usageCount
     };
   } catch {
-    return { hasPurchased: false, hasVision: false, trialUsed: false };
+    return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0 };
   }
 }
+
+// Increment monthly usage counter (call after successful generation)
+async function incrementUsage(userEmail: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    
+    // Get current usage
+    const { data } = await supabase
+      .from('users')
+      .select('vision_usage_count, vision_usage_month')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    
+    let newCount = 1;
+    if (data?.vision_usage_month === currentMonth) {
+      // Same month - increment
+      newCount = (data.vision_usage_count || 0) + 1;
+    }
+    // If different month - reset to 1
+    
+    await supabase
+      .from('users')
+      .update({ 
+        vision_usage_count: newCount,
+        vision_usage_month: currentMonth
+      })
+      .eq('email', userEmail.toLowerCase());
+  } catch (e) {
+    console.error('Failed to increment usage:', e);
+  }
+}
+
+const MONTHLY_VISION_LIMIT = 10;
 
 // Cost estimation logic
 interface CostItem {
@@ -286,6 +330,16 @@ export async function POST(request: NextRequest) {
           code: "VISION_SUBSCRIPTION_REQUIRED"
         }, { status: 403 });
       }
+      
+      // Check monthly usage limit (10 per month for Vision subscribers)
+      if (subscription.monthlyUsage >= MONTHLY_VISION_LIMIT) {
+        return NextResponse.json({ 
+          error: `הגעת למכסה החודשית (${MONTHLY_VISION_LIMIT} יצירות). המכסה מתאפסת בתחילת החודש הבא.`,
+          code: "MONTHLY_LIMIT_REACHED",
+          usage: subscription.monthlyUsage,
+          limit: MONTHLY_VISION_LIMIT
+        }, { status: 429 });
+      }
     }
 
     // Read API key from environment
@@ -453,14 +507,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Step 4: Return the results (only if we have a generated image)
+    // Step 4: Increment usage counter (for subscribed users, not trial)
+    if (userEmail && subscription.trialUsed) {
+      await incrementUsage(userEmail);
+    }
+
+    // Step 5: Return the results (only if we have a generated image)
     return NextResponse.json({
       success: true,
       analysis: analysisText,
       generatedImage: generatedImage,
       costs: costEstimate,
       prompt: editPrompt,
-      description: description
+      description: description,
+      usage: subscription.trialUsed ? subscription.monthlyUsage + 1 : 0,
+      limit: MONTHLY_VISION_LIMIT
     });
 
   } catch (error) {

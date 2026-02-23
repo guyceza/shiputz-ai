@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const REGULAR_PRICE = 39.99;  // ₪39.99
-const PROMO_PRICE = 19.99; // ₪19.99 first month (displayed) = $5.99 in Whop
-const PROMO_CODE = "LAUNCH50";
-const WHOP_PLAN_ID = "plan_ORVfC8pmG328G"; // AI Vision monthly plan - $11.99/month
+const DISCOUNT_PRICE = 19.99; // ₪19.99 first month (displayed) = $5.99 in Whop
+const WHOP_PLAN_REGULAR = "plan_ORVfC8pmG328G"; // AI Vision monthly plan - $11.99/month
 const WHOP_PLAN_DISCOUNTED = "plan_786h1Ueozm30s"; // AI Vision discounted - $5.99 first month
 
 function CheckoutVisionContent() {
@@ -15,19 +14,20 @@ function CheckoutVisionContent() {
   const router = useRouter();
   
   const [email, setEmail] = useState("");
-  const [discountCode, setDiscountCode] = useState(PROMO_CODE);
+  const [discountCode, setDiscountCode] = useState("");
+  const [codeValid, setCodeValid] = useState<boolean | null>(null);
+  const [checkingCode, setCheckingCode] = useState(false);
+  const [codeError, setCodeError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [hasPurchased, setHasPurchased] = useState<boolean | null>(null); // null = loading
+  const [hasPurchased, setHasPurchased] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Check if user has main subscription
+  // Check if user has main subscription and pre-fill code from URL
   useEffect(() => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
       
-      // Check if user has main subscription
       if (user.purchased === true) {
         setHasPurchased(true);
       } else {
@@ -37,12 +37,55 @@ function CheckoutVisionContent() {
       setHasPurchased(false);
     }
     setCheckingAuth(false);
-  }, []);
+    
+    // Get code from URL
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl) {
+      setDiscountCode(codeFromUrl.toUpperCase());
+    }
+  }, [searchParams]);
 
-  const copyPromoCode = async () => {
-    await navigator.clipboard.writeText(PROMO_CODE);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Auto-validate code when it's from URL
+  useEffect(() => {
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl && email) {
+      validateCode();
+    }
+  }, [email, searchParams]);
+
+  const validateCode = async () => {
+    if (!discountCode.trim()) {
+      setCodeError("נא להזין קוד הנחה");
+      return;
+    }
+
+    setCheckingCode(true);
+    setCodeError("");
+    setCodeValid(null);
+
+    try {
+      const response = await fetch("/api/discount-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          code: discountCode.toUpperCase(), 
+          email: email.toLowerCase() 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setCodeValid(true);
+      } else {
+        setCodeValid(false);
+        setCodeError(data.reason || "קוד לא תקף");
+      }
+    } catch (err) {
+      setCodeError("שגיאה בבדיקת הקוד");
+    }
+
+    setCheckingCode(false);
   };
 
   const handlePurchase = async () => {
@@ -53,10 +96,13 @@ function CheckoutVisionContent() {
 
     setLoading(true);
 
-    // Redirect to Whop checkout with email
-    const checkoutUrl = `https://whop.com/checkout/${WHOP_PLAN_ID}?email=${encodeURIComponent(email)}`;
+    // Use discounted plan if code is valid
+    const planId = codeValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
+    const checkoutUrl = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
     window.location.href = checkoutUrl;
   };
+
+  const finalPrice = codeValid ? DISCOUNT_PRICE : REGULAR_PRICE;
 
   // Show loading while checking auth
   if (checkingAuth) {
@@ -120,7 +166,7 @@ function CheckoutVisionContent() {
 
       <div className="max-w-md mx-auto px-6 py-12">
         <h1 className="text-3xl font-semibold text-gray-900 text-center mb-2">
-          השלמת רכישה
+          מנוי הדמיות AI
         </h1>
         <p className="text-gray-500 text-center mb-8">
           מנוי חודשי · AI עריכת תמונות
@@ -131,8 +177,10 @@ function CheckoutVisionContent() {
           <div className="flex justify-between items-center mb-4">
             <span className="text-gray-900 font-medium">ShiputzAI Vision</span>
             <div className="text-left">
-              <span className="text-gray-400 line-through text-sm">₪{REGULAR_PRICE}</span>
-              <span className="text-2xl font-bold text-gray-900 mr-2">₪{PROMO_PRICE}</span>
+              {codeValid && (
+                <span className="text-gray-400 line-through text-sm">₪{REGULAR_PRICE}</span>
+              )}
+              <span className="text-2xl font-bold text-gray-900 mr-2">₪{finalPrice}</span>
               <span className="text-gray-500 text-sm">/חודש</span>
             </div>
           </div>
@@ -152,27 +200,27 @@ function CheckoutVisionContent() {
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              עריכות ללא הגבלה
+              10 הדמיות בחודש
             </li>
           </ul>
 
-          {/* Promo applied notice */}
-          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-4 mb-4 text-white">
-            <div className="text-center">
-              <div className="text-sm opacity-90 mb-1">מחיר מיוחד למנויי ShiputzAI</div>
-              <div className="flex justify-center items-center gap-3">
-                <span className="opacity-70 line-through text-lg">₪{REGULAR_PRICE}</span>
-                <span className="font-bold text-3xl">₪{PROMO_PRICE}</span>
-                <span className="opacity-90">/חודש</span>
+          {codeValid && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+              <div className="text-center">
+                <div className="text-green-700 font-bold text-lg mb-2">🎉 הקוד הופעל!</div>
+                <div className="flex justify-center items-center gap-3">
+                  <span className="text-gray-400 line-through text-lg">₪{REGULAR_PRICE}</span>
+                  <span className="text-green-700 font-bold text-2xl">₪{DISCOUNT_PRICE}</span>
+                </div>
+                <div className="text-green-600 text-sm mt-1">לחודש הראשון · אח״כ ₪{REGULAR_PRICE}/חודש</div>
               </div>
-              <div className="text-xs opacity-80 mt-2">לחודש הראשון · לאחר מכן ₪{REGULAR_PRICE}/חודש</div>
             </div>
-          </div>
+          )}
 
           <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
             <span className="font-semibold text-gray-900">סה״כ לתשלום</span>
             <div>
-              <span className="text-2xl font-bold text-gray-900">₪{PROMO_PRICE}</span>
+              <span className="text-2xl font-bold text-gray-900">₪{finalPrice}</span>
               <span className="text-gray-500 text-sm">/חודש</span>
             </div>
           </div>
@@ -191,25 +239,39 @@ function CheckoutVisionContent() {
           />
         </div>
 
-        {/* Promo Code Display */}
+        {/* Discount Code */}
         <div className="mb-6">
-          <label className="block text-sm text-gray-600 mb-2">קוד הנחה</label>
+          <label className="block text-sm text-gray-600 mb-2">קוד הנחה (אופציונלי)</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={discountCode}
-              readOnly
-              className="flex-1 px-4 py-3 border border-green-300 bg-green-50 rounded-xl text-base text-green-800 font-medium"
+              onChange={(e) => {
+                setDiscountCode(e.target.value.toUpperCase());
+                setCodeValid(null);
+                setCodeError("");
+              }}
+              placeholder="VIS-XXXX-XXXXXX"
+              className={`flex-1 px-4 py-3 border rounded-xl text-base focus:outline-none focus:border-gray-900 ${
+                codeValid === true ? 'border-green-500 bg-green-50' : 
+                codeValid === false ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              }`}
               dir="ltr"
             />
             <button
-              onClick={copyPromoCode}
-              className="px-4 py-3 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors"
+              onClick={validateCode}
+              disabled={checkingCode || !discountCode.trim()}
+              className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-colors"
             >
-              {copied ? "✓" : "העתק"}
+              {checkingCode ? "..." : "בדוק"}
             </button>
           </div>
-          <p className="text-green-600 text-sm mt-2">✓ הקוד יופעל אוטומטית בעמוד התשלום</p>
+          {codeError && (
+            <p className="text-red-500 text-sm mt-2">{codeError}</p>
+          )}
+          {codeValid && (
+            <p className="text-green-600 text-sm mt-2">✓ קוד הנחה הופעל - 50% לחודש הראשון!</p>
+          )}
         </div>
 
         {/* Purchase Button */}
@@ -218,7 +280,7 @@ function CheckoutVisionContent() {
           disabled={loading || !email.trim()}
           className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
         >
-          {loading ? "מעבד..." : `לתשלום ₪${PROMO_PRICE}/חודש`}
+          {loading ? "מעבד..." : `לתשלום ₪${finalPrice}/חודש`}
         </button>
 
         <p className="text-center text-xs text-gray-400 mt-4">

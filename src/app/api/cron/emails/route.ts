@@ -97,7 +97,7 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
 }
 
 // Generate email HTML based on template
-function getEmailHTML(template: string, user: any, discountCode?: string): string {
+function getEmailHTML(template: string, user: any, discountCode?: string, visionCode?: string): string {
   const name = user.name || 'משפץ יקר';
   
   const greeting = `<p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${name}</strong>,</p>`;
@@ -299,15 +299,19 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
             🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק
           </p>
         </div>
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: rgba(255,255,255,0.9); margin: 0 0 8px;">🎁 הנחה מיוחדת למנויי ShiputzAI</p>
-          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 0;">₪19.99<span style="font-size: 16px; font-weight: 400;"> לחודש הראשון</span></p>
-          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 8px 0 0; text-decoration: line-through;">במקום ₪39.99</p>
+        <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
+          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px;">קוד ההנחה שלך:</p>
+          <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${visionCode || ''}</p>
+          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>50% הנחה</strong> לחודש הראשון</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
+          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 0; text-decoration: line-through;">₪39.99</p>
+          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 4px 0;">₪19.99<span style="font-size: 16px; font-weight: 400;"> לחודש הראשון</span></p>
           <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0;">אחר כך ₪39.99/חודש · ביטול בכל עת</p>
         </div>
       `,
-      cta: 'לנסות עכשיו בהנחה',
-      url: 'https://shipazti.com/checkout-vision'
+      cta: 'לממש את ההנחה',
+      url: `https://shipazti.com/checkout-vision?code=${visionCode || ''}`
     },
 
     // === NON-PURCHASED SEQUENCE ===
@@ -451,11 +455,18 @@ function getEmailHTML(template: string, user: any, discountCode?: string): strin
   return wrapEmail(t.title, t.subtitle, t.content, t.cta, t.url);
 }
 
-// Generate unique discount code
+// Generate unique discount code for Premium
 function generateDiscountCode(email: string): string {
   const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `SHIP-${prefix}-${random}`;
+}
+
+// Generate unique discount code for Vision
+function generateVisionDiscountCode(email: string): string {
+  const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `VIS-${prefix}-${random}`;
 }
 
 // Send email via Resend
@@ -521,7 +532,7 @@ export async function GET(request: NextRequest) {
             let html: string;
             
             if (step.template === 'discount_offer') {
-              // Create new discount code
+              // Create new discount code for Premium
               const code = generateDiscountCode(user.email);
               const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
               
@@ -533,6 +544,19 @@ export async function GET(request: NextRequest) {
               });
               
               html = getEmailHTML(step.template, user, code);
+            } else if (step.template === 'vision_offer') {
+              // Create new discount code for Vision
+              const visionCode = generateVisionDiscountCode(user.email);
+              const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+              
+              await supabase.from('discount_codes').insert({
+                code: visionCode,
+                user_email: user.email,
+                discount_percent: 50,
+                expires_at: expiresAt.toISOString(),
+              });
+              
+              html = getEmailHTML(step.template, user, undefined, visionCode);
             } else if (step.template === 'urgency') {
               // Fetch existing discount code for urgency reminder
               const { data: discountData } = await supabase

@@ -40,7 +40,82 @@ async function verifyWebhookSignature(request: NextRequest, body: string): Promi
   }
 }
 
-// Send welcome email after purchase
+// Send Vision AI welcome email
+async function sendVisionWelcomeEmail(email: string, name?: string) {
+  if (!RESEND_KEY) {
+    console.error('RESEND_API_KEY not configured');
+    return null;
+  }
+  
+  const html = `
+    <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #111; margin: 0;">🎨 ברוך הבא למנוי הדמיות AI!</h1>
+      </div>
+      
+      <p style="font-size: 16px; color: #333;">היי ${name || 'משפץ יקר'},</p>
+      
+      <p style="font-size: 16px; color: #333;">
+        תודה שהצטרפת למנוי הדמיות AI! עכשיו תוכל לראות איך השיפוץ שלך ייראה לפני שמתחילים.
+      </p>
+      
+      <div style="background: #f0f9ff; border-radius: 12px; padding: 20px; margin: 24px 0; border: 1px solid #bae6fd;">
+        <h3 style="color: #0369a1; margin-top: 0;">🎨 מה כלול במנוי:</h3>
+        <ul style="color: #555; line-height: 1.8;">
+          <li>הדמיות AI ללא הגבלה</li>
+          <li>עריכת תמונות של חדרים</li>
+          <li>הצעות עיצוב אוטומטיות</li>
+          <li>הערכת עלויות לפי שינויים</li>
+          <li>Shop the Look - קניית מוצרים מהתמונה</li>
+        </ul>
+      </div>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="https://shipazti.com/visualize" 
+           style="display: inline-block; background: #0ea5e9; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">
+          צור הדמיה ראשונה ←
+        </a>
+      </div>
+      
+      <p style="font-size: 16px; color: #333;">
+        יש שאלות? פשוט תשלח מייל ל-<a href="mailto:help@shipazti.com" style="color: #111;">help@shipazti.com</a>
+      </p>
+      
+      <p style="font-size: 16px; color: #333;">
+        בהצלחה עם השיפוץ! 🏠<br>
+        <strong>צוות ShiputzAI</strong>
+      </p>
+      
+      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+      <p style="font-size: 12px; color: #999; text-align: center;">
+        ShiputzAI · ניהול שיפוצים חכם
+      </p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ShiputzAI <help@shipazti.com>',
+        to: email,
+        subject: '🎨 ברוך הבא למנוי הדמיות AI!',
+        html,
+      }),
+    });
+    const result = await response.json();
+    console.log(`Vision welcome email sent to ${email}`);
+    return result;
+  } catch (error) {
+    console.error('Failed to send Vision welcome email:', error);
+  }
+}
+
+// Send Premium welcome email after purchase
 async function sendWelcomeEmail(email: string, name?: string) {
   if (!RESEND_KEY) {
     console.error('RESEND_API_KEY not configured');
@@ -136,7 +211,7 @@ export async function POST(request: NextRequest) {
 
     // Plan IDs
     const PREMIUM_PLANS = ['plan_gtlFi4zoHPy80', 'plan_9kPvCqLkwwmUc']; // One-time premium
-    const VISION_PLANS = ['plan_hp3ThM2ndloYF', 'plan_6RAptSlrFl31x'];  // Monthly Vision AI
+    const VISION_PLANS = ['plan_hp3ThM2ndloYF', 'plan_6RAptSlrFl31x', 'plan_NXh1FfZxz2xky'];  // Monthly Vision AI (including test plan)
 
     // Handle successful payment / membership activation
     if (action === 'membership.went_valid' || action === 'payment.succeeded' || action === 'membership_went_valid' || action === 'payment_succeeded') {
@@ -162,6 +237,9 @@ export async function POST(request: NextRequest) {
           } else {
             console.log(`User ${email} Vision subscription activated`);
           }
+          
+          // Send Vision welcome email
+          await sendVisionWelcomeEmail(email, name);
         } else {
           // Premium one-time purchase (default behavior)
           const { error: userError } = await supabase

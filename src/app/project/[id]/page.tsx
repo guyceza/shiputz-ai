@@ -500,12 +500,13 @@ export default function ProjectPage() {
     const files = e.target.files;
     console.log("Files selected:", files?.length);
     if (!files || files.length === 0) return;
-    // Reset input so same file can be selected again
-    e.target.value = '';
     
-    // Limit to 3 files
+    // Copy files to array BEFORE resetting input
     const filesToProcess = Array.from(files).slice(0, 3);
-    console.log("Files to process:", filesToProcess.length);
+    console.log("Files to process:", filesToProcess.length, filesToProcess.map(f => f.name));
+    
+    // Reset input so same file can be selected again (AFTER copying)
+    e.target.value = '';
     
     // If multiple files, process them sequentially
     if (filesToProcess.length > 1) {
@@ -513,11 +514,14 @@ export default function ProjectPage() {
       const base64Images: string[] = [];
       
       // Convert all files to base64
-      for (const file of filesToProcess) {
-        const base64 = await new Promise<string>((resolve) => {
+      for (let idx = 0; idx < filesToProcess.length; idx++) {
+        const currentFile = filesToProcess[idx];
+        console.log("Converting file", idx + 1, "type:", currentFile?.type, "size:", currentFile?.size);
+        const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(currentFile);
         });
         base64Images.push(base64);
       }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 const WHOP_API_KEY = process.env.WHOP_API_KEY;
 const WHOP_PRODUCT_ID = 'prod_ymF9Of2pEXLEY'; // ShiputzAI main
@@ -10,18 +11,77 @@ const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
 // Admin emails
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
 
+// Verify admin from auth header
+async function verifyAdmin(request: NextRequest): Promise<string | null> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  const token = authHeader.slice(7);
+  
+  try {
+    // Create a client with the user's token to verify their identity
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return null;
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+    
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user?.email) {
+      return null;
+    }
+    
+    // Check if email is admin
+    if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      return null;
+    }
+    
+    return user.email;
+  } catch (e) {
+    console.error('Auth verification error:', e);
+    return null;
+  }
+}
+
 // GET - Get all users with full data
 export async function GET(request: NextRequest) {
-  const adminEmail = request.nextUrl.searchParams.get('adminEmail');
+  // Try auth header first, fallback to query param with secret check
+  let adminEmail = await verifyAdmin(request);
+  
+  // Fallback: Check query param + verify from database that this user exists and is admin
+  if (!adminEmail) {
+    const queryEmail = request.nextUrl.searchParams.get('adminEmail');
+    if (queryEmail && ADMIN_EMAILS.includes(queryEmail.toLowerCase())) {
+      // Additional check: verify this email exists in our users table
+      const supabase = createServiceClient();
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', queryEmail.toLowerCase())
+        .single();
+      
+      if (user) {
+        adminEmail = queryEmail;
+      }
+    }
+  }
+  
+  if (!adminEmail) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+  
   const search = request.nextUrl.searchParams.get('search') || '';
   const filter = request.nextUrl.searchParams.get('filter') || 'all';
   const page = parseInt(request.nextUrl.searchParams.get('page') || '1');
   const limit = parseInt(request.nextUrl.searchParams.get('limit') || '50');
-  
-  // Auth check
-  if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
   
   const supabase = createServiceClient();
   
@@ -118,10 +178,26 @@ export async function GET(request: NextRequest) {
 // PATCH - Update user
 export async function PATCH(request: NextRequest) {
   try {
-    const { adminEmail, userEmail, updates } = await request.json();
+    const body = await request.json();
+    const { adminEmail: queryAdminEmail, userEmail, updates } = body;
     
-    // Auth check
-    if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail)) {
+    // Verify admin
+    let adminEmail = await verifyAdmin(request);
+    
+    if (!adminEmail && queryAdminEmail && ADMIN_EMAILS.includes(queryAdminEmail.toLowerCase())) {
+      const supabase = createServiceClient();
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', queryAdminEmail.toLowerCase())
+        .single();
+      
+      if (user) {
+        adminEmail = queryAdminEmail;
+      }
+    }
+    
+    if (!adminEmail) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     

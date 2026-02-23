@@ -1,7 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServiceClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 const WHOP_API_KEY = process.env.WHOP_API_KEY;
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
+
+// Verify admin from auth header or query param
+async function verifyAdmin(request: NextRequest, queryEmail?: string | null): Promise<boolean> {
+  // Try auth header first
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (!error && user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error('Auth verification error:', e);
+    }
+  }
+  
+  // Fallback: verify query param email exists in our database
+  if (queryEmail && ADMIN_EMAILS.includes(queryEmail.toLowerCase())) {
+    const supabase = createServiceClient();
+    const { data: user } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', queryEmail.toLowerCase())
+      .single();
+    
+    if (user) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 
 // GET - Get Whop data for a user
 export async function GET(request: NextRequest) {
@@ -9,7 +55,8 @@ export async function GET(request: NextRequest) {
   const userEmail = request.nextUrl.searchParams.get('email');
   
   // Auth check
-  if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail)) {
+  const isAdmin = await verifyAdmin(request, adminEmail);
+  if (!isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
   
@@ -78,7 +125,8 @@ export async function POST(request: NextRequest) {
     const { adminEmail, membershipId, action } = await request.json();
     
     // Auth check
-    if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail)) {
+    const isAdmin = await verifyAdmin(request, adminEmail);
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
-        { error: "יותר מדי בקשות. נסו שוב בעוד דקה." },
+        { error: "המערכת עמוסה כרגע. נסו שוב בעוד דקה." },
         { status: 429 }
       );
     }
@@ -139,8 +139,17 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API error:", errorText);
+      
+      // Handle rate limit / quota exceeded
+      if (response.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
+        return NextResponse.json(
+          { error: "יש עומס זמני על המערכת. נסו שוב בעוד כמה דקות." },
+          { status: 503 }
+        );
+      }
+      
       return NextResponse.json(
-        { error: "שגיאה בשרת. נסו שוב." },
+        { error: "שגיאה זמנית בשירות. נסו שוב." },
         { status: 500 }
       );
     }

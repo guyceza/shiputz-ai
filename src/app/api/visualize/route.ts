@@ -7,6 +7,44 @@ import { createServiceClient } from "@/lib/supabase";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
 
+const RESEND_KEY = process.env.RESEND_API_KEY;
+const ADMIN_EMAIL = process.env.ADMIN_EMAILS?.split(',')[0] || 'guyceza@gmail.com';
+
+// Send notification to admin when API rate limit is hit
+async function notifyAdminRateLimit(apiName: string, status: number, errorDetails: string): Promise<void> {
+  if (!RESEND_KEY) return;
+  
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ShiputzAI Alerts <help@shipazti.com>',
+        to: ADMIN_EMAIL,
+        subject: `🚨 ShiputzAI: ${apiName} Rate Limit הגענו למגבלה!`,
+        html: `
+          <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
+            <h2 style="color: #e53e3e;">⚠️ התראת Rate Limit</h2>
+            <p><strong>API:</strong> ${apiName}</p>
+            <p><strong>Status Code:</strong> ${status}</p>
+            <p><strong>זמן:</strong> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}</p>
+            <p><strong>פרטים:</strong></p>
+            <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 200px;">${errorDetails.substring(0, 500)}</pre>
+            <hr>
+            <p>יש לשקול שדרוג ל-Tier 2 או להמתין שהמכסה תתאפס.</p>
+          </div>
+        `
+      }),
+    });
+    console.log('Admin notified about rate limit');
+  } catch (e) {
+    console.error('Failed to notify admin:', e);
+  }
+}
+
 // Verify user is authenticated (has valid Supabase session via cookie)
 async function verifyAuth(request: NextRequest): Promise<boolean> {
   try {
@@ -299,7 +337,7 @@ export async function POST(request: NextRequest) {
     const rateLimit = checkRateLimit(clientId, 10, 60000);
     if (!rateLimit.success) {
       return NextResponse.json({ 
-        error: "יותר מדי בקשות. נסה שוב בעוד דקה." 
+        error: "המערכת עמוסה כרגע. נסה שוב בעוד דקה." 
       }, { status: 429 });
     }
 
@@ -400,8 +438,20 @@ export async function POST(request: NextRequest) {
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error("Gemini API error:", geminiResponse.status, errorText);
+      
+      // Handle rate limit / quota exceeded from Gemini
+      if (geminiResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
+        // Send admin notification
+        await notifyAdminRateLimit("Gemini Vision API", geminiResponse.status, errorText);
+        
+        return NextResponse.json({
+          error: "יש עומס זמני על המערכת. הצוות שלנו כבר מטפל בזה. נסה שוב בעוד כמה דקות.",
+          code: "SYSTEM_OVERLOAD"
+        }, { status: 503 });
+      }
+      
       return NextResponse.json(
-        { error: `Gemini API error: ${geminiResponse.status}` },
+        { error: "שגיאה זמנית בשירות. נסה שוב." },
         { status: 500 }
       );
     }
@@ -489,6 +539,20 @@ export async function POST(request: NextRequest) {
       } else {
         const errorText = await editResponse.text();
         console.error("Nano Banana error:", editResponse.status, errorText);
+        
+        // Handle rate limit / quota exceeded from Gemini Image API
+        if (editResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
+          await notifyAdminRateLimit("Nano Banana Pro (Image Gen)", editResponse.status, errorText);
+          
+          return NextResponse.json({
+            success: false,
+            error: "SYSTEM_OVERLOAD",
+            message: "יש עומס זמני על המערכת. הצוות שלנו כבר מטפל בזה. נסה שוב בעוד כמה דקות.",
+            analysis: analysisText,
+            costs: costEstimate
+          }, { status: 503 });
+        }
+        
         return NextResponse.json({
           success: false,
           error: "API_ERROR",

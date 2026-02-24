@@ -18,8 +18,11 @@ function PaymentSuccessContent() {
       if (userData) {
         const user = JSON.parse(userData);
         user.purchased = true;
-        if (product === 'vision' || product === 'bundle') {
+        if (product === 'vision') {
           user.vision_active = true;
+        }
+        if (product === 'premium_plus') {
+          user.vision_credits = 2; // Bonus credits from Premium Plus
         }
         localStorage.setItem('shiputzai_user', JSON.stringify(user));
       }
@@ -43,7 +46,7 @@ function PaymentSuccessContent() {
   const productNames: Record<string, string> = {
     premium: 'Premium',
     vision: 'AI Vision',
-    bundle: 'Premium + AI Vision',
+    premium_plus: 'Premium Plus',
   };
 
   return (

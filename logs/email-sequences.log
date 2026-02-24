@@ -8,3 +8,16 @@ Sending reminder to dhtdht200@gmail.com (day 1)
 Sending welcome_purchased to guyceza@gmail.com (day 0)
 ✅ Sent successfully: ab86744e-ddf9-4c43-af62-3dc8d2557986
 [2026-02-23T09:00:08.213Z] Done!
+[2026-02-24T09:00:01.941Z] Starting email sequence processing...
+Found 8 users
+Sending reminder to test-check-1234@gmail.com (day 1)
+✅ Sent successfully: 93f1feac-f7f1-4a3e-b7e8-a9fcfe6e0c65
+Sending reminder to test123@gmail.com (day 1)
+✅ Sent successfully: e485f721-d6bd-4dd1-8292-bf90943a6449
+Sending welcome_purchased to dhtdht200@gmail.com (day 0)
+✅ Sent successfully: a7b748dd-c2dd-4c3b-89b9-a8793e6d9dfd
+Sending getting_started to dhtdht200@gmail.com (day 1)
+✅ Sent successfully: 66bb1d6a-8876-4305-8b3d-9415cd1ae27c
+Sending getting_started to guyceza@gmail.com (day 1)
+✅ Sent successfully: 429f719d-f39e-4c79-ad3c-2b8c31f25cf8
+[2026-02-24T09:00:09.496Z] Done!

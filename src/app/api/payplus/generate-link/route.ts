@@ -6,7 +6,7 @@ const PAYPLUS_PAGE_UID = process.env.PAYPLUS_PAGE_UID;
 const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplus.co.il/api/v1.0';
 
 interface PayPlusRequest {
-  productType: 'premium' | 'vision' | 'bundle';
+  productType: 'premium' | 'vision' | 'premium_plus';
   email: string;
   userId?: string;
   discountCode?: string;
@@ -16,7 +16,7 @@ interface PayPlusRequest {
 const PRICING = {
   premium: { amount: 149, chargeMethod: 1 }, // One-time charge
   vision: { amount: 39.99, chargeMethod: 3 }, // Recurring monthly
-  bundle: { amount: 169, chargeMethod: 1 }, // One-time (Premium + first month Vision)
+  premium_plus: { amount: 179, chargeMethod: 1 }, // One-time (Premium + 2 bonus Vision credits)
 };
 
 export async function POST(request: NextRequest) {

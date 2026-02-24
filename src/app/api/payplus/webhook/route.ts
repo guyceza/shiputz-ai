@@ -66,26 +66,34 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update user in database based on product type
-    if (productType === 'premium' || productType === 'bundle') {
+    if (productType === 'premium' || productType === 'premium_plus') {
       // Mark user as premium
+      const updateData: any = { 
+        purchased: true,
+        purchase_date: new Date().toISOString(),
+        payment_method: 'payplus',
+        transaction_id: transaction_uid || page_request_uid,
+      };
+
+      // Premium Plus includes 2 bonus Vision credits
+      if (productType === 'premium_plus') {
+        updateData.vision_credits = 2;
+        updateData.vision_credits_source = 'premium_plus_bonus';
+      }
+
       const { error: updateError } = await supabase
         .from('users')
-        .update({ 
-          purchased: true,
-          purchase_date: new Date().toISOString(),
-          payment_method: 'payplus',
-          transaction_id: transaction_uid || page_request_uid,
-        })
+        .update(updateData)
         .eq('email', email.toLowerCase());
 
       if (updateError) {
         console.error('Error updating user premium status:', updateError);
       } else {
-        console.log(`User ${email} marked as Premium`);
+        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 2 Vision credits)' : ''}`);
       }
     }
 
-    if (productType === 'vision' || productType === 'bundle') {
+    if (productType === 'vision') {
       // Mark user as having Vision subscription
       const { error: updateError } = await supabase
         .from('users')

@@ -360,7 +360,7 @@ export default function VisualizePage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'bundle' | 'separate'>('bundle');
+  const [selectedPlan, setSelectedPlan] = useState<'plus' | 'separate'>('plus');
   const [generatedResult, setGeneratedResult] = useState<{image: string, beforeImage: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
   const [countdown, setCountdown] = useState(45);
@@ -1071,9 +1071,9 @@ export default function VisualizePage() {
               <div className="space-y-3 mb-6">
                 {/* Bundle Option - Selectable */}
                 <button
-                  onClick={() => setSelectedPlan('bundle')}
+                  onClick={() => setSelectedPlan('plus')}
                   className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
-                    selectedPlan === 'bundle' 
+                    selectedPlan === 'plus' 
                       ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
@@ -1081,18 +1081,18 @@ export default function VisualizePage() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedPlan === 'bundle' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                        selectedPlan === 'plus' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
                       }`}>
-                        {selectedPlan === 'bundle' && <span className="text-white text-xs">✓</span>}
+                        {selectedPlan === 'plus' && <span className="text-white text-xs">✓</span>}
                       </div>
-                      <span className="font-medium text-gray-900">🎁 חבילה משתלמת</span>
+                      <span className="font-medium text-gray-900">⭐ Premium Plus</span>
                     </div>
-                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪50</span>
                   </div>
                   <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪169.99</p>
-                    <p className="text-sm text-gray-500">ShiputzAI + חודש הדמיות AI</p>
-                    <p className="text-xs text-gray-400">אח״כ ₪39.99/חודש · ביטול בכל עת</p>
+                    <p className="text-xl font-bold text-gray-900">₪179</p>
+                    <p className="text-sm text-gray-500">Premium + 2 הדמיות AI מתנה</p>
+                    <p className="text-xs text-gray-400">רוצה עוד? מנוי Vision ב-₪39.99/חודש</p>
                   </div>
                 </button>
                 
@@ -1116,7 +1116,7 @@ export default function VisualizePage() {
                     </div>
                   </div>
                   <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪149.99 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                    <p className="text-xl font-bold text-gray-900">₪149 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
                     <p className="text-sm text-gray-500">ניהול תקציב, סריקת קבלות, התראות</p>
                     <p className="text-xs text-gray-400">הדמיות AI בנפרד אח״כ</p>
                   </div>
@@ -1124,7 +1124,7 @@ export default function VisualizePage() {
               </div>
               
               <Link
-                href={selectedPlan === 'bundle' ? '/checkout?plan=bundle' : '/checkout'}
+                href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
                 className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
               >
                 המשך לתשלום
@@ -1336,9 +1336,9 @@ export default function VisualizePage() {
                 <div className="space-y-3 mb-6">
                   {/* Bundle Option - Selectable */}
                   <button
-                    onClick={() => setSelectedPlan('bundle')}
+                    onClick={() => setSelectedPlan('plus')}
                     className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
-                      selectedPlan === 'bundle' 
+                      selectedPlan === 'plus' 
                         ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
@@ -1346,17 +1346,17 @@ export default function VisualizePage() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedPlan === 'bundle' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                          selectedPlan === 'plus' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
                         }`}>
-                          {selectedPlan === 'bundle' && <span className="text-white text-xs">✓</span>}
+                          {selectedPlan === 'plus' && <span className="text-white text-xs">✓</span>}
                         </div>
-                        <span className="font-medium text-gray-900">🎁 חבילה משתלמת</span>
+                        <span className="font-medium text-gray-900">⭐ Premium Plus</span>
                       </div>
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪20</span>
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪50</span>
                     </div>
                     <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪169.99</p>
-                      <p className="text-xs text-gray-500">ShiputzAI + חודש הדמיות AI · אח״כ ₪39.99/חודש</p>
+                      <p className="text-lg font-bold text-gray-900">₪179</p>
+                      <p className="text-xs text-gray-500">Premium + 2 הדמיות AI בונוס</p>
                     </div>
                   </button>
                   
@@ -1380,14 +1380,14 @@ export default function VisualizePage() {
                       </div>
                     </div>
                     <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪149.99 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                      <p className="text-lg font-bold text-gray-900">₪149 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
                       <p className="text-xs text-gray-500">ניהול תקציב, סריקת קבלות, התראות · הדמיות בנפרד</p>
                     </div>
                   </button>
                 </div>
                 
                 <Link
-                  href={selectedPlan === 'bundle' ? '/checkout?plan=bundle' : '/checkout'}
+                  href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
                   המשך לתשלום

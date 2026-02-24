@@ -23,27 +23,27 @@ export default function PricingCard({
           50% הנחה
         </div>
         
-        {/* Plan Toggle */}
-        <div className="flex gap-2 mb-4 justify-center">
-          <button
-            onClick={() => setSelectedPlan('premium')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              selectedPlan === 'premium'
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Premium
-          </button>
+        {/* Plan Toggle - clearer toggle style */}
+        <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-4 w-fit mx-auto">
           <button
             onClick={() => setSelectedPlan('plus')}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedPlan === 'plus'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             ⭐ Premium Plus
+          </button>
+          <button
+            onClick={() => setSelectedPlan('premium')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              selectedPlan === 'premium'
+                ? 'bg-white text-gray-900 shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Premium
           </button>
         </div>
         
@@ -51,7 +51,7 @@ export default function PricingCard({
           <div className="text-right">
             <div className="flex items-baseline gap-2 justify-end">
               <span className="text-sm text-gray-400 line-through">
-                {selectedPlan === 'plus' ? '₪229' : '₪299'}
+                {selectedPlan === 'plus' ? '₪359' : '₪299'}
               </span>
               <div className="text-3xl font-bold text-gray-900">
                 {selectedPlan === 'plus' ? '₪179' : '₪149'}
@@ -83,34 +83,34 @@ export default function PricingCard({
           </span>
         </div>
         
-        {/* Plan Toggle */}
-        <div className="flex gap-2 mb-4 justify-center">
-          <button
-            onClick={() => setSelectedPlan('premium')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              selectedPlan === 'premium'
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Premium
-          </button>
+        {/* Plan Toggle - clearer toggle style */}
+        <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-4">
           <button
             onClick={() => setSelectedPlan('plus')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               selectedPlan === 'plus'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             ⭐ Plus
+          </button>
+          <button
+            onClick={() => setSelectedPlan('premium')}
+            className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              selectedPlan === 'premium'
+                ? 'bg-white text-gray-900 shadow-md'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Premium
           </button>
         </div>
         
         {/* Price */}
         <div className="text-center mb-4">
           <span className="text-lg text-gray-400 line-through">
-            {selectedPlan === 'plus' ? '₪229' : '₪299'}
+            {selectedPlan === 'plus' ? '₪359' : '₪299'}
           </span>
           <div className="text-4xl font-bold text-gray-900">
             {selectedPlan === 'plus' ? '₪179' : '₪149'}
@@ -158,33 +158,33 @@ export default function PricingCard({
         50% הנחה
       </div>
       
-      {/* Plan Toggle */}
-      <div className="flex gap-2 mb-6 justify-center">
-        <button
-          onClick={() => setSelectedPlan('premium')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-            selectedPlan === 'premium'
-              ? 'bg-gray-900 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          Premium
-        </button>
+      {/* Plan Toggle - clearer toggle style */}
+      <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-6 max-w-xs mx-auto">
         <button
           onClick={() => setSelectedPlan('plus')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all ${
             selectedPlan === 'plus'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+              : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           ⭐ Premium Plus
+        </button>
+        <button
+          onClick={() => setSelectedPlan('premium')}
+          className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            selectedPlan === 'premium'
+              ? 'bg-white text-gray-900 shadow-md'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Premium
         </button>
       </div>
       
       <div className="mb-2 text-center">
         <span className="text-2xl text-gray-400 line-through">
-          {selectedPlan === 'plus' ? '₪229' : '₪299'}
+          {selectedPlan === 'plus' ? '₪359' : '₪299'}
         </span>
       </div>
       <div className="text-6xl font-semibold text-gray-900 mb-2 text-center">

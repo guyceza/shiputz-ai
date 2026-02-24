@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 const ORIGINAL_PRICE = 299.99;
 const SALE_PRICE = 149;
 const PREMIUM_PLUS_PRICE = 179;
-const PREMIUM_PLUS_ORIGINAL = 229; // 149 + 80 (value of 2 Vision credits)
+const PREMIUM_PLUS_ORIGINAL = 359; // 149 + 80 (value of 2 Vision credits)
 
 function CheckoutContent() {
   const router = useRouter();

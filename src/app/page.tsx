@@ -358,7 +358,7 @@ export default function Home() {
             {/* Size Slider */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-medium text-gray-700">🏠 גודל הדירה</label>
+                <label className="text-sm font-medium text-gray-700">גודל הדירה</label>
                 <span className="text-2xl font-bold text-gray-900 transition-all duration-300">{calcSize} מ״ר</span>
               </div>
               <input
@@ -378,12 +378,12 @@ export default function Home() {
             
             {/* Renovation Type Cards */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">✨ סוג השיפוץ</label>
+              <label className="block text-sm font-medium text-gray-700 mb-3">סוג השיפוץ</label>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { value: "קוסמטי", icon: "🎨", label: "קוסמטי", desc: "צבע, תיקונים" },
-                  { value: "קומפלט", icon: "🔨", label: "קומפלט", desc: "שיפוץ מלא" },
-                  { value: "יוקרתי", icon: "💎", label: "יוקרתי", desc: "גמר גבוה" }
+                  { value: "קוסמטי", label: "קוסמטי", desc: "צבע, תיקונים" },
+                  { value: "קומפלט", label: "קומפלט", desc: "שיפוץ מלא" },
+                  { value: "יוקרתי", label: "יוקרתי", desc: "גמר גבוה" }
                 ].map((type) => (
                   <button
                     key={type.value}
@@ -394,7 +394,6 @@ export default function Home() {
                         : "border-gray-200 bg-white hover:border-gray-400 hover:shadow"
                     }`}
                   >
-                    <div className="text-2xl mb-1">{type.icon}</div>
                     <div className="font-medium text-sm">{type.label}</div>
                     <div className={`text-xs mt-1 ${calcType === type.value ? "text-gray-300" : "text-gray-400"}`}>
                       {type.desc}
@@ -407,7 +406,7 @@ export default function Home() {
             {/* Location & Bathrooms */}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">📍 מיקום</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
                 <select 
                   value={calcLocation}
                   onChange={(e) => setCalcLocation(e.target.value)}
@@ -421,7 +420,7 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">🚿 חדרי רחצה</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">חדרי רחצה</label>
                 <div className="flex gap-2">
                   {["1", "2", "3"].map((num) => (
                     <button
@@ -443,7 +442,7 @@ export default function Home() {
             {/* Kitchen & Infrastructure */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">🍳 מטבח</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">מטבח</label>
                 <select 
                   value={calcKitchen}
                   onChange={(e) => setCalcKitchen(e.target.value)}
@@ -456,7 +455,7 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">⚡ תשתיות</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">תשתיות</label>
                 <select 
                   value={calcInfrastructure}
                   onChange={(e) => setCalcInfrastructure(e.target.value)}
@@ -537,7 +536,8 @@ export default function Home() {
                   )}
                 </div>
                 
-                <p className="text-xs text-gray-400 text-center mb-4">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026</p>
+                <p className="text-xs text-gray-400 text-center mb-2">הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
+                <p className="text-xs text-gray-500 text-center mb-4">מקורות: midrag.co.il, top-renovations.co.il</p>
                 
                 <Link
                   href={isLoggedIn ? "/dashboard" : "/signup"}

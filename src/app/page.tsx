@@ -744,52 +744,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
           <p className="text-gray-500 mb-12">תשלום אחד. לכל משך הפרויקט.</p>
           
-          <div className="border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg hover-scale hover-glow">
-            {/* Discount Badge */}
-            <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-              50% הנחה
-            </div>
-            
-            <div className="mb-2">
-              <span className="text-2xl text-gray-400 line-through">₪299.99</span>
-            </div>
-            <div className="text-6xl font-semibold text-gray-900 mb-2">₪149.99</div>
-            <p className="text-gray-500 mb-2">תשלום חד פעמי</p>
-            <p className="text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-8">מבצע לזמן מוגבל</p>
-            
-            <ul className="text-right space-y-4 mb-10 text-sm text-gray-600">
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>מעקב תקציב ללא הגבלה</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>סריקת קבלות AI</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>ניתוח הצעות מחיר</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>בדיקת חוזים</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>התראות חכמות</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="text-green-500">✓</span>
-                <span>עוזר AI אישי</span>
-              </li>
-            </ul>
-            <Link
-              href="/checkout"
-              className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-            >
-              לרכישה
-            </Link>
-          </div>
+          <PricingCard variant="full" />
         </div>
       </section>
       )}

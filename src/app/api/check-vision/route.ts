@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     
     const { data: user, error } = await supabase
       .from('users')
-      .select('vision_subscription, vision_credits')
+      .select('vision_subscription')
       .eq('email', email.toLowerCase())
       .single();
 
@@ -22,15 +22,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ hasSubscription: false });
     }
 
-    // User has vision if they have active subscription (string 'active' or boolean true) OR vision credits
-    const hasSubscription = user.vision_subscription === 'active' || user.vision_subscription === true || (user.vision_credits && user.vision_credits > 0);
+    // User has vision if they have active subscription (string 'active' or boolean true)
+    const hasSubscription = user.vision_subscription === 'active' || user.vision_subscription === true;
 
     return NextResponse.json({ 
       hasSubscription,
-      visionSubscription: user.vision_subscription,
-      visionSubscriptionType: typeof user.vision_subscription,
-      visionCredits: user.vision_credits || 0,
-      debug: { raw: user.vision_subscription }
+      visionSubscription: user.vision_subscription
     });
   } catch (error: any) {
     console.error('Check vision error:', error);

@@ -2535,13 +2535,13 @@ export default function ProjectPage() {
                 <>
                   <button 
                     onClick={() => { setEditingExpense(true); setEditExpenseData(selectedExpense); }}
-                    className="w-full bg-blue-600 text-white py-3 rounded-full font-medium hover:bg-blue-700 transition-colors"
+                    className="w-full bg-gray-100 text-gray-700 py-3 rounded-full font-medium hover:bg-gray-200 transition-colors border border-gray-200"
                   >
                     ✏️ ערוך פרטים
                   </button>
                   <button 
                     onClick={() => deleteExpense(selectedExpense.id)}
-                    className="w-full bg-red-500 text-white py-3 rounded-full font-medium hover:bg-red-600 transition-colors"
+                    className="w-full bg-red-50 text-red-600 py-3 rounded-full font-medium hover:bg-red-100 transition-colors border border-red-100"
                   >
                     🗑️ מחק הוצאה
                   </button>

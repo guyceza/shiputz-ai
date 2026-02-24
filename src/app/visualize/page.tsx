@@ -683,6 +683,7 @@ export default function VisualizePage() {
           analysis: data.analysis,
           costs: data.costEstimate
         });
+        setDetectedProducts([]); // Clear products for new image
         
         // Save to history (async, don't block UI)
         // Pass userId explicitly to avoid closure issues
@@ -710,6 +711,12 @@ export default function VisualizePage() {
     if (!generatedResult?.image) return;
     
     setShowShopModal(true);
+    
+    // If we already have products for this image, don't scan again
+    if (detectedProducts.length > 0) {
+      return;
+    }
+    
     setDetectingProducts(true);
     
     try {
@@ -1515,7 +1522,7 @@ export default function VisualizePage() {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
           <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
             <button
-              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); }}
+              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); setDetectedProducts([]); }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl z-10"
             >
               ✕
@@ -1590,7 +1597,7 @@ export default function VisualizePage() {
               </a>
               {hasSubscription ? (
                 <button
-                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); }}
+                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); setDetectedProducts([]); }}
                   className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
                 >
                   🎨 צור הדמיה נוספת
@@ -1619,14 +1626,14 @@ export default function VisualizePage() {
       {showShopModal && generatedResult && (
         <div 
           className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4"
-          onClick={() => { setShowShopModal(false); setDetectedProducts([]); }}
+          onClick={() => setShowShopModal(false)}
         >
           <div 
             className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
             onClick={e => e.stopPropagation()}
           >
             <button 
-              onClick={() => { setShowShopModal(false); setDetectedProducts([]); }}
+              onClick={() => setShowShopModal(false)}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100"
             >
               ✕
@@ -1713,7 +1720,7 @@ export default function VisualizePage() {
                 className="relative cursor-pointer group"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
-                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); setDetectedProducts([]);
                   setShowShopModal(true);
                   setDetectingProducts(true);
                   const ud = localStorage.getItem("user");

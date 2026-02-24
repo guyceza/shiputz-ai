@@ -17,20 +17,6 @@ interface User {
   banned: boolean;
 }
 
-interface WhopMembership {
-  id: string;
-  product: string;
-  productId: string;
-  plan: string;
-  planId: string;
-  status: string;
-  createdAt: string | null;
-  renewalPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-  canceledAt: string | null;
-  totalSpent: number;
-}
-
 interface Stats {
   total: number;
   premium: number;
@@ -52,8 +38,6 @@ export default function AdminDashboard() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [whopData, setWhopData] = useState<{ memberships: WhopMembership[], totalRevenue: number } | null>(null);
-  const [whopLoading, setWhopLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   // Auth check
@@ -133,27 +117,9 @@ export default function AdminDashboard() {
     }
   }, [adminEmail, fetchUsers]);
   
-  // Fetch Whop data for selected user
-  const fetchWhopData = async (email: string) => {
-    if (!adminEmail) return;
-    setWhopLoading(true);
-    setWhopData(null);
-    
-    try {
-      const res = await fetch(`/api/admin/whop?adminEmail=${adminEmail}&email=${encodeURIComponent(email)}`);
-      const data = await res.json();
-      setWhopData(data);
-    } catch (error) {
-      console.error("Failed to fetch Whop data:", error);
-    }
-    
-    setWhopLoading(false);
-  };
-  
   // Handle user selection
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
-    fetchWhopData(user.email);
   };
   
   // Update user
@@ -551,53 +517,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
               
-              {/* Whop Data */}
-              <div className="border-t border-gray-100 pt-6">
-                <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
-                  <img src="https://whop.com/favicon.ico" alt="" className="w-4 h-4" />
-                  נתוני Whop
-                </h4>
-                
-                {whopLoading ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
-                  </div>
-                ) : whopData?.memberships && whopData.memberships.length > 0 ? (
-                  <div className="space-y-3">
-                    {whopData.memberships.map((m) => (
-                      <div key={m.id} className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium text-sm text-gray-900">{m.product}</span>
-                          <span className={`px-2 py-0.5 rounded text-xs ${
-                            m.status === 'active' ? 'bg-green-100 text-green-700' :
-                            m.status === 'canceled' ? 'bg-red-100 text-red-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {m.status}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500 space-y-1">
-                          <p>תוכנית: {m.plan}</p>
-                          <p>נרכש: {formatDate(m.createdAt)}</p>
-                          {m.renewalPeriodEnd && (
-                            <p>חידוש: {formatDate(m.renewalPeriodEnd)}</p>
-                          )}
-                          {m.cancelAtPeriodEnd && (
-                            <p className="text-red-600">מתבטל בסוף התקופה</p>
-                          )}
-                          <p className="font-medium text-gray-700">סה״כ: {formatCurrency(m.totalSpent)}</p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="bg-green-50 rounded-lg p-3 text-center">
-                      <p className="text-sm text-gray-600">סה״כ הכנסות מהמשתמש</p>
-                      <p className="text-xl font-semibold text-green-700">{formatCurrency(whopData.totalRevenue)}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">אין רכישות ב-Whop</p>
-                )}
-              </div>
             </div>
           </div>
         )}

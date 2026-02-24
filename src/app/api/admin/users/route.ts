@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
-const WHOP_API_KEY = process.env.WHOP_API_KEY;
-const WHOP_PRODUCT_ID = 'prod_ymF9Of2pEXLEY'; // ShiputzAI main
-const WHOP_VISION_PRODUCT_ID = 'prod_ORVfC8pmG328G'; // Vision add-on
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
 

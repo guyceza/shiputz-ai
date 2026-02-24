@@ -90,12 +90,12 @@ export default function ShopLookPage() {
             console.error("Failed to check trial:", e);
           }
           
-          // Check Vision subscription from Whop API
+          // Check Vision subscription from Supabase
           try {
-            const visionRes = await fetch(`/api/whop/check-vision?email=${encodeURIComponent(userEmail)}`);
+            const visionRes = await fetch(`/api/check-vision?email=${encodeURIComponent(userEmail)}`);
             if (visionRes.ok) {
               const visionData = await visionRes.json();
-              const hasSub = visionData.hasVision || false;
+              const hasSub = visionData.hasSubscription || false;
               setHasSubscription(hasSub);
               setHasAccess(hasSub || !trialUsed);
             }
@@ -117,11 +117,11 @@ export default function ShopLookPage() {
             })
             .catch(e => console.error("Failed to check trial:", e));
           
-          // Check Vision subscription from Whop API
-          fetch(`/api/whop/check-vision?email=${encodeURIComponent(user.email)}`)
+          // Check Vision subscription from Supabase
+          fetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
-              const hasSub = data.hasVision || false;
+              const hasSub = data.hasSubscription || false;
               setHasSubscription(hasSub);
               setHasAccess(hasSub || !trialUsed);
             })

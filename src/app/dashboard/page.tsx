@@ -88,7 +88,7 @@ function DashboardContent() {
             // Start both requests at once
             const [premiumRes, visionRes] = await Promise.all([
               fetch(`/api/users?email=${email}`).catch(() => null),
-              fetch(`/api/whop/cancel-subscription?email=${email}`).catch(() => null)
+              fetch(`/api/check-vision?email=${email}`).catch(() => null)
             ]);
             
             // Handle premium result
@@ -182,7 +182,6 @@ function DashboardContent() {
           }
           setProjectsLoading(false);
           
-          // Legacy localStorage vision removed - now using Whop API only
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -220,11 +219,9 @@ function DashboardContent() {
     
     setIsCanceling(true);
     
-    // Legacy localStorage vision removed - now using Whop API only
-    
-    // Otherwise, cancel via Whop API
+    // Cancel vision subscription via Supabase
     try {
-      const res = await fetch('/api/whop/cancel-subscription', {
+      const res = await fetch('/api/cancel-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
@@ -233,10 +230,7 @@ function DashboardContent() {
       if (res.ok) {
         const data = await res.json();
         setCancelSuccess(true);
-        setVisionSubInfo({
-          cancelAtPeriodEnd: true,
-          periodEnd: data.periodEnd
-        });
+        setHasVisionSub(false);
         // Close modal after 2 seconds
         setTimeout(() => {
           setShowCancelModal(false);

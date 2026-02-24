@@ -414,7 +414,7 @@ export default function ProjectPage() {
         try {
           const [premiumRes, visionRes] = await Promise.all([
             fetch(`/api/admin/premium?email=${encodeURIComponent(email)}`),
-            fetch(`/api/whop/check-vision?email=${encodeURIComponent(email)}`)
+            fetch(`/api/check-vision?email=${encodeURIComponent(email)}`)
           ]);
           
           if (premiumRes.ok) {

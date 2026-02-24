@@ -1,5 +1,3 @@
-import { getSupabaseClient } from './supabase';
-
 export interface UserSettings {
   user_id: string;
   vision_usage_date: string | null;
@@ -9,64 +7,28 @@ export interface UserSettings {
   updated_at: string;
 }
 
-// Get or create user settings
+// Get or create user settings via API
 export async function getUserSettings(userId: string): Promise<UserSettings | null> {
   try {
-    const supabase = getSupabaseClient();
-    
-    // Try to get existing settings
-    const { data, error } = await supabase
-      .from('user_settings')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-    
-    if (error && error.code === 'PGRST116') {
-      // No row found - create one
-      const { data: newData, error: insertError } = await supabase
-        .from('user_settings')
-        .insert({ user_id: userId })
-        .select()
-        .single();
-      
-      if (insertError) {
-        console.error('Failed to create user settings:', insertError);
-        return null;
-      }
-      return newData;
-    }
-    
-    if (error) {
-      console.error('Failed to get user settings:', error);
-      return null;
-    }
-    
-    return data;
+    const res = await fetch(`/api/user-settings?userId=${encodeURIComponent(userId)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.settings || null;
   } catch (e) {
     console.error('getUserSettings error:', e);
     return null;
   }
 }
 
-// Update user settings
+// Update user settings via API
 export async function updateUserSettings(userId: string, updates: Partial<UserSettings>): Promise<boolean> {
   try {
-    const supabase = getSupabaseClient();
-    
-    const { error } = await supabase
-      .from('user_settings')
-      .upsert({ 
-        user_id: userId, 
-        ...updates,
-        updated_at: new Date().toISOString()
-      });
-    
-    if (error) {
-      console.error('Failed to update user settings:', error);
-      return false;
-    }
-    
-    return true;
+    const res = await fetch('/api/user-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, updates })
+    });
+    return res.ok;
   } catch (e) {
     console.error('updateUserSettings error:', e);
     return false;

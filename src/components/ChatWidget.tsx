@@ -102,12 +102,12 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Chat Bubble - Right side, middle of screen */}
+      {/* Floating Chat Bubble - Points to robot button */}
       {showBubble && !isOpen && (
-        <div className="fixed bottom-24 right-4 z-50 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="fixed bottom-20 right-4 z-50 animate-in slide-in-from-bottom-4 duration-500">
           <div 
             onClick={() => setIsOpen(true)}
-            className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[260px] border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow"
+            className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[220px] border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow"
           >
             {/* Close button */}
             <button
@@ -120,35 +120,30 @@ export default function ChatWidget() {
             >
               ✕
             </button>
-            {/* Arrow pointing down */}
-            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
-            {/* Content */}
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="/robot-support.png" alt="" className="w-9 h-9 object-contain" />
-              </div>
-              <div>
-                <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
-                <p className="text-gray-500 text-xs leading-relaxed">
-                  יש לי תשובות לכל שאלה
-                </p>
-                <span className="mt-2 text-emerald-600 text-xs font-medium inline-block">
-                  לחצו לשיחה →
-                </span>
-              </div>
+            {/* Arrow pointing down to robot */}
+            <div className="absolute -bottom-2 right-4 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+            {/* Content - simpler, just text */}
+            <div className="text-center">
+              <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
+              <p className="text-gray-500 text-xs leading-relaxed">
+                יש לי תשובות לכל שאלה
+              </p>
+              <span className="mt-2 text-emerald-600 text-xs font-medium inline-block">
+                לחצו לשיחה ↓
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Chat Button - Right side, bottom */}
+      {/* Chat Button - Right side, bottom - Always visible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-4 z-50 flex items-center justify-center transition-all duration-300 ${
           isOpen
             ? "w-12 h-12 rounded-full bg-gray-600 hover:bg-gray-700 shadow-lg"
             : "w-12 h-12 hover:scale-110 drop-shadow-lg"
-        } ${showBubble ? "hidden" : ""}`}
+        }`}
         aria-label={isOpen ? "סגור צ'אט" : "פתח צ'אט"}
       >
         {isOpen ? (

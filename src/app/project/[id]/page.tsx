@@ -132,6 +132,53 @@ const DEFAULT_PHASES: Omit<Phase, "id">[] = [
 
 const PROFESSIONS = ["קבלן ראשי", "חשמלאי", "אינסטלטור", "רצף", "צבעי", "נגר", "מזגן", "גבס", "אלומיניום", "אחר"];
 
+// Rotating loading messages for quote analysis
+const QUOTE_LOADING_MESSAGES = [
+  "משווה למחירי שוק ממדרג...",
+  "בודק מחירי קבלנים באזור...",
+  "מנתח את סוג העבודה...",
+  "מחשב טווח מחירים הוגן...",
+  "בודק אם יש פריטים חסרים...",
+  "מכין את הניתוח שלך...",
+];
+
+function QuoteLoadingState() {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+  
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % QUOTE_LOADING_MESSAGES.length);
+    }, 3000);
+    
+    const secondsInterval = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+    
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(secondsInterval);
+    };
+  }, []);
+  
+  return (
+    <div className="py-16 flex flex-col items-center justify-center">
+      <div className="relative w-20 h-20 mb-6">
+        <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-900 animate-spin"></div>
+        <div className="absolute inset-3 rounded-full bg-gray-900 flex items-center justify-center">
+          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+      </div>
+      <p className="text-gray-900 font-medium text-lg mb-2">מנתח את ההצעה</p>
+      <p className="text-gray-500 text-sm mb-3 h-5 transition-all">{QUOTE_LOADING_MESSAGES[messageIndex]}</p>
+      <p className="text-gray-400 text-xs">עד 25 שניות • {seconds} שניות</p>
+    </div>
+  );
+}
+
 export default function ProjectPage() {
   const router = useRouter();
   const params = useParams();
@@ -3094,21 +3141,9 @@ export default function ProjectPage() {
                 </div>
               )}
               
-              {/* Loading State */}
+              {/* Loading State with rotating messages */}
               {analyzing && (
-                <div className="py-16 flex flex-col items-center justify-center">
-                  <div className="relative w-20 h-20 mb-6">
-                    <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-                    <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-900 animate-spin"></div>
-                    <div className="absolute inset-3 rounded-full bg-gray-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p className="text-gray-900 font-medium text-lg mb-2">מנתח את ההצעה</p>
-                  <p className="text-gray-500 text-sm">משווה למחירי שוק ממידרג...</p>
-                </div>
+                <QuoteLoadingState />
               )}
               
               {/* Error State */}
@@ -3136,16 +3171,16 @@ export default function ProjectPage() {
               
               {/* Results State */}
               {quoteAnalysis && !analyzing && !quoteError && (
-                <>
+                <div className="space-y-4">
                   {/* Verdict Badge */}
                   {quoteVerdict && (
-                    <div className={`mb-4 p-4 rounded-2xl text-center ${
-                      quoteVerdict === "great" ? "bg-green-50 border-2 border-green-200" :
-                      quoteVerdict === "ok" ? "bg-blue-50 border-2 border-blue-200" :
-                      quoteVerdict === "expensive" ? "bg-orange-50 border-2 border-orange-200" :
-                      "bg-red-50 border-2 border-red-200"
+                    <div className={`p-5 rounded-2xl text-center ${
+                      quoteVerdict === "great" ? "bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200" :
+                      quoteVerdict === "ok" ? "bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200" :
+                      quoteVerdict === "expensive" ? "bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200" :
+                      "bg-gradient-to-br from-red-50 to-rose-50 border border-red-200"
                     }`}>
-                      <div className={`text-2xl font-bold ${
+                      <div className={`text-3xl font-bold mb-1 ${
                         quoteVerdict === "great" ? "text-green-600" :
                         quoteVerdict === "ok" ? "text-blue-600" :
                         quoteVerdict === "expensive" ? "text-orange-600" :
@@ -3158,17 +3193,26 @@ export default function ProjectPage() {
                       </div>
                     </div>
                   )}
-                  <div className="bg-gray-50 rounded-2xl p-5 mb-5 border border-gray-100">
+                  
+                  {/* Analysis Content */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm">סיכום</h4>
                     <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">{quoteAnalysis}</div>
                   </div>
-                  <p className="text-center text-green-600 text-sm mb-3">✓ ההצעה נשמרה אוטומטית</p>
+                  
+                  {/* Saved indicator */}
+                  <div className="flex items-center justify-center gap-2 py-2">
+                    <span className="text-green-600 text-sm">✓ ההצעה נשמרה אוטומטית</span>
+                  </div>
+                  
+                  {/* Action buttons */}
                   <button
                     onClick={() => { setQuoteAnalysis(null); setQuoteVerdict(null); setQuoteText(""); }}
-                    className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium hover:bg-gray-800 transition-all mb-3"
+                    className="w-full bg-gray-900 text-white py-3.5 rounded-full font-medium hover:bg-gray-800 transition-all"
                   >
                     נתח הצעה נוספת
                   </button>
-                </>
+                </div>
               )}
               
               <button onClick={() => setShowQuoteAnalysis(false)} className="w-full bg-gray-100 text-gray-700 py-3 rounded-full hover:bg-gray-200 transition-all">סגור</button>

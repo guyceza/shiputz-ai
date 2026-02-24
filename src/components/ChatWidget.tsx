@@ -124,8 +124,8 @@ export default function ChatWidget() {
             <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
             {/* Content */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-lg">👋</span>
+              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="/robot-support.png" alt="" className="w-9 h-9 object-contain" />
               </div>
               <div>
                 <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
@@ -169,8 +169,8 @@ export default function ChatWidget() {
         <div className="fixed bottom-24 right-4 z-50 w-[350px] max-w-[calc(100vw-2rem)] h-[450px] max-h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 animate-in slide-in-from-bottom-4 duration-300">
           {/* Header */}
           <div className="bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-5 h-5" />
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+              <img src="/robot-support.png" alt="Support Bot" className="w-9 h-9 object-contain" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold">ShiputzAI Support</h3>
@@ -203,10 +203,15 @@ export default function ChatWidget() {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"}`}
+                className={`flex items-end gap-2 ${msg.role === "user" ? "justify-start flex-row-reverse" : "justify-end"}`}
               >
+                {msg.role === "assistant" && (
+                  <div className="w-8 h-8 bg-white rounded-full flex-shrink-0 overflow-hidden shadow-sm border border-gray-100">
+                    <img src="/robot-support.png" alt="" className="w-full h-full object-contain" />
+                  </div>
+                )}
                 <div
-                  className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                  className={`max-w-[75%] px-4 py-2 rounded-2xl ${
                     msg.role === "user"
                       ? "bg-emerald-600 text-white rounded-tr-sm"
                       : "bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-sm"
@@ -217,7 +222,10 @@ export default function ChatWidget() {
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-end">
+              <div className="flex items-end gap-2 justify-end">
+                <div className="w-8 h-8 bg-white rounded-full flex-shrink-0 overflow-hidden shadow-sm border border-gray-100">
+                  <img src="/robot-support.png" alt="" className="w-full h-full object-contain" />
+                </div>
                 <div className="bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100 rounded-tl-sm">
                   <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
                 </div>

@@ -22,7 +22,7 @@ const TEMPLATE_SUBJECTS: Record<string, string> = {
 };
 
 // Generate HTML for template (simplified version for testing)
-const generateHtml = (templateId: string): string => {
+const generateHtml = (templateId: string, userEmail?: string): string => {
   const user = { name: 'משתמש טסט' };
   
   const baseWrapper = (content: string, headerGradient: string, headerTitle: string, headerSubtitle: string, titleColor: string, subtitleColor: string) => `
@@ -41,7 +41,7 @@ const generateHtml = (templateId: string): string => {
     </div>
     <div style="text-align: center; padding: 24px; color: #94a3b8; font-size: 12px;">
       <p style="margin: 0;">ShiputzAI · ניהול שיפוצים חכם</p>
-      <p style="margin: 8px 0 0 0;"><a href="https://shipazti.com/unsubscribe" style="color: #94a3b8;">להסרה</a></p>
+      <p style="margin: 8px 0 0 0;"><a href="https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail || '')}" style="color: #94a3b8;">להסרה מרשימת התפוצה</a></p>
     </div>
   </div>
 </body>
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     const subject = `🧪 טסט: ${TEMPLATE_SUBJECTS[template] || template}`;
-    const html = generateHtml(template);
+    const html = generateHtml(template, email);
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',

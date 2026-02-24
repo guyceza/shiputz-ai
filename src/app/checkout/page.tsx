@@ -131,12 +131,22 @@ function CheckoutContent() {
 
         {/* Trust - minimal */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-4 text-gray-400">
+          <div className="flex items-center justify-center gap-3 text-gray-400">
             <span className="text-sm">🔒 מאובטח</span>
-            <span className="text-gray-300">·</span>
-            <div className="flex gap-2">
-              <svg className="h-5 w-8" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#1A1F71"/><path d="M19.5 21H17L18.75 11H21.25L19.5 21Z" fill="white"/></svg>
-              <svg className="h-5 w-8" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#F5F5F5"/><circle cx="19" cy="16" r="8" fill="#EB001B"/><circle cx="29" cy="16" r="8" fill="#F79E1B"/></svg>
+            <div className="flex gap-2 items-center">
+              {/* Mastercard */}
+              <svg className="h-6" viewBox="0 0 38 24" fill="none">
+                <rect width="38" height="24" rx="4" fill="#F5F5F5"/>
+                <circle cx="15" cy="12" r="7" fill="#EB001B"/>
+                <circle cx="23" cy="12" r="7" fill="#F79E1B"/>
+                <path d="M19 6.5a6.97 6.97 0 0 0-2.5 5.5c0 2.2 1 4.2 2.5 5.5a6.97 6.97 0 0 0 2.5-5.5c0-2.2-1-4.2-2.5-5.5z" fill="#FF5F00"/>
+              </svg>
+              {/* Visa */}
+              <svg className="h-6" viewBox="0 0 38 24" fill="none">
+                <rect width="38" height="24" rx="4" fill="#1A1F71"/>
+                <path d="M15.5 15.5h-2l1.25-7h2.5l-1.75 7zm7-7c-.4-.15-1-.3-1.8-.3-2 0-3.4 1-3.4 2.5 0 1.1 1 1.7 1.8 2 .8.4 1 .6 1 1 0 .5-.6.8-1.2.8-.8 0-1.2-.1-1.9-.4l-.3-.1-.3 1.7c.5.2 1.3.4 2.2.4 2.1 0 3.5-1 3.5-2.5 0-.9-.5-1.5-1.7-2.1-.7-.3-1.1-.6-1.1-.9 0-.3.4-.6 1.1-.6.7 0 1.1.1 1.5.3l.2.1.3-1.7zm5.3-.1h-1.6c-.5 0-.8.1-1 .6l-2.9 6.5h2.1l.4-1.1h2.5l.2 1.1h1.8l-1.5-7.1zm-2.4 4.6c.2-.4.8-2.1.8-2.1l.2.9.5 1.2h-1.5zm-10.9-4.5l-2 4.8-.2-1c-.4-1.2-1.5-2.5-2.8-3.2l1.8 6.4h2.1l3.2-7h-2.1z" fill="white"/>
+                <path d="M8.5 8.5h-3l-.1.2c2.5.6 4.2 2.1 4.9 3.9l-.7-3.5c-.1-.4-.4-.6-.9-.6h-.2z" fill="#F9A51A"/>
+              </svg>
             </div>
           </div>
         </div>

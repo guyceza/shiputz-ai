@@ -367,6 +367,7 @@ export default function VisualizePage() {
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
   const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
+  const [productsForImage, setProductsForImage] = useState<string | null>(null); // Track which image products belong to
   const [detectingProducts, setDetectingProducts] = useState(false);
   const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string}[]>([]);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string} | null>(null);
@@ -684,6 +685,7 @@ export default function VisualizePage() {
           costs: data.costEstimate
         });
         setDetectedProducts([]); // Clear products for new image
+        setProductsForImage(null);
         
         // Save to history (async, don't block UI)
         // Pass userId explicitly to avoid closure issues
@@ -711,6 +713,12 @@ export default function VisualizePage() {
     if (!generatedResult?.image) return;
     
     setShowShopModal(true);
+    
+    // If we already have products for THIS specific image, don't scan again
+    if (productsForImage === generatedResult.image && detectedProducts.length > 0) {
+      return;
+    }
+    
     setDetectingProducts(true);
     
     try {
@@ -726,6 +734,7 @@ export default function VisualizePage() {
       const data = await res.json();
       if (data.items && data.items.length > 0) {
         setDetectedProducts(data.items);
+        setProductsForImage(generatedResult.image); // Track which image these products belong to
       }
     } catch (err) {
       console.error("Failed to detect products:", err);
@@ -1516,7 +1525,7 @@ export default function VisualizePage() {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
           <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
             <button
-              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); setDetectedProducts([]); }}
+              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); setDetectedProducts([]); setProductsForImage(null); }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl z-10"
             >
               ✕
@@ -1591,7 +1600,7 @@ export default function VisualizePage() {
               </a>
               {hasSubscription ? (
                 <button
-                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); setDetectedProducts([]); }}
+                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); setDetectedProducts([]); setProductsForImage(null); }}
                   className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
                 >
                   🎨 צור הדמיה נוספת
@@ -1714,7 +1723,7 @@ export default function VisualizePage() {
                 className="relative cursor-pointer group"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
-                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); setDetectedProducts([]);
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); setDetectedProducts([]); setProductsForImage(null);
                   setShowShopModal(true);
                   setDetectingProducts(true);
                   const ud = localStorage.getItem("user");

@@ -20,32 +20,69 @@ function CheckoutVisionContent() {
   const [hasPurchased, setHasPurchased] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Check if user has main subscription and pre-fill code from URL
+  // Check if user is logged in AND has main subscription
   useEffect(() => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      if (user.email) setEmail(user.email);
-      
-      // Also try shiputzai_user
-      const shiputzUser = JSON.parse(localStorage.getItem("shiputzai_user") || "{}");
-      if (shiputzUser.email) setEmail(shiputzUser.email);
-      
-      if (user.purchased === true || shiputzUser.purchased === true) {
-        setHasPurchased(true);
-      } else {
-        setHasPurchased(false);
+    const checkAuth = async () => {
+      try {
+        // Check localStorage first
+        const userData = localStorage.getItem("user");
+        const shiputzUserData = localStorage.getItem("shiputzai_user");
+        
+        let userEmail = "";
+        let isPurchased = false;
+        
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.email && user.id) {
+            userEmail = user.email;
+            isPurchased = user.purchased === true;
+          }
+        }
+        
+        if (shiputzUserData) {
+          const shiputzUser = JSON.parse(shiputzUserData);
+          if (shiputzUser.email) {
+            userEmail = shiputzUser.email;
+            isPurchased = isPurchased || shiputzUser.purchased === true;
+          }
+        }
+        
+        // If no email found, check Supabase session
+        if (!userEmail) {
+          const { getSession } = await import("@/lib/auth");
+          const session = await getSession();
+          
+          if (session?.user?.email) {
+            userEmail = session.user.email;
+          }
+        }
+        
+        // Not logged in - redirect to login
+        if (!userEmail) {
+          const code = searchParams.get("code") || "";
+          const redirectUrl = `/checkout-vision${code ? `?code=${code}` : ""}`;
+          router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+          return;
+        }
+        
+        setEmail(userEmail);
+        setHasPurchased(isPurchased);
+        setCheckingAuth(false);
+        
+      } catch (e) {
+        console.error("Auth check failed:", e);
+        router.push("/login?redirect=/checkout-vision");
       }
-    } catch {
-      setHasPurchased(false);
-    }
-    setCheckingAuth(false);
+    };
+    
+    checkAuth();
     
     // Get code from URL
     const codeFromUrl = searchParams.get("code");
     if (codeFromUrl) {
       setDiscountCode(codeFromUrl.toUpperCase());
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   // Auto-validate code when it's from URL
   useEffect(() => {
@@ -249,17 +286,12 @@ function CheckoutVisionContent() {
           </div>
         </div>
 
-        {/* Email Input */}
+        {/* Email Display (read-only - user must be logged in) */}
         <div className="mb-4">
-          <label className="block text-sm text-gray-600 mb-2">אימייל</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
-            dir="ltr"
-          />
+          <label className="block text-sm text-gray-600 mb-2">מחובר בתור:</label>
+          <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-base text-gray-700" dir="ltr">
+            {email}
+          </div>
         </div>
 
         {/* Discount Code */}

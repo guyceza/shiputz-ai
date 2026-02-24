@@ -2,13 +2,15 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [discountCode, setDiscountCode] = useState("");
   const [codeValid, setCodeValid] = useState<boolean | null>(null);
   const [checkingCode, setCheckingCode] = useState(false);
@@ -21,16 +23,47 @@ function CheckoutContent() {
   const originalPrice = isPremiumPlus ? 359 : 299;
   const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
 
-  // Pre-fill email and code from localStorage/URL
+  // Check if user is logged in - MUST be logged in to checkout
   useEffect(() => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      if (user.email) setEmail(user.email);
-      const shiputzUser = JSON.parse(localStorage.getItem("shiputzai_user") || "{}");
-      if (shiputzUser.email) setEmail(shiputzUser.email);
-    } catch {}
+    const checkAuth = async () => {
+      try {
+        // Check localStorage first
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.email && user.id) {
+            setEmail(user.email);
+            setCheckingAuth(false);
+            return;
+          }
+        }
+        
+        // Check Supabase session
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        
+        if (session?.user?.email) {
+          setEmail(session.user.email);
+          setCheckingAuth(false);
+          return;
+        }
+        
+        // Not logged in - redirect to login
+        const plan = isPremiumPlus ? "plus" : "";
+        const code = searchParams.get("code") || "";
+        const redirectUrl = `/checkout${plan ? `?plan=${plan}` : ""}${code ? `${plan ? "&" : "?"}code=${code}` : ""}`;
+        router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+      } catch (e) {
+        console.error("Auth check failed:", e);
+        router.push("/login?redirect=/checkout");
+      }
+    };
     
-    // Get code from URL
+    checkAuth();
+  }, [router, isPremiumPlus, searchParams]);
+
+  // Get discount code from URL
+  useEffect(() => {
     const codeFromUrl = searchParams.get("code");
     if (codeFromUrl) {
       setDiscountCode(codeFromUrl.toUpperCase());
@@ -116,6 +149,18 @@ function CheckoutContent() {
     }
   };
 
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center" dir="rtl">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">בודק התחברות...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fafafa]" dir="rtl">
       {/* Minimal Header */}
@@ -167,16 +212,12 @@ function CheckoutContent() {
             </div>
           </div>
 
-          {/* Email Input */}
+          {/* Email Display (read-only - user must be logged in) */}
           <div className="mb-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="האימייל שלך"
-              className="w-full px-4 py-4 bg-gray-50 border-0 rounded-xl text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900"
-              dir="ltr"
-            />
+            <label className="block text-sm text-gray-500 mb-2">מחובר בתור:</label>
+            <div className="w-full px-4 py-4 bg-gray-100 border-0 rounded-xl text-base text-gray-700" dir="ltr">
+              {email}
+            </div>
           </div>
 
           {/* Discount Code */}

@@ -146,19 +146,19 @@ export default function ChatWidget() {
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-4 z-50 flex items-center justify-center transition-all duration-300 ${
           isOpen
-            ? "w-14 h-14 rounded-full bg-gray-600 hover:bg-gray-700 shadow-lg"
-            : "w-20 h-20 hover:scale-110 drop-shadow-xl"
+            ? "w-12 h-12 rounded-full bg-gray-600 hover:bg-gray-700 shadow-lg"
+            : "w-12 h-12 hover:scale-110 drop-shadow-lg"
         } ${showBubble ? "hidden" : ""}`}
         aria-label={isOpen ? "סגור צ'אט" : "פתח צ'אט"}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-5 h-5 text-white" />
         ) : (
           <>
-            <img src="/robot-support.png" alt="Support" className="w-20 h-20 object-contain" />
+            <img src="/robot-support.png" alt="Support" className="w-12 h-12 object-contain" />
             {/* Notification dot */}
             {!bubbleDismissed && (
-              <span className="absolute top-0 left-0 w-5 h-5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+              <span className="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
             )}
           </>
         )}

@@ -144,7 +144,7 @@ export default function ChatWidget() {
       {/* Chat Button - Right side, bottom */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-6 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 overflow-hidden ${
           isOpen
             ? "bg-gray-600 hover:bg-gray-700"
             : "bg-emerald-600 hover:bg-emerald-700 hover:scale-110"
@@ -155,7 +155,7 @@ export default function ChatWidget() {
           <X className="w-6 h-6 text-white" />
         ) : (
           <>
-            <MessageCircle className="w-6 h-6 text-white" />
+            <img src="/robot-support.png" alt="Support" className="w-11 h-11 object-contain" />
             {/* Notification dot */}
             {!bubbleDismissed && (
               <span className="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>

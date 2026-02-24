@@ -19,7 +19,7 @@ function CheckoutContent() {
 
   const basePrice = isPremiumPlus ? 179 : 149;
   const originalPrice = isPremiumPlus ? 359 : 299;
-  const price = codeValid ? Math.round(basePrice * (100 - discountPercent)) / 100 : basePrice;
+  const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
 
   // Pre-fill email and code from localStorage/URL
   useEffect(() => {

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
               // Apply discount!
               discountPercent = codeData.discount_percent || 20;
-              finalAmount = Math.round((pricing.amount * (100 - discountPercent)) * 100) / 100;
+              finalAmount = Math.round(pricing.amount * (100 - discountPercent) / 100);
               console.log(`Discount applied: ${discountPercent}% off, final amount: ${finalAmount}`);
             } else {
               console.log('Discount code expired');

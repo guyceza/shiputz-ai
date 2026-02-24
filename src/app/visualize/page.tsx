@@ -711,12 +711,6 @@ export default function VisualizePage() {
     if (!generatedResult?.image) return;
     
     setShowShopModal(true);
-    
-    // If we already have products for this image, don't scan again
-    if (detectedProducts.length > 0) {
-      return;
-    }
-    
     setDetectingProducts(true);
     
     try {

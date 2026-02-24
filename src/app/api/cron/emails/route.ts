@@ -30,7 +30,8 @@ const NON_PURCHASED_SEQUENCE = [
 ];
 
 // Apple-style email wrapper
-function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string): string {
+function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail?: string): string {
+  const unsubscribeUrl = userEmail ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}` : 'https://shipazti.com/unsubscribe';
   return `
 <!DOCTYPE html>
 <html dir="rtl" lang="he">
@@ -84,7 +85,10 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
           <tr>
             <td style="padding: 40px 20px; text-align: center;">
               <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ! 🏠</p>
-              <p style="font-size: 12px; color: #86868b; margin: 0;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 16px;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 11px; color: #aeaeb2; margin: 0;">
+                <a href="${unsubscribeUrl}" style="color: #aeaeb2; text-decoration: underline;">להסרה מרשימת התפוצה</a>
+              </p>
             </td>
           </tr>
           
@@ -99,6 +103,7 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
 // Generate email HTML based on template
 function getEmailHTML(template: string, user: any, discountCode?: string, visionCode?: string): string {
   const name = user.name || 'משפץ יקר';
+  const userEmail = user.email || '';
   
   const greeting = `<p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${name}</strong>,</p>`;
   
@@ -452,7 +457,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
   };
   
   const t = templates[template] || templates.reminder;
-  return wrapEmail(t.title, t.subtitle, t.content, t.cta, t.url);
+  return wrapEmail(t.title, t.subtitle, t.content, t.cta, t.url, userEmail);
 }
 
 // Generate unique discount code for Premium
@@ -499,6 +504,11 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     for (const user of users || []) {
+      // Skip unsubscribed users
+      if (user.email_unsubscribed) {
+        continue;
+      }
+      
       const daysSinceRegistration = Math.floor(
         (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)
       );

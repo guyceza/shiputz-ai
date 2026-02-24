@@ -54,6 +54,7 @@ async function sendWelcomePremiumEmail(email: string, name?: string) {
         בהצלחה עם השיפוץ! 🏠<br>
         <strong>צוות ShiputzAI</strong>
       </p>
+      <p style="margin-top: 30px; text-align: center;"><a href="https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
     </div>
   `;
 

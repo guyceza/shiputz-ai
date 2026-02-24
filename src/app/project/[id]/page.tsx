@@ -144,7 +144,7 @@ const QUOTE_LOADING_MESSAGES = [
 
 function QuoteLoadingState() {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [seconds, setSeconds] = useState(0);
+  const [secondsLeft, setSecondsLeft] = useState(25);
   
   useEffect(() => {
     const messageInterval = setInterval(() => {
@@ -152,7 +152,7 @@ function QuoteLoadingState() {
     }, 3000);
     
     const secondsInterval = setInterval(() => {
-      setSeconds((prev) => prev + 1);
+      setSecondsLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
     
     return () => {
@@ -167,14 +167,11 @@ function QuoteLoadingState() {
         <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-900 animate-spin"></div>
         <div className="absolute inset-3 rounded-full bg-gray-900 flex items-center justify-center">
-          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
+          <span className="text-white font-bold text-lg">{secondsLeft}</span>
         </div>
       </div>
       <p className="text-gray-900 font-medium text-lg mb-2">מנתח את ההצעה</p>
       <p className="text-gray-500 text-sm mb-3 h-5 transition-all">{QUOTE_LOADING_MESSAGES[messageIndex]}</p>
-      <p className="text-gray-400 text-xs">עד 25 שניות • {seconds} שניות</p>
     </div>
   );
 }

@@ -338,7 +338,7 @@ export default function Home() {
           <div className="relative">
             {/* Light blur overlay with lock - hidden for admin and premium users */}
             {!isAdmin && !isPremium && (
-              <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-10 rounded-3xl flex flex-col items-center justify-center">
+              <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px] z-10 rounded-3xl flex flex-col items-center justify-center">
                 <div className="bg-white/95 rounded-2xl p-8 shadow-xl text-center max-w-sm mx-4 backdrop-blur-sm">
                   <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

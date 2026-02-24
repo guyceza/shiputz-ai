@@ -503,9 +503,16 @@ export async function GET(request: NextRequest) {
     const { data: users, error } = await supabase.from('users').select('*');
     if (error) throw error;
 
+    // Get unsubscribed emails
+    const { data: unsubscribed } = await supabase
+      .from('newsletter_subscribers')
+      .select('email')
+      .not('unsubscribed_at', 'is', null);
+    const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()));
+
     for (const user of users || []) {
       // Skip unsubscribed users
-      if (user.email_unsubscribed) {
+      if (unsubscribedEmails.has(user.email.toLowerCase())) {
         continue;
       }
       

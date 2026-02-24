@@ -367,48 +367,17 @@ export default function VisualizePage() {
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
   const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
-  const [productsForImage, setProductsForImage] = useState<string | null>(null); // Track which image products belong to
+  const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null); // Track current visualization for saving products
   const [detectingProducts, setDetectingProducts] = useState(false);
   
-  // Load cached products from localStorage on mount
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem('vision_products_cache');
-      if (cached) {
-        const { products, forImage } = JSON.parse(cached);
-        if (products && forImage) {
-          setDetectedProducts(products);
-          setProductsForImage(forImage);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load cached products:', e);
-    }
-  }, []);
-  
-  // Save products to localStorage when they change
-  useEffect(() => {
-    if (detectedProducts.length > 0 && productsForImage) {
-      try {
-        localStorage.setItem('vision_products_cache', JSON.stringify({
-          products: detectedProducts,
-          forImage: productsForImage
-        }));
-      } catch (e) {
-        console.error('Failed to cache products:', e);
-      }
-    }
-  }, [detectedProducts, productsForImage]);
-  
-  // Helper to clear products cache (state + localStorage)
+  // Helper to clear products cache
   const clearProductsCache = () => {
     setDetectedProducts([]);
-    setProductsForImage(null);
-    localStorage.removeItem('vision_products_cache');
+    setCurrentVisualizationId(null);
   };
   
-  const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string}[]>([]);
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string} | null>(null);
+  const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string, detectedProducts?: any[]}[]>([]);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string, detectedProducts?: any[]} | null>(null);
   const [savingToCloud, setSavingToCloud] = useState(false);
   
   const LOADING_TIPS = [
@@ -560,7 +529,8 @@ export default function VisualizePage() {
             description: v.description,
             analysis: v.analysis,
             costs: v.costs,
-            createdAt: v.created_at
+            createdAt: v.created_at,
+            detectedProducts: v.detected_products || []
           }));
           setVisualizationHistory(mapped);
         } catch (e) {
@@ -572,13 +542,13 @@ export default function VisualizePage() {
   }, [userId]);
 
   // Save visualization to Supabase
-  const saveToHistory = async (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, currentUserId?: string) => {
+  const saveToHistory = async (beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, currentUserId?: string): Promise<string | null> => {
     // Use passed userId or fallback to state, then to localStorage
     const effectiveUserId = currentUserId || userId || JSON.parse(localStorage.getItem("user") || "{}").id;
     
     if (!effectiveUserId) {
       console.error("saveToHistory: No userId available", { currentUserId, userId, localStorage: localStorage.getItem("user") });
-      return;
+      return null;
     }
     
     console.log("saveToHistory: Saving with userId:", effectiveUserId);
@@ -588,6 +558,8 @@ export default function VisualizePage() {
       const saved = await saveVisualization(effectiveUserId, beforeImage, afterImage, description, analysis, costs);
       if (saved) {
         console.log("saveToHistory: Save successful!", saved.id);
+        // Store the visualization ID for product saving
+        setCurrentVisualizationId(saved.id);
         // Add to local state
         const newItem = {
           id: saved.id,
@@ -599,11 +571,14 @@ export default function VisualizePage() {
           createdAt: saved.created_at
         };
         setVisualizationHistory(prev => [newItem, ...prev].slice(0, 50));
+        return saved.id;
       } else {
         console.error("saveToHistory: Save returned null");
+        return null;
       }
     } catch (e) {
       console.error("Failed to save to cloud:", e);
+      return null;
     } finally {
       setSavingToCloud(false);
     }
@@ -751,8 +726,8 @@ export default function VisualizePage() {
     
     setShowShopModal(true);
     
-    // If we already have products for THIS specific image, don't scan again
-    if (productsForImage === generatedResult.image && detectedProducts.length > 0) {
+    // If we already have products cached, don't scan again
+    if (detectedProducts.length > 0) {
       return;
     }
     
@@ -771,7 +746,15 @@ export default function VisualizePage() {
       const data = await res.json();
       if (data.items && data.items.length > 0) {
         setDetectedProducts(data.items);
-        setProductsForImage(generatedResult.image); // Track which image these products belong to
+        
+        // Save products to database if we have a visualization ID
+        if (currentVisualizationId) {
+          fetch('/api/update-visualization-products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visualizationId: currentVisualizationId, products: data.items })
+          }).catch(e => console.error('Failed to save products to DB:', e));
+        }
       }
     } catch (err) {
       console.error("Failed to detect products:", err);
@@ -1760,19 +1743,36 @@ export default function VisualizePage() {
                 className="relative cursor-pointer group"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
-                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); clearProductsCache();
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
+                  setCurrentVisualizationId(selectedHistoryItem.id);
                   setShowShopModal(true);
-                  setDetectingProducts(true);
-                  const ud = localStorage.getItem("user");
-                  const ue = ud ? JSON.parse(ud).email : null;
-                  fetch('/api/detect-products', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
-                  }).then(res => res.json()).then(data => {
-                    if (data.items?.length > 0) setDetectedProducts(data.items);
-                    setDetectingProducts(false);
-                  }).catch(() => setDetectingProducts(false));
+                  
+                  // If products already saved in history, use them
+                  if (selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0) {
+                    setDetectedProducts(selectedHistoryItem.detectedProducts);
+                  } else {
+                    // Otherwise, detect and save
+                    setDetectedProducts([]);
+                    setDetectingProducts(true);
+                    const ud = localStorage.getItem("user");
+                    const ue = ud ? JSON.parse(ud).email : null;
+                    fetch('/api/detect-products', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
+                    }).then(res => res.json()).then(data => {
+                      if (data.items?.length > 0) {
+                        setDetectedProducts(data.items);
+                        // Save to database
+                        fetch('/api/update-visualization-products', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ visualizationId: selectedHistoryItem.id, products: data.items })
+                        }).catch(e => console.error('Failed to save products:', e));
+                      }
+                      setDetectingProducts(false);
+                    }).catch(() => setDetectingProducts(false));
+                  }
                 }}
               >
                 <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />

@@ -7,6 +7,7 @@ export interface Visualization {
   before_image_url: string;
   after_image_url: string;
   created_at: string;
+  detected_products?: any[];
 }
 
 // Save visualization via API (uses service role on server)

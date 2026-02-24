@@ -10,10 +10,11 @@
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-3.1-pro-preview",
+  // Note: gemini-3.1-pro-preview was timing out, using 3-pro instead
+  VISION_PRO: "gemini-3-pro-preview",
   
   // For fast text tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-3-flash-preview",
+  TEXT_FAST: "gemini-2.5-flash",
   
   // For image generation (Nano Banana Pro)
   IMAGE_GEN: "gemini-3-pro-image-preview",

@@ -123,8 +123,9 @@ export async function POST(request: NextRequest) {
 
     // Update user in database based on product type
     if (productType === 'premium' || productType === 'premium_plus') {
-      // Mark user as premium
+      // Mark user as premium - use upsert to handle users who pay before signing up
       const updateData: any = { 
+        email: email.toLowerCase(),
         purchased: true,
         purchase_date: new Date().toISOString(),
         payment_method: 'payplus',
@@ -137,12 +138,26 @@ export async function POST(request: NextRequest) {
         updateData.vision_credits_source = 'premium_plus_bonus';
       }
 
-      const { error: updateError } = await supabase
+      // First try update (for existing users)
+      const { data: updateResult, error: updateError } = await supabase
         .from('users')
         .update(updateData)
-        .eq('email', email.toLowerCase());
+        .eq('email', email.toLowerCase())
+        .select();
 
-      if (updateError) {
+      // If no rows updated, create new user
+      if (!updateResult || updateResult.length === 0) {
+        console.log(`User ${email} not found, creating new user with premium status`);
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert(updateData);
+        
+        if (insertError) {
+          console.error('Error creating user with premium status:', insertError);
+        } else {
+          console.log(`New user ${email} created with Premium${productType === 'premium_plus' ? ' Plus' : ''}`);
+        }
+      } else if (updateError) {
         console.error('Error updating user premium status:', updateError);
       } else {
         console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 2 Vision credits)' : ''}`);
@@ -154,6 +169,7 @@ export async function POST(request: NextRequest) {
       const isRenewal = type === 'recurring_payment';
       
       const updateData: any = { 
+        email: email.toLowerCase(),
         vision_active: true,
         vision_transaction_id: transaction_uid || recurring_id || page_request_uid,
       };
@@ -166,12 +182,26 @@ export async function POST(request: NextRequest) {
       // Clear any previous cancellation
       updateData.vision_cancelled_at = null;
       
-      const { error: updateError } = await supabase
+      // First try update (for existing users)
+      const { data: updateResult, error: updateError } = await supabase
         .from('users')
         .update(updateData)
-        .eq('email', email.toLowerCase());
+        .eq('email', email.toLowerCase())
+        .select();
 
-      if (updateError) {
+      // If no rows updated, create new user
+      if (!updateResult || updateResult.length === 0) {
+        console.log(`User ${email} not found, creating new user with Vision subscription`);
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert(updateData);
+        
+        if (insertError) {
+          console.error('Error creating user with vision status:', insertError);
+        } else {
+          console.log(`New user ${email} created with Vision subscription`);
+        }
+      } else if (updateError) {
         console.error('Error updating user vision status:', updateError);
       } else {
         console.log(`User ${email} marked as Vision active${isRenewal ? ' (renewal)' : ''}`);

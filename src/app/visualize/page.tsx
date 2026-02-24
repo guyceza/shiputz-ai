@@ -369,6 +369,44 @@ export default function VisualizePage() {
   const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
   const [productsForImage, setProductsForImage] = useState<string | null>(null); // Track which image products belong to
   const [detectingProducts, setDetectingProducts] = useState(false);
+  
+  // Load cached products from localStorage on mount
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('vision_products_cache');
+      if (cached) {
+        const { products, forImage } = JSON.parse(cached);
+        if (products && forImage) {
+          setDetectedProducts(products);
+          setProductsForImage(forImage);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load cached products:', e);
+    }
+  }, []);
+  
+  // Save products to localStorage when they change
+  useEffect(() => {
+    if (detectedProducts.length > 0 && productsForImage) {
+      try {
+        localStorage.setItem('vision_products_cache', JSON.stringify({
+          products: detectedProducts,
+          forImage: productsForImage
+        }));
+      } catch (e) {
+        console.error('Failed to cache products:', e);
+      }
+    }
+  }, [detectedProducts, productsForImage]);
+  
+  // Helper to clear products cache (state + localStorage)
+  const clearProductsCache = () => {
+    setDetectedProducts([]);
+    setProductsForImage(null);
+    localStorage.removeItem('vision_products_cache');
+  };
+  
   const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string}[]>([]);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string} | null>(null);
   const [savingToCloud, setSavingToCloud] = useState(false);
@@ -684,8 +722,7 @@ export default function VisualizePage() {
           analysis: data.analysis,
           costs: data.costEstimate
         });
-        setDetectedProducts([]); // Clear products for new image
-        setProductsForImage(null);
+        clearProductsCache(); // Clear products for new image
         
         // Save to history (async, don't block UI)
         // Pass userId explicitly to avoid closure issues
@@ -1525,7 +1562,7 @@ export default function VisualizePage() {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
           <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
             <button
-              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); setDetectedProducts([]); setProductsForImage(null); }}
+              onClick={() => { setGeneratedResult(null); setShowUploadModal(false); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl z-10"
             >
               ✕
@@ -1600,7 +1637,7 @@ export default function VisualizePage() {
               </a>
               {hasSubscription ? (
                 <button
-                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); setDetectedProducts([]); setProductsForImage(null); }}
+                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
                   className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
                 >
                   🎨 צור הדמיה נוספת
@@ -1723,7 +1760,7 @@ export default function VisualizePage() {
                 className="relative cursor-pointer group"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
-                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); setDetectedProducts([]); setProductsForImage(null);
+                  setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs }); clearProductsCache();
                   setShowShopModal(true);
                   setDetectingProducts(true);
                   const ud = localStorage.getItem("user");

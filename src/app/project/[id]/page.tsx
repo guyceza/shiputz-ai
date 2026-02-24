@@ -773,9 +773,17 @@ export default function ProjectPage() {
       }
     }
     
-    // Update React state with final project
-    if (currentProject) {
+    // Update React state with final project AND save to Supabase
+    if (currentProject && successfulScans.length > 0) {
       setProject(currentProject);
+      // CRITICAL: Save to Supabase (was missing - only saved to localStorage!)
+      try {
+        await saveProject(currentProject);
+        console.log("Multi-scan: Saved", successfulScans.length, "expenses to Supabase");
+      } catch (saveError) {
+        console.error("Failed to save to Supabase:", saveError);
+        // Data is still in localStorage as backup
+      }
     }
     
     // Reset states

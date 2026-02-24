@@ -15,7 +15,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "היי! 👋 אני כאן לענות על כל שאלה לגבי ShiputzAI. איך אפשר לעזור?",
+      content: "היי! 👋 אני השיפוצניק שלך — כאן לענות על כל שאלה. איך אפשר לעזור?",
     },
   ]);
   const [input, setInput] = useState("");

@@ -4,17 +4,16 @@
  * כל שמות המודלים במקום אחד!
  * אם גוגל משנים שמות - מעדכנים רק פה.
  * 
- * Last updated: 2026-02-23
+ * Last updated: 2026-02-24
  * Docs: https://ai.google.dev/models/gemini
  */
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  // Note: gemini-3.1-pro-preview was timing out, gemini-2.5-flash is more reliable
-  VISION_PRO: "gemini-2.5-flash",
+  VISION_PRO: "gemini-3.1-pro-preview",
   
   // For fast text tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-2.5-flash",
+  TEXT_FAST: "gemini-3-flash-preview",
   
   // For image generation (Nano Banana Pro)
   IMAGE_GEN: "gemini-3-pro-image-preview",

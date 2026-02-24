@@ -1116,7 +1116,7 @@ export default function VisualizePage() {
                     </div>
                   </div>
                   <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪149 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                    <p className="text-xl font-bold text-gray-900">₪149 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
                     <p className="text-sm text-gray-500">ניהול תקציב, סריקת קבלות, התראות</p>
                     <p className="text-xs text-gray-400">הדמיות AI בנפרד אח״כ</p>
                   </div>
@@ -1380,7 +1380,7 @@ export default function VisualizePage() {
                       </div>
                     </div>
                     <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪149 <span className="text-sm font-normal text-gray-500">חד פעמי</span></p>
+                      <p className="text-lg font-bold text-gray-900">₪149 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
                       <p className="text-xs text-gray-500">ניהול תקציב, סריקת קבלות, התראות · הדמיות בנפרד</p>
                     </div>
                   </button>

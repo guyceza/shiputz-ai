@@ -58,7 +58,7 @@ export default function PricingCard({
               </div>
             </div>
             <span className="text-sm text-emerald-600 font-medium">
-              {selectedPlan === 'plus' ? 'כולל 2 הדמיות AI מתנה!' : 'תשלום חד פעמי לכל הפרויקט'}
+              {selectedPlan === 'plus' ? '💳 חד פעמי · כולל 2 הדמיות AI' : '💳 תשלום חד פעמי · בלי מנוי'}
             </span>
           </div>
           <Link
@@ -115,7 +115,7 @@ export default function PricingCard({
           <div className="text-4xl font-bold text-gray-900">
             {selectedPlan === 'plus' ? '₪179' : '₪149'}
           </div>
-          <p className="text-sm text-gray-500">תשלום חד פעמי</p>
+          <p className="text-sm text-green-600 font-medium">💳 תשלום חד פעמי</p>
         </div>
         
         {/* Key features */}
@@ -190,8 +190,10 @@ export default function PricingCard({
       <div className="text-6xl font-semibold text-gray-900 mb-2 text-center">
         {selectedPlan === 'plus' ? '₪179' : '₪149'}
       </div>
-      <p className="text-gray-500 mb-2 text-center">תשלום חד פעמי</p>
-      <p className="text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-8 text-center">מבצע לזמן מוגבל</p>
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full">💳 תשלום חד פעמי</span>
+      </div>
+      <p className="text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-8 text-center">מבצע לזמן מוגבל · בלי מנוי</p>
       
       <ul className="text-right space-y-4 mb-10 text-sm text-gray-600">
         <li className="flex items-center gap-3">

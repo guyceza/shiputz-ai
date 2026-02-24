@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       hasSubscription,
       visionSubscription: user.vision_subscription,
-      visionCredits: user.vision_credits || 0
+      visionSubscriptionType: typeof user.vision_subscription,
+      visionCredits: user.vision_credits || 0,
+      debug: { raw: user.vision_subscription }
     });
   } catch (error: any) {
     console.error('Check vision error:', error);

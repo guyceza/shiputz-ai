@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY;
 const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY;
 const PAYPLUS_PAGE_UID = process.env.PAYPLUS_PAGE_UID;
 const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplus.co.il/api/v1.0';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface PayPlusRequest {
   productType: 'premium' | 'vision' | 'premium_plus';
@@ -40,9 +44,41 @@ export async function POST(request: NextRequest) {
 
     // Apply discount if code provided
     let finalAmount = pricing.amount;
+    let discountPercent = 0;
+    
     if (discountCode) {
-      // TODO: Validate discount code and apply discount
-      // For now, we'll handle this later
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      
+      // Validate discount code
+      const { data: codeData, error: codeError } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .eq('code', discountCode.toUpperCase())
+        .single();
+      
+      if (!codeError && codeData) {
+        // Check if code belongs to this email
+        if (codeData.user_email.toLowerCase() === email.toLowerCase()) {
+          // Check if not used
+          if (!codeData.used_at) {
+            // Check if not expired
+            if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
+              // Apply discount!
+              discountPercent = codeData.discount_percent || 20;
+              finalAmount = Math.round((pricing.amount * (100 - discountPercent)) * 100) / 100;
+              console.log(`Discount applied: ${discountPercent}% off, final amount: ${finalAmount}`);
+            } else {
+              console.log('Discount code expired');
+            }
+          } else {
+            console.log('Discount code already used');
+          }
+        } else {
+          console.log('Discount code belongs to different email');
+        }
+      } else {
+        console.log('Discount code not found:', discountCode);
+      }
     }
 
     // Build PayPlus request

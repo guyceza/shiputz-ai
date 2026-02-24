@@ -40,7 +40,52 @@ export async function POST(request: NextRequest) {
       more_info_3,    // discountCode
       approval_num,
       voucher_num,
+      type,           // For recurring: 'recurring_payment', 'recurring_cancel', etc.
+      recurring_id,
     } = data;
+
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Extract email from various possible fields
+    const email = more_info_1 || data.email || data.customer_email;
+    const productType = more_info || data.product_type;
+
+    // Handle recurring subscription cancellation
+    if (type === 'recurring_cancel' || data.action === 'cancel' || data.status === 'cancelled') {
+      console.log('PayPlus subscription cancelled for:', email);
+      
+      if (email) {
+        // Deactivate Vision subscription
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({ 
+            vision_active: false,
+            vision_cancelled_at: new Date().toISOString(),
+          })
+          .eq('email', email.toLowerCase());
+
+        if (updateError) {
+          console.error('Error deactivating vision subscription:', updateError);
+        } else {
+          console.log(`Vision subscription cancelled for ${email}`);
+        }
+
+        // Log the cancellation
+        await supabase.from('transactions').insert({
+          email: email.toLowerCase(),
+          product_type: 'vision',
+          amount: 0,
+          currency: 'ILS',
+          status: 'cancelled',
+          payment_provider: 'payplus',
+          transaction_id: transaction_uid || recurring_id || page_request_uid,
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      return NextResponse.json({ received: true, status: 'cancelled' });
+    }
 
     // Check if transaction was successful
     // PayPlus status codes: 0 = success, others = failure
@@ -48,12 +93,26 @@ export async function POST(request: NextRequest) {
 
     if (!isSuccess) {
       console.log('PayPlus transaction failed:', status_description);
+      
+      // Log failed transaction
+      if (email) {
+        await supabase.from('transactions').insert({
+          email: email.toLowerCase(),
+          product_type: productType || 'unknown',
+          amount: parseFloat(amount) || 0,
+          currency: 'ILS',
+          status: 'failed',
+          status_description: status_description,
+          payment_provider: 'payplus',
+          transaction_id: transaction_uid || page_request_uid,
+          created_at: new Date().toISOString(),
+        });
+      }
+      
       return NextResponse.json({ received: true, status: 'failed' });
     }
 
     // Extract our custom data
-    const productType = more_info || data.product_type;
-    const email = more_info_1 || data.email;
     const userId = more_info_2 || data.user_id;
     const discountCode = more_info_3 || data.discount_code;
 
@@ -61,9 +120,6 @@ export async function POST(request: NextRequest) {
       console.error('PayPlus webhook: No email in callback data');
       return NextResponse.json({ received: true, error: 'No email provided' });
     }
-
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Update user in database based on product type
     if (productType === 'premium' || productType === 'premium_plus') {
@@ -93,21 +149,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (productType === 'vision') {
-      // Mark user as having Vision subscription
+    if (productType === 'vision' || type === 'recurring_payment') {
+      // Mark user as having Vision subscription (or renewal)
+      const isRenewal = type === 'recurring_payment';
+      
+      const updateData: any = { 
+        vision_active: true,
+        vision_transaction_id: transaction_uid || recurring_id || page_request_uid,
+      };
+      
+      // Only set start date on initial subscription, not renewals
+      if (!isRenewal) {
+        updateData.vision_start_date = new Date().toISOString();
+      }
+      
+      // Clear any previous cancellation
+      updateData.vision_cancelled_at = null;
+      
       const { error: updateError } = await supabase
         .from('users')
-        .update({ 
-          vision_active: true,
-          vision_start_date: new Date().toISOString(),
-          vision_transaction_id: transaction_uid || page_request_uid,
-        })
+        .update(updateData)
         .eq('email', email.toLowerCase());
 
       if (updateError) {
         console.error('Error updating user vision status:', updateError);
       } else {
-        console.log(`User ${email} marked as Vision active`);
+        console.log(`User ${email} marked as Vision active${isRenewal ? ' (renewal)' : ''}`);
       }
     }
 

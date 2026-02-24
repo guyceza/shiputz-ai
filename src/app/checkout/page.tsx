@@ -9,12 +9,19 @@ function CheckoutContent() {
   
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [codeValid, setCodeValid] = useState<boolean | null>(null);
+  const [checkingCode, setCheckingCode] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [discountPercent, setDiscountPercent] = useState(0);
+  
   const isPremiumPlus = searchParams.get("plan") === "plus" || searchParams.get("plan") === "premium_plus";
 
-  const price = isPremiumPlus ? 179 : 149;
+  const basePrice = isPremiumPlus ? 179 : 149;
   const originalPrice = isPremiumPlus ? 359 : 299;
+  const price = codeValid ? Math.round(basePrice * (100 - discountPercent)) / 100 : basePrice;
 
-  // Pre-fill email from localStorage
+  // Pre-fill email and code from localStorage/URL
   useEffect(() => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -22,7 +29,57 @@ function CheckoutContent() {
       const shiputzUser = JSON.parse(localStorage.getItem("shiputzai_user") || "{}");
       if (shiputzUser.email) setEmail(shiputzUser.email);
     } catch {}
-  }, []);
+    
+    // Get code from URL
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl) {
+      setDiscountCode(codeFromUrl.toUpperCase());
+    }
+  }, [searchParams]);
+
+  // Auto-validate code when it's from URL and email is set
+  useEffect(() => {
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl && email && !codeValid) {
+      validateCode();
+    }
+  }, [email, searchParams]);
+
+  const validateCode = async () => {
+    if (!discountCode.trim() || !email.trim()) {
+      setCodeError("נא להזין קוד ואימייל");
+      return;
+    }
+
+    setCheckingCode(true);
+    setCodeError("");
+    setCodeValid(null);
+
+    try {
+      const response = await fetch("/api/discount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          code: discountCode.toUpperCase(), 
+          email: email.toLowerCase() 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setCodeValid(true);
+        setDiscountPercent(data.discount || 20);
+      } else {
+        setCodeValid(false);
+        setCodeError(data.reason || "קוד לא תקף");
+      }
+    } catch (err) {
+      setCodeError("שגיאה בבדיקת הקוד");
+    }
+
+    setCheckingCode(false);
+  };
 
   const handlePurchase = async () => {
     if (!email.trim()) {
@@ -41,6 +98,7 @@ function CheckoutContent() {
         body: JSON.stringify({
           productType,
           email: email.toLowerCase(),
+          discountCode: codeValid ? discountCode.toUpperCase() : undefined,
         }),
       });
       
@@ -80,11 +138,13 @@ function CheckoutContent() {
             </div>
             
             <div className="flex items-center justify-center gap-3">
-              <span className="text-gray-400 line-through text-2xl">₪{originalPrice}</span>
+              <span className="text-gray-400 line-through text-2xl">₪{codeValid ? basePrice : originalPrice}</span>
               <span className="text-5xl font-bold text-gray-900">₪{price}</span>
             </div>
             
-            <p className="text-green-600 font-medium mt-2">💳 תשלום חד פעמי</p>
+            <p className="text-green-600 font-medium mt-2">
+              {codeValid ? `🎉 ${discountPercent}% הנחה!` : '💳 תשלום חד פעמי'}
+            </p>
           </div>
 
           {/* What's included - minimal */}
@@ -108,7 +168,7 @@ function CheckoutContent() {
           </div>
 
           {/* Email Input */}
-          <div className="mb-6">
+          <div className="mb-4">
             <input
               type="email"
               value={email}
@@ -117,6 +177,40 @@ function CheckoutContent() {
               className="w-full px-4 py-4 bg-gray-50 border-0 rounded-xl text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900"
               dir="ltr"
             />
+          </div>
+
+          {/* Discount Code */}
+          <div className="mb-6">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={discountCode}
+                onChange={(e) => {
+                  setDiscountCode(e.target.value.toUpperCase());
+                  setCodeValid(null);
+                  setCodeError("");
+                }}
+                placeholder="קוד הנחה (אופציונלי)"
+                className={`flex-1 px-4 py-3 bg-gray-50 border-0 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-gray-900 ${
+                  codeValid === true ? 'ring-2 ring-green-500 bg-green-50' : 
+                  codeValid === false ? 'ring-2 ring-red-300 bg-red-50' : ''
+                }`}
+                dir="ltr"
+              />
+              <button
+                onClick={validateCode}
+                disabled={checkingCode || !discountCode.trim() || !email.trim()}
+                className="px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 disabled:opacity-50 transition-colors text-sm font-medium"
+              >
+                {checkingCode ? "..." : "בדוק"}
+              </button>
+            </div>
+            {codeError && (
+              <p className="text-red-500 text-sm mt-2">{codeError}</p>
+            )}
+            {codeValid && (
+              <p className="text-green-600 text-sm mt-2">✓ קוד הנחה הופעל - {discountPercent}% הנחה!</p>
+            )}
           </div>
 
           {/* CTA Button */}

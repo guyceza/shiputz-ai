@@ -105,98 +105,80 @@ interface LegacyProject {
 
 const MIGRATION_KEY = 'projects_migrated_to_supabase_v2';
 
-// Get all projects for current user
+// Get all projects for current user (via API to bypass RLS)
 export async function getProjects(userId: string): Promise<Project[]> {
-  const supabase = getSupabaseClient();
+  const response = await fetch(`/api/projects?userId=${encodeURIComponent(userId)}`);
   
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error('Error fetching projects:', error);
-    throw error;
+    throw new Error(error.error || 'Failed to fetch projects');
   }
   
-  return data || [];
+  return response.json();
 }
 
-// Get single project by ID
+// Get single project by ID (via API to bypass RLS)
 export async function getProject(projectId: string): Promise<Project | null> {
-  const supabase = getSupabaseClient();
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`);
   
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', projectId)
-    .single();
+  if (response.status === 404) {
+    return null;
+  }
   
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
+  if (!response.ok) {
+    const error = await response.json();
     console.error('Error fetching project:', error);
-    throw error;
+    throw new Error(error.error || 'Failed to fetch project');
   }
   
-  return data;
+  return response.json();
 }
 
-// Create a new project
+// Create a new project (via API to bypass RLS)
 export async function createProject(userId: string, name: string, budget: number = 0): Promise<Project> {
-  const supabase = getSupabaseClient();
+  const response = await fetch('/api/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, name, budget }),
+  });
   
-  const { data, error } = await supabase
-    .from('projects')
-    .insert({
-      user_id: userId,
-      name,
-      budget,
-      spent: 0,
-      data: {}
-    })
-    .select()
-    .single();
-  
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error('Error creating project:', error);
-    throw error;
+    throw new Error(error.error || 'Failed to create project');
   }
   
-  return data;
+  return response.json();
 }
 
-// Update a project (including nested data)
+// Update a project (including nested data) - via API to bypass RLS
 export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent' | 'data'>>): Promise<Project> {
-  const supabase = getSupabaseClient();
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
   
-  const { data, error } = await supabase
-    .from('projects')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', projectId)
-    .select()
-    .single();
-  
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error('Error updating project:', error);
-    throw error;
+    throw new Error(error.error || 'Failed to update project');
   }
   
-  return data;
+  return response.json();
 }
 
-// Delete a project
+// Delete a project - via API to bypass RLS
 export async function deleteProject(projectId: string): Promise<void> {
-  const supabase = getSupabaseClient();
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, {
+    method: 'DELETE',
+  });
   
-  const { error } = await supabase
-    .from('projects')
-    .delete()
-    .eq('id', projectId);
-  
-  if (error) {
+  if (!response.ok) {
+    const error = await response.json();
     console.error('Error deleting project:', error);
-    throw error;
+    throw new Error(error.error || 'Failed to delete project');
   }
 }
 

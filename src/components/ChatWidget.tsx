@@ -169,8 +169,8 @@ export default function ChatWidget() {
         <div className="fixed bottom-24 right-4 z-50 w-[350px] max-w-[calc(100vw-2rem)] h-[450px] max-h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 animate-in slide-in-from-bottom-4 duration-300">
           {/* Header */}
           <div className="bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
-              <img src="/robot-support.png" alt="Support Bot" className="w-9 h-9 object-contain" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src="/robot-support.png" alt="Support Bot" className="w-12 h-12 object-contain" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold">ShiputzAI Support</h3>

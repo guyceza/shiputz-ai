@@ -753,6 +753,13 @@ export default function VisualizePage() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ visualizationId: currentVisualizationId, products: data.items })
+          }).then(() => {
+            // Update local history state
+            setVisualizationHistory(prev => prev.map(v => 
+              v.id === currentVisualizationId 
+                ? { ...v, detectedProducts: data.items }
+                : v
+            ));
           }).catch(e => console.error('Failed to save products to DB:', e));
         }
       }
@@ -1768,6 +1775,13 @@ export default function VisualizePage() {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ visualizationId: selectedHistoryItem.id, products: data.items })
+                        }).then(() => {
+                          // Update local history state so we don't rescan
+                          setVisualizationHistory(prev => prev.map(v => 
+                            v.id === selectedHistoryItem.id 
+                              ? { ...v, detectedProducts: data.items }
+                              : v
+                          ));
                         }).catch(e => console.error('Failed to save products:', e));
                       }
                       setDetectingProducts(false);

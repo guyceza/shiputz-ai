@@ -2,6 +2,8 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
+// Bug #29 fix: Use shared rate limiter instead of duplicating logic
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -52,31 +54,12 @@ function getFullSystemPrompt(): string {
   return SYSTEM_PROMPT;
 }
 
-// Simple rate limiting (10 requests per minute per IP)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  
-  if (!limit || now > limit.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
-    return true;
-  }
-  
-  if (limit.count >= 10) {
-    return false;
-  }
-  
-  limit.count++;
-  return true;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(ip)) {
+    // Bug #29 fix: Use shared rate limiter (10 requests per minute per IP)
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 10, 60000);
+    if (!rateLimit.success) {
       return NextResponse.json(
         { error: "המערכת עמוסה כרגע. נסו שוב בעוד דקה." },
         { status: 429 }

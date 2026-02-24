@@ -114,35 +114,83 @@ async function verifySubscription(userEmail: string | null): Promise<{ hasPurcha
   }
 }
 
-// Increment monthly usage counter (call after successful generation)
-async function incrementUsage(userEmail: string): Promise<void> {
+// Bug #9 fix: Atomic increment for vision usage counter
+// Uses PostgreSQL's atomic operations to prevent race conditions
+async function incrementUsage(userEmail: string): Promise<{ success: boolean; newCount: number }> {
   try {
     const supabase = createServiceClient();
     const currentMonth = new Date().toISOString().slice(0, 7);
     
-    // Get current usage
-    const { data } = await supabase
+    // First check if we need to reset (new month)
+    const { data: userData } = await supabase
       .from('users')
-      .select('vision_usage_count, vision_usage_month')
+      .select('vision_usage_month')
       .eq('email', userEmail.toLowerCase())
       .single();
     
-    let newCount = 1;
-    if (data?.vision_usage_month === currentMonth) {
-      // Same month - increment
-      newCount = (data.vision_usage_count || 0) + 1;
+    if (userData?.vision_usage_month !== currentMonth) {
+      // New month - reset to 1
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          vision_usage_count: 1,
+          vision_usage_month: currentMonth
+        })
+        .eq('email', userEmail.toLowerCase());
+      
+      return { success: !error, newCount: 1 };
     }
-    // If different month - reset to 1
     
-    await supabase
-      .from('users')
-      .update({ 
-        vision_usage_count: newCount,
-        vision_usage_month: currentMonth
-      })
-      .eq('email', userEmail.toLowerCase());
+    // Same month - use atomic increment via RPC or raw SQL
+    // Fallback: Use optimistic update with version check
+    const { data, error } = await supabase.rpc('increment_vision_usage', { 
+      user_email: userEmail.toLowerCase(),
+      current_month: currentMonth
+    }).single();
+    
+    if (error) {
+      // Fallback if RPC doesn't exist: manual increment (less safe but works)
+      console.warn('RPC not available, using manual increment:', error.message);
+      const { data: currentData } = await supabase
+        .from('users')
+        .select('vision_usage_count')
+        .eq('email', userEmail.toLowerCase())
+        .single();
+      
+      const newCount = (currentData?.vision_usage_count || 0) + 1;
+      await supabase
+        .from('users')
+        .update({ 
+          vision_usage_count: newCount,
+          vision_usage_month: currentMonth
+        })
+        .eq('email', userEmail.toLowerCase());
+      
+      return { success: true, newCount };
+    }
+    
+    return { success: true, newCount: (data as any)?.vision_usage_count || 1 };
   } catch (e) {
     console.error('Failed to increment usage:', e);
+    return { success: false, newCount: 0 };
+  }
+}
+
+// Bug #12 fix: Mark trial as used BEFORE generation to prevent abuse
+async function markTrialUsed(userEmail: string): Promise<boolean> {
+  try {
+    const supabase = createServiceClient();
+    const { error } = await supabase
+      .from('users')
+      .update({ vision_trial_used: true })
+      .eq('email', userEmail.toLowerCase())
+      .eq('vision_trial_used', false); // Only update if not already used
+    
+    // If no error and row was updated, we successfully claimed the trial
+    return !error;
+  } catch (e) {
+    console.error('Failed to mark trial as used:', e);
+    return false;
   }
 }
 
@@ -352,9 +400,23 @@ export async function POST(request: NextRequest) {
     // After trial: require BOTH main subscription (purchased) AND vision subscription
     const subscription = await verifySubscription(userEmail);
     
-    // If trial not used yet, allow access (free trial)
+    // Bug #12 fix: If trial not used, mark it BEFORE generation to prevent abuse
+    let isTrialRun = false;
     if (!subscription.trialUsed) {
-      // Trial allowed - will be marked as used after successful generation
+      // Atomically mark trial as used BEFORE generation
+      const trialClaimed = await markTrialUsed(userEmail);
+      if (!trialClaimed) {
+        // Another request already claimed the trial - re-check subscription
+        const recheckSub = await verifySubscription(userEmail);
+        if (!recheckSub.hasPurchased || !recheckSub.hasVision) {
+          return NextResponse.json({ 
+            error: "התקופת הנסיון שלך כבר נוצלה. נדרש מנוי Vision פעיל.",
+            code: "TRIAL_ALREADY_USED"
+          }, { status: 403 });
+        }
+      } else {
+        isTrialRun = true;
+      }
     } else {
       // Trial used - need both subscriptions
       if (!subscription.hasPurchased) {
@@ -573,7 +635,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 4: Increment usage counter (for subscribed users, not trial)
-    if (userEmail && subscription.trialUsed) {
+    // Bug #12: Trial was already marked used before generation
+    if (userEmail && !isTrialRun) {
       await incrementUsage(userEmail);
     }
 

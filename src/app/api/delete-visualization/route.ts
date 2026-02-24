@@ -14,16 +14,25 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Get the visualization first to delete images
-    const { data: viz } = await supabase
+    // Bug #6 fix: Check if visualization exists and user owns it
+    const { data: viz, error: fetchError } = await supabase
       .from('visualizations')
-      .select('before_image_url, after_image_url')
+      .select('id, user_id, before_image_url, after_image_url')
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
+    // Check if visualization exists
+    if (fetchError || !viz) {
+      return NextResponse.json({ error: "Visualization not found" }, { status: 404 });
+    }
+
+    // Verify ownership
+    if (viz.user_id !== userId) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
     // Delete from database
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from('visualizations')
       .delete()
       .eq('id', id)

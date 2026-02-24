@@ -32,35 +32,26 @@ export async function POST(request: NextRequest) {
       .eq('code', code.toUpperCase())
       .single();
 
+    // Bug #11 fix: Use generic error message for all failures to prevent enumeration
+    const genericError = { valid: false, reason: 'קוד לא תקין' };
+
     if (error || !data) {
-      return NextResponse.json({ 
-        valid: false, 
-        reason: 'קוד לא קיים' 
-      });
+      return NextResponse.json(genericError);
     }
 
     // Check if code belongs to this email
     if (data.user_email.toLowerCase() !== email.toLowerCase()) {
-      return NextResponse.json({ 
-        valid: false, 
-        reason: 'הקוד לא שייך לחשבון זה' 
-      });
+      return NextResponse.json(genericError);
     }
 
     // Check if already used
     if (data.used_at) {
-      return NextResponse.json({ 
-        valid: false, 
-        reason: 'הקוד כבר נוצל' 
-      });
+      return NextResponse.json(genericError);
     }
 
     // Check expiry
     if (new Date(data.expires_at) < new Date()) {
-      return NextResponse.json({ 
-        valid: false, 
-        reason: 'פג תוקף הקוד' 
-      });
+      return NextResponse.json(genericError);
     }
 
     return NextResponse.json({ 

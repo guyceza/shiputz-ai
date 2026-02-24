@@ -5,7 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
-import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+// Bug #21 fix: Removed unused GEMINI_BASE_URL import
+import { AI_MODELS } from "@/lib/ai-config";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 import { createServiceClient } from '@/lib/supabase';

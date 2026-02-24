@@ -1,27 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// PayPlus signature verification (prepared for when Cardcom terminal is connected)
+function verifyPayPlusSignature(rawBody: string, signature: string | null): boolean {
+  const secretKey = process.env.PAYPLUS_SECRET_KEY;
+  
+  // If no secret key configured, log warning but allow (for development/migration period)
+  if (!secretKey) {
+    console.warn('PayPlus signature verification skipped: PAYPLUS_SECRET_KEY not configured');
+    return true;
+  }
+  
+  // If signature header missing, reject in production
+  if (!signature) {
+    console.warn('PayPlus webhook: Missing signature header');
+    // Allow for now since Cardcom terminal not connected yet
+    // In production with Cardcom connected: return false;
+    return true;
+  }
+  
+  // Verify HMAC-SHA256 signature
+  const expectedSignature = crypto
+    .createHmac('sha256', secretKey)
+    .update(rawBody)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedSignature, 'hex'),
+    Buffer.from(signature, 'hex')
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Clone request to read raw body for signature verification
+    const rawBody = await request.text();
+    const signature = request.headers.get('x-payplus-signature');
+    
+    // Verify signature (prepared for Cardcom connection)
+    if (!verifyPayPlusSignature(rawBody, signature)) {
+      console.error('PayPlus webhook: Invalid signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+    
     // PayPlus sends callback data as JSON or form-urlencoded
     const contentType = request.headers.get('content-type') || '';
     let data: any;
 
+    // Parse the raw body we already read
     if (contentType.includes('application/json')) {
-      data = await request.json();
+      data = JSON.parse(rawBody);
     } else if (contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await request.formData();
-      data = Object.fromEntries(formData);
+      const params = new URLSearchParams(rawBody);
+      data = Object.fromEntries(params);
     } else {
       // Try to parse as JSON anyway
-      const text = await request.text();
       try {
-        data = JSON.parse(text);
+        data = JSON.parse(rawBody);
       } catch {
-        data = { raw: text };
+        data = { raw: rawBody };
       }
     }
 
@@ -51,8 +92,46 @@ export async function POST(request: NextRequest) {
     const email = more_info_1 || data.email || data.customer_email;
     const productType = more_info || data.product_type;
 
+    // Bug #39: Handle refund webhooks
+    if (type === 'refund' || data.action === 'refund' || data.status === 'refunded') {
+      console.log('PayPlus refund received for:', email);
+      
+      if (email) {
+        // Revoke premium/vision access on refund
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({ 
+            purchased: false,
+            vision_active: false,
+            refunded_at: new Date().toISOString(),
+          })
+          .eq('email', email.toLowerCase());
+
+        if (updateError) {
+          console.error('Error revoking access after refund:', updateError);
+        } else {
+          console.log(`Access revoked for ${email} after refund`);
+        }
+
+        // Log the refund transaction
+        await supabase.from('transactions').insert({
+          email: email.toLowerCase(),
+          product_type: productType || 'unknown',
+          amount: parseFloat(amount) || 0,
+          currency: 'ILS',
+          status: 'refunded',
+          payment_provider: 'payplus',
+          transaction_id: transaction_uid || page_request_uid,
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      return NextResponse.json({ received: true, status: 'refunded' });
+    }
+
     // Handle recurring subscription cancellation
-    if (type === 'recurring_cancel' || data.action === 'cancel' || data.status === 'cancelled') {
+    // Bug #38: Added more specific field checks based on PayPlus documentation
+    if (type === 'recurring_cancel' || data.action === 'cancel' || data.status === 'cancelled' || data.subscription_status === 'cancelled') {
       console.log('PayPlus subscription cancelled for:', email);
       
       if (email) {
@@ -89,7 +168,8 @@ export async function POST(request: NextRequest) {
 
     // Check if transaction was successful
     // PayPlus status codes: 0 = success, others = failure
-    const isSuccess = status_code === '0' || status_code === 0 || data.status === 'approved';
+    // Bug #7 fix: Convert to string explicitly to avoid type confusion
+    const isSuccess = String(status_code) === '0' || data.status === 'approved';
 
     if (!isSuccess) {
       console.log('PayPlus transaction failed:', status_description);
@@ -124,7 +204,8 @@ export async function POST(request: NextRequest) {
     // Update user in database based on product type
     if (productType === 'premium' || productType === 'premium_plus') {
       // Mark user as premium - use upsert to handle users who pay before signing up
-      const updateData: any = { 
+      // Bug #8 fix: Use upsert to avoid race condition
+      const upsertData: any = { 
         email: email.toLowerCase(),
         purchased: true,
         purchase_date: new Date().toISOString(),
@@ -134,31 +215,17 @@ export async function POST(request: NextRequest) {
 
       // Premium Plus includes 2 bonus Vision credits
       if (productType === 'premium_plus') {
-        updateData.vision_credits = 2;
-        updateData.vision_credits_source = 'premium_plus_bonus';
+        upsertData.vision_credits = 2;
+        upsertData.vision_credits_source = 'premium_plus_bonus';
       }
 
-      // First try update (for existing users)
-      const { data: updateResult, error: updateError } = await supabase
+      // Use upsert with conflict on email
+      const { error: upsertError } = await supabase
         .from('users')
-        .update(updateData)
-        .eq('email', email.toLowerCase())
-        .select();
+        .upsert(upsertData, { onConflict: 'email' });
 
-      // If no rows updated, create new user
-      if (!updateResult || updateResult.length === 0) {
-        console.log(`User ${email} not found, creating new user with premium status`);
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert(updateData);
-        
-        if (insertError) {
-          console.error('Error creating user with premium status:', insertError);
-        } else {
-          console.log(`New user ${email} created with Premium${productType === 'premium_plus' ? ' Plus' : ''}`);
-        }
-      } else if (updateError) {
-        console.error('Error updating user premium status:', updateError);
+      if (upsertError) {
+        console.error('Error upserting user premium status:', upsertError);
       } else {
         console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 2 Vision credits)' : ''}`);
       }
@@ -166,43 +233,28 @@ export async function POST(request: NextRequest) {
 
     if (productType === 'vision' || type === 'recurring_payment') {
       // Mark user as having Vision subscription (or renewal)
+      // Bug #8 fix: Use upsert to avoid race condition
       const isRenewal = type === 'recurring_payment';
       
-      const updateData: any = { 
+      const upsertData: any = { 
         email: email.toLowerCase(),
         vision_active: true,
         vision_transaction_id: transaction_uid || recurring_id || page_request_uid,
+        vision_cancelled_at: null, // Clear any previous cancellation
       };
       
       // Only set start date on initial subscription, not renewals
       if (!isRenewal) {
-        updateData.vision_start_date = new Date().toISOString();
+        upsertData.vision_start_date = new Date().toISOString();
       }
       
-      // Clear any previous cancellation
-      updateData.vision_cancelled_at = null;
-      
-      // First try update (for existing users)
-      const { data: updateResult, error: updateError } = await supabase
+      // Use upsert with conflict on email
+      const { error: upsertError } = await supabase
         .from('users')
-        .update(updateData)
-        .eq('email', email.toLowerCase())
-        .select();
+        .upsert(upsertData, { onConflict: 'email' });
 
-      // If no rows updated, create new user
-      if (!updateResult || updateResult.length === 0) {
-        console.log(`User ${email} not found, creating new user with Vision subscription`);
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert(updateData);
-        
-        if (insertError) {
-          console.error('Error creating user with vision status:', insertError);
-        } else {
-          console.log(`New user ${email} created with Vision subscription`);
-        }
-      } else if (updateError) {
-        console.error('Error updating user vision status:', updateError);
+      if (upsertError) {
+        console.error('Error upserting user vision status:', upsertError);
       } else {
         console.log(`User ${email} marked as Vision active${isRenewal ? ' (renewal)' : ''}`);
       }
@@ -241,8 +293,10 @@ export async function POST(request: NextRequest) {
       });
 
     if (logError) {
-      // Table might not exist yet, that's okay
-      console.log('Could not log transaction (table may not exist):', logError.message);
+      // Bug #35: Alert when transaction logging fails (important audit trail)
+      console.error('CRITICAL: Failed to log transaction:', logError.message, { email, productType, transaction_uid });
+      // In production, this should send an alert to admin
+      // The transaction still succeeded, but we lost audit trail
     }
 
     return NextResponse.json({ 

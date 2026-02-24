@@ -3,7 +3,11 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
+// Bug #20 fix: Don't use hardcoded fallback - fail if not configured
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+if (!SUPABASE_URL) {
+  console.error('NEXT_PUBLIC_SUPABASE_URL not configured');
+}
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
@@ -13,6 +17,11 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !beforeImage || !afterImage || !description) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    
+    // Bug #20 fix: Check if SUPABASE_URL is configured
+    if (!SUPABASE_URL) {
+      return NextResponse.json({ error: "Storage not configured" }, { status: 503 });
     }
     
     // Validate image sizes (rough check on base64 length)

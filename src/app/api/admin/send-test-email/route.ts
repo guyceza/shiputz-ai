@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_DUfgFQ4J_KnMvhKXtaDC9g4Q6ZaiEMjEo';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'guyceza@gmail.com').split(',').map(e => e.trim().toLowerCase());
+// Bug #3 fix: Never use hardcoded API keys - use env var only
+const RESEND_KEY = process.env.RESEND_API_KEY;
 
 // Template subjects
 const TEMPLATE_SUBJECTS: Record<string, string> = {
@@ -126,15 +127,20 @@ const generateHtml = (templateId: string, userEmail?: string): string => {
 
 export async function POST(request: NextRequest) {
   try {
+    // Bug #3 fix: Fail gracefully if API key not configured
+    if (!RESEND_KEY) {
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
+    }
+
     const { template, email } = await request.json();
 
     if (!template || !email) {
       return NextResponse.json({ error: 'Missing template or email' }, { status: 400 });
     }
 
-    // Verify admin (basic check)
-    if (!ADMIN_EMAILS.includes(email.toLowerCase()) && !email.includes('@')) {
-      return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
+    // Bug #4 fix: Verify admin consistently
+    if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const subject = `🧪 טסט: ${TEMPLATE_SUBJECTS[template] || template}`;

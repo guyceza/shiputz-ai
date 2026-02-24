@@ -43,18 +43,39 @@ export async function PATCH(
 ) {
   try {
     const { id: projectId } = await params;
-    const updates = await request.json();
+    const { userId, ...updates } = await request.json();
 
     if (!projectId) {
       return NextResponse.json({ error: 'Missing project ID' }, { status: 400 });
     }
 
+    // Bug #5 fix: Require userId and verify ownership
+    if (!userId) {
+      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
+
     const supabase = createServiceClient();
+    
+    // Verify ownership before update
+    const { data: project } = await supabase
+      .from('projects')
+      .select('user_id')
+      .eq('id', projectId)
+      .single();
+    
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+    
+    if (project.user_id !== userId) {
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    }
     
     const { data, error } = await supabase
       .from('projects')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', projectId)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -77,17 +98,40 @@ export async function DELETE(
 ) {
   try {
     const { id: projectId } = await params;
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
 
     if (!projectId) {
       return NextResponse.json({ error: 'Missing project ID' }, { status: 400 });
     }
 
+    // Bug #5 fix: Require userId and verify ownership
+    if (!userId) {
+      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
+
     const supabase = createServiceClient();
+    
+    // Verify ownership before delete
+    const { data: project } = await supabase
+      .from('projects')
+      .select('user_id')
+      .eq('id', projectId)
+      .single();
+    
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+    
+    if (project.user_id !== userId) {
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    }
     
     const { error } = await supabase
       .from('projects')
       .delete()
-      .eq('id', projectId);
+      .eq('id', projectId)
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error deleting project:', error);

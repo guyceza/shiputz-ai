@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [handled, setHandled] = useState(false);
+  // Bug #18 fix: Use ref instead of state for the handled flag
+  // State updates are async, so multiple calls could pass the check before state updates
+  const handledRef = useRef(false);
 
   const handleUserSession = async (session: any) => {
-    // Prevent double execution
-    if (handled) return;
-    setHandled(true);
+    // Prevent double execution using ref (synchronous)
+    if (handledRef.current) return;
+    handledRef.current = true;
     const email = session.user.email;
     const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
     

@@ -488,15 +488,24 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret (optional security)
+  // Bug #24 fix: Always require CRON_SECRET in production
   const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET) {
+    console.error('CRON_SECRET not configured - rejecting cron request');
+    return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
+  }
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const supabase = createServiceClient();
   let sent = 0;
   let errors = 0;
+  let skipped = 0;
+
+  // Bug #10 fix: Generate a unique run ID for idempotency
+  const runId = `cron-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+  console.log(`Email cron started: ${runId}`);
 
   try {
     // Get all users
@@ -535,14 +544,38 @@ export async function GET(request: NextRequest) {
             .single();
 
           if (!existing) {
-            // Skip vision_offer email if user already has Vision subscription
-            if (step.template === 'vision_offer' && user.vision_subscription === 'active') {
-              // Mark as sent so we don't check again, but don't actually send
-              await supabase.from('email_sequences').insert({
+            // Bug #10 fix: Use atomic insert with conflict handling for idempotency
+            // Try to insert the record first - if it already exists (race condition), skip
+            const { error: lockError } = await supabase
+              .from('email_sequences')
+              .insert({
                 user_email: user.email,
                 sequence_type: sequenceType,
                 day_number: step.day,
+                run_id: runId, // Track which cron run claimed this
+                status: 'pending',
               });
+            
+            // If insert failed due to conflict, another instance already claimed this
+            if (lockError) {
+              if (lockError.code === '23505') { // Unique violation
+                skipped++;
+                continue;
+              }
+              console.error('Lock error:', lockError);
+              continue;
+            }
+            
+            // Skip vision_offer email if user already has Vision subscription
+            if (step.template === 'vision_offer' && user.vision_subscription === 'active') {
+              // Already marked as pending, update to skipped
+              await supabase
+                .from('email_sequences')
+                .update({ status: 'skipped', reason: 'user_has_vision' })
+                .eq('user_email', user.email)
+                .eq('sequence_type', sequenceType)
+                .eq('day_number', step.day);
+              skipped++;
               continue;
             }
             
@@ -593,13 +626,22 @@ export async function GET(request: NextRequest) {
             const result = await sendEmail(user.email, step.subject, html);
 
             if (result.id) {
-              await supabase.from('email_sequences').insert({
-                user_email: user.email,
-                sequence_type: sequenceType,
-                day_number: step.day,
-              });
+              // Bug #10 fix: Update status to sent (record already exists from lock)
+              await supabase
+                .from('email_sequences')
+                .update({ status: 'sent', sent_at: new Date().toISOString(), resend_id: result.id })
+                .eq('user_email', user.email)
+                .eq('sequence_type', sequenceType)
+                .eq('day_number', step.day);
               sent++;
             } else {
+              // Bug #37 partial fix: Mark as failed for potential retry
+              await supabase
+                .from('email_sequences')
+                .update({ status: 'failed', error: result.message || 'Unknown error' })
+                .eq('user_email', user.email)
+                .eq('sequence_type', sequenceType)
+                .eq('day_number', step.day);
               errors++;
             }
           }
@@ -607,10 +649,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    console.log(`Email cron completed: ${runId} - sent: ${sent}, errors: ${errors}, skipped: ${skipped}`);
     return NextResponse.json({ 
       success: true, 
       sent, 
       errors,
+      skipped,
+      runId,
       timestamp: new Date().toISOString()
     });
   } catch (error) {

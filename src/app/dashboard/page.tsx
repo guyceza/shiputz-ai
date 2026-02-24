@@ -134,9 +134,17 @@ function DashboardContent() {
             router.push("/login");
             return;
           }
-          const parsedUser = JSON.parse(userData);
-          userId = parsedUser.id;
-          setUser(parsedUser);
+          // Bug #25 fix: Wrap JSON.parse in try-catch
+          try {
+            const parsedUser = JSON.parse(userData);
+            userId = parsedUser.id;
+            setUser(parsedUser);
+          } catch (e) {
+            console.error("Invalid user data in localStorage:", e);
+            localStorage.removeItem("user");
+            router.push("/login");
+            return;
+          }
         }
 
         // Load projects from Supabase (with localStorage migration & fallback)
@@ -191,21 +199,29 @@ function DashboardContent() {
           router.push("/login");
           return;
         }
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        
-        // Load projects from localStorage (offline fallback)
-        if (parsedUser.id) {
-          const cached = getCachedProjects(parsedUser.id);
-          if (cached) {
-            setProjects(cached.map(p => ({
-              id: p.id,
-              name: p.name,
-              budget: p.budget,
-              spent: p.spent,
-              createdAt: p.created_at
-            })));
+        // Bug #25 fix: Wrap JSON.parse in try-catch
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          
+          // Load projects from localStorage (offline fallback)
+          if (parsedUser.id) {
+            const cached = getCachedProjects(parsedUser.id);
+            if (cached) {
+              setProjects(cached.map(p => ({
+                id: p.id,
+                name: p.name,
+                budget: p.budget,
+                spent: p.spent,
+                createdAt: p.created_at
+              })));
+            }
           }
+        } catch (parseError) {
+          console.error("Invalid user data in localStorage:", parseError);
+          localStorage.removeItem("user");
+          router.push("/login");
+          return;
         }
       }
       setIsLoading(false);
@@ -260,7 +276,15 @@ function DashboardContent() {
       // Get user ID
       const { getSession } = await import("@/lib/auth");
       const session = await getSession();
-      const userId = session?.user?.id || JSON.parse(localStorage.getItem("user") || "{}").id;
+      // Bug #25 fix: Safe JSON parse with fallback
+      let userId: string | undefined = session?.user?.id;
+      if (!userId) {
+        try {
+          userId = JSON.parse(localStorage.getItem("user") || "{}").id;
+        } catch {
+          userId = undefined;
+        }
+      }
       
       if (!userId) {
         alert("נא להתחבר מחדש");

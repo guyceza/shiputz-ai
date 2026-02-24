@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 // Register a new user
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, auth_provider } = await request.json();
+    const { email, name, auth_provider, auth_id } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -109,9 +109,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new user (always store email in lowercase)
+    // Use auth_id if provided (from Supabase Auth) to keep IDs in sync
+    const insertData: Record<string, any> = { 
+      email: normalizedEmail, 
+      name, 
+      auth_provider: auth_provider || 'email' 
+    };
+    if (auth_id) {
+      insertData.id = auth_id;
+    }
+    
     const { data, error } = await supabase
       .from('users')
-      .insert({ email: normalizedEmail, name, auth_provider: auth_provider || 'email' })
+      .insert(insertData)
       .select()
       .single();
 

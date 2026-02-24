@@ -43,12 +43,12 @@ export default function AuthCallbackPage() {
     // Also check if they've completed onboarding (stored in metadata)
     const hasCompletedOnboarding = session.user.user_metadata?.onboarding_complete;
     
-    // Save to users table with Google provider - await before redirecting
+    // Save to users table with Google provider - pass auth ID for consistency
     try {
       await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, auth_provider: 'google' }),
+        body: JSON.stringify({ email, name, auth_provider: 'google', auth_id: session.user.id }),
       });
     } catch (e) {
       console.error('User save failed:', e);

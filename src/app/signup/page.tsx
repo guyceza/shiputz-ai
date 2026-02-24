@@ -76,7 +76,7 @@ export default function SignupPage() {
         const userRes = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, auth_provider: 'email' }),
+          body: JSON.stringify({ email, name, auth_provider: 'email', auth_id: data.user?.id }),
         });
         const userData = await userRes.json();
         console.log('👤 User save result:', userData);

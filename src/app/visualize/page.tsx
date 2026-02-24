@@ -522,19 +522,16 @@ export default function VisualizePage() {
         try {
           const data = await loadVisualizations(userId);
           // Map Supabase format to local format
-          const mapped = data.map(v => {
-            console.log('Loading visualization:', v.id, 'detected_products:', v.detected_products);
-            return {
-              id: v.id,
-              beforeImage: v.before_image_url,
-              afterImage: v.after_image_url,
-              description: v.description,
-              analysis: v.analysis,
-              costs: v.costs,
-              createdAt: v.created_at,
-              detectedProducts: v.detected_products || []
-            };
-          });
+          const mapped = data.map(v => ({
+            id: v.id,
+            beforeImage: v.before_image_url,
+            afterImage: v.after_image_url,
+            description: v.description,
+            analysis: v.analysis,
+            costs: v.costs,
+            createdAt: v.created_at,
+            detectedProducts: v.detected_products || []
+          }));
           setVisualizationHistory(mapped);
         } catch (e) {
           console.error("Failed to load history:", e);
@@ -1758,12 +1755,9 @@ export default function VisualizePage() {
                   setShowShopModal(true);
                   
                   // If products already saved in history, use them
-                  console.log('Shop the Look clicked, detectedProducts:', selectedHistoryItem.detectedProducts);
                   if (selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0) {
-                    console.log('Using cached products:', selectedHistoryItem.detectedProducts.length);
                     setDetectedProducts(selectedHistoryItem.detectedProducts);
                   } else {
-                    console.log('No cached products, will scan');
                     // Otherwise, detect and save
                     setDetectedProducts([]);
                     setDetectingProducts(true);

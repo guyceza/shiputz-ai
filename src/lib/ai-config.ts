@@ -10,8 +10,8 @@
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  // Note: gemini-3.1-pro-preview was timing out, using 3-pro instead
-  VISION_PRO: "gemini-3-pro-preview",
+  // Note: gemini-3.1-pro-preview was timing out, gemini-2.5-flash is more reliable
+  VISION_PRO: "gemini-2.5-flash",
   
   // For fast text tasks (chat support, simple Q&A)
   TEXT_FAST: "gemini-2.5-flash",

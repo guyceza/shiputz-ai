@@ -153,7 +153,7 @@ function CheckoutContent() {
               <div className="bg-gradient-to-r from-purple-500 to-blue-500 -m-6 mb-4 p-4 rounded-t-2xl">
                 <div className="flex justify-between items-center text-white">
                   <span className="font-medium">⭐ Premium Plus</span>
-                  <span className="bg-white/20 px-2 py-1 rounded-full text-xs">חוסך ₪50</span>
+                  <span className="bg-white/20 px-2 py-1 rounded-full text-xs">חוסך 22%</span>
                 </div>
               </div>
               

@@ -1087,11 +1087,11 @@ export default function VisualizePage() {
                       </div>
                       <span className="font-medium text-gray-900">⭐ Premium Plus</span>
                     </div>
-                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪50</span>
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
                   </div>
                   <div className="pr-7">
                     <p className="text-xl font-bold text-gray-900">₪179</p>
-                    <p className="text-sm text-gray-500">Premium + 2 הדמיות AI מתנה</p>
+                    <p className="text-sm text-gray-500">Premium כולל 2 הדמיות AI</p>
                     <p className="text-xs text-gray-400">רוצה עוד? מנוי Vision ב-₪39.99/חודש</p>
                   </div>
                 </button>
@@ -1352,11 +1352,11 @@ export default function VisualizePage() {
                         </div>
                         <span className="font-medium text-gray-900">⭐ Premium Plus</span>
                       </div>
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך ₪50</span>
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
                     </div>
                     <div className="pr-7">
                       <p className="text-lg font-bold text-gray-900">₪179</p>
-                      <p className="text-xs text-gray-500">Premium + 2 הדמיות AI בונוס</p>
+                      <p className="text-xs text-gray-500">Premium כולל 2 הדמיות AI</p>
                     </div>
                   </button>
                   

@@ -60,7 +60,7 @@ Based in Israel
 ## Technical
 - Built with Next.js
 - AI powered by Google Gemini
-- Payments via Whop
+- Payments via PayPlus
 - Database: Supabase
 
 ## Keywords

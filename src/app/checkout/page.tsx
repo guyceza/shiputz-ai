@@ -39,6 +39,10 @@ function CheckoutContent() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
+      
+      // Also try shiputzai_user
+      const shiputzUser = JSON.parse(localStorage.getItem("shiputzai_user") || "{}");
+      if (shiputzUser.email) setEmail(shiputzUser.email);
     } catch {
       // Ignore localStorage errors (private browsing, etc.)
     }
@@ -92,37 +96,33 @@ function CheckoutContent() {
 
     setLoading(true);
 
-    // Build Whop checkout URL
-    // Use discounted plan if discount code is valid
-    const WHOP_PLAN_REGULAR = "plan_gtlFi4zoHPy80";      // $39.99
-    const WHOP_PLAN_DISCOUNTED = "plan_9kPvCqLkwwmUc";  // $35.99 (10% off)
-    const WHOP_PLAN_BUNDLE = "plan_NsKEmfTR2eIsK";
-    
-    const planId = isBundle ? WHOP_PLAN_BUNDLE : (discountValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR);
-    
-    // Create checkout session with metadata (discount code will be marked as used by webhook)
     try {
-      const sessionRes = await fetch("/api/whop/checkout-session", {
+      // Determine product type
+      const productType = isBundle ? 'bundle' : 'premium';
+      
+      // Create PayPlus payment link
+      const response = await fetch("/api/payplus/generate-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planId,
-          email,
-          discountCode: discountValid ? discountCode.toUpperCase() : null,
+          productType,
+          email: email.toLowerCase(),
+          discountCode: discountValid ? discountCode.toUpperCase() : undefined,
         }),
       });
       
-      const session = await sessionRes.json();
+      const data = await response.json();
       
-      if (session.purchase_url) {
-        window.location.href = session.purchase_url;
+      if (data.success && data.payment_url) {
+        // Redirect to PayPlus payment page
+        window.location.href = data.payment_url;
       } else {
-        // Fallback to direct URL if session creation fails
-        window.location.href = `https://whop.com/checkout/${planId}?d[email]=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}`;
+        throw new Error(data.error || 'Failed to create payment link');
       }
-    } catch (error) {
-      // Fallback to direct URL
-      window.location.href = `https://whop.com/checkout/${planId}?d[email]=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}`;
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      alert('אירעה שגיאה. אנא נסה שוב.');
+      setLoading(false);
     }
   };
 
@@ -224,10 +224,10 @@ function CheckoutContent() {
               <div className="text-center">
                 <div className="text-green-700 font-bold text-lg mb-2">🎉 הקוד תקף!</div>
                 <div className="flex justify-center items-center gap-3">
-                  <span className="text-gray-400 line-through text-lg">$39.99</span>
-                  <span className="text-green-700 font-bold text-2xl">$35.99</span>
+                  <span className="text-gray-400 line-through text-lg">₪{SALE_PRICE}</span>
+                  <span className="text-green-700 font-bold text-2xl">₪{finalPrice.toFixed(2)}</span>
                 </div>
-                <div className="text-green-600 text-sm mt-1">חסכת 10%!</div>
+                <div className="text-green-600 text-sm mt-1">חסכת {discountPercent}%!</div>
               </div>
             </div>
           )}
@@ -298,12 +298,18 @@ function CheckoutContent() {
         </button>
 
         <p className="text-center text-xs text-gray-400 mt-4">
-          התשלום מאובטח
+          🔒 התשלום מאובטח באמצעות PayPlus
         </p>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          תשלום מאובטח באמצעות Whop
-        </p>
+        {/* Payment methods icons */}
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <span className="text-xs text-gray-400">אמצעי תשלום:</span>
+          <div className="flex gap-2">
+            <span className="bg-gray-100 px-2 py-1 rounded text-xs">💳 אשראי</span>
+            <span className="bg-blue-100 px-2 py-1 rounded text-xs">Bit</span>
+            <span className="bg-green-100 px-2 py-1 rounded text-xs">Apple Pay</span>
+          </div>
+        </div>
       </div>
     </div>
   );

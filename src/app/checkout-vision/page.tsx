@@ -5,9 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const REGULAR_PRICE = 39.99;  // ₪39.99
-const DISCOUNT_PRICE = 19.99; // ₪19.99 first month (displayed) = $5.99 in Whop
-const WHOP_PLAN_REGULAR = "plan_ORVfC8pmG328G"; // AI Vision monthly plan - $11.99/month
-const WHOP_PLAN_DISCOUNTED = "plan_786h1Ueozm30s"; // AI Vision discounted - $5.99 first month
+const DISCOUNT_PRICE = 19.99; // ₪19.99 first month with discount
 
 function CheckoutVisionContent() {
   const searchParams = useSearchParams();
@@ -28,7 +26,11 @@ function CheckoutVisionContent() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (user.email) setEmail(user.email);
       
-      if (user.purchased === true) {
+      // Also try shiputzai_user
+      const shiputzUser = JSON.parse(localStorage.getItem("shiputzai_user") || "{}");
+      if (shiputzUser.email) setEmail(shiputzUser.email);
+      
+      if (user.purchased === true || shiputzUser.purchased === true) {
         setHasPurchased(true);
       } else {
         setHasPurchased(false);
@@ -96,10 +98,31 @@ function CheckoutVisionContent() {
 
     setLoading(true);
 
-    // Use discounted plan if code is valid
-    const planId = codeValid ? WHOP_PLAN_DISCOUNTED : WHOP_PLAN_REGULAR;
-    const checkoutUrl = `https://whop.com/checkout/${planId}?email=${encodeURIComponent(email)}`;
-    window.location.href = checkoutUrl;
+    try {
+      // Create PayPlus payment link for Vision subscription
+      const response = await fetch("/api/payplus/generate-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productType: 'vision',
+          email: email.toLowerCase(),
+          discountCode: codeValid ? discountCode.toUpperCase() : undefined,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.payment_url) {
+        // Redirect to PayPlus payment page
+        window.location.href = data.payment_url;
+      } else {
+        throw new Error(data.error || 'Failed to create payment link');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      alert('אירעה שגיאה. אנא נסה שוב.');
+      setLoading(false);
+    }
   };
 
   const finalPrice = codeValid ? DISCOUNT_PRICE : REGULAR_PRICE;
@@ -288,8 +311,18 @@ function CheckoutVisionContent() {
         </p>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          תשלום מאובטח באמצעות Whop
+          🔒 תשלום מאובטח באמצעות PayPlus
         </p>
+        
+        {/* Payment methods icons */}
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <span className="text-xs text-gray-400">אמצעי תשלום:</span>
+          <div className="flex gap-2">
+            <span className="bg-gray-100 px-2 py-1 rounded text-xs">💳 אשראי</span>
+            <span className="bg-blue-100 px-2 py-1 rounded text-xs">Bit</span>
+            <span className="bg-green-100 px-2 py-1 rounded text-xs">Apple Pay</span>
+          </div>
+        </div>
       </div>
     </div>
   );

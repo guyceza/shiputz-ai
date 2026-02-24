@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     
   return NextResponse.json({ 
     hasPremium: data?.purchased || false, 
-    hasVision: data?.vision_subscription === 'active',
+    hasVision: data?.vision_subscription === 'active' || data?.vision_subscription === true,
     trialUsed: data?.vision_trial_used || false,
     since: data?.purchased_at 
   });

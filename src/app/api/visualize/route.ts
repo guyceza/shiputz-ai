@@ -105,7 +105,7 @@ async function verifySubscription(userEmail: string | null): Promise<{ hasPurcha
     
     return { 
       hasPurchased: data?.purchased === true,
-      hasVision: data?.vision_subscription === true,
+      hasVision: data?.vision_subscription === true || data?.vision_subscription === 'active',
       trialUsed: data?.vision_trial_used === true,
       monthlyUsage: usageCount
     };

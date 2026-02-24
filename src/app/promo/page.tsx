@@ -2,25 +2,51 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Special promo page - redirects to Vision checkout
 export default function PromoPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasPurchased, setHasPurchased] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Try to get email from localStorage and check main subscription
-    try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      if (user.email) setEmail(user.email);
-      setHasPurchased(user.purchased === true);
-    } catch {
-      setHasPurchased(false);
-    }
-    setCheckingAuth(false);
-  }, []);
+    const checkAuth = async () => {
+      try {
+        // Check localStorage first
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.email && user.id) {
+            setEmail(user.email);
+            setHasPurchased(user.purchased === true);
+            setCheckingAuth(false);
+            return;
+          }
+        }
+        
+        // Check Supabase session
+        const { getSession } = await import("@/lib/auth");
+        const session = await getSession();
+        
+        if (session?.user?.email) {
+          setEmail(session.user.email);
+          setHasPurchased(false); // Will need to check DB for purchased status
+          setCheckingAuth(false);
+          return;
+        }
+        
+        // Not logged in - redirect to login
+        router.push("/login?redirect=/promo");
+      } catch {
+        router.push("/login?redirect=/promo");
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
 
   const handleCheckout = () => {
     setLoading(true);

@@ -109,7 +109,8 @@ export default function Home() {
     checkNewsletter();
   }, []);
 
-  const calculateEstimate = () => {
+  // Auto-calculate estimate when any value changes
+  useEffect(() => {
     const size = parseInt(calcSize) || 0;
     const bathrooms = parseInt(calcBathrooms) || 0;
     
@@ -119,14 +120,12 @@ export default function Home() {
     }
     
     // Base price per sqm by type (2026 market data - based on Midrag.co.il real transactions)
-    // Midrag data: Full renovation 90 sqm = ₪120,000-190,000 (avg ₪1,333-2,111/sqm)
     const basePrices: Record<string, number> = {
-      "קוסמטי": 550,    // ₪450-700/מ"ר - צביעה, תיקונים קטנים (Midrag: ריצוף ₪450-700/מ"ר)
-      "קומפלט": 1700,   // ₪1,400-2,000/מ"ר - שיפוץ מלא (Midrag avg: ₪1,722/מ"ר)
-      "יוקרתי": 3500,   // ₪3,000-4,000/מ"ר - חומרים וגימורים יוקרתיים
+      "קוסמטי": 550,    // ₪450-700/מ"ר
+      "קומפלט": 1700,   // ₪1,400-2,000/מ"ר
+      "יוקרתי": 3500,   // ₪3,000-4,000/מ"ר
     };
     
-    // Location multiplier
     const locationMultiplier: Record<string, number> = {
       "תל אביב": 1.25,
       "מרכז": 1.0,
@@ -135,25 +134,19 @@ export default function Home() {
       "דרום": 0.80,
     };
     
-    // Kitchen prices (based on Midrag.co.il real transactions)
-    // Midrag: חידוש מטבח ₪5,000-15,000, מטבח חדש ₪35,000-50,000, יוקרתי ₪70,000-100,000
     const kitchenPrices: Record<string, number> = {
       "ללא": 0,
-      "רענון": 10000,   // חידוש דלתות/פרזול (Midrag: ₪5,000-15,000)
-      "חדש": 45000,     // מטבח חדש איכותי (Midrag: ₪41,400-50,600)
-      "יוקרתי": 85000,  // מטבח יוקרתי עם שיש קוריאן (Midrag: ₪70,000-100,000)
+      "רענון": 10000,
+      "חדש": 45000,
+      "יוקרתי": 85000,
     };
     
-    // Infrastructure prices (based on Midrag.co.il real transactions)
-    // Midrag: אינסטלציה ₪18,670-22,820, חשמל ₪9,400-11,500
     const infraPrices: Record<string, number> = {
       "ללא": 0,
-      "חלקי": 12000,    // חשמל או אינסטלציה חלקית (Midrag: ₪9,400-11,500)
-      "מלא": 32000,     // חשמל + אינסטלציה מלאה (Midrag: ~₪28,000-34,000 combined)
+      "חלקי": 12000,
+      "מלא": 32000,
     };
     
-    // Bathroom price (per bathroom) - based on Midrag.co.il real transactions
-    // Midrag: שיפוץ אמבטיה ₪16,000-32,000 (standard), ₪25,000-32,000 (high-end)
     const bathroomPrice = calcType === "יוקרתי" ? 28000 : calcType === "קומפלט" ? 22000 : 12000;
     
     const basePrice = basePrices[calcType] || 1400;
@@ -173,6 +166,10 @@ export default function Home() {
       kitchen: kitchenEstimate,
       infrastructure: infraEstimate
     });
+  }, [calcSize, calcType, calcLocation, calcBathrooms, calcKitchen, calcInfrastructure]);
+
+  const calculateEstimate = () => {
+    // Now handled by useEffect - this function kept for compatibility
   };
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -358,45 +355,63 @@ export default function Home() {
             )}
             
           <div className="bg-gray-50 rounded-3xl p-8 md:p-10">
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">גודל הדירה (מ״ר)</label>
-                <select 
-                  value={calcSize}
-                  onChange={(e) => setCalcSize(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
-                >
-                  <option value="50">50 מ״ר</option>
-                  <option value="60">60 מ״ר</option>
-                  <option value="70">70 מ״ר</option>
-                  <option value="80">80 מ״ר</option>
-                  <option value="90">90 מ״ר</option>
-                  <option value="100">100 מ״ר</option>
-                  <option value="120">120 מ״ר</option>
-                  <option value="150">150 מ״ר</option>
-                </select>
+            {/* Size Slider */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-medium text-gray-700">🏠 גודל הדירה</label>
+                <span className="text-2xl font-bold text-gray-900 transition-all duration-300">{calcSize} מ״ר</span>
               </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">סוג השיפוץ</label>
-                <select 
-                  value={calcType}
-                  onChange={(e) => setCalcType(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
-                >
-                  <option value="קוסמטי">קוסמטי (צבע, תיקונים קלים)</option>
-                  <option value="קומפלט">קומפלט (שינויים משמעותיים)</option>
-                  <option value="יוקרתי">יוקרתי (גמר גבוה)</option>
-                </select>
+              <input
+                type="range"
+                min="30"
+                max="200"
+                step="5"
+                value={calcSize}
+                onChange={(e) => setCalcSize(e.target.value)}
+                className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-gray-900 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gray-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>30 מ״ר</span>
+                <span>200 מ״ר</span>
               </div>
             </div>
             
+            {/* Renovation Type Cards */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">✨ סוג השיפוץ</label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "קוסמטי", icon: "🎨", label: "קוסמטי", desc: "צבע, תיקונים" },
+                  { value: "קומפלט", icon: "🔨", label: "קומפלט", desc: "שיפוץ מלא" },
+                  { value: "יוקרתי", icon: "💎", label: "יוקרתי", desc: "גמר גבוה" }
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setCalcType(type.value)}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      calcType === type.value 
+                        ? "border-gray-900 bg-gray-900 text-white shadow-lg scale-[1.02]" 
+                        : "border-gray-200 bg-white hover:border-gray-400 hover:shadow"
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{type.icon}</div>
+                    <div className="font-medium text-sm">{type.label}</div>
+                    <div className={`text-xs mt-1 ${calcType === type.value ? "text-gray-300" : "text-gray-400"}`}>
+                      {type.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Location & Bathrooms */}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-2">מיקום</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">📍 מיקום</label>
                 <select 
                   value={calcLocation}
                   onChange={(e) => setCalcLocation(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
                 >
                   <option value="תל אביב">תל אביב (+25%)</option>
                   <option value="מרכז">מרכז (בסיס)</option>
@@ -406,26 +421,33 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">חדרי רחצה</label>
-                <select 
-                  value={calcBathrooms}
-                  onChange={(e) => setCalcBathrooms(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
-                >
-                  <option value="1">1 חדר רחצה</option>
-                  <option value="2">2 חדרי רחצה</option>
-                  <option value="3">3 חדרי רחצה</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">🚿 חדרי רחצה</label>
+                <div className="flex gap-2">
+                  {["1", "2", "3"].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setCalcBathrooms(num)}
+                      className={`flex-1 py-3 rounded-xl border-2 font-medium transition-all duration-200 ${
+                        calcBathrooms === num 
+                          ? "border-gray-900 bg-gray-900 text-white" 
+                          : "border-gray-200 bg-white hover:border-gray-400"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             
+            {/* Kitchen & Infrastructure */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-sm text-gray-600 mb-2">מטבח</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">🍳 מטבח</label>
                 <select 
                   value={calcKitchen}
                   onChange={(e) => setCalcKitchen(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
                 >
                   <option value="ללא">ללא שינוי</option>
                   <option value="רענון">רענון (חזיתות, משטח)</option>
@@ -434,11 +456,11 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">תשתיות (חשמל/אינסטלציה)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">⚡ תשתיות</label>
                 <select 
                   value={calcInfrastructure}
                   onChange={(e) => setCalcInfrastructure(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
                 >
                   <option value="ללא">ללא שינוי</option>
                   <option value="חלקי">שדרוג חלקי</option>
@@ -447,54 +469,82 @@ export default function Home() {
               </div>
             </div>
             
-            <button
-              onClick={calculateEstimate}
-              className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 hover-bounce hover-shine"
-            >
-              חשב עכשיו
-            </button>
-            
+            {/* Live Results */}
             {estimate && estimateBreakdown && (
-              <div className="mt-8 animate-fadeIn">
-                <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                  <p className="text-sm text-gray-500 mb-2 text-center">הערכת עלות משוערת</p>
-                  <p className="text-4xl font-bold text-gray-900 mb-4 text-center">₪{estimate.toLocaleString()}</p>
-                  
-                  <div className="border-t border-gray-100 pt-4 mb-4">
-                    <p className="text-xs text-gray-500 mb-2">פירוט:</p>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">עבודות בסיס ({calcSize} מ״ר)</span>
-                        <span className="text-gray-900">₪{estimateBreakdown.base.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">חדרי רחצה ({calcBathrooms})</span>
-                        <span className="text-gray-900">₪{estimateBreakdown.bathrooms.toLocaleString()}</span>
-                      </div>
-                      {estimateBreakdown.kitchen > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">מטבח</span>
-                          <span className="text-gray-900">₪{estimateBreakdown.kitchen.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {estimateBreakdown.infrastructure > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">תשתיות</span>
-                          <span className="text-gray-900">₪{estimateBreakdown.infrastructure.toLocaleString()}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <p className="text-xs text-gray-400 mb-2 text-center">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
-                  <p className="text-xs text-gray-400 mb-6 text-center">מקורות: top-renovations.co.il, renovations-israel.co.il</p>
-                  <Link
-                    href={isLoggedIn ? "/dashboard" : "/signup"}
-                    className="block text-center bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-                  >
-                    {isLoggedIn ? "התחל לנהל את התקציב ←" : "רוצה לנהל את התקציב? התחל פרויקט ←"}
-                  </Link>
+              <div className="mt-6 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl text-white">
+                <div className="text-center mb-4">
+                  <p className="text-gray-400 text-sm mb-1">הערכת עלות</p>
+                  <p className="text-5xl font-bold tracking-tight transition-all duration-500">
+                    ₪{estimate.toLocaleString()}
+                  </p>
                 </div>
+                
+                {/* Visual Breakdown Bar */}
+                <div className="mb-4">
+                  <div className="h-4 rounded-full overflow-hidden flex bg-gray-700">
+                    <div 
+                      className="bg-blue-500 transition-all duration-500" 
+                      style={{ width: `${(estimateBreakdown.base / estimate) * 100}%` }}
+                      title="עבודות בסיס"
+                    />
+                    <div 
+                      className="bg-cyan-500 transition-all duration-500" 
+                      style={{ width: `${(estimateBreakdown.bathrooms / estimate) * 100}%` }}
+                      title="חדרי רחצה"
+                    />
+                    {estimateBreakdown.kitchen > 0 && (
+                      <div 
+                        className="bg-amber-500 transition-all duration-500" 
+                        style={{ width: `${(estimateBreakdown.kitchen / estimate) * 100}%` }}
+                        title="מטבח"
+                      />
+                    )}
+                    {estimateBreakdown.infrastructure > 0 && (
+                      <div 
+                        className="bg-emerald-500 transition-all duration-500" 
+                        style={{ width: `${(estimateBreakdown.infrastructure / estimate) * 100}%` }}
+                        title="תשתיות"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Legend */}
+                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-blue-500"></div>
+                    <span className="text-gray-300">בסיס</span>
+                    <span className="text-white font-medium mr-auto">₪{estimateBreakdown.base.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-cyan-500"></div>
+                    <span className="text-gray-300">רחצה</span>
+                    <span className="text-white font-medium mr-auto">₪{estimateBreakdown.bathrooms.toLocaleString()}</span>
+                  </div>
+                  {estimateBreakdown.kitchen > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-amber-500"></div>
+                      <span className="text-gray-300">מטבח</span>
+                      <span className="text-white font-medium mr-auto">₪{estimateBreakdown.kitchen.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {estimateBreakdown.infrastructure > 0 && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-emerald-500"></div>
+                      <span className="text-gray-300">תשתיות</span>
+                      <span className="text-white font-medium mr-auto">₪{estimateBreakdown.infrastructure.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-xs text-gray-400 text-center mb-4">⚠️ הערכה בלבד · מבוסס על נתוני שוק 2026</p>
+                
+                <Link
+                  href={isLoggedIn ? "/dashboard" : "/signup"}
+                  className="block text-center bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  {isLoggedIn ? "התחל לנהל את התקציב ←" : "רוצה לתכנן את התקציב? התחל בחינם ←"}
+                </Link>
               </div>
             )}
           </div>

@@ -8,11 +8,14 @@ import { createServiceClient } from "@/lib/supabase";
 function verifyAuth(request: NextRequest): boolean {
   try {
     const cookies = request.cookies.getAll();
+    console.log('Cookies received:', cookies.map(c => c.name));
     const hasSupabaseCookie = cookies.some(c => 
       c.name.startsWith('sb-')
     );
+    console.log('Has Supabase cookie:', hasSupabaseCookie);
     return hasSupabaseCookie;
-  } catch {
+  } catch (e) {
+    console.error('verifyAuth error:', e);
     return false;
   }
 }

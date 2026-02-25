@@ -66,7 +66,9 @@ export async function saveVisualization(
 // Load user's visualizations via API
 export async function loadVisualizations(userId: string): Promise<Visualization[]> {
   try {
-    const response = await fetch(`/api/get-visualizations?userId=${encodeURIComponent(userId)}`);
+    const response = await fetch(`/api/get-visualizations?userId=${encodeURIComponent(userId)}`, {
+      credentials: 'include'  // Ensure cookies are sent
+    });
     
     if (!response.ok) {
       console.error('Load API error:', response.status);

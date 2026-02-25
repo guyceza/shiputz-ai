@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getArticle, getRelatedArticles } from "../articles";
 import { notFound } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const categoryColors: Record<string, string> = {
   "תקציב": "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
@@ -267,7 +268,7 @@ export default function ArticlePage() {
           <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Link href="/tips" className="text-xs text-gray-900 dark:text-white font-medium">
               מאמרים וטיפים
             </Link>
@@ -280,6 +281,7 @@ export default function ArticlePage() {
                 כניסה
               </Link>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </nav>

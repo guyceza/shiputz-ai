@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -140,8 +141,9 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
         <nav className="h-11 border-b border-gray-100 dark:border-gray-800">
-          <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
+          <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
             <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">ShiputzAI</Link>
+            <ThemeToggle />
           </div>
         </nav>
 
@@ -173,8 +175,9 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
       <nav className="h-11 border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
+        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">ShiputzAI</Link>
+          <ThemeToggle />
         </div>
       </nav>
 

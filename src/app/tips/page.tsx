@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { articles } from "./articles";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const categoryColors: Record<string, string> = {
   "תקציב": "bg-gray-900 text-white dark:bg-white dark:text-gray-900",
@@ -51,7 +52,7 @@ export default function TipsPage() {
           <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Link href="/tips" className="text-xs text-gray-900 dark:text-white font-medium">
               מאמרים וטיפים
             </Link>
@@ -64,6 +65,7 @@ export default function TipsPage() {
                 כניסה
               </Link>
             )}
+            <ThemeToggle />
           </div>
         </div>
       </nav>

@@ -184,6 +184,7 @@ export default function ProjectPage() {
   const [editExpenseData, setEditExpenseData] = useState<Partial<Expense>>({});
   const [expenseSort, setExpenseSort] = useState<'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'>('date-desc');
   const [expenseFilter, setExpenseFilter] = useState<string>('all');
+  const [expenseSearch, setExpenseSearch] = useState<string>('');
   
   // AI Chat
   const [showAIChat, setShowAIChat] = useState(false);
@@ -595,6 +596,17 @@ export default function ProjectPage() {
   const getFilteredExpenses = () => {
     if (!project?.expenses) return [];
     let filtered = [...project.expenses];
+    
+    // Filter by search
+    if (expenseSearch.trim()) {
+      const search = expenseSearch.trim().toLowerCase();
+      filtered = filtered.filter(e => 
+        e.description.toLowerCase().includes(search) ||
+        e.category.toLowerCase().includes(search) ||
+        (e.vendor && e.vendor.toLowerCase().includes(search)) ||
+        e.amount.toString().includes(search)
+      );
+    }
     
     // Filter by category
     if (expenseFilter !== 'all') {
@@ -1667,9 +1679,27 @@ export default function ProjectPage() {
                 </div>
               </div>
               
-              {/* Filters & Sort */}
+              {/* Search, Filters & Sort */}
               {project.expenses && project.expenses.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4 print:hidden">
+                  {/* Search Input */}
+                  <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                    <input
+                      type="text"
+                      value={expenseSearch}
+                      onChange={(e) => setExpenseSearch(e.target.value)}
+                      placeholder="🔍 חפש הוצאה..."
+                      className="w-full text-sm border border-gray-200 rounded-full px-4 py-1.5 bg-white focus:outline-none focus:border-gray-400"
+                    />
+                    {expenseSearch && (
+                      <button
+                        onClick={() => setExpenseSearch('')}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
                   <select
                     value={expenseFilter}
                     onChange={(e) => setExpenseFilter(e.target.value)}
@@ -1690,7 +1720,7 @@ export default function ProjectPage() {
                     <option value="amount-desc">סכום (גבוה → נמוך)</option>
                     <option value="amount-asc">סכום (נמוך → גבוה)</option>
                   </select>
-                  {expenseFilter !== 'all' && (
+                  {(expenseFilter !== 'all' || expenseSearch) && (
                     <span className="text-sm text-gray-500 self-center">
                       {getFilteredExpenses().length} מתוך {project.expenses.length}
                     </span>
@@ -1703,7 +1733,9 @@ export default function ProjectPage() {
               {!project.expenses || project.expenses.length === 0 ? (
                 <p className="text-gray-500 text-center py-12">אין הוצאות עדיין</p>
               ) : getFilteredExpenses().length === 0 ? (
-                <p className="text-gray-500 text-center py-12">אין הוצאות בקטגוריה זו</p>
+                <p className="text-gray-500 text-center py-12">
+                  {expenseSearch ? `לא נמצאו הוצאות עבור "${expenseSearch}"` : 'אין הוצאות בקטגוריה זו'}
+                </p>
               ) : (
                 <div className="divide-y divide-gray-100">
                   {getFilteredExpenses().map((expense) => (

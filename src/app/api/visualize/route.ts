@@ -546,22 +546,17 @@ export async function POST(request: NextRequest) {
     // Step 3: Edit image with Nano Banana Pro
     const nanoBananaUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
     
-    // Edit prompt - minimal changes, preserve original image
-    const editPrompt = `Edit this image with MINIMAL changes. Only modify what is specifically requested.
+    // Edit prompt - make the requested change while preserving the room
+    const editPrompt = `You are editing a room photo for a renovation visualization.
 
-Request: ${description}
+THE CHANGE REQUESTED: ${description}
 
-CRITICAL RULES:
-- Keep the SAME room, SAME angle, SAME perspective
-- Keep the SAME windows, SAME floor, SAME ceiling  
-- Keep ALL furniture and objects that are not mentioned
-- Only change what was specifically requested
-- If "remove wall" or "break wall" - remove ONLY that wall, keep everything else identical
-- The result must look like the SAME room, just with the requested change
-- Do NOT reimagine the entire space
-- Do NOT change the photography angle
-- Do NOT replace furniture unless specifically asked
-- Show finished renovation result (no debris, no construction)`;
+INSTRUCTIONS:
+1. MAKE THE CHANGE - Actually perform what was requested. If they ask to remove a wall, remove it and show the open space behind it.
+2. KEEP THE ROOM - Same angle, same lighting, same floor, same other furniture
+3. SHOW RESULTS - The image should show a finished, clean renovation result
+
+If the request is to "remove wall", "break wall", or "open the space" - you MUST show the wall removed with a clear view of what's behind/beyond it. This is a renovation visualization - show what it would look like AFTER the renovation is complete.`;
 
     // Send image + text to Nano Banana
     const editPayload = {

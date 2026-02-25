@@ -635,14 +635,20 @@ function DashboardContent() {
             <p className="text-gray-500">טוען פרויקטים...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="border border-gray-100 rounded-2xl p-16 text-center">
+          <div className="border border-gray-100 rounded-2xl p-16 text-center animate-fade-in-up">
+            {/* Empty state illustration */}
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">אין פרויקטים עדיין</h2>
             <p className="text-gray-500 mb-8">צור את הפרויקט הראשון שלך והתחל לעקוב אחרי ההוצאות</p>
             <button
               onClick={() => setShowNewProject(true)}
-              className="bg-gray-900 text-white px-8 py-3 rounded-full text-base hover:bg-gray-800 transition-colors"
+              className="bg-gray-900 text-white px-8 py-3 rounded-full text-base hover:bg-gray-800 transition-colors btn-press"
             >
-              צור פרויקט
+              + צור פרויקט
             </button>
             
             <div className="mt-16 pt-12 border-t border-gray-100 text-right max-w-md mx-auto">

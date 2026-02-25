@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Project, CATEGORIES } from '@/types';
+import { ExpenseChart, MonthlyTrendChart } from '@/components/ExpenseChart';
 
 interface BudgetOverviewProps {
   project: Project;
@@ -8,6 +10,8 @@ interface BudgetOverviewProps {
 }
 
 export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewProps) {
+  const [chartView, setChartView] = useState<'bar' | 'pie'>('bar');
+  
   // Calculate expenses by category
   const getExpensesByCategory = () => {
     if (!project?.expenses) return {};
@@ -103,16 +107,42 @@ export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewPro
       <div className="border border-gray-100 rounded-2xl p-8 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900">הוצאות לפי קטגוריה</h2>
-          <button
-            onClick={onOpenBudgetModal}
-            className="text-sm text-gray-500 hover:text-gray-900 border border-gray-200 px-4 py-2 rounded-full"
-          >
-            הגדר תקציב לקטגוריות
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Chart view toggle */}
+            <div className="flex bg-gray-100 rounded-full p-1">
+              <button
+                onClick={() => setChartView('bar')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  chartView === 'bar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                📊
+              </button>
+              <button
+                onClick={() => setChartView('pie')}
+                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                  chartView === 'pie' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                🥧
+              </button>
+            </div>
+            <button
+              onClick={onOpenBudgetModal}
+              className="text-sm text-gray-500 hover:text-gray-900 border border-gray-200 px-4 py-2 rounded-full"
+            >
+              הגדר תקציב לקטגוריות
+            </button>
+          </div>
         </div>
         
         {Object.keys(expensesByCategory).length === 0 ? (
           <p className="text-gray-500 text-center py-8">אין הוצאות עדיין</p>
+        ) : chartView === 'pie' ? (
+          <ExpenseChart 
+            expenses={project.expenses || []} 
+            type="pie" 
+          />
         ) : (
           <div className="space-y-4">
             {CATEGORIES.filter(cat => expensesByCategory[cat] || project.categoryBudgets?.find(cb => cb.category === cat)?.allocated).map(cat => {
@@ -142,6 +172,14 @@ export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewPro
           </div>
         )}
       </div>
+
+      {/* Monthly Trend Chart */}
+      {project.expenses && project.expenses.length > 1 && (
+        <div className="border border-gray-100 rounded-2xl p-8 mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">מגמת הוצאות לפי חודש</h2>
+          <MonthlyTrendChart expenses={project.expenses} />
+        </div>
+      )}
     </>
   );
 }

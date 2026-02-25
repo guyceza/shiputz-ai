@@ -157,6 +157,11 @@ export default function ProjectPage() {
   const [hasVisionSub, setHasVisionSub] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
+  // Share modal
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  
   // Expense modal
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -1301,6 +1306,44 @@ export default function ProjectPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Share project
+  const generateShareLink = async () => {
+    if (!project) return;
+    
+    setShareLoading(true);
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
+      const user = JSON.parse(userData);
+      
+      const res = await fetch("/api/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId: project.id,
+          userId: user.id,
+          expiresInDays: 7,
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setShareUrl(data.shareUrl);
+        setShowShareModal(true);
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+    }
+  };
+
   // Vision usage tracking (from Supabase)
   const [visionUsageToday, setVisionUsageToday] = useState(0);
   
@@ -1541,6 +1584,13 @@ export default function ProjectPage() {
             <span className="text-xs md:text-sm text-gray-900 truncate max-w-[100px] md:max-w-none">{project.name}</span>
           </div>
           <div className="hidden md:flex gap-2">
+            <button 
+              onClick={generateShareLink} 
+              disabled={shareLoading}
+              className="text-sm text-gray-500 hover:text-gray-900 px-3 py-1 border border-gray-200 rounded-lg disabled:opacity-50"
+            >
+              {shareLoading ? "..." : "🔗 שתף"}
+            </button>
             <button onClick={exportToPDF} className="text-sm text-gray-500 hover:text-gray-900 px-3 py-1 border border-gray-200 rounded-lg">
               PDF ייצוא
             </button>
@@ -3230,6 +3280,65 @@ export default function ProjectPage() {
             >
               סגור
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && shareUrl && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">🔗 שתף פרויקט</h3>
+              <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-gray-600">
+                ✕
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">
+              שלח את הקישור לקבלנים, בני משפחה או כל מי שתרצה שיראה את התקדמות הפרויקט.
+            </p>
+            
+            <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-2 mb-4">
+              <input 
+                type="text" 
+                value={shareUrl} 
+                readOnly 
+                className="flex-1 bg-transparent text-sm text-gray-700 outline-none"
+                dir="ltr"
+              />
+              <button 
+                onClick={copyShareLink}
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition-colors"
+              >
+                העתק
+              </button>
+            </div>
+            
+            <div className="flex gap-2">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`צפה בפרויקט השיפוץ שלי: ${shareUrl}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-green-500 text-white py-2 rounded-lg text-center text-sm hover:bg-green-600 transition-colors"
+              >
+                שתף בוואטסאפ
+              </a>
+              <button
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: project?.name, url: shareUrl });
+                  }
+                }}
+                className="flex-1 bg-blue-500 text-white py-2 rounded-lg text-sm hover:bg-blue-600 transition-colors"
+              >
+                שתף
+              </button>
+            </div>
+            
+            <p className="text-xs text-gray-400 text-center mt-4">
+              הקישור תקף ל-7 ימים • צפייה בלבד
+            </p>
           </div>
         </div>
       )}

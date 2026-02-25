@@ -505,9 +505,9 @@ export async function POST(request: NextRequest) {
       }]
     };
 
-    // Add timeout controller for Gemini analysis (30 seconds)
+    // Add timeout controller for Gemini analysis (60 seconds)
     const analysisController = new AbortController();
-    const analysisTimeout = setTimeout(() => analysisController.abort(), 30000);
+    const analysisTimeout = setTimeout(() => analysisController.abort(), 60000);
     
     const geminiResponse = await fetch(geminiUrl, {
       method: "POST",
@@ -584,9 +584,9 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     let generatedImage: string | null = null;
     
     try {
-      // Add timeout controller for image generation (45 seconds - main operation)
+      // Add timeout controller for image generation (60 seconds)
       const imageController = new AbortController();
-      const imageTimeout = setTimeout(() => imageController.abort(), 45000);
+      const imageTimeout = setTimeout(() => imageController.abort(), 60000);
       
       const editResponse = await fetch(nanoBananaUrl, {
         method: "POST",

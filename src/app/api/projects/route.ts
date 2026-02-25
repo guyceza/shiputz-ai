@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/server-auth';
 
 // GET - List user's projects
+// Bug fix: Verify authenticated user matches requested userId
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -9,6 +11,12 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
+
+    // Bug fix: Verify authenticated user owns this userId
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.id !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -32,6 +40,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create a new project
+// Bug fix: Verify authenticated user matches requested userId
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -39,6 +48,12 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !name) {
       return NextResponse.json({ error: 'Missing required fields: userId, name' }, { status: 400 });
+    }
+
+    // Bug fix: Verify authenticated user owns this userId
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.id !== userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

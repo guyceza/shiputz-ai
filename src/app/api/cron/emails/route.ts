@@ -6,8 +6,13 @@ const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
 
 // Generate unsubscribe token for email
+// Bug fix: Don't use predictable fallback - require proper configuration
 function generateUnsubscribeToken(email: string): string {
-  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || 'fallback-secret-change-me';
+  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET;
+  if (!secret) {
+    console.error('SECURITY WARNING: UNSUBSCRIBE_SECRET or CRON_SECRET not configured!');
+    return ''; // Return empty token - link will still work but without verification
+  }
   return crypto
     .createHmac('sha256', secret)
     .update(email.toLowerCase())

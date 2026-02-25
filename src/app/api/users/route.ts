@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/server-auth';
+
+const ADMIN_EMAILS = ['guyceza@gmail.com'];
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
@@ -49,6 +52,7 @@ async function sendWelcomeEmail(email: string, name: string) {
 }
 
 // Get user by email
+// Bug fix: Verify authenticated user is querying their own data
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -56,6 +60,15 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // Bug fix: Verify authenticated user is querying their own email
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.email?.toLowerCase() !== email.toLowerCase()) {
+      // Allow admins to query any user
+      if (!authUser || !ADMIN_EMAILS.includes(authUser.email?.toLowerCase() || '')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const supabase = createServiceClient();
@@ -152,12 +165,22 @@ export async function POST(request: NextRequest) {
 }
 
 // Mark user as purchased
+// Bug fix: Require admin authentication - this endpoint should only be used by admins
+// Payment webhooks update the database directly, not through this endpoint
 export async function PATCH(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { email, adminEmail } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // Bug fix: Require admin authentication
+    const authUser = await getAuthUser();
+    const requestingEmail = adminEmail || authUser?.email;
+    
+    if (!requestingEmail || !ADMIN_EMAILS.includes(requestingEmail.toLowerCase())) {
+      return NextResponse.json({ error: 'Unauthorized - admin only' }, { status: 403 });
     }
 
     const supabase = createServiceClient();

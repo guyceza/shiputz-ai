@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { checkRateLimit, getClientId } from '@/lib/rate-limit';
+import { verifyUserEmail } from '@/lib/server-auth';
 
 // Validate discount code
 export async function POST(request: NextRequest) {
@@ -65,20 +66,39 @@ export async function POST(request: NextRequest) {
 }
 
 // Mark code as used
+// Bug fix: Require auth and verify code ownership
 export async function PATCH(request: NextRequest) {
   try {
-    const { code } = await request.json();
+    const { code, email } = await request.json();
 
-    if (!code) {
-      return NextResponse.json({ error: 'Code is required' }, { status: 400 });
+    if (!code || !email) {
+      return NextResponse.json({ error: 'Code and email are required' }, { status: 400 });
+    }
+
+    // Bug fix: Verify authenticated user owns this email
+    const isAuthorized = await verifyUserEmail(email);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
 
+    // Verify the code belongs to this user before marking as used
+    const { data: discountCode } = await supabase
+      .from('discount_codes')
+      .select('user_email')
+      .eq('code', code.toUpperCase())
+      .single();
+
+    if (!discountCode || discountCode.user_email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ error: 'Code not found or not yours' }, { status: 403 });
+    }
+
     const { error } = await supabase
       .from('discount_codes')
       .update({ used_at: new Date().toISOString() })
-      .eq('code', code.toUpperCase());
+      .eq('code', code.toUpperCase())
+      .eq('user_email', email.toLowerCase()); // Double-check ownership
 
     if (error) {
       console.error('Error marking code as used:', error);

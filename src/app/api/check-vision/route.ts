@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { getAuthUser } from '@/lib/server-auth';
 
+// Bug fix: Verify authenticated user is checking their own subscription
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -8,6 +10,12 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ hasSubscription: false, error: 'Missing email' });
+    }
+
+    // Bug fix: Verify authenticated user is checking their own email
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.email?.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ hasSubscription: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

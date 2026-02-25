@@ -2,12 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
 
+// Bug fix: Get secret securely - require proper configuration
+function getUnsubscribeSecret(): string | null {
+  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET;
+  if (!secret) {
+    console.error('SECURITY WARNING: UNSUBSCRIBE_SECRET or CRON_SECRET not configured!');
+    return null;
+  }
+  return secret;
+}
+
 // Bug #23 fix: Helper to verify unsubscribe token
 function verifyUnsubscribeToken(email: string, token: string | null): boolean {
-  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || 'fallback-secret-change-me';
+  const secret = getUnsubscribeSecret();
   
-  // If no token provided, still allow (backward compatibility)
-  // but log a warning - in production, should require token
+  // If no secret configured, allow unsubscribe but log warning (graceful degradation)
+  if (!secret) {
+    console.warn('Unsubscribe without token verification (no secret configured) for:', email);
+    return true;
+  }
+  
+  // If no token provided, still allow (backward compatibility for old emails)
   if (!token) {
     console.warn('Unsubscribe request without token for:', email);
     return true; // Allow for backward compatibility
@@ -24,7 +39,12 @@ function verifyUnsubscribeToken(email: string, token: string | null): boolean {
 
 // Helper to generate unsubscribe token (for email templates)
 export function generateUnsubscribeToken(email: string): string {
-  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || 'fallback-secret-change-me';
+  const secret = getUnsubscribeSecret();
+  if (!secret) {
+    // Return empty string if no secret - emails will still have unsubscribe link but without token
+    console.error('Cannot generate unsubscribe token: no secret configured');
+    return '';
+  }
   return crypto
     .createHmac('sha256', secret)
     .update(email.toLowerCase())

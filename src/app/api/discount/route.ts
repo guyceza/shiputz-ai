@@ -7,7 +7,7 @@ function verifyAuth(request: NextRequest): boolean {
   try {
     const cookies = request.cookies.getAll();
     const hasSupabaseCookie = cookies.some(c => 
-      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+      c.name.startsWith('sb-')
     );
     return hasSupabaseCookie;
   } catch {

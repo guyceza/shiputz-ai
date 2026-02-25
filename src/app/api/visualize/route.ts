@@ -51,7 +51,7 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
     // Check for any Supabase auth cookie (various formats)
     const cookies = request.cookies.getAll();
     const hasSupabaseCookie = cookies.some(c => 
-      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+      c.name.startsWith('sb-')
     );
     if (hasSupabaseCookie) return true;
     

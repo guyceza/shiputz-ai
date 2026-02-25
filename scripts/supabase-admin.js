@@ -6,10 +6,45 @@
  *   node supabase-admin.js user <email>   - Get user by email
  *   node supabase-admin.js role <email> <role>  - Set user role (admin/user)
  *   node supabase-admin.js delete <email> - Delete user
+ * 
+ * Requires: .env.local with NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
  */
 
-const SUPABASE_URL = 'https://vghfcdtzywbmlacltnjp.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnaGZjZHR6eXdibWxhY2x0bmpwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTY2MTcxNywiZXhwIjoyMDg3MjM3NzE3fQ.HO-ka0H8J0hH1pCHgzDGiiH0ajOKeyFXaDSKJb8LUog';
+const fs = require('fs');
+const path = require('path');
+
+// Bug #C02 fix: Load credentials from .env.local instead of hardcoding
+function loadEnv() {
+  const envPath = path.join(__dirname, '..', '.env.local');
+  const env = {};
+  
+  try {
+    const content = fs.readFileSync(envPath, 'utf-8');
+    content.split('\n').forEach(line => {
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        env[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+      }
+    });
+  } catch (e) {
+    console.error('Error: Could not read .env.local file');
+    console.error('Make sure you are running this from the project root');
+    process.exit(1);
+  }
+  
+  return env;
+}
+
+const env = loadEnv();
+const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error('Error: Missing required environment variables:');
+  if (!SUPABASE_URL) console.error('  - NEXT_PUBLIC_SUPABASE_URL');
+  if (!SERVICE_ROLE_KEY) console.error('  - SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
+}
 
 const headers = {
   'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,

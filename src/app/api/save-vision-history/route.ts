@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { getAuthUser } from "@/lib/server-auth";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -13,6 +14,12 @@ export async function POST(request: NextRequest) {
 
     if (!projectId || !userId || !beforeImage || !afterImage) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Bug #H03 fix: Verify authenticated user matches userId
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.id !== userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
     // Validate image sizes (rough check on base64 length)

@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { getAuthUser } from "@/lib/server-auth";
 
 // GET - Get user settings
 export async function GET(request: NextRequest) {
@@ -11,6 +12,12 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    // Bug #H04 fix: Verify authenticated user matches userId
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.id !== userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -57,6 +64,12 @@ export async function POST(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    // Bug #H04 fix: Verify authenticated user matches userId
+    const authUser = await getAuthUser();
+    if (!authUser || authUser.id !== userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceClient();

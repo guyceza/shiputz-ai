@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { checkRateLimit, getClientId } from '@/lib/rate-limit';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID; // Create in Resend dashboard
@@ -41,6 +42,14 @@ async function addToResendAudience(email: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Bug #H07 fix: Add rate limiting
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(`newsletter:${clientId}`, 5, 60 * 1000); // 5 per minute
+    
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { email } = await request.json();
 
     if (!email || !email.includes('@')) {

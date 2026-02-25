@@ -21,9 +21,16 @@ async function verifyAdmin(email: string | null): Promise<boolean> {
 export async function GET(request: NextRequest) {
   try {
     const email = request.nextUrl.searchParams.get('email');
+    const adminEmail = request.nextUrl.searchParams.get('adminEmail');
     const supabase = createServiceClient();
     
     if (!email) {
+      // Bug #C04 fix: Require admin auth to get full banned list
+      const isAdmin = await verifyAdmin(adminEmail);
+      if (!isAdmin) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+      
       // Get all banned users
       const { data, error } = await supabase
         .from('banned_users')
@@ -33,7 +40,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ list: data?.map(u => u.email) || [] });
     }
     
-    // Check specific user
+    // Check specific user (allowed without admin for general ban checks)
     const { data } = await supabase
       .from('banned_users')
       .select('id')

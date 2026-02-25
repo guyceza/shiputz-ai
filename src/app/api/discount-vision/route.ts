@@ -36,11 +36,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Bug #M02 fix: Use generic error message to prevent code ownership enumeration
     // Check if code belongs to this email
     if (discountCode.user_email.toLowerCase() !== email.toLowerCase()) {
       return NextResponse.json({
         valid: false,
-        reason: 'הקוד לא שייך לאימייל זה'
+        reason: 'קוד לא תקין'
       });
     }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserEmail } from '@/lib/server-auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,6 +9,12 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+    }
+
+    // Bug #C01 fix: Verify authenticated user owns this email
+    const isAuthorized = await verifyUserEmail(email);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

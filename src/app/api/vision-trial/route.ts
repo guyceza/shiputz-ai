@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserEmail } from '@/lib/server-auth';
 
 // Mark vision trial as used for a user
 export async function POST(request: NextRequest) {
@@ -8,6 +9,12 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // Bug #H06 fix: Verify authenticated user owns this email
+    const isAuthorized = await verifyUserEmail(email);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

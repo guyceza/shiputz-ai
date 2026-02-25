@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientId } from '@/lib/rate-limit';
+import { verifyUserEmail } from '@/lib/server-auth';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
@@ -9,6 +11,22 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    // Bug #H08 fix: Add strict rate limiting (1 per hour per IP) 
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(`welcome:${clientId}`, 1, 60 * 60 * 1000); // 1 per hour
+    
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    // Bug #H08 fix: Verify user owns the email OR is the current session user
+    const isAuthorized = await verifyUserEmail(email);
+    if (!isAuthorized) {
+      // If not authenticated, still allow but with very strict rate limiting (already applied above)
+      // This handles the case where someone just signed up and isn't fully authenticated yet
+      console.warn(`Welcome email requested for ${email} without auth - allowing due to rate limit`);
     }
 
     if (!RESEND_KEY) {

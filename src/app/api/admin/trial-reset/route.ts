@@ -21,9 +21,16 @@ async function verifyAdmin(email: string | null): Promise<boolean> {
 export async function GET(request: NextRequest) {
   try {
     const email = request.nextUrl.searchParams.get('email');
+    const adminEmail = request.nextUrl.searchParams.get('adminEmail');
     const supabase = createServiceClient();
     
     if (!email) {
+      // Bug #H05 fix: Require admin auth to get full reset list
+      const isAdmin = await verifyAdmin(adminEmail);
+      if (!isAdmin) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+      
       // Get all pending resets
       const { data, error } = await supabase
         .from('trial_resets')

@@ -96,9 +96,32 @@ const generatePreview = (templateId: string): string => {
   return templateFn();
 };
 
+import { createServiceClient } from '@/lib/supabase';
+
+// Verify admin exists in database
+async function verifyAdmin(email: string | null): Promise<boolean> {
+  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
+    return false;
+  }
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from('users')
+    .select('email')
+    .eq('email', email.toLowerCase())
+    .single();
+  return !!data;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const template = searchParams.get('template');
+  const adminEmail = searchParams.get('adminEmail');
+
+  // Bug #M01 fix: Require admin verification
+  const isAdmin = await verifyAdmin(adminEmail);
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   if (!template) {
     return NextResponse.json({ error: 'Missing template parameter' }, { status: 400 });

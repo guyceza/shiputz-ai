@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { getAuthUser } from "@/lib/server-auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Bug #H02 fix: Verify user is authenticated
+    const authUser = await getAuthUser();
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createServiceClient();
+
+    // Verify ownership before update
+    const { data: visualization } = await supabase
+      .from('visualizations')
+      .select('user_id')
+      .eq('id', visualizationId)
+      .single();
+
+    if (!visualization || visualization.user_id !== authUser.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { error } = await supabase
       .from('visualizations')

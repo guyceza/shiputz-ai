@@ -6,7 +6,6 @@ import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
 import PricingCard from "@/components/PricingCard";
 import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -195,25 +194,24 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl z-50 border-b border-gray-200/50 dark:border-gray-800">
+      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">
+          <Link href="/" className="text-base font-semibold text-gray-900">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/tips" className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          <div className="flex items-center gap-6">
+            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
               מאמרים וטיפים
             </Link>
             {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
+              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
                 לאזור האישי
               </Link>
             ) : (
-              <Link href="/login" className="text-xs text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
+              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
                 התחברות
               </Link>
             )}
-            <ThemeToggle />
           </div>
         </div>
       </nav>

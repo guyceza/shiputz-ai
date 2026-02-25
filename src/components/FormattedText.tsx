@@ -27,7 +27,7 @@ export function FormattedText({ text, className = '' }: FormattedTextProps) {
           return (
             <div key={pIdx} className="space-y-3">
               {items.map((item, iIdx) => {
-                const match = item.match(/^(\d+)\.\s*(.*)/s);
+                const match = item.match(/^(\d+)\.\s*([\s\S]*)/);
                 if (match) {
                   const [, num, content] = match;
                   return (

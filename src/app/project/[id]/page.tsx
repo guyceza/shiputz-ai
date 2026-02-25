@@ -525,8 +525,10 @@ export default function ProjectPage() {
   }, [isLoading, project, actionParam, actionHandled, params.id, router]);
 
   const saveProject = async (updatedProject: Project) => {
+    console.log("saveProject called");
     const userData = localStorage.getItem("user");
     const userId = userData ? JSON.parse(userData).id : null;
+    console.log("userId:", userId);
     const storageKey = userId ? `projects_${userId}` : "projects";
     
     // Update local state immediately for responsiveness
@@ -546,6 +548,7 @@ export default function ProjectPage() {
       return;
     }
     try {
+      console.log("Saving to Supabase...");
       const projectData: ProjectData = {
         expenses: updatedProject.expenses || [],
         categoryBudgets: updatedProject.categoryBudgets || [],
@@ -555,7 +558,9 @@ export default function ProjectPage() {
         suppliers: updatedProject.suppliers || [],
         savedQuotes: updatedProject.savedQuotes || []
       };
+      console.log("Calling saveProjectData with", updatedProject.id, "userId:", userId);
       await saveProjectData(updatedProject.id, projectData, userId, updatedProject.spent);
+      console.log("saveProjectData completed");
     } catch (err) {
       console.error("Failed to save to Supabase:", err);
       // Data is still saved locally, will sync later

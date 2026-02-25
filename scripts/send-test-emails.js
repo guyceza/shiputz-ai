@@ -61,7 +61,10 @@ function wrapEmail(title, subtitle, content, ctaText, ctaUrl) {
           <tr>
             <td style="padding: 40px 20px; text-align: center;">
               <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ! 🏠</p>
-              <p style="font-size: 12px; color: #86868b; margin: 0;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 16px;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 11px; color: #aeaeb2; margin: 0;">
+                <a href="https://shipazti.com/unsubscribe?email=${testUser.email}" style="color: #aeaeb2; text-decoration: underline;">להסרה מרשימת התפוצה</a>
+              </p>
             </td>
           </tr>
           

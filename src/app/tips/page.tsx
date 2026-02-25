@@ -194,7 +194,7 @@ export default function TipsPage() {
           <div className="flex gap-6 text-sm text-gray-500">
             <Link href="/tips" className="hover:text-gray-900">מאמרים</Link>
             <Link href="/terms" className="hover:text-gray-900">תנאי שימוש</Link>
-            <a href="mailto:support@shipazti.com" className="hover:text-gray-900">צור קשר</a>
+            <a href="/contact" className="hover:text-gray-900">צור קשר</a>
           </div>
         </div>
       </footer>

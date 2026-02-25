@@ -10,9 +10,10 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Easing curves for natural movement
-const smoothEasing = [0.43, 0.13, 0.23, 0.96];
-const bounceEasing = [0.68, -0.55, 0.265, 1.55];
+// Easing curves for natural movement - using Framer Motion compatible format
+type EasingArray = [number, number, number, number];
+const smoothEasing: EasingArray = [0.43, 0.13, 0.23, 0.96];
+const bounceEasing: EasingArray = [0.68, -0.55, 0.265, 1.55];
 
 // Floating Pill Component with sophisticated animation
 const FloatingPill = ({ 

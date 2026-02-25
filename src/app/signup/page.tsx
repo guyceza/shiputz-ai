@@ -125,42 +125,42 @@ export default function SignupPage() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">
-        <div className="text-2xl font-bold text-gray-900 mb-6">ShiputzAI</div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 flex flex-col items-center justify-center">
+        <div className="text-2xl font-bold text-gray-900 dark:text-white mb-6">ShiputzAI</div>
         <div className="relative w-12 h-12 mb-4">
-          <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
           <div className="absolute inset-0 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
         </div>
-        <p className="text-gray-600 font-medium">טוען...</p>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">טוען...</p>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <nav className="h-11 border-b border-gray-100">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
+        <nav className="h-11 border-b border-gray-100 dark:border-gray-800">
           <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
-            <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
+            <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">ShiputzAI</Link>
           </div>
         </nav>
 
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="w-full max-w-sm text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">✉️</span>
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">בדוק את האימייל שלך</h1>
-            <p className="text-gray-600 mb-6">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">בדוק את האימייל שלך</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               שלחנו לך קישור לאישור ל-<br/>
-              <span className="font-medium text-gray-900">{email}</span>
+              <span className="font-medium text-gray-900 dark:text-white">{email}</span>
             </p>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
               לא קיבלת? בדוק בתיקיית הספאם
             </p>
             <Link 
               href="/login"
-              className="text-gray-900 hover:underline"
+              className="text-gray-900 dark:text-white hover:underline"
             >
               חזור להתחברות
             </Link>
@@ -171,16 +171,16 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <nav className="h-11 border-b border-gray-100">
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
+      <nav className="h-11 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center">
-          <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
+          <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white">ShiputzAI</Link>
         </div>
       </nav>
 
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
-          <h1 className="text-3xl font-semibold text-gray-900 text-center mb-8">הרשמה</h1>
+          <h1 className="text-3xl font-semibold text-gray-900 dark:text-white text-center mb-8">הרשמה</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
@@ -188,7 +188,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="שם מלא"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-base focus:outline-none focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               required
             />
             <input
@@ -196,7 +196,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="אימייל"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-base focus:outline-none focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               required
               dir="ltr"
             />
@@ -206,7 +206,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="סיסמה (לפחות 6 תווים)"
-                className="w-full px-4 py-3 pl-12 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+                className="w-full px-4 py-3 pl-12 border border-gray-200 dark:border-gray-700 rounded-xl text-base focus:outline-none focus:border-gray-900 dark:focus:border-gray-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 required
                 dir="ltr"
                 minLength={6}
@@ -214,7 +214,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +230,7 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">{error}</p>
             )}
 
             {/* Terms checkbox */}
@@ -239,18 +239,18 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={acceptedTerms}
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                className="mt-1 w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-gray-900 dark:focus:ring-gray-500 bg-white dark:bg-gray-800"
               />
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 קראתי ואני מסכים/ה ל
-                <a href="/privacy" className="text-gray-900 underline hover:no-underline" target="_blank">תנאי השימוש ומדיניות הפרטיות</a>
+                <a href="/privacy" className="text-gray-900 dark:text-white underline hover:no-underline" target="_blank">תנאי השימוש ומדיניות הפרטיות</a>
               </span>
             </label>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gray-900 text-white py-3 rounded-full text-base hover:bg-gray-800 transition-colors disabled:opacity-50"
+              className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3 rounded-full text-base hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
               {loading ? "נרשם..." : "הרשמה"}
             </button>
@@ -258,10 +258,10 @@ export default function SignupPage() {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">או</span>
+              <span className="px-4 bg-white dark:bg-gray-950 text-gray-500 dark:text-gray-400">או</span>
             </div>
           </div>
 
@@ -274,7 +274,7 @@ export default function SignupPage() {
               const { signInWithGoogle } = await import("@/lib/auth");
               await signInWithGoogle();
             }}
-            className={`w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 py-3 rounded-full text-base transition-colors ${acceptedTerms ? 'hover:bg-gray-50' : 'opacity-60 cursor-not-allowed'}`}
+            className={`w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 py-3 rounded-full text-base transition-colors ${acceptedTerms ? 'hover:bg-gray-50 dark:hover:bg-gray-800' : 'opacity-60 cursor-not-allowed'}`}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -285,9 +285,9 @@ export default function SignupPage() {
             המשך עם Google
           </button>
 
-          <p className="text-center text-gray-500 mt-8">
+          <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
             יש לך חשבון?{" "}
-            <Link href="/login" className="text-gray-900 hover:underline">התחברות</Link>
+            <Link href="/login" className="text-gray-900 dark:text-white hover:underline">התחברות</Link>
           </p>
         </div>
       </div>

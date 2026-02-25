@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BarChart2, PieChart } from 'lucide-react';
 import { Project, CATEGORIES } from '@/types';
 import { ExpenseChart, MonthlyTrendChart } from '@/components/ExpenseChart';
 
@@ -112,19 +113,19 @@ export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewPro
             <div className="flex bg-gray-100 rounded-full p-1">
               <button
                 onClick={() => setChartView('bar')}
-                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors ${
                   chartView === 'bar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
                 }`}
               >
-                📊
+                <BarChart2 className="w-4 h-4" strokeWidth={1.5} />
               </button>
               <button
                 onClick={() => setChartView('pie')}
-                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors ${
                   chartView === 'pie' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
                 }`}
               >
-                🥧
+                <PieChart className="w-4 h-4" strokeWidth={1.5} />
               </button>
             </div>
             <button

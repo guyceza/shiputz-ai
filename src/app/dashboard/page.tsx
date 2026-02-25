@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SettingsModal } from "@/components/SettingsModal";
 import { 
   getProjects, 
   createProject, 
@@ -45,6 +46,7 @@ function DashboardContent() {
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -496,6 +498,12 @@ function DashboardContent() {
                 </button>
               </div>
             )}
+            <button
+              onClick={() => setShowSettings(true)}
+              className="text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              ⚙️ הגדרות
+            </button>
             <ThemeToggle />
             <button
               onClick={handleLogout}
@@ -963,6 +971,13 @@ function DashboardContent() {
           </div>
         </div>
       )}
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        userId={user?.id || ""}
+      />
     </div>
   );
 }

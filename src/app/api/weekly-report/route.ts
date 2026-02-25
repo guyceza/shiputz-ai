@@ -10,13 +10,17 @@ function getSupabase() {
   );
 }
 
-// Send weekly report emails - called by cron
-export async function POST(req: NextRequest) {
+// Send weekly report emails - called by Vercel Cron
+export async function GET(req: NextRequest) {
   try {
-    // Verify cron secret to prevent unauthorized calls
+    // Verify Vercel cron secret to prevent unauthorized calls
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      // Also check for Vercel's cron header
+      const vercelCron = req.headers.get("x-vercel-cron");
+      if (!vercelCron) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
 
     const supabase = getSupabase();

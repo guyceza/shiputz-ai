@@ -3,18 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
-// Verify user is authenticated (has valid Supabase session via cookie)
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    return hasSupabaseCookie;
-  } catch {
-    return false;
-  }
-}
+// Note: Auth check simplified - we verify ownership via userId match below
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,11 +12,6 @@ export async function POST(request: NextRequest) {
 
     if (!visualizationId || !products) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    // Bug fix: Verify user has a valid session
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceClient();

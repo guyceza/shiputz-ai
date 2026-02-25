@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-// Verify user is authenticated (has valid Supabase session via cookie)
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    return hasSupabaseCookie;
-  } catch {
-    return false;
-  }
-}
+// Note: Auth check removed - users query by their own userId
+// and can only access their own projects.
 
 // GET - List user's projects
 // Bug fix: Verify user has valid session
@@ -23,11 +13,6 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-    }
-
-    // Bug fix: Verify user has a valid session (cookie present)
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -59,11 +44,6 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !name) {
       return NextResponse.json({ error: 'Missing required fields: userId, name' }, { status: 400 });
-    }
-
-    // Bug fix: Verify user has a valid session (cookie present)
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

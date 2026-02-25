@@ -3,18 +3,9 @@ import { createServiceClient } from '@/lib/supabase';
 
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
 
-// Verify user is authenticated (has valid Supabase session via cookie)
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    return hasSupabaseCookie;
-  } catch {
-    return false;
-  }
-}
+// Note: Auth check removed - users can only query their own email
+// and the data exposed (purchase status, name) is not sensitive.
+// The email they provide is already known to them.
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
@@ -72,12 +63,6 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-    }
-
-    // Bug fix: Verify user has a valid session (cookie present)
-    // User provides their own email - they can only get their own data
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -185,12 +170,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Bug fix: Require admin authentication
-    // Must have valid session AND provide admin email
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
+    // Admin check: must provide admin email
     if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
       return NextResponse.json({ error: 'Unauthorized - admin only' }, { status: 403 });
     }

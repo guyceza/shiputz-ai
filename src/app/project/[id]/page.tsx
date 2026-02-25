@@ -22,6 +22,7 @@ import { QuoteLoadingState } from "@/components/project/QuoteLoadingState";
 import { BudgetOverview } from "@/components/project/BudgetOverview";
 import { ExpenseCard } from "@/components/project/ExpenseCard";
 import { ExpenseListSkeleton } from "@/components/Skeleton";
+import { FormattedText } from "@/components/FormattedText";
 import { BarChart3, Calendar, Users, Camera } from "lucide-react";
 
 // Check for admin mode from localStorage (set during login)
@@ -3036,7 +3037,11 @@ export default function ProjectPage() {
               )}
               {chatHistory.map((msg, i) => (
                 <div key={i} className={`p-4 rounded-xl ${msg.role === "user" ? "bg-gray-900 text-white mr-8" : "border border-gray-100 ml-8"}`}>
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  {msg.role === "user" ? (
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  ) : (
+                    <FormattedText text={msg.content} className="text-gray-700" />
+                  )}
                 </div>
               ))}
               {chatLoading && <div className="border border-gray-100 ml-8 p-4 rounded-xl text-gray-500">חושב...</div>}

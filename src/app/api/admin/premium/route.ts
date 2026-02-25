@@ -82,9 +82,16 @@ async function sendWelcomePremiumEmail(email: string, name?: string) {
 // GET - Get premium users list or check if email has premium
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
+  const adminEmail = request.nextUrl.searchParams.get('adminEmail');
   const supabase = createServiceClient();
   
   if (!email) {
+    // Bug fix: Require admin auth to get full premium list
+    const isAdmin = await verifyAdmin(adminEmail);
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+    
     // Get all premium users
     const { data } = await supabase
       .from('users')

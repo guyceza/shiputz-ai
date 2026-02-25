@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { checkRateLimit, getClientId } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Bug fix: Add rate limiting to prevent brute force
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 10, 60000); // 10 attempts per minute
+    if (!rateLimit.success) {
+      return NextResponse.json({ 
+        valid: false,
+        reason: 'יותר מדי ניסיונות. נסה שוב בעוד דקה.' 
+      }, { status: 429 });
+    }
+
     const { code, email } = await request.json();
 
     if (!code || !email) {

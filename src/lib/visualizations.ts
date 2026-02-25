@@ -66,8 +66,21 @@ export async function saveVisualization(
 // Load user's visualizations via API
 export async function loadVisualizations(userId: string): Promise<Visualization[]> {
   try {
+    // Get Supabase session token from localStorage
+    const supabaseKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+    let accessToken = '';
+    if (supabaseKey) {
+      try {
+        const session = JSON.parse(localStorage.getItem(supabaseKey) || '{}');
+        accessToken = session.access_token || '';
+      } catch (e) {
+        console.error('Failed to parse Supabase session:', e);
+      }
+    }
+    
     const response = await fetch(`/api/get-visualizations?userId=${encodeURIComponent(userId)}`, {
-      credentials: 'include'  // Ensure cookies are sent
+      credentials: 'include',
+      headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}
     });
     
     if (!response.ok) {

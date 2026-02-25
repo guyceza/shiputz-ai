@@ -2,23 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-
-// Verify user is authenticated (has valid Supabase session via cookie)
-// This is more reliable than getAuthUser() which can have issues with cookie parsing
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    console.log('Cookies received:', cookies.map(c => c.name));
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    console.log('Has Supabase cookie:', hasSupabaseCookie);
-    return hasSupabaseCookie;
-  } catch (e) {
-    console.error('verifyAuth error:', e);
-    return false;
-  }
-}
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {

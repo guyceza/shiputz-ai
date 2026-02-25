@@ -546,8 +546,17 @@ export async function POST(request: NextRequest) {
     // Step 3: Edit image with Nano Banana Pro
     const nanoBananaUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
     
-    // Edit prompt
-    const editPrompt = `Edit this room image: ${description}`;
+    // Edit prompt - always in renovation context, showing finished result
+    const editPrompt = `You are a professional interior designer showing a FINISHED renovation result.
+Edit this room image to show: ${description}
+
+IMPORTANT RULES:
+- Always show the COMPLETED, FINISHED result - never show construction, demolition, or work in progress
+- If the request mentions "break wall", "remove wall", "knock down" - show an open space WITHOUT the wall (clean, finished)
+- If the request mentions any demolition or removal - show the beautiful END RESULT after renovation
+- Keep the image realistic, professional, and aspirational
+- The result should look like a real estate photo of a finished renovation
+- No debris, no dust, no construction materials, no workers`;
 
     // Send image + text to Nano Banana
     const editPayload = {

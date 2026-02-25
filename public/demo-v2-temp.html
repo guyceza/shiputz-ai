@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiputzAI - Demo V2</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Heebo', sans-serif; background: #fff; overflow-x: hidden; }
+    
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #4CAF50, #2196F3);
+      transform-origin: left; z-index: 100;
+    }
+    
+    /* Hero */
+    .hero {
+      min-height: 100vh; position: relative; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 40px 20px; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 50%, #f3e5f5 100%);
+    }
+    
+    /* Blobs */
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+      pointer-events: none; will-change: transform;
+    }
+    .blob-1 { width: 500px; height: 500px; background: linear-gradient(135deg, #4CAF50, #81C784); top: -15%; right: -10%; }
+    .blob-2 { width: 400px; height: 400px; background: linear-gradient(135deg, #2196F3, #64B5F6); bottom: -10%; left: -10%; }
+    .blob-3 { width: 350px; height: 350px; background: linear-gradient(135deg, #9C27B0, #BA68C8); top: 40%; left: 5%; }
+    
+    /* Content */
+    .hero-content { position: relative; z-index: 10; text-align: center; max-width: 900px; }
+    .logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 32px; opacity: 0; }
+    .logo-icon {
+      width: 56px; height: 56px; background: linear-gradient(135deg, #4CAF50, #2196F3);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 28px; box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .logo-icon:hover { transform: rotate(10deg) scale(1.1); box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4); }
+    .logo-text { font-size: 32px; font-weight: 800; color: #1a1a2e; }
+    
+    h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; color: #1a1a2e; margin-bottom: 24px; line-height: 1.2; }
+    h1 .gradient { background: linear-gradient(135deg, #4CAF50, #2196F3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .subtitle { font-size: 1.3rem; color: #555; margin-bottom: 48px; line-height: 1.7; opacity: 0; }
+    
+    /* Pills */
+    .pills-container { position: relative; width: 100%; height: 140px; margin-bottom: 48px; }
+    .pill {
+      position: absolute; padding: 14px 28px; border-radius: 50px; font-weight: 600;
+      font-size: 0.95rem; color: white; box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      cursor: pointer; white-space: nowrap; opacity: 0; will-change: transform;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    }
+    .pill:hover { transform: scale(1.12) !important; box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+    .pill-1 { background: linear-gradient(135deg, #4CAF50, #66BB6A); top: 0; right: 15%; }
+    .pill-2 { background: linear-gradient(135deg, #2196F3, #42A5F5); top: 55px; right: 38%; }
+    .pill-3 { background: linear-gradient(135deg, #9C27B0, #AB47BC); top: 20px; left: 12%; }
+    .pill-4 { background: linear-gradient(135deg, #FF9800, #FFB74D); top: 80px; left: 32%; }
+    .pill-5 { background: linear-gradient(135deg, #607D8B, #78909C); top: 35px; left: 55%; }
+    
+    /* CTA Button */
+    .cta-wrapper { opacity: 0; }
+    .cta-btn {
+      position: relative; display: inline-flex; align-items: center; gap: 12px;
+      padding: 20px 48px; font-size: 1.25rem; font-weight: 700; color: white;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32); border: none;
+      border-radius: 50px; cursor: pointer; overflow: hidden;
+      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .cta-btn:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 50px rgba(76, 175, 80, 0.5); }
+    .cta-btn .glow {
+      position: absolute; inset: -2px; background: linear-gradient(135deg, #66BB6A, #43A047);
+      border-radius: 50px; filter: blur(15px); opacity: 0.6; z-index: -1;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .cta-btn .shimmer {
+      position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: translateX(-100%) skewX(-15deg);
+    }
+    .cta-btn:hover .shimmer { animation: shimmer 0.6s forwards; }
+    .cta-btn .arrow { transition: transform 0.3s; }
+    .cta-btn:hover .arrow { transform: translateX(-5px); }
+    
+    @keyframes pulse-glow { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+    @keyframes shimmer { to { transform: translateX(100%) skewX(-15deg); } }
+    
+    /* Browser Mockup */
+    .browser-mock {
+      width: 100%; max-width: 900px; margin: 60px auto 0; opacity: 0;
+      transform: translateY(60px) scale(0.9);
+    }
+    .browser-frame {
+      background: white; border-radius: 20px; overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05);
+    }
+    .browser-header {
+      background: #f8f9fa; padding: 14px 20px; display: flex; align-items: center;
+      gap: 10px; border-bottom: 1px solid #eee;
+    }
+    .browser-dots { display: flex; gap: 8px; }
+    .browser-dot { width: 14px; height: 14px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28c940; }
+    .browser-url {
+      flex: 1; margin: 0 20px; padding: 8px 16px; background: white;
+      border-radius: 8px; text-align: center; color: #666; font-size: 0.9rem;
+    }
+    .browser-content { padding: 40px; background: linear-gradient(135deg, #f8f9fa, #fff); }
+    .preview-cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+    .preview-card {
+      background: white; border-radius: 16px; padding: 24px 32px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08); min-width: 180px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .preview-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+    .preview-card h4 { color: #888; font-size: 0.9rem; margin-bottom: 8px; font-weight: 500; }
+    .preview-card .value { font-size: 2rem; font-weight: 700; }
+    .value-default { color: #1a1a2e; }
+    .value-red { color: #f44336; }
+    .value-green { color: #4CAF50; }
+    
+    /* Features Section */
+    .features {
+      padding: 120px 20px; background: #0f1419; position: relative; overflow: hidden;
+    }
+    .features-bg {
+      position: absolute; inset: 0; opacity: 0.03;
+      background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+      background-size: 50px 50px;
+    }
+    .features-content { max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
+    .features h2 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: white; text-align: center; margin-bottom: 80px; opacity: 0; }
+    .features h2 span { color: #4CAF50; }
+    
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; }
+    .feature-card {
+      background: rgba(255,255,255,0.03); backdrop-filter: blur(10px);
+      border-radius: 24px; padding: 40px; border: 1px solid rgba(255,255,255,0.08);
+      opacity: 0; transform: translateY(40px);
+      transition: transform 0.4s, background 0.3s, border-color 0.3s;
+      cursor: pointer;
+    }
+    .feature-card:hover {
+      background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);
+      transform: translateY(-8px) !important;
+    }
+    .feature-icon {
+      width: 72px; height: 72px; background: linear-gradient(135deg, #4CAF50, #2196F3);
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+    }
+    .feature-card h3 { font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 12px; }
+    .feature-card p { color: rgba(255,255,255,0.6); line-height: 1.7; font-size: 1.05rem; }
+    
+    /* Glass CTA */
+    .glass-cta {
+      margin-top: 80px; max-width: 650px; margin-left: auto; margin-right: auto;
+      background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+      border-radius: 32px; padding: 56px; border: 1px solid rgba(255,255,255,0.1);
+      text-align: center; opacity: 0; transform: translateY(40px);
+    }
+    .glass-cta .emoji { font-size: 4rem; margin-bottom: 24px; display: inline-block; }
+    .glass-cta h3 { font-size: 2rem; font-weight: 700; color: white; margin-bottom: 16px; }
+    .glass-cta p { color: rgba(255,255,255,0.7); margin-bottom: 32px; font-size: 1.1rem; }
+    
+    /* Footer */
+    footer { padding: 24px; background: #0f1419; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer p { text-align: center; color: rgba(255,255,255,0.4); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    
+    <div class="hero-content">
+      <div class="logo">
+        <div class="logo-icon">🏠</div>
+        <span class="logo-text">ShiputzAI</span>
+      </div>
+      
+      <h1>
+        ניהול שיפוצים <span class="gradient">חכם</span>
+        <br>בעזרת בינה מלאכותית
+      </h1>
+      
+      <p class="subtitle">
+        עוקבים אחרי התקציב, סורקים קבלות באוטומט,
+        <br>ומדמים איך הבית ייראה - הכל במקום אחד
+      </p>
+      
+      <div class="pills-container">
+        <div class="pill pill-1">📊 מעקב תקציב</div>
+        <div class="pill pill-2">🧾 סריקת קבלות</div>
+        <div class="pill pill-3">🎨 הדמיות AI</div>
+        <div class="pill pill-4">💬 עוזר חכם</div>
+        <div class="pill pill-5">📋 ניתוח הצעות מחיר</div>
+      </div>
+      
+      <div class="cta-wrapper">
+        <button class="cta-btn">
+          <span class="glow"></span>
+          <span class="shimmer"></span>
+          התחל בחינם
+          <span class="arrow">←</span>
+        </button>
+      </div>
+      
+      <div class="browser-mock">
+        <div class="browser-frame">
+          <div class="browser-header">
+            <div class="browser-dots">
+              <div class="browser-dot dot-red"></div>
+              <div class="browser-dot dot-yellow"></div>
+              <div class="browser-dot dot-green"></div>
+            </div>
+            <div class="browser-url">shipazti.com/dashboard</div>
+          </div>
+          <div class="browser-content">
+            <div class="preview-cards">
+              <div class="preview-card">
+                <h4>תקציב כולל</h4>
+                <div class="value value-default">₪150,000</div>
+              </div>
+              <div class="preview-card">
+                <h4>הוצאות עד כה</h4>
+                <div class="value value-red">₪87,340</div>
+              </div>
+              <div class="preview-card">
+                <h4>נשאר</h4>
+                <div class="value value-green">₪62,660</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="features-bg"></div>
+    <div class="features-content">
+      <h2>למה <span>ShiputzAI</span>?</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📸</div>
+          <h3>סריקה אוטומטית</h3>
+          <p>צלם קבלה והמערכת תזהה אוטומטית את הפרטים - ספק, סכום, פריטים ומע"מ</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>הדמיות AI</h3>
+          <p>העלה תמונה של החדר וקבל הדמיה של איך הוא ייראה אחרי השיפוץ</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <h3>השוואת מחירים</h3>
+          <p>בדוק אם ההצעת מחיר שקיבלת סבירה בהשוואה למחירי השוק</p>
+        </div>
+      </div>
+      
+      <div class="glass-cta">
+        <span class="emoji">🎁</span>
+        <h3>התחל בחינם</h3>
+        <p>הרשם עכשיו וקבל גישה מלאה למערכת + הדמיית AI אחת במתנה</p>
+        <button class="cta-btn">
+          <span class="glow"></span>
+          <span class="shimmer"></span>
+          הרשם עכשיו
+          <span class="arrow">←</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Demo V2 — Built with GSAP + ScrollTrigger</p>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // Progress bar
+    gsap.to("#progressBar", {
+      scaleX: 1,
+      ease: "none",
+      scrollTrigger: { scrub: 0.3 }
+    });
+    
+    // Blob animations
+    gsap.utils.toArray('.blob').forEach((blob, i) => {
+      gsap.to(blob, {
+        x: "random(-50, 50)",
+        y: "random(-50, 50)",
+        scale: "random(0.9, 1.1)",
+        duration: "random(8, 15)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: i * 2
+      });
+    });
+    
+    // Hero animations with smooth stagger
+    const heroTl = gsap.timeline({ defaults: { ease: "power3.out" }});
+    
+    heroTl
+      .to(".logo", { opacity: 1, y: 0, duration: 0.8 })
+      .from("h1", { opacity: 0, y: 40, duration: 0.8 }, "-=0.4")
+      .to(".subtitle", { opacity: 1, y: 0, duration: 0.8 }, "-=0.4")
+      .to(".pill", { 
+        opacity: 1, 
+        scale: 1, 
+        stagger: { each: 0.1, from: "random" },
+        duration: 0.6,
+        ease: "back.out(1.7)"
+      }, "-=0.3")
+      .to(".cta-wrapper", { opacity: 1, y: 0, duration: 0.6 }, "-=0.2")
+      .to(".browser-mock", { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        duration: 1,
+        ease: "power2.out"
+      }, "-=0.3");
+    
+    // Floating pills animation
+    gsap.utils.toArray('.pill').forEach((pill, i) => {
+      gsap.to(pill, {
+        y: "random(-12, 12)",
+        x: "random(-8, 8)",
+        rotation: "random(-8, 8)",
+        duration: "random(2.5, 4)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: i * 0.3
+      });
+    });
+    
+    // Parallax blobs on mouse move
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 40;
+      const y = (e.clientY / window.innerHeight - 0.5) * 40;
+      
+      gsap.to('.blob-1', { x: x * 0.5, y: y * 0.5, duration: 1.5, ease: "power2.out" });
+      gsap.to('.blob-2', { x: x * 0.3, y: y * 0.3, duration: 1.5, ease: "power2.out" });
+      gsap.to('.blob-3', { x: x * 0.4, y: y * 0.4, duration: 1.5, ease: "power2.out" });
+    });
+    
+    // Browser mockup parallax
+    ScrollTrigger.create({
+      trigger: ".browser-mock",
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 1,
+      onUpdate: (self) => {
+        gsap.to(".browser-mock", { y: self.progress * -80, duration: 0 });
+      }
+    });
+    
+    // Features section animations
+    gsap.to(".features h2", {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      scrollTrigger: {
+        trigger: ".features h2",
+        start: "top 80%"
+      }
+    });
+    
+    gsap.utils.toArray('.feature-card').forEach((card, i) => {
+      gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: i * 0.15,
+        scrollTrigger: {
+          trigger: card,
+          start: "top 85%"
+        }
+      });
+    });
+    
+    // Glass CTA animation
+    gsap.to(".glass-cta", {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      scrollTrigger: {
+        trigger: ".glass-cta",
+        start: "top 80%"
+      }
+    });
+    
+    // Emoji bounce
+    gsap.to(".glass-cta .emoji", {
+      rotation: 15,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "power1.inOut"
+    });
+    
+    // Preview cards hover
+    document.querySelectorAll('.preview-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, { y: -8, scale: 1.02, duration: 0.3, ease: "power2.out" });
+      });
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, { y: 0, scale: 1, duration: 0.3, ease: "power2.out" });
+      });
+    });
+  </script>
+</body>
+</html>

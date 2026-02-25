@@ -1604,28 +1604,25 @@ export default function ProjectPage() {
       </nav>
 
       {/* Tabs */}
-      <div className="border-b border-gray-100 print:hidden overflow-x-auto">
+      <div className="border-b border-gray-100 print:hidden">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
-          <div className="flex gap-4 md:gap-6">
+          <div className="flex justify-center gap-2 md:gap-3">
             {[
-              { id: "overview", label: "סקירה", Icon: BarChart3, color: "from-violet-500 to-purple-600" },
-              { id: "timeline", label: "ציר זמן", Icon: Calendar, color: "from-blue-500 to-cyan-500" },
-              { id: "suppliers", label: "ספקים", Icon: Users, color: "from-emerald-500 to-teal-500" },
-              { id: "photos", label: "תמונות", Icon: Camera, color: "from-orange-500 to-amber-500" },
+              { id: "overview", label: "סקירה", Icon: BarChart3 },
+              { id: "timeline", label: "ציר זמן", Icon: Calendar },
+              { id: "suppliers", label: "ספקים", Icon: Users },
+              { id: "photos", label: "תמונות", Icon: Camera },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`py-2 px-3 md:py-2.5 md:px-4 text-sm font-semibold rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
+                className={`py-2 px-3 md:py-2.5 md:px-4 text-sm font-medium rounded-full transition-all flex items-center justify-center whitespace-nowrap ${
                   activeTab === tab.id 
-                    ? "bg-gray-900 text-white shadow-lg shadow-gray-900/20" 
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                    ? "bg-gray-900 text-white" 
+                    : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
                 }`}
               >
-                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-xl bg-gradient-to-br ${tab.color} flex items-center justify-center shadow-sm`}>
-                  <tab.Icon className="w-4 h-4 text-white" strokeWidth={2} />
-                </div>
-                <span className="hidden sm:inline">{tab.label}</span>
+                <tab.Icon className={`w-5 h-5 ${activeTab === tab.id ? "text-white" : "text-gray-500"}`} strokeWidth={1.5} />
               </button>
             ))}
           </div>

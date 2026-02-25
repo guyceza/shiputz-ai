@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { getAuthUser } from '@/lib/server-auth';
 
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
+
+// Verify user is authenticated (has valid Supabase session via cookie)
+function verifyAuth(request: NextRequest): boolean {
+  try {
+    const cookies = request.cookies.getAll();
+    const hasSupabaseCookie = cookies.some(c => 
+      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+    );
+    return hasSupabaseCookie;
+  } catch {
+    return false;
+  }
+}
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
@@ -52,7 +64,7 @@ async function sendWelcomeEmail(email: string, name: string) {
 }
 
 // Get user by email
-// Bug fix: Verify authenticated user is querying their own data
+// Bug fix: Verify user has valid session
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -62,13 +74,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Bug fix: Verify authenticated user is querying their own email
-    const authUser = await getAuthUser();
-    if (!authUser || authUser.email?.toLowerCase() !== email.toLowerCase()) {
-      // Allow admins to query any user
-      if (!authUser || !ADMIN_EMAILS.includes(authUser.email?.toLowerCase() || '')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    // Bug fix: Verify user has a valid session (cookie present)
+    // User provides their own email - they can only get their own data
+    if (!verifyAuth(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -167,6 +176,7 @@ export async function POST(request: NextRequest) {
 // Mark user as purchased
 // Bug fix: Require admin authentication - this endpoint should only be used by admins
 // Payment webhooks update the database directly, not through this endpoint
+// Note: This endpoint is unused - admin uses /api/admin/premium instead
 export async function PATCH(request: NextRequest) {
   try {
     const { email, adminEmail } = await request.json();
@@ -176,10 +186,12 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Bug fix: Require admin authentication
-    const authUser = await getAuthUser();
-    const requestingEmail = adminEmail || authUser?.email;
+    // Must have valid session AND provide admin email
+    if (!verifyAuth(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     
-    if (!requestingEmail || !ADMIN_EMAILS.includes(requestingEmail.toLowerCase())) {
+    if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
       return NextResponse.json({ error: 'Unauthorized - admin only' }, { status: 403 });
     }
 

@@ -21,6 +21,7 @@ import { StarRating } from "@/components/project/StarRating";
 import { QuoteLoadingState } from "@/components/project/QuoteLoadingState";
 import { BudgetOverview } from "@/components/project/BudgetOverview";
 import { ExpenseCard } from "@/components/project/ExpenseCard";
+import { ExpenseListSkeleton } from "@/components/Skeleton";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
+import { DashboardSkeleton } from "@/components/Skeleton";
 import { 
   getProjects, 
   createProject, 
@@ -630,10 +631,7 @@ function DashboardContent() {
 
         {/* Projects */}
         {projectsLoading ? (
-          <div className="border border-gray-100 rounded-2xl p-16 text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-gray-900 rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500">טוען פרויקטים...</p>
-          </div>
+          <DashboardSkeleton />
         ) : projects.length === 0 ? (
           <div className="border border-gray-100 rounded-2xl p-16 text-center animate-fade-in-up">
             {/* Empty state illustration */}

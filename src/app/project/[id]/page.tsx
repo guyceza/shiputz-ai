@@ -16,6 +16,10 @@ import {
 import { uploadImage, migrateProjectImages, isBase64Image } from "@/lib/storage";
 import { saveVisionHistory, loadVisionHistory, VisionHistoryItem } from "@/lib/vision-history";
 import { getVisionUsage, incrementVisionUsage as incrementVisionUsageDB } from "@/lib/user-settings";
+import { StarRating } from "@/components/project/StarRating";
+import { QuoteLoadingState } from "@/components/project/QuoteLoadingState";
+import { BudgetOverview } from "@/components/project/BudgetOverview";
+import { ExpenseCard } from "@/components/project/ExpenseCard";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -131,50 +135,6 @@ const DEFAULT_PHASES: Omit<Phase, "id">[] = [
 ];
 
 const PROFESSIONS = ["קבלן ראשי", "חשמלאי", "אינסטלטור", "רצף", "צבעי", "נגר", "מזגן", "גבס", "אלומיניום", "אחר"];
-
-// Rotating loading messages for quote analysis
-const QUOTE_LOADING_MESSAGES = [
-  "משווה למחירי שוק ממדרג...",
-  "בודק מחירי קבלנים באזור...",
-  "מנתח את סוג העבודה...",
-  "מחשב טווח מחירים הוגן...",
-  "בודק אם יש פריטים חסרים...",
-  "מכין את הניתוח שלך...",
-];
-
-function QuoteLoadingState() {
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(25);
-  
-  useEffect(() => {
-    const messageInterval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % QUOTE_LOADING_MESSAGES.length);
-    }, 3000);
-    
-    const secondsInterval = setInterval(() => {
-      setSecondsLeft((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    
-    return () => {
-      clearInterval(messageInterval);
-      clearInterval(secondsInterval);
-    };
-  }, []);
-  
-  return (
-    <div className="py-16 flex flex-col items-center justify-center">
-      <div className="relative w-20 h-20 mb-6">
-        <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-900 animate-spin"></div>
-        <div className="absolute inset-3 rounded-full bg-gray-900 flex items-center justify-center">
-          <span className="text-white font-bold text-lg">{secondsLeft}</span>
-        </div>
-      </div>
-      <p className="text-gray-900 font-medium text-lg mb-2">מנתח את ההצעה</p>
-      <p className="text-gray-500 text-sm mb-3 h-5 transition-all">{QUOTE_LOADING_MESSAGES[messageIndex]}</p>
-    </div>
-  );
-}
 
 export default function ProjectPage() {
   const router = useRouter();
@@ -1528,23 +1488,6 @@ export default function ProjectPage() {
   const budgetAlerts = getBudgetAlerts();
   const maxCategoryExpense = Math.max(...Object.values(expensesByCategory), 1);
 
-  // Star rating component
-  const StarRating = ({ rating, onChange, readonly = false }: { rating: number; onChange?: (r: number) => void; readonly?: boolean }) => (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map(star => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => !readonly && onChange?.(star)}
-          className={`text-xl ${readonly ? "cursor-default" : "cursor-pointer hover:scale-110"} transition-transform`}
-          disabled={readonly}
-        >
-          {star <= rating ? "★" : "☆"}
-        </button>
-      ))}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-white print:bg-white">
       {/* Navigation */}
@@ -1599,108 +1542,8 @@ export default function ProjectPage() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <>
-            {/* Budget Overview */}
-            <div className="grid md:grid-cols-3 gap-px bg-gray-100 rounded-2xl overflow-hidden mb-8">
-              <div className="bg-white p-8">
-                <p className="text-sm text-gray-500 mb-1">תקציב</p>
-                <p className="text-3xl font-semibold text-gray-900">₪{project.budget.toLocaleString()}</p>
-              </div>
-              <div className="bg-white p-8">
-                <p className="text-sm text-gray-500 mb-1">הוצאות</p>
-                <p className="text-3xl font-semibold text-gray-900">₪{project.spent.toLocaleString()}</p>
-              </div>
-              <div className="bg-white p-8">
-                <p className="text-sm text-gray-500 mb-1">נותר</p>
-                <p className={`text-3xl font-semibold ${remaining < 0 ? "text-red-600" : "text-gray-900"}`}>
-                  ₪{remaining.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* Progress */}
-            <div className="mb-8">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>התקדמות</span>
-                <span>{budgetPercentage.toFixed(0)}%</span>
-              </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full ${budgetPercentage > 100 ? "bg-red-500" : "bg-gray-900"}`} 
-                  style={{ width: `${Math.min(budgetPercentage, 100)}%` }} 
-                />
-              </div>
-            </div>
-
-            {/* Budget Alerts */}
-            {budgetAlerts.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
-                <p className="font-semibold text-red-800 mb-3">⚠️ התראות חריגה מתקציב</p>
-                <div className="space-y-2">
-                  {budgetAlerts.map(alert => (
-                    <p key={alert.category} className="text-sm text-red-700">
-                      {alert.category}: חריגה של ₪{alert.over.toLocaleString()} (הוקצה ₪{alert.allocated.toLocaleString()}, הוצאו ₪{alert.spent.toLocaleString()})
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* General Alert */}
-            {budgetPercentage > 80 && (
-              <div className="border border-gray-900 rounded-2xl p-6 mb-8">
-                <p className="font-medium text-gray-900">שים לב</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {budgetPercentage > 100 
-                    ? `חרגת מהתקציב ב-₪${Math.abs(remaining).toLocaleString()}`
-                    : `נשארו ₪${remaining.toLocaleString()} מתוך התקציב (${(100 - budgetPercentage).toFixed(0)}%)`
-                  }
-                </p>
-              </div>
-            )}
-
-            {/* Category Budget Chart */}
-            <div className="border border-gray-100 rounded-2xl p-8 mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">הוצאות לפי קטגוריה</h2>
-                <button
-                  onClick={openBudgetModal}
-                  className="text-sm text-gray-500 hover:text-gray-900 border border-gray-200 px-4 py-2 rounded-full"
-                >
-                  הגדר תקציב לקטגוריות
-                </button>
-              </div>
-              
-              {Object.keys(expensesByCategory).length === 0 ? (
-                <p className="text-gray-500 text-center py-8">אין הוצאות עדיין</p>
-              ) : (
-                <div className="space-y-4">
-                  {CATEGORIES.filter(cat => expensesByCategory[cat] || project.categoryBudgets?.find(cb => cb.category === cat)?.allocated).map(cat => {
-                    const spent = expensesByCategory[cat] || 0;
-                    const allocated = project.categoryBudgets?.find(cb => cb.category === cat)?.allocated || 0;
-                    const barWidth = (spent / (allocated || maxCategoryExpense)) * 100;
-                    const isOver = allocated > 0 && spent > allocated;
-                    
-                    return (
-                      <div key={cat}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-700">{cat}</span>
-                          <span className={isOver ? "text-red-600 font-medium" : "text-gray-500"}>
-                            ₪{spent.toLocaleString()}
-                            {allocated > 0 && ` / ₪${allocated.toLocaleString()}`}
-                          </span>
-                        </div>
-                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all ${isOver ? "bg-red-500" : "bg-gray-700"}`}
-                            style={{ width: `${Math.min(barWidth, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            {/* Budget Overview - includes grid, progress, alerts, and category chart */}
+            <BudgetOverview project={project} onOpenBudgetModal={openBudgetModal} />
 
             {/* איך השיפוץ שלי יראה? - Requires Premium + Vision subscription */}
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden bg-gray-50">
@@ -1837,29 +1680,11 @@ export default function ProjectPage() {
               ) : (
                 <div className="divide-y divide-gray-100">
                   {getFilteredExpenses().map((expense) => (
-                    <div 
-                      key={expense.id} 
-                      className="flex items-center justify-between py-4 cursor-pointer hover:bg-gray-50 -mx-4 px-4 rounded-lg transition-colors"
+                    <ExpenseCard
+                      key={expense.id}
+                      expense={expense}
                       onClick={() => setSelectedExpense(expense)}
-                    >
-                      <div className="flex items-center gap-4">
-                        {expense.imageUrl && (
-                          <img src={expense.imageUrl} alt="" className="w-10 h-10 object-cover rounded-lg print:hidden" />
-                        )}
-                        <div>
-                          <p className="font-medium text-gray-900">{expense.description}</p>
-                          <p className="text-sm text-gray-500">
-                            {expense.vendor ? `${expense.vendor} · ` : ""}{expense.category} · {new Date(expense.date).toLocaleDateString("he-IL")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900">₪{expense.amount.toLocaleString()}</p>
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
+                    />
                   ))}
                 </div>
               )}

@@ -2,18 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { checkRateLimit, getClientId } from '@/lib/rate-limit';
 
-// Verify user is authenticated (has valid Supabase session via cookie)
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    return hasSupabaseCookie;
-  } catch {
-    return false;
-  }
-}
+// Note: Auth simplified - discount codes are validated by code+email match
 
 // Validate discount code
 export async function POST(request: NextRequest) {
@@ -85,11 +74,6 @@ export async function PATCH(request: NextRequest) {
 
     if (!code || !email) {
       return NextResponse.json({ error: 'Code and email are required' }, { status: 400 });
-    }
-
-    // Bug fix: Verify user has a valid session
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

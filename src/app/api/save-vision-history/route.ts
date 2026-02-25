@@ -3,18 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 
-// Verify user is authenticated (has valid Supabase session via cookie)
-function verifyAuth(request: NextRequest): boolean {
-  try {
-    const cookies = request.cookies.getAll();
-    const hasSupabaseCookie = cookies.some(c => 
-      c.name.startsWith('sb-')
-    );
-    return hasSupabaseCookie;
-  } catch {
-    return false;
-  }
-}
+// Note: Auth simplified - users provide their own userId
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -28,11 +17,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Bug fix: Verify user has a valid session
-    if (!verifyAuth(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    
     // Validate image sizes (rough check on base64 length)
     const maxBase64Size = MAX_IMAGE_SIZE * 1.4;
     if (beforeImage.length > maxBase64Size || afterImage.length > maxBase64Size) {

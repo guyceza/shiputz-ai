@@ -21,3 +21,14 @@ Sending getting_started to dhtdht200@gmail.com (day 1)
 Sending getting_started to guyceza@gmail.com (day 1)
 ✅ Sent successfully: 429f719d-f39e-4c79-ad3c-2b8c31f25cf8
 [2026-02-24T09:00:09.496Z] Done!
+[2026-02-25T09:00:01.841Z] Starting email sequence processing...
+Found 8 users
+Sending discount_offer to test@test.com (day 3)
+✅ Sent successfully: 57489514-08ad-423e-924b-00ae8ac7392b
+Sending vision_upsell to dhtdht200@gmail.com (day 3)
+✅ Sent successfully: 31a1aad3-ba0b-4abd-ac15-1799d198023c
+Sending reminder to dht1dht@gmail.com (day 1)
+✅ Sent successfully: 4406f9f3-01e6-4f9a-8654-86a0a895c32a
+Sending reminder to guyc@crms.co.il (day 1)
+✅ Sent successfully: dfb21f8b-fc02-4d74-b488-d3ed6c5bb9e7
+[2026-02-25T09:00:09.662Z] Done!

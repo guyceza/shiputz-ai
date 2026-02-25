@@ -174,7 +174,11 @@ function LoginContent() {
             המשך עם Google
           </button>
 
-          <p className="text-center text-gray-500 mt-8">
+          <p className="text-center text-gray-500 mt-6">
+            <Link href="/forgot-password" className="text-gray-900 hover:underline">שכחתי סיסמה</Link>
+          </p>
+
+          <p className="text-center text-gray-500 mt-4">
             אין לך חשבון?{" "}
             <Link href="/signup" className="text-gray-900 hover:underline">הרשמה</Link>
           </p>

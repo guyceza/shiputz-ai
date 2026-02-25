@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import ChatWidget from "@/components/ChatWidget";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -111,9 +112,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${heebo.className} antialiased`}>
-        {children}
-        <ChatWidget />
+      <body className={`${heebo.className} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
+        <ThemeProvider>
+          {children}
+          <ChatWidget />
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

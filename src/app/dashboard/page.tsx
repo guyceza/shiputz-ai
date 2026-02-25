@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
 import { DashboardSkeleton } from "@/components/Skeleton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { 
   getProjects, 
   createProject, 
@@ -465,18 +466,18 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Navigation */}
-      <nav className="h-11 border-b border-gray-100">
+      <nav className="h-11 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600">
+            <Link href="/" className="text-base font-semibold text-gray-900 dark:text-white hover:text-blue-600">
               ShiputzAI
             </Link>
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">דף הבית</Link>
+            <Link href="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">דף הבית</Link>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
+            <Link href="/tips" className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
               מאמרים וטיפים
             </Link>
             {isAdmin && (
@@ -495,9 +496,10 @@ function DashboardContent() {
                 </button>
               </div>
             )}
+            <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="text-xs text-gray-500 hover:text-gray-900"
+              className="text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
             >
               התנתקות
             </button>

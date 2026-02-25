@@ -89,6 +89,8 @@ export async function GET(req: NextRequest) {
         projects (
           id,
           name,
+          budget,
+          spent,
           data
         )
       `)

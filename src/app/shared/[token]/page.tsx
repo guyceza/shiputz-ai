@@ -25,6 +25,8 @@ interface ProjectData {
 interface SharedProject {
   id: string;
   name: string;
+  budget: number;
+  spent: number;
   data: ProjectData;
 }
 
@@ -93,9 +95,11 @@ export default function SharedProjectPage() {
 
   if (!project) return null;
 
-  const projectData = project.data;
-  const budgetPercentage = (projectData.spent / projectData.budget) * 100;
-  const remaining = projectData.budget - projectData.spent;
+  const projectData = project.data || {};
+  const budget = project.budget || 0;
+  const spent = project.spent || 0;
+  const budgetPercentage = budget > 0 ? (spent / budget) * 100 : 0;
+  const remaining = budget - spent;
 
   // Group expenses by category
   const expensesByCategory: Record<string, number> = {};
@@ -123,11 +127,11 @@ export default function SharedProjectPage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-500 mb-1">תקציב</p>
-            <p className="text-2xl font-semibold text-gray-900">₪{projectData.budget.toLocaleString()}</p>
+            <p className="text-2xl font-semibold text-gray-900">₪{budget.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-500 mb-1">הוצאות</p>
-            <p className="text-2xl font-semibold text-gray-900">₪{projectData.spent.toLocaleString()}</p>
+            <p className="text-2xl font-semibold text-gray-900">₪{spent.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl p-6 text-center">
             <p className="text-sm text-gray-500 mb-1">נותר</p>

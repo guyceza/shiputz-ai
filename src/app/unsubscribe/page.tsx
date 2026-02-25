@@ -7,13 +7,16 @@ import Link from "next/link";
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const token = searchParams.get("token") || "";
   
   const [status, setStatus] = useState<"loading" | "confirm" | "success" | "error">("loading");
   const [processing, setProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!email) {
       setStatus("error");
+      setErrorMessage("לא נמצאה כתובת מייל");
       return;
     }
     setStatus("confirm");
@@ -26,15 +29,18 @@ function UnsubscribeContent() {
       const response = await fetch("/api/unsubscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.toLowerCase() }),
+        body: JSON.stringify({ email: email.toLowerCase(), token }),
       });
 
       if (response.ok) {
         setStatus("success");
       } else {
+        const data = await response.json();
+        setErrorMessage(data.error || "שגיאה בהסרה מדיוור");
         setStatus("error");
       }
-    } catch {
+    } catch (err) {
+      setErrorMessage("שגיאת תקשורת");
       setStatus("error");
     }
     

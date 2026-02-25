@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import crypto from 'crypto';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
+
+// Generate unsubscribe token for email
+function generateUnsubscribeToken(email: string): string {
+  const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || 'fallback-secret-change-me';
+  return crypto
+    .createHmac('sha256', secret)
+    .update(email.toLowerCase())
+    .digest('hex')
+    .substring(0, 16);
+}
 
 if (!RESEND_KEY) {
   console.error('RESEND_API_KEY not configured');
@@ -31,7 +42,10 @@ const NON_PURCHASED_SEQUENCE = [
 
 // Apple-style email wrapper
 function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail?: string): string {
-  const unsubscribeUrl = userEmail ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}` : 'https://shipazti.com/unsubscribe';
+  const token = userEmail ? generateUnsubscribeToken(userEmail) : '';
+  const unsubscribeUrl = userEmail 
+    ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}&token=${token}` 
+    : 'https://shipazti.com/unsubscribe';
   return `
 <!DOCTYPE html>
 <html dir="rtl" lang="he">

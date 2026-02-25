@@ -3145,7 +3145,7 @@ export default function ProjectPage() {
                   {/* Analysis Content */}
                   <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <h4 className="font-semibold text-gray-900 mb-3 text-sm">סיכום</h4>
-                    <div className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed">{quoteAnalysis}</div>
+                    <FormattedText text={quoteAnalysis} className="text-gray-700 text-sm" />
                   </div>
                   
                   {/* Saved indicator */}

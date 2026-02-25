@@ -505,11 +505,16 @@ export async function POST(request: NextRequest) {
       }]
     };
 
+    // Add timeout controller for Gemini analysis (30 seconds)
+    const analysisController = new AbortController();
+    const analysisTimeout = setTimeout(() => analysisController.abort(), 30000);
+    
     const geminiResponse = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(geminiPayload)
-    });
+      body: JSON.stringify(geminiPayload),
+      signal: analysisController.signal
+    }).finally(() => clearTimeout(analysisTimeout));
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
@@ -579,11 +584,16 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     let generatedImage: string | null = null;
     
     try {
+      // Add timeout controller for image generation (45 seconds - main operation)
+      const imageController = new AbortController();
+      const imageTimeout = setTimeout(() => imageController.abort(), 45000);
+      
       const editResponse = await fetch(nanoBananaUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editPayload)
-      });
+        body: JSON.stringify(editPayload),
+        signal: imageController.signal
+      }).finally(() => clearTimeout(imageTimeout));
 
       if (editResponse.ok) {
         const editData = await editResponse.json();
@@ -665,7 +675,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
           costs: costEstimate
         });
       }
-    } catch (editError) {
+    } catch (editError: any) {
       console.error("Image edit failed:", editError);
       
       // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
@@ -673,10 +683,15 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         await rollbackTrial(userEmail);
       }
       
+      // Handle timeout specifically
+      const isTimeout = editError?.name === 'AbortError' || editError?.message?.includes('abort');
+      
       return NextResponse.json({
         success: false,
-        error: "API_ERROR",
-        message: "שגיאה בעיבוד התמונה. נסה שוב.",
+        error: isTimeout ? "TIMEOUT" : "API_ERROR",
+        message: isTimeout 
+          ? "העיבוד לקח יותר מדי זמן. נסה שוב עם תמונה קטנה יותר או תיאור קצר יותר."
+          : "שגיאה בעיבוד התמונה. נסה שוב.",
         analysis: analysisText,
         costs: costEstimate
       });

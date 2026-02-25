@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מעצב פנים AI | ShiputzAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --purple: #8b5cf6;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 50%, #eff6ff 100%);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 16px 32px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    /* Chat Layout */
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 30px;
+      height: calc(100vh - 130px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow-y: auto;
+    }
+    .sidebar h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topic-btn {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 12px;
+      text-align: right;
+    }
+    .topic-btn:hover {
+      border-color: var(--purple);
+      background: #faf5ff;
+    }
+    .topic-btn.active {
+      border-color: var(--purple);
+      background: linear-gradient(135deg, #faf5ff, #ede9fe);
+    }
+    .topic-btn .icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    .topic-btn .title {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .topic-btn .desc {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    /* Suggestions */
+    .suggestions {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 2px solid #f1f5f9;
+    }
+    .suggestions h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gray);
+      margin-bottom: 12px;
+    }
+    .suggestion-chip {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #f1f5f9;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .suggestion-chip:hover {
+      background: var(--gradient-purple);
+      color: white;
+    }
+
+    /* Chat Area */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* Chat Header */
+    .chat-header {
+      padding: 20px 24px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ai-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: var(--gradient-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .ai-info h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .ai-info p {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    .ai-status {
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      font-size: 0.85rem;
+    }
+    .ai-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Messages */
+    .messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+    }
+    .message.user {
+      align-self: flex-start;
+      flex-direction: row-reverse;
+    }
+    .message.ai {
+      align-self: flex-end;
+    }
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .message.user .message-avatar {
+      background: var(--gradient);
+      color: white;
+    }
+    .message.ai .message-avatar {
+      background: var(--gradient-purple);
+    }
+    .message-content {
+      padding: 16px 20px;
+      border-radius: 20px;
+      line-height: 1.7;
+    }
+    .message.user .message-content {
+      background: #f1f5f9;
+      border-bottom-right-radius: 8px;
+    }
+    .message.ai .message-content {
+      background: linear-gradient(135deg, #faf5ff, #ede9fe);
+      border-bottom-left-radius: 8px;
+    }
+
+    /* Product Cards in Chat */
+    .product-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .product-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      transition: all 0.3s;
+    }
+    .product-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+    }
+    .product-card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .product-card .name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .product-card .store {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+    .product-card .price {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .product-card .link {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Color Palette */
+    .color-palette {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .color-swatch {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.3s;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+    .color-swatch .tooltip {
+      display: none;
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: none;
+      align-self: flex-end;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #faf5ff, #ede9fe);
+      border-radius: 20px;
+      border-bottom-left-radius: 8px;
+    }
+    .typing-indicator.show { display: flex; }
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: var(--purple);
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    /* Input Area */
+    .input-area {
+      padding: 20px 24px;
+      border-top: 2px solid #f1f5f9;
+      display: flex;
+      gap: 12px;
+    }
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    .input-wrapper input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    .send-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: var(--gradient-purple);
+      border: none;
+      cursor: pointer;
+      font-size: 1.4rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .chat-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="demo-v2-home.html" class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-text">ShiputzAI</span>
+    </a>
+    <a href="demo-v2-home.html" class="back-btn">
+      → חזרה לדף הבית
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="chat-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <h3>🎨 נושאי עיצוב</h3>
+        
+        <button class="topic-btn active" onclick="selectTopic('styles')">
+          <div class="icon">🖼️</div>
+          <div class="title">סגנונות עיצוב</div>
+          <div class="desc">מודרני, כפרי, סקנדינבי...</div>
+        </button>
+        
+        <button class="topic-btn" onclick="selectTopic('colors')">
+          <div class="icon">🎨</div>
+          <div class="title">פלטות צבעים</div>
+          <div class="desc">שילובים מנצחים</div>
+        </button>
+        
+        <button class="topic-btn" onclick="selectTopic('furniture')">
+          <div class="icon">🛋️</div>
+          <div class="title">ריהוט</div>
+          <div class="desc">המלצות ופריסה</div>
+        </button>
+        
+        <button class="topic-btn" onclick="selectTopic('lighting')">
+          <div class="icon">💡</div>
+          <div class="title">תאורה</div>
+          <div class="desc">טבעית ומלאכותית</div>
+        </button>
+        
+        <button class="topic-btn" onclick="selectTopic('budget')">
+          <div class="icon">💰</div>
+          <div class="title">תקציב</div>
+          <div class="desc">חסכוני עד יוקרתי</div>
+        </button>
+
+        <div class="suggestions">
+          <h4>שאלות מומלצות:</h4>
+          <span class="suggestion-chip" onclick="askQuestion('איזה סגנון מתאים לדירה קטנה?')">דירה קטנה</span>
+          <span class="suggestion-chip" onclick="askQuestion('איך לבחור צבעים לסלון?')">צבעי סלון</span>
+          <span class="suggestion-chip" onclick="askQuestion('רעיונות למטבח מודרני')">מטבח מודרני</span>
+          <span class="suggestion-chip" onclick="askQuestion('עיצוב חדר ילדים')">חדר ילדים</span>
+        </div>
+      </aside>
+
+      <!-- Chat Area -->
+      <div class="chat-area">
+        <div class="chat-header">
+          <div class="ai-avatar">🎨</div>
+          <div class="ai-info">
+            <h2>מעצב הפנים שלך</h2>
+            <p>מומחה בעיצוב ישראלי</p>
+          </div>
+          <div class="ai-status">מחובר</div>
+        </div>
+
+        <div class="messages" id="messages">
+          <!-- Initial AI Message -->
+          <div class="message ai">
+            <div class="message-avatar">🎨</div>
+            <div class="message-content">
+              <strong>שלום! 👋</strong><br><br>
+              אני מעצב הפנים הווירטואלי שלך. אני מכיר את כל החנויות בישראל - מ-IKEA ועד עמינח, ויכול לעזור לך לעצב כל חדר בבית.<br><br>
+              <strong>ספר לי:</strong>
+              <ul style="margin-top: 10px; padding-right: 20px;">
+                <li>איזה חדר אתה רוצה לעצב?</li>
+                <li>מה התקציב שלך?</li>
+                <li>יש סגנון שאתה אוהב?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <div class="input-area">
+          <div class="input-wrapper">
+            <input type="text" id="messageInput" placeholder="שאל אותי על עיצוב..." onkeypress="handleKeyPress(event)">
+          </div>
+          <button class="send-btn" onclick="sendMessage()">
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    // Design knowledge base
+    const designKnowledge = {
+      styles: {
+        modern: {
+          name: 'מודרני',
+          colors: ['#ffffff', '#1a1a1a', '#d4d4d4', '#3b82f6'],
+          features: ['קווים נקיים', 'חלל פתוח', 'מינימליזם', 'חומרים טבעיים'],
+          furniture: [
+            { name: 'ספה KIVIK', store: 'IKEA', price: '₪3,490', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200' },
+            { name: 'שולחן סלון', store: 'עמינח', price: '₪1,200', img: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=200' }
+          ]
+        },
+        scandinavian: {
+          name: 'סקנדינבי',
+          colors: ['#fefce8', '#ffffff', '#a3e635', '#78716c'],
+          features: ['עץ בהיר', 'הרבה אור טבעי', 'צמחים', 'טקסטיל נעים'],
+          furniture: [
+            { name: 'כורסת STRANDMON', store: 'IKEA', price: '₪1,490', img: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=200' },
+            { name: 'שטיח צמר', store: 'הום סנטר', price: '₪890', img: 'https://images.unsplash.com/photo-1600166898405-da9535204843?w=200' }
+          ]
+        },
+        industrial: {
+          name: 'תעשייתי',
+          colors: ['#292524', '#78716c', '#dc2626', '#fafaf9'],
+          features: ['בטון חשוף', 'מתכת', 'צנרת גלויה', 'תאורת וינטג\''],
+          furniture: [
+            { name: 'שולחן מתכת', store: 'ACE', price: '₪2,200', img: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=200' },
+            { name: 'מנורת לופט', store: 'IKEA', price: '₪299', img: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=200' }
+          ]
+        },
+        rustic: {
+          name: 'כפרי',
+          colors: ['#fef3c7', '#a16207', '#365314', '#fafaf9'],
+          features: ['עץ כהה', 'אבן', 'טקסטיל טבעי', 'פרטים וינטג\''],
+          furniture: [
+            { name: 'שידת עץ מלא', store: 'עמינח', price: '₪3,800', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200' },
+            { name: 'כיסא קש', store: 'הום סנטר', price: '₪450', img: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=200' }
+          ]
+        }
+      },
+      rooms: {
+        living: ['סלון', 'ספה', 'טלוויזיה', 'שולחן סלון'],
+        bedroom: ['חדר שינה', 'מיטה', 'ארון', 'שידה'],
+        kitchen: ['מטבח', 'אי', 'כיריים', 'ארונות'],
+        bathroom: ['חדר רחצה', 'אמבטיה', 'מקלחון', 'כיור'],
+        kids: ['חדר ילדים', 'מיטת קומותיים', 'שולחן כתיבה']
+      }
+    };
+
+    function selectTopic(topic) {
+      document.querySelectorAll('.topic-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.closest('.topic-btn').classList.add('active');
+    }
+
+    function askQuestion(question) {
+      messageInput.value = question;
+      sendMessage();
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      // Add user message
+      addMessage(text, 'user');
+      messageInput.value = '';
+
+      // Show typing indicator
+      typingIndicator.classList.add('show');
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Simulate AI response
+      setTimeout(() => {
+        typingIndicator.classList.remove('show');
+        const response = generateResponse(text);
+        addMessage(response.text, 'ai', response.extras);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 1500 + Math.random() * 1000);
+    }
+
+    function addMessage(text, type, extras = null) {
+      const message = document.createElement('div');
+      message.className = `message ${type}`;
+      
+      let extraContent = '';
+      
+      if (extras) {
+        if (extras.products) {
+          extraContent += '<div class="product-cards">';
+          extras.products.forEach(p => {
+            extraContent += `
+              <div class="product-card">
+                <img src="${p.img}" alt="${p.name}">
+                <div class="name">${p.name}</div>
+                <div class="store">${p.store}</div>
+                <div class="price">${p.price}</div>
+                <a href="#" class="link">לצפייה →</a>
+              </div>
+            `;
+          });
+          extraContent += '</div>';
+        }
+        
+        if (extras.colors) {
+          extraContent += '<div class="color-palette">';
+          extras.colors.forEach(c => {
+            extraContent += `<div class="color-swatch" style="background: ${c}" title="${c}"></div>`;
+          });
+          extraContent += '</div>';
+        }
+      }
+      
+      message.innerHTML = `
+        <div class="message-avatar">${type === 'user' ? '👤' : '🎨'}</div>
+        <div class="message-content">
+          ${text}
+          ${extraContent}
+        </div>
+      `;
+      
+      messagesContainer.appendChild(message);
+      
+      // Animate
+      gsap.from(message, { opacity: 0, y: 20, duration: 0.4 });
+    }
+
+    function generateResponse(input) {
+      const lowerInput = input.toLowerCase();
+      
+      // Style detection
+      if (lowerInput.includes('מודרני') || lowerInput.includes('מינימליסטי')) {
+        return {
+          text: `<strong>עיצוב מודרני 🏢</strong><br><br>
+            בחירה מצוינת! הסגנון המודרני מאופיין ב:<br>
+            • קווים נקיים וחדים<br>
+            • פלטת צבעים ניטרלית עם אקסנטים<br>
+            • מינימום עומס<br>
+            • חומרים כמו מתכת, זכוכית ועץ בהיר<br><br>
+            הנה פלטת צבעים מומלצת:<br><br>
+            והנה כמה פריטים שיתאימו:`,
+          extras: {
+            colors: designKnowledge.styles.modern.colors,
+            products: designKnowledge.styles.modern.furniture
+          }
+        };
+      }
+      
+      if (lowerInput.includes('סקנדינבי') || lowerInput.includes('נורדי')) {
+        return {
+          text: `<strong>עיצוב סקנדינבי 🌲</strong><br><br>
+            הסגנון הסקנדינבי מושלם לדירות ישראליות! הוא מביא:<br>
+            • תחושת מרחב וקלילות<br>
+            • הרבה אור טבעי<br>
+            • עץ בהיר וטקסטיל נעים<br>
+            • צמחייה פנימית<br><br>
+            הנה פלטת צבעים סקנדינבית קלאסית:`,
+          extras: {
+            colors: designKnowledge.styles.scandinavian.colors,
+            products: designKnowledge.styles.scandinavian.furniture
+          }
+        };
+      }
+      
+      if (lowerInput.includes('תקציב') || lowerInput.includes('זול') || lowerInput.includes('חסכוני')) {
+        return {
+          text: `<strong>עיצוב בתקציב חכם 💡</strong><br><br>
+            יש הרבה דרכים לעצב יפה בלי לשבור את הקופה:<br><br>
+            <strong>טיפים לחיסכון:</strong><br>
+            • IKEA - מחירים נגישים ועיצוב טוב<br>
+            • שווקי פשפשים - פריטים ייחודיים במחירי מציאה<br>
+            • DIY - צביעה ושדרוג רהיטים ישנים<br>
+            • חליפין בקבוצות פייסבוק<br><br>
+            <strong>איפה לקנות?</strong><br>
+            • IKEA - ריהוט בסיסי<br>
+            • JYSK - אלטרנטיבה זולה יותר<br>
+            • עמינח אאוטלט - הנחות על דגמי תצוגה<br><br>
+            מה התקציב שלך ואיזה חדר אתה רוצה לעצב?`
+        };
+      }
+      
+      if (lowerInput.includes('סלון')) {
+        return {
+          text: `<strong>עיצוב סלון 🛋️</strong><br><br>
+            הסלון הוא הלב של הבית! הנה כמה שאלות שיעזרו לי להמליץ:<br><br>
+            1. מה גודל הסלון (מ"ר)?<br>
+            2. יש לך ילדים או חיות מחמד?<br>
+            3. מה השימוש העיקרי - טלוויזיה, אירוח, עבודה?<br>
+            4. יש סגנון שמושך אותך?<br><br>
+            בינתיים, הנה פריטים פופולריים לסלון:`,
+          extras: {
+            products: [
+              { name: 'ספה פינתית SÖDERHAMN', store: 'IKEA', price: '₪4,990', img: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200' },
+              { name: 'שולחן סלון עץ אלון', store: 'עמינח', price: '₪1,890', img: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=200' }
+            ]
+          }
+        };
+      }
+      
+      if (lowerInput.includes('מטבח')) {
+        return {
+          text: `<strong>עיצוב מטבח 🍳</strong><br><br>
+            המטבח הוא אחד החדרים החשובים! כמה שאלות:<br><br>
+            1. מטבח פתוח או סגור?<br>
+            2. יש מקום לאי?<br>
+            3. מה סגנון הארונות שאתה אוהב?<br>
+            4. צבעים בהירים או כהים?<br><br>
+            <strong>טרנדים חמים ב-2025:</strong><br>
+            • ארונות בגוון ירוק כהה<br>
+            • משטחי קוורץ<br>
+            • ברזים שחורים מט<br>
+            • תאורת LED מתחת לארונות`
+        };
+      }
+      
+      if (lowerInput.includes('צבע') || lowerInput.includes('צבעים')) {
+        return {
+          text: `<strong>פלטות צבעים מומלצות 🎨</strong><br><br>
+            הצבעים משפיעים על האווירה בחדר. הנה כמה שילובים פופולריים:<br><br>
+            <strong>קלאסי ונקי:</strong> לבן + אפור + עץ טבעי<br>
+            <strong>חמים ומזמין:</strong> בז' + חרדל + אפרסק<br>
+            <strong>אלגנטי:</strong> כחול כהה + זהב + לבן<br>
+            <strong>טבעי:</strong> ירוק מרווה + חום + קרם<br><br>
+            הנה פלטה נייטרלית שתמיד עובדת:`,
+          extras: {
+            colors: ['#fafaf9', '#e7e5e4', '#78716c', '#44403c', '#292524']
+          }
+        };
+      }
+      
+      if (lowerInput.includes('קטן') || lowerInput.includes('קטנה')) {
+        return {
+          text: `<strong>טיפים לחללים קטנים 📐</strong><br><br>
+            דירה קטנה יכולה להרגיש ענקית עם התכנון הנכון:<br><br>
+            <strong>עשה:</strong><br>
+            ✓ צבעים בהירים על הקירות<br>
+            ✓ מראות להגדלת החלל<br>
+            ✓ ריהוט רב-תכליתי<br>
+            ✓ אחסון אנכי<br>
+            ✓ תאורה טובה<br><br>
+            <strong>אל תעשה:</strong><br>
+            ✗ ריהוט מסורבל<br>
+            ✗ הרבה פריטים קטנים<br>
+            ✗ וילונות כבדים<br><br>
+            הנה כמה פתרונות חכמים:`,
+          extras: {
+            products: [
+              { name: 'מיטה עם אחסון MALM', store: 'IKEA', price: '₪1,995', img: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=200' },
+              { name: 'שולחן מתקפל', store: 'JYSK', price: '₪399', img: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=200' }
+            ]
+          }
+        };
+      }
+      
+      // Default response
+      return {
+        text: `זו שאלה מעניינת! 🤔<br><br>
+          אני יכול לעזור לך עם:<br>
+          • בחירת סגנון עיצוב (מודרני, סקנדינבי, תעשייתי...)<br>
+          • פלטות צבעים<br>
+          • המלצות ריהוט מחנויות ישראליות<br>
+          • פתרונות לחללים קטנים<br>
+          • תכנון תקציב<br><br>
+          ספר לי יותר על מה אתה מחפש - איזה חדר, מה הסגנון שאתה אוהב, ומה התקציב?`
+      };
+    }
+
+    // Animations on load
+    gsap.from('.sidebar', { opacity: 0, x: -30, duration: 0.8 });
+    gsap.from('.chat-area', { opacity: 0, y: 30, duration: 0.8, delay: 0.2 });
+  </script>
+</body>
+</html>

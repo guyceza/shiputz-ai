@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>כתב כמויות אוטומטי | ShiputzAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      color: #1e293b;
+    }
+    
+    /* Header */
+    .header {
+      background: white;
+      padding: 16px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .badge {
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    /* Main Container */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: #64748b;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Upload Area */
+    .upload-card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+    }
+    .upload-zone {
+      border: 3px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f8fafc;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+    .upload-zone.has-file {
+      border-color: #10b981;
+      border-style: solid;
+      background: #f0fdf4;
+    }
+    .upload-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .upload-zone h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+    .upload-zone p {
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    }
+    #fileInput {
+      display: none;
+    }
+    
+    /* Preview */
+    .preview {
+      margin-top: 24px;
+      display: none;
+    }
+    .preview.show {
+      display: block;
+    }
+    .preview-image {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .file-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+      background: #f1f5f9;
+      border-radius: 12px;
+    }
+    .file-name {
+      font-weight: 600;
+      color: #334155;
+    }
+    .remove-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    /* Analyze Button */
+    .analyze-section {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .analyze-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      padding: 18px 48px;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: none;
+    }
+    .analyze-btn.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+    }
+    .analyze-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Loading */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .loading-overlay.show {
+      display: flex;
+    }
+    .loader {
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 24px;
+    }
+    .loading-sub {
+      color: rgba(255,255,255,0.7);
+      margin-top: 8px;
+    }
+    
+    /* Results */
+    .results-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .results-card.show {
+      display: block;
+    }
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .results-header h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .export-btns {
+      display: flex;
+      gap: 12px;
+    }
+    .export-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid;
+    }
+    .export-btn.excel {
+      background: #dcfce7;
+      color: #16a34a;
+      border-color: #16a34a;
+    }
+    .export-btn.pdf {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #dc2626;
+    }
+    .export-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .summary-card {
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .summary-card .label {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .summary-card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .summary-card .unit {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    
+    /* Table */
+    .boq-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+    }
+    .boq-table th {
+      background: #1e293b;
+      color: white;
+      padding: 16px 12px;
+      text-align: right;
+      font-weight: 600;
+    }
+    .boq-table th:first-child {
+      border-radius: 0 12px 0 0;
+    }
+    .boq-table th:last-child {
+      border-radius: 12px 0 0 0;
+    }
+    .boq-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .boq-table tr:hover td {
+      background: #f8fafc;
+    }
+    .boq-table .category {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+    .boq-table .category td {
+      padding: 12px;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    .quantity {
+      font-weight: 600;
+      color: #3b82f6;
+    }
+    .unit {
+      color: #64748b;
+    }
+    
+    /* Notes */
+    .notes {
+      margin-top: 32px;
+      padding: 20px;
+      background: #fef3c7;
+      border-radius: 12px;
+      border-right: 4px solid #f59e0b;
+    }
+    .notes h4 {
+      color: #92400e;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notes ul {
+      color: #78350f;
+      padding-right: 20px;
+    }
+    .notes li {
+      margin-bottom: 4px;
+    }
+    
+    /* Error */
+    .error-msg {
+      display: none;
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .error-msg.show {
+      display: block;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: #64748b;
+    }
+    .footer a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-text">ShiputzAI</span>
+    </a>
+    <span class="badge">✨ חדש! Beta</span>
+  </header>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+    <div class="loading-text">מנתח את התכנית...</div>
+    <div class="loading-sub">AI מזהה אלמנטים ומחשב כמויות</div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <h1>📋 כתב כמויות אוטומטי</h1>
+      <p>העלה תכנית בניה או תכנית אדריכלית וקבל כתב כמויות מפורט תוך שניות</p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="upload-card">
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📐</div>
+        <h3>גרור תכנית לכאן או לחץ להעלאה</h3>
+        <p>תומך ב-JPG, PNG, PDF (עד 10MB)</p>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+          📁 בחר קובץ
+        </button>
+        <input type="file" id="fileInput" accept="image/*,.pdf">
+      </div>
+      
+      <div class="preview" id="preview">
+        <img class="preview-image" id="previewImage" src="" alt="תצוגה מקדימה">
+        <div class="file-info">
+          <span class="file-name" id="fileName"></span>
+          <button class="remove-btn" onclick="removeFile()">🗑️ הסר</button>
+        </div>
+      </div>
+      
+      <div class="analyze-section">
+        <button class="analyze-btn" id="analyzeBtn" onclick="analyzeFloorPlan()">
+          🔍 נתח והוצא כתב כמויות
+        </button>
+      </div>
+      
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="results-card" id="resultsCard">
+      <div class="results-header">
+        <h2>📊 כתב כמויות</h2>
+        <div class="export-btns">
+          <button class="export-btn excel" onclick="exportExcel()">📊 Excel</button>
+          <button class="export-btn pdf" onclick="exportPDF()">📄 PDF</button>
+        </div>
+      </div>
+      
+      <div class="summary-grid" id="summaryGrid">
+        <!-- Populated by JS -->
+      </div>
+      
+      <table class="boq-table">
+        <thead>
+          <tr>
+            <th>סעיף</th>
+            <th>תיאור</th>
+            <th>כמות</th>
+            <th>יחידה</th>
+            <th>הערות</th>
+          </tr>
+        </thead>
+        <tbody id="boqTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+      
+      <div class="notes">
+        <h4>⚠️ הערות חשובות</h4>
+        <ul id="notesList">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>בבטא | <a href="/">חזרה לאתר הראשי</a></p>
+  </footer>
+
+  <script>
+    let selectedFile = null;
+    let selectedFileBase64 = null;
+
+    // Upload zone events
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        showError('סוג קובץ לא נתמך. העלה תמונה או PDF.');
+        return;
+      }
+
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        showError('הקובץ גדול מדי. מקסימום 10MB.');
+        return;
+      }
+
+      selectedFile = file;
+      fileName.textContent = file.name;
+      uploadZone.classList.add('has-file');
+
+      // Read as base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        selectedFileBase64 = e.target.result;
+        
+        if (file.type.startsWith('image/')) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+        } else {
+          previewImage.style.display = 'none';
+        }
+        
+        preview.classList.add('show');
+        analyzeBtn.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+      
+      hideError();
+    }
+
+    function removeFile() {
+      selectedFile = null;
+      selectedFileBase64 = null;
+      fileInput.value = '';
+      preview.classList.remove('show');
+      analyzeBtn.classList.remove('show');
+      uploadZone.classList.remove('has-file');
+      document.getElementById('resultsCard').classList.remove('show');
+    }
+
+    function showError(msg) {
+      const errorEl = document.getElementById('errorMsg');
+      errorEl.textContent = msg;
+      errorEl.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('errorMsg').classList.remove('show');
+    }
+
+    async function analyzeFloorPlan() {
+      if (!selectedFileBase64) return;
+
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsCard = document.getElementById('resultsCard');
+      
+      loadingOverlay.classList.add('show');
+      analyzeBtn.disabled = true;
+      hideError();
+
+      try {
+        const response = await fetch('/api/bill-of-quantities', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: selectedFileBase64,
+            fileName: selectedFile.name
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'שגיאה בניתוח התכנית');
+        }
+
+        displayResults(data);
+        resultsCard.classList.add('show');
+        resultsCard.scrollIntoView({ behavior: 'smooth' });
+
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        loadingOverlay.classList.remove('show');
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    function displayResults(data) {
+      // Summary cards
+      const summaryGrid = document.getElementById('summaryGrid');
+      summaryGrid.innerHTML = '';
+      
+      if (data.summary) {
+        Object.entries(data.summary).forEach(([key, item]) => {
+          summaryGrid.innerHTML += `
+            <div class="summary-card">
+              <div class="label">${item.label || key}</div>
+              <div class="value">${item.value}</div>
+              <div class="unit">${item.unit || ''}</div>
+            </div>
+          `;
+        });
+      }
+
+      // Table
+      const tableBody = document.getElementById('boqTableBody');
+      tableBody.innerHTML = '';
+      
+      if (data.items && data.items.length > 0) {
+        let currentCategory = '';
+        
+        data.items.forEach((item, idx) => {
+          if (item.category && item.category !== currentCategory) {
+            currentCategory = item.category;
+            tableBody.innerHTML += `
+              <tr class="category">
+                <td colspan="5">${currentCategory}</td>
+              </tr>
+            `;
+          }
+          
+          tableBody.innerHTML += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>${item.description || '-'}</td>
+              <td class="quantity">${item.quantity || '-'}</td>
+              <td class="unit">${item.unit || '-'}</td>
+              <td>${item.notes || '-'}</td>
+            </tr>
+          `;
+        });
+      }
+
+      // Notes
+      const notesList = document.getElementById('notesList');
+      notesList.innerHTML = '';
+      
+      if (data.notes && data.notes.length > 0) {
+        data.notes.forEach(note => {
+          notesList.innerHTML += `<li>${note}</li>`;
+        });
+      } else {
+        notesList.innerHTML = '<li>הנתונים מבוססים על ניתוח AI ויש לאמת אותם מול התכניות המקוריות</li>';
+      }
+    }
+
+    function exportExcel() {
+      alert('ייצוא ל-Excel יהיה זמין בקרוב!');
+    }
+
+    function exportPDF() {
+      alert('ייצוא ל-PDF יהיה זמין בקרוב!');
+    }
+  </script>
+</body>
+</html>

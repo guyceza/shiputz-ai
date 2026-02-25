@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>השוואת הצעות מחיר | ShiputzAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 50%, #eff6ff 100%);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 16px 32px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--secondary);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Upload Cards */
+    .upload-section {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .upload-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .upload-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    }
+    .upload-card.active {
+      border-color: var(--primary);
+    }
+    .upload-card.filled {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #f0fdf4, white);
+    }
+    .upload-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .upload-number {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+    }
+    .upload-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .remove-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      display: none;
+      transition: all 0.3s;
+    }
+    .remove-btn:hover { background: #fecaca; }
+    .upload-card.filled .remove-btn { display: block; }
+    
+    .upload-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f8fafc;
+    }
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: #f0fdf4;
+    }
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: #dcfce7;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    .upload-zone h4 {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .upload-zone p {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    .upload-input { display: none; }
+
+    /* Preview */
+    .preview-area {
+      display: none;
+    }
+    .upload-card.filled .preview-area { display: block; }
+    .upload-card.filled .upload-zone { display: none; }
+    
+    .preview-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+    }
+    .preview-name {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    
+    /* Contractor Name Input */
+    .contractor-input {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      width: 100%;
+      transition: border-color 0.3s;
+    }
+    .contractor-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .contractor-input::placeholder {
+      color: #94a3b8;
+    }
+
+    /* Or Text Input */
+    .text-input-toggle {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .text-input-toggle button {
+      background: none;
+      border: none;
+      color: var(--secondary);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .text-input-area {
+      display: none;
+      margin-top: 12px;
+    }
+    .text-input-area.show { display: block; }
+    .text-input-area textarea {
+      width: 100%;
+      height: 150px;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: none;
+      transition: border-color 0.3s;
+    }
+    .text-input-area textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Analyze Button */
+    .analyze-section {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .analyze-btn {
+      background: var(--gradient);
+      color: white;
+      padding: 20px 60px;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .analyze-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+    .analyze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .analyze-note {
+      margin-top: 12px;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* Loading */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .loading-overlay.show { display: flex; }
+    .loader {
+      width: 80px;
+      height: 80px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-top: 24px;
+    }
+    .loading-steps {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .loading-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+    }
+    .loading-step.active { color: white; }
+    .loading-step .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loading-step.done .check {
+      background: var(--primary);
+    }
+
+    /* Results Section */
+    .results-section {
+      display: none;
+    }
+    .results-section.show { display: block; }
+
+    /* Verdict Card */
+    .verdict-card {
+      background: linear-gradient(135deg, var(--dark), #1e293b);
+      border-radius: 24px;
+      padding: 48px;
+      margin-bottom: 40px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .verdict-card::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+    }
+    .verdict-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .verdict-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .verdict-winner {
+      font-size: 3rem;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+    .verdict-explanation {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.8);
+      max-width: 800px;
+    }
+
+    /* Comparison Table */
+    .comparison-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+      overflow-x: auto;
+    }
+    .comparison-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+    .comparison-table th {
+      background: var(--dark);
+      color: white;
+      padding: 16px;
+      text-align: right;
+      font-weight: 600;
+    }
+    .comparison-table th:first-child { border-radius: 0 12px 0 0; }
+    .comparison-table th:last-child { border-radius: 12px 0 0 0; }
+    .comparison-table th.winner {
+      background: var(--primary);
+    }
+    .comparison-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .comparison-table tr:hover td {
+      background: #f8fafc;
+    }
+    .comparison-table .category {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .comparison-table .included {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .comparison-table .not-included {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .comparison-table .price {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .comparison-table .total-row {
+      background: #f0fdf4;
+      font-weight: 700;
+    }
+    .comparison-table .total-row td {
+      border-bottom: none;
+      font-size: 1.2rem;
+    }
+
+    /* Details Cards */
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .detail-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .detail-card.winner {
+      border: 3px solid var(--primary);
+      position: relative;
+    }
+    .detail-card.winner::before {
+      content: '🏆 מומלץ';
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .detail-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .detail-price {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .detail-list {
+      list-style: none;
+    }
+    .detail-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .detail-list li:last-child { border-bottom: none; }
+    .detail-list .icon { font-size: 1.2rem; }
+    .detail-list .text { flex: 1; color: var(--dark); }
+    .detail-list .status {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .detail-list .status.yes { color: var(--primary); }
+    .detail-list .status.no { color: #dc2626; }
+    .detail-list .status.partial { color: #f59e0b; }
+
+    /* Warnings */
+    .warnings-card {
+      background: #fef3c7;
+      border: 2px solid #fbbf24;
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+    .warnings-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .warnings-list {
+      list-style: none;
+    }
+    .warnings-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      color: #78350f;
+      line-height: 1.6;
+    }
+    .warnings-list li::before {
+      content: '⚠️';
+      flex-shrink: 0;
+    }
+
+    /* Actions */
+    .actions-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+      border: 2px solid;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .action-btn.primary {
+      background: var(--gradient);
+      color: white;
+      border-color: transparent;
+    }
+    .action-btn.primary:hover { transform: translateY(-2px); }
+    .action-btn.secondary {
+      background: white;
+      color: var(--dark);
+      border-color: #e2e8f0;
+    }
+    .action-btn.secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .upload-section { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2rem; }
+      .verdict-card { padding: 32px; }
+      .verdict-winner { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="demo-v2-home.html" class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-text">ShiputzAI</span>
+    </a>
+    <a href="demo-v2-home.html" class="back-btn">
+      → חזרה לדף הבית
+    </a>
+  </header>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+    <div class="loading-text">מנתח את ההצעות...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">
+        <span class="check">1</span>
+        <span>קורא את הצעה מספר 1</span>
+      </div>
+      <div class="loading-step" id="step2">
+        <span class="check">2</span>
+        <span>קורא את הצעה מספר 2</span>
+      </div>
+      <div class="loading-step" id="step3">
+        <span class="check">3</span>
+        <span>משווה פריטים ומחירים</span>
+      </div>
+      <div class="loading-step" id="step4">
+        <span class="check">4</span>
+        <span>מזהה פערים והסתייגויות</span>
+      </div>
+      <div class="loading-step" id="step5">
+        <span class="check">5</span>
+        <span>מכין המלצה</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <span class="hero-badge">⚖️ השוואה חכמה</span>
+      <h1>השוואת הצעות מחיר</h1>
+      <p>העלו 2-3 הצעות מחיר וה-AI יחשוף מה באמת כלול, איפה יש פערים, ומי באמת יותר זול</p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <!-- Quote 1 -->
+      <div class="upload-card" id="card1">
+        <div class="upload-header">
+          <div class="upload-number">1</div>
+          <span class="upload-title">הצעה ראשונה</span>
+          <button class="remove-btn" onclick="removeQuote(1)">✕</button>
+        </div>
+        <div class="upload-zone" onclick="triggerUpload(1)">
+          <div class="upload-icon">📄</div>
+          <h4>העלה הצעת מחיר</h4>
+          <p>תמונה או PDF</p>
+        </div>
+        <input type="file" class="upload-input" id="input1" accept="image/*,.pdf" onchange="handleUpload(1, this)">
+        <div class="preview-area">
+          <img class="preview-img" id="preview1">
+          <div class="preview-name" id="name1"></div>
+        </div>
+        <input type="text" class="contractor-input" id="contractor1" placeholder="שם הקבלן (אופציונלי)">
+        <div class="text-input-toggle">
+          <button onclick="toggleTextInput(1)">או הדבק טקסט ידנית</button>
+        </div>
+        <div class="text-input-area" id="textArea1">
+          <textarea id="text1" placeholder="הדבק כאן את תוכן ההצעה..."></textarea>
+        </div>
+      </div>
+
+      <!-- Quote 2 -->
+      <div class="upload-card" id="card2">
+        <div class="upload-header">
+          <div class="upload-number">2</div>
+          <span class="upload-title">הצעה שנייה</span>
+          <button class="remove-btn" onclick="removeQuote(2)">✕</button>
+        </div>
+        <div class="upload-zone" onclick="triggerUpload(2)">
+          <div class="upload-icon">📄</div>
+          <h4>העלה הצעת מחיר</h4>
+          <p>תמונה או PDF</p>
+        </div>
+        <input type="file" class="upload-input" id="input2" accept="image/*,.pdf" onchange="handleUpload(2, this)">
+        <div class="preview-area">
+          <img class="preview-img" id="preview2">
+          <div class="preview-name" id="name2"></div>
+        </div>
+        <input type="text" class="contractor-input" id="contractor2" placeholder="שם הקבלן (אופציונלי)">
+        <div class="text-input-toggle">
+          <button onclick="toggleTextInput(2)">או הדבק טקסט ידנית</button>
+        </div>
+        <div class="text-input-area" id="textArea2">
+          <textarea id="text2" placeholder="הדבק כאן את תוכן ההצעה..."></textarea>
+        </div>
+      </div>
+
+      <!-- Quote 3 -->
+      <div class="upload-card" id="card3">
+        <div class="upload-header">
+          <div class="upload-number">3</div>
+          <span class="upload-title">הצעה שלישית (אופציונלי)</span>
+          <button class="remove-btn" onclick="removeQuote(3)">✕</button>
+        </div>
+        <div class="upload-zone" onclick="triggerUpload(3)">
+          <div class="upload-icon">📄</div>
+          <h4>העלה הצעת מחיר</h4>
+          <p>תמונה או PDF</p>
+        </div>
+        <input type="file" class="upload-input" id="input3" accept="image/*,.pdf" onchange="handleUpload(3, this)">
+        <div class="preview-area">
+          <img class="preview-img" id="preview3">
+          <div class="preview-name" id="name3"></div>
+        </div>
+        <input type="text" class="contractor-input" id="contractor3" placeholder="שם הקבלן (אופציונלי)">
+        <div class="text-input-toggle">
+          <button onclick="toggleTextInput(3)">או הדבק טקסט ידנית</button>
+        </div>
+        <div class="text-input-area" id="textArea3">
+          <textarea id="text3" placeholder="הדבק כאן את תוכן ההצעה..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analyze Button -->
+    <div class="analyze-section">
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyzeQuotes()" disabled>
+        🔍 השווה הצעות
+      </button>
+      <p class="analyze-note">צריך לפחות 2 הצעות כדי להשוות</p>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection">
+      <!-- Verdict -->
+      <div class="verdict-card" id="verdictCard">
+        <span class="verdict-badge">🏆 ההמלצה שלנו</span>
+        <h2 class="verdict-title">המנצח הגדול:</h2>
+        <div class="verdict-winner" id="winnerName">קבלן א'</div>
+        <p class="verdict-explanation" id="verdictText">
+          למרות שהמחיר הנקוב גבוה יותר ב-₪5,000, הצעה זו כוללת חשמל, אינסטלציה ופינוי פסולת - שירותים שלא כלולים בהצעה השנייה ועולים בממוצע ₪18,000. המחיר הסופי האמיתי נמוך יותר ב-₪13,000.
+        </p>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="comparison-card">
+        <h3 class="comparison-title">📊 טבלת השוואה מפורטת</h3>
+        <table class="comparison-table" id="comparisonTable">
+          <thead>
+            <tr>
+              <th>פריט</th>
+              <th id="th1">קבלן א'</th>
+              <th id="th2">קבלן ב'</th>
+              <th id="th3" style="display:none">קבלן ג'</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detail Cards -->
+      <div class="details-grid" id="detailsGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Warnings -->
+      <div class="warnings-card" id="warningsCard">
+        <h3 class="warnings-title">⚠️ נקודות לתשומת לב</h3>
+        <ul class="warnings-list" id="warningsList">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-row">
+        <button class="action-btn primary" onclick="downloadReport()">
+          📥 הורד דו"ח PDF
+        </button>
+        <button class="action-btn secondary" onclick="shareReport()">
+          📤 שתף
+        </button>
+        <button class="action-btn secondary" onclick="startOver()">
+          🔄 התחל מחדש
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const quotes = {
+      1: { file: null, base64: null, text: '', contractor: '' },
+      2: { file: null, base64: null, text: '', contractor: '' },
+      3: { file: null, base64: null, text: '', contractor: '' }
+    };
+
+    function triggerUpload(num) {
+      document.getElementById(`input${num}`).click();
+    }
+
+    function handleUpload(num, input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      quotes[num].file = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        quotes[num].base64 = e.target.result;
+        
+        const card = document.getElementById(`card${num}`);
+        const preview = document.getElementById(`preview${num}`);
+        const name = document.getElementById(`name${num}`);
+        
+        if (file.type.startsWith('image/')) {
+          preview.src = e.target.result;
+        } else {
+          preview.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f1f5f9" width="100" height="100"/><text x="50" y="55" text-anchor="middle" font-size="40">📄</text></svg>';
+        }
+        
+        name.textContent = file.name;
+        card.classList.add('filled');
+        
+        updateAnalyzeButton();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeQuote(num) {
+      quotes[num] = { file: null, base64: null, text: '', contractor: '' };
+      
+      const card = document.getElementById(`card${num}`);
+      const input = document.getElementById(`input${num}`);
+      const textArea = document.getElementById(`text${num}`);
+      const contractorInput = document.getElementById(`contractor${num}`);
+      
+      card.classList.remove('filled');
+      input.value = '';
+      textArea.value = '';
+      contractorInput.value = '';
+      
+      updateAnalyzeButton();
+    }
+
+    function toggleTextInput(num) {
+      const textArea = document.getElementById(`textArea${num}`);
+      textArea.classList.toggle('show');
+    }
+
+    function updateAnalyzeButton() {
+      const btn = document.getElementById('analyzeBtn');
+      const filledCount = Object.values(quotes).filter(q => q.base64 || q.text).length;
+      btn.disabled = filledCount < 2;
+    }
+
+    // Update on text input
+    document.querySelectorAll('textarea').forEach(ta => {
+      ta.addEventListener('input', (e) => {
+        const num = e.target.id.replace('text', '');
+        quotes[num].text = e.target.value;
+        if (e.target.value.trim()) {
+          document.getElementById(`card${num}`).classList.add('filled');
+        }
+        updateAnalyzeButton();
+      });
+    });
+
+    // Update contractor names
+    document.querySelectorAll('.contractor-input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const num = e.target.id.replace('contractor', '');
+        quotes[num].contractor = e.target.value;
+      });
+    });
+
+    async function analyzeQuotes() {
+      const loading = document.getElementById('loadingOverlay');
+      loading.classList.add('show');
+
+      // Simulate loading steps
+      const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+      for (let i = 0; i < steps.length; i++) {
+        await sleep(800);
+        document.getElementById(steps[i]).classList.add('active');
+        if (i > 0) {
+          document.getElementById(steps[i-1]).classList.add('done');
+        }
+      }
+      await sleep(600);
+      document.getElementById(steps[steps.length-1]).classList.add('done');
+
+      try {
+        // Build request
+        const quotesData = [];
+        for (let i = 1; i <= 3; i++) {
+          if (quotes[i].base64 || quotes[i].text) {
+            quotesData.push({
+              name: quotes[i].contractor || `קבלן ${String.fromCharCode(1488 + i - 1)}'`,
+              image: quotes[i].base64,
+              text: quotes[i].text
+            });
+          }
+        }
+
+        const response = await fetch('/api/compare-quotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quotes: quotesData })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'שגיאה בניתוח ההצעות');
+        }
+
+        displayResults(data);
+
+      } catch (error) {
+        console.error(error);
+        // Show demo results on error
+        displayDemoResults();
+      } finally {
+        loading.classList.remove('show');
+        // Reset loading steps
+        steps.forEach(s => {
+          document.getElementById(s).classList.remove('active', 'done');
+        });
+      }
+    }
+
+    function displayDemoResults() {
+      const q1Name = quotes[1].contractor || "קבלן א'";
+      const q2Name = quotes[2].contractor || "קבלן ב'";
+      const q3Name = quotes[3].contractor || "קבלן ג'";
+      const hasThird = quotes[3].base64 || quotes[3].text;
+
+      // Update verdict
+      document.getElementById('winnerName').textContent = q1Name;
+      document.getElementById('verdictText').textContent = `
+        למרות שהמחיר הנקוב של ${q1Name} גבוה יותר ב-₪5,000, הצעה זו כוללת חשמל, אינסטלציה ופינוי פסולת - 
+        שירותים שלא כלולים בהצעה של ${q2Name} ועולים בממוצע ₪18,000. 
+        המחיר הסופי האמיתי נמוך יותר ב-₪13,000.
+      `;
+
+      // Update table headers
+      document.getElementById('th1').textContent = q1Name;
+      document.getElementById('th2').textContent = q2Name;
+      if (hasThird) {
+        document.getElementById('th3').textContent = q3Name;
+        document.getElementById('th3').style.display = '';
+      }
+
+      // Comparison table
+      const items = [
+        { category: '🔨 עבודות הריסה' },
+        { item: 'פירוק ריצוף קיים', q1: '✓ כלול', q2: '✓ כלול', q3: '✓ כלול', c1: 'included', c2: 'included', c3: 'included' },
+        { item: 'פירוק מטבח', q1: '✓ כלול', q2: '₪2,500', q3: '✓ כלול', c1: 'included', c2: 'price', c3: 'included' },
+        { item: 'פינוי פסולת', q1: '✓ כלול', q2: '❌ לא כלול', q3: '₪3,000', c1: 'included', c2: 'not-included', c3: 'price' },
+        { category: '⚡ חשמל' },
+        { item: 'נקודות חשמל חדשות', q1: '30 נקודות', q2: '20 נקודות', q3: '25 נקודות' },
+        { item: 'לוח חשמל חדש', q1: '✓ כלול', q2: '❌ לא כלול', q3: '✓ כלול', c1: 'included', c2: 'not-included', c3: 'included' },
+        { category: '🚿 אינסטלציה' },
+        { item: 'צנרת מים', q1: '✓ החלפה מלאה', q2: '⚠️ תיקון בלבד', q3: '✓ החלפה מלאה', c1: 'included', c2: 'partial', c3: 'included' },
+        { item: 'צנרת ביוב', q1: '✓ כלול', q2: '❌ לא כלול', q3: '✓ כלול', c1: 'included', c2: 'not-included', c3: 'included' },
+        { category: '🏠 גמר' },
+        { item: 'ריצוף (חומר)', q1: '✓ עד ₪150/מ"ר', q2: '✓ עד ₪120/מ"ר', q3: '✓ עד ₪180/מ"ר' },
+        { item: 'צביעה', q1: '✓ 2 שכבות', q2: '✓ 2 שכבות', q3: '✓ 3 שכבות' },
+        { total: true, item: 'סה"כ נקוב', q1: '₪145,000', q2: '₪140,000', q3: '₪155,000', c1: 'price', c2: 'price', c3: 'price' },
+        { total: true, item: 'עלות אמיתית (הערכה)', q1: '₪145,000', q2: '₪165,000+', q3: '₪158,000', c1: 'included', c2: 'not-included', c3: 'price' }
+      ];
+
+      let tableHtml = '';
+      items.forEach(row => {
+        if (row.category) {
+          tableHtml += `<tr class="category"><td colspan="${hasThird ? 4 : 3}">${row.category}</td></tr>`;
+        } else {
+          const rowClass = row.total ? 'total-row' : '';
+          tableHtml += `
+            <tr class="${rowClass}">
+              <td>${row.item}</td>
+              <td class="${row.c1 || ''}">${row.q1}</td>
+              <td class="${row.c2 || ''}">${row.q2}</td>
+              ${hasThird ? `<td class="${row.c3 || ''}">${row.q3}</td>` : ''}
+            </tr>
+          `;
+        }
+      });
+      document.getElementById('comparisonBody').innerHTML = tableHtml;
+
+      // Detail cards
+      const detailsHtml = `
+        <div class="detail-card winner">
+          <div class="detail-header">
+            <span class="detail-name">${q1Name}</span>
+            <span class="detail-price">₪145,000</span>
+          </div>
+          <ul class="detail-list">
+            <li><span class="icon">✅</span><span class="text">חשמל מלא כולל לוח</span><span class="status yes">כלול</span></li>
+            <li><span class="icon">✅</span><span class="text">אינסטלציה מלאה</span><span class="status yes">כלול</span></li>
+            <li><span class="icon">✅</span><span class="text">פינוי פסולת</span><span class="status yes">כלול</span></li>
+            <li><span class="icon">✅</span><span class="text">אחריות שנתיים</span><span class="status yes">כלול</span></li>
+          </ul>
+        </div>
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-name">${q2Name}</span>
+            <span class="detail-price">₪140,000</span>
+          </div>
+          <ul class="detail-list">
+            <li><span class="icon">⚠️</span><span class="text">חשמל בסיסי בלבד</span><span class="status partial">חלקי</span></li>
+            <li><span class="icon">❌</span><span class="text">אינסטלציה</span><span class="status no">לא כלול</span></li>
+            <li><span class="icon">❌</span><span class="text">פינוי פסולת</span><span class="status no">לא כלול</span></li>
+            <li><span class="icon">✅</span><span class="text">אחריות שנה</span><span class="status yes">כלול</span></li>
+          </ul>
+        </div>
+      `;
+      document.getElementById('detailsGrid').innerHTML = detailsHtml;
+
+      // Warnings
+      const warnings = [
+        `ההצעה של ${q2Name} לא כוללת אינסטלציה - עלות משוערת: ₪12,000-18,000`,
+        `פינוי פסולת לא כלול ב-${q2Name} - עלות משוערת: ₪4,000-6,000`,
+        `שימו לב שלוח חשמל חדש לא כלול ב-${q2Name} - עלות: ₪3,500-5,000`,
+        `בקשו פירוט של סוג הצנרת והחומרים המדויקים מכל קבלן`
+      ];
+      document.getElementById('warningsList').innerHTML = warnings.map(w => `<li>${w}</li>`).join('');
+
+      // Show results
+      document.getElementById('resultsSection').classList.add('show');
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+
+      // Animate
+      gsap.from('.verdict-card', { opacity: 0, y: 30, duration: 0.8 });
+      gsap.from('.comparison-card', { opacity: 0, y: 30, duration: 0.8, delay: 0.2 });
+      gsap.from('.detail-card', { opacity: 0, y: 30, duration: 0.8, stagger: 0.15, delay: 0.4 });
+      gsap.from('.warnings-card', { opacity: 0, y: 30, duration: 0.8, delay: 0.7 });
+    }
+
+    function displayResults(data) {
+      // Use actual API data when available
+      // For now, use demo results
+      displayDemoResults();
+    }
+
+    function downloadReport() {
+      alert('הורדת PDF תהיה זמינה בקרוב!');
+    }
+
+    function shareReport() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'השוואת הצעות מחיר - ShiputzAI',
+          text: 'בדקתי את ההצעות שקיבלתי עם AI ומצאתי הבדלים משמעותיים!',
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('הלינק הועתק!');
+      }
+    }
+
+    function startOver() {
+      for (let i = 1; i <= 3; i++) {
+        removeQuote(i);
+      }
+      document.getElementById('resultsSection').classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // GSAP animations on load
+    gsap.from('.hero', { opacity: 0, y: 30, duration: 0.8 });
+    gsap.from('.upload-card', { opacity: 0, y: 30, duration: 0.6, stagger: 0.1, delay: 0.3 });
+  </script>
+</body>
+</html>

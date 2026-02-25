@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop the Look | ShiputzAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --pink: #ec4899;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      --gradient-pink: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: linear-gradient(135deg, #fdf2f8 0%, #fef3c7 30%, #f0fdf4 70%, #eff6ff 100%);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 16px 32px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--gradient-pink);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: var(--gradient-pink);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      max-width: 700px;
+      margin: 0 auto 60px;
+    }
+    .upload-card {
+      background: white;
+      border-radius: 28px;
+      padding: 48px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .upload-zone {
+      border: 3px dashed #e2e8f0;
+      border-radius: 20px;
+      padding: 60px 40px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--pink);
+      background: #fdf2f8;
+    }
+    .upload-zone.has-image {
+      padding: 0;
+      border: none;
+      background: none;
+    }
+    .upload-icon {
+      font-size: 5rem;
+      margin-bottom: 16px;
+    }
+    .upload-zone h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+    .upload-zone p {
+      color: var(--gray);
+      margin-bottom: 24px;
+    }
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gradient-pink);
+      color: white;
+      padding: 16px 36px;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.3);
+    }
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(236, 72, 153, 0.4);
+    }
+    #fileInput { display: none; }
+    
+    .preview-container {
+      display: none;
+      position: relative;
+    }
+    .upload-zone.has-image .preview-container {
+      display: block;
+    }
+    .upload-zone.has-image .upload-content {
+      display: none;
+    }
+    .preview-image {
+      width: 100%;
+      border-radius: 20px;
+      max-height: 400px;
+      object-fit: cover;
+    }
+    .change-image-btn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+    }
+    .change-image-btn:hover {
+      background: rgba(0,0,0,0.9);
+    }
+
+    /* Analyze Button */
+    .analyze-section {
+      text-align: center;
+      margin-top: 24px;
+      display: none;
+    }
+    .analyze-section.show { display: block; }
+    .analyze-btn {
+      background: var(--gradient);
+      color: white;
+      padding: 20px 60px;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+    .analyze-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.5);
+    }
+    .analyze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Loading */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .loading-overlay.show { display: flex; }
+    .loading-animation {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+    .loading-animation::before {
+      content: '🛋️';
+      font-size: 60px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: bounce 1s infinite;
+    }
+    .loading-ring {
+      width: 100%;
+      height: 100%;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes bounce {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.2); }
+    }
+    .loading-text {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-top: 32px;
+    }
+    .loading-sub {
+      color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+    }
+
+    /* Results Section */
+    .results-section {
+      display: none;
+    }
+    .results-section.show { display: block; }
+
+    /* Image with Hotspots */
+    .image-analysis {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+    .image-container {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .analyzed-image {
+      width: 100%;
+      display: block;
+    }
+    .hotspot {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+      animation: pulse-hotspot 2s infinite;
+    }
+    @keyframes pulse-hotspot {
+      0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 4px 30px rgba(236, 72, 153, 0.5); }
+    }
+    .hotspot:hover {
+      transform: scale(1.2);
+    }
+    .hotspot .number {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--pink);
+    }
+
+    /* Products Sidebar */
+    .products-sidebar {
+      max-height: 600px;
+      overflow-y: auto;
+      padding-left: 10px;
+    }
+    .products-sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .products-sidebar::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 3px;
+    }
+    .product-list-item {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .product-list-item:hover {
+      transform: translateX(-5px);
+      border-color: var(--pink);
+    }
+    .product-list-item.active {
+      border-color: var(--pink);
+      background: #fdf2f8;
+    }
+    .product-list-item .number {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-pink);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .product-list-item .info {
+      flex: 1;
+    }
+    .product-list-item .name {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--dark);
+    }
+    .product-list-item .category {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+    .product-list-item .price {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Product Grid */
+    .products-grid-section {
+      margin-bottom: 60px;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    }
+    .product-card .image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      position: relative;
+    }
+    .product-card .badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--gradient-pink);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .product-card .content {
+      padding: 24px;
+    }
+    .product-card .category {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+    .product-card .name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+    .product-card .store-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .product-card .store-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      object-fit: contain;
+      background: #f1f5f9;
+      padding: 4px;
+    }
+    .product-card .store-name {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    .product-card .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .product-card .price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+    .product-card .price .estimate {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--gray);
+    }
+    .product-card .buy-btn {
+      background: var(--gradient);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .product-card .buy-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Store Filters */
+    .store-filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .store-filter {
+      padding: 12px 24px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .store-filter:hover {
+      border-color: var(--secondary);
+    }
+    .store-filter.active {
+      border-color: var(--secondary);
+      background: #eff6ff;
+      color: var(--secondary);
+    }
+    .store-filter img {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+    }
+
+    /* Total Section */
+    .total-section {
+      background: linear-gradient(135deg, var(--dark), #1e293b);
+      border-radius: 24px;
+      padding: 40px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .total-info h3 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .total-info p {
+      color: rgba(255,255,255,0.7);
+    }
+    .total-amount {
+      text-align: left;
+    }
+    .total-amount .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 4px;
+    }
+    .total-amount .amount {
+      font-size: 3rem;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .total-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .total-btn {
+      padding: 16px 32px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      border: none;
+    }
+    .total-btn.primary {
+      background: var(--gradient-pink);
+      color: white;
+    }
+    .total-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .total-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .image-analysis {
+        grid-template-columns: 1fr;
+      }
+      .products-sidebar {
+        display: flex;
+        overflow-x: auto;
+        gap: 16px;
+        padding-bottom: 10px;
+      }
+      .product-list-item {
+        min-width: 250px;
+        margin-bottom: 0;
+      }
+      .hero h1 { font-size: 2rem; }
+      .total-section {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="demo-v2-home.html" class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-text">ShiputzAI</span>
+    </a>
+    <a href="demo-v2-home.html" class="back-btn">
+      → חזרה לדף הבית
+    </a>
+  </header>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-animation">
+      <div class="loading-ring"></div>
+    </div>
+    <div class="loading-text">מזהה מוצרים בתמונה...</div>
+    <div class="loading-sub">AI מחפש פריטים דומים בחנויות ישראליות</div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <span class="hero-badge">🛒 Shop the Look</span>
+      <h1>מצא את המוצרים מהתמונה</h1>
+      <p>העלה תמונת חדר מושלם וה-AI יזהה את הפריטים וימצא לך איפה לקנות אותם בישראל</p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section" id="uploadSection">
+      <div class="upload-card">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-content">
+            <div class="upload-icon">🖼️</div>
+            <h3>העלה תמונת השראה</h3>
+            <p>מאינסטגרם, פינטרסט, או כל מקום אחר</p>
+            <button class="upload-btn">
+              📸 בחר תמונה
+            </button>
+          </div>
+          <div class="preview-container">
+            <img class="preview-image" id="previewImage">
+            <button class="change-image-btn" onclick="event.stopPropagation(); changeImage()">🔄 החלף תמונה</button>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="handleUpload(this)">
+        
+        <div class="analyze-section" id="analyzeSection">
+          <button class="analyze-btn" onclick="analyzeImage()">
+            🔍 זהה מוצרים
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection">
+      <!-- Image with Hotspots -->
+      <div class="image-analysis">
+        <div class="image-container">
+          <img class="analyzed-image" id="analyzedImage">
+          <div id="hotspotsContainer"></div>
+        </div>
+        <div class="products-sidebar" id="productsSidebar">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Store Filters -->
+      <div class="store-filters">
+        <button class="store-filter active" onclick="filterByStore('all')">
+          🏪 כל החנויות
+        </button>
+        <button class="store-filter" onclick="filterByStore('ikea')">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg" alt="IKEA">
+          IKEA
+        </button>
+        <button class="store-filter" onclick="filterByStore('aminach')">
+          עמינח
+        </button>
+        <button class="store-filter" onclick="filterByStore('ace')">
+          ACE
+        </button>
+        <button class="store-filter" onclick="filterByStore('homecenter')">
+          הום סנטר
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid-section">
+        <h2 class="section-title">🛍️ מוצרים שזוהו</h2>
+        <div class="products-grid" id="productsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Total Section -->
+      <div class="total-section">
+        <div class="total-info">
+          <h3>🎯 סיכום העגלה</h3>
+          <p>כל המוצרים שזוהו בתמונה</p>
+        </div>
+        <div class="total-amount">
+          <div class="label">עלות משוערת</div>
+          <div class="amount" id="totalAmount">₪0</div>
+        </div>
+        <div class="total-actions">
+          <button class="total-btn primary" onclick="shareResults()">
+            📤 שתף
+          </button>
+          <button class="total-btn secondary" onclick="saveList()">
+            💾 שמור רשימה
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let uploadedImage = null;
+    let identifiedProducts = [];
+
+    const stores = {
+      ikea: { name: 'IKEA', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Ikea_logo.svg', url: 'https://www.ikea.co.il' },
+      aminach: { name: 'עמינח', logo: '🛋️', url: 'https://www.aminach.co.il' },
+      ace: { name: 'ACE', logo: '🔧', url: 'https://www.ace.co.il' },
+      homecenter: { name: 'הום סנטר', logo: '🏠', url: 'https://www.homecenter.co.il' },
+      jysk: { name: 'JYSK', logo: '🪑', url: 'https://jysk.co.il' }
+    };
+
+    // Demo products database
+    const demoProducts = {
+      sofa: [
+        { name: 'ספה 3 מושבים KIVIK', store: 'ikea', price: 3490, category: 'ספות', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400', match: 92 },
+        { name: 'ספת בד STOCKHOLM', store: 'ikea', price: 5990, category: 'ספות', image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400', match: 85 },
+        { name: 'ספה מעוצבת "אורבן"', store: 'aminach', price: 4200, category: 'ספות', image: 'https://images.unsplash.com/photo-1550254478-ead40cc54513?w=400', match: 78 }
+      ],
+      table: [
+        { name: 'שולחן סלון LACK', store: 'ikea', price: 199, category: 'שולחנות', image: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=400', match: 88 },
+        { name: 'שולחן עץ אלון', store: 'homecenter', price: 890, category: 'שולחנות', image: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400', match: 82 }
+      ],
+      lamp: [
+        { name: 'מנורת רצפה RANARP', store: 'ikea', price: 349, category: 'תאורה', image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400', match: 90 },
+        { name: 'מנורה תלויה "נורדיק"', store: 'ace', price: 450, category: 'תאורה', image: 'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400', match: 75 }
+      ],
+      rug: [
+        { name: 'שטיח VINDUM', store: 'ikea', price: 799, category: 'שטיחים', image: 'https://images.unsplash.com/photo-1600166898405-da9535204843?w=400', match: 85 },
+        { name: 'שטיח צמר טבעי', store: 'homecenter', price: 1290, category: 'שטיחים', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', match: 70 }
+      ],
+      plant: [
+        { name: 'עציץ FEJKA', store: 'ikea', price: 59, category: 'צמחים', image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400', match: 95 },
+        { name: 'כלי לעציץ קרמי', store: 'ace', price: 89, category: 'צמחים', image: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400', match: 80 }
+      ],
+      chair: [
+        { name: 'כורסא STRANDMON', store: 'ikea', price: 1490, category: 'כורסאות', image: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400', match: 88 },
+        { name: 'כורסת עור "קלאסיק"', store: 'aminach', price: 2800, category: 'כורסאות', image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400', match: 72 }
+      ]
+    };
+
+    const uploadZone = document.getElementById('uploadZone');
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileUpload(files[0]);
+      }
+    });
+
+    function handleUpload(input) {
+      if (input.files.length > 0) {
+        handleFileUpload(input.files[0]);
+      }
+    }
+
+    function handleFileUpload(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('נא להעלות קובץ תמונה');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImage = e.target.result;
+        document.getElementById('previewImage').src = uploadedImage;
+        uploadZone.classList.add('has-image');
+        document.getElementById('analyzeSection').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function changeImage() {
+      uploadZone.classList.remove('has-image');
+      document.getElementById('fileInput').value = '';
+      document.getElementById('analyzeSection').classList.remove('show');
+      document.getElementById('resultsSection').classList.remove('show');
+    }
+
+    async function analyzeImage() {
+      const loading = document.getElementById('loadingOverlay');
+      loading.classList.add('show');
+
+      // Simulate AI analysis
+      await sleep(2500);
+
+      // Generate random products
+      identifiedProducts = [];
+      const productTypes = Object.keys(demoProducts);
+      const numProducts = 4 + Math.floor(Math.random() * 3);
+      
+      const usedTypes = new Set();
+      for (let i = 0; i < numProducts; i++) {
+        let type;
+        do {
+          type = productTypes[Math.floor(Math.random() * productTypes.length)];
+        } while (usedTypes.has(type) && usedTypes.size < productTypes.length);
+        usedTypes.add(type);
+        
+        const products = demoProducts[type];
+        const product = products[Math.floor(Math.random() * products.length)];
+        identifiedProducts.push({
+          ...product,
+          id: i + 1,
+          position: {
+            x: 15 + Math.random() * 70,
+            y: 20 + Math.random() * 60
+          }
+        });
+      }
+
+      loading.classList.remove('show');
+      displayResults();
+    }
+
+    function displayResults() {
+      // Show results section
+      document.getElementById('resultsSection').classList.add('show');
+      document.getElementById('analyzedImage').src = uploadedImage;
+
+      // Create hotspots
+      const hotspotsContainer = document.getElementById('hotspotsContainer');
+      hotspotsContainer.innerHTML = identifiedProducts.map((p, i) => `
+        <div class="hotspot" style="top: ${p.position.y}%; right: ${p.position.x}%;" 
+             onclick="highlightProduct(${i})" onmouseenter="highlightProduct(${i})">
+          <span class="number">${i + 1}</span>
+        </div>
+      `).join('');
+
+      // Populate sidebar
+      const sidebar = document.getElementById('productsSidebar');
+      sidebar.innerHTML = identifiedProducts.map((p, i) => `
+        <div class="product-list-item" id="sidebarItem${i}" onclick="highlightProduct(${i})">
+          <div class="number">${i + 1}</div>
+          <div class="info">
+            <div class="name">${p.name}</div>
+            <div class="category">${p.category} • ${stores[p.store].name}</div>
+            <div class="price">₪${p.price.toLocaleString()}</div>
+          </div>
+        </div>
+      `).join('');
+
+      // Populate grid
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = identifiedProducts.map((p, i) => `
+        <div class="product-card" data-store="${p.store}">
+          <div style="position: relative;">
+            <img class="image" src="${p.image}" alt="${p.name}">
+            <span class="badge">${p.match}% התאמה</span>
+          </div>
+          <div class="content">
+            <div class="category">${p.category}</div>
+            <div class="name">${p.name}</div>
+            <div class="store-row">
+              ${typeof stores[p.store].logo === 'string' && stores[p.store].logo.startsWith('http') 
+                ? `<img class="store-logo" src="${stores[p.store].logo}" alt="${stores[p.store].name}">`
+                : `<span style="font-size: 20px;">${stores[p.store].logo}</span>`
+              }
+              <span class="store-name">${stores[p.store].name}</span>
+            </div>
+            <div class="price-row">
+              <div class="price">₪${p.price.toLocaleString()} <span class="estimate">(משוער)</span></div>
+              <a href="${stores[p.store].url}" target="_blank" class="buy-btn">לחנות →</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Calculate total
+      const total = identifiedProducts.reduce((sum, p) => sum + p.price, 0);
+      document.getElementById('totalAmount').textContent = `₪${total.toLocaleString()}`;
+
+      // Scroll to results
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+
+      // Animate
+      gsap.from('.hotspot', { scale: 0, duration: 0.4, stagger: 0.1, ease: 'back.out(1.7)' });
+      gsap.from('.product-list-item', { opacity: 0, x: 20, duration: 0.4, stagger: 0.1 });
+      gsap.from('.product-card', { opacity: 0, y: 30, duration: 0.5, stagger: 0.1 });
+    }
+
+    function highlightProduct(index) {
+      // Remove active from all
+      document.querySelectorAll('.product-list-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.hotspot').forEach(el => el.style.background = 'white');
+      
+      // Add active to selected
+      const item = document.getElementById(`sidebarItem${index}`);
+      if (item) {
+        item.classList.add('active');
+        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      
+      const hotspots = document.querySelectorAll('.hotspot');
+      if (hotspots[index]) {
+        hotspots[index].style.background = 'linear-gradient(135deg, #ec4899, #f97316)';
+        hotspots[index].querySelector('.number').style.color = 'white';
+      }
+    }
+
+    function filterByStore(store) {
+      document.querySelectorAll('.store-filter').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.product-card').forEach(card => {
+        if (store === 'all' || card.dataset.store === store) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function shareResults() {
+      const text = `מצאתי את המוצרים האלה עם ShiputzAI:\n\n` +
+        identifiedProducts.map(p => `• ${p.name} - ₪${p.price} (${stores[p.store].name})`).join('\n');
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'Shop the Look - ShiputzAI',
+          text: text,
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(text);
+        alert('הרשימה הועתקה!');
+      }
+    }
+
+    function saveList() {
+      const list = identifiedProducts.map(p => 
+        `${p.name}\n${stores[p.store].name} - ₪${p.price}\n${stores[p.store].url}\n`
+      ).join('\n');
+      
+      const blob = new Blob([list], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'shop-the-look.txt';
+      a.click();
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Animations on load
+    gsap.from('.hero', { opacity: 0, y: 30, duration: 0.8 });
+    gsap.from('.upload-card', { opacity: 0, y: 30, duration: 0.8, delay: 0.2 });
+  </script>
+</body>
+</html>

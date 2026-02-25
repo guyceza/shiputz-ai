@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מחשבון חומרים | ShiputzAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --orange: #f97316;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: linear-gradient(135deg, #fff7ed 0%, #f0fdf4 50%, #eff6ff 100%);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 16px 32px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .back-btn:hover { color: var(--primary); }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(249, 115, 22, 0.1);
+      color: var(--orange);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--orange), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 40px;
+    }
+
+    /* Input Section */
+    .input-section {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+    .input-section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-group {
+      margin-bottom: 24px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .input-field {
+      position: relative;
+    }
+    .input-field input {
+      width: 100%;
+      padding: 14px 16px;
+      padding-left: 50px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+    .input-field input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .input-field .unit {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* Work Type Selection */
+    .work-types {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .work-type {
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    .work-type:hover {
+      border-color: var(--primary);
+      background: #f0fdf4;
+    }
+    .work-type.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+    .work-type .icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .work-type .name {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    /* Calculate Button */
+    .calculate-btn {
+      width: 100%;
+      background: var(--gradient);
+      color: white;
+      padding: 18px;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .calculate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+    }
+    .calculate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Results Section */
+    .results-section {
+      display: none;
+    }
+    .results-section.show {
+      display: block;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .summary-card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .summary-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+    .summary-card .value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .summary-card .label {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* Materials List */
+    .materials-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+    }
+    .materials-card h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .materials-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .materials-table th {
+      background: var(--dark);
+      color: white;
+      padding: 16px;
+      text-align: right;
+      font-weight: 600;
+    }
+    .materials-table th:first-child { border-radius: 0 12px 0 0; }
+    .materials-table th:last-child { border-radius: 12px 0 0 0; }
+    .materials-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .materials-table tr:hover td {
+      background: #f8fafc;
+    }
+    .materials-table .quantity {
+      font-weight: 700;
+      color: var(--secondary);
+    }
+    .materials-table .price {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .materials-table .notes {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    .material-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .material-icon .emoji {
+      font-size: 1.5rem;
+    }
+
+    /* Brands Recommendations */
+    .brands-card {
+      background: linear-gradient(135deg, #f0fdf4, #ecfeff);
+      border: 2px solid #d1fae5;
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+    .brands-card h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .brand-item {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+    .brand-info {
+      flex: 1;
+    }
+    .brand-info .name {
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .brand-info .desc {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+    .brand-info .price-range {
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .brand-link {
+      color: var(--secondary);
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+
+    /* Shopping List */
+    .shopping-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+    .shopping-card h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .shopping-list {
+      list-style: none;
+    }
+    .shopping-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .shopping-item:last-child { border-bottom: none; }
+    .shopping-check {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shopping-check:hover { border-color: var(--primary); }
+    .shopping-check.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .shopping-item .text {
+      flex: 1;
+      font-weight: 500;
+    }
+    .shopping-item .qty {
+      font-weight: 700;
+      color: var(--secondary);
+    }
+    .shopping-actions {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid;
+    }
+    .action-btn.primary {
+      background: var(--gradient);
+      color: white;
+      border-color: transparent;
+    }
+    .action-btn.primary:hover { transform: translateY(-2px); }
+    .action-btn.secondary {
+      background: white;
+      color: var(--dark);
+      border-color: #e2e8f0;
+    }
+    .action-btn.secondary:hover { border-color: var(--primary); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .input-section {
+        position: static;
+      }
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .hero h1 { font-size: 2rem; }
+    }
+    @media (max-width: 600px) {
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+      .work-types {
+        grid-template-columns: 1fr;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="demo-v2-home.html" class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-text">ShiputzAI</span>
+    </a>
+    <a href="demo-v2-home.html" class="back-btn">
+      → חזרה לדף הבית
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <span class="hero-badge">🧮 מחשבון חכם</span>
+      <h1>מחשבון חומרים</h1>
+      <p>הזינו מידות חדר וקבלו רשימת חומרים מדויקת עם כמויות, מחירים והמלצות למותגים</p>
+    </div>
+
+    <div class="main-grid">
+      <!-- Input Section -->
+      <div class="input-section">
+        <h2>📐 מידות החדר</h2>
+        
+        <div class="input-group">
+          <label>מידות (מטרים)</label>
+          <div class="input-row">
+            <div class="input-field">
+              <input type="number" id="length" placeholder="אורך" step="0.1" min="0">
+              <span class="unit">מ'</span>
+            </div>
+            <div class="input-field">
+              <input type="number" id="width" placeholder="רוחב" step="0.1" min="0">
+              <span class="unit">מ'</span>
+            </div>
+            <div class="input-field">
+              <input type="number" id="height" placeholder="גובה" value="2.7" step="0.1" min="0">
+              <span class="unit">מ'</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>סוג עבודה</label>
+          <div class="work-types">
+            <div class="work-type" data-type="tiles" onclick="selectWorkType(this)">
+              <div class="icon">🪨</div>
+              <div class="name">ריצוף</div>
+            </div>
+            <div class="work-type" data-type="paint" onclick="selectWorkType(this)">
+              <div class="icon">🎨</div>
+              <div class="name">צביעה</div>
+            </div>
+            <div class="work-type" data-type="drywall" onclick="selectWorkType(this)">
+              <div class="icon">🧱</div>
+              <div class="name">גבס</div>
+            </div>
+            <div class="work-type" data-type="flooring" onclick="selectWorkType(this)">
+              <div class="icon">🪵</div>
+              <div class="name">פרקט</div>
+            </div>
+            <div class="work-type" data-type="waterproof" onclick="selectWorkType(this)">
+              <div class="icon">💧</div>
+              <div class="name">איטום</div>
+            </div>
+            <div class="work-type" data-type="electric" onclick="selectWorkType(this)">
+              <div class="icon">⚡</div>
+              <div class="name">חשמל</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="calculate-btn" id="calcBtn" onclick="calculate()" disabled>
+          🧮 חשב כמויות
+        </button>
+      </div>
+
+      <!-- Results Section -->
+      <div class="results-section" id="resultsSection">
+        <!-- Summary -->
+        <div class="summary-grid" id="summaryGrid">
+          <div class="summary-card">
+            <div class="icon">📐</div>
+            <div class="value" id="areaValue">0</div>
+            <div class="label">מ"ר שטח</div>
+          </div>
+          <div class="summary-card">
+            <div class="icon">📦</div>
+            <div class="value" id="materialsCount">0</div>
+            <div class="label">סוגי חומרים</div>
+          </div>
+          <div class="summary-card">
+            <div class="icon">💰</div>
+            <div class="value" id="totalCost">₪0</div>
+            <div class="label">עלות משוערת</div>
+          </div>
+          <div class="summary-card">
+            <div class="icon">⏱️</div>
+            <div class="value" id="workDays">0</div>
+            <div class="label">ימי עבודה</div>
+          </div>
+        </div>
+
+        <!-- Materials Table -->
+        <div class="materials-card">
+          <h3>📋 רשימת חומרים</h3>
+          <table class="materials-table">
+            <thead>
+              <tr>
+                <th>חומר</th>
+                <th>כמות</th>
+                <th>יחידה</th>
+                <th>מחיר ליחידה</th>
+                <th>סה"כ</th>
+                <th>הערות</th>
+              </tr>
+            </thead>
+            <tbody id="materialsBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Brand Recommendations -->
+        <div class="brands-card">
+          <h3>🏪 המלצות מותגים</h3>
+          <div class="brands-grid" id="brandsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Shopping List -->
+        <div class="shopping-card">
+          <h3>🛒 רשימת קניות</h3>
+          <ul class="shopping-list" id="shoppingList">
+            <!-- Populated by JS -->
+          </ul>
+          <div class="shopping-actions">
+            <button class="action-btn primary" onclick="downloadList()">
+              📥 הורד רשימה
+            </button>
+            <button class="action-btn secondary" onclick="shareList()">
+              📤 שתף
+            </button>
+            <button class="action-btn secondary" onclick="printList()">
+              🖨️ הדפס
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let selectedWorkTypes = [];
+
+    function selectWorkType(el) {
+      el.classList.toggle('selected');
+      const type = el.dataset.type;
+      
+      if (el.classList.contains('selected')) {
+        selectedWorkTypes.push(type);
+      } else {
+        selectedWorkTypes = selectedWorkTypes.filter(t => t !== type);
+      }
+      
+      updateCalcButton();
+    }
+
+    function updateCalcButton() {
+      const length = document.getElementById('length').value;
+      const width = document.getElementById('width').value;
+      const btn = document.getElementById('calcBtn');
+      
+      btn.disabled = !length || !width || selectedWorkTypes.length === 0;
+    }
+
+    // Add input listeners
+    ['length', 'width', 'height'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateCalcButton);
+    });
+
+    function calculate() {
+      const length = parseFloat(document.getElementById('length').value);
+      const width = parseFloat(document.getElementById('width').value);
+      const height = parseFloat(document.getElementById('height').value) || 2.7;
+      
+      const floorArea = length * width;
+      const wallArea = 2 * (length + width) * height;
+      const perimeter = 2 * (length + width);
+      
+      let materials = [];
+      let brands = [];
+      let totalCost = 0;
+      let workDays = 0;
+
+      // Calculate materials based on work types
+      selectedWorkTypes.forEach(type => {
+        switch(type) {
+          case 'tiles':
+            const tilesNeeded = Math.ceil(floorArea * 1.1); // 10% extra
+            const adhesiveNeeded = Math.ceil(floorArea / 5); // 5 sqm per bag
+            const groutNeeded = Math.ceil(floorArea / 10); // 10 sqm per bag
+            
+            materials.push(
+              { name: 'אריחים', icon: '🪨', qty: tilesNeeded, unit: 'מ"ר', price: 150, notes: 'כולל 10% עודף לפחת' },
+              { name: 'דבק לאריחים', icon: '🧪', qty: adhesiveNeeded, unit: 'שקים', price: 45, notes: 'שק 25 ק"ג' },
+              { name: 'רובה', icon: '🎨', qty: groutNeeded, unit: 'שקים', price: 35, notes: 'צבע לבחירה' },
+              { name: 'פסי פריימר', icon: '📏', qty: Math.ceil(perimeter), unit: 'מטר', price: 8, notes: 'לקצוות' }
+            );
+            brands.push(
+              { name: 'סרגל', logo: '🏪', desc: 'מבחר גדול, מחירים סבירים', price: '₪80-250/מ"ר', link: 'https://sergel.co.il' },
+              { name: 'הום סנטר', logo: '🏠', desc: 'מותגים מובילים', price: '₪100-400/מ"ר', link: 'https://www.homecenter.co.il' }
+            );
+            workDays += Math.ceil(floorArea / 15);
+            break;
+            
+          case 'paint':
+            const paintLiters = Math.ceil(wallArea / 10 * 2); // 2 coats, 10 sqm per liter
+            const primerLiters = Math.ceil(wallArea / 12);
+            
+            materials.push(
+              { name: 'צבע', icon: '🎨', qty: paintLiters, unit: 'ליטר', price: 35, notes: '2 שכבות' },
+              { name: 'יסוד', icon: '🫗', qty: primerLiters, unit: 'ליטר', price: 28, notes: 'שכבה אחת' },
+              { name: 'טייפ מסקינג', icon: '📦', qty: Math.ceil(perimeter / 50), unit: 'גלילים', price: 15, notes: 'להגנה' },
+              { name: 'ניילון כיסוי', icon: '🛡️', qty: Math.ceil(floorArea / 10), unit: 'גלילים', price: 25, notes: 'לרצפה' }
+            );
+            brands.push(
+              { name: 'טמבור', logo: '🎨', desc: 'המותג המוביל בישראל', price: '₪30-80/ליטר', link: 'https://tambour.co.il' },
+              { name: 'נירלט', logo: '🖌️', desc: 'איכות גבוהה', price: '₪35-90/ליטר', link: 'https://nirlat.co.il' }
+            );
+            workDays += Math.ceil(wallArea / 50);
+            break;
+            
+          case 'drywall':
+            const drywallSheets = Math.ceil(wallArea / 3.6); // 1.2x3m sheets
+            const profilesMeters = Math.ceil(perimeter * 2);
+            const screwBoxes = Math.ceil(drywallSheets / 10);
+            
+            materials.push(
+              { name: 'לוחות גבס', icon: '🧱', qty: drywallSheets, unit: 'לוחות', price: 45, notes: '1.2x2.4 מ\'' },
+              { name: 'פרופילים', icon: '📏', qty: profilesMeters, unit: 'מטר', price: 12, notes: 'C ו-U' },
+              { name: 'ברגים', icon: '🔩', qty: screwBoxes, unit: 'קופסאות', price: 35, notes: '500 יח\'' },
+              { name: 'שפכטל', icon: '🪣', qty: Math.ceil(drywallSheets / 5), unit: 'דליים', price: 55, notes: '5 ק"ג' }
+            );
+            brands.push(
+              { name: 'קנאוף', logo: '🏗️', desc: 'סטנדרט תעשייתי', price: '₪40-60/לוח', link: 'https://knauf.co.il' },
+              { name: 'ACE', logo: '🛠️', desc: 'כל חומרי הגבס', price: 'מחירים משתנים', link: 'https://ace.co.il' }
+            );
+            workDays += Math.ceil(drywallSheets / 8);
+            break;
+            
+          case 'flooring':
+            const parquetArea = Math.ceil(floorArea * 1.08); // 8% extra
+            const underlayRolls = Math.ceil(floorArea / 15);
+            
+            materials.push(
+              { name: 'פרקט למינציה', icon: '🪵', qty: parquetArea, unit: 'מ"ר', price: 89, notes: '8 מ"מ' },
+              { name: 'תחתית בידוד', icon: '📦', qty: underlayRolls, unit: 'גלילים', price: 65, notes: '15 מ"ר לגליל' },
+              { name: 'פנלים', icon: '📏', qty: Math.ceil(perimeter), unit: 'מטר', price: 15, notes: 'לקצוות' },
+              { name: 'פרופילי מעבר', icon: '🚪', qty: 2, unit: 'יחידות', price: 45, notes: 'לדלתות' }
+            );
+            brands.push(
+              { name: 'פאראדור', logo: '🪵', desc: 'פרקט גרמני איכותי', price: '₪70-200/מ"ר', link: 'https://parador.co.il' },
+              { name: 'IKEA', logo: '🔵', desc: 'מחירים נגישים', price: '₪50-120/מ"ר', link: 'https://ikea.co.il' }
+            );
+            workDays += Math.ceil(floorArea / 20);
+            break;
+            
+          case 'waterproof':
+            const waterproofLiters = Math.ceil(floorArea * 2);
+            const primmerLiters = Math.ceil(floorArea);
+            
+            materials.push(
+              { name: 'חומר איטום', icon: '💧', qty: waterproofLiters, unit: 'ליטר', price: 55, notes: '2 שכבות' },
+              { name: 'פריימר', icon: '🫗', qty: primmerLiters, unit: 'ליטר', price: 40, notes: 'הכנה' },
+              { name: 'רשת איטום', icon: '🕸️', qty: Math.ceil(floorArea * 1.2), unit: 'מ"ר', price: 12, notes: 'לפינות' },
+              { name: 'טייפ פינות', icon: '📦', qty: Math.ceil(perimeter / 10), unit: 'גלילים', price: 35, notes: '' }
+            );
+            brands.push(
+              { name: 'סיקה', logo: '🔵', desc: 'שוויצרי מוביל', price: '₪50-80/ליטר', link: 'https://sika.co.il' },
+              { name: 'פזית', logo: '🟢', desc: 'ישראלי איכותי', price: '₪40-65/ליטר', link: 'https://pazit.co.il' }
+            );
+            workDays += Math.ceil(floorArea / 25);
+            break;
+            
+          case 'electric':
+            const points = Math.ceil(floorArea / 3); // 1 point per 3 sqm
+            const cableMeters = Math.ceil(perimeter * 3);
+            
+            materials.push(
+              { name: 'כבל חשמל 2.5', icon: '⚡', qty: cableMeters, unit: 'מטר', price: 4, notes: '3 גידים' },
+              { name: 'שקעים', icon: '🔌', qty: points, unit: 'יחידות', price: 18, notes: 'כולל מסגרת' },
+              { name: 'מפסקים', icon: '🔘', qty: Math.ceil(points / 3), unit: 'יחידות', price: 22, notes: '' },
+              { name: 'קופסאות חיבור', icon: '📦', qty: points, unit: 'יחידות', price: 5, notes: 'טמון' }
+            );
+            brands.push(
+              { name: 'לגרנד', logo: '⚡', desc: 'צרפתי מוביל', price: '₪15-50/יחידה', link: 'https://legrand.co.il' },
+              { name: 'שניידר', logo: '🔶', desc: 'איכות פרימיום', price: '₪20-60/יחידה', link: 'https://se.com/il' }
+            );
+            workDays += Math.ceil(points / 10);
+            break;
+        }
+      });
+
+      // Calculate total cost
+      materials.forEach(m => {
+        m.total = m.qty * m.price;
+        totalCost += m.total;
+      });
+
+      // Update summary
+      document.getElementById('areaValue').textContent = floorArea.toFixed(1);
+      document.getElementById('materialsCount').textContent = materials.length;
+      document.getElementById('totalCost').textContent = `₪${totalCost.toLocaleString()}`;
+      document.getElementById('workDays').textContent = workDays;
+
+      // Populate materials table
+      document.getElementById('materialsBody').innerHTML = materials.map(m => `
+        <tr>
+          <td class="material-icon"><span class="emoji">${m.icon}</span> ${m.name}</td>
+          <td class="quantity">${m.qty}</td>
+          <td>${m.unit}</td>
+          <td>₪${m.price}</td>
+          <td class="price">₪${m.total.toLocaleString()}</td>
+          <td class="notes">${m.notes}</td>
+        </tr>
+      `).join('');
+
+      // Populate brands
+      document.getElementById('brandsGrid').innerHTML = brands.map(b => `
+        <div class="brand-item">
+          <div class="brand-logo">${b.logo}</div>
+          <div class="brand-info">
+            <div class="name">${b.name}</div>
+            <div class="desc">${b.desc}</div>
+            <div class="price-range">${b.price}</div>
+          </div>
+          <a href="${b.link}" target="_blank" class="brand-link">🔗</a>
+        </div>
+      `).join('');
+
+      // Populate shopping list
+      document.getElementById('shoppingList').innerHTML = materials.map((m, i) => `
+        <li class="shopping-item">
+          <div class="shopping-check" onclick="toggleCheck(this)" data-index="${i}"></div>
+          <span class="text">${m.icon} ${m.name}</span>
+          <span class="qty">${m.qty} ${m.unit}</span>
+        </li>
+      `).join('');
+
+      // Show results
+      document.getElementById('resultsSection').classList.add('show');
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Animate
+      gsap.from('.summary-card', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1 });
+      gsap.from('.materials-card', { opacity: 0, y: 20, duration: 0.5, delay: 0.3 });
+      gsap.from('.brands-card', { opacity: 0, y: 20, duration: 0.5, delay: 0.5 });
+      gsap.from('.shopping-card', { opacity: 0, y: 20, duration: 0.5, delay: 0.7 });
+    }
+
+    function toggleCheck(el) {
+      el.classList.toggle('checked');
+      el.innerHTML = el.classList.contains('checked') ? '✓' : '';
+    }
+
+    function downloadList() {
+      const list = [...document.querySelectorAll('.shopping-item')].map(item => {
+        return `${item.querySelector('.text').textContent.trim()} - ${item.querySelector('.qty').textContent}`;
+      }).join('\n');
+      
+      const blob = new Blob([list], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'shopping-list.txt';
+      a.click();
+    }
+
+    function shareList() {
+      const list = [...document.querySelectorAll('.shopping-item')].map(item => {
+        return `${item.querySelector('.text').textContent.trim()} - ${item.querySelector('.qty').textContent}`;
+      }).join('\n');
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'רשימת חומרים - ShiputzAI',
+          text: list
+        });
+      } else {
+        navigator.clipboard.writeText(list);
+        alert('הרשימה הועתקה!');
+      }
+    }
+
+    function printList() {
+      window.print();
+    }
+
+    // Animations on load
+    gsap.from('.hero', { opacity: 0, y: 30, duration: 0.8 });
+    gsap.from('.input-section', { opacity: 0, x: -30, duration: 0.8, delay: 0.2 });
+  </script>
+</body>
+</html>

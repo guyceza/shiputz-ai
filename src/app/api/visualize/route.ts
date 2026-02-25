@@ -194,6 +194,20 @@ async function markTrialUsed(userEmail: string): Promise<boolean> {
   }
 }
 
+// Bug fix: Rollback trial if generation fails due to system error (not user's fault)
+async function rollbackTrial(userEmail: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    await supabase
+      .from('users')
+      .update({ vision_trial_used: false })
+      .eq('email', userEmail.toLowerCase());
+    console.log(`Trial rolled back for ${userEmail} due to system error`);
+  } catch (e) {
+    console.error('Failed to rollback trial:', e);
+  }
+}
+
 const MONTHLY_VISION_LIMIT = 10;
 
 // Cost estimation logic
@@ -501,6 +515,11 @@ export async function POST(request: NextRequest) {
       const errorText = await geminiResponse.text();
       console.error("Gemini API error:", geminiResponse.status, errorText);
       
+      // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
+      if (isTrialRun && userEmail) {
+        await rollbackTrial(userEmail);
+      }
+      
       // Handle rate limit / quota exceeded from Gemini
       if (geminiResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
         // Send admin notification
@@ -565,6 +584,11 @@ export async function POST(request: NextRequest) {
         
         // Check if model refused to process the image
         if (finishReason === "OTHER" || finishReason === "SAFETY") {
+          // SAFETY = user uploaded inappropriate content, don't rollback trial
+          // OTHER = ambiguous, could be system issue, rollback to be safe
+          if (finishReason === "OTHER" && isTrialRun && userEmail) {
+            await rollbackTrial(userEmail);
+          }
           return NextResponse.json({
             success: false,
             error: "IMAGE_NOT_SUPPORTED",
@@ -588,8 +612,12 @@ export async function POST(request: NextRequest) {
           }
         }
         
-        // If no image was found in parts
+        // If no image was found in parts - this is likely a system issue
         if (!generatedImage) {
+          // Bug fix: Rollback trial - no image generated despite API success
+          if (isTrialRun && userEmail) {
+            await rollbackTrial(userEmail);
+          }
           return NextResponse.json({
             success: false,
             error: "IMAGE_NOT_SUPPORTED",
@@ -601,6 +629,11 @@ export async function POST(request: NextRequest) {
       } else {
         const errorText = await editResponse.text();
         console.error("Nano Banana error:", editResponse.status, errorText);
+        
+        // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
+        if (isTrialRun && userEmail) {
+          await rollbackTrial(userEmail);
+        }
         
         // Handle rate limit / quota exceeded from Gemini Image API
         if (editResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
@@ -625,10 +658,16 @@ export async function POST(request: NextRequest) {
       }
     } catch (editError) {
       console.error("Image edit failed:", editError);
+      
+      // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
+      if (isTrialRun && userEmail) {
+        await rollbackTrial(userEmail);
+      }
+      
       return NextResponse.json({
         success: false,
-        error: "IMAGE_NOT_SUPPORTED",
-        message: "לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.",
+        error: "API_ERROR",
+        message: "שגיאה בעיבוד התמונה. נסה שוב.",
         analysis: analysisText,
         costs: costEstimate
       });
@@ -660,6 +699,33 @@ export async function POST(request: NextRequest) {
     
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Visualize API error:", errorMessage, error);
+    
+    // Bug fix: Try to rollback trial on unexpected errors
+    // Note: isTrialRun and userEmail may not be defined if error happened early
+    // But we can try to extract userEmail from the request body
+    try {
+      const body = await request.clone().json().catch(() => ({}));
+      if (body.userEmail) {
+        // Check if this user's trial was just marked as used (within last minute)
+        const supabase = createServiceClient();
+        const { data } = await supabase
+          .from('users')
+          .select('vision_trial_used, updated_at')
+          .eq('email', body.userEmail.toLowerCase())
+          .single();
+        
+        // Only rollback if trial was marked used very recently (within 60 seconds)
+        if (data?.vision_trial_used && data?.updated_at) {
+          const updatedAt = new Date(data.updated_at).getTime();
+          const now = Date.now();
+          if (now - updatedAt < 60000) {
+            await rollbackTrial(body.userEmail);
+          }
+        }
+      }
+    } catch (rollbackError) {
+      console.error("Failed to check/rollback trial on error:", rollbackError);
+    }
     
     // Return friendly error message
     return NextResponse.json({

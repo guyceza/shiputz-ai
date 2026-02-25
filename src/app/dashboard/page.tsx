@@ -7,6 +7,8 @@ import AdminPanel from "./admin-panel";
 import { 
   getProjects, 
   createProject, 
+  updateProject,
+  deleteProject,
   migrateLocalStorageProjects, 
   cacheProjectsLocally,
   getCachedProjects,
@@ -56,9 +58,25 @@ function DashboardContent() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+  
+  // Edit/Delete project state
+  const [editingProject, setEditingProject] = useState<DisplayProject | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editBudget, setEditBudget] = useState("");
+  const [deleteConfirmProject, setDeleteConfirmProject] = useState<DisplayProject | null>(null);
+  const [projectMenuOpen, setProjectMenuOpen] = useState<string | null>(null);
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setProjectMenuOpen(null);
+    if (projectMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [projectMenuOpen]);
 
   useEffect(() => {
     // Check for auth session
@@ -338,6 +356,89 @@ function DashboardContent() {
     router.push("/");
   };
 
+  // Edit project
+  const handleEditProject = async () => {
+    if (!editingProject || !editName || !editBudget) return;
+    
+    const budgetNum = parseInt(editBudget);
+    if (isNaN(budgetNum) || budgetNum <= 0) {
+      alert("נא להזין תקציב תקין");
+      return;
+    }
+
+    try {
+      const { getSession } = await import("@/lib/auth");
+      const session = await getSession();
+      let userId: string | undefined = session?.user?.id;
+      if (!userId) {
+        try {
+          userId = JSON.parse(localStorage.getItem("user") || "{}").id;
+        } catch {
+          userId = undefined;
+        }
+      }
+      
+      if (!userId) {
+        alert("נא להתחבר מחדש");
+        return;
+      }
+
+      await updateProject(editingProject.id, { name: editName, budget: budgetNum }, userId);
+      
+      // Update local state
+      setProjects(projects.map(p => 
+        p.id === editingProject.id 
+          ? { ...p, name: editName, budget: budgetNum }
+          : p
+      ));
+      
+      setEditingProject(null);
+    } catch (err) {
+      console.error("Failed to update project:", err);
+      alert("שגיאה בעדכון הפרויקט");
+    }
+  };
+
+  // Delete project
+  const handleDeleteProject = async () => {
+    if (!deleteConfirmProject) return;
+
+    try {
+      const { getSession } = await import("@/lib/auth");
+      const session = await getSession();
+      let userId: string | undefined = session?.user?.id;
+      if (!userId) {
+        try {
+          userId = JSON.parse(localStorage.getItem("user") || "{}").id;
+        } catch {
+          userId = undefined;
+        }
+      }
+      
+      if (!userId) {
+        alert("נא להתחבר מחדש");
+        return;
+      }
+
+      await deleteProject(deleteConfirmProject.id, userId);
+      
+      // Update local state
+      setProjects(projects.filter(p => p.id !== deleteConfirmProject.id));
+      setDeleteConfirmProject(null);
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+      alert("שגיאה במחיקת הפרויקט");
+    }
+  };
+
+  // Open edit modal
+  const openEditModal = (project: DisplayProject) => {
+    setEditingProject(project);
+    setEditName(project.name);
+    setEditBudget(project.budget.toString());
+    setProjectMenuOpen(null);
+  };
+
   const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
   const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0);
   const totalRemaining = totalBudget - totalSpent;
@@ -580,48 +681,91 @@ function DashboardContent() {
               const isNearLimit = percentage > 80 && !isOverBudget;
               
               return (
-                <Link
+                <div
                   key={project.id}
-                  href={`/project/${project.id}`}
-                  className="block border border-gray-100 rounded-2xl p-8 hover:border-gray-300 hover:shadow-md transition-all duration-200"
+                  className="relative border border-gray-100 rounded-2xl p-8 hover:border-gray-300 hover:shadow-md transition-all duration-200"
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <h3 className="text-xl font-semibold text-gray-900">{project.name}</h3>
-                    <span className={`text-sm px-3 py-1 rounded-full ${
-                      isOverBudget ? 'bg-red-100 text-red-700' :
-                      isNearLimit ? 'bg-amber-100 text-amber-700' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {percentage.toFixed(0)}% נוצל
-                    </span>
+                  {/* Project Menu Button */}
+                  <div className="absolute top-4 left-4">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProjectMenuOpen(projectMenuOpen === project.id ? null : project.id);
+                      }}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {projectMenuOpen === project.id && (
+                      <div className="absolute left-0 top-10 bg-white border border-gray-200 rounded-xl shadow-lg py-2 min-w-[140px] z-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(project);
+                          }}
+                          className="w-full px-4 py-2 text-right text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <span>✏️</span>
+                          <span>עריכה</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmProject(project);
+                            setProjectMenuOpen(null);
+                          }}
+                          className="w-full px-4 py-2 text-right text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
+                          <span>🗑️</span>
+                          <span>מחיקה</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="grid md:grid-cols-3 gap-8">
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">תקציב</p>
-                      <p className="text-lg font-medium text-gray-900">₪{project.budget.toLocaleString()}</p>
+
+                  <Link href={`/project/${project.id}`} className="block">
+                    <div className="flex items-start justify-between mb-6">
+                      <h3 className="text-xl font-semibold text-gray-900">{project.name}</h3>
+                      <span className={`text-sm px-3 py-1 rounded-full ${
+                        isOverBudget ? 'bg-red-100 text-red-700' :
+                        isNearLimit ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {percentage.toFixed(0)}% נוצל
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">הוצאות</p>
-                      <p className="text-lg font-medium text-gray-900">₪{project.spent.toLocaleString()}</p>
+                    <div className="grid md:grid-cols-3 gap-8">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">תקציב</p>
+                        <p className="text-lg font-medium text-gray-900">₪{project.budget.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">הוצאות</p>
+                        <p className="text-lg font-medium text-gray-900">₪{project.spent.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">נותר</p>
+                        <p className={`text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
+                          ₪{remaining.toLocaleString()}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">נותר</p>
-                      <p className={`text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
-                        ₪{remaining.toLocaleString()}
-                      </p>
+                    <div className="mt-6 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          isOverBudget ? 'bg-red-500' :
+                          isNearLimit ? 'bg-amber-500' :
+                          'bg-gray-900'
+                        }`}
+                        style={{ width: `${Math.min(percentage, 100)}%` }}
+                      />
                     </div>
-                  </div>
-                  <div className="mt-6 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        isOverBudget ? 'bg-red-500' :
-                        isNearLimit ? 'bg-amber-500' :
-                        'bg-gray-900'
-                      }`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               );
             })}
           </div>
@@ -667,6 +811,88 @@ function DashboardContent() {
               </button>
               <button
                 onClick={() => setShowNewProject(false)}
+                className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full text-base hover:bg-gray-50 transition-colors"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50" onClick={() => setEditingProject(null)}>
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-8">עריכת פרויקט</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm text-gray-500 mb-2">שם הפרויקט</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-500 mb-2">תקציב (₪)</label>
+                <input
+                  type="number"
+                  value={editBudget}
+                  onChange={(e) => setEditBudget(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={handleEditProject}
+                disabled={!editName || !editBudget}
+                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-base hover:bg-gray-800 transition-colors disabled:opacity-30"
+              >
+                שמור שינויים
+              </button>
+              <button
+                onClick={() => setEditingProject(null)}
+                className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full text-base hover:bg-gray-50 transition-colors"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Project Confirmation Modal */}
+      {deleteConfirmProject && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50" onClick={() => setDeleteConfirmProject(null)}>
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md text-center" onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">🗑️</span>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">מחיקת פרויקט</h2>
+            <p className="text-gray-500 mb-2">
+              האם אתה בטוח שברצונך למחוק את הפרויקט
+            </p>
+            <p className="text-gray-900 font-semibold mb-6">
+              &quot;{deleteConfirmProject.name}&quot;?
+            </p>
+            <p className="text-red-500 text-sm mb-6">
+              פעולה זו תמחק את כל ההוצאות, התמונות והנתונים של הפרויקט ולא ניתן לשחזר אותם.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteProject}
+                className="flex-1 bg-red-600 text-white py-3 rounded-full text-base hover:bg-red-700 transition-colors"
+              >
+                כן, מחק
+              </button>
+              <button
+                onClick={() => setDeleteConfirmProject(null)}
                 className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full text-base hover:bg-gray-50 transition-colors"
               >
                 ביטול

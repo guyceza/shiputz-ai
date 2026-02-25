@@ -437,7 +437,7 @@ export default function ProjectPage() {
                 suppliers: projectData.suppliers,
                 savedQuotes: projectData.savedQuotes
               };
-              await saveProjectData(projectData.id, dataToSave, projectData.spent);
+              await saveProjectData(projectData.id, dataToSave, userId, projectData.spent);
               setProject({ ...projectData }); // Trigger re-render with URLs
             }
           }).catch(err => console.error('Image migration failed:', err));
@@ -541,6 +541,10 @@ export default function ProjectPage() {
     }
     
     // Save to Supabase (async, non-blocking)
+    if (!userId) {
+      console.error("Failed to save to Supabase: Missing userId");
+      return;
+    }
     try {
       const projectData: ProjectData = {
         expenses: updatedProject.expenses || [],
@@ -551,7 +555,7 @@ export default function ProjectPage() {
         suppliers: updatedProject.suppliers || [],
         savedQuotes: updatedProject.savedQuotes || []
       };
-      await saveProjectData(updatedProject.id, projectData, updatedProject.spent);
+      await saveProjectData(updatedProject.id, projectData, userId, updatedProject.spent);
     } catch (err) {
       console.error("Failed to save to Supabase:", err);
       // Data is still saved locally, will sync later

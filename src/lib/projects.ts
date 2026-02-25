@@ -153,11 +153,11 @@ export async function createProject(userId: string, name: string, budget: number
 }
 
 // Update a project (including nested data) - via API to bypass RLS
-export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent' | 'data'>>): Promise<Project> {
+export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent' | 'data'>>, userId: string): Promise<Project> {
   const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updates),
+    body: JSON.stringify({ userId, ...updates }),
   });
   
   if (!response.ok) {
@@ -170,8 +170,8 @@ export async function updateProject(projectId: string, updates: Partial<Pick<Pro
 }
 
 // Delete a project - via API to bypass RLS
-export async function deleteProject(projectId: string): Promise<void> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, {
+export async function deleteProject(projectId: string, userId: string): Promise<void> {
+  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}?userId=${encodeURIComponent(userId)}`, {
     method: 'DELETE',
   });
   
@@ -183,12 +183,12 @@ export async function deleteProject(projectId: string): Promise<void> {
 }
 
 // Save full project data (expenses, suppliers, etc.)
-export async function saveProjectData(projectId: string, data: ProjectData, spent?: number): Promise<Project> {
+export async function saveProjectData(projectId: string, data: ProjectData, userId: string, spent?: number): Promise<Project> {
   const updates: Partial<Project> = { data };
   if (spent !== undefined) {
     updates.spent = spent;
   }
-  return updateProject(projectId, updates);
+  return updateProject(projectId, updates, userId);
 }
 
 // Migrate localStorage projects to Supabase (one-time, v2 with full data)

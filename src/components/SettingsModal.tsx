@@ -15,7 +15,15 @@ export function SettingsModal({ isOpen, onClose, userId }: SettingsModalProps) {
 
   useEffect(() => {
     if (isOpen && userId) {
+      setLoading(true);
       loadSettings();
+    }
+  }, [isOpen, userId]);
+
+  // If no userId, don't show loading forever
+  useEffect(() => {
+    if (isOpen && !userId) {
+      setLoading(false);
     }
   }, [isOpen, userId]);
 
@@ -53,6 +61,18 @@ export function SettingsModal({ isOpen, onClose, userId }: SettingsModalProps) {
   };
 
   if (!isOpen) return null;
+
+  // No userId - can't load settings
+  if (!userId) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-md w-full text-center">
+          <p className="text-gray-500">טוען משתמש...</p>
+          <button onClick={onClose} className="mt-4 text-sm text-gray-400">סגור</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

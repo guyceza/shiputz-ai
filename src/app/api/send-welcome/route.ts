@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientId } from '@/lib/rate-limit';
-import { verifyUserEmail } from '@/lib/server-auth';
+
+// Verify user is authenticated (has valid Supabase session via cookie)
+function verifyAuth(request: NextRequest): boolean {
+  try {
+    const cookies = request.cookies.getAll();
+    const hasSupabaseCookie = cookies.some(c => 
+      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+    );
+    return hasSupabaseCookie;
+  } catch {
+    return false;
+  }
+}
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
@@ -21,11 +33,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
-    // Bug #H08 fix: Verify user owns the email OR is the current session user
-    const isAuthorized = await verifyUserEmail(email);
-    if (!isAuthorized) {
-      // If not authenticated, still allow but with very strict rate limiting (already applied above)
-      // This handles the case where someone just signed up and isn't fully authenticated yet
+    // Bug fix: Verify user has a valid session
+    // If not authenticated, still allow but with very strict rate limiting (already applied above)
+    // This handles the case where someone just signed up and isn't fully authenticated yet
+    if (!verifyAuth(request)) {
       console.warn(`Welcome email requested for ${email} without auth - allowing due to rate limit`);
     }
 

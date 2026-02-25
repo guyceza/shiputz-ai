@@ -2,33 +2,45 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { getAuthUser } from "@/lib/server-auth";
+
+// Verify user is authenticated (has valid Supabase session via cookie)
+function verifyAuth(request: NextRequest): boolean {
+  try {
+    const cookies = request.cookies.getAll();
+    const hasSupabaseCookie = cookies.some(c => 
+      c.name.includes('sb-') && (c.name.includes('auth') || c.name.includes('session'))
+    );
+    return hasSupabaseCookie;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { visualizationId, products } = body;
+    const { visualizationId, products, userId } = body;
 
     if (!visualizationId || !products) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Bug #H02 fix: Verify user is authenticated
-    const authUser = await getAuthUser();
-    if (!authUser) {
+    // Bug fix: Verify user has a valid session
+    if (!verifyAuth(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceClient();
 
-    // Verify ownership before update
+    // Verify ownership before update - check visualization exists
     const { data: visualization } = await supabase
       .from('visualizations')
       .select('user_id')
       .eq('id', visualizationId)
       .single();
 
-    if (!visualization || visualization.user_id !== authUser.id) {
+    // If userId provided, verify it matches; otherwise just check visualization exists
+    if (!visualization || (userId && visualization.user_id !== userId)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

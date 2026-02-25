@@ -516,28 +516,34 @@ export default function VisualizePage() {
   }, []);
 
   // Load visualization history from Supabase
+  const reloadHistory = async (forUserId?: string) => {
+    const effectiveUserId = forUserId || userId;
+    if (!effectiveUserId) return;
+    
+    try {
+      console.log("Loading history for userId:", effectiveUserId);
+      const data = await loadVisualizations(effectiveUserId);
+      console.log("Loaded history:", data.length, "items");
+      // Map Supabase format to local format
+      const mapped = data.map(v => ({
+        id: v.id,
+        beforeImage: v.before_image_url,
+        afterImage: v.after_image_url,
+        description: v.description,
+        analysis: v.analysis,
+        costs: v.costs,
+        createdAt: v.created_at,
+        detectedProducts: v.detected_products || []
+      }));
+      setVisualizationHistory(mapped);
+    } catch (e) {
+      console.error("Failed to load history:", e);
+    }
+  };
+  
   useEffect(() => {
     if (userId) {
-      const loadHistory = async () => {
-        try {
-          const data = await loadVisualizations(userId);
-          // Map Supabase format to local format
-          const mapped = data.map(v => ({
-            id: v.id,
-            beforeImage: v.before_image_url,
-            afterImage: v.after_image_url,
-            description: v.description,
-            analysis: v.analysis,
-            costs: v.costs,
-            createdAt: v.created_at,
-            detectedProducts: v.detected_products || []
-          }));
-          setVisualizationHistory(mapped);
-        } catch (e) {
-          console.error("Failed to load history:", e);
-        }
-      };
-      loadHistory();
+      reloadHistory(userId);
     }
   }, [userId]);
 
@@ -705,6 +711,10 @@ export default function VisualizePage() {
         if (uploadedImage && data.generatedImage && currentUserId) {
           console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
           saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate, currentUserId)
+            .then(() => {
+              // Reload history to ensure it's up to date
+              setTimeout(() => reloadHistory(currentUserId), 1000);
+            })
             .catch(e => console.error('Failed to save to history:', e));
         } else {
           console.error("handleGenerate: Cannot save - missing data", { 

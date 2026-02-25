@@ -43,19 +43,28 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
+    const normalizedEmail = email.toLowerCase();
     
-    // Check newsletter_subscribers table - if unsubscribed_at is set, they're unsubscribed
-    const { data } = await supabase
-      .from('newsletter_subscribers')
-      .select('unsubscribed_at')
-      .eq('email', email.toLowerCase())
-      .single();
+    // Check both tables
+    const [newsletterResult, userResult] = await Promise.all([
+      supabase
+        .from('newsletter_subscribers')
+        .select('unsubscribed_at')
+        .eq('email', normalizedEmail)
+        .single(),
+      supabase
+        .from('users')
+        .select('marketing_unsubscribed_at')
+        .eq('email', normalizedEmail)
+        .single()
+    ]);
 
     return NextResponse.json({ 
-      unsubscribed: data?.unsubscribed_at !== null 
+      newsletter_unsubscribed: newsletterResult.data?.unsubscribed_at !== null,
+      marketing_unsubscribed: userResult.data?.marketing_unsubscribed_at !== null,
+      unsubscribed: newsletterResult.data?.unsubscribed_at !== null || userResult.data?.marketing_unsubscribed_at !== null
     });
   } catch (error) {
-    // If no record exists, they're not unsubscribed
     return NextResponse.json({ unsubscribed: false });
   }
 }
@@ -77,43 +86,70 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
     const normalizedEmail = email.toLowerCase();
+    const now = new Date().toISOString();
     
-    // Try to update existing record first
-    const { data: existing } = await supabase
+    let unsubscribedFrom: string[] = [];
+
+    // 1. Try to unsubscribe from users table (marketing emails / 14 email flow)
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (existingUser) {
+      const { error } = await supabase
+        .from('users')
+        .update({ marketing_unsubscribed_at: now })
+        .eq('email', normalizedEmail);
+
+      if (!error) {
+        unsubscribedFrom.push('marketing');
+      } else {
+        console.error('User unsubscribe error:', error);
+      }
+    }
+
+    // 2. Try to unsubscribe from newsletter_subscribers table
+    const { data: existingNewsletter } = await supabase
       .from('newsletter_subscribers')
       .select('id')
       .eq('email', normalizedEmail)
       .single();
 
-    if (existing) {
-      // Update existing record - set unsubscribed_at
+    if (existingNewsletter) {
       const { error } = await supabase
         .from('newsletter_subscribers')
-        .update({ 
-          unsubscribed_at: new Date().toISOString()
-        })
+        .update({ unsubscribed_at: now })
         .eq('email', normalizedEmail);
 
-      if (error) {
-        console.error('Unsubscribe update error:', error);
-        return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 });
+      if (!error) {
+        unsubscribedFrom.push('newsletter');
+      } else {
+        console.error('Newsletter unsubscribe error:', error);
       }
     } else {
-      // Create new record with unsubscribed_at set
+      // Create record to remember they unsubscribed (even if they sign up later)
       const { error } = await supabase
         .from('newsletter_subscribers')
         .insert({ 
           email: normalizedEmail,
-          unsubscribed_at: new Date().toISOString()
+          unsubscribed_at: now
         });
 
-      if (error) {
-        console.error('Unsubscribe insert error:', error);
-        return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 });
+      if (!error) {
+        unsubscribedFrom.push('newsletter');
       }
     }
 
-    return NextResponse.json({ success: true });
+    if (unsubscribedFrom.length === 0) {
+      return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      unsubscribed_from: unsubscribedFrom
+    });
   } catch (error) {
     console.error('Unsubscribe error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

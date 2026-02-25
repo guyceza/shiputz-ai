@@ -534,7 +534,12 @@ export async function GET(request: NextRequest) {
     const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()));
 
     for (const user of users || []) {
-      // Skip unsubscribed users
+      // Skip users who unsubscribed from marketing emails
+      if (user.marketing_unsubscribed_at) {
+        continue;
+      }
+      
+      // Skip newsletter unsubscribes (backward compatibility)
       if (unsubscribedEmails.has(user.email.toLowerCase())) {
         continue;
       }

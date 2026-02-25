@@ -39,6 +39,9 @@
     },
     "src/app/api/weekly-report/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/bill-of-quantities/route.ts": {
+      "maxDuration": 60
     }
   }
 }

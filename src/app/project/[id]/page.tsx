@@ -1615,14 +1615,14 @@ export default function ProjectPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`py-3 px-4 text-sm font-semibold rounded-full transition-all flex items-center gap-2 ${
+                className={`py-2.5 px-3 md:py-3 md:px-4 text-sm font-semibold rounded-full transition-all flex items-center gap-1.5 md:gap-2 whitespace-nowrap ${
                   activeTab === tab.id 
                     ? "bg-gray-900 text-white shadow-md" 
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                 }`}
               >
-                <tab.Icon className="w-4 h-4" strokeWidth={2.5} />
-                {tab.label}
+                <tab.Icon className="w-4 h-4 flex-shrink-0" strokeWidth={2.5} />
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>

@@ -895,7 +895,7 @@ export default function Home() {
           <div className="flex gap-6 text-sm text-gray-500">
             <Link href="/terms" className="hover:text-gray-900">תנאי שימוש</Link>
             <Link href="/privacy" className="hover:text-gray-900">פרטיות</Link>
-            <Link href="#" className="hover:text-gray-900">צור קשר</Link>
+            <a href="mailto:support@shipazti.com" className="hover:text-gray-900">צור קשר</a>
           </div>
         </div>
       </footer>

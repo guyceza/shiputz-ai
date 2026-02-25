@@ -193,8 +193,8 @@ export default function TipsPage() {
           <p className="text-sm text-gray-500">© 2026 ShiputzAI</p>
           <div className="flex gap-6 text-sm text-gray-500">
             <Link href="/tips" className="hover:text-gray-900">מאמרים</Link>
-            <Link href="#" className="hover:text-gray-900">תנאי שימוש</Link>
-            <Link href="#" className="hover:text-gray-900">צור קשר</Link>
+            <Link href="/terms" className="hover:text-gray-900">תנאי שימוש</Link>
+            <a href="mailto:support@shipazti.com" className="hover:text-gray-900">צור קשר</a>
           </div>
         </div>
       </footer>

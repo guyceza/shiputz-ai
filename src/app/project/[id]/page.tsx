@@ -22,6 +22,7 @@ import { QuoteLoadingState } from "@/components/project/QuoteLoadingState";
 import { BudgetOverview } from "@/components/project/BudgetOverview";
 import { ExpenseCard } from "@/components/project/ExpenseCard";
 import { ExpenseListSkeleton } from "@/components/Skeleton";
+import { BarChart3, Calendar, Users, Camera } from "lucide-react";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -1606,21 +1607,21 @@ export default function ProjectPage() {
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex gap-4 md:gap-6">
             {[
-              { id: "overview", label: "סקירה", icon: "📊" },
-              { id: "timeline", label: "ציר זמן", icon: "📅" },
-              { id: "suppliers", label: "ספקים", icon: "👷" },
-              { id: "photos", label: "תמונות", icon: "📸" },
+              { id: "overview", label: "סקירה", Icon: BarChart3 },
+              { id: "timeline", label: "ציר זמן", Icon: Calendar },
+              { id: "suppliers", label: "ספקים", Icon: Users },
+              { id: "photos", label: "תמונות", Icon: Camera },
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`py-3 px-4 text-sm font-semibold rounded-full transition-all ${
+                className={`py-3 px-4 text-sm font-semibold rounded-full transition-all flex items-center gap-2 ${
                   activeTab === tab.id 
                     ? "bg-gray-900 text-white shadow-md" 
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                 }`}
               >
-                <span className="ml-1">{tab.icon}</span>
+                <tab.Icon className="w-4 h-4" strokeWidth={2.5} />
                 {tab.label}
               </button>
             ))}

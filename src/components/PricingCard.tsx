@@ -171,15 +171,21 @@ export default function PricingCard({
       
       {/* Price */}
       <div className="text-center mb-6">
+        <div className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full mb-3">
+          50% הנחה
+        </div>
         <div className="flex items-baseline justify-center gap-3">
           <span className="text-5xl font-bold text-gray-900">
             {selectedPlan === 'plus' ? '₪179' : '₪149'}
           </span>
-          <span className="text-xl text-gray-400 line-through">
+          <span className="text-xl text-red-400 line-through">
             {selectedPlan === 'plus' ? '₪359' : '₪299'}
           </span>
         </div>
         <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
+        <p className="text-green-600 text-sm font-medium mt-1">
+          חוסך {selectedPlan === 'plus' ? '₪180' : '₪150'}
+        </p>
       </div>
       
       {/* Features with included/not included styling */}

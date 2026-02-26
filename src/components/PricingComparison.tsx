@@ -16,9 +16,82 @@ const allFeatures = [
 
 export default function PricingComparison() {
   return (
-    <div className="flex flex-col lg:flex-row-reverse gap-6 justify-center items-stretch max-w-5xl mx-auto">
+    <div className="flex flex-col lg:flex-row-reverse gap-6 justify-center items-stretch max-w-6xl mx-auto">
       
-      {/* Premium Card - RIGHT in RTL = LEFT visually */}
+      {/* Free Card - LEFTMOST */}
+      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
+          <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
+        </div>
+        
+        <div className="mb-6">
+          <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-bold text-gray-900">₪0</span>
+          </div>
+          <p className="text-gray-500 text-sm mt-1">ללא התחייבות</p>
+        </div>
+        
+        <ul className="space-y-3 mb-8">
+          <li className="flex items-center gap-3 text-gray-900">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>הדמיה אחת בחינם</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-900">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>טיפים ומאמרים</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>מעקב תקציב</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>סריקת קבלות</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>ניתוח הצעות מחיר</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>בדיקת חוזים</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>התראות חכמות</span>
+          </li>
+          <li className="flex items-center gap-3 text-gray-300">
+            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span>עוזר אישי</span>
+          </li>
+        </ul>
+        
+        <Link
+          href="/signup"
+          className="block w-full border-2 border-gray-300 text-gray-600 py-3 rounded-lg text-center font-medium hover:bg-gray-50 transition-colors"
+        >
+          התחל בחינם
+        </Link>
+      </div>
+
+      {/* Premium Card */}
       <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>

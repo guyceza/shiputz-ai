@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 export async function POST(request: Request) {
   try {
@@ -181,8 +181,13 @@ ${hasPlumbingPlan ? '8. זהה נקודות אינסטלציה (מים חמים/
     const geminiData = await response.json();
 
     if (geminiData.error) {
-      console.error("Gemini API error:", geminiData.error);
-      return NextResponse.json({ error: "שגיאה בשירות AI" }, { status: 500 });
+      console.error("Gemini API error:", JSON.stringify(geminiData.error, null, 2));
+      return NextResponse.json({ error: "שגיאה בשירות AI", details: geminiData.error?.message || "Unknown error" }, { status: 500 });
+    }
+
+    if (!geminiData.candidates || geminiData.candidates.length === 0) {
+      console.error("No candidates in response:", JSON.stringify(geminiData, null, 2));
+      return NextResponse.json({ error: "לא התקבלה תשובה מה-AI" }, { status: 500 });
     }
 
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";

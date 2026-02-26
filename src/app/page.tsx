@@ -219,7 +219,7 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-11 min-h-screen flex flex-col justify-center px-6">
+      <section className="pt-20 pb-8 px-6">
         <div className="max-w-6xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             {/* Text Content */}

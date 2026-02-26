@@ -68,7 +68,7 @@ export default function StatsCounter() {
   const stat4 = useCountUp(12850, 2300);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-12 mb-4 max-w-4xl mx-auto">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-12 max-w-4xl mx-auto">
       <div ref={stat1.ref} className="group p-4 rounded-2xl hover-lift cursor-default">
         <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">
           ₪{stat1.count.toLocaleString('he-IL')}<span className="text-gray-400">+</span>

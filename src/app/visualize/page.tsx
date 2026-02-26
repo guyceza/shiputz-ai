@@ -370,7 +370,7 @@ export default function VisualizePage() {
   const [selectedPlan, setSelectedPlan] = useState<'plus' | 'separate'>('plus');
   const [generatedResult, setGeneratedResult] = useState<{image: string, beforeImage: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
-  const [countdown, setCountdown] = useState(45);
+  const [countdown, setCountdown] = useState(60);
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
   const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
@@ -412,7 +412,7 @@ export default function VisualizePage() {
   // Countdown and tips rotation when generating
   useEffect(() => {
     if (!generating) {
-      setCountdown(45);
+      setCountdown(60);
       setCurrentTip(0);
       return;
     }

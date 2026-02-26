@@ -110,7 +110,8 @@ ${midragPricing}
 כתוב בעברית, בצורה ברורה. היה ספציפי עם מספרים - השווה כל מחיר לטווח מידרג.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`,
+      // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

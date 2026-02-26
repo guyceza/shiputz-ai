@@ -61,7 +61,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Use Gemini to detect products in the image
-    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${apiKey}`;
+    // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
     
     const geminiPayload = {
       contents: [{

@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
+// Construction worker animation from LottieFiles CDN
+const ANIMATION_URL = 'https://assets1.lottiefiles.com/packages/lf20_1pxqjqps.json';
+
 interface LoadingScreenProps {
   text?: string;
   tip?: string;
@@ -12,12 +15,24 @@ interface LoadingScreenProps {
 
 export default function LoadingScreen({ text = "טוען...", tip }: LoadingScreenProps) {
   const [animationData, setAnimationData] = useState<object | null>(null);
+  const [loadAttempted, setLoadAttempted] = useState(false);
 
   useEffect(() => {
-    fetch('/loading-animation.json')
-      .then(res => res.json())
+    // Try CDN first, then local fallback
+    fetch(ANIMATION_URL)
+      .then(res => {
+        if (!res.ok) throw new Error('CDN failed');
+        return res.json();
+      })
       .then(data => setAnimationData(data))
-      .catch(() => {});
+      .catch(() => {
+        // Fallback to local file
+        fetch('/loading-animation.json')
+          .then(res => res.json())
+          .then(data => setAnimationData(data))
+          .catch(() => {});
+      })
+      .finally(() => setLoadAttempted(true));
   }, []);
 
   return (
@@ -28,8 +43,10 @@ export default function LoadingScreen({ text = "טוען...", tip }: LoadingScre
         <Lottie 
           animationData={animationData} 
           loop={true}
-          style={{ width: 280, height: 220 }}
+          style={{ width: 300, height: 280 }}
         />
+      ) : loadAttempted ? (
+        <div className="text-6xl mb-4">🏗️</div>
       ) : (
         <div className="relative w-16 h-16 mb-6">
           <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>

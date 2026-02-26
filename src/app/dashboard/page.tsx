@@ -4,10 +4,14 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import AdminPanel from "./admin-panel";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
+
+// Dynamic import for Lottie (client-side only)
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import { 
   getProjects, 
   createProject, 
@@ -51,6 +55,7 @@ function DashboardContent() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [lottieData, setLottieData] = useState<object | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
@@ -73,6 +78,14 @@ function DashboardContent() {
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
+
+  // Load Lottie animation
+  useEffect(() => {
+    fetch('/loading-animation.json')
+      .then(res => res.json())
+      .then(data => setLottieData(data))
+      .catch(() => {}); // Fallback to spinner if fails
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -455,11 +468,19 @@ function DashboardContent() {
         {/* Logo */}
         <div className="text-3xl font-bold text-gray-900 mb-8">ShiputzAI</div>
         
-        {/* Animated Spinner */}
-        <div className="relative w-16 h-16 mb-6">
-          <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
-        </div>
+        {/* Lottie Animation or Fallback Spinner */}
+        {lottieData ? (
+          <Lottie 
+            animationData={lottieData} 
+            loop={true}
+            style={{ width: 180, height: 180 }}
+          />
+        ) : (
+          <div className="relative w-16 h-16 mb-6">
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
+          </div>
+        )}
         
         {/* Loading Text */}
         <div className="text-gray-600 font-medium mb-2">טוען את האזור האישי...</div>

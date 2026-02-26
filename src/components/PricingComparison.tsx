@@ -81,7 +81,7 @@ export default function PricingComparison() {
             <span className="text-sm text-gray-400 line-through">₪599</span>
             <span className="text-3xl font-bold text-gray-900">₪299.99</span>
           </div>
-          <p className="text-emerald-600 text-sm mt-1 font-semibold animate-pulse">💰 תשלום חד פעמי</p>
+          <p className="text-emerald-600 text-sm mt-1 font-semibold animate-pulse">תשלום חד פעמי</p>
         </div>
         
         <ul className="space-y-3 mb-8 flex-grow">
@@ -121,7 +121,7 @@ export default function PricingComparison() {
             <span className="text-sm text-gray-400 line-through">₪699</span>
             <span className="text-3xl font-bold text-gray-900">₪349.99</span>
           </div>
-          <p className="text-emerald-600 text-sm mt-1 font-semibold animate-pulse">💰 תשלום חד פעמי</p>
+          <p className="text-emerald-600 text-sm mt-1 font-semibold animate-pulse">תשלום חד פעמי</p>
         </div>
         
         <ul className="space-y-3 mb-8 flex-grow">

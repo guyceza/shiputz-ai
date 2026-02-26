@@ -317,18 +317,27 @@ export default function Home() {
       {/* Trusted Sources Bar - Infinite Carousel */}
       <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden">
         <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes marquee {
+          .marquee-container {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+          }
+          .marquee-content {
+            display: flex;
+            animation: scroll 15s linear infinite;
+          }
+          .marquee-content span {
+            flex-shrink: 0;
+            padding: 0 2rem;
+          }
+          @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
           }
-          .marquee-track {
-            animation: marquee 20s linear infinite;
-          }
         `}} />
         <p className="text-center text-sm text-gray-400 mb-5">מחירונים מבוססים על נתונים מ:</p>
-        <div className="max-w-3xl mx-auto overflow-hidden">
-          <div className="marquee-track flex items-center gap-10 whitespace-nowrap" style={{ width: 'max-content' }}>
-            {/* First set */}
+        <div className="marquee-container">
+          <div className="marquee-content">
             <span className="text-lg font-semibold text-gray-300">midrag</span>
             <span className="text-lg font-semibold text-gray-300">ACE</span>
             <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
@@ -337,7 +346,8 @@ export default function Home() {
             <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
             <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
             <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
-            {/* Duplicate for seamless loop */}
+            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
+            <span className="text-lg font-semibold text-gray-300">טמבור</span>
             <span className="text-lg font-semibold text-gray-300">midrag</span>
             <span className="text-lg font-semibold text-gray-300">ACE</span>
             <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
@@ -346,6 +356,8 @@ export default function Home() {
             <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
             <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
             <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
+            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
+            <span className="text-lg font-semibold text-gray-300">טמבור</span>
           </div>
         </div>
       </section>

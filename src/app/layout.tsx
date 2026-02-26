@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import ChatWidget from "@/components/ChatWidget";
+import CookieConsent from "@/components/CookieConsent";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
@@ -135,6 +136,7 @@ export default function RootLayout({
             {children}
           </main>
           <ChatWidget />
+          <CookieConsent />
         </ThemeProvider>
         <Analytics />
       </body>

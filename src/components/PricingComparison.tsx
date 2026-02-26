@@ -12,7 +12,7 @@ const allFeatures = [
   { name: "בדיקת חוזים", free: false, premium: true, plus: true },
   { name: "התראות חכמות", free: false, premium: true, plus: true },
   { name: "עוזר אישי", free: false, premium: true, plus: true },
-  { name: "הדמיות נוספות", free: false, premium: false, plus: true },
+  { name: "4 הדמיות", free: false, premium: false, plus: true },
   { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
 ];
 

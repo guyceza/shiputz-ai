@@ -12,8 +12,8 @@ const allFeatures = [
   { name: "בדיקת חוזים", free: false, premium: true, plus: true },
   { name: "התראות חכמות", free: false, premium: true, plus: true },
   { name: "עוזר אישי", free: false, premium: true, plus: true },
-  { name: "4 הדמיות במערכת AI Vision", free: false, premium: false, plus: true, plusOnly: true },
-  { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look", plusOnly: true },
+  { name: "4 הדמיות במערכת AI Vision", free: false, premium: false, plus: true },
+  { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
 ];
 
 const businessFeatures = [

@@ -314,16 +314,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted Sources Bar */}
-      <section className="py-10 px-6 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-center text-sm text-gray-400 mb-6">מחירונים מבוססים על נתונים מ:</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">midrag</span>
-            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">ACE</span>
-            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">HomeCenter</span>
-            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">TAMBUR</span>
-            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">IKEA</span>
+      {/* Trusted Sources Bar - Infinite Carousel */}
+      <section className="py-10 bg-gray-50 border-y border-gray-100 overflow-hidden">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .marquee-track {
+            animation: marquee 25s linear infinite;
+          }
+          .marquee-track:hover {
+            animation-play-state: paused;
+          }
+        `}} />
+        <p className="text-center text-sm text-gray-400 mb-6">מחירונים מבוססים על נתונים מ:</p>
+        <div className="relative">
+          <div className="marquee-track flex items-center gap-16 whitespace-nowrap" style={{ width: 'max-content' }}>
+            {/* First set */}
+            <span className="text-xl font-bold text-gray-300">midrag</span>
+            <span className="text-xl font-bold text-gray-300">ACE</span>
+            <span className="text-xl font-bold text-gray-300">HomeCenter</span>
+            <span className="text-xl font-bold text-gray-300">TAMBUR</span>
+            <span className="text-xl font-bold text-gray-300">IKEA</span>
+            <span className="text-xl font-bold text-gray-300">ארד שיפוצים</span>
+            <span className="text-xl font-bold text-gray-300">מחסני חשמל</span>
+            <span className="text-xl font-bold text-gray-300">שקם אלקטריק</span>
+            <span className="text-xl font-bold text-gray-300">ZARA HOME</span>
+            <span className="text-xl font-bold text-gray-300">H&M HOME</span>
+            {/* Duplicate for seamless loop */}
+            <span className="text-xl font-bold text-gray-300">midrag</span>
+            <span className="text-xl font-bold text-gray-300">ACE</span>
+            <span className="text-xl font-bold text-gray-300">HomeCenter</span>
+            <span className="text-xl font-bold text-gray-300">TAMBUR</span>
+            <span className="text-xl font-bold text-gray-300">IKEA</span>
+            <span className="text-xl font-bold text-gray-300">ארד שיפוצים</span>
+            <span className="text-xl font-bold text-gray-300">מחסני חשמל</span>
+            <span className="text-xl font-bold text-gray-300">שקם אלקטריק</span>
+            <span className="text-xl font-bold text-gray-300">ZARA HOME</span>
+            <span className="text-xl font-bold text-gray-300">H&M HOME</span>
           </div>
         </div>
       </section>

@@ -53,11 +53,11 @@ export default function PricingComparison() {
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-start gap-1 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.free ? (
-                <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}
@@ -96,11 +96,11 @@ export default function PricingComparison() {
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-start gap-1 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.premium ? (
-                <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}
@@ -143,7 +143,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.map((feature: any, i) => (
             <li key={i} className="flex items-start gap-1 text-gray-900">
-              <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {feature.link ? (
@@ -184,7 +184,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 text-gray-700 flex-grow">
           {businessFeatures.map((feature, i) => (
             <li key={i} className="flex items-start gap-1">
-              <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="3 5 18 14">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>{feature}</span>

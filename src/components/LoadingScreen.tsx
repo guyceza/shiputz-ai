@@ -5,19 +5,23 @@ import { useEffect, useState } from 'react';
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
-// Business Website animation from LottieFiles CDN
-const ANIMATION_URL = 'https://assets2.lottiefiles.com/packages/lf20_dews3j6m.json';
+// Default: Home animation | Project: Business Website animation
+const DEFAULT_ANIMATION_URL = 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json';
+const PROJECT_ANIMATION_URL = 'https://assets2.lottiefiles.com/packages/lf20_dews3j6m.json';
 
 interface LoadingScreenProps {
   text?: string;
   tip?: string;
+  variant?: 'default' | 'project';
 }
 
-export default function LoadingScreen({ text = "טוען...", tip }: LoadingScreenProps) {
+export default function LoadingScreen({ text = "טוען...", tip, variant = 'default' }: LoadingScreenProps) {
   const [animationData, setAnimationData] = useState<object | null>(null);
 
+  const animationUrl = variant === 'project' ? PROJECT_ANIMATION_URL : DEFAULT_ANIMATION_URL;
+
   useEffect(() => {
-    fetch(ANIMATION_URL)
+    fetch(animationUrl)
       .then(res => res.json())
       .then(data => setAnimationData(data))
       .catch(() => {
@@ -27,7 +31,7 @@ export default function LoadingScreen({ text = "טוען...", tip }: LoadingScre
           .then(data => setAnimationData(data))
           .catch(() => {});
       });
-  }, []);
+  }, [animationUrl]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">

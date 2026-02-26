@@ -1558,7 +1558,7 @@ export default function ProjectPage() {
   };
 
   if (isLoading || !project) {
-    return <LoadingScreen text="טוען את הפרויקט..." tip="רגע ונהיה מוכנים" />;
+    return <LoadingScreen text="טוען את הפרויקט..." tip="רגע ונהיה מוכנים" variant="project" />;
   }
 
   const budgetPercentage = (project.spent / project.budget) * 100;

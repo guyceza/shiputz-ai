@@ -273,7 +273,7 @@ export default function ComparisonSection() {
             
             <div className="relative z-10 text-center pt-6 pb-4 mb-2">
               <span className="text-2xl font-black text-stone-700 bg-stone-200/60 px-6 py-2 rounded-full">
-                בלי Shipazti
+                בלי ShiputzAI
               </span>
             </div>
 
@@ -329,7 +329,7 @@ export default function ComparisonSection() {
             
             <div className="relative z-10 text-center pt-6 pb-4">
               <span className="text-2xl font-black text-white bg-white/10 px-6 py-2 rounded-full">
-                עם Shipazti
+                עם ShiputzAI
               </span>
             </div>
 

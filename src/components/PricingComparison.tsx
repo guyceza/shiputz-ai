@@ -5,6 +5,7 @@ import Link from "next/link";
 const allFeatures = [
   { name: "הדמיה אחת בחינם", free: true, premium: true, plus: true },
   { name: "טיפים ומאמרים", free: true, premium: true, plus: true },
+  { name: "הזנת הוצאות ידנית", free: true, premium: true, plus: true },
   { name: "מעקב תקציב", free: false, premium: true, plus: true },
   { name: "סריקת קבלות", free: false, premium: true, plus: true },
   { name: "ניתוח הצעות מחיר", free: false, premium: true, plus: true },

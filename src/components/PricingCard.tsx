@@ -25,25 +25,15 @@ export default function PricingCard({
 }: PricingCardProps) {
   const [selectedPlan, setSelectedPlan] = useState<'premium' | 'plus'>('plus');
   
-  // Mini variant - compact pricing card
+  // Mini variant - wide, black & white only
   if (variant === "mini") {
     return (
-      <div className={`relative bg-white border border-gray-200 rounded-2xl px-6 py-5 shadow-sm ${className}`}>
-        {/* Plan Toggle - Premium Plus first (RTL) */}
-        <div className="flex justify-center gap-1 mb-4">
-          <button
-            onClick={() => setSelectedPlan('plus')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-              selectedPlan === 'plus'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            Premium Plus
-          </button>
+      <div className={`relative bg-white border border-gray-200 rounded-2xl px-8 py-6 shadow-sm w-full max-w-lg ${className}`}>
+        {/* Plan Toggle */}
+        <div className="flex justify-center gap-2 mb-5">
           <button
             onClick={() => setSelectedPlan('premium')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
               selectedPlan === 'premium'
                 ? 'bg-gray-900 text-white'
                 : 'text-gray-400 hover:text-gray-600'
@@ -51,21 +41,31 @@ export default function PricingCard({
           >
             Premium
           </button>
+          <button
+            onClick={() => setSelectedPlan('plus')}
+            className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              selectedPlan === 'plus'
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            Premium Plus
+          </button>
         </div>
         
-        <div className="flex items-center gap-5">
+        <div className="flex items-center justify-between">
           <Link
             href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-            className="bg-[#0d9488] text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition-colors whitespace-nowrap"
+            className="bg-gray-900 text-white px-8 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
           >
             לרכישה
           </Link>
           <div className="text-right">
-            <div className="flex items-baseline gap-2 justify-end">
-              <span className="text-3xl font-bold text-gray-900">
+            <div className="flex items-baseline gap-3 justify-end">
+              <span className="text-4xl font-bold text-gray-900">
                 {selectedPlan === 'plus' ? '₪179' : '₪149'}
               </span>
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-base text-gray-400 line-through">
                 {selectedPlan === 'plus' ? '₪359' : '₪299'}
               </span>
             </div>

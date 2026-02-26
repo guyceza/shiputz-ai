@@ -178,17 +178,17 @@ function CheckoutContent() {
           
           {/* Title */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-              {isPremiumPlus ? '⭐ Premium Plus' : 'Premium'}
+            <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
+              {isPremiumPlus ? 'Premium Plus' : 'Premium'}
             </div>
             
             <div className="flex items-center justify-center gap-3">
-              <span className="text-gray-400 line-through text-2xl">₪{codeValid ? basePrice : originalPrice}</span>
               <span className="text-5xl font-bold text-gray-900">₪{price}</span>
+              <span className="text-gray-400 line-through text-2xl">₪{codeValid ? basePrice : originalPrice}</span>
             </div>
             
-            <p className="text-green-600 font-medium mt-2">
-              {codeValid ? `🎉 ${discountPercent}% הנחה!` : '💳 תשלום חד פעמי'}
+            <p className="text-gray-500 mt-2">
+              {codeValid ? `הנחה ${discountPercent}% הופעלה` : 'תשלום חד פעמי'}
             </p>
           </div>
 
@@ -196,17 +196,23 @@ function CheckoutContent() {
           <div className="border-t border-gray-100 pt-6 mb-6">
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-center gap-3">
-                <span className="text-green-500 text-lg">✓</span>
-                <span>מעקב תקציב + סריקת קבלות AI</span>
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>מעקב תקציב + סריקת קבלות</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-green-500 text-lg">✓</span>
-                <span>ניתוח הצעות מחיר + עוזר AI</span>
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>ניתוח הצעות מחיר + עוזר אישי</span>
               </div>
               {isPremiumPlus && (
-                <div className="flex items-center gap-3 text-purple-700 font-medium">
-                  <span className="text-purple-500 text-lg">✓</span>
-                  <span>2 הדמיות AI מתנה</span>
+                <div className="flex items-center gap-3 font-medium">
+                  <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>2 הדמיות חדר</span>
                 </div>
               )}
             </div>
@@ -233,8 +239,8 @@ function CheckoutContent() {
                 }}
                 placeholder="קוד הנחה (אופציונלי)"
                 className={`flex-1 px-4 py-3 bg-gray-50 border-0 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-gray-900 ${
-                  codeValid === true ? 'ring-2 ring-green-500 bg-green-50' : 
-                  codeValid === false ? 'ring-2 ring-red-300 bg-red-50' : ''
+                  codeValid === true ? 'ring-2 ring-gray-900 bg-gray-100' : 
+                  codeValid === false ? 'ring-2 ring-gray-400 bg-gray-50' : ''
                 }`}
                 dir="ltr"
               />
@@ -247,10 +253,10 @@ function CheckoutContent() {
               </button>
             </div>
             {codeError && (
-              <p className="text-red-500 text-sm mt-2">{codeError}</p>
+              <p className="text-gray-500 text-sm mt-2">{codeError}</p>
             )}
             {codeValid && (
-              <p className="text-green-600 text-sm mt-2">✓ קוד הנחה הופעל - {discountPercent}% הנחה!</p>
+              <p className="text-gray-700 text-sm mt-2">קוד הנחה הופעל - {discountPercent}% הנחה</p>
             )}
           </div>
 
@@ -266,20 +272,17 @@ function CheckoutContent() {
 
         {/* Trust - minimal */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-3 text-gray-400">
-            <span className="text-sm">🔒 מאובטח</span>
+          <div className="flex items-center justify-center gap-4 text-gray-400">
+            <span className="text-sm">מאובטח</span>
             <div className="flex gap-2 items-center">
-              {/* Visa - simple text logo */}
-              <div className="h-6 px-2 bg-[#1A1F71] rounded flex items-center justify-center">
+              {/* Visa */}
+              <div className="h-6 px-2 bg-gray-800 rounded flex items-center justify-center">
                 <span className="text-white text-xs font-bold italic tracking-tight">VISA</span>
               </div>
               {/* Mastercard */}
-              <svg className="h-6" viewBox="0 0 38 24" fill="none">
-                <rect width="38" height="24" rx="4" fill="#F5F5F5"/>
-                <circle cx="15" cy="12" r="7" fill="#EB001B"/>
-                <circle cx="23" cy="12" r="7" fill="#F79E1B"/>
-                <path d="M19 6.5a6.97 6.97 0 0 0-2.5 5.5c0 2.2 1 4.2 2.5 5.5a6.97 6.97 0 0 0 2.5-5.5c0-2.2-1-4.2-2.5-5.5z" fill="#FF5F00"/>
-              </svg>
+              <div className="h-6 px-2 bg-gray-800 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold tracking-tight">MC</span>
+              </div>
             </div>
           </div>
         </div>
@@ -290,7 +293,7 @@ function CheckoutContent() {
             href={isPremiumPlus ? "/checkout" : "/checkout?plan=plus"}
             className="text-sm text-gray-500 hover:text-gray-700 underline"
           >
-            {isPremiumPlus ? "רוצה רק Premium? ₪149" : "שדרג ל-Premium Plus עם 2 הדמיות AI →"}
+            {isPremiumPlus ? "רוצה רק Premium? ₪149" : "שדרג ל-Premium Plus עם 2 הדמיות"}
           </Link>
         </div>
 

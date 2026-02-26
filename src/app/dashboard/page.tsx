@@ -458,29 +458,29 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="h-11 border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600">
+      <nav className="h-11 border-b border-gray-100 overflow-x-auto">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between min-w-max">
+          <div className="flex items-center gap-3 md:gap-6">
+            <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600 whitespace-nowrap">
               ShiputzAI
             </Link>
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 whitespace-nowrap">דף הבית</Link>
+            <Link href="/" className="text-xs md:text-sm text-gray-500 hover:text-gray-900 whitespace-nowrap">דף הבית</Link>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
+          <div className="flex items-center gap-3 md:gap-6">
+            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap">
               מאמרים וטיפים
             </Link>
             {isAdmin && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <Link
                   href="/admin"
-                  className="text-xs font-medium text-purple-600 hover:text-purple-800 bg-purple-50 px-3 py-1 rounded-full"
+                  className="text-xs font-medium text-purple-600 hover:text-purple-800 bg-purple-50 px-2 md:px-3 py-1 rounded-full whitespace-nowrap"
                 >
                   📊 CRM
                 </Link>
                 <button
                   onClick={() => setShowAdminPanel(!showAdminPanel)}
-                  className={`text-xs font-medium ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                  className={`text-xs font-medium whitespace-nowrap ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                   🔧 Admin
                 </button>
@@ -488,14 +488,14 @@ function DashboardContent() {
             )}
             <button
               onClick={() => setShowSettings(true)}
-              className="text-xs text-gray-500 hover:text-gray-900"
+              className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap"
             >
               ⚙️ הגדרות
             </button>
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="text-xs text-gray-500 hover:text-gray-900"
+              className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap"
             >
               התנתקות
             </button>

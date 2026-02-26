@@ -3,15 +3,16 @@
 import Link from "next/link";
 
 const allFeatures = [
-  { name: "מעקב תקציב ללא הגבלה", premium: true, plus: true },
-  { name: "סריקת קבלות", premium: true, plus: true },
-  { name: "ניתוח הצעות מחיר", premium: true, plus: true },
-  { name: "בדיקת חוזים", premium: true, plus: true },
-  { name: "התראות חכמות", premium: true, plus: true },
-  { name: "עוזר אישי", premium: true, plus: true },
-  { name: "הדמיית חדר", premium: false, plus: true },
-  { name: "4 הדמיות כלולות", premium: false, plus: true },
-  { name: "Shop the Look", premium: false, plus: true, link: "/shop-look" },
+  { name: "הדמיה אחת בחינם", free: true, premium: true, plus: true },
+  { name: "טיפים ומאמרים", free: true, premium: true, plus: true },
+  { name: "מעקב תקציב", free: false, premium: true, plus: true },
+  { name: "סריקת קבלות", free: false, premium: true, plus: true },
+  { name: "ניתוח הצעות מחיר", free: false, premium: true, plus: true },
+  { name: "בדיקת חוזים", free: false, premium: true, plus: true },
+  { name: "התראות חכמות", free: false, premium: true, plus: true },
+  { name: "עוזר אישי", free: false, premium: true, plus: true },
+  { name: "הדמיות נוספות", free: false, premium: false, plus: true },
+  { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
 ];
 
 export default function PricingComparison() {
@@ -19,7 +20,7 @@ export default function PricingComparison() {
     <div className="flex flex-col lg:flex-row-reverse gap-6 justify-center items-stretch max-w-6xl mx-auto">
       
       {/* Free Card - LEFTMOST */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white">
+      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white flex flex-col">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
           <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
@@ -32,70 +33,36 @@ export default function PricingComparison() {
           <p className="text-gray-500 text-sm mt-1">ללא התחייבות</p>
         </div>
         
-        <ul className="space-y-3 mb-8">
-          <li className="flex items-center gap-3 text-gray-900">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>הדמיה אחת בחינם</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-900">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>טיפים ומאמרים</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>מעקב תקציב</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>סריקת קבלות</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>ניתוח הצעות מחיר</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>בדיקת חוזים</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>התראות חכמות</span>
-          </li>
-          <li className="flex items-center gap-3 text-gray-300">
-            <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>עוזר אישי</span>
-          </li>
+        <ul className="space-y-3 mb-8 flex-grow">
+          {allFeatures.map((feature: any, i) => (
+            <li key={i} className={`flex items-center gap-3 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
+              {feature.free ? (
+                <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+              <span>{feature.name}</span>
+            </li>
+          ))}
         </ul>
         
         <Link
           href="/signup"
-          className="block w-full border-2 border-gray-300 text-gray-600 py-3 rounded-lg text-center font-medium hover:bg-gray-50 transition-colors"
+          className="block w-full border-2 border-gray-300 text-gray-600 py-3 rounded-lg text-center font-medium hover:bg-gray-50 transition-colors mt-auto"
         >
           התחל בחינם
         </Link>
       </div>
 
       {/* Premium Card */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white">
+      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white flex flex-col">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>
-          <p className="text-gray-500 text-sm">לניהול תקציב בסיסי</p>
+          <p className="text-gray-500 text-sm">לניהול תקציב מלא</p>
         </div>
         
         <div className="mb-6">
@@ -109,7 +76,7 @@ export default function PricingComparison() {
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>
         
-        <ul className="space-y-3 mb-8">
+        <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.map((feature: any, i) => (
             <li key={i} className={`flex items-center gap-3 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.premium ? (
@@ -128,14 +95,14 @@ export default function PricingComparison() {
         
         <Link
           href="/checkout"
-          className="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-lg text-center font-medium hover:bg-gray-50 transition-colors"
+          className="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-lg text-center font-medium hover:bg-gray-50 transition-colors mt-auto"
         >
           בחר Premium
         </Link>
       </div>
 
       {/* Premium Plus Card - CENTER - Highlighted */}
-      <div className="flex-1 border-2 border-gray-900 rounded-2xl p-8 bg-white relative">
+      <div className="flex-1 border-2 border-gray-900 rounded-2xl p-8 bg-white relative flex flex-col">
         {/* Popular Badge */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
           הכי פופולרי
@@ -157,7 +124,7 @@ export default function PricingComparison() {
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>
         
-        <ul className="space-y-3 mb-8">
+        <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.map((feature: any, i) => (
             <li key={i} className="flex items-center gap-3 text-gray-900">
               <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,14 +143,14 @@ export default function PricingComparison() {
         
         <Link
           href="/checkout?plan=plus"
-          className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors"
+          className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors mt-auto"
         >
           בחר Premium Plus
         </Link>
       </div>
 
       {/* Business Card - RIGHT */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-gradient-to-b from-gray-50 to-white flex flex-col">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">לעסקים</h3>
           <p className="text-gray-500 text-sm">למעצבי פנים וקבלנים</p>
@@ -196,12 +163,12 @@ export default function PricingComparison() {
           <p className="text-gray-500 text-sm mt-1">מותאם לצרכים שלך</p>
         </div>
         
-        <ul className="space-y-3 mb-8 text-gray-700">
+        <ul className="space-y-3 mb-8 text-gray-700 flex-grow">
           <li className="flex items-center gap-3">
             <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            <span>כל הפיצ'רים של Plus</span>
+            <span>כל הפיצ׳רים של Plus</span>
           </li>
           <li className="flex items-center gap-3">
             <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,11 +194,35 @@ export default function PricingComparison() {
             </svg>
             <span>תמיכה עדיפות</span>
           </li>
+          <li className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>דוחות מתקדמים</span>
+          </li>
+          <li className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>API לאינטגרציה</span>
+          </li>
+          <li className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>מיתוג אישי</span>
+          </li>
+          <li className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>הדרכה אישית</span>
+          </li>
         </ul>
         
         <Link
           href="/contact"
-          className="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-lg text-center font-medium hover:bg-gray-100 transition-colors"
+          className="block w-full border-2 border-gray-900 text-gray-900 py-3 rounded-lg text-center font-medium hover:bg-gray-100 transition-colors mt-auto"
         >
           דברו איתנו
         </Link>

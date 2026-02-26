@@ -254,7 +254,7 @@ export default function ComparisonSection() {
         </motion.div>
 
         {/* Comparison */}
-        <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-stretch" style={{ direction: 'ltr' }}>
           {/* Old Way - Realistic Chaos */}
           <motion.div 
             className="relative min-h-[450px] rounded-2xl overflow-hidden"

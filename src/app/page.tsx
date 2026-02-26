@@ -271,7 +271,7 @@ export default function Home() {
       </section>
 
       {/* Trust Bar */}
-      <section className="py-6 px-6 border-b border-gray-100">
+      <section className="py-4 px-6 border-b border-gray-100">
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes livePulse {
             0%, 100% { opacity: 1; transform: scale(1); }

@@ -22,7 +22,7 @@ function PaymentSuccessContent() {
           user.vision_active = true;
         }
         if (product === 'premium_plus') {
-          user.vision_credits = 2; // Bonus credits from Premium Plus
+          user.vision_credits = 4; // Bonus credits from Premium Plus
         }
         localStorage.setItem('shiputzai_user', JSON.stringify(user));
       }

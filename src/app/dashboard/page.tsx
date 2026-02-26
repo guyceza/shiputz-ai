@@ -97,6 +97,7 @@ function DashboardContent() {
           // Real authenticated user
           userId = session.user.id;
           setUser({ 
+            id: session.user.id,
             email: session.user.email || "", 
             name: session.user.user_metadata?.name 
           });

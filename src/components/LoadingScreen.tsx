@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
-// Construction animation from LottieFiles CDN
-const ANIMATION_URL = 'https://assets1.lottiefiles.com/packages/lf20_1pxqjqps.json';
+// Home/House animation from LottieFiles CDN
+const ANIMATION_URL = 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json';
 
 interface LoadingScreenProps {
   text?: string;
@@ -34,12 +34,12 @@ export default function LoadingScreen({ text = "טוען...", tip }: LoadingScre
       <div className="text-3xl font-bold text-gray-900 mb-6">ShiputzAI</div>
       
       {/* Lottie animation - empty placeholder until loaded (no spinner) */}
-      <div className="h-[280px] flex items-center justify-center">
+      <div className="h-[200px] flex items-center justify-center">
         {animationData && (
           <Lottie 
             animationData={animationData} 
             loop={true}
-            style={{ width: 300, height: 280 }}
+            style={{ width: 350, height: 200 }}
           />
         )}
       </div>

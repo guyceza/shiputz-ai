@@ -195,58 +195,50 @@ function CheckoutContent() {
           {/* What's included - detailed */}
           <div className="border-t border-gray-100 pt-6 mb-6">
             <div className="space-y-3 text-sm text-gray-600">
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>מעקב תקציב ללא הגבלה</span>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>הדמיה אחת בחינם</span>
               </div>
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>סריקת קבלות אוטומטית</span>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>טיפים ומאמרים</span>
               </div>
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>הזנת הוצאות ידנית</span>
+              </div>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>מעקב תקציב</span>
+              </div>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>סריקת קבלות</span>
+              </div>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>ניתוח הצעות מחיר</span>
               </div>
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>בדיקת חוזים</span>
               </div>
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>התראות חכמות</span>
               </div>
-              <div className="flex items-center gap-3">
-                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>עוזר אישי</span>
               </div>
-              {isPremiumPlus && (
-                <>
-                  <div className="flex items-center gap-3 font-medium">
-                    <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>הדמיית חדר</span>
-                  </div>
-                  <div className="flex items-center gap-3 font-medium">
-                    <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>4 הדמיות כלולות</span>
-                  </div>
-                </>
-              )}
+              <div className={`flex items-start gap-0 ${isPremiumPlus ? 'text-gray-900 font-medium' : 'text-gray-300'}`}>
+                <span className="flex-shrink-0 ml-0.5">{isPremiumPlus ? '✓' : '✗'}</span>
+                <span>4 הדמיות במערכת AI Vision</span>
+              </div>
+              <div className={`flex items-start gap-0 ${isPremiumPlus ? 'text-gray-900 font-medium' : 'text-gray-300'}`}>
+                <span className="flex-shrink-0 ml-0.5">{isPremiumPlus ? '✓' : '✗'}</span>
+                <span>Shop the Look</span>
+              </div>
             </div>
           </div>
 

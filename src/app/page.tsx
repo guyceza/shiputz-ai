@@ -415,10 +415,10 @@ export default function Home() {
               className="w-full h-auto object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/40 to-transparent" />
             <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 text-white max-w-md">
-              <h2 className="text-2xl md:text-4xl font-bold mb-3">AI שעובד בשבילך</h2>
-              <p className="text-white/80 text-sm md:text-base mb-4">ניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר - הכל במקום אחד</p>
+              <h2 className="text-2xl md:text-4xl font-bold mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">AI שעובד בשבילך</h2>
+              <p className="text-white text-sm md:text-base mb-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">ניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר - הכל במקום אחד</p>
               <Link
                 href={isLoggedIn ? "/dashboard" : "/signup"}
                 className="inline-block bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"

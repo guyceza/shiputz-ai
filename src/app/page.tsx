@@ -315,100 +315,42 @@ export default function Home() {
       </section>
 
       {/* House Showcase with Floating Features */}
-      <section className="py-16 px-6 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 px-6 bg-white">
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes popupFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-6px); }
           }
-          @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-          }
-          @keyframes pulse-ring {
-            0% { transform: scale(0.9); opacity: 1; }
-            100% { transform: scale(1.3); opacity: 0; }
-          }
-          .popup-float { animation: popupFloat 4s ease-in-out infinite; }
-          .popup-float-delay-1 { animation-delay: 0.7s; }
-          .popup-float-delay-2 { animation-delay: 1.4s; }
-          .showcase-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-          }
-          .icon-gradient-green {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-          }
-          .icon-gradient-purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
-          }
-          .icon-gradient-gold {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
-          }
-          .status-dot {
-            position: relative;
-          }
-          .status-dot::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: inherit;
-            animation: pulse-ring 2s ease-out infinite;
+          .popup-float { animation: popupFloat 5s ease-in-out infinite; }
+          .popup-float-delay-1 { animation-delay: 1s; }
+          .popup-float-delay-2 { animation-delay: 2s; }
+          .feature-card {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.07);
           }
         `}} />
         <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-[2rem] overflow-hidden shadow-[0_25px_80px_-12px_rgba(0,0,0,0.25)]">
+          <div className="relative rounded-2xl overflow-hidden">
             <img 
               src="/images/hero-house.jpg" 
               alt="בית מודרני" 
               className="w-full h-auto"
             />
             
-            {/* Floating Cards */}
-            <div className="popup-float absolute top-[10%] left-[4%] showcase-card rounded-2xl px-5 py-4 flex items-center gap-4">
-              <div className="w-12 h-12 icon-gradient-green rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">כתב כמויות</p>
-                <p className="text-gray-500 text-sm flex items-center gap-1.5">
-                  <span className="status-dot w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                  נוצר ב-30 שניות
-                </p>
-              </div>
+            {/* Minimal Floating Cards */}
+            <div className="popup-float absolute top-[10%] left-[4%] feature-card rounded-xl px-4 py-3">
+              <p className="font-semibold text-gray-900 text-sm">כתב כמויות</p>
+              <p className="text-gray-400 text-xs">נוצר ב-30 שניות</p>
             </div>
             
-            <div className="popup-float popup-float-delay-1 absolute bottom-[15%] left-[8%] showcase-card rounded-2xl px-5 py-4 flex items-center gap-4">
-              <div className="w-12 h-12 icon-gradient-purple rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">הדמיית חדר</p>
-                <p className="text-gray-500 text-sm">צפייה לפני שקונים</p>
-              </div>
+            <div className="popup-float popup-float-delay-1 absolute bottom-[15%] left-[8%] feature-card rounded-xl px-4 py-3">
+              <p className="font-semibold text-gray-900 text-sm">הדמיית חדר</p>
+              <p className="text-gray-400 text-xs">לפני שקונים</p>
             </div>
             
-            <div className="popup-float popup-float-delay-2 absolute top-[32%] right-[4%] showcase-card rounded-2xl px-5 py-4 flex items-center gap-4">
-              <div className="w-12 h-12 icon-gradient-gold rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">חסכון ממוצע</p>
-                <p className="text-gray-500 text-sm">₪15,000 לשיפוץ</p>
-              </div>
+            <div className="popup-float popup-float-delay-2 absolute top-[32%] right-[4%] feature-card rounded-xl px-4 py-3">
+              <p className="font-semibold text-gray-900 text-sm">חסכון ממוצע</p>
+              <p className="text-emerald-600 text-xs font-medium">₪15,000 לשיפוץ</p>
             </div>
           </div>
         </div>

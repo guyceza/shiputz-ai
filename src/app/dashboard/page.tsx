@@ -4,14 +4,11 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import AdminPanel from "./admin-panel";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
-
-// Dynamic import for Lottie (client-side only)
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+import LoadingScreen from "@/components/LoadingScreen";
 import { 
   getProjects, 
   createProject, 
@@ -55,7 +52,6 @@ function DashboardContent() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [lottieData, setLottieData] = useState<object | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
@@ -78,14 +74,6 @@ function DashboardContent() {
 
   // Random tip that changes on refresh
   const randomTip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
-
-  // Load Lottie animation
-  useEffect(() => {
-    fetch('/loading-animation.json')
-      .then(res => res.json())
-      .then(data => setLottieData(data))
-      .catch(() => {}); // Fallback to spinner if fails
-  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -463,30 +451,7 @@ function DashboardContent() {
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
   if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">
-        {/* Logo */}
-        <div className="text-3xl font-bold text-gray-900 mb-8">ShiputzAI</div>
-        
-        {/* Lottie Animation or Fallback Spinner */}
-        {lottieData ? (
-          <Lottie 
-            animationData={lottieData} 
-            loop={true}
-            style={{ width: 280, height: 220 }}
-          />
-        ) : (
-          <div className="relative w-16 h-16 mb-6">
-            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
-          </div>
-        )}
-        
-        {/* Loading Text */}
-        <div className="text-gray-600 font-medium mb-2">טוען את האזור האישי...</div>
-        <div className="text-gray-400 text-sm">{randomTip}</div>
-      </div>
-    );
+    return <LoadingScreen text="טוען את האזור האישי..." tip={randomTip} />;
   }
 
   return (
@@ -1080,16 +1045,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">
-        <div className="text-2xl font-bold text-gray-900 mb-6">ShiputzAI</div>
-        <div className="relative w-12 h-12 mb-4">
-          <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
-        </div>
-        <p className="text-gray-600 font-medium">טוען...</p>
-      </div>
-    }>
+    <Suspense fallback={<LoadingScreen text="טוען..." />}>
       <DashboardContent />
     </Suspense>
   );

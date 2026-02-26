@@ -314,6 +314,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trusted Sources Bar */}
+      <section className="py-10 px-6 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-sm text-gray-400 mb-6">מחירונים מבוססים על נתונים מ:</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">midrag</span>
+            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">ACE</span>
+            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">HomeCenter</span>
+            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">TAMBUR</span>
+            <span className="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors">IKEA</span>
+          </div>
+        </div>
+      </section>
+
       {/* House Showcase with Floating Features */}
       <section className="py-12 px-6 bg-white">
         <style dangerouslySetInnerHTML={{ __html: `

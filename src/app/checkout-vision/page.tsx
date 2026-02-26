@@ -187,8 +187,12 @@ function CheckoutVisionContent() {
         
         <div className="max-w-md mx-auto px-6 py-12">
           <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 text-center">
-            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <span className="text-3xl">🔒</span>
+            {/* Animated illustration */}
+            <div className="w-24 h-24 mx-auto mb-6 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
+                <span className="text-4xl animate-bounce" style={{ animationDuration: '2s' }}>🔐</span>
+              </div>
             </div>
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
               שירות Vision דורש מנוי ShiputzAI
@@ -201,7 +205,7 @@ function CheckoutVisionContent() {
               href="/checkout"
               className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mb-4"
             >
-              הצטרף ל-ShiputzAI · ₪299.99
+              רכוש ShiputzAI ב-₪299.99
             </Link>
             
             <p className="text-xs text-gray-400">

@@ -19,8 +19,8 @@ function CheckoutContent() {
   
   const isPremiumPlus = searchParams.get("plan") === "plus" || searchParams.get("plan") === "premium_plus";
 
-  const basePrice = isPremiumPlus ? 179 : 149;
-  const originalPrice = isPremiumPlus ? 359 : 299;
+  const basePrice = isPremiumPlus ? 315.99 : 299.99;
+  const originalPrice = isPremiumPlus ? 631 : 599;
   const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
 
   // Check if user is logged in - MUST be logged in to checkout
@@ -243,7 +243,7 @@ function CheckoutContent() {
                     <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>2 הדמיות כלולות</span>
+                    <span>4 הדמיות כלולות</span>
                   </div>
                 </>
               )}
@@ -330,7 +330,7 @@ function CheckoutContent() {
             href={isPremiumPlus ? "/checkout" : "/checkout?plan=plus"}
             className="text-sm text-gray-500 hover:text-gray-700 underline"
           >
-            {isPremiumPlus ? "רוצה רק Premium? ₪149" : "שדרג ל-Premium Plus עם 2 הדמיות"}
+            {isPremiumPlus ? "רוצה רק Premium? ₪299.99" : "שדרג ל-Premium Plus עם 4 הדמיות"}
           </Link>
         </div>
 

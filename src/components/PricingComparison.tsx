@@ -10,7 +10,7 @@ const allFeatures = [
   { name: "התראות חכמות", premium: true, plus: true },
   { name: "עוזר אישי", premium: true, plus: true },
   { name: "הדמיית חדר", premium: false, plus: true },
-  { name: "2 הדמיות כלולות", premium: false, plus: true },
+  { name: "4 הדמיות כלולות", premium: false, plus: true },
 ];
 
 export default function PricingComparison() {
@@ -25,9 +25,12 @@ export default function PricingComparison() {
         </div>
         
         <div className="mb-6">
+          <div className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
+            50% הנחה
+          </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-lg text-gray-400 line-through">₪299</span>
-            <span className="text-4xl font-bold text-gray-900">₪149</span>
+            <span className="text-lg text-gray-400 line-through">₪599</span>
+            <span className="text-4xl font-bold text-gray-900">₪299.99</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>
@@ -74,8 +77,8 @@ export default function PricingComparison() {
             50% הנחה
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-lg text-gray-400 line-through">₪359</span>
-            <span className="text-4xl font-bold text-gray-900">₪179</span>
+            <span className="text-lg text-gray-400 line-through">₪631</span>
+            <span className="text-4xl font-bold text-gray-900">₪315.99</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>

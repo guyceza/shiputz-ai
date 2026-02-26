@@ -450,7 +450,7 @@ export default function ShopLookPage() {
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חד פעמי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₪149.99</span>
+                    <span className="text-4xl font-bold text-gray-900">₪299.99</span>
                   </div>
                 </div>
                 

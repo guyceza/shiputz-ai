@@ -213,9 +213,9 @@ export async function POST(request: NextRequest) {
         transaction_id: transaction_uid || page_request_uid,
       };
 
-      // Premium Plus includes 2 bonus Vision credits
+      // Premium Plus includes 4 bonus Vision credits
       if (productType === 'premium_plus') {
-        upsertData.vision_credits = 2;
+        upsertData.vision_credits = 4;
         upsertData.vision_credits_source = 'premium_plus_bonus';
       }
 
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user premium status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 2 Vision credits)' : ''}`);
+        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 4 Vision credits)' : ''}`);
       }
     }
 

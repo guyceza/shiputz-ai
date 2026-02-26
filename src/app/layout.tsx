@@ -80,7 +80,7 @@ const jsonLd = {
       "operatingSystem": "Web",
       "offers": {
         "@type": "Offer",
-        "price": "149.99",
+        "price": "299.99",
         "priceCurrency": "ILS",
       },
       "aggregateRating": {

@@ -18,9 +18,9 @@ interface PayPlusRequest {
 
 // Pricing configuration (in ILS)
 const PRICING = {
-  premium: { amount: 149, chargeMethod: 1 }, // One-time charge
+  premium: { amount: 299.99, chargeMethod: 1 }, // One-time charge
   vision: { amount: 39.99, chargeMethod: 3 }, // Recurring monthly
-  premium_plus: { amount: 179, chargeMethod: 1 }, // One-time (Premium + 2 bonus Vision credits)
+  premium_plus: { amount: 315.99, chargeMethod: 1 }, // One-time (Premium + 4 bonus Vision credits)
 };
 
 export async function POST(request: NextRequest) {

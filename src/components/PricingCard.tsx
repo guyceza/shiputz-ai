@@ -16,7 +16,7 @@ const features = [
   { name: "התראות חכמות", includedIn: ["premium", "plus"] },
   { name: "עוזר אישי", includedIn: ["premium", "plus"] },
   { name: "הדמיית חדר", includedIn: ["plus"] },
-  { name: "2 הדמיות כלולות", includedIn: ["plus"] },
+  { name: "4 הדמיות כלולות", includedIn: ["plus"] },
 ];
 
 export default function PricingCard({ 
@@ -63,14 +63,14 @@ export default function PricingCard({
           <div className="text-right">
             <div className="flex items-baseline gap-3 justify-end">
               <span className="text-4xl font-bold text-gray-900">
-                {selectedPlan === 'plus' ? '₪179' : '₪149'}
+                {selectedPlan === 'plus' ? '₪315.99' : '₪299.99'}
               </span>
               <span className="text-base text-gray-400 line-through">
-                {selectedPlan === 'plus' ? '₪359' : '₪299'}
+                {selectedPlan === 'plus' ? '₪631' : '₪599'}
               </span>
             </div>
             <span className="text-sm text-gray-500">
-              {selectedPlan === 'plus' ? 'חד פעמי · כולל 2 הדמיות' : 'תשלום חד פעמי'}
+              {selectedPlan === 'plus' ? 'חד פעמי · כולל 4 הדמיות' : 'תשלום חד פעמי'}
             </span>
           </div>
         </div>
@@ -110,10 +110,10 @@ export default function PricingCard({
         <div className="text-center mb-5">
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-4xl font-bold text-gray-900">
-              {selectedPlan === 'plus' ? '₪179' : '₪149'}
+              {selectedPlan === 'plus' ? '₪315.99' : '₪299.99'}
             </span>
             <span className="text-gray-400 line-through text-lg">
-              {selectedPlan === 'plus' ? '₪359' : '₪299'}
+              {selectedPlan === 'plus' ? '₪631' : '₪599'}
             </span>
           </div>
           <p className="text-sm text-gray-500 mt-1">תשלום חד פעמי</p>
@@ -176,15 +176,15 @@ export default function PricingCard({
         </div>
         <div className="flex items-baseline justify-center gap-3 flex-row-reverse">
           <span className="text-5xl font-bold text-gray-900">
-            {selectedPlan === 'plus' ? '₪179' : '₪149'}
+            {selectedPlan === 'plus' ? '₪315.99' : '₪299.99'}
           </span>
           <span className="text-xl text-gray-400 line-through">
-            {selectedPlan === 'plus' ? '₪359' : '₪299'}
+            {selectedPlan === 'plus' ? '₪631' : '₪599'}
           </span>
         </div>
         <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
         <p className="text-amber-600 text-sm font-medium mt-1">
-          חוסך {selectedPlan === 'plus' ? '₪180' : '₪150'}
+          חוסך {selectedPlan === 'plus' ? '₪315' : '₪299'}
         </p>
       </div>
       

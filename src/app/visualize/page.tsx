@@ -1137,8 +1137,8 @@ export default function VisualizePage() {
                     <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
                   </div>
                   <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪179</p>
-                    <p className="text-sm text-gray-500">Premium כולל 2 הדמיות AI</p>
+                    <p className="text-xl font-bold text-gray-900">₪315.99</p>
+                    <p className="text-sm text-gray-500">Premium כולל 4 הדמיות AI</p>
                     <p className="text-xs text-gray-400">רוצה עוד? מנוי Vision ב-₪39.99/חודש</p>
                   </div>
                 </button>
@@ -1163,7 +1163,7 @@ export default function VisualizePage() {
                     </div>
                   </div>
                   <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪149 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
+                    <p className="text-xl font-bold text-gray-900">₪299.99 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
                     <p className="text-sm text-gray-500">ניהול תקציב, סריקת קבלות, התראות</p>
                     <p className="text-xs text-gray-400">הדמיות AI בנפרד אח״כ</p>
                   </div>
@@ -1402,8 +1402,8 @@ export default function VisualizePage() {
                       <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
                     </div>
                     <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪179</p>
-                      <p className="text-xs text-gray-500">Premium כולל 2 הדמיות AI</p>
+                      <p className="text-lg font-bold text-gray-900">₪315.99</p>
+                      <p className="text-xs text-gray-500">Premium כולל 4 הדמיות AI</p>
                     </div>
                   </button>
                   
@@ -1427,7 +1427,7 @@ export default function VisualizePage() {
                       </div>
                     </div>
                     <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪149 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
+                      <p className="text-lg font-bold text-gray-900">₪299.99 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
                       <p className="text-xs text-gray-500">ניהול תקציב, סריקת קבלות, התראות · הדמיות בנפרד</p>
                     </div>
                   </button>

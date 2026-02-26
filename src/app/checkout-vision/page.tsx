@@ -201,7 +201,7 @@ function CheckoutVisionContent() {
               href="/checkout"
               className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mb-4"
             >
-              הצטרף ל-ShiputzAI · ₪149.99
+              הצטרף ל-ShiputzAI · ₪299.99
             </Link>
             
             <p className="text-xs text-gray-400">

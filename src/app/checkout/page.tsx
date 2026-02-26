@@ -307,14 +307,19 @@ function CheckoutContent() {
           <div className="flex items-center justify-center gap-4 text-gray-400">
             <span className="text-sm">מאובטח</span>
             <div className="flex gap-2 items-center">
-              {/* Visa */}
-              <div className="h-6 px-2 bg-gray-800 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold italic tracking-tight">VISA</span>
-              </div>
               {/* Mastercard */}
-              <div className="h-6 px-2 bg-gray-800 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold tracking-tight">MC</span>
-              </div>
+              <svg className="h-7" viewBox="0 0 38 24" fill="none">
+                <rect width="38" height="24" rx="4" fill="#F5F5F5"/>
+                <circle cx="15" cy="12" r="7" fill="#EB001B"/>
+                <circle cx="23" cy="12" r="7" fill="#F79E1B"/>
+                <path d="M19 6.5a6.97 6.97 0 0 0-2.5 5.5c0 2.2 1 4.2 2.5 5.5a6.97 6.97 0 0 0 2.5-5.5c0-2.2-1-4.2-2.5-5.5z" fill="#FF5F00"/>
+              </svg>
+              {/* Visa */}
+              <svg className="h-7" viewBox="0 0 38 24" fill="none">
+                <rect width="38" height="24" rx="4" fill="#F5F5F5"/>
+                <path d="M15.5 15.5h-2l1.25-7.5h2l-1.25 7.5zm6.5-7.3c-.4-.15-.95-.3-1.7-.3-1.85 0-3.15.95-3.15 2.3 0 1 .95 1.55 1.65 1.9.75.35 1 .6 1 .9 0 .5-.6.7-1.15.7-.75 0-1.15-.1-1.8-.35l-.25-.1-.25 1.55c.45.2 1.25.35 2.1.35 1.95 0 3.25-.95 3.25-2.35 0-.8-.5-1.4-1.55-1.9-.65-.3-1.05-.55-1.05-.85 0-.3.35-.6 1.05-.6.6 0 1.05.15 1.4.3l.15.05.25-1.5zm4.85-.2h-1.45c-.45 0-.8.15-.95.55l-2.75 6.45h1.95l.4-1.05h2.35l.25 1.05h1.7l-1.5-7zm-2.15 4.55l.75-2 .4 2h-1.15zM13 8l-1.85 5.15-.2-.95c-.35-1.15-1.4-2.4-2.6-3l1.65 6.3h1.95L15 8h-2z" fill="#1A1F71"/>
+                <path d="M9.15 8H6.1l-.05.15c2.35.6 3.9 2.05 4.55 3.75L10 8.55c-.1-.4-.4-.55-.85-.55z" fill="#F79E1B"/>
+              </svg>
             </div>
           </div>
         </div>

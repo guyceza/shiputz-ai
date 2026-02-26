@@ -14,32 +14,27 @@ export default function PricingCard({
 }: PricingCardProps) {
   const [selectedPlan, setSelectedPlan] = useState<'premium' | 'plus'>('plus');
   
-  // Mini variant - compact but clear pricing card with plan toggle
+  // Mini variant - compact pricing card with plan toggle
   if (variant === "mini") {
     return (
-      <div className={`relative bg-white border-2 border-emerald-500 rounded-2xl px-6 py-5 shadow-lg hover-scale hover-glow ${className}`}>
-        {/* Badge */}
-        <div className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-          50% הנחה
-        </div>
-        
-        {/* Plan Toggle - clearer toggle style */}
-        <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-4 w-fit mx-auto">
+      <div className={`relative bg-white border border-gray-200 rounded-2xl px-6 py-5 shadow-sm ${className}`}>
+        {/* Plan Toggle */}
+        <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-4 w-fit mx-auto">
           <button
             onClick={() => setSelectedPlan('plus')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               selectedPlan === 'plus'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            ⭐ Premium Plus
+            Premium Plus
           </button>
           <button
             onClick={() => setSelectedPlan('premium')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               selectedPlan === 'premium'
-                ? 'bg-white text-gray-900 shadow-md'
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -57,49 +52,42 @@ export default function PricingCard({
                 {selectedPlan === 'plus' ? '₪179' : '₪149'}
               </div>
             </div>
-            <span className="text-sm text-emerald-600 font-medium">
-              {selectedPlan === 'plus' ? '💳 חד פעמי · כולל 2 הדמיות AI' : '💳 תשלום חד פעמי · בלי מנוי'}
+            <span className="text-sm text-gray-500">
+              {selectedPlan === 'plus' ? 'חד פעמי · כולל 2 הדמיות' : 'תשלום חד פעמי'}
             </span>
           </div>
           <Link
             href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-            className="bg-emerald-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-emerald-700 whitespace-nowrap shadow-md hover:shadow-lg hover-bounce hover-shine"
+            className="bg-gray-900 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors whitespace-nowrap"
           >
-            לרכישה ←
+            לרכישה
           </Link>
         </div>
       </div>
     );
   }
 
-  // Compact variant - medium size, key info only
+  // Compact variant - medium size
   if (variant === "compact") {
     return (
-      <div className={`bg-white border-2 border-emerald-500 rounded-2xl p-6 shadow-lg max-w-xs hover-lift hover-glow ${className}`}>
-        {/* Badge */}
-        <div className="flex justify-between items-start mb-4">
-          <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-            50% הנחה
-          </span>
-        </div>
-        
-        {/* Plan Toggle - clearer toggle style */}
-        <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-4">
+      <div className={`bg-white border border-gray-200 rounded-2xl p-6 shadow-sm max-w-xs ${className}`}>
+        {/* Plan Toggle */}
+        <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-5">
           <button
             onClick={() => setSelectedPlan('plus')}
-            className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
               selectedPlan === 'plus'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            ⭐ Plus
+            Plus
           </button>
           <button
             onClick={() => setSelectedPlan('premium')}
-            className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
               selectedPlan === 'premium'
-                ? 'bg-white text-gray-900 shadow-md'
+                ? 'bg-gray-900 text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -108,41 +96,51 @@ export default function PricingCard({
         </div>
         
         {/* Price */}
-        <div className="text-center mb-4">
-          <span className="text-lg text-gray-400 line-through">
-            {selectedPlan === 'plus' ? '₪359' : '₪299'}
-          </span>
-          <div className="text-4xl font-bold text-gray-900">
-            {selectedPlan === 'plus' ? '₪179' : '₪149'}
+        <div className="text-center mb-5">
+          <div className="flex items-baseline justify-center gap-2">
+            <span className="text-4xl font-bold text-gray-900">
+              {selectedPlan === 'plus' ? '₪179' : '₪149'}
+            </span>
+            <span className="text-gray-400 line-through text-lg">
+              {selectedPlan === 'plus' ? '₪359' : '₪299'}
+            </span>
           </div>
-          <p className="text-sm text-green-600 font-medium">💳 תשלום חד פעמי</p>
+          <p className="text-sm text-gray-500 mt-1">תשלום חד פעמי</p>
         </div>
         
-        {/* Key features */}
-        <ul className="text-right space-y-2 mb-6 text-sm text-gray-600">
+        {/* Features */}
+        <ul className="text-right space-y-3 mb-6 text-sm text-gray-600">
           <li className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span>
-            <span>מעקב תקציב + קבלות AI</span>
+            <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>מעקב תקציב + קבלות</span>
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span>
+            <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
             <span>ניתוח הצעות מחיר</span>
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span>
-            <span>עוזר AI אישי</span>
+            <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>עוזר אישי</span>
           </li>
           {selectedPlan === 'plus' && (
             <li className="flex items-center gap-2">
-              <span className="text-purple-500">✓</span>
-              <span className="text-purple-700 font-medium">2 הדמיות AI מתנה!</span>
+              <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>2 הדמיות חדר</span>
             </li>
           )}
         </ul>
         
         <Link
           href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-          className="block w-full bg-gray-900 text-white py-3 rounded-full text-center text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center text-sm font-medium hover:bg-gray-800 transition-colors"
         >
           לרכישה
         </Link>
@@ -150,31 +148,26 @@ export default function PricingCard({
     );
   }
 
-  // Full variant - original design with plan toggle
+  // Full variant
   return (
-    <div className={`border-2 border-gray-400 rounded-3xl p-10 relative overflow-hidden bg-white shadow-lg max-w-sm mx-auto hover-scale hover-glow ${className}`}>
-      {/* Discount Badge */}
-      <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-        50% הנחה
-      </div>
-      
-      {/* Plan Toggle - clearer toggle style */}
-      <div className="bg-gray-100 p-1 rounded-full flex gap-1 mb-6 max-w-xs mx-auto">
+    <div className={`border border-gray-200 rounded-2xl p-8 bg-white shadow-sm max-w-sm mx-auto ${className}`}>
+      {/* Plan Toggle */}
+      <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-6">
         <button
           onClick={() => setSelectedPlan('plus')}
-          className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
             selectedPlan === 'plus'
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md'
+              ? 'bg-gray-900 text-white'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          ⭐ Premium Plus
+          Premium Plus
         </button>
         <button
           onClick={() => setSelectedPlan('premium')}
-          className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
             selectedPlan === 'premium'
-              ? 'bg-white text-gray-900 shadow-md'
+              ? 'bg-gray-900 text-white'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -182,54 +175,70 @@ export default function PricingCard({
         </button>
       </div>
       
-      <div className="mb-2 text-center">
-        <span className="text-2xl text-gray-400 line-through">
-          {selectedPlan === 'plus' ? '₪359' : '₪299'}
-        </span>
+      {/* Price */}
+      <div className="text-center mb-6">
+        <div className="flex items-baseline justify-center gap-3">
+          <span className="text-5xl font-bold text-gray-900">
+            {selectedPlan === 'plus' ? '₪179' : '₪149'}
+          </span>
+          <span className="text-xl text-gray-400 line-through">
+            {selectedPlan === 'plus' ? '₪359' : '₪299'}
+          </span>
+        </div>
+        <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
       </div>
-      <div className="text-6xl font-semibold text-gray-900 mb-2 text-center">
-        {selectedPlan === 'plus' ? '₪179' : '₪149'}
-      </div>
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <span className="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full">💳 תשלום חד פעמי</span>
-      </div>
-      <p className="text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-8 text-center">מבצע לזמן מוגבל · בלי מנוי</p>
       
-      <ul className="text-right space-y-4 mb-10 text-sm text-gray-600">
+      {/* Features */}
+      <ul className="text-right space-y-4 mb-8 text-gray-600">
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
           <span>מעקב תקציב ללא הגבלה</span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
-          <span>סריקת קבלות AI</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span>סריקת קבלות</span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
           <span>ניתוח הצעות מחיר</span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
           <span>בדיקת חוזים</span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
           <span>התראות חכמות</span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="text-green-500">✓</span>
-          <span>עוזר AI אישי</span>
+          <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span>עוזר אישי</span>
         </li>
         {selectedPlan === 'plus' && (
-          <li className="flex items-center gap-3 bg-purple-50 -mx-2 px-2 py-2 rounded-lg">
-            <span className="text-purple-500">✓</span>
-            <span className="text-purple-700 font-medium">2 הדמיות AI מתנה!</span>
+          <li className="flex items-center gap-3 pt-3 border-t border-gray-100">
+            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">2 הדמיות חדר</span>
           </li>
         )}
       </ul>
+      
       <Link
         href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-        className="block bg-gray-900 text-white py-4 rounded-full text-base hover:bg-gray-800 transition-colors text-center"
+        className="block bg-gray-900 text-white py-4 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors"
       >
         לרכישה
       </Link>

@@ -236,14 +236,16 @@ export default function Home() {
                 {isLoggedIn ? (
                   <Link
                     href="/dashboard"
-                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 transition-colors"
+                    style={{ backgroundColor: '#101010' }}
                   >
                     לאזור האישי
                   </Link>
                 ) : (
                   <Link
                     href="/signup"
-                    className="bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 hover-bounce hover-shine"
+                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine"
+                    style={{ backgroundColor: '#101010' }}
                   >
                     התחילו בחינם
                   </Link>
@@ -392,7 +394,7 @@ export default function Home() {
                     height={300}
                     className="w-full h-full object-cover group-hover:brightness-110 transition-all"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
+                  <div className="absolute bottom-0 left-0 right-0 text-white text-sm py-2 text-center" style={{ backgroundColor: '#101010' }}>
                     אחרי
                   </div>
                   
@@ -409,7 +411,7 @@ export default function Home() {
                   </div>
                 </Link>
               </div>
-              <div className="absolute -top-3 -right-3 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-full">
+              <div className="absolute -top-3 -right-3 text-white text-xs font-medium px-3 py-1 rounded-full" style={{ backgroundColor: '#101010' }}>
                 חדש
               </div>
             </div>
@@ -542,7 +544,8 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  className="w-full bg-gray-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
+                  className="w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors"
+                  style={{ backgroundColor: '#101010' }}
                 >
                   הרשמה
                 </button>

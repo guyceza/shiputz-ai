@@ -104,7 +104,7 @@ export default function PricingComparison() {
       {/* Premium Plus Card - Highlighted */}
       <div className="border-2 border-gray-900 rounded-2xl p-6 lg:p-10 bg-white relative flex flex-col flex-1 max-w-[320px]" dir="rtl">
         {/* Popular Badge */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-4 py-1 rounded-full" style={{ backgroundColor: '#101010' }}>
           הכי פופולרי
         </div>
         
@@ -141,7 +141,7 @@ export default function PricingComparison() {
         
         <Link
           href="/checkout?plan=plus"
-          className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors mt-auto"
+          className="block w-full text-white py-3 rounded-lg text-center font-medium hover:opacity-90 transition-colors mt-auto" style={{ backgroundColor: '#101010' }}
         >
           בחר Premium Plus
         </Link>

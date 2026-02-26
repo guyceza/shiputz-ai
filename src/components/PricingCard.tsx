@@ -57,7 +57,7 @@ export default function PricingCard({
         <div className="flex items-center justify-between">
           <Link
             href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-            className="bg-gray-900 text-white px-8 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+            className="text-white px-8 py-3 rounded-lg text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
           >
             לרכישה
           </Link>
@@ -135,7 +135,7 @@ export default function PricingCard({
         
         <Link
           href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-          className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="block w-full text-white py-3 rounded-lg text-center text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
         >
           לרכישה
         </Link>

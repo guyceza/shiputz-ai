@@ -353,13 +353,16 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
                 איך השיפוץ שלי יראה?
               </h2>
-              <p className="text-gray-500 mb-8 leading-relaxed">
+              <p className="text-gray-500 mb-4 leading-relaxed">
                 העלו תמונה של החדר, תארו מה אתם רוצים לשנות, וקבלו הדמיה של התוצאה הסופית עם הערכת עלויות.
+              </p>
+              <p className="text-gray-700 mb-8 leading-relaxed font-medium">
+                🛒 <span className="text-gray-900">Shop the Look</span> — אהבתם משהו בהדמיה? לחצו וקנו את המוצרים ישירות מחנויות בישראל.
               </p>
               <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-8">
                 <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הדמיה חכמה</span>
                 <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הערכת עלויות</span>
-                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">תוך שניות</span>
+                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">Shop the Look</span>
               </div>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <Link
@@ -371,14 +374,10 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/shop-look"
-                  className="group relative inline-flex flex-col items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-2xl text-base hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                  className="inline-flex items-center gap-2 border border-gray-200 text-gray-900 px-6 py-4 rounded-full text-base hover:bg-gray-50 transition-colors"
                 >
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">HOT</span>
-                  <span className="flex items-center gap-2 font-semibold">
-                    <span>🛒</span>
-                    <span>Shop the Look</span>
-                  </span>
-                  <span className="text-[11px] text-emerald-100">קנו את המוצרים מההדמיה</span>
+                  <img src="/icons/cart.png" alt="" className="w-5 h-5" />
+                  <span>Shop the Look</span>
                 </Link>
               </div>
             </div>

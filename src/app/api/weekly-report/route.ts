@@ -48,15 +48,15 @@ export async function GET(req: NextRequest) {
 
         if (!projects || projects.length === 0) continue;
 
-        // Calculate weekly stats
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        // Calculate monthly stats
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
-        let totalSpentThisWeek = 0;
-        let expensesThisWeek = 0;
+        let totalSpentThisMonth = 0;
+        let expensesThisMonth = 0;
         const projectSummaries: Array<{
           name: string;
-          spentThisWeek: number;
+          spentThisMonth: number;
           totalSpent: number;
           budget: number;
           remaining: number;
@@ -66,20 +66,20 @@ export async function GET(req: NextRequest) {
           const data = project.data as any;
           if (!data) continue;
 
-          const weeklyExpenses = (data.expenses || []).filter(
-            (e: any) => new Date(e.date) >= oneWeekAgo
+          const monthlyExpenses = (data.expenses || []).filter(
+            (e: any) => new Date(e.date) >= oneMonthAgo
           );
-          const weeklyTotal = weeklyExpenses.reduce(
+          const monthlyTotal = monthlyExpenses.reduce(
             (sum: number, e: any) => sum + (e.amount || 0),
             0
           );
 
-          totalSpentThisWeek += weeklyTotal;
-          expensesThisWeek += weeklyExpenses.length;
+          totalSpentThisMonth += monthlyTotal;
+          expensesThisMonth += monthlyExpenses.length;
 
           projectSummaries.push({
             name: project.name,
-            spentThisWeek: weeklyTotal,
+            spentThisMonth: monthlyTotal,
             totalSpent: data.spent || 0,
             budget: data.budget || 0,
             remaining: (data.budget || 0) - (data.spent || 0),
@@ -88,11 +88,11 @@ export async function GET(req: NextRequest) {
 
         // Send email
         if (RESEND_API_KEY) {
-          const emailHtml = generateWeeklyReportHtml(
+          const emailHtml = generateMonthlyReportHtml(
             user.name || user.email.split("@")[0],
             projectSummaries,
-            totalSpentThisWeek,
-            expensesThisWeek
+            totalSpentThisMonth,
+            expensesThisMonth
           );
 
           await fetch("https://api.resend.com/emails", {
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
             body: JSON.stringify({
               from: "ShiputzAI <noreply@shipazti.com>",
               to: user.email,
-              subject: `📊 סיכום שבועי - ShiputzAI`,
+              subject: `📊 סיכום חודשי - ShiputzAI`,
               html: emailHtml,
             }),
           });
@@ -124,25 +124,25 @@ export async function GET(req: NextRequest) {
   }
 }
 
-function generateWeeklyReportHtml(
+function generateMonthlyReportHtml(
   userName: string,
   projects: Array<{
     name: string;
-    spentThisWeek: number;
+    spentThisMonth: number;
     totalSpent: number;
     budget: number;
     remaining: number;
   }>,
-  totalSpentThisWeek: number,
-  expensesThisWeek: number
+  totalSpentThisMonth: number,
+  expensesThisMonth: number
 ): string {
   const projectRows = projects
     .map(
       (p) => `
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${p.name}</td>
-        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: ${p.spentThisWeek > 0 ? '#ef4444' : '#666'};">
-          ${p.spentThisWeek > 0 ? `₪${p.spentThisWeek.toLocaleString()}` : '-'}
+        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: ${p.spentThisMonth > 0 ? '#ef4444' : '#666'};">
+          ${p.spentThisMonth > 0 ? `₪${p.spentThisMonth.toLocaleString()}` : '-'}
         </td>
         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
           ₪${p.totalSpent.toLocaleString()} / ₪${p.budget.toLocaleString()}
@@ -166,7 +166,7 @@ function generateWeeklyReportHtml(
       <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); padding: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 24px;">📊 סיכום שבועי</h1>
+          <h1 style="color: white; margin: 0; font-size: 24px;">📊 סיכום חודשי</h1>
           <p style="color: #aaa; margin: 8px 0 0 0;">ShiputzAI</p>
         </div>
 
@@ -179,15 +179,15 @@ function generateWeeklyReportHtml(
           <!-- Summary Cards -->
           <div style="display: flex; gap: 16px; margin-bottom: 24px;">
             <div style="flex: 1; background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center;">
-              <p style="color: #666; margin: 0 0 8px 0; font-size: 14px;">הוצאות השבוע</p>
+              <p style="color: #666; margin: 0 0 8px 0; font-size: 14px;">הוצאות החודש</p>
               <p style="color: #1a1a1a; margin: 0; font-size: 24px; font-weight: bold;">
-                ₪${totalSpentThisWeek.toLocaleString()}
+                ₪${totalSpentThisMonth.toLocaleString()}
               </p>
             </div>
             <div style="flex: 1; background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center;">
               <p style="color: #666; margin: 0 0 8px 0; font-size: 14px;">פעולות</p>
               <p style="color: #1a1a1a; margin: 0; font-size: 24px; font-weight: bold;">
-                ${expensesThisWeek}
+                ${expensesThisMonth}
               </p>
             </div>
           </div>
@@ -197,7 +197,7 @@ function generateWeeklyReportHtml(
             <thead>
               <tr style="background: #f8f9fa;">
                 <th style="padding: 12px; text-align: right; font-weight: 600; color: #333;">פרויקט</th>
-                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">השבוע</th>
+                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">החודש</th>
                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">סה״כ</th>
                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">נותר</th>
               </tr>
@@ -218,7 +218,7 @@ function generateWeeklyReportHtml(
         <!-- Footer -->
         <div style="background: #f8f9fa; padding: 24px; text-align: center; border-top: 1px solid #eee;">
           <p style="color: #888; font-size: 12px; margin: 0;">
-            קיבלת מייל זה כי הפעלת דוחות שבועיים ב-ShiputzAI
+            קיבלת מייל זה כי הפעלת דוחות חודשיים ב-ShiputzAI
           </p>
           <p style="color: #888; font-size: 12px; margin: 8px 0 0 0;">
             <a href="https://shipazti.com/unsubscribe" style="color: #666;">ביטול הרשמה</a>

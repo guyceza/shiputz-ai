@@ -91,8 +91,8 @@ export function SettingsModal({ isOpen, onClose, userId }: SettingsModalProps) {
             {/* Weekly Report Toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">דוח שבועי במייל</p>
-                <p className="text-sm text-gray-500">קבל סיכום שבועי על ההוצאות שלך</p>
+                <p className="font-medium text-gray-900">דוח חודשי במייל</p>
+                <p className="text-sm text-gray-500">קבל סיכום חודשי על ההוצאות שלך</p>
               </div>
               <button
                 onClick={() => setWeeklyReport(!weeklyReport)}

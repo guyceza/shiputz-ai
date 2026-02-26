@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 export async function POST(request: Request) {
   try {
@@ -156,7 +156,7 @@ ${hasPlumbingPlan ? '8. זהה נקודות אינסטלציה (מים חמים/
 
 החזר **רק JSON תקין**, ללא טקסט נוסף!`;
 
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

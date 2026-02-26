@@ -26,8 +26,8 @@ export default function PricingComparison() {
         
         <div className="mb-6">
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-gray-900">₪149</span>
             <span className="text-lg text-gray-400 line-through">₪299</span>
+            <span className="text-4xl font-bold text-gray-900">₪149</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>
@@ -74,8 +74,8 @@ export default function PricingComparison() {
             50% הנחה
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-gray-900">₪179</span>
             <span className="text-lg text-gray-400 line-through">₪359</span>
+            <span className="text-4xl font-bold text-gray-900">₪179</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>

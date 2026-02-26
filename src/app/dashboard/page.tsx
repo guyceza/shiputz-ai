@@ -639,6 +639,61 @@ function DashboardContent() {
           </div>
         )}
 
+        {/* Premium Tools Section */}
+        {isPremium && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">כלים מתקדמים</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Bill of Quantities */}
+              <Link 
+                href="/dashboard/bill-of-quantities"
+                className="group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all"
+              >
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <span className="text-2xl">📋</span>
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">כתב כמויות AI</h3>
+                <p className="text-sm text-gray-500">העלה תכנית וקבל כתב כמויות מפורט אוטומטית</p>
+                <span className="inline-block mt-3 text-xs text-blue-600 group-hover:underline">
+                  התחל עכשיו ←
+                </span>
+              </Link>
+
+              {/* Visualize (if has vision) */}
+              {(hasVisionSub || hasLocalVision) && (
+                <Link 
+                  href="/visualize"
+                  className="group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all"
+                >
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <span className="text-2xl">🎨</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-1">הדמיות AI</h3>
+                  <p className="text-sm text-gray-500">צור הדמיה של השיפוץ לפני שמתחילים</p>
+                  <span className="inline-block mt-3 text-xs text-emerald-600 group-hover:underline">
+                    צור הדמיה ←
+                  </span>
+                </Link>
+              )}
+
+              {/* Quote Analysis */}
+              <Link 
+                href="/dashboard"
+                className="group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all opacity-60 pointer-events-none"
+              >
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">ניתוח הצעות מחיר</h3>
+                <p className="text-sm text-gray-500">השווה הצעות וקבל המלצות AI</p>
+                <span className="inline-block mt-3 text-xs text-gray-400">
+                  בקרוב
+                </span>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Projects */}
         {projectsLoading ? (
           <DashboardSkeleton />

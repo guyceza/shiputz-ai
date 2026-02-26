@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
 
 export async function POST(request: Request) {
   try {
-    const { image, fileName } = await request.json();
+    const body = await request.json();
+    const { 
+      image, 
+      fileName,
+      scale,
+      ceilingHeight = 2.70,
+      buildingType,
+      wallType,
+      wallThickness,
+      floorType,
+      hasElectricalPlan,
+      hasPlumbingPlan,
+      additionalNotes,
+      accuracyScore
+    } = body;
 
     if (!image) {
       return NextResponse.json({ error: "לא התקבלה תמונה" }, { status: 400 });
@@ -24,9 +38,63 @@ export async function POST(request: Request) {
     const mimeType = base64Match[1];
     const imageData = base64Match[2];
 
+    // Build context from additional inputs
+    const contextParts: string[] = [];
+    
+    if (scale) {
+      contextParts.push(`- סקאלה ידועה: ${scale}`);
+    }
+    if (ceilingHeight && ceilingHeight !== 2.70) {
+      contextParts.push(`- גובה תקרה: ${ceilingHeight} מ'`);
+    }
+    if (buildingType) {
+      const buildingTypes: Record<string, string> = {
+        apartment: 'דירה',
+        house: 'בית פרטי',
+        office: 'משרד',
+        commercial: 'מסחרי'
+      };
+      contextParts.push(`- סוג מבנה: ${buildingTypes[buildingType] || buildingType}`);
+    }
+    if (wallType) {
+      const wallTypes: Record<string, string> = {
+        blocks: 'בלוקים',
+        concrete: 'בטון',
+        drywall: 'גבס',
+        brick: 'לבנים'
+      };
+      contextParts.push(`- סוג קירות: ${wallTypes[wallType] || wallType}`);
+    }
+    if (wallThickness) {
+      contextParts.push(`- עובי קירות: ${wallThickness} ס"מ`);
+    }
+    if (floorType) {
+      const floorTypes: Record<string, string> = {
+        tiles: 'אריחים',
+        parquet: 'פרקט',
+        concrete: 'בטון',
+        marble: 'שיש'
+      };
+      contextParts.push(`- סוג ריצוף קיים: ${floorTypes[floorType] || floorType}`);
+    }
+    if (hasElectricalPlan) {
+      contextParts.push(`- התכנית כוללת נקודות חשמל - זהה וספור אותן`);
+    }
+    if (hasPlumbingPlan) {
+      contextParts.push(`- התכנית כוללת תכנית אינסטלציה - זהה נקודות מים וביוב`);
+    }
+    if (additionalNotes) {
+      contextParts.push(`- הערות נוספות מהמשתמש: ${additionalNotes}`);
+    }
+
+    const additionalContext = contextParts.length > 0 
+      ? `\n\n## מידע נוסף שסופק על ידי המשתמש:\n${contextParts.join('\n')}\n\nהשתמש במידע זה לשיפור דיוק הכמויות!`
+      : '';
+
     const prompt = `אתה מומחה לכתבי כמויות ותכניות בניה בישראל.
 
 נתח את התכנית המצורפת והפק כתב כמויות מפורט בפורמט JSON.
+${additionalContext}
 
 ## הוראות:
 1. זהה את סוג התכנית (דירה, בית, משרד וכו')
@@ -34,39 +102,48 @@ export async function POST(request: Request) {
 3. מדוד/העריך אורכי קירות (חיצוניים ופנימיים)
 4. ספור דלתות וחלונות
 5. חשב שטחי ריצוף
-6. חשב שטחי צביעה (קירות + תקרות, גובה 2.70 מ')
+6. חשב שטחי צביעה (קירות + תקרות)
+${hasElectricalPlan ? '7. זהה וספור נקודות חשמל (מפסקים, שקעים, תאורה)' : ''}
+${hasPlumbingPlan ? '8. זהה נקודות אינסטלציה (מים חמים/קרים, ביוב)' : ''}
 7. הוסף כל אלמנט רלוונטי נוסף
 
-## הנחות (אם לא מצוין בתכנית):
-- גובה תקרה: 2.70 מ'
-- עובי קיר חוץ: 20 ס"מ
-- עובי קיר פנים: 10 ס"מ
+## הנחות (השתמש רק אם לא צוין מידע ספציפי):
+- גובה תקרה: ${ceilingHeight || 2.70} מ'
+- עובי קיר חוץ: ${wallThickness || 20} ס"מ
+- עובי קיר פנים: ${wallThickness ? Math.floor(parseInt(wallThickness) / 2) : 10} ס"מ
 - רוחב דלת פנים: 80 ס"מ
 - רוחב חלון: 120 ס"מ
 
 ## פורמט התשובה (JSON בלבד!):
 {
   "summary": {
-    "totalArea": { "label": "שטח כולל", "value": "XX", "unit": "מ\"ר" },
+    "totalArea": { "label": "שטח כולל", "value": "XX", "unit": "מ\\"ר" },
     "rooms": { "label": "חדרים", "value": "X", "unit": "" },
-    "walls": { "label": "קירות", "value": "XX", "unit": "מ\"א" },
+    "walls": { "label": "קירות", "value": "XX", "unit": "מ\\"א" },
     "doors": { "label": "דלתות", "value": "X", "unit": "יח'" },
     "windows": { "label": "חלונות", "value": "X", "unit": "יח'" }
   },
   "items": [
-    { "category": "שטחים", "description": "סלון", "quantity": "25", "unit": "מ\"ר", "notes": "" },
-    { "category": "שטחים", "description": "מטבח", "quantity": "12", "unit": "מ\"ר", "notes": "" },
-    { "category": "קירות", "description": "קירות חוץ", "quantity": "35", "unit": "מ\"א", "notes": "היקף המבנה" },
-    { "category": "קירות", "description": "מחיצות פנים", "quantity": "18", "unit": "מ\"א", "notes": "" },
-    { "category": "פתחים", "description": "דלתות פנים", "quantity": "4", "unit": "יח'", "notes": "80 ס\"מ רוחב" },
-    { "category": "פתחים", "description": "חלונות", "quantity": "5", "unit": "יח'", "notes": "120x100 ס\"מ" },
-    { "category": "ריצוף", "description": "ריצוף כללי", "quantity": "85", "unit": "מ\"ר", "notes": "כולל 10% עודף" },
-    { "category": "צביעה", "description": "קירות פנים", "quantity": "190", "unit": "מ\"ר", "notes": "גובה 2.70" },
-    { "category": "צביעה", "description": "תקרות", "quantity": "85", "unit": "מ\"ר", "notes": "" }
+    { "category": "שטחים", "description": "סלון", "quantity": "25", "unit": "מ\\"ר", "notes": "" },
+    { "category": "שטחים", "description": "מטבח", "quantity": "12", "unit": "מ\\"ר", "notes": "" },
+    { "category": "קירות", "description": "קירות חוץ", "quantity": "35", "unit": "מ\\"א", "notes": "היקף המבנה" },
+    { "category": "קירות", "description": "מחיצות פנים", "quantity": "18", "unit": "מ\\"א", "notes": "" },
+    { "category": "פתחים", "description": "דלתות פנים", "quantity": "4", "unit": "יח'", "notes": "80 ס\\"מ רוחב" },
+    { "category": "פתחים", "description": "חלונות", "quantity": "5", "unit": "יח'", "notes": "120x100 ס\\"מ" },
+    { "category": "ריצוף", "description": "ריצוף כללי", "quantity": "85", "unit": "מ\\"ר", "notes": "כולל 10% עודף" },
+    { "category": "צביעה", "description": "קירות פנים", "quantity": "190", "unit": "מ\\"ר", "notes": "גובה ${ceilingHeight || 2.70}" },
+    { "category": "צביעה", "description": "תקרות", "quantity": "85", "unit": "מ\\"ר", "notes": "" }
+    ${hasElectricalPlan ? `,
+    { "category": "חשמל", "description": "נקודות תאורה", "quantity": "X", "unit": "יח'", "notes": "" },
+    { "category": "חשמל", "description": "שקעים", "quantity": "X", "unit": "יח'", "notes": "" },
+    { "category": "חשמל", "description": "מפסקים", "quantity": "X", "unit": "יח'", "notes": "" }` : ''}
+    ${hasPlumbingPlan ? `,
+    { "category": "אינסטלציה", "description": "נקודות מים", "quantity": "X", "unit": "יח'", "notes": "" },
+    { "category": "אינסטלציה", "description": "נקודות ביוב", "quantity": "X", "unit": "יח'", "notes": "" }` : ''}
   ],
   "notes": [
     "הנתונים מבוססים על ניתוח התכנית ויש לאמתם",
-    "הנחת גובה תקרה: 2.70 מ'",
+    ${scale ? `"סקאלה שהוזנה: ${scale}",` : '"לא צוינה סקאלה - הכמויות הן הערכה",'}
     "מומלץ להוסיף 10-15% לכמויות לבטיחות"
   ]
 }
@@ -95,7 +172,7 @@ export async function POST(request: Request) {
           ]
         }],
         generationConfig: {
-          maxOutputTokens: 4096,
+          maxOutputTokens: 8192,
           temperature: 0.2
         }
       })
@@ -135,6 +212,24 @@ export async function POST(request: Request) {
     if (result.error) {
       return NextResponse.json(result, { status: 400 });
     }
+
+    // Add accuracy score to result
+    if (accuracyScore !== undefined) {
+      result.accuracyScore = accuracyScore;
+    }
+
+    // Add metadata about inputs used
+    result.metadata = {
+      scale: scale || null,
+      ceilingHeight: ceilingHeight || 2.70,
+      buildingType: buildingType || null,
+      wallType: wallType || null,
+      wallThickness: wallThickness || null,
+      floorType: floorType || null,
+      hasElectricalPlan: hasElectricalPlan || false,
+      hasPlumbingPlan: hasPlumbingPlan || false,
+      generatedAt: new Date().toISOString()
+    };
 
     return NextResponse.json(result);
 

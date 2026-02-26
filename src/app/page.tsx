@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
 import PricingCard from "@/components/PricingCard";
@@ -255,7 +256,7 @@ export default function Home() {
                 </Link>
               </div>
               {!isLoggedIn && (
-                <p className="text-sm text-gray-400 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
+                <p className="text-sm text-gray-500 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
               )}
             </div>
             
@@ -316,7 +317,7 @@ export default function Home() {
             100% { transform: translateX(-25%); }
           }
         `}} />
-        <p className="text-center text-sm text-gray-400 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
+        <p className="text-center text-sm text-gray-500 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
         <div className="brands-marquee">
           <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
           <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
@@ -374,28 +375,29 @@ export default function Home() {
         `}} />
         <div className="max-w-4xl mx-auto">
           <div className="relative rounded-[20px] overflow-hidden shadow-2xl">
-            <img 
-              src="/images/hero-house.jpg" 
+            <Image 
+              src="/images/hero-house.webp" 
               alt="בית מודרני" 
               width={800}
               height={533}
+              priority
               className="w-full h-auto"
             />
             
             {/* Floating Cards - text only */}
             <div className="popup-float absolute top-[8%] left-[3%] bg-white rounded-2xl py-3 px-5 shadow-xl">
               <p className="font-bold text-gray-900 text-[15px]">כתב כמויות</p>
-              <p className="text-gray-400 text-[13px]">נוצר ב-30 שניות</p>
+              <p className="text-gray-500 text-[13px]">נוצר ב-30 שניות</p>
             </div>
             
             <div className="popup-float popup-float-delay-1 absolute bottom-[12%] left-[6%] bg-white rounded-2xl py-3 px-5 shadow-xl">
               <p className="font-bold text-gray-900 text-[15px]">הדמיית חדר</p>
-              <p className="text-gray-400 text-[13px]">לפני שקונים</p>
+              <p className="text-gray-500 text-[13px]">לפני שקונים</p>
             </div>
             
             <div className="popup-float popup-float-delay-2 absolute top-[30%] right-[3%] bg-white rounded-2xl py-3 px-5 shadow-xl">
               <p className="font-bold text-gray-900 text-[15px]">חסכון ממוצע</p>
-              <p className="text-gray-400 text-[13px]">15,000 ₪ לשיפוץ</p>
+              <p className="text-gray-500 text-[13px]">15,000 ₪ לשיפוץ</p>
             </div>
           </div>
         </div>
@@ -642,8 +644,8 @@ export default function Home() {
             <div className="flex-1 relative">
               <div className="grid grid-cols-2 gap-3 rounded-2xl overflow-hidden">
                 <div className="relative aspect-[4/3]">
-                  <img 
-                    src="/before-room.jpg" 
+                  <Image 
+                    src="/before-room.webp" 
                     alt="לפני השיפוץ"
                     width={400}
                     height={300}
@@ -657,8 +659,8 @@ export default function Home() {
                   href="/shop-look"
                   className="relative aspect-[4/3] group cursor-pointer"
                 >
-                  <img 
-                    src="/after-room.jpg" 
+                  <Image 
+                    src="/after-room.webp" 
                     alt="אחרי השיפוץ"
                     width={400}
                     height={300}
@@ -818,7 +820,7 @@ export default function Home() {
                   הרשמה
                 </button>
               </form>
-              <p className="text-xs text-gray-400 mt-4">ללא ספאם. אפשר להסיר בכל עת.</p>
+              <p className="text-xs text-gray-500 mt-4">ללא ספאם. אפשר להסיר בכל עת.</p>
             </div>
           </div>
         </div>

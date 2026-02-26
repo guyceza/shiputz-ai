@@ -3,6 +3,12 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
+// Cute character animation for premium upsell
+const PREMIUM_ANIMATION_URL = "https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json";
 
 const REGULAR_PRICE = 39.99;  // ₪39.99
 const DISCOUNT_PRICE = 19.99; // ₪19.99 first month with discount
@@ -19,6 +25,15 @@ function CheckoutVisionContent() {
   const [loading, setLoading] = useState(false);
   const [hasPurchased, setHasPurchased] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [premiumAnimData, setPremiumAnimData] = useState<object | null>(null);
+
+  // Load Lottie animation for premium upsell
+  useEffect(() => {
+    fetch(PREMIUM_ANIMATION_URL)
+      .then(res => res.json())
+      .then(data => setPremiumAnimData(data))
+      .catch(() => {});
+  }, []);
 
   // Check if user is logged in AND has main subscription
   useEffect(() => {
@@ -187,12 +202,19 @@ function CheckoutVisionContent() {
         
         <div className="max-w-md mx-auto px-6 py-12">
           <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 text-center">
-            {/* Animated illustration */}
-            <div className="w-24 h-24 mx-auto mb-6 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full animate-pulse"></div>
-              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-                <span className="text-4xl animate-bounce" style={{ animationDuration: '2s' }}>🔐</span>
-              </div>
+            {/* Lottie Animation */}
+            <div className="w-48 h-36 mx-auto mb-4">
+              {premiumAnimData ? (
+                <Lottie 
+                  animationData={premiumAnimData} 
+                  loop={true}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-5xl">✨</span>
+                </div>
+              )}
             </div>
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
               שירות Vision דורש מנוי ShiputzAI

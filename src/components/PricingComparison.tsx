@@ -31,10 +31,10 @@ const businessFeatures = [
 
 export default function PricingComparison() {
   return (
-    <div dir="ltr" className="flex flex-col lg:flex-row gap-6 lg:gap-8 w-full px-4 lg:px-12 overflow-x-auto">
+    <div dir="ltr" className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full px-4 lg:px-8 justify-center">
       
       {/* Free Card - LEFTMOST */}
-      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col min-w-[280px]" dir="rtl">
+      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col flex-1 max-w-[320px]" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
           <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
@@ -75,7 +75,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Premium Card */}
-      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col min-w-[280px]" dir="rtl">
+      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col flex-1 max-w-[320px]" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>
           <p className="text-gray-500 text-sm">לניהול תקציב מלא</p>
@@ -118,7 +118,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Premium Plus Card - Highlighted */}
-      <div className="border-2 border-gray-900 rounded-2xl p-6 lg:p-10 bg-white relative flex flex-col min-w-[280px]" dir="rtl">
+      <div className="border-2 border-gray-900 rounded-2xl p-6 lg:p-10 bg-white relative flex flex-col flex-1 max-w-[320px]" dir="rtl">
         {/* Popular Badge */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
           הכי פופולרי
@@ -166,7 +166,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Business Card - RIGHTMOST */}
-      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-gradient-to-b from-gray-50 to-white flex flex-col min-w-[280px]" dir="rtl">
+      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-gradient-to-b from-gray-50 to-white flex flex-col flex-1 max-w-[320px]" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">לעסקים</h3>
           <p className="text-gray-500 text-sm">למעצבי פנים וקבלנים</p>

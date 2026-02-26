@@ -219,20 +219,37 @@ function CheckoutVisionContent() {
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
               שירות Vision דורש מנוי ShiputzAI
             </h1>
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-500 mb-6">
               כדי לרכוש את מנוי Vision, צריך קודם חשבון ShiputzAI פעיל
             </p>
             
+            {/* Premium button with subtext inside */}
             <Link
               href="/checkout"
-              className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all mb-4"
+              className="block w-full text-center bg-gray-900 text-white py-4 px-6 rounded-2xl hover:bg-gray-800 transition-all mb-4"
             >
-              רכוש ShiputzAI ב-₪299.99
+              <div className="font-medium text-base">רכוש ShiputzAI ב-₪299.99</div>
+              <div className="text-xs text-gray-400 mt-1">תשלום חד פעמי · אחרי זה תוכל להוסיף Vision</div>
             </Link>
             
-            <p className="text-xs text-gray-400">
-              תשלום חד פעמי · אחרי זה תוכל להוסיף Vision
-            </p>
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-xs text-gray-400">או</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+            
+            {/* Premium Plus Bundle - Better value */}
+            <Link
+              href="/checkout?plan=plus"
+              className="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-6 rounded-2xl hover:from-purple-700 hover:to-blue-700 transition-all"
+            >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">הכי משתלם</span>
+              </div>
+              <div className="font-medium text-base">Premium Plus כולל 4 הדמיות AI ב-₪349.99</div>
+              <div className="text-xs text-purple-200 mt-1">חד פעמי · כולל את כל הפיצ׳רים + 4 הדמיות מתנה</div>
+            </Link>
           </div>
         </div>
       </div>

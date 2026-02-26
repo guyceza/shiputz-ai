@@ -10,7 +10,7 @@ const allFeatures = [
   { name: "התראות חכמות", premium: true, plus: true },
   { name: "עוזר אישי", premium: true, plus: true },
   { name: "הדמיית חדר", premium: false, plus: true },
-  { name: "הדמיות כלולות", premium: false, plus: true },
+  { name: "4 הדמיות כלולות", premium: false, plus: true },
   { name: "Shop the Look", premium: false, plus: true, link: "/shop-look" },
 ];
 
@@ -78,8 +78,8 @@ export default function PricingComparison() {
             50% הנחה
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-lg text-gray-400 line-through">₪631</span>
-            <span className="text-4xl font-bold text-gray-900">₪315.99</span>
+            <span className="text-lg text-gray-400 line-through">₪699</span>
+            <span className="text-4xl font-bold text-gray-900">₪349.99</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">תשלום חד פעמי</p>
         </div>

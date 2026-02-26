@@ -15,9 +15,9 @@ const allFeatures = [
 
 export default function PricingComparison() {
   return (
-    <div className="flex flex-col lg:flex-row gap-6 justify-center items-stretch max-w-5xl mx-auto">
+    <div className="flex flex-col lg:flex-row-reverse gap-6 justify-center items-stretch max-w-5xl mx-auto">
       
-      {/* Premium Card - LEFT */}
+      {/* Premium Card - RIGHT in RTL = LEFT visually */}
       <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>

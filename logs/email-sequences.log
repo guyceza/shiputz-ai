@@ -32,3 +32,14 @@ Sending reminder to dht1dht@gmail.com (day 1)
 Sending reminder to guyc@crms.co.il (day 1)
 ✅ Sent successfully: dfb21f8b-fc02-4d74-b488-d3ed6c5bb9e7
 [2026-02-25T09:00:09.662Z] Done!
+[2026-02-26T09:00:01.695Z] Starting email sequence processing...
+Found 9 users
+Sending discount_offer to test-check-1234@gmail.com (day 3)
+✅ Sent successfully: f9fc413e-a2fa-40a3-ad60-529f70f333ba
+Sending vision_upsell to guyceza@gmail.com (day 3)
+✅ Sent successfully: 643d11e6-9c55-41fc-9514-884ddf2e034a
+Sending welcome_purchased to test@shiputzai.com (day 0)
+✅ Sent successfully: 3c65a807-ecc7-490f-b103-30f8b45affa4
+Sending discount_offer to test123@gmail.com (day 3)
+✅ Sent successfully: 7dfed9df-23dd-47f0-b560-6df747b1e0f8
+[2026-02-26T09:00:13.041Z] Done!

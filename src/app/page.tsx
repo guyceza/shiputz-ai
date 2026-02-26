@@ -865,7 +865,7 @@ export default function Home() {
       {/* Pricing - hide for users with subscription */}
       {!isPremium && (
       <section className="py-24 px-6 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
           <p className="text-gray-500 mb-12">תשלום אחד. לכל משך הפרויקט.</p>
           

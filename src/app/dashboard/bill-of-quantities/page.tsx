@@ -44,16 +44,28 @@ interface AccuracyInputs {
 
 const calculateAccuracy = (inputs: AccuracyInputs): number => {
   let score = 0;
-  if (inputs.hasBlueprint) score += 30;
-  if (inputs.hasScale) score += 25;
-  if (inputs.hasCeilingHeight) score += 10;
+  if (inputs.hasBlueprint) score += 27;
+  if (inputs.hasScale) score += 22;
+  if (inputs.hasCeilingHeight) score += 9;
   if (inputs.hasWallType) score += 8;
   if (inputs.hasWallThickness) score += 5;
   if (inputs.hasFloorType) score += 5;
   if (inputs.hasElectricalPoints) score += 7;
-  if (inputs.hasPlumbingPlan) score += 10;
-  return Math.min(score, 100);
+  if (inputs.hasPlumbingPlan) score += 7;
+  return Math.min(score, 90); // מקסימום 90%
 };
+
+// Tips to show during loading
+const loadingTips = [
+  "טיפ: כתב כמויות מפורט עוזר למנוע הפתעות בהמשך הפרויקט",
+  "טיפ: השוו לפחות 3 הצעות מחיר לפני שסוגרים עם קבלן",
+  "טיפ: הוסיפו 10-15% לכמויות כרזרבה לביטחון",
+  "טיפ: תמיד דרשו מהקבלן כתב כמויות מפורט לפני תחילת העבודה",
+  "טיפ: תעדו את התקדמות הפרויקט בתמונות לאורך הדרך",
+  "טיפ: קראו את החוזה בעיון לפני החתימה",
+  "טיפ: בקשו המלצות מלקוחות קודמים של הקבלן",
+  "טיפ: הגדירו לוח זמנים ברור עם אבני דרך",
+];
 
 const getAccuracyLabel = (score: number): string => {
   if (score < 35) return "הערכה ראשונית";
@@ -103,6 +115,10 @@ export default function BillOfQuantitiesPage() {
   const [result, setResult] = useState<BOQResult | null>(null);
   const [error, setError] = useState<string>("");
   
+  // Loading state
+  const [countdown, setCountdown] = useState(60);
+  const [currentTip, setCurrentTip] = useState(0);
+  
   // Calculate accuracy
   const accuracyInputs: AccuracyInputs = {
     hasBlueprint: !!uploadedImage,
@@ -119,6 +135,30 @@ export default function BillOfQuantitiesPage() {
   const accuracyLabel = getAccuracyLabel(accuracyScore);
   const accuracyColor = getAccuracyColor(accuracyScore);
   const accuracyTextColor = getAccuracyTextColor(accuracyScore);
+
+  // Countdown timer and tip rotation during generation
+  useEffect(() => {
+    if (!generating) {
+      setCountdown(60);
+      setCurrentTip(0);
+      return;
+    }
+    
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    
+    // Tip rotation every 5 seconds
+    const tipInterval = setInterval(() => {
+      setCurrentTip(prev => (prev + 1) % loadingTips.length);
+    }, 5000);
+    
+    return () => {
+      clearInterval(countdownInterval);
+      clearInterval(tipInterval);
+    };
+  }, [generating]);
 
   // Check auth and premium status
   useEffect(() => {
@@ -744,12 +784,21 @@ export default function BillOfQuantitiesPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  מנתח תכנית...
+                  מנתח תכנית... ({countdown} שניות)
                 </span>
               ) : (
                 'צור כתב כמויות'
               )}
             </button>
+            
+            {/* Loading Tips */}
+            {generating && (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600 transition-all duration-300">
+                  {loadingTips[currentTip]}
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">

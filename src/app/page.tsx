@@ -362,47 +362,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* House Showcase with Floating Features */}
-      <section className="py-12 px-6 bg-white">
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes popupFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-          }
-          .popup-float { animation: popupFloat 4s ease-in-out infinite; }
-          .popup-float-delay-1 { animation-delay: 0.5s; }
-          .popup-float-delay-2 { animation-delay: 1s; }
-        `}} />
-        <div className="max-w-4xl mx-auto">
-          <div className="relative rounded-[20px] overflow-hidden shadow-2xl">
-            <Image 
-              src="/images/hero-house.webp" 
-              alt="בית מודרני" 
-              width={800}
-              height={533}
-              priority
-              className="w-full h-auto"
-            />
-            
-            {/* Floating Cards - text only */}
-            <div className="popup-float absolute top-[8%] left-[3%] bg-white rounded-2xl py-3 px-5 shadow-xl">
-              <p className="font-bold text-gray-900 text-[15px]">כתב כמויות</p>
-              <p className="text-gray-500 text-[13px]">נוצר ב-30 שניות</p>
-            </div>
-            
-            <div className="popup-float popup-float-delay-1 absolute bottom-[12%] left-[6%] bg-white rounded-2xl py-3 px-5 shadow-xl">
-              <p className="font-bold text-gray-900 text-[15px]">הדמיית חדר</p>
-              <p className="text-gray-500 text-[13px]">לפני שקונים</p>
-            </div>
-            
-            <div className="popup-float popup-float-delay-2 absolute top-[30%] right-[3%] bg-white rounded-2xl py-3 px-5 shadow-xl">
-              <p className="font-bold text-gray-900 text-[15px]">חסכון ממוצע</p>
-              <p className="text-gray-500 text-[13px]">15,000 ₪ לשיפוץ</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* איך השיפוץ שלי יראה? Teaser */}
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-5xl mx-auto">

@@ -48,11 +48,7 @@ export default function PricingComparison() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}
-              {feature.link ? (
-                <Link href={feature.link} className="hover:underline">{feature.name}</Link>
-              ) : (
-                <span>{feature.name}</span>
-              )}
+              <span>{feature.name}</span>
             </li>
           ))}
         </ul>
@@ -95,7 +91,9 @@ export default function PricingComparison() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {feature.link ? (
-                <Link href={feature.link} className={`hover:underline ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>{feature.name}</Link>
+                <Link href={feature.link} className={`underline underline-offset-2 decoration-gray-300 hover:decoration-gray-900 transition-colors ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>
+                  {feature.name} <span className="text-xs">←</span>
+                </Link>
               ) : (
                 <span className={feature.plus && !feature.premium ? 'font-medium' : ''}>{feature.name}</span>
               )}

@@ -742,58 +742,6 @@ export default function Home() {
       {/* Problem/Comparison */}
       <ComparisonSection />
 
-      {/* Testimonials */}
-      <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">מה אומרים המשפצים</h2>
-            <p className="text-gray-500">הצטרפו למאות משפצים שכבר חוסכים זמן וכסף</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <TestimonialCard
-              quote="שפצתי דירת 4 חדרים והאפליקציה עזרה לי לחסוך ₪15,000 בהשוואת הצעות מחיר"
-              name="יעל מ."
-              city="תל אביב"
-              rating={5}
-            />
-            <TestimonialCard
-              quote="סוף סוף הצלחתי לעקוב אחרי כל ההוצאות במקום אחד. ממליץ בחום!"
-              name="אבי כ."
-              city="רמת גן"
-              rating={5}
-            />
-            <TestimonialCard
-              quote="ניתוח הצעת המחיר ב-AI חשף לי עלויות מנופחות שחסכו לי אלפים"
-              name="מיכל ר."
-              city="חיפה"
-              rating={5}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Tip of the Week */}
-      <section className="py-16 px-6 border-t border-gray-100">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-10 border border-amber-100">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">הטיפ השבוע</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                לפני שסוגרים עם קבלן, בקשו ממנו כתב כמויות מפורט - זה יחסוך לכם הפתעות בהמשך ויאפשר השוואה אמיתית בין הצעות.
-              </p>
-              <Link 
-                href="/tips"
-                className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 group"
-              >
-                עוד טיפים 
-                <span className="group-hover:-translate-x-1 transition-transform">←</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section id="features" className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-5xl mx-auto">
@@ -1008,26 +956,6 @@ function Step({ number, title, description }: { number: string; title: string; d
       <div>
         <h3 className="text-xl font-semibold mb-2 text-gray-900">{title}</h3>
         <p className="text-gray-500">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-function TestimonialCard({ quote, name, city, rating }: { quote: string; name: string; city: string; rating: number }) {
-  return (
-    <div className="bg-white rounded-2xl p-8 border border-gray-100 hover-lift hover-glow">
-      <div className="text-4xl text-gray-200 mb-4 leading-none">"</div>
-      <p className="text-gray-700 mb-6 leading-relaxed">{quote}</p>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="font-medium text-gray-900">{name}</p>
-          <p className="text-sm text-gray-500">{city}</p>
-        </div>
-        <div className="flex gap-0.5">
-          {Array.from({ length: rating }).map((_, i) => (
-            <span key={i} className="text-amber-400">★</span>
-          ))}
-        </div>
       </div>
     </div>
   );

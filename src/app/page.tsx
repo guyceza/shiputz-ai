@@ -377,6 +377,8 @@ export default function Home() {
             <img 
               src="/images/hero-house.jpg" 
               alt="בית מודרני" 
+              width={800}
+              height={533}
               className="w-full h-auto"
             />
             
@@ -433,16 +435,18 @@ export default function Home() {
             {/* Size Slider */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-medium text-gray-700">גודל הדירה</label>
+                <label htmlFor="calc-size" className="text-sm font-medium text-gray-700">גודל הדירה</label>
                 <span className="text-2xl font-bold text-gray-900 transition-all duration-300">{calcSize} מ״ר</span>
               </div>
               <input
+                id="calc-size"
                 type="range"
                 min="30"
                 max="200"
                 step="5"
                 value={calcSize}
                 onChange={(e) => setCalcSize(e.target.value)}
+                aria-label="גודל הדירה במטרים רבועים"
                 className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-gray-900 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gray-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
@@ -481,8 +485,9 @@ export default function Home() {
             {/* Location & Bathrooms */}
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
+                <label htmlFor="calc-location" className="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
                 <select 
+                  id="calc-location"
                   value={calcLocation}
                   onChange={(e) => setCalcLocation(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
@@ -517,8 +522,9 @@ export default function Home() {
             {/* Kitchen & Infrastructure */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">מטבח</label>
+                <label htmlFor="calc-kitchen" className="block text-sm font-medium text-gray-700 mb-2">מטבח</label>
                 <select 
+                  id="calc-kitchen"
                   value={calcKitchen}
                   onChange={(e) => setCalcKitchen(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
@@ -530,8 +536,9 @@ export default function Home() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">תשתיות</label>
+                <label htmlFor="calc-infrastructure" className="block text-sm font-medium text-gray-700 mb-2">תשתיות</label>
                 <select 
+                  id="calc-infrastructure"
                   value={calcInfrastructure}
                   onChange={(e) => setCalcInfrastructure(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
@@ -638,6 +645,8 @@ export default function Home() {
                   <img 
                     src="/before-room.jpg" 
                     alt="לפני השיפוץ"
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm py-2 text-center">
@@ -651,6 +660,8 @@ export default function Home() {
                   <img 
                     src="/after-room.jpg" 
                     alt="אחרי השיפוץ"
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover group-hover:brightness-110 transition-all"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-sm py-2 text-center">
@@ -840,11 +851,14 @@ export default function Home() {
               <p className="text-gray-500 mb-6">הצטרפו ל-500+ משפצים שמקבלים טיפים שבועיים</p>
               
               <form onSubmit={(e) => { handleSubscribe(e); setShowNewsletterPopup(false); }} className="flex flex-col gap-3">
+                <label htmlFor="newsletter-email" className="sr-only">כתובת אימייל</label>
                 <input
+                  id="newsletter-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
+                  aria-label="כתובת אימייל להרשמה לניוזלטר"
                   className="w-full px-5 py-4 border border-gray-200 rounded-full text-base focus:outline-none focus:border-gray-900 text-left"
                   dir="ltr"
                   required

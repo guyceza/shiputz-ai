@@ -125,7 +125,9 @@ export default function RootLayout({
       </head>
       <body className={`${heebo.className} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
         <ThemeProvider>
-          {children}
+          <main id="main-content">
+            {children}
+          </main>
           <ChatWidget />
         </ThemeProvider>
         <Analytics />

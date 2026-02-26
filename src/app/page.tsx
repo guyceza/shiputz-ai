@@ -662,7 +662,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-6 bg-gray-900 text-white">
+      <section className="py-24 px-6 text-white" style={{ backgroundColor: '#101010' }}>
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4">{isLoggedIn ? "הפרויקטים שלך מחכים" : "מוכנים?"}</h2>
           <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "התחילו לנהל את השיפוץ בצורה חכמה."}</p>

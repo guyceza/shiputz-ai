@@ -27,6 +27,7 @@ export default function PricingComparison() {
         </div>
         
         <div className="mb-6">
+          <div className="h-6 mb-2"></div>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-gray-900">₪0</span>
           </div>
@@ -157,6 +158,7 @@ export default function PricingComparison() {
         </div>
         
         <div className="mb-6">
+          <div className="h-6 mb-2"></div>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-bold text-gray-900">בהתאמה</span>
           </div>

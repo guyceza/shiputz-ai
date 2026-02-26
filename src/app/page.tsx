@@ -315,7 +315,7 @@ export default function Home() {
       </section>
 
       {/* House Showcase with Floating Features */}
-      <section className="py-12 px-6 bg-slate-900">
+      <section className="py-12 px-6 bg-white">
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes popupFloat {
             0%, 100% { transform: translateY(0); }
@@ -335,7 +335,11 @@ export default function Home() {
             
             {/* Floating Popups */}
             <div className="popup-float absolute top-[12%] left-[5%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
-              <div className="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">📋</div>
+              <div className="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm">כתב כמויות</p>
                 <p className="text-gray-500 text-xs">נוצר ב-30 שניות</p>
@@ -343,7 +347,11 @@ export default function Home() {
             </div>
             
             <div className="popup-float popup-float-delay-1 absolute bottom-[18%] left-[10%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
-              <div className="w-11 h-11 bg-pink-100 rounded-xl flex items-center justify-center text-xl">🎨</div>
+              <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm">הדמיית חדר</p>
                 <p className="text-gray-500 text-xs">לפני שקונים</p>
@@ -351,7 +359,11 @@ export default function Home() {
             </div>
             
             <div className="popup-float popup-float-delay-2 absolute top-[35%] right-[5%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
-              <div className="w-11 h-11 bg-orange-100 rounded-xl flex items-center justify-center text-xl">💰</div>
+              <div className="w-11 h-11 bg-amber-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <div>
                 <p className="font-bold text-gray-900 text-sm">חסכון ממוצע</p>
                 <p className="text-gray-500 text-xs">15,000 ₪ לשיפוץ</p>

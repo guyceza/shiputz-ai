@@ -5,6 +5,7 @@ import Link from "next/link";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
 import PricingCard from "@/components/PricingCard";
+import StatsCounter from "@/components/StatsCounter";
 import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
 
 export default function Home() {
@@ -264,25 +265,8 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl mx-auto">
-          <div className="group p-4 rounded-2xl hover-lift cursor-default">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">₪10,000,000<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">תקציבים הוזנו ב-24 שעות</p>
-          </div>
-          <div className="group p-4 rounded-2xl hover-lift cursor-default">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">100<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">משפצים פעילים</p>
-          </div>
-          <div className="group p-4 rounded-2xl hover-lift cursor-default">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">500<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">הצעות מחיר נותחו</p>
-          </div>
-          <div className="group p-4 rounded-2xl hover-lift cursor-default">
-            <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">10,000<span className="text-gray-400">+</span></p>
-            <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">טיפים נקראו</p>
-          </div>
-        </div>
+        {/* Stats with counting animation */}
+        <StatsCounter />
       </section>
 
       {/* Trust Bar */}

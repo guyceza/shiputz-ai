@@ -10,7 +10,7 @@
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-3-pro-preview",
+  VISION_PRO: "gemini-3.1-pro-preview",
   
   // For fast text tasks (chat support, simple Q&A)
   TEXT_FAST: "gemini-3-flash-preview",
@@ -33,7 +33,7 @@ export const MODEL_CAPABILITIES = {
     vision: true,
     text: true,
     maxTokens: 65536,
-    description: "Gemini 3.1 Pro - best for complex vision tasks"
+    description: "Gemini 3.1 Pro Preview - best for complex vision tasks"
   },
   [AI_MODELS.TEXT_FAST]: {
     vision: true,

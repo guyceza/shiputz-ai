@@ -1110,8 +1110,7 @@ export default function VisualizePage() {
         <section className="py-20 px-6 bg-gray-50">
           <div className="max-w-md mx-auto text-center">
             <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-              <div className="text-4xl mb-4">🎨</div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 בחר את המסלול שלך
               </h2>
               
@@ -1137,7 +1136,10 @@ export default function VisualizePage() {
                     <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded-full">הכי פופולרי</span>
                   </div>
                   <div className="pr-8">
-                    <p className="text-2xl font-bold text-gray-900 mb-1">₪349.99</p>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-sm text-gray-400 line-through">₪699</span>
+                      <span className="text-2xl font-bold text-gray-900">₪349.99</span>
+                    </div>
                     <p className="text-sm text-gray-600">כולל 4 הדמיות במערכת AI Vision</p>
                     <p className="text-sm text-gray-600">+ Shop the Look</p>
                   </div>
@@ -1163,7 +1165,10 @@ export default function VisualizePage() {
                     </div>
                   </div>
                   <div className="pr-8">
-                    <p className="text-2xl font-bold text-gray-900 mb-1">₪299.99</p>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-sm text-gray-400 line-through">₪599</span>
+                      <span className="text-2xl font-bold text-gray-900">₪299.99</span>
+                    </div>
                     <p className="text-sm text-gray-600">ניהול תקציב, סריקת קבלות, התראות</p>
                     <p className="text-sm text-gray-400">ללא הדמיות AI Vision</p>
                   </div>
@@ -1374,10 +1379,7 @@ export default function VisualizePage() {
               // User doesn't have main subscription - redirect to main checkout
               <>
                 <div className="text-center mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">🎨</span>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">בחר את המסלול שלך</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">בחר את המסלול שלך</h3>
                 </div>
                 
                 <div className="space-y-3 mb-6">
@@ -1402,7 +1404,10 @@ export default function VisualizePage() {
                       <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded-full">הכי פופולרי</span>
                     </div>
                     <div className="pr-8">
-                      <p className="text-2xl font-bold text-gray-900 mb-1">₪349.99</p>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-sm text-gray-400 line-through">₪699</span>
+                        <span className="text-2xl font-bold text-gray-900">₪349.99</span>
+                      </div>
                       <p className="text-sm text-gray-600">כולל 4 הדמיות במערכת AI Vision</p>
                       <p className="text-sm text-gray-600">+ Shop the Look</p>
                     </div>
@@ -1428,7 +1433,10 @@ export default function VisualizePage() {
                       </div>
                     </div>
                     <div className="pr-8">
-                      <p className="text-2xl font-bold text-gray-900 mb-1">₪299.99</p>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-sm text-gray-400 line-through">₪599</span>
+                        <span className="text-2xl font-bold text-gray-900">₪299.99</span>
+                      </div>
                       <p className="text-sm text-gray-600">ניהול תקציב, סריקת קבלות, התראות</p>
                       <p className="text-sm text-gray-400">ללא הדמיות AI Vision</p>
                     </div>

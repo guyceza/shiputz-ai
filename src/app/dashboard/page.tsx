@@ -464,7 +464,7 @@ function DashboardContent() {
             <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600">
               ShiputzAI
             </Link>
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">דף הבית</Link>
+            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 whitespace-nowrap">דף הבית</Link>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">

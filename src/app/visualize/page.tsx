@@ -1613,7 +1613,11 @@ export default function VisualizePage() {
             {generatedResult.analysis && (
               <div className="bg-blue-50 rounded-2xl p-4 mb-6">
                 <h4 className="font-semibold text-gray-900 mb-2">📝 ניתוח מקצועי</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">{generatedResult.analysis}</p>
+                <div className="text-gray-700 text-sm leading-relaxed space-y-3">
+                  {generatedResult.analysis.split('\n\n').map((paragraph, idx) => (
+                    <p key={idx}>{paragraph.replace(/\*\*/g, '').replace(/\n/g, ' ').trim()}</p>
+                  ))}
+                </div>
               </div>
             )}
             
@@ -1828,7 +1832,11 @@ export default function VisualizePage() {
             {selectedHistoryItem.analysis && (
               <div className="bg-blue-50 rounded-2xl p-4 mb-6">
                 <h4 className="font-semibold text-gray-900 mb-2">📋 ניתוח מקצועי</h4>
-                <p className="text-gray-700 text-sm leading-relaxed">{selectedHistoryItem.analysis}</p>
+                <div className="text-gray-700 text-sm leading-relaxed space-y-3">
+                  {selectedHistoryItem.analysis.split('\n\n').map((paragraph, idx) => (
+                    <p key={idx}>{paragraph.replace(/\*\*/g, '').replace(/\n/g, ' ').trim()}</p>
+                  ))}
+                </div>
               </div>
             )}
             

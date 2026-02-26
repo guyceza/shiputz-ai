@@ -7,6 +7,7 @@ import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
 import PricingCard from "@/components/PricingCard";
 import PricingComparison from "@/components/PricingComparison";
+import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";
 import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
 
@@ -615,16 +616,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">© 2026 ShiputzAI</p>
-          <div className="flex gap-6 text-sm text-gray-500">
-            <Link href="/terms" className="hover:text-gray-900">תנאי שימוש</Link>
-            <Link href="/privacy" className="hover:text-gray-900">פרטיות</Link>
-            <a href="/contact" className="hover:text-gray-900">צור קשר</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

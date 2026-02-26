@@ -3,44 +3,35 @@
 import Link from 'next/link';
 
 const footerLinks = {
-  products: {
-    title: 'מוצרים',
+  services: {
+    title: 'השירותים שלנו',
     links: [
-      { label: 'AI Vision - הדמיות', href: '/visualize' },
+      { label: 'הדמיות AI', href: '/visualize' },
       { label: 'Shop the Look', href: '/shop-look' },
       { label: 'כתב כמויות', href: '/dashboard/bill-of-quantities' },
-      { label: 'מאמרים וטיפים', href: '/tips' },
+      { label: 'טיפים לשיפוץ', href: '/tips' },
     ],
   },
   account: {
-    title: 'חשבון',
+    title: 'החשבון שלי',
     links: [
-      { label: 'לאזור האישי', href: '/dashboard' },
+      { label: 'אזור אישי', href: '/dashboard' },
       { label: 'התחברות', href: '/login' },
       { label: 'הרשמה', href: '/signup' },
-      { label: 'איפוס סיסמה', href: '/forgot-password' },
     ],
   },
-  support: {
-    title: 'תמיכה',
+  help: {
+    title: 'עזרה',
     links: [
       { label: 'צור קשר', href: '/contact' },
-      { label: 'מאמרים וטיפים', href: '/tips' },
+      { label: 'שאלות נפוצות', href: '/#faq' },
     ],
   },
-  legal: {
-    title: 'משפטי',
+  info: {
+    title: 'מידע',
     links: [
       { label: 'תנאי שימוש', href: '/terms' },
       { label: 'מדיניות פרטיות', href: '/privacy' },
-      { label: 'ביטול הרשמה', href: '/unsubscribe' },
-    ],
-  },
-  pricing: {
-    title: 'תמחור',
-    links: [
-      { label: 'Premium', href: '/checkout' },
-      { label: 'Vision מנוי', href: '/checkout-vision' },
     ],
   },
 };

@@ -52,7 +52,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-start gap-0 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
-              <span className="w-5 flex-shrink-0 mt-px">{feature.free ? '✓' : '✗'}</span>
+              <span className="flex-shrink-0 ml-0.5">{feature.free ? '✓' : '✗'}</span>
               <span>{feature.name}</span>
             </li>
           ))}
@@ -87,7 +87,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-start gap-0 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
-              <span className="w-5 flex-shrink-0 mt-px">{feature.premium ? '✓' : '✗'}</span>
+              <span className="flex-shrink-0 ml-0.5">{feature.premium ? '✓' : '✗'}</span>
               <span>{feature.name}</span>
             </li>
           ))}
@@ -127,7 +127,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.map((feature: any, i) => (
             <li key={i} className="flex items-start gap-0 text-gray-900">
-              <span className="w-5 flex-shrink-0 mt-px">✓</span>
+              <span className="flex-shrink-0 ml-0.5">✓</span>
               {feature.link ? (
                 <Link href={feature.link} className={`underline underline-offset-2 decoration-gray-400 hover:decoration-gray-900 transition-colors ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>
                   {feature.name}
@@ -166,7 +166,7 @@ export default function PricingComparison() {
         <ul className="space-y-3 mb-8 text-gray-700 flex-grow">
           {businessFeatures.map((feature, i) => (
             <li key={i} className="flex items-start gap-0">
-              <span className="w-5 flex-shrink-0 mt-px text-gray-900">✓</span>
+              <span className="flex-shrink-0 text-gray-900">✓</span>
               <span>{feature}</span>
             </li>
           ))}

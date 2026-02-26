@@ -315,42 +315,65 @@ export default function Home() {
       </section>
 
       {/* House Showcase with Floating Features */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-12 px-6 bg-[#0f172a]">
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes popupFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-8px); }
           }
-          .popup-float { animation: popupFloat 5s ease-in-out infinite; }
-          .popup-float-delay-1 { animation-delay: 1s; }
-          .popup-float-delay-2 { animation-delay: 2s; }
-          .feature-card {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.07);
-          }
+          .popup-float { animation: popupFloat 4s ease-in-out infinite; }
+          .popup-float-delay-1 { animation-delay: 0.5s; }
+          .popup-float-delay-2 { animation-delay: 1s; }
         `}} />
-        <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-2xl overflow-hidden">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative rounded-[20px] overflow-hidden">
             <img 
               src="/images/hero-house.jpg" 
               alt="בית מודרני" 
               className="w-full h-auto"
             />
             
-            {/* Minimal Floating Cards */}
-            <div className="popup-float absolute top-[10%] left-[4%] feature-card rounded-xl px-4 py-3">
-              <p className="font-semibold text-gray-900 text-sm">כתב כמויות</p>
-              <p className="text-gray-400 text-xs">נוצר ב-30 שניות</p>
+            {/* Floating Cards - matching reference style */}
+            <div className="popup-float absolute top-[8%] left-[3%] bg-white rounded-2xl py-3 px-4 flex items-center gap-3 shadow-xl">
+              <div className="order-2">
+                <p className="font-bold text-gray-900 text-[15px]">כתב כמויות</p>
+                <p className="text-gray-400 text-[13px]">נוצר ב-30 שניות</p>
+              </div>
+              <div className="order-1 w-11 h-11 bg-[#d1fae5] rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#059669]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="5" y="3" width="14" height="18" rx="2"/>
+                  <line x1="9" y1="8" x2="15" y2="8"/>
+                  <line x1="9" y1="12" x2="15" y2="12"/>
+                  <line x1="9" y1="16" x2="12" y2="16"/>
+                </svg>
+              </div>
             </div>
             
-            <div className="popup-float popup-float-delay-1 absolute bottom-[15%] left-[8%] feature-card rounded-xl px-4 py-3">
-              <p className="font-semibold text-gray-900 text-sm">הדמיית חדר</p>
-              <p className="text-gray-400 text-xs">לפני שקונים</p>
+            <div className="popup-float popup-float-delay-1 absolute bottom-[12%] left-[6%] bg-white rounded-2xl py-3 px-4 flex items-center gap-3 shadow-xl">
+              <div className="order-2">
+                <p className="font-bold text-gray-900 text-[15px]">הדמיית חדר</p>
+                <p className="text-gray-400 text-[13px]">לפני שקונים</p>
+              </div>
+              <div className="order-1 w-11 h-11 bg-[#fce7f3] rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#db2777]" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="8" cy="8" r="3" opacity="0.6"/>
+                  <circle cx="16" cy="8" r="3" opacity="0.8"/>
+                  <circle cx="12" cy="14" r="4"/>
+                </svg>
+              </div>
             </div>
             
-            <div className="popup-float popup-float-delay-2 absolute top-[32%] right-[4%] feature-card rounded-xl px-4 py-3">
-              <p className="font-semibold text-gray-900 text-sm">חסכון ממוצע</p>
-              <p className="text-emerald-600 text-xs font-medium">₪15,000 לשיפוץ</p>
+            <div className="popup-float popup-float-delay-2 absolute top-[30%] right-[3%] bg-white rounded-2xl py-3 px-4 flex items-center gap-3 shadow-xl">
+              <div className="order-2">
+                <p className="font-bold text-gray-900 text-[15px]">חסכון ממוצע</p>
+                <p className="text-gray-400 text-[13px]">15,000 ₪ לשיפוץ</p>
+              </div>
+              <div className="order-1 w-11 h-11 bg-[#fef3c7] rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-[#d97706]" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="8"/>
+                  <text x="12" y="16" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">₪</text>
+                </svg>
+              </div>
             </div>
           </div>
         </div>

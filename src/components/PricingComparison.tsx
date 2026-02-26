@@ -13,7 +13,7 @@ const allFeatures = [
   { name: "התראות חכמות", free: false, premium: true, plus: true },
   { name: "עוזר אישי", free: false, premium: true, plus: true },
   { name: "4 הדמיות במערכת AI Vision", free: false, premium: false, plus: true, plusOnly: true },
-  { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
+  { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look", plusOnly: true },
 ];
 
 const businessFeatures = [

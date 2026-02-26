@@ -192,28 +192,60 @@ function CheckoutContent() {
             </p>
           </div>
 
-          {/* What's included - minimal */}
+          {/* What's included - detailed */}
           <div className="border-t border-gray-100 pt-6 mb-6">
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-center gap-3">
                 <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span>מעקב תקציב + סריקת קבלות</span>
+                <span>מעקב תקציב ללא הגבלה</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span>ניתוח הצעות מחיר + עוזר אישי</span>
+                <span>סריקת קבלות אוטומטית</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>ניתוח הצעות מחיר</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>בדיקת חוזים</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>התראות חכמות</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>עוזר אישי</span>
               </div>
               {isPremiumPlus && (
-                <div className="flex items-center gap-3 font-medium">
-                  <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>2 הדמיות חדר</span>
-                </div>
+                <>
+                  <div className="flex items-center gap-3 font-medium">
+                    <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>הדמיית חדר</span>
+                  </div>
+                  <div className="flex items-center gap-3 font-medium">
+                    <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>2 הדמיות כלולות</span>
+                  </div>
+                </>
               )}
             </div>
           </div>

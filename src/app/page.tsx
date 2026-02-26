@@ -606,10 +606,22 @@ export default function Home() {
       )}
 
       {/* About / Our Story - Premium B&W */}
-      <section className="py-24 px-6 bg-black">
-        <div className="max-w-4xl mx-auto">
+      <section className="relative py-24 px-6 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image 
+            src="/images/about-bg.webp" 
+            alt="" 
+            fill 
+            className="object-cover"
+            quality={90}
+          />
+          <div className="absolute inset-0 bg-black/75"></div>
+        </div>
+        
+        <div className="relative max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-gray-500 text-sm tracking-widest uppercase mb-4">הסיפור שלנו</p>
+            <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">הסיפור שלנו</p>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">מי אנחנו</h2>
             <div className="w-16 h-px bg-white/30 mx-auto"></div>
           </div>
@@ -618,7 +630,7 @@ export default function Home() {
             {/* Subtle border glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-2xl blur-xl"></div>
             
-            <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl p-10 md:p-14 border border-white/10">
+            <div className="relative bg-black/60 backdrop-blur-sm rounded-2xl p-10 md:p-14 border border-white/10">
               <div className="space-y-8 text-right">
                 <p className="text-xl md:text-2xl text-white font-light leading-relaxed">
                   בנינו את <span className="font-semibold">ShiputzAI</span> כי עברנו את זה בעצמנו.

@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
-// Home/House animation from LottieFiles CDN
-const ANIMATION_URL = 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json';
+// Business Website animation from LottieFiles CDN
+const ANIMATION_URL = 'https://assets2.lottiefiles.com/packages/lf20_dews3j6m.json';
 
 interface LoadingScreenProps {
   text?: string;

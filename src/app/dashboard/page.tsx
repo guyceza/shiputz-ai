@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
 import { DashboardSkeleton } from "@/components/Skeleton";
@@ -524,7 +525,26 @@ function DashboardContent() {
       )}
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Robot Hero Banner */}
+        <div className="relative rounded-2xl overflow-hidden mb-8 h-48 md:h-64">
+          <Image 
+            src="/images/robot-hero.webp" 
+            alt="ShiputzAI - ניהול שיפוצים חכם" 
+            fill
+            className="object-cover object-center"
+            priority
+            quality={90}
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-end p-6 md:p-10">
+            <div className="text-white text-right max-w-sm">
+              <h2 className="text-xl md:text-3xl font-bold mb-2 drop-shadow-lg">AI שעובד בשבילך</h2>
+              <p className="text-white/90 text-sm md:text-base drop-shadow-md">ניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר</p>
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

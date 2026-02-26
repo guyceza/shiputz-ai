@@ -312,11 +312,31 @@ export default function Home() {
           }
           @keyframes brands-scroll {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            100% { transform: translateX(-25%); }
           }
         `}} />
         <p className="text-center text-sm text-gray-400 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
         <div className="brands-marquee">
+          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
+          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
+          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
+          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
+          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
+          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
+          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
           <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
           <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
           <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>

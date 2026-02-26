@@ -15,12 +15,25 @@ const allFeatures = [
   { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
 ];
 
+const businessFeatures = [
+  "כל הפיצ׳רים של Plus",
+  "הדמיות ללא הגבלה",
+  "ניהול מספר פרויקטים",
+  "גישה ללקוחות שלך",
+  "תמיכה עדיפות",
+  "דוחות מתקדמים",
+  "API לאינטגרציה",
+  "מיתוג אישי",
+  "הדרכה אישית",
+  "SLA מותאם",
+];
+
 export default function PricingComparison() {
   return (
-    <div className="flex flex-col lg:flex-row-reverse gap-6 justify-center items-stretch max-w-6xl mx-auto">
+    <div dir="ltr" className="grid grid-cols-1 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
       
       {/* Free Card - LEFTMOST */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white flex flex-col">
+      <div className="border border-gray-200 rounded-2xl p-8 bg-white flex flex-col" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
           <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
@@ -60,7 +73,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Premium Card */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-white flex flex-col">
+      <div className="border border-gray-200 rounded-2xl p-8 bg-white flex flex-col" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Premium</h3>
           <p className="text-gray-500 text-sm">לניהול תקציב מלא</p>
@@ -102,8 +115,8 @@ export default function PricingComparison() {
         </Link>
       </div>
 
-      {/* Premium Plus Card - CENTER - Highlighted */}
-      <div className="flex-1 border-2 border-gray-900 rounded-2xl p-8 bg-white relative flex flex-col">
+      {/* Premium Plus Card - Highlighted */}
+      <div className="border-2 border-gray-900 rounded-2xl p-8 bg-white relative flex flex-col" dir="rtl">
         {/* Popular Badge */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
           הכי פופולרי
@@ -150,8 +163,8 @@ export default function PricingComparison() {
         </Link>
       </div>
 
-      {/* Business Card - RIGHT */}
-      <div className="flex-1 border border-gray-200 rounded-2xl p-8 bg-gradient-to-b from-gray-50 to-white flex flex-col">
+      {/* Business Card - RIGHTMOST */}
+      <div className="border border-gray-200 rounded-2xl p-8 bg-gradient-to-b from-gray-50 to-white flex flex-col" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">לעסקים</h3>
           <p className="text-gray-500 text-sm">למעצבי פנים וקבלנים</p>
@@ -166,60 +179,14 @@ export default function PricingComparison() {
         </div>
         
         <ul className="space-y-3 mb-8 text-gray-700 flex-grow">
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>כל הפיצ׳רים של Plus</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>הדמיות ללא הגבלה</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>ניהול מספר פרויקטים</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>גישה ללקוחות שלך</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>תמיכה עדיפות</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>דוחות מתקדמים</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>API לאינטגרציה</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>מיתוג אישי</span>
-          </li>
-          <li className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>הדרכה אישית</span>
-          </li>
+          {businessFeatures.map((feature, i) => (
+            <li key={i} className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{feature}</span>
+            </li>
+          ))}
         </ul>
         
         <Link

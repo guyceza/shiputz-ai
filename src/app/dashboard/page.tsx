@@ -601,7 +601,7 @@ function DashboardContent() {
           <div className="mb-8 bg-gray-900 rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white mb-1">✨ מנוי פרימיום פעיל</p>
+                <p className="text-sm font-medium text-white mb-1">מנוי פרימיום פעיל</p>
                 <p className="text-xs text-gray-300">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
               </div>
               <span className="text-xs text-gray-300 bg-gray-800 px-3 py-1 rounded-full">
@@ -616,7 +616,7 @@ function DashboardContent() {
           <div className="mb-8 bg-gray-100 rounded-2xl p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-1">🎨 מנוי הדמיות AI פעיל</p>
+                <p className="text-sm font-medium text-gray-900 mb-1">מנוי הדמיות AI פעיל</p>
                 {visionSubInfo?.cancelAtPeriodEnd ? (
                   <p className="text-xs text-amber-600">
                     יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}

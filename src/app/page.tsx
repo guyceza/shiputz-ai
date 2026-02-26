@@ -71,14 +71,6 @@ export default function Home() {
     checkAuth();
   }, []);
   
-  const [calcSize, setCalcSize] = useState("80");
-  const [calcType, setCalcType] = useState("קומפלט");
-  const [calcLocation, setCalcLocation] = useState("מרכז");
-  const [calcBathrooms, setCalcBathrooms] = useState("1");
-  const [calcKitchen, setCalcKitchen] = useState("חדש");
-  const [calcInfrastructure, setCalcInfrastructure] = useState("חלקי");
-  const [estimate, setEstimate] = useState<number | null>(null);
-  const [estimateBreakdown, setEstimateBreakdown] = useState<{base: number, bathrooms: number, kitchen: number, infrastructure: number} | null>(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [showNewsletterPopup, setShowNewsletterPopup] = useState(false);
@@ -111,69 +103,6 @@ export default function Home() {
     
     checkNewsletter();
   }, []);
-
-  // Auto-calculate estimate when any value changes
-  useEffect(() => {
-    const size = parseInt(calcSize) || 0;
-    const bathrooms = parseInt(calcBathrooms) || 0;
-    
-    if (size <= 0) {
-      setEstimate(null);
-      return;
-    }
-    
-    // Base price per sqm by type (2026 market data - based on Midrag.co.il real transactions)
-    const basePrices: Record<string, number> = {
-      "קוסמטי": 550,    // ₪450-700/מ"ר
-      "קומפלט": 1700,   // ₪1,400-2,000/מ"ר
-      "יוקרתי": 3500,   // ₪3,000-4,000/מ"ר
-    };
-    
-    const locationMultiplier: Record<string, number> = {
-      "תל אביב": 1.25,
-      "מרכז": 1.0,
-      "שרון/שפלה": 0.95,
-      "חיפה/צפון": 0.85,
-      "דרום": 0.80,
-    };
-    
-    const kitchenPrices: Record<string, number> = {
-      "ללא": 0,
-      "רענון": 10000,
-      "חדש": 45000,
-      "יוקרתי": 85000,
-    };
-    
-    const infraPrices: Record<string, number> = {
-      "ללא": 0,
-      "חלקי": 12000,
-      "מלא": 32000,
-    };
-    
-    const bathroomPrice = calcType === "יוקרתי" ? 28000 : calcType === "קומפלט" ? 22000 : 12000;
-    
-    const basePrice = basePrices[calcType] || 1400;
-    const locMultiplier = locationMultiplier[calcLocation] || 1.0;
-    
-    const baseEstimate = Math.round(size * basePrice * locMultiplier);
-    const bathroomEstimate = bathrooms * bathroomPrice;
-    const kitchenEstimate = kitchenPrices[calcKitchen] || 0;
-    const infraEstimate = infraPrices[calcInfrastructure] || 0;
-    
-    const total = baseEstimate + bathroomEstimate + kitchenEstimate + infraEstimate;
-    
-    setEstimate(total);
-    setEstimateBreakdown({
-      base: baseEstimate,
-      bathrooms: bathroomEstimate,
-      kitchen: kitchenEstimate,
-      infrastructure: infraEstimate
-    });
-  }, [calcSize, calcType, calcLocation, calcBathrooms, calcKitchen, calcInfrastructure]);
-
-  const calculateEstimate = () => {
-    // Now handled by useEffect - this function kept for compatibility
-  };
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();

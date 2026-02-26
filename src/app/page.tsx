@@ -337,15 +337,15 @@ export default function Home() {
           <span className="brand-item text-lg font-semibold text-gray-300">ACE</span>
           <span className="brand-item text-lg font-semibold text-gray-300">HomeCenter</span>
           <span className="brand-item text-lg font-semibold text-gray-300">TAMBUR</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">IKEA</span>
+          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">ארד שיפוצים</span>
           <span className="brand-item text-lg font-semibold text-gray-300">מחסני חשמל</span>
           <span className="brand-item text-lg font-semibold text-gray-300">שקם אלקטריק</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">ZARA HOME</span>
+          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">טמבור</span>
           <span className="brand-item text-lg font-semibold text-gray-300">פוקס הום</span>
           <span className="brand-item text-lg font-semibold text-gray-300">קסטרו</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">H&M HOME</span>
+          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">JYSK</span>
           <span className="brand-item text-lg font-semibold text-gray-300">אורבן</span>
           <span className="brand-item text-lg font-semibold text-gray-300">kare</span>
@@ -355,15 +355,15 @@ export default function Home() {
           <span className="brand-item text-lg font-semibold text-gray-300">ACE</span>
           <span className="brand-item text-lg font-semibold text-gray-300">HomeCenter</span>
           <span className="brand-item text-lg font-semibold text-gray-300">TAMBUR</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">IKEA</span>
+          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">ארד שיפוצים</span>
           <span className="brand-item text-lg font-semibold text-gray-300">מחסני חשמל</span>
           <span className="brand-item text-lg font-semibold text-gray-300">שקם אלקטריק</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">ZARA HOME</span>
+          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">טמבור</span>
           <span className="brand-item text-lg font-semibold text-gray-300">פוקס הום</span>
           <span className="brand-item text-lg font-semibold text-gray-300">קסטרו</span>
-          <span className="brand-item text-lg font-semibold text-gray-300">H&M HOME</span>
+          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6 opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all" /></span>
           <span className="brand-item text-lg font-semibold text-gray-300">JYSK</span>
           <span className="brand-item text-lg font-semibold text-gray-300">אורבן</span>
           <span className="brand-item text-lg font-semibold text-gray-300">kare</span>

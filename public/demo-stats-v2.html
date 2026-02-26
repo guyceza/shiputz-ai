@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiputzAI Features - V2</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #030303;
+      color: white;
+      padding: 60px 40px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 2.8rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 60px;
+      font-size: 1.1rem;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    
+    .card {
+      background: linear-gradient(145deg, #0a0a0a 0%, #050505 100%);
+      border: 1px solid #1a1a1a;
+      border-radius: 20px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    
+    .card:hover {
+      border-color: #2a2a2a;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .card-icon {
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+    
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .card p {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      max-width: 280px;
+    }
+    
+    .card p strong {
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .card-graphic {
+      margin-top: 28px;
+      position: relative;
+    }
+    
+    /* Grid spans */
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    
+    /* Budget Card - Large with chart */
+    .budget-card {
+      min-height: 380px;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 200px;
+      margin-top: 40px;
+    }
+    
+    .chart-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
+    
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .chart-path {
+      fill: none;
+      stroke: url(#greenGradient);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    
+    .chart-area {
+      fill: url(#areaGradient);
+    }
+    
+    .chart-dot {
+      fill: #10b981;
+      filter: drop-shadow(0 0 8px #10b981);
+    }
+    
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: #444;
+    }
+    
+    .budget-amount {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+    
+    .budget-amount .label {
+      font-size: 0.7rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .budget-amount .value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #10b981;
+    }
+    
+    /* Receipt Scanner Card */
+    .receipt-card {
+      min-height: 380px;
+    }
+    
+    .receipt-ui {
+      background: #0d0d0d;
+      border: 1px solid #1a1a1a;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+    
+    .receipt-preview {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    .receipt-image {
+      width: 80px;
+      height: 100px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .receipt-scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #10b981;
+      box-shadow: 0 0 20px #10b981, 0 0 40px #10b981;
+      animation: scanMove 2.5s ease-in-out infinite;
+    }
+    
+    @keyframes scanMove {
+      0%, 100% { top: 10%; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      95% { top: 85%; opacity: 0; }
+    }
+    
+    .receipt-lines {
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .receipt-line {
+      height: 4px;
+      background: #252525;
+      border-radius: 2px;
+    }
+    
+    .receipt-line:nth-child(1) { width: 60%; }
+    .receipt-line:nth-child(2) { width: 80%; }
+    .receipt-line:nth-child(3) { width: 45%; }
+    .receipt-line:nth-child(4) { width: 70%; }
+    
+    .extracted-data {
+      flex: 1;
+    }
+    
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 0.85rem;
+    }
+    
+    .data-row:last-child {
+      border-bottom: none;
+    }
+    
+    .data-label {
+      color: #555;
+    }
+    
+    .data-value {
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .data-value.highlight {
+      color: #10b981;
+    }
+    
+    /* Quote Analysis Card */
+    .quote-card {
+      min-height: 340px;
+    }
+    
+    .quotes-comparison {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    
+    .quote-item {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .quote-item.recommended {
+      border-color: #10b981;
+      background: linear-gradient(180deg, rgba(16,185,129,0.1) 0%, transparent 100%);
+    }
+    
+    .quote-item .vendor {
+      font-size: 0.75rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    
+    .quote-item .price {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #888;
+    }
+    
+    .quote-item.recommended .price {
+      color: #10b981;
+    }
+    
+    .quote-item .tag {
+      margin-top: 10px;
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 20px;
+      background: #1a1a1a;
+      color: #666;
+      display: inline-block;
+    }
+    
+    .quote-item.recommended .tag {
+      background: rgba(16,185,129,0.2);
+      color: #10b981;
+    }
+    
+    /* AI Visualization Card */
+    .viz-card {
+      min-height: 340px;
+    }
+    
+    .viz-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .viz-room {
+      width: 120px;
+      height: 90px;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .viz-room.before {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+      border: 1px solid #252525;
+    }
+    
+    .viz-room.after {
+      background: linear-gradient(135deg, #0f1a15 0%, #0a0f0c 100%);
+      border: 1px solid #10b981;
+      box-shadow: 0 0 30px rgba(16,185,129,0.15);
+    }
+    
+    .room-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .room-icon {
+      font-size: 1.8rem;
+      opacity: 0.6;
+    }
+    
+    .viz-room.after .room-icon {
+      opacity: 1;
+    }
+    
+    .room-label {
+      font-size: 0.65rem;
+      color: #555;
+    }
+    
+    .viz-room.after .room-label {
+      color: #10b981;
+    }
+    
+    .viz-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .arrow-line {
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, #333 0%, #10b981 100%);
+      position: relative;
+    }
+    
+    .arrow-line::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: -4px;
+      border: 5px solid transparent;
+      border-left-color: #10b981;
+    }
+    
+    .arrow-text {
+      font-size: 0.6rem;
+      color: #444;
+    }
+    
+    /* Contract Card */
+    .contract-card {
+      min-height: 340px;
+    }
+    
+    .contract-checks {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #0a0a0a;
+      border-radius: 10px;
+      border: 1px solid #1a1a1a;
+    }
+    
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+    
+    .check-icon.success {
+      background: rgba(16,185,129,0.2);
+      color: #10b981;
+    }
+    
+    .check-icon.warning {
+      background: rgba(245,158,11,0.2);
+      color: #f59e0b;
+    }
+    
+    .check-text {
+      font-size: 0.85rem;
+      color: #888;
+    }
+    
+    .check-row.warning {
+      border-color: rgba(245,158,11,0.3);
+    }
+    
+    .check-row.warning .check-text {
+      color: #f59e0b;
+    }
+    
+    /* Alerts Card */
+    .alerts-card {
+      background: linear-gradient(145deg, #0a0a0a 0%, #050505 100%);
+    }
+    
+    .alert-item {
+      background: #0d0d0d;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    
+    .alert-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .alert-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f59e0b;
+      animation: alertPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes alertPulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+    }
+    
+    .alert-title {
+      font-size: 0.85rem;
+      color: #f59e0b;
+    }
+    
+    .alert-desc {
+      font-size: 0.8rem;
+      color: #666;
+      line-height: 1.5;
+    }
+    
+    .alert-time {
+      font-size: 0.7rem;
+      color: #444;
+      margin-top: 12px;
+    }
+    
+    /* Bullet points */
+    .features-list {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .feature-check {
+      color: #10b981;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>הכלים שלך לשיפוץ מוצלח</h1>
+    <p class="subtitle">בינה מלאכותית שעובדת בשבילך, לא במקומך</p>
+    
+    <div class="grid">
+      <!-- Budget Tracking - Large -->
+      <div class="card span-5 budget-card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <h3>מעקב תקציב</h3>
+        </div>
+        <p>עקוב אחרי <strong>כל הוצאה בזמן אמת</strong>. קבל התראות לפני שחורגים מהתקציב.</p>
+        
+        <div class="chart-container">
+          <div class="budget-amount">
+            <div class="label">סה״כ הוצאות</div>
+            <div class="value">₪127,450</div>
+          </div>
+          
+          <svg class="chart-svg" viewBox="0 0 400 150" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+              </linearGradient>
+              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                <stop offset="100%" style="stop-color:#10b981;stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <path class="chart-area" d="M0,140 L0,100 Q50,95 80,85 T160,70 T240,50 T320,60 T400,30 L400,140 Z" />
+            <path class="chart-path" d="M0,100 Q50,95 80,85 T160,70 T240,50 T320,60 T400,30" />
+            <circle class="chart-dot" cx="400" cy="30" r="5" />
+          </svg>
+        </div>
+        
+        <div class="chart-labels">
+          <span>ינואר</span>
+          <span>פברואר</span>
+          <span>מרץ</span>
+          <span>היום</span>
+        </div>
+      </div>
+      
+      <!-- Receipt Scanner -->
+      <div class="card span-7 receipt-card">
+        <div class="card-header">
+          <span class="card-icon">📸</span>
+          <h3>סריקת קבלות</h3>
+        </div>
+        <p>צלם קבלה והמערכת <strong>מזהה אוטומטית</strong> את הפרטים ומוסיפה לתקציב.</p>
+        
+        <div class="receipt-ui">
+          <div class="receipt-preview">
+            <div class="receipt-image">
+              <div class="receipt-scan-line"></div>
+              <div class="receipt-lines">
+                <div class="receipt-line"></div>
+                <div class="receipt-line"></div>
+                <div class="receipt-line"></div>
+                <div class="receipt-line"></div>
+              </div>
+            </div>
+            <div class="extracted-data">
+              <div class="data-row">
+                <span class="data-label">חנות</span>
+                <span class="data-value">הום סנטר</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">תאריך</span>
+                <span class="data-value">26.02.2026</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">קטגוריה</span>
+                <span class="data-value">חומרי בניין</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">סכום</span>
+                <span class="data-value highlight">₪1,847</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quote Analysis -->
+      <div class="card span-4 quote-card">
+        <div class="card-header">
+          <span class="card-icon">📋</span>
+          <h3>ניתוח הצעות מחיר</h3>
+        </div>
+        <p>השווה הצעות וקבל <strong>המלצה מבוססת AI</strong></p>
+        
+        <div class="quotes-comparison">
+          <div class="quote-item">
+            <div class="vendor">קבלן א׳</div>
+            <div class="price">₪48K</div>
+            <div class="tag">חסר פירוט</div>
+          </div>
+          <div class="quote-item recommended">
+            <div class="vendor">קבלן ב׳</div>
+            <div class="price">₪42K</div>
+            <div class="tag">✓ מומלץ</div>
+          </div>
+          <div class="quote-item">
+            <div class="vendor">קבלן ג׳</div>
+            <div class="price">₪55K</div>
+            <div class="tag">מנופח</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- AI Visualization -->
+      <div class="card span-4 viz-card">
+        <div class="card-header">
+          <span class="card-icon">🎨</span>
+          <h3>הדמיות AI</h3>
+        </div>
+        <p>ראה את <strong>התוצאה הסופית</strong> לפני שמתחילים בעבודה</p>
+        
+        <div class="viz-preview">
+          <div class="viz-room before">
+            <div class="room-content">
+              <span class="room-icon">🏚️</span>
+              <span class="room-label">לפני</span>
+            </div>
+          </div>
+          <div class="viz-arrow">
+            <div class="arrow-line"></div>
+            <span class="arrow-text">AI</span>
+          </div>
+          <div class="viz-room after">
+            <div class="room-content">
+              <span class="room-icon">✨</span>
+              <span class="room-label">אחרי</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="features-list">
+          <div class="feature-item">
+            <span class="feature-check">✓</span>
+            <span>הדמיה תוך שניות</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-check">✓</span>
+            <span>Shop the Look</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contract Check -->
+      <div class="card span-4 contract-card">
+        <div class="card-header">
+          <span class="card-icon">📝</span>
+          <h3>בדיקת חוזים</h3>
+        </div>
+        <p>סריקה חכמה של החוזה <strong>לזיהוי בעיות</strong></p>
+        
+        <div class="contract-checks">
+          <div class="check-row">
+            <div class="check-icon success">✓</div>
+            <span class="check-text">לוח זמנים מפורט</span>
+          </div>
+          <div class="check-row">
+            <div class="check-icon success">✓</div>
+            <span class="check-text">תנאי תשלום ברורים</span>
+          </div>
+          <div class="check-row warning">
+            <div class="check-icon warning">!</div>
+            <span class="check-text">חסר סעיף אחריות</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</body>
+</html>

@@ -403,235 +403,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quick Calculator */}
-      <section className="py-20 px-6 border-t border-gray-100">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">כמה יעלה לך השיפוץ?</h2>
-            <p className="text-gray-500">קבלו הערכה מיידית על בסיס נתוני שוק 2026</p>
-          </div>
-          
-          <div className="relative">
-            {/* Light blur overlay with lock - hidden for admin and premium users */}
-            {!isAdmin && !isPremium && (
-              <div className="absolute inset-0 bg-white/25 backdrop-blur-[1px] z-10 rounded-3xl flex flex-col items-center justify-center">
-                <div className="bg-white/95 rounded-2xl p-8 shadow-xl text-center max-w-sm mx-4 backdrop-blur-sm">
-                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">מחשבון עלויות מתקדם</h3>
-                  <p className="text-gray-500 text-sm mb-6">שדרגו לפרימיום וקבלו הערכת עלויות מדויקת + כל הכלים</p>
-                  <Link
-                    href="/checkout?plan=plus"
-                    className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
-                  >
-                    שדרג עכשיו
-                  </Link>
-                </div>
-              </div>
-            )}
-            
-          <div className="bg-gray-50 rounded-3xl p-8 md:p-10">
-            {/* Size Slider */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-3">
-                <label htmlFor="calc-size" className="text-sm font-medium text-gray-700">גודל הדירה</label>
-                <span className="text-2xl font-bold text-gray-900 transition-all duration-300">{calcSize} מ״ר</span>
-              </div>
-              <input
-                id="calc-size"
-                type="range"
-                min="30"
-                max="200"
-                step="5"
-                value={calcSize}
-                onChange={(e) => setCalcSize(e.target.value)}
-                aria-label="גודל הדירה במטרים רבועים"
-                className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-gray-900 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-gray-900 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>30 מ״ר</span>
-                <span>200 מ״ר</span>
-              </div>
+      {/* Robot Hero Section */}
+      <section className="py-16 px-6 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden">
+            <Image 
+              src="/images/robot-hero.webp" 
+              alt="רובוט שיפוצים עם כלי עבודה" 
+              width={1200}
+              height={600}
+              className="w-full h-auto object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent" />
+            <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 text-white max-w-md">
+              <h2 className="text-2xl md:text-4xl font-bold mb-3">AI שעובד בשבילך</h2>
+              <p className="text-white/80 text-sm md:text-base mb-4">ניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר - הכל במקום אחד</p>
+              <Link
+                href={isLoggedIn ? "/dashboard" : "/signup"}
+                className="inline-block bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                {isLoggedIn ? "לאזור האישי ←" : "התחל בחינם ←"}
+              </Link>
             </div>
-            
-            {/* Renovation Type Cards */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">סוג השיפוץ</label>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { value: "קוסמטי", label: "קוסמטי", desc: "צבע, תיקונים" },
-                  { value: "קומפלט", label: "קומפלט", desc: "שיפוץ מלא" },
-                  { value: "יוקרתי", label: "יוקרתי", desc: "גמר גבוה" }
-                ].map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setCalcType(type.value)}
-                    className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
-                      calcType === type.value 
-                        ? "border-gray-900 bg-gray-900 text-white shadow-lg scale-[1.02]" 
-                        : "border-gray-200 bg-white hover:border-gray-400 hover:shadow"
-                    }`}
-                  >
-                    <div className="font-medium text-sm">{type.label}</div>
-                    <div className={`text-xs mt-1 ${calcType === type.value ? "text-gray-300" : "text-gray-400"}`}>
-                      {type.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Location & Bathrooms */}
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label htmlFor="calc-location" className="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
-                <select 
-                  id="calc-location"
-                  value={calcLocation}
-                  onChange={(e) => setCalcLocation(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
-                >
-                  <option value="תל אביב">תל אביב (+25%)</option>
-                  <option value="מרכז">מרכז (בסיס)</option>
-                  <option value="שרון/שפלה">שרון / שפלה (-5%)</option>
-                  <option value="חיפה/צפון">חיפה / צפון (-15%)</option>
-                  <option value="דרום">דרום (-20%)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">חדרי רחצה</label>
-                <div className="flex gap-2">
-                  {["1", "2", "3"].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => setCalcBathrooms(num)}
-                      className={`flex-1 py-3 rounded-xl border-2 font-medium transition-all duration-200 ${
-                        calcBathrooms === num 
-                          ? "border-gray-900 bg-gray-900 text-white" 
-                          : "border-gray-200 bg-white hover:border-gray-400"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            {/* Kitchen & Infrastructure */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label htmlFor="calc-kitchen" className="block text-sm font-medium text-gray-700 mb-2">מטבח</label>
-                <select 
-                  id="calc-kitchen"
-                  value={calcKitchen}
-                  onChange={(e) => setCalcKitchen(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
-                >
-                  <option value="ללא">ללא שינוי</option>
-                  <option value="רענון">רענון (חזיתות, משטח)</option>
-                  <option value="חדש">מטבח חדש סטנדרטי</option>
-                  <option value="יוקרתי">מטבח יוקרתי</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="calc-infrastructure" className="block text-sm font-medium text-gray-700 mb-2">תשתיות</label>
-                <select 
-                  id="calc-infrastructure"
-                  value={calcInfrastructure}
-                  onChange={(e) => setCalcInfrastructure(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-gray-900 cursor-pointer transition-colors"
-                >
-                  <option value="ללא">ללא שינוי</option>
-                  <option value="חלקי">שדרוג חלקי</option>
-                  <option value="מלא">החלפה מלאה</option>
-                </select>
-              </div>
-            </div>
-            
-            {/* Live Results */}
-            {estimate && estimateBreakdown && (
-              <div className="mt-6 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl text-white">
-                <div className="text-center mb-4">
-                  <p className="text-gray-400 text-sm mb-1">הערכת עלות</p>
-                  <p className="text-5xl font-bold tracking-tight transition-all duration-500">
-                    ₪{estimate.toLocaleString()}
-                  </p>
-                </div>
-                
-                {/* Visual Breakdown Bar */}
-                <div className="mb-4">
-                  <div className="h-4 rounded-full overflow-hidden flex bg-gray-700">
-                    <div 
-                      className="bg-blue-500 transition-all duration-500" 
-                      style={{ width: `${(estimateBreakdown.base / estimate) * 100}%` }}
-                      title="עבודות בסיס"
-                    />
-                    <div 
-                      className="bg-cyan-500 transition-all duration-500" 
-                      style={{ width: `${(estimateBreakdown.bathrooms / estimate) * 100}%` }}
-                      title="חדרי רחצה"
-                    />
-                    {estimateBreakdown.kitchen > 0 && (
-                      <div 
-                        className="bg-amber-500 transition-all duration-500" 
-                        style={{ width: `${(estimateBreakdown.kitchen / estimate) * 100}%` }}
-                        title="מטבח"
-                      />
-                    )}
-                    {estimateBreakdown.infrastructure > 0 && (
-                      <div 
-                        className="bg-emerald-500 transition-all duration-500" 
-                        style={{ width: `${(estimateBreakdown.infrastructure / estimate) * 100}%` }}
-                        title="תשתיות"
-                      />
-                    )}
-                  </div>
-                </div>
-                
-                {/* Legend */}
-                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span className="text-gray-300">בסיס</span>
-                    <span className="text-white font-medium mr-auto">₪{estimateBreakdown.base.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-cyan-500"></div>
-                    <span className="text-gray-300">רחצה</span>
-                    <span className="text-white font-medium mr-auto">₪{estimateBreakdown.bathrooms.toLocaleString()}</span>
-                  </div>
-                  {estimateBreakdown.kitchen > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-amber-500"></div>
-                      <span className="text-gray-300">מטבח</span>
-                      <span className="text-white font-medium mr-auto">₪{estimateBreakdown.kitchen.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {estimateBreakdown.infrastructure > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded bg-emerald-500"></div>
-                      <span className="text-gray-300">תשתיות</span>
-                      <span className="text-white font-medium mr-auto">₪{estimateBreakdown.infrastructure.toLocaleString()}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <p className="text-xs text-gray-400 text-center mb-2">הערכה בלבד · מבוסס על נתוני שוק 2026 · לא מהווה הצעת מחיר</p>
-                <p className="text-xs text-gray-500 text-center mb-4">מקורות: midrag.co.il, top-renovations.co.il</p>
-                
-                <Link
-                  href={isLoggedIn ? "/dashboard" : "/signup"}
-                  className="block text-center bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-                >
-                  {isLoggedIn ? "התחל לנהל את התקציב ←" : "רוצה לתכנן את התקציב? התחל בחינם ←"}
-                </Link>
-              </div>
-            )}
-          </div>
           </div>
         </div>
       </section>

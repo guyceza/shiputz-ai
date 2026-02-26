@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiputzAI Stats Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: white;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5rem;
+      font-weight: 600;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      background: #0f0f0f;
+      border: 1px solid #1a1a1a;
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      border-color: #10b981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+    
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 16px;
+      color: #10b981;
+    }
+    
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card p {
+      color: #888;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    .card .highlight {
+      color: white;
+      font-weight: 500;
+    }
+    
+    .card-graphic {
+      margin-top: 24px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    /* Budget Tracker Animation */
+    .budget-bars {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      height: 100px;
+    }
+    
+    .budget-bar {
+      width: 24px;
+      background: linear-gradient(to top, #10b981, #059669);
+      border-radius: 4px;
+      animation: barGrow 2s ease-in-out infinite alternate;
+    }
+    
+    .budget-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+    .budget-bar:nth-child(2) { height: 80%; animation-delay: 0.2s; }
+    .budget-bar:nth-child(3) { height: 45%; animation-delay: 0.4s; }
+    .budget-bar:nth-child(4) { height: 90%; animation-delay: 0.6s; }
+    .budget-bar:nth-child(5) { height: 70%; animation-delay: 0.8s; }
+    
+    @keyframes barGrow {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    
+    /* Receipt Scanner Animation */
+    .receipt {
+      width: 80px;
+      height: 100px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: scan 2s linear infinite;
+    }
+    
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    
+    .receipt-lines {
+      padding: 12px;
+    }
+    
+    .receipt-line {
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+    
+    .receipt-line:nth-child(2) { width: 70%; }
+    .receipt-line:nth-child(3) { width: 85%; }
+    .receipt-line:nth-child(4) { width: 60%; }
+    
+    /* Quote Analysis */
+    .quote-graphic {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .quote-card {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 12px;
+      width: 70px;
+      text-align: center;
+    }
+    
+    .quote-card.good {
+      border: 1px solid #10b981;
+    }
+    
+    .quote-price {
+      font-size: 0.7rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .quote-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .quote-card.good .quote-value {
+      color: #10b981;
+    }
+    
+    /* Stats Numbers */
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #10b981;
+      text-align: center;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    /* AI Visualization */
+    .ai-viz {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .room-before, .room-after {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .room-after {
+      border: 1px solid #10b981;
+    }
+    
+    .arrow {
+      color: #10b981;
+      font-size: 1.5rem;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    /* Checklist */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    
+    .check-icon {
+      color: #10b981;
+    }
+    
+    .large-card {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <h1>ShiputzAI</h1>
+  
+  <div class="grid">
+    <!-- Budget Tracker -->
+    <div class="card">
+      <h3>📊 מעקב תקציב</h3>
+      <p>עקוב אחרי <span class="highlight">כל שקל</span> בזמן אמת. התראות אוטומטיות כשמתקרבים לחריגה.</p>
+      <div class="card-graphic">
+        <div class="budget-bars">
+          <div class="budget-bar"></div>
+          <div class="budget-bar"></div>
+          <div class="budget-bar"></div>
+          <div class="budget-bar"></div>
+          <div class="budget-bar"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Receipt Scanner -->
+    <div class="card">
+      <h3>📸 סריקת קבלות</h3>
+      <p>צלם קבלה, ה-AI <span class="highlight">קורא ומוסיף</span> אוטומטית. סכום, תאריך, קטגוריה.</p>
+      <div class="card-graphic">
+        <div class="receipt">
+          <div class="scan-line"></div>
+          <div class="receipt-lines">
+            <div class="receipt-line"></div>
+            <div class="receipt-line"></div>
+            <div class="receipt-line"></div>
+            <div class="receipt-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Quote Analysis -->
+    <div class="card">
+      <h3>📋 ניתוח הצעות מחיר</h3>
+      <p>העלה הצעה וקבל <span class="highlight">ניתוח מיידי</span>. האם המחיר הוגן?</p>
+      <div class="card-graphic">
+        <div class="quote-graphic">
+          <div class="quote-card">
+            <div class="quote-price">הצעה א׳</div>
+            <div class="quote-value">₪45K</div>
+          </div>
+          <div class="quote-card good">
+            <div class="quote-price">הצעה ב׳</div>
+            <div class="quote-value">₪38K</div>
+          </div>
+          <div class="quote-card">
+            <div class="quote-price">הצעה ג׳</div>
+            <div class="quote-value">₪52K</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats Large -->
+    <div class="card large-card">
+      <h3>🎯 חיסכון ממוצע</h3>
+      <p>משתמשי ShiputzAI חוסכים בממוצע <span class="highlight">15% מהתקציב</span> הכולל</p>
+      <div class="card-graphic">
+        <div>
+          <div class="stat-number">₪15,000</div>
+          <div class="stat-label">חיסכון ממוצע לשיפוץ</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- AI Visualization -->
+    <div class="card">
+      <h3>🎨 הדמיות AI</h3>
+      <p>ראה את <span class="highlight">התוצאה הסופית</span> לפני שמתחילים</p>
+      <div class="card-graphic">
+        <div class="ai-viz">
+          <div class="room-before">🏚️</div>
+          <div class="arrow">→</div>
+          <div class="room-after">🏠</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contract Check -->
+    <div class="card">
+      <h3>📝 בדיקת חוזים</h3>
+      <p>ה-AI סורק את החוזה ו<span class="highlight">מזהה בעיות</span></p>
+      <div class="card-graphic">
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon">✓</span> לוח זמנים מוגדר</div>
+          <div class="check-item"><span class="check-icon">✓</span> תנאי תשלום ברורים</div>
+          <div class="check-item"><span class="check-icon">✓</span> אחריות 12 חודשים</div>
+          <div class="check-item" style="color: #ef4444;"><span>⚠</span> חסר סעיף פיצויים</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Alerts -->
+    <div class="card">
+      <h3>🔔 התראות חכמות</h3>
+      <p><span class="highlight">התראה בזמן</span> לפני שחורגים מהתקציב</p>
+      <div class="card-graphic">
+        <div style="text-align: center;">
+          <div style="font-size: 2rem; margin-bottom: 8px;">⚡</div>
+          <div style="font-size: 0.8rem; color: #10b981;">חריגה צפויה ב-3 ימים</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

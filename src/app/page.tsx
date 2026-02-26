@@ -403,33 +403,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Robot Hero Section */}
-      <section className="py-16 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden">
-            <Image 
-              src="/images/robot-hero.webp" 
-              alt="רובוט שיפוצים עם כלי עבודה" 
-              width={1200}
-              height={600}
-              className="w-full h-auto object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/40 to-transparent" />
-            <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 text-white max-w-md">
-              <h2 className="text-2xl md:text-4xl font-bold mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">AI שעובד בשבילך</h2>
-              <p className="text-white text-sm md:text-base mb-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">ניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר - הכל במקום אחד</p>
-              <Link
-                href={isLoggedIn ? "/dashboard" : "/signup"}
-                className="inline-block bg-white text-gray-900 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                {isLoggedIn ? "לאזור האישי ←" : "התחל בחינם ←"}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* איך השיפוץ שלי יראה? Teaser */}
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-5xl mx-auto">

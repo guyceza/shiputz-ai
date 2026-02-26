@@ -629,7 +629,7 @@ export default function Home() {
                 </p>
                 
                 <p className="text-gray-400 text-lg leading-relaxed">
-                  רצינו כלי פשוט שעושה את העבודה — בלי סיבוכים, בלי להתעסק עם אקסלים, בלי להרגיש אבודים.
+                  רצינו כלי פשוט שעושה את העבודה. בלי סיבוכים, בלי להתעסק עם אקסלים, בלי להרגיש אבודים.
                 </p>
                 
                 <div className="border-r-2 border-white/30 pr-6 my-10">
@@ -643,12 +643,12 @@ export default function Home() {
                 </p>
                 
                 <p className="text-gray-500 text-lg leading-relaxed">
-                  אנחנו צוות קטן שאוהב לפתור בעיות אמיתיות. אם יש לכם רעיון לשיפור — נשמח לשמוע.
+                  אנחנו צוות קטן שאוהב לפתור בעיות אמיתיות. אם יש לכם רעיון לשיפור, נשמח לשמוע.
                 </p>
                 
                 <div className="pt-8 border-t border-white/10">
                   <p className="text-white/60 text-base">
-                    — צוות ShiputzAI
+                    צוות ShiputzAI
                   </p>
                 </div>
               </div>

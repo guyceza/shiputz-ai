@@ -1469,8 +1469,14 @@ export default function ProjectPage() {
         // Image couldn't be processed - show friendly error in UI, no analysis
         setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
         setVisionResult(null);  // Don't show any results
+      } else if (data.code === "VISION_SUBSCRIPTION_REQUIRED" || data.code === "SUBSCRIPTION_REQUIRED") {
+        setVisionError('נדרש מנוי AI Vision פעיל לשימוש בשירות זה.');
+      } else if (data.code === "TRIAL_ALREADY_USED") {
+        setVisionError('תקופת הנסיון שלך הסתיימה. שדרג ל-AI Vision להמשך שימוש.');
+      } else if (data.code === "MONTHLY_LIMIT_REACHED") {
+        setVisionError(`הגעת למכסה החודשית. המכסה מתאפסת בתחילת החודש הבא.`);
       } else {
-        setVisionError('שגיאה ביצירת ההדמיה. נסה שוב.');
+        setVisionError(data.error || data.message || 'שגיאה ביצירת ההדמיה. נסה שוב.');
       }
     } catch {
       setVisionError('שגיאה בתקשורת. נסה שוב.');

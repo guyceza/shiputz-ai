@@ -1116,63 +1116,63 @@ export default function VisualizePage() {
               </h2>
               
               <div className="space-y-3 mb-6">
-                {/* Bundle Option - Selectable */}
+                {/* Premium Plus Option */}
                 <button
                   onClick={() => setSelectedPlan('plus')}
-                  className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                  className={`w-full text-right rounded-2xl p-5 border-2 transition-all ${
                     selectedPlan === 'plus' 
-                      ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-gray-900 bg-white shadow-lg' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedPlan === 'plus' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                        selectedPlan === 'plus' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
                       }`}>
                         {selectedPlan === 'plus' && <span className="text-white text-xs">✓</span>}
                       </div>
-                      <span className="font-medium text-gray-900">⭐ Premium Plus</span>
+                      <span className="font-semibold text-gray-900">Premium Plus</span>
                     </div>
-                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
+                    <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded-full">הכי פופולרי</span>
                   </div>
-                  <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪349.99</p>
-                    <p className="text-sm text-gray-500">Premium כולל 4 הדמיות AI</p>
-                    <p className="text-xs text-gray-400">רוצה עוד? מנוי Vision ב-₪39.99/חודש</p>
+                  <div className="pr-8">
+                    <p className="text-2xl font-bold text-gray-900 mb-1">₪349.99</p>
+                    <p className="text-sm text-gray-600">כולל 4 הדמיות במערכת AI Vision</p>
+                    <p className="text-sm text-gray-600">+ Shop the Look</p>
                   </div>
                 </button>
                 
-                {/* Separate Option - Selectable */}
+                {/* Premium Option */}
                 <button
                   onClick={() => setSelectedPlan('separate')}
-                  className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                  className={`w-full text-right rounded-2xl p-5 border-2 transition-all ${
                     selectedPlan === 'separate' 
-                      ? 'border-gray-900 bg-gray-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-gray-900 bg-white shadow-lg' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                         selectedPlan === 'separate' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
                       }`}>
                         {selectedPlan === 'separate' && <span className="text-white text-xs">✓</span>}
                       </div>
-                      <span className="font-medium text-gray-900">ShiputzAI בלבד</span>
+                      <span className="font-semibold text-gray-900">Premium</span>
                     </div>
                   </div>
-                  <div className="pr-7">
-                    <p className="text-xl font-bold text-gray-900">₪299.99 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
-                    <p className="text-sm text-gray-500">ניהול תקציב, סריקת קבלות, התראות</p>
-                    <p className="text-xs text-gray-400">הדמיות AI בנפרד אח״כ</p>
+                  <div className="pr-8">
+                    <p className="text-2xl font-bold text-gray-900 mb-1">₪299.99</p>
+                    <p className="text-sm text-gray-600">ניהול תקציב, סריקת קבלות, התראות</p>
+                    <p className="text-sm text-gray-400">ללא הדמיות AI Vision</p>
                   </div>
                 </button>
               </div>
               
               <Link
                 href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+                className="block w-full text-center bg-gray-900 text-white py-4 rounded-xl text-base font-medium hover:bg-gray-800 transition-all"
               >
                 המשך לתשלום
               </Link>
@@ -1381,61 +1381,63 @@ export default function VisualizePage() {
                 </div>
                 
                 <div className="space-y-3 mb-6">
-                  {/* Bundle Option - Selectable */}
+                  {/* Premium Plus Option */}
                   <button
                     onClick={() => setSelectedPlan('plus')}
-                    className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                    className={`w-full text-right rounded-2xl p-5 border-2 transition-all ${
                       selectedPlan === 'plus' 
-                        ? 'border-purple-500 bg-gradient-to-r from-purple-50 to-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-gray-900 bg-white shadow-lg' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedPlan === 'plus' ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                          selectedPlan === 'plus' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
                         }`}>
                           {selectedPlan === 'plus' && <span className="text-white text-xs">✓</span>}
                         </div>
-                        <span className="font-medium text-gray-900">⭐ Premium Plus</span>
+                        <span className="font-semibold text-gray-900">Premium Plus</span>
                       </div>
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">חוסך 22%</span>
+                      <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded-full">הכי פופולרי</span>
                     </div>
-                    <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪349.99</p>
-                      <p className="text-xs text-gray-500">Premium כולל 4 הדמיות AI</p>
+                    <div className="pr-8">
+                      <p className="text-2xl font-bold text-gray-900 mb-1">₪349.99</p>
+                      <p className="text-sm text-gray-600">כולל 4 הדמיות במערכת AI Vision</p>
+                      <p className="text-sm text-gray-600">+ Shop the Look</p>
                     </div>
                   </button>
                   
-                  {/* Separate Option - Selectable */}
+                  {/* Premium Option */}
                   <button
                     onClick={() => setSelectedPlan('separate')}
-                    className={`w-full text-right rounded-xl p-4 border-2 transition-all ${
+                    className={`w-full text-right rounded-2xl p-5 border-2 transition-all ${
                       selectedPlan === 'separate' 
-                        ? 'border-gray-900 bg-gray-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-gray-900 bg-white shadow-lg' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedPlan === 'separate' ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
                         }`}>
                           {selectedPlan === 'separate' && <span className="text-white text-xs">✓</span>}
                         </div>
-                        <span className="font-medium text-gray-900">ShiputzAI בלבד</span>
+                        <span className="font-semibold text-gray-900">Premium</span>
                       </div>
                     </div>
-                    <div className="pr-7">
-                      <p className="text-lg font-bold text-gray-900">₪299.99 <span className="text-sm font-medium text-green-600">💳 חד פעמי</span></p>
-                      <p className="text-xs text-gray-500">ניהול תקציב, סריקת קבלות, התראות · הדמיות בנפרד</p>
+                    <div className="pr-8">
+                      <p className="text-2xl font-bold text-gray-900 mb-1">₪299.99</p>
+                      <p className="text-sm text-gray-600">ניהול תקציב, סריקת קבלות, התראות</p>
+                      <p className="text-sm text-gray-400">ללא הדמיות AI Vision</p>
                     </div>
                   </button>
                 </div>
                 
                 <Link
                   href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-                  className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+                  className="block w-full text-center bg-gray-900 text-white py-4 rounded-xl text-base font-medium hover:bg-gray-800 transition-all"
                 >
                   המשך לתשלום
                 </Link>

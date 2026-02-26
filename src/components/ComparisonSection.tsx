@@ -317,7 +317,7 @@ export default function ComparisonSection() {
           <motion.div 
             className="relative min-h-[450px] rounded-2xl overflow-hidden"
             style={{
-              background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+              background: '#101010',
             }}
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}

@@ -430,7 +430,8 @@ export default function Home() {
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <Link
                   href="/visualize"
-                  className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 hover-bounce hover-shine"
+                  className="inline-block text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine"
+                  style={{ backgroundColor: '#101010' }}
                 >
                   {hasVisionSubscription ? '🎨 צור הדמיה' : 'נסו עכשיו'}
                 </Link>

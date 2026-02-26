@@ -581,15 +581,15 @@ function DashboardContent() {
         )}
 
         {/* Did You Know? Tip Box */}
-        <div className="mb-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+        <div className="mb-8 bg-gray-50 rounded-2xl p-6 border border-gray-200">
           <div className="flex items-start gap-4">
             <div className="flex-1">
-              <p className="text-xs font-medium text-blue-600 mb-1">הידעת?</p>
-              <p className="text-gray-700 text-sm leading-relaxed">{randomTip}</p>
+              <p className="text-xs font-medium text-gray-900 mb-1">הידעת?</p>
+              <p className="text-gray-600 text-sm leading-relaxed">{randomTip}</p>
             </div>
             <Link 
               href="/tips"
-              className="text-xs text-blue-600 hover:text-blue-700 whitespace-nowrap"
+              className="text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap"
             >
               עוד טיפים ←
             </Link>
@@ -598,13 +598,13 @@ function DashboardContent() {
 
         {/* Premium Status - One time purchase (no cancel needed) */}
         {isPremium && (
-          <div className="mb-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
+          <div className="mb-8 bg-gray-900 rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-900 mb-1">✨ מנוי פרימיום פעיל</p>
-                <p className="text-xs text-purple-600">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
+                <p className="text-sm font-medium text-white mb-1">✨ מנוי פרימיום פעיל</p>
+                <p className="text-xs text-gray-300">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
               </div>
-              <span className="text-xs text-purple-500 bg-purple-100 px-3 py-1 rounded-full">
+              <span className="text-xs text-gray-300 bg-gray-800 px-3 py-1 rounded-full">
                 רכישה חד-פעמית
               </span>
             </div>
@@ -613,24 +613,24 @@ function DashboardContent() {
 
         {/* Vision AI Subscription - Monthly (can cancel) */}
         {(hasVisionSub || hasLocalVision) && (
-          <div className="mb-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+          <div className="mb-8 bg-gray-100 rounded-2xl p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-emerald-900 mb-1">🎨 מנוי הדמיות AI פעיל</p>
+                <p className="text-sm font-medium text-gray-900 mb-1">🎨 מנוי הדמיות AI פעיל</p>
                 {visionSubInfo?.cancelAtPeriodEnd ? (
                   <p className="text-xs text-amber-600">
                     יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
                   </p>
                 ) : hasVisionSub ? (
-                  <p className="text-xs text-emerald-600">מתחדש אוטומטית כל חודש</p>
+                  <p className="text-xs text-gray-500">מתחדש אוטומטית כל חודש</p>
                 ) : (
-                  <p className="text-xs text-emerald-600">גישה מלאה להדמיות</p>
+                  <p className="text-xs text-gray-500">גישה מלאה להדמיות</p>
                 )}
               </div>
               {!visionSubInfo?.cancelAtPeriodEnd && (hasLocalVision || hasVisionSub) && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="text-sm text-red-600 hover:text-red-700 border border-red-200 px-4 py-2 rounded-full hover:bg-red-50 transition-colors"
+                  className="text-sm text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
                 >
                   בטל מנוי
                 </button>

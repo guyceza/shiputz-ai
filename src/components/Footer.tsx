@@ -1,49 +1,63 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const footerLinks = {
-  services: {
-    title: 'השירותים שלנו',
-    links: [
-      { label: 'הדמיות AI', href: '/visualize' },
-      { label: 'Shop the Look', href: '/shop-look' },
-      { label: 'כתב כמויות', href: '/dashboard/bill-of-quantities' },
-      { label: 'טיפים לשיפוץ', href: '/tips' },
-    ],
-  },
-  account: {
-    title: 'החשבון שלי',
-    links: [
-      { label: 'אזור אישי', href: '/dashboard' },
-      { label: 'התחברות', href: '/login' },
-      { label: 'הרשמה', href: '/signup' },
-    ],
-  },
-  help: {
-    title: 'עזרה',
-    links: [
-      { label: 'צור קשר', href: '/contact' },
-      { label: 'שאלות נפוצות', href: '/#faq' },
-    ],
-  },
-  info: {
-    title: 'מידע',
-    links: [
-      { label: 'תנאי שימוש', href: '/terms' },
-      { label: 'מדיניות פרטיות', href: '/privacy' },
-    ],
-  },
-};
-
 export default function Footer() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.id) {
+        setIsLoggedIn(true);
+      }
+    }
+  }, []);
+
+  const footerLinks = {
+    services: {
+      title: 'השירותים שלנו',
+      links: [
+        { label: 'הדמיות AI', href: '/visualize' },
+        { label: 'Shop the Look', href: '/shop-look' },
+        { label: 'כתב כמויות', href: '/dashboard/bill-of-quantities' },
+        { label: 'טיפים לשיפוץ', href: '/tips' },
+      ],
+    },
+    account: {
+      title: 'החשבון שלי',
+      links: isLoggedIn 
+        ? [{ label: 'אזור אישי', href: '/dashboard' }]
+        : [
+            { label: 'אזור אישי', href: '/dashboard' },
+            { label: 'התחברות', href: '/login' },
+            { label: 'הרשמה', href: '/signup' },
+          ],
+    },
+    help: {
+      title: 'עזרה',
+      links: [
+        { label: 'צור קשר', href: '/contact' },
+        { label: 'שאלות נפוצות', href: '/#faq' },
+      ],
+    },
+    info: {
+      title: 'מידע',
+      links: [
+        { label: 'תנאי שימוש', href: '/terms' },
+        { label: 'מדיניות פרטיות', href: '/privacy' },
+      ],
+    },
+  };
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       {/* Main Footer Links */}
       <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {Object.values(footerLinks).map((section) => (
             <div key={section.title}>
               <h3 className="text-xs font-semibold text-gray-900 mb-4">

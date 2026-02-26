@@ -1,68 +1,272 @@
 <!DOCTYPE html>
 <html dir="rtl">
 <head>
-  <title>בחירת אנימציה</title>
+  <title>ספריית אנימציות - ShiputzAI</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-    .card h3 { margin: 0 0 10px; }
-    .animation { height: 200px; }
-    .url { font-size: 10px; color: #999; word-break: break-all; margin-top: 10px; }
-    h1 { text-align: center; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; padding: 20px; margin: 0; }
+    h1 { text-align: center; color: #1a1a1a; margin-bottom: 10px; }
     .note { text-align: center; color: #666; margin-bottom: 30px; }
+    .category { margin-bottom: 40px; }
+    .category h2 { color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .card h4 { margin: 0 0 8px; font-size: 14px; color: #333; }
+    .animation { height: 120px; display: flex; align-items: center; justify-content: center; }
+    .url { font-size: 9px; color: #999; word-break: break-all; margin-top: 8px; background: #f5f5f5; padding: 4px 8px; border-radius: 4px; }
+    .copy-btn { margin-top: 8px; padding: 6px 12px; background: #101010; color: white; border: none; border-radius: 20px; font-size: 11px; cursor: pointer; }
+    .copy-btn:hover { background: #333; }
+    .search { width: 100%; max-width: 400px; margin: 0 auto 30px; display: block; padding: 12px 20px; border: 2px solid #e0e0e0; border-radius: 30px; font-size: 16px; }
+    .search:focus { outline: none; border-color: #101010; }
+    .copied { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000; }
   </style>
 </head>
 <body>
-  <h1>בחר אנימציית טעינה 👷</h1>
-  <p class="note">לחץ על קישור האנימציה כדי לשלוח לי</p>
+  <h1>🎬 ספריית אנימציות Lottie</h1>
+  <p class="note">לחץ על "העתק URL" כדי להעתיק את הקישור</p>
   
-  <div class="grid">
-    <div class="card">
-      <h3>🏠 בית (נוכחי)</h3>
-      <div class="animation" id="anim1"></div>
-      <div class="url">home</div>
-    </div>
-    <div class="card">
-      <h3>👨‍💻 Designer Boy</h3>
-      <div class="animation" id="anim2"></div>
-      <div class="url">designer</div>
-    </div>
-    <div class="card">
-      <h3>🖥️ Developer</h3>
-      <div class="animation" id="anim3"></div>
-      <div class="url">developer</div>
-    </div>
-    <div class="card">
-      <h3>📱 App Loading</h3>
-      <div class="animation" id="anim4"></div>
-      <div class="url">app-loading</div>
-    </div>
-    <div class="card">
-      <h3>⚙️ Working Gears</h3>
-      <div class="animation" id="anim5"></div>
-      <div class="url">gears</div>
-    </div>
-    <div class="card">
-      <h3>📊 Analytics</h3>
-      <div class="animation" id="anim6"></div>
-      <div class="url">analytics</div>
-    </div>
+  <input type="text" class="search" placeholder="🔍 חפש אנימציה..." id="search">
+  <div class="copied" id="copied">✓ הועתק!</div>
+
+  <!-- 🏠 בית ובנייה -->
+  <div class="category">
+    <h2>🏠 בית ובנייה</h2>
+    <div class="grid" id="home-grid"></div>
   </div>
-  
+
+  <!-- ⏳ טעינה -->
+  <div class="category">
+    <h2>⏳ טעינה והמתנה</h2>
+    <div class="grid" id="loading-grid"></div>
+  </div>
+
+  <!-- ✅ הצלחה -->
+  <div class="category">
+    <h2>✅ הצלחה ואישור</h2>
+    <div class="grid" id="success-grid"></div>
+  </div>
+
+  <!-- ❌ שגיאה -->
+  <div class="category">
+    <h2>❌ שגיאה וריק</h2>
+    <div class="grid" id="error-grid"></div>
+  </div>
+
+  <!-- 💰 כסף ותקציב -->
+  <div class="category">
+    <h2>💰 כסף ותקציב</h2>
+    <div class="grid" id="money-grid"></div>
+  </div>
+
+  <!-- 📄 מסמכים -->
+  <div class="category">
+    <h2>📄 מסמכים וקבלות</h2>
+    <div class="grid" id="docs-grid"></div>
+  </div>
+
+  <!-- 🔧 כלים ועבודה -->
+  <div class="category">
+    <h2>🔧 כלים ועבודה</h2>
+    <div class="grid" id="tools-grid"></div>
+  </div>
+
+  <!-- 📊 נתונים וגרפים -->
+  <div class="category">
+    <h2>📊 נתונים וגרפים</h2>
+    <div class="grid" id="data-grid"></div>
+  </div>
+
+  <!-- 🤖 AI וטכנולוגיה -->
+  <div class="category">
+    <h2>🤖 AI וטכנולוגיה</h2>
+    <div class="grid" id="ai-grid"></div>
+  </div>
+
+  <!-- 👤 אנשים -->
+  <div class="category">
+    <h2>👤 אנשים ודמויות</h2>
+    <div class="grid" id="people-grid"></div>
+  </div>
+
+  <!-- 🎉 חגיגה -->
+  <div class="category">
+    <h2>🎉 חגיגה ואנימציות</h2>
+    <div class="grid" id="celebration-grid"></div>
+  </div>
+
   <script>
-    const anims = {
-      'anim1': 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json',
-      'anim2': 'https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json',
-      'anim3': 'https://assets7.lottiefiles.com/packages/lf20_kyu7xb1v.json',
-      'anim4': 'https://assets2.lottiefiles.com/packages/lf20_jcikwtux.json',
-      'anim5': 'https://assets5.lottiefiles.com/datafiles/fab7172a9302d416bcdb8ac7e1c71123/data.json',
-      'anim6': 'https://assets10.lottiefiles.com/datafiles/zc3XRzudyWE36ZBJr7PIkkqq0PFIrIBgp4ojqShI/newAnimation.json'
+    const animations = {
+      home: [
+        { name: 'בית (נוכחי)', url: 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json' },
+        { name: 'בית מודרני', url: 'https://assets2.lottiefiles.com/packages/lf20_2m1cvtim.json' },
+        { name: 'בניין נבנה', url: 'https://assets7.lottiefiles.com/packages/lf20_ystsffqy.json' },
+        { name: 'בית 3D', url: 'https://assets3.lottiefiles.com/packages/lf20_rovf9gpa.json' },
+        { name: 'דירה', url: 'https://assets10.lottiefiles.com/packages/lf20_syqnfe7c.json' },
+        { name: 'בנייה', url: 'https://assets1.lottiefiles.com/packages/lf20_9gyvkvur.json' },
+        { name: 'מפתח בית', url: 'https://assets5.lottiefiles.com/packages/lf20_xlmz9xwm.json' },
+        { name: 'Smart Home', url: 'https://assets8.lottiefiles.com/packages/lf20_ch3azxq7.json' },
+      ],
+      loading: [
+        { name: 'טעינה כללי', url: 'https://assets2.lottiefiles.com/packages/lf20_jcikwtux.json' },
+        { name: 'ספינר', url: 'https://assets4.lottiefiles.com/packages/lf20_p8bfn5to.json' },
+        { name: 'נקודות', url: 'https://assets10.lottiefiles.com/packages/lf20_usmfx6bp.json' },
+        { name: 'עיגול', url: 'https://assets9.lottiefiles.com/packages/lf20_x62chJ.json' },
+        { name: 'גלגל שיניים', url: 'https://assets5.lottiefiles.com/datafiles/fab7172a9302d416bcdb8ac7e1c71123/data.json' },
+        { name: 'מעבד', url: 'https://assets3.lottiefiles.com/packages/lf20_szlepvdh.json' },
+        { name: 'Progress Bar', url: 'https://assets6.lottiefiles.com/packages/lf20_4XmSkB.json' },
+        { name: 'Hourglass', url: 'https://assets1.lottiefiles.com/packages/lf20_rbtawnwz.json' },
+      ],
+      success: [
+        { name: 'וי ירוק', url: 'https://assets1.lottiefiles.com/packages/lf20_jbrw3hcz.json' },
+        { name: 'וי עם עיגול', url: 'https://assets4.lottiefiles.com/packages/lf20_lk80fpsm.json' },
+        { name: 'Success', url: 'https://assets9.lottiefiles.com/packages/lf20_s2lryxtd.json' },
+        { name: 'Confetti וי', url: 'https://assets2.lottiefiles.com/packages/lf20_wcnjmdp1.json' },
+        { name: 'Done', url: 'https://assets7.lottiefiles.com/packages/lf20_pmYw5P.json' },
+        { name: 'אישור', url: 'https://assets3.lottiefiles.com/packages/lf20_atunrlig.json' },
+        { name: 'Complete', url: 'https://assets5.lottiefiles.com/packages/lf20_y2hxPc.json' },
+        { name: 'Verified', url: 'https://assets8.lottiefiles.com/packages/lf20_aZTdD5.json' },
+      ],
+      error: [
+        { name: 'שגיאה X', url: 'https://assets10.lottiefiles.com/packages/lf20_qp1spzqv.json' },
+        { name: 'Error', url: 'https://assets4.lottiefiles.com/packages/lf20_yw3nyrsf.json' },
+        { name: 'ריק - תיבה', url: 'https://assets1.lottiefiles.com/packages/lf20_hl5n0bwb.json' },
+        { name: 'No Data', url: 'https://assets6.lottiefiles.com/packages/lf20_ydo1amjm.json' },
+        { name: '404', url: 'https://assets2.lottiefiles.com/packages/lf20_suhe7qtm.json' },
+        { name: 'Empty Box', url: 'https://assets7.lottiefiles.com/packages/lf20_GIyuVN.json' },
+        { name: 'Not Found', url: 'https://assets3.lottiefiles.com/packages/lf20_hXHdlx.json' },
+        { name: 'Warning', url: 'https://assets9.lottiefiles.com/packages/lf20_s0xmlrca.json' },
+      ],
+      money: [
+        { name: 'מטבעות', url: 'https://assets5.lottiefiles.com/packages/lf20_kyu7xb1v.json' },
+        { name: 'ארנק', url: 'https://assets8.lottiefiles.com/packages/lf20_06a6pf9i.json' },
+        { name: 'דולר', url: 'https://assets2.lottiefiles.com/packages/lf20_PgZx3O.json' },
+        { name: 'חיסכון', url: 'https://assets4.lottiefiles.com/packages/lf20_xyadoh9h.json' },
+        { name: 'תקציב', url: 'https://assets1.lottiefiles.com/packages/lf20_ysas4vcp.json' },
+        { name: 'Money Bag', url: 'https://assets6.lottiefiles.com/packages/lf20_fQ7gzF.json' },
+        { name: 'Credit Card', url: 'https://assets3.lottiefiles.com/packages/lf20_w7xivbhr.json' },
+        { name: 'Payment', url: 'https://assets10.lottiefiles.com/packages/lf20_oczjxapb.json' },
+      ],
+      docs: [
+        { name: 'מסמך', url: 'https://assets7.lottiefiles.com/packages/lf20_DMgKk1.json' },
+        { name: 'קבלה', url: 'https://assets4.lottiefiles.com/packages/lf20_vnikbczh.json' },
+        { name: 'סריקה', url: 'https://assets9.lottiefiles.com/packages/lf20_rlh0mzg0.json' },
+        { name: 'חוזה', url: 'https://assets2.lottiefiles.com/packages/lf20_l13zwcsx.json' },
+        { name: 'תיקייה', url: 'https://assets5.lottiefiles.com/packages/lf20_awhkbj0q.json' },
+        { name: 'PDF', url: 'https://assets1.lottiefiles.com/packages/lf20_cgjrfdzx.json' },
+        { name: 'Upload File', url: 'https://assets8.lottiefiles.com/packages/lf20_urbk83vw.json' },
+        { name: 'Clipboard', url: 'https://assets3.lottiefiles.com/packages/lf20_q5pk6p1k.json' },
+      ],
+      tools: [
+        { name: 'כלי עבודה', url: 'https://assets6.lottiefiles.com/packages/lf20_kuofwtft.json' },
+        { name: 'פטיש', url: 'https://assets10.lottiefiles.com/packages/lf20_yMpiqX.json' },
+        { name: 'Settings', url: 'https://assets4.lottiefiles.com/packages/lf20_uu0x8lqv.json' },
+        { name: 'מברג', url: 'https://assets2.lottiefiles.com/packages/lf20_bkmfke0w.json' },
+        { name: 'ארגז כלים', url: 'https://assets7.lottiefiles.com/packages/lf20_vj5bvbyf.json' },
+        { name: 'Wrench', url: 'https://assets1.lottiefiles.com/packages/lf20_swnrn2oy.json' },
+        { name: 'Construction', url: 'https://assets5.lottiefiles.com/packages/lf20_9gyvkvur.json' },
+        { name: 'Paint Roller', url: 'https://assets9.lottiefiles.com/packages/lf20_khkbhasi.json' },
+      ],
+      data: [
+        { name: 'גרף', url: 'https://assets10.lottiefiles.com/datafiles/zc3XRzudyWE36ZBJr7PIkkqq0PFIrIBgp4ojqShI/newAnimation.json' },
+        { name: 'Chart', url: 'https://assets3.lottiefiles.com/packages/lf20_dykfumqe.json' },
+        { name: 'Analytics', url: 'https://assets8.lottiefiles.com/packages/lf20_22mjkcbb.json' },
+        { name: 'Dashboard', url: 'https://assets6.lottiefiles.com/packages/lf20_qm8eqzse.json' },
+        { name: 'Pie Chart', url: 'https://assets2.lottiefiles.com/packages/lf20_bhebjzpu.json' },
+        { name: 'Statistics', url: 'https://assets4.lottiefiles.com/packages/lf20_kd5rzej5.json' },
+        { name: 'Growth', url: 'https://assets1.lottiefiles.com/packages/lf20_xvrofzfk.json' },
+        { name: 'Report', url: 'https://assets7.lottiefiles.com/packages/lf20_qwl4gi1f.json' },
+      ],
+      ai: [
+        { name: 'רובוט', url: 'https://assets5.lottiefiles.com/packages/lf20_M9p23l.json' },
+        { name: 'AI Brain', url: 'https://assets9.lottiefiles.com/packages/lf20_fcfjwiyb.json' },
+        { name: 'Machine Learning', url: 'https://assets3.lottiefiles.com/packages/lf20_oyi9a28g.json' },
+        { name: 'Neural Network', url: 'https://assets2.lottiefiles.com/packages/lf20_bo8vqwyw.json' },
+        { name: 'Tech', url: 'https://assets10.lottiefiles.com/packages/lf20_vybwn7df.json' },
+        { name: 'Processing', url: 'https://assets4.lottiefiles.com/packages/lf20_uwR49r.json' },
+        { name: 'Smart', url: 'https://assets8.lottiefiles.com/packages/lf20_kyu7xb1v.json' },
+        { name: 'Innovation', url: 'https://assets1.lottiefiles.com/packages/lf20_tuzu2mfr.json' },
+      ],
+      people: [
+        { name: 'מעצב', url: 'https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json' },
+        { name: 'Developer', url: 'https://assets7.lottiefiles.com/packages/lf20_kyu7xb1v.json' },
+        { name: 'עובד', url: 'https://assets6.lottiefiles.com/packages/lf20_2LdLki.json' },
+        { name: 'בנאי', url: 'https://assets2.lottiefiles.com/packages/lf20_twijbubv.json' },
+        { name: 'Handyman', url: 'https://assets4.lottiefiles.com/packages/lf20_vnikbczh.json' },
+        { name: 'Team', url: 'https://assets1.lottiefiles.com/packages/lf20_xvrofzfk.json' },
+        { name: 'Support', url: 'https://assets5.lottiefiles.com/packages/lf20_u25cckyh.json' },
+        { name: 'Thinking', url: 'https://assets9.lottiefiles.com/packages/lf20_rbtawnwz.json' },
+      ],
+      celebration: [
+        { name: 'Confetti', url: 'https://assets8.lottiefiles.com/packages/lf20_u4yrau.json' },
+        { name: 'כוכבים', url: 'https://assets10.lottiefiles.com/packages/lf20_xlmz9xwm.json' },
+        { name: 'Party', url: 'https://assets3.lottiefiles.com/packages/lf20_rovf9gpa.json' },
+        { name: 'Fireworks', url: 'https://assets6.lottiefiles.com/packages/lf20_ky24lkyk.json' },
+        { name: 'Celebration', url: 'https://assets2.lottiefiles.com/packages/lf20_wcnjmdp1.json' },
+        { name: 'Trophy', url: 'https://assets4.lottiefiles.com/packages/lf20_touohxv0.json' },
+        { name: 'Medal', url: 'https://assets1.lottiefiles.com/packages/lf20_96bovdur.json' },
+        { name: 'Clap', url: 'https://assets7.lottiefiles.com/packages/lf20_fmjmduru.json' },
+      ]
     };
-    
-    Object.entries(anims).forEach(([id, path]) => {
-      lottie.loadAnimation({ container: document.getElementById(id), path, loop: true, autoplay: true });
+
+    function createCard(anim) {
+      const id = 'anim_' + Math.random().toString(36).substr(2, 9);
+      return `
+        <div class="card" data-name="${anim.name}">
+          <h4>${anim.name}</h4>
+          <div class="animation" id="${id}"></div>
+          <div class="url">${anim.url.split('/').pop()}</div>
+          <button class="copy-btn" onclick="copyUrl('${anim.url}')">העתק URL</button>
+        </div>
+      `;
+    }
+
+    function renderCategory(gridId, anims) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = anims.map(createCard).join('');
+      
+      // Load animations
+      grid.querySelectorAll('.animation').forEach((el, i) => {
+        try {
+          lottie.loadAnimation({
+            container: el,
+            path: anims[i].url,
+            loop: true,
+            autoplay: true,
+            rendererSettings: { preserveAspectRatio: 'xMidYMid slice' }
+          });
+        } catch(e) {}
+      });
+    }
+
+    function copyUrl(url) {
+      navigator.clipboard.writeText(url);
+      const copied = document.getElementById('copied');
+      copied.style.display = 'block';
+      setTimeout(() => copied.style.display = 'none', 1500);
+    }
+
+    // Render all
+    renderCategory('home-grid', animations.home);
+    renderCategory('loading-grid', animations.loading);
+    renderCategory('success-grid', animations.success);
+    renderCategory('error-grid', animations.error);
+    renderCategory('money-grid', animations.money);
+    renderCategory('docs-grid', animations.docs);
+    renderCategory('tools-grid', animations.tools);
+    renderCategory('data-grid', animations.data);
+    renderCategory('ai-grid', animations.ai);
+    renderCategory('people-grid', animations.people);
+    renderCategory('celebration-grid', animations.celebration);
+
+    // Search
+    document.getElementById('search').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll('.card').forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        card.style.display = name.includes(query) ? '' : 'none';
+      });
     });
   </script>
 </body>

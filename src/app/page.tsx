@@ -317,48 +317,59 @@ export default function Home() {
       {/* Trusted Sources Bar - Infinite Carousel */}
       <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden">
         <style dangerouslySetInnerHTML={{ __html: `
-          .marquee-wrapper {
+          .marquee {
+            --gap: 2.5rem;
             display: flex;
-            width: 100%;
             overflow: hidden;
+            user-select: none;
           }
-          .marquee-track {
+          .marquee-inner {
             display: flex;
-            flex-shrink: 0;
-            gap: 3rem;
-            padding-right: 3rem;
-            animation: marquee-scroll 20s linear infinite;
+            gap: var(--gap);
+            animation: scroll 30s linear infinite;
+            min-width: 200%;
           }
-          @keyframes marquee-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
+          .marquee-inner span {
+            flex-shrink: 0;
+          }
+          @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(calc(-50% - var(--gap) / 2)); }
           }
         `}} />
         <p className="text-center text-sm text-gray-400 mb-5">מחירונים מבוססים על נתונים מ:</p>
-        <div className="marquee-wrapper">
-          <div className="marquee-track">
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">midrag</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ACE</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">HomeCenter</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">TAMBUR</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">IKEA</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ארד שיפוצים</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">מחסני חשמל</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">שקם אלקטריק</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ZARA HOME</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">טמבור</span>
-          </div>
-          <div className="marquee-track">
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">midrag</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ACE</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">HomeCenter</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">TAMBUR</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">IKEA</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ארד שיפוצים</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">מחסני חשמל</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">שקם אלקטריק</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">ZARA HOME</span>
-            <span className="text-lg font-semibold text-gray-300 whitespace-nowrap">טמבור</span>
+        <div className="marquee">
+          <div className="marquee-inner">
+            <span className="text-lg font-semibold text-gray-300">midrag</span>
+            <span className="text-lg font-semibold text-gray-300">ACE</span>
+            <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
+            <span className="text-lg font-semibold text-gray-300">TAMBUR</span>
+            <span className="text-lg font-semibold text-gray-300">IKEA</span>
+            <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
+            <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
+            <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
+            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
+            <span className="text-lg font-semibold text-gray-300">טמבור</span>
+            <span className="text-lg font-semibold text-gray-300">פוקס הום</span>
+            <span className="text-lg font-semibold text-gray-300">קסטרו</span>
+            <span className="text-lg font-semibold text-gray-300">H&M HOME</span>
+            <span className="text-lg font-semibold text-gray-300">JYSK</span>
+            <span className="text-lg font-semibold text-gray-300">אורבן</span>
+            <span className="text-lg font-semibold text-gray-300">midrag</span>
+            <span className="text-lg font-semibold text-gray-300">ACE</span>
+            <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
+            <span className="text-lg font-semibold text-gray-300">TAMBUR</span>
+            <span className="text-lg font-semibold text-gray-300">IKEA</span>
+            <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
+            <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
+            <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
+            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
+            <span className="text-lg font-semibold text-gray-300">טמבור</span>
+            <span className="text-lg font-semibold text-gray-300">פוקס הום</span>
+            <span className="text-lg font-semibold text-gray-300">קסטרו</span>
+            <span className="text-lg font-semibold text-gray-300">H&M HOME</span>
+            <span className="text-lg font-semibold text-gray-300">JYSK</span>
+            <span className="text-lg font-semibold text-gray-300">אורבן</span>
           </div>
         </div>
       </section>

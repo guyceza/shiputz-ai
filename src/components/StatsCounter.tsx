@@ -73,7 +73,7 @@ export default function StatsCounter() {
         <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">
           ₪{stat1.count.toLocaleString('he-IL')}<span className="text-gray-400">+</span>
         </p>
-        <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">תקציבים הוזנו ב-24 שעות</p>
+        <p className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors">תקציבים הוזנו עד עכשיו</p>
       </div>
       <div ref={stat2.ref} className="group p-4 rounded-2xl hover-lift cursor-default">
         <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 group-hover:text-emerald-600 transition-all duration-300">

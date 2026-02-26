@@ -473,7 +473,7 @@ function DashboardContent() {
           <Lottie 
             animationData={lottieData} 
             loop={true}
-            style={{ width: 180, height: 180 }}
+            style={{ width: 280, height: 220 }}
           />
         ) : (
           <div className="relative w-16 h-16 mb-6">

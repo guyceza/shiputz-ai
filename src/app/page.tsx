@@ -367,14 +367,18 @@ export default function Home() {
                   className="inline-block text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine"
                   style={{ backgroundColor: '#101010' }}
                 >
-                  {hasVisionSubscription ? '🎨 צור הדמיה' : 'נסו עכשיו'}
+                  🎨 צור הדמיה
                 </Link>
                 <Link
                   href="/shop-look"
-                  className="inline-flex items-center gap-2 border border-gray-200 text-gray-900 px-6 py-4 rounded-full text-base hover:bg-gray-50 transition-colors"
+                  className="group relative inline-flex flex-col items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-2xl text-base hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  <img src="/icons/cart.png" alt="" className="w-5 h-5" />
-                  <span>Shop the Look</span>
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">HOT</span>
+                  <span className="flex items-center gap-2 font-semibold">
+                    <span>🛒</span>
+                    <span>Shop the Look</span>
+                  </span>
+                  <span className="text-[11px] text-emerald-100">קנו את המוצרים מההדמיה</span>
                 </Link>
               </div>
             </div>

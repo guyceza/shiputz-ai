@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiputzAI | הפלטפורמה החכמה לשיפוצים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --orange: #f97316;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      --gradient-pink: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+      --gradient-orange: linear-gradient(135deg, #f97316 0%, #10b981 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    body { 
+      font-family: 'Heebo', sans-serif; 
+      background: var(--light);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+    }
+    .nav.scrolled {
+      padding: 12px 40px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .nav-logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link {
+      padding: 10px 18px;
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    .nav-link:hover {
+      color: var(--primary);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .nav-link.active {
+      color: var(--primary);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .nav-cta {
+      background: var(--gradient);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    }
+    .nav-mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 30%, #eff6ff 60%, #faf5ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      animation: float 10s ease-in-out infinite;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+      bottom: -150px;
+      left: -150px;
+      animation: float 12s ease-in-out infinite reverse;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+    .hero-content {
+      max-width: 900px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .hero-badge .dot {
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--gray) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero h1 span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 1.4rem;
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 48px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-features {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .hero-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-feature-icon {
+      width: 48px;
+      height: 48px;
+      background: white;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .hero-feature-text {
+      text-align: right;
+    }
+    .hero-feature-text strong {
+      display: block;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .hero-feature-text span {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--gradient);
+      color: white;
+      padding: 20px 48px;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+    .hero-cta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 50px rgba(16, 185, 129, 0.5);
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray);
+      font-size: 0.9rem;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ===== SECTION STYLES ===== */
+    .section {
+      padding: 120px 40px;
+      position: relative;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-badge {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+    .section-subtitle {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ===== COMPARE QUOTES SECTION ===== */
+    .section-compare {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 50%, #eff6ff 100%);
+    }
+    .section-compare .section-badge {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--secondary);
+    }
+    .section-compare .section-title {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .compare-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .compare-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+      border: 3px solid transparent;
+    }
+    .compare-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    }
+    .compare-card.winner {
+      border-color: var(--primary);
+      position: relative;
+    }
+    .compare-card.winner::before {
+      content: '🏆 המומלץ';
+      position: absolute;
+      top: -14px;
+      right: 24px;
+      background: var(--primary);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .compare-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .compare-card-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .compare-card-price {
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .compare-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .compare-item:last-child { border: none; }
+    .compare-item .icon { font-size: 1.2rem; }
+    .compare-item .text { flex: 1; }
+    .compare-item .status {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .compare-item .status.yes { color: var(--primary); }
+    .compare-item .status.no { color: #dc2626; }
+    .compare-item .status.partial { color: var(--orange); }
+
+    /* ===== MATERIALS SECTION ===== */
+    .section-materials {
+      background: linear-gradient(135deg, #fff7ed 0%, #f0fdf4 50%, #eff6ff 100%);
+    }
+    .section-materials .section-badge {
+      background: rgba(249, 115, 22, 0.1);
+      color: var(--orange);
+    }
+    .section-materials .section-title {
+      background: linear-gradient(135deg, var(--orange), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .materials-demo {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 40px;
+    }
+    .materials-input {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      height: fit-content;
+    }
+    .materials-input h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+    .input-row {
+      display: flex;
+      gap: 12px;
+    }
+    .input-field {
+      flex: 1;
+      position: relative;
+    }
+    .input-field input {
+      width: 100%;
+      padding: 14px 16px;
+      padding-left: 40px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+    .input-field input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .input-field .unit {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    .work-types {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .work-type {
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .work-type:hover, .work-type.selected {
+      border-color: var(--primary);
+      background: #f0fdf4;
+    }
+    .work-type .icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .work-type .name { font-weight: 600; font-size: 0.9rem; }
+    .materials-results {
+      display: grid;
+      gap: 24px;
+    }
+    .materials-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .summary-card {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .summary-card .icon { font-size: 2rem; margin-bottom: 12px; }
+    .summary-card .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+    .summary-card .label { color: var(--gray); font-size: 0.9rem; margin-top: 4px; }
+    .materials-table {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+    .materials-table h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .materials-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .materials-table th {
+      background: var(--dark);
+      color: white;
+      padding: 14px;
+      text-align: right;
+      font-weight: 600;
+    }
+    .materials-table th:first-child { border-radius: 0 12px 0 0; }
+    .materials-table th:last-child { border-radius: 12px 0 0 0; }
+    .materials-table td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .materials-table .quantity { color: var(--secondary); font-weight: 700; }
+    .materials-table .price { color: var(--primary); font-weight: 700; }
+
+    /* ===== DESIGNER SECTION ===== */
+    .section-designer {
+      background: linear-gradient(135deg, #faf5ff 0%, #f0fdf4 50%, #eff6ff 100%);
+    }
+    .section-designer .section-badge {
+      background: var(--gradient-purple);
+      color: white;
+    }
+    .section-designer .section-title {
+      background: var(--gradient-purple);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .designer-demo {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 32px;
+    }
+    .designer-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .designer-topic {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .designer-topic:hover, .designer-topic.active {
+      border-color: var(--purple);
+      background: linear-gradient(135deg, #faf5ff, #ede9fe);
+    }
+    .designer-topic .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .designer-topic .title { font-weight: 700; margin-bottom: 4px; }
+    .designer-topic .desc { font-size: 0.85rem; color: var(--gray); }
+    .designer-chat {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+    }
+    .chat-header {
+      padding: 20px 24px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .chat-avatar {
+      width: 50px;
+      height: 50px;
+      background: var(--gradient-purple);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .chat-info h3 { font-weight: 700; }
+    .chat-info p { font-size: 0.85rem; color: var(--gray); }
+    .chat-messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-message {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: 20px;
+      line-height: 1.6;
+    }
+    .chat-message.ai {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #faf5ff, #ede9fe);
+      border-bottom-left-radius: 8px;
+    }
+    .chat-message.user {
+      align-self: flex-start;
+      background: #f1f5f9;
+      border-bottom-right-radius: 8px;
+    }
+    .chat-input {
+      padding: 20px 24px;
+      border-top: 2px solid #f1f5f9;
+      display: flex;
+      gap: 12px;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    .chat-input button {
+      width: 54px;
+      height: 54px;
+      background: var(--gradient-purple);
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    /* ===== SHOP THE LOOK SECTION ===== */
+    .section-shop {
+      background: linear-gradient(135deg, #fdf2f8 0%, #fef3c7 30%, #f0fdf4 70%, #eff6ff 100%);
+    }
+    .section-shop .section-badge {
+      background: var(--gradient-pink);
+      color: white;
+    }
+    .section-shop .section-title {
+      background: var(--gradient-pink);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .shop-demo {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 40px;
+    }
+    .shop-image {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .shop-image img {
+      width: 100%;
+      height: 450px;
+      object-fit: cover;
+    }
+    .shop-hotspot {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: pulse-hotspot 2s infinite;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--pink);
+    }
+    @keyframes pulse-hotspot {
+      0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 4px 30px rgba(236, 72, 153, 0.5); }
+    }
+    .shop-products {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .shop-product {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .shop-product:hover {
+      transform: translateX(-8px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    }
+    .shop-product .number {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient-pink);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .shop-product .info { flex: 1; }
+    .shop-product .name { font-weight: 700; margin-bottom: 4px; }
+    .shop-product .store { font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; }
+    .shop-product .price { font-weight: 700; color: var(--primary); }
+    .shop-product .match {
+      font-size: 0.8rem;
+      background: rgba(236, 72, 153, 0.1);
+      color: var(--pink);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* ===== BOQ SECTION ===== */
+    .section-boq {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    .section-boq .section-badge {
+      background: linear-gradient(135deg, var(--dark), #334155);
+      color: white;
+    }
+    .section-boq .section-title {
+      background: linear-gradient(135deg, var(--dark), var(--gray));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .boq-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    .boq-upload {
+      background: white;
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .boq-upload-zone {
+      border: 3px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 48px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .boq-upload-zone:hover {
+      border-color: var(--primary);
+      background: #f0fdf4;
+    }
+    .boq-upload-zone .icon { font-size: 4rem; margin-bottom: 16px; }
+    .boq-upload-zone h3 { font-weight: 700; margin-bottom: 8px; }
+    .boq-upload-zone p { color: var(--gray); }
+    .boq-results {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+    .boq-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .boq-results-header h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .boq-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .boq-summary-item {
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+    .boq-summary-item .value { font-size: 1.5rem; font-weight: 800; color: var(--dark); }
+    .boq-summary-item .label { font-size: 0.85rem; color: var(--gray); }
+    .boq-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .boq-table th {
+      background: var(--dark);
+      color: white;
+      padding: 12px;
+      text-align: right;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .boq-table th:first-child { border-radius: 0 10px 0 0; }
+    .boq-table th:last-child { border-radius: 10px 0 0 0; }
+    .boq-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+    .boq-table .quantity { color: var(--secondary); font-weight: 700; }
+
+    /* ===== CTA SECTION ===== */
+    .section-cta {
+      background: linear-gradient(135deg, var(--dark), #1e293b);
+      padding: 100px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-cta::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+    }
+    .section-cta::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      bottom: -150px;
+      left: -150px;
+    }
+    .cta-content {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .cta-content h2 {
+      font-size: 3rem;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 20px;
+    }
+    .cta-content h2 span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .cta-content p {
+      font-size: 1.3rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-btn {
+      padding: 18px 40px;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cta-btn.primary {
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+    .cta-btn.primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 50px rgba(16, 185, 129, 0.5);
+    }
+    .cta-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .cta-btn.secondary:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+    }
+    .cta-features {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+    .cta-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.8);
+    }
+    .cta-feature .icon { font-size: 1.5rem; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--dark);
+      padding: 40px;
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+    }
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .hero h1 { font-size: 3rem; }
+      .section-title { font-size: 2.2rem; }
+      .compare-demo { grid-template-columns: 1fr; }
+      .materials-demo { grid-template-columns: 1fr; }
+      .designer-demo { grid-template-columns: 1fr; }
+      .shop-demo { grid-template-columns: 1fr; }
+      .boq-demo { grid-template-columns: 1fr; }
+      .materials-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .nav-mobile-toggle { display: block; }
+      .hero { padding: 100px 20px 60px; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero-subtitle { font-size: 1.1rem; }
+      .hero-features { flex-direction: column; gap: 20px; }
+      .section { padding: 80px 20px; }
+      .section-title { font-size: 1.8rem; }
+      .cta-content h2 { font-size: 2rem; }
+      .work-types { grid-template-columns: repeat(3, 1fr); }
+      .designer-sidebar { flex-direction: row; overflow-x: auto; padding-bottom: 10px; }
+      .designer-topic { min-width: 150px; }
+      .shop-products { flex-direction: row; overflow-x: auto; padding-bottom: 10px; }
+      .shop-product { min-width: 250px; }
+      .boq-summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">🏠</div>
+      <span class="nav-logo-text">ShiputzAI</span>
+    </a>
+    <div class="nav-links">
+      <a href="#compare" class="nav-link">השוואת הצעות</a>
+      <a href="#materials" class="nav-link">מחשבון חומרים</a>
+      <a href="#designer" class="nav-link">מעצב פנים</a>
+      <a href="#shop" class="nav-link">Shop the Look</a>
+      <a href="#boq" class="nav-link">כתב כמויות</a>
+      <a href="#cta" class="nav-cta">התחל עכשיו</a>
+    </div>
+    <button class="nav-mobile-toggle" onclick="toggleMobileMenu()">☰</button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        <span>הפלטפורמה #1 לשיפוצים חכמים</span>
+      </div>
+      <h1>השיפוץ הבא שלך<br>מתחיל עם <span>AI</span></h1>
+      <p class="hero-subtitle">
+        חסכו אלפי שקלים ושעות עבודה עם כלי AI חכמים להשוואת הצעות מחיר, 
+        חישוב חומרים, עיצוב פנים ועוד - הכל במקום אחד
+      </p>
+      <div class="hero-features">
+        <div class="hero-feature">
+          <div class="hero-feature-icon">⚖️</div>
+          <div class="hero-feature-text">
+            <strong>השוואה חכמה</strong>
+            <span>זיהוי פערים בהצעות</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-icon">🧮</div>
+          <div class="hero-feature-text">
+            <strong>חישוב מדויק</strong>
+            <span>כמויות וחומרים</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-icon">🎨</div>
+          <div class="hero-feature-text">
+            <strong>עיצוב AI</strong>
+            <span>המלצות אישיות</span>
+          </div>
+        </div>
+      </div>
+      <a href="#compare" class="hero-cta">
+        🚀 גלה את הכלים
+      </a>
+    </div>
+    <div class="hero-scroll">
+      <span>גלול למטה</span>
+      <span>↓</span>
+    </div>
+  </section>
+
+  <!-- Compare Quotes Section -->
+  <section class="section section-compare" id="compare">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">⚖️ השוואה חכמה</span>
+        <h2 class="section-title">השוואת הצעות מחיר</h2>
+        <p class="section-subtitle">
+          העלו 2-3 הצעות מחיר וה-AI יחשוף מה באמת כלול, איפה יש פערים, ומי באמת יותר זול
+        </p>
+      </div>
+      
+      <div class="compare-demo">
+        <div class="compare-card winner">
+          <div class="compare-card-header">
+            <span class="compare-card-name">קבלן א'</span>
+            <span class="compare-card-price">₪145,000</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">⚡</span>
+            <span class="text">חשמל כולל לוח</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚿</span>
+            <span class="text">אינסטלציה מלאה</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚛</span>
+            <span class="text">פינוי פסולת</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🛡️</span>
+            <span class="text">אחריות</span>
+            <span class="status yes">שנתיים</span>
+          </div>
+        </div>
+        
+        <div class="compare-card">
+          <div class="compare-card-header">
+            <span class="compare-card-name">קבלן ב'</span>
+            <span class="compare-card-price">₪140,000</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">⚡</span>
+            <span class="text">חשמל</span>
+            <span class="status partial">⚠️ בסיסי</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚿</span>
+            <span class="text">אינסטלציה</span>
+            <span class="status no">❌ לא כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚛</span>
+            <span class="text">פינוי פסולת</span>
+            <span class="status no">❌ לא כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🛡️</span>
+            <span class="text">אחריות</span>
+            <span class="status partial">שנה</span>
+          </div>
+        </div>
+        
+        <div class="compare-card">
+          <div class="compare-card-header">
+            <span class="compare-card-name">קבלן ג'</span>
+            <span class="compare-card-price">₪155,000</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">⚡</span>
+            <span class="text">חשמל כולל לוח</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚿</span>
+            <span class="text">אינסטלציה מלאה</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🚛</span>
+            <span class="text">פינוי פסולת</span>
+            <span class="status yes">✓ כלול</span>
+          </div>
+          <div class="compare-item">
+            <span class="icon">🛡️</span>
+            <span class="text">אחריות</span>
+            <span class="status yes">3 שנים</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Materials Calculator Section -->
+  <section class="section section-materials" id="materials">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">🧮 מחשבון חכם</span>
+        <h2 class="section-title">מחשבון חומרים</h2>
+        <p class="section-subtitle">
+          הזינו מידות חדר וקבלו רשימת חומרים מדויקת עם כמויות, מחירים והמלצות למותגים
+        </p>
+      </div>
+      
+      <div class="materials-demo">
+        <div class="materials-input">
+          <h3>📐 מידות החדר</h3>
+          <div class="input-group">
+            <label>מידות (מטרים)</label>
+            <div class="input-row">
+              <div class="input-field">
+                <input type="number" placeholder="אורך" value="5">
+                <span class="unit">מ'</span>
+              </div>
+              <div class="input-field">
+                <input type="number" placeholder="רוחב" value="4">
+                <span class="unit">מ'</span>
+              </div>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>סוג עבודה</label>
+            <div class="work-types">
+              <div class="work-type selected">
+                <div class="icon">🪨</div>
+                <div class="name">ריצוף</div>
+              </div>
+              <div class="work-type">
+                <div class="icon">🎨</div>
+                <div class="name">צביעה</div>
+              </div>
+              <div class="work-type">
+                <div class="icon">🧱</div>
+                <div class="name">גבס</div>
+              </div>
+              <div class="work-type selected">
+                <div class="icon">💧</div>
+                <div class="name">איטום</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="materials-results">
+          <div class="materials-summary">
+            <div class="summary-card">
+              <div class="icon">📐</div>
+              <div class="value">20</div>
+              <div class="label">מ"ר שטח</div>
+            </div>
+            <div class="summary-card">
+              <div class="icon">📦</div>
+              <div class="value">8</div>
+              <div class="label">סוגי חומרים</div>
+            </div>
+            <div class="summary-card">
+              <div class="icon">💰</div>
+              <div class="value">₪6,850</div>
+              <div class="label">עלות משוערת</div>
+            </div>
+            <div class="summary-card">
+              <div class="icon">⏱️</div>
+              <div class="value">3</div>
+              <div class="label">ימי עבודה</div>
+            </div>
+          </div>
+          
+          <div class="materials-table">
+            <h3>📋 רשימת חומרים</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>חומר</th>
+                  <th>כמות</th>
+                  <th>מחיר ליחידה</th>
+                  <th>סה"כ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>🪨 אריחים</td>
+                  <td class="quantity">22 מ"ר</td>
+                  <td>₪150</td>
+                  <td class="price">₪3,300</td>
+                </tr>
+                <tr>
+                  <td>🧪 דבק לאריחים</td>
+                  <td class="quantity">4 שקים</td>
+                  <td>₪45</td>
+                  <td class="price">₪180</td>
+                </tr>
+                <tr>
+                  <td>💧 חומר איטום</td>
+                  <td class="quantity">40 ליטר</td>
+                  <td>₪55</td>
+                  <td class="price">₪2,200</td>
+                </tr>
+                <tr>
+                  <td>🎨 רובה</td>
+                  <td class="quantity">2 שקים</td>
+                  <td>₪35</td>
+                  <td class="price">₪70</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Designer Section -->
+  <section class="section section-designer" id="designer">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">🎨 מעצב AI</span>
+        <h2 class="section-title">מעצב פנים וירטואלי</h2>
+        <p class="section-subtitle">
+          שוחח עם מעצב פנים AI שמכיר את כל החנויות בישראל ויעזור לך לעצב את הבית
+        </p>
+      </div>
+      
+      <div class="designer-demo">
+        <div class="designer-sidebar">
+          <div class="designer-topic active">
+            <div class="icon">🖼️</div>
+            <div class="title">סגנונות עיצוב</div>
+            <div class="desc">מודרני, סקנדינבי...</div>
+          </div>
+          <div class="designer-topic">
+            <div class="icon">🎨</div>
+            <div class="title">פלטות צבעים</div>
+            <div class="desc">שילובים מנצחים</div>
+          </div>
+          <div class="designer-topic">
+            <div class="icon">🛋️</div>
+            <div class="title">ריהוט</div>
+            <div class="desc">המלצות ופריסה</div>
+          </div>
+          <div class="designer-topic">
+            <div class="icon">💡</div>
+            <div class="title">תאורה</div>
+            <div class="desc">טבעית ומלאכותית</div>
+          </div>
+        </div>
+        
+        <div class="designer-chat">
+          <div class="chat-header">
+            <div class="chat-avatar">🎨</div>
+            <div class="chat-info">
+              <h3>מעצב הפנים שלך</h3>
+              <p>מומחה בעיצוב ישראלי</p>
+            </div>
+          </div>
+          <div class="chat-messages">
+            <div class="chat-message ai">
+              <strong>שלום! 👋</strong><br><br>
+              אני מעצב הפנים הווירטואלי שלך. אני מכיר את כל החנויות בישראל ויכול לעזור לך לעצב כל חדר.<br><br>
+              <strong>מה תרצה לעצב היום?</strong>
+            </div>
+            <div class="chat-message user">
+              אני מחפש סגנון מודרני לסלון קטן
+            </div>
+            <div class="chat-message ai">
+              <strong>עיצוב מודרני 🏢</strong><br><br>
+              לסלון קטן אני ממליץ על:<br>
+              • צבעים בהירים להגדלת החלל<br>
+              • ספה בגוון ניטרלי מ-IKEA<br>
+              • שולחן סלון זכוכית<br>
+              • מראות לתחושת מרחב
+            </div>
+          </div>
+          <div class="chat-input">
+            <input type="text" placeholder="שאל אותי על עיצוב...">
+            <button>➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop the Look Section -->
+  <section class="section section-shop" id="shop">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">🛒 Shop the Look</span>
+        <h2 class="section-title">מצא את המוצרים מהתמונה</h2>
+        <p class="section-subtitle">
+          העלה תמונת חדר מושלם וה-AI יזהה את הפריטים וימצא לך איפה לקנות אותם בישראל
+        </p>
+      </div>
+      
+      <div class="shop-demo">
+        <div class="shop-image">
+          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800" alt="סלון מעוצב">
+          <div class="shop-hotspot" style="top: 40%; right: 20%;">1</div>
+          <div class="shop-hotspot" style="top: 60%; right: 50%;">2</div>
+          <div class="shop-hotspot" style="top: 25%; right: 70%;">3</div>
+          <div class="shop-hotspot" style="top: 70%; right: 30%;">4</div>
+        </div>
+        
+        <div class="shop-products">
+          <div class="shop-product">
+            <div class="number">1</div>
+            <div class="info">
+              <div class="name">ספה 3 מושבים KIVIK</div>
+              <div class="store">IKEA • ספות</div>
+              <div class="price">₪3,490</div>
+            </div>
+            <span class="match">92%</span>
+          </div>
+          <div class="shop-product">
+            <div class="number">2</div>
+            <div class="info">
+              <div class="name">שולחן סלון LACK</div>
+              <div class="store">IKEA • שולחנות</div>
+              <div class="price">₪199</div>
+            </div>
+            <span class="match">88%</span>
+          </div>
+          <div class="shop-product">
+            <div class="number">3</div>
+            <div class="info">
+              <div class="name">מנורת רצפה RANARP</div>
+              <div class="store">IKEA • תאורה</div>
+              <div class="price">₪349</div>
+            </div>
+            <span class="match">85%</span>
+          </div>
+          <div class="shop-product">
+            <div class="number">4</div>
+            <div class="info">
+              <div class="name">שטיח VINDUM</div>
+              <div class="store">IKEA • שטיחים</div>
+              <div class="price">₪799</div>
+            </div>
+            <span class="match">78%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOQ Section -->
+  <section class="section section-boq" id="boq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">📋 כתב כמויות</span>
+        <h2 class="section-title">כתב כמויות אוטומטי</h2>
+        <p class="section-subtitle">
+          העלה תכנית בניה וקבל כתב כמויות מפורט תוך שניות
+        </p>
+      </div>
+      
+      <div class="boq-demo">
+        <div class="boq-upload">
+          <div class="boq-upload-zone">
+            <div class="icon">📐</div>
+            <h3>גרור תכנית לכאן</h3>
+            <p>תומך ב-JPG, PNG, PDF</p>
+          </div>
+        </div>
+        
+        <div class="boq-results">
+          <div class="boq-results-header">
+            <h3>📊 תוצאות הניתוח</h3>
+          </div>
+          
+          <div class="boq-summary">
+            <div class="boq-summary-item">
+              <div class="value">85</div>
+              <div class="label">מ"ר שטח</div>
+            </div>
+            <div class="boq-summary-item">
+              <div class="value">4</div>
+              <div class="label">חדרים</div>
+            </div>
+            <div class="boq-summary-item">
+              <div class="value">24</div>
+              <div class="label">פריטים</div>
+            </div>
+          </div>
+          
+          <table class="boq-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>תיאור</th>
+                <th>כמות</th>
+                <th>יחידה</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>קירות גבס</td>
+                <td class="quantity">42</td>
+                <td>מ"ר</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>ריצוף</td>
+                <td class="quantity">85</td>
+                <td>מ"ר</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>דלתות פנים</td>
+                <td class="quantity">5</td>
+                <td>יח'</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>חלונות</td>
+                <td class="quantity">6</td>
+                <td>יח'</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section-cta" id="cta">
+    <div class="cta-content">
+      <h2>מוכנים להתחיל<br><span>שיפוץ חכם?</span></h2>
+      <p>
+        הצטרפו לאלפי משפחות שכבר חוסכות זמן וכסף בשיפוצים שלהם עם ShiputzAI
+      </p>
+      <div class="cta-buttons">
+        <a href="/demo-v2-home.html" class="cta-btn primary">
+          🚀 התחל בחינם
+        </a>
+        <a href="#compare" class="cta-btn secondary">
+          📖 ראה דוגמאות
+        </a>
+      </div>
+      <div class="cta-features">
+        <div class="cta-feature">
+          <span class="icon">✓</span>
+          <span>ללא כרטיס אשראי</span>
+        </div>
+        <div class="cta-feature">
+          <span class="icon">✓</span>
+          <span>גרסה חינמית זמינה</span>
+        </div>
+        <div class="cta-feature">
+          <span class="icon">✓</span>
+          <span>תמיכה בעברית</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 ShiputzAI | <a href="/demo-v2-home.html">דף הבית</a></p>
+  </footer>
+
+  <script>
+    // Register GSAP plugins
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Navigation scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('.section, .hero, .section-cta');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 150;
+        if (scrollY >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // GSAP Animations
+    
+    // Hero animations
+    gsap.from('.hero-badge', { opacity: 0, y: 30, duration: 0.8, delay: 0.2 });
+    gsap.from('.hero h1', { opacity: 0, y: 40, duration: 1, delay: 0.4 });
+    gsap.from('.hero-subtitle', { opacity: 0, y: 30, duration: 0.8, delay: 0.6 });
+    gsap.from('.hero-features', { opacity: 0, y: 30, duration: 0.8, delay: 0.8 });
+    gsap.from('.hero-cta', { opacity: 0, y: 30, duration: 0.8, delay: 1 });
+
+    // Section animations on scroll
+    gsap.utils.toArray('.section').forEach(section => {
+      gsap.from(section.querySelector('.section-header'), {
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        opacity: 0,
+        y: 50,
+        duration: 0.8
+      });
+    });
+
+    // Compare cards animation
+    gsap.from('.compare-card', {
+      scrollTrigger: {
+        trigger: '.compare-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      y: 40,
+      stagger: 0.15,
+      duration: 0.6
+    });
+
+    // Materials demo animation
+    gsap.from('.materials-input', {
+      scrollTrigger: {
+        trigger: '.materials-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: -40,
+      duration: 0.8
+    });
+    gsap.from('.materials-results', {
+      scrollTrigger: {
+        trigger: '.materials-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: 40,
+      duration: 0.8
+    });
+
+    // Designer demo animation
+    gsap.from('.designer-topic', {
+      scrollTrigger: {
+        trigger: '.designer-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: -30,
+      stagger: 0.1,
+      duration: 0.5
+    });
+    gsap.from('.designer-chat', {
+      scrollTrigger: {
+        trigger: '.designer-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      y: 40,
+      duration: 0.8
+    });
+
+    // Shop demo animation
+    gsap.from('.shop-image', {
+      scrollTrigger: {
+        trigger: '.shop-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.8
+    });
+    gsap.from('.shop-hotspot', {
+      scrollTrigger: {
+        trigger: '.shop-demo',
+        start: 'top 70%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      scale: 0,
+      stagger: 0.15,
+      duration: 0.4,
+      ease: 'back.out(1.7)'
+    });
+    gsap.from('.shop-product', {
+      scrollTrigger: {
+        trigger: '.shop-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: 30,
+      stagger: 0.1,
+      duration: 0.5
+    });
+
+    // BOQ demo animation
+    gsap.from('.boq-upload', {
+      scrollTrigger: {
+        trigger: '.boq-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: -40,
+      duration: 0.8
+    });
+    gsap.from('.boq-results', {
+      scrollTrigger: {
+        trigger: '.boq-demo',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      x: 40,
+      duration: 0.8
+    });
+
+    // CTA animation
+    gsap.from('.cta-content', {
+      scrollTrigger: {
+        trigger: '.section-cta',
+        start: 'top 80%',
+        toggleActions: 'play none none reverse'
+      },
+      opacity: 0,
+      y: 50,
+      duration: 1
+    });
+
+    // Interactive elements
+    document.querySelectorAll('.work-type').forEach(el => {
+      el.addEventListener('click', () => {
+        el.classList.toggle('selected');
+      });
+    });
+
+    document.querySelectorAll('.designer-topic').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.designer-topic').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+      });
+    });
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const navLinks = document.querySelector('.nav-links');
+      navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

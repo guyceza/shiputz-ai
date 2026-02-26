@@ -469,7 +469,8 @@ export async function POST(request: NextRequest) {
     // API key verified
 
     // Step 1: Use Gemini to understand the request and enhance the prompt
-    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_PRO}:generateContent?key=${apiKey}`;
+    // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
     
     // Extract base64 data if it's a data URL
     let imageBase64 = image;

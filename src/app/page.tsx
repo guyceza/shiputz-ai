@@ -315,62 +315,60 @@ export default function Home() {
       </section>
 
       {/* Trusted Sources Bar - Infinite Carousel */}
-      <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden">
+      <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden" dir="ltr">
         <style dangerouslySetInnerHTML={{ __html: `
-          .marquee {
-            --gap: 2.5rem;
+          .brands-marquee {
             display: flex;
-            overflow: hidden;
-            user-select: none;
+            width: max-content;
+            animation: brands-scroll 25s linear infinite;
           }
-          .marquee-inner {
-            display: flex;
-            gap: var(--gap);
-            animation: scroll 30s linear infinite;
-            min-width: 200%;
+          .brands-marquee .brand-item {
+            padding: 0 1.5rem;
+            white-space: nowrap;
           }
-          .marquee-inner span {
-            flex-shrink: 0;
-          }
-          @keyframes scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(calc(-50% - var(--gap) / 2)); }
+          @keyframes brands-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
         `}} />
-        <p className="text-center text-sm text-gray-400 mb-5">מחירונים מבוססים על נתונים מ:</p>
-        <div className="marquee">
-          <div className="marquee-inner">
-            <span className="text-lg font-semibold text-gray-300">midrag</span>
-            <span className="text-lg font-semibold text-gray-300">ACE</span>
-            <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
-            <span className="text-lg font-semibold text-gray-300">TAMBUR</span>
-            <span className="text-lg font-semibold text-gray-300">IKEA</span>
-            <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
-            <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
-            <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
-            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
-            <span className="text-lg font-semibold text-gray-300">טמבור</span>
-            <span className="text-lg font-semibold text-gray-300">פוקס הום</span>
-            <span className="text-lg font-semibold text-gray-300">קסטרו</span>
-            <span className="text-lg font-semibold text-gray-300">H&M HOME</span>
-            <span className="text-lg font-semibold text-gray-300">JYSK</span>
-            <span className="text-lg font-semibold text-gray-300">אורבן</span>
-            <span className="text-lg font-semibold text-gray-300">midrag</span>
-            <span className="text-lg font-semibold text-gray-300">ACE</span>
-            <span className="text-lg font-semibold text-gray-300">HomeCenter</span>
-            <span className="text-lg font-semibold text-gray-300">TAMBUR</span>
-            <span className="text-lg font-semibold text-gray-300">IKEA</span>
-            <span className="text-lg font-semibold text-gray-300">ארד שיפוצים</span>
-            <span className="text-lg font-semibold text-gray-300">מחסני חשמל</span>
-            <span className="text-lg font-semibold text-gray-300">שקם אלקטריק</span>
-            <span className="text-lg font-semibold text-gray-300">ZARA HOME</span>
-            <span className="text-lg font-semibold text-gray-300">טמבור</span>
-            <span className="text-lg font-semibold text-gray-300">פוקס הום</span>
-            <span className="text-lg font-semibold text-gray-300">קסטרו</span>
-            <span className="text-lg font-semibold text-gray-300">H&M HOME</span>
-            <span className="text-lg font-semibold text-gray-300">JYSK</span>
-            <span className="text-lg font-semibold text-gray-300">אורבן</span>
-          </div>
+        <p className="text-center text-sm text-gray-400 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
+        <div className="brands-marquee">
+          <span className="brand-item text-lg font-semibold text-gray-300">midrag</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ACE</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">HomeCenter</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">TAMBUR</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">IKEA</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ארד שיפוצים</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">מחסני חשמל</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">שקם אלקטריק</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ZARA HOME</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">טמבור</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">פוקס הום</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">קסטרו</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">H&M HOME</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">JYSK</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">אורבן</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">kare</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">IDdesign</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">עמינח</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">midrag</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ACE</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">HomeCenter</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">TAMBUR</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">IKEA</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ארד שיפוצים</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">מחסני חשמל</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">שקם אלקטריק</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">ZARA HOME</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">טמבור</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">פוקס הום</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">קסטרו</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">H&M HOME</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">JYSK</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">אורבן</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">kare</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">IDdesign</span>
+          <span className="brand-item text-lg font-semibold text-gray-300">עמינח</span>
         </div>
       </section>
 

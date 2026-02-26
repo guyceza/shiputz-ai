@@ -682,18 +682,18 @@ function DashboardContent() {
 
               {/* Quote Analysis */}
               <Link 
-                href="/dashboard"
-                className="group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all opacity-60 pointer-events-none"
+                href={projects.length > 0 ? `/project/${projects[0].id}?tab=quote` : "/dashboard"}
+                className={`group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
               >
                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
                   <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">ניתוח הצעות מחיר</h3>
                 <p className="text-sm text-gray-500">השווה הצעות וקבל המלצות AI</p>
-                <span className="inline-block mt-3 text-xs text-gray-400">
-                  בקרוב
+                <span className="inline-block mt-3 text-xs text-emerald-600 group-hover:underline">
+                  {projects.length > 0 ? 'נתח הצעה ←' : 'צור פרויקט קודם'}
                 </span>
               </Link>
             </div>

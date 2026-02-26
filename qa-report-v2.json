@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-02-26T10:44:42.492Z",
+  "passed": [
+    "Login with test user",
+    "Dashboard loads",
+    "Project page elements",
+    "Receipt Scanner",
+    "Quote Analyzer",
+    "BOQ page access",
+    "BOQ form elements",
+    "Premium checkout page",
+    "Vision checkout page",
+    "Tips/Articles page",
+    "Homepage sections",
+    "Mobile homepage"
+  ],
+  "failed": [
+    {
+      "name": "Create new project",
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('button[type=\"submit\"], button:has-text(\"צור\"), button:has-text(\"שמור\")').first()\n    - locator resolved to <button disabled class=\"flex-1 bg-gray-900 text-white py-3 rounded-full text-base hover:bg-gray-800 transition-colors disabled:opacity-30\">צור</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not enabled\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not enabled\n    - retrying click action\n      - waiting 100ms\n    56 × waiting for element to be visible, enabled and stable\n       - element is not enabled\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "name": "Mobile dashboard",
+      "error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('main, [class*=\"content\"]').first()\n"
+    }
+  ],
+  "warnings": [],
+  "issues": [
+    {
+      "category": "UI",
+      "description": "No tabs found in project page",
+      "details": ""
+    },
+    {
+      "category": "Feature",
+      "description": "Receipt scanner button not accessible from dashboard",
+      "details": ""
+    },
+    {
+      "category": "Feature",
+      "description": "Quote analyzer not accessible from dashboard",
+      "details": ""
+    },
+    {
+      "category": "Mobile",
+      "description": "No mobile menu hamburger found",
+      "details": ""
+    }
+  ]
+}

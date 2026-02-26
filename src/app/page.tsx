@@ -394,16 +394,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Floating Pricing - Compact */}
-      {!isPremium && (
-      <section className="py-8 px-6">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6">
-          <p className="text-gray-600 text-lg">מוכנים להתחיל לנהל את השיפוץ?</p>
-          <PricingCard variant="mini" />
-        </div>
-      </section>
-      )}
-
       {/* Quick Calculator */}
       <section className="py-20 px-6 border-t border-gray-100">
         <div className="max-w-2xl mx-auto">

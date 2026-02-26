@@ -29,50 +29,50 @@ export default function PricingCard({
   if (variant === "mini") {
     return (
       <div className={`relative bg-white border border-gray-200 rounded-2xl px-6 py-5 shadow-sm ${className}`}>
-        {/* Plan Toggle */}
-        <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-4 w-fit mx-auto">
-          <button
-            onClick={() => setSelectedPlan('premium')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              selectedPlan === 'premium'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Premium
-          </button>
+        {/* Plan Toggle - Premium Plus first (RTL) */}
+        <div className="flex justify-center gap-1 mb-4">
           <button
             onClick={() => setSelectedPlan('plus')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedPlan === 'plus'
                 ? 'bg-gray-900 text-white'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             Premium Plus
           </button>
+          <button
+            onClick={() => setSelectedPlan('premium')}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+              selectedPlan === 'premium'
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            Premium
+          </button>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5">
+          <Link
+            href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
+            className="bg-[#0d9488] text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition-colors whitespace-nowrap"
+          >
+            לרכישה
+          </Link>
           <div className="text-right">
             <div className="flex items-baseline gap-2 justify-end">
+              <span className="text-3xl font-bold text-gray-900">
+                {selectedPlan === 'plus' ? '₪179' : '₪149'}
+              </span>
               <span className="text-sm text-gray-400 line-through">
                 {selectedPlan === 'plus' ? '₪359' : '₪299'}
               </span>
-              <div className="text-3xl font-bold text-gray-900">
-                {selectedPlan === 'plus' ? '₪179' : '₪149'}
-              </div>
             </div>
             <span className="text-sm text-gray-500">
               {selectedPlan === 'plus' ? 'חד פעמי · כולל 2 הדמיות' : 'תשלום חד פעמי'}
             </span>
           </div>
-          <Link
-            href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
-            className="bg-gray-900 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors whitespace-nowrap"
-          >
-            לרכישה
-          </Link>
         </div>
       </div>
     );

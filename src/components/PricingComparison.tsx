@@ -12,7 +12,7 @@ const allFeatures = [
   { name: "בדיקת חוזים", free: false, premium: true, plus: true },
   { name: "התראות חכמות", free: false, premium: true, plus: true },
   { name: "עוזר אישי", free: false, premium: true, plus: true },
-  { name: "4 הדמיות", free: false, premium: false, plus: true },
+  { name: "4 הדמיות במערכת AI Vision", free: false, premium: false, plus: true, plusOnly: true },
   { name: "Shop the Look", free: false, premium: false, plus: true, link: "/shop-look" },
 ];
 
@@ -50,7 +50,7 @@ export default function PricingComparison() {
         </div>
         
         <ul className="space-y-3 mb-8 flex-grow">
-          {allFeatures.map((feature: any, i) => (
+          {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-center gap-3 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.free ? (
                 <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +93,7 @@ export default function PricingComparison() {
         </div>
         
         <ul className="space-y-3 mb-8 flex-grow">
-          {allFeatures.map((feature: any, i) => (
+          {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
             <li key={i} className={`flex items-center gap-3 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.premium ? (
                 <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

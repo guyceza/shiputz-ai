@@ -91,8 +91,8 @@ export default function PricingComparison() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               {feature.link ? (
-                <Link href={feature.link} className={`underline underline-offset-2 decoration-gray-300 hover:decoration-gray-900 transition-colors ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>
-                  {feature.name} <span className="text-xs">←</span>
+                <Link href={feature.link} className={`underline underline-offset-2 decoration-gray-400 hover:decoration-gray-900 transition-colors ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>
+                  {feature.name}
                 </Link>
               ) : (
                 <span className={feature.plus && !feature.premium ? 'font-medium' : ''}>{feature.name}</span>

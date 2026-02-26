@@ -250,6 +250,14 @@ function CheckoutVisionContent() {
               <div className="font-medium text-base">Premium Plus כולל 4 הדמיות AI ב-₪349.99</div>
               <div className="text-xs text-purple-200 mt-1">חד פעמי · כולל את כל הפיצ׳רים + 4 הדמיות מתנה</div>
             </Link>
+            
+            {/* Back to homepage */}
+            <Link
+              href="/"
+              className="block text-center text-sm text-gray-400 hover:text-gray-600 mt-6"
+            >
+              חזור לדף הבית
+            </Link>
           </div>
         </div>
       </div>

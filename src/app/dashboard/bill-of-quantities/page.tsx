@@ -19,6 +19,7 @@ interface BOQItem {
   quantity: string;
   unit: string;
   notes: string;
+  source?: string; // "תכנית" | "הערכה" | "חישוב"
 }
 
 interface BOQResult {
@@ -28,6 +29,7 @@ interface BOQResult {
   accuracyScore?: number;
   error?: string;
   suggestion?: string;
+  disclaimer?: string;
 }
 
 // Accuracy calculation based on provided inputs
@@ -860,6 +862,7 @@ export default function BillOfQuantitiesPage() {
                           <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">כמות</th>
                           <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">יחידה</th>
                           <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">הערות</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">מקור</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -870,6 +873,15 @@ export default function BillOfQuantitiesPage() {
                             <td className="px-4 py-3 text-sm text-gray-900 font-semibold">{item.quantity}</td>
                             <td className="px-4 py-3 text-sm text-gray-500">{item.unit}</td>
                             <td className="px-4 py-3 text-sm text-gray-400">{item.notes}</td>
+                            <td className="px-4 py-3 text-xs">
+                              <span className={`px-2 py-1 rounded-full ${
+                                item.source === 'תכנית' ? 'bg-green-100 text-green-700' :
+                                item.source === 'חישוב' ? 'bg-blue-100 text-blue-700' :
+                                'bg-gray-100 text-gray-600'
+                              }`}>
+                                {item.source || 'הערכה'}
+                              </span>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -891,6 +903,14 @@ export default function BillOfQuantitiesPage() {
                     </ul>
                   </div>
                 )}
+
+                {/* Disclaimer */}
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+                  <h3 className="text-sm font-semibold text-red-800 mb-2">⚠️ הצהרה חשובה</h3>
+                  <p className="text-sm text-red-700">
+                    {result.disclaimer || "כתב כמויות זה הינו הערכה ראשונית בלבד, המבוססת על ניתוח אוטומטי של התכנית. אין להסתמך עליו לצורך חתימת חוזה או התחייבות כספית. לקבלת כתב כמויות מדויק, יש לפנות למודד כמויות מוסמך עם תכניות מלאות (אדריכלות, קונסטרוקציה, חשמל, אינסטלציה)."}
+                  </p>
+                </div>
 
                 {/* Export Buttons */}
                 <div className="flex gap-3">

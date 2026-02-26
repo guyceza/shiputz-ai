@@ -63,9 +63,9 @@ function formatNumber(num: number, prefix: string = "", suffix: string = "") {
 
 export default function StatsCounter() {
   const stat1 = useCountUp(10847320, 2500);
-  const stat2 = useCountUp(127, 2000);
-  const stat3 = useCountUp(583, 2200);
-  const stat4 = useCountUp(12847, 2300);
+  const stat2 = useCountUp(130, 2000);
+  const stat3 = useCountUp(580, 2200);
+  const stat4 = useCountUp(12850, 2300);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16 max-w-4xl mx-auto">

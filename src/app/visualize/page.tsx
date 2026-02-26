@@ -2,7 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
+
+// Dynamic import for Lottie (client-side only)
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+
+// Popcorn waiting animation URL
+const POPCORN_ANIMATION_URL = '/popcorn-waiting.json';
 
 // Add keyframes for animations
 const animationStyles = `
@@ -379,6 +386,15 @@ export default function VisualizePage() {
   const [visualizationHistory, setVisualizationHistory] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string, detectedProducts?: any[]}[]>([]);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string, detectedProducts?: any[]} | null>(null);
   const [savingToCloud, setSavingToCloud] = useState(false);
+  const [waitingAnimationData, setWaitingAnimationData] = useState<object | null>(null);
+  
+  // Load popcorn animation for waiting state
+  useEffect(() => {
+    fetch(POPCORN_ANIMATION_URL)
+      .then(res => res.json())
+      .then(data => setWaitingAnimationData(data))
+      .catch(err => console.error('Failed to load waiting animation:', err));
+  }, []);
   
   const LOADING_TIPS = [
     "💡 קבל לפחות 3 הצעות מחיר לפני שמתחילים",
@@ -1534,11 +1550,21 @@ export default function VisualizePage() {
             
             {generating && (
               <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
+                {/* Popcorn waiting animation */}
+                {waitingAnimationData && (
+                  <div className="flex justify-center mb-2">
+                    <Lottie 
+                      animationData={waitingAnimationData} 
+                      loop={true}
+                      style={{ width: 200, height: 140 }}
+                    />
+                  </div>
+                )}
                 <div className="text-2xl font-bold text-gray-900 mb-2">
                   {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
                 </div>
                 <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
-                  {LOADING_TIPS[currentTip]}
+                  💡 {LOADING_TIPS[currentTip]}
                 </div>
               </div>
             )}

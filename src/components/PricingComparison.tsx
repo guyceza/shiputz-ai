@@ -10,7 +10,8 @@ const allFeatures = [
   { name: "התראות חכמות", premium: true, plus: true },
   { name: "עוזר אישי", premium: true, plus: true },
   { name: "הדמיית חדר", premium: false, plus: true },
-  { name: "4 הדמיות כלולות", premium: false, plus: true },
+  { name: "הדמיות כלולות", premium: false, plus: true },
+  { name: "Shop the Look", premium: false, plus: true, link: "/shop-look" },
 ];
 
 export default function PricingComparison() {
@@ -36,7 +37,7 @@ export default function PricingComparison() {
         </div>
         
         <ul className="space-y-3 mb-8">
-          {allFeatures.map((feature, i) => (
+          {allFeatures.map((feature: any, i) => (
             <li key={i} className={`flex items-center gap-3 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.premium ? (
                 <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +48,11 @@ export default function PricingComparison() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               )}
-              <span>{feature.name}</span>
+              {feature.link ? (
+                <Link href={feature.link} className="hover:underline">{feature.name}</Link>
+              ) : (
+                <span>{feature.name}</span>
+              )}
             </li>
           ))}
         </ul>
@@ -84,12 +89,16 @@ export default function PricingComparison() {
         </div>
         
         <ul className="space-y-3 mb-8">
-          {allFeatures.map((feature, i) => (
+          {allFeatures.map((feature: any, i) => (
             <li key={i} className="flex items-center gap-3 text-gray-900">
               <svg className="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className={feature.plus && !feature.premium ? 'font-medium' : ''}>{feature.name}</span>
+              {feature.link ? (
+                <Link href={feature.link} className={`hover:underline ${feature.plus && !feature.premium ? 'font-medium' : ''}`}>{feature.name}</Link>
+              ) : (
+                <span className={feature.plus && !feature.premium ? 'font-medium' : ''}>{feature.name}</span>
+              )}
             </li>
           ))}
         </ul>

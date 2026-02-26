@@ -16,7 +16,8 @@ const features = [
   { name: "התראות חכמות", includedIn: ["premium", "plus"] },
   { name: "עוזר אישי", includedIn: ["premium", "plus"] },
   { name: "הדמיית חדר", includedIn: ["plus"] },
-  { name: "4 הדמיות כלולות", includedIn: ["plus"] },
+  { name: "הדמיות כלולות", includedIn: ["plus"] },
+  { name: "Shop the Look", includedIn: ["plus"], link: "/shop-look" },
 ];
 
 export default function PricingCard({ 
@@ -70,7 +71,7 @@ export default function PricingCard({
               </span>
             </div>
             <span className="text-sm text-gray-500">
-              {selectedPlan === 'plus' ? 'חד פעמי · כולל 4 הדמיות' : 'תשלום חד פעמי'}
+              {selectedPlan === 'plus' ? 'חד פעמי · כולל הדמיות' : 'תשלום חד פעמי'}
             </span>
           </div>
         </div>

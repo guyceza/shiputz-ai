@@ -243,7 +243,7 @@ function CheckoutContent() {
                     <svg className="w-4 h-4 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>4 הדמיות כלולות</span>
+                    <span>הדמיות כלולות</span>
                   </div>
                 </>
               )}
@@ -330,7 +330,7 @@ function CheckoutContent() {
             href={isPremiumPlus ? "/checkout" : "/checkout?plan=plus"}
             className="text-sm text-gray-500 hover:text-gray-700 underline"
           >
-            {isPremiumPlus ? "רוצה רק Premium? ₪299.99" : "שדרג ל-Premium Plus עם 4 הדמיות"}
+            {isPremiumPlus ? "רוצה רק Premium? ₪299.99" : "שדרג ל-Premium Plus עם הדמיות"}
           </Link>
         </div>
 

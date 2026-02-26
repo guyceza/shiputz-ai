@@ -1138,7 +1138,7 @@ export default function VisualizePage() {
                   </div>
                   <div className="pr-7">
                     <p className="text-xl font-bold text-gray-900">₪315.99</p>
-                    <p className="text-sm text-gray-500">Premium כולל 4 הדמיות AI</p>
+                    <p className="text-sm text-gray-500">Premium כולל הדמיות AI</p>
                     <p className="text-xs text-gray-400">רוצה עוד? מנוי Vision ב-₪39.99/חודש</p>
                   </div>
                 </button>
@@ -1403,7 +1403,7 @@ export default function VisualizePage() {
                     </div>
                     <div className="pr-7">
                       <p className="text-lg font-bold text-gray-900">₪315.99</p>
-                      <p className="text-xs text-gray-500">Premium כולל 4 הדמיות AI</p>
+                      <p className="text-xs text-gray-500">Premium כולל הדמיות AI</p>
                     </div>
                   </button>
                   

@@ -183,8 +183,8 @@ function CheckoutContent() {
             </div>
             
             <div className="flex items-center justify-center gap-3">
-              <span className="text-5xl font-bold text-gray-900">₪{price}</span>
-              <span className="text-gray-400 line-through text-2xl">₪{codeValid ? basePrice : originalPrice}</span>
+              <span className="text-gray-400 line-through text-4xl">₪{codeValid ? basePrice : originalPrice}</span>
+              <span className="text-3xl font-bold text-gray-900">₪{price}</span>
             </div>
             
             <p className="text-gray-500 mt-2">

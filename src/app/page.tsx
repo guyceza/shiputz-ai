@@ -605,43 +605,53 @@ export default function Home() {
       </section>
       )}
 
-      {/* About / Our Story */}
-      <section className="py-24 px-6 border-t border-gray-100 bg-gray-50">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">מי אנחנו</h2>
+      {/* About / Our Story - Premium B&W */}
+      <section className="py-24 px-6 bg-black">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-gray-500 text-sm tracking-widest uppercase mb-4">הסיפור שלנו</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">מי אנחנו</h2>
+            <div className="w-16 h-px bg-white/30 mx-auto"></div>
           </div>
           
-          <div className="relative bg-gradient-to-br from-sky-50 to-indigo-50 rounded-3xl p-8 md:p-12 border border-sky-100 overflow-hidden">
-            {/* Fabric patch - positioned in corner, 3D effect */}
-            <div className="absolute -top-2 -right-2 w-16 h-16 rotate-12"
-                 style={{
-                   filter: 'drop-shadow(3px 3px 2px rgba(0,0,0,0.2))'
-                 }}>
-              <div className="w-full h-full bg-amber-200 rounded-md flex items-center justify-center"
-                   style={{
-                     border: '2px dashed #b45309',
-                     boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.1)'
-                   }}>
-                <span className="text-2xl -rotate-12">🔨</span>
+          <div className="relative">
+            {/* Subtle border glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-2xl blur-xl"></div>
+            
+            <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl p-10 md:p-14 border border-white/10">
+              <div className="space-y-8 text-right">
+                <p className="text-xl md:text-2xl text-white font-light leading-relaxed">
+                  בנינו את <span className="font-semibold">ShiputzAI</span> כי עברנו את זה בעצמנו.
+                </p>
+                
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  שיפוצים שיצאו משליטה, קבלות שהלכו לאיבוד, והרגשה שמישהו תמיד מנפח לנו את המחיר.
+                </p>
+                
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  רצינו כלי פשוט שעושה את העבודה — בלי סיבוכים, בלי להתעסק עם אקסלים, בלי להרגיש אבודים.
+                </p>
+                
+                <div className="border-r-2 border-white/30 pr-6 my-10">
+                  <p className="text-white text-xl md:text-2xl font-medium leading-relaxed">
+                    המטרה שלנו: שכל מי שנכנס לשיפוץ ירגיש בשליטה.
+                  </p>
+                </div>
+                
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  שידע בדיוק לאן הולך הכסף, שיקבל התראה לפני שחורג, ושיוכל לבדוק אם המחיר שמציעים לו הגיוני.
+                </p>
+                
+                <p className="text-gray-500 text-lg leading-relaxed">
+                  אנחנו צוות קטן שאוהב לפתור בעיות אמיתיות. אם יש לכם רעיון לשיפור — נשמח לשמוע.
+                </p>
+                
+                <div className="pt-8 border-t border-white/10">
+                  <p className="text-white/60 text-base">
+                    — צוות ShiputzAI
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed space-y-6 text-right relative z-10">
-              <p>
-                <span className="text-gray-900 font-medium">בנינו את Shipazti כי עברנו את זה בעצמנו.</span> שיפוצים שיצאו משליטה, קבלות שהלכו לאיבוד, והרגשה שמישהו תמיד מנפח לנו את המחיר.
-              </p>
-              <p>
-                רצינו כלי פשוט שעושה את העבודה - בלי סיבוכים, בלי להתעסק עם אקסלים, בלי להרגיש אבודים.
-              </p>
-              <p>
-                <span className="text-gray-900 font-medium">המטרה שלנו:</span> שכל מי שנכנס לשיפוץ ירגיש בשליטה. שידע בדיוק לאן הולך הכסף, שיקבל התראה לפני שחורג, ושיוכל לבדוק אם המחיר שמציעים לו הגיוני.
-              </p>
-              <p>
-                אנחנו צוות קטן שאוהב לפתור בעיות אמיתיות. אם יש לכם רעיון לשיפור - נשמח לשמוע.
-              </p>
-              <p className="text-gray-500 text-base">
-                — צוות Shipazti 🛠️
-              </p>
             </div>
           </div>
         </div>

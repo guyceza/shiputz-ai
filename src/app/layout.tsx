@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import Script from "next/script";
+import NextTopLoader from "nextjs-toploader";
 import ChatWidget from "@/components/ChatWidget";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
@@ -124,6 +125,11 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${heebo.className} antialiased bg-[var(--background)] text-[var(--foreground)]`}>
+        <NextTopLoader 
+          color="#3b82f6"
+          height={3}
+          showSpinner={false}
+        />
         <ThemeProvider>
           <main id="main-content">
             {children}

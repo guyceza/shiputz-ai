@@ -51,7 +51,7 @@ export default function PricingComparison() {
         
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
-            <li key={i} className={`flex items-start gap-2 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
+            <li key={i} className={`flex items-start gap-1 ${feature.free ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.free ? (
                 <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -94,7 +94,7 @@ export default function PricingComparison() {
         
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.filter((f: any) => !f.plusOnly).map((feature: any, i) => (
-            <li key={i} className={`flex items-start gap-2 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
+            <li key={i} className={`flex items-start gap-1 ${feature.premium ? 'text-gray-900' : 'text-gray-300'}`}>
               {feature.premium ? (
                 <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -142,7 +142,7 @@ export default function PricingComparison() {
         
         <ul className="space-y-3 mb-8 flex-grow">
           {allFeatures.map((feature: any, i) => (
-            <li key={i} className="flex items-start gap-2 text-gray-900">
+            <li key={i} className="flex items-start gap-1 text-gray-900">
               <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -183,7 +183,7 @@ export default function PricingComparison() {
         
         <ul className="space-y-3 mb-8 text-gray-700 flex-grow">
           {businessFeatures.map((feature, i) => (
-            <li key={i} className="flex items-start gap-2">
+            <li key={i} className="flex items-start gap-1">
               <svg className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>

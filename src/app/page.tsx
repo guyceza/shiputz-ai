@@ -131,16 +131,19 @@ export default function Home() {
           <Link href="/" className="text-base font-semibold text-gray-900">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
+          <div className="flex items-center gap-3">
+            <Link href="/visualize" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
+              🎨 AI Vision
+            </Link>
+            <Link href="/tips" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
               מאמרים וטיפים
             </Link>
             {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
+              <Link href="/dashboard" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
                 לאזור האישי
               </Link>
             ) : (
-              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
+              <Link href="/login" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
                 התחברות
               </Link>
             )}

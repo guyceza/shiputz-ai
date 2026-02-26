@@ -687,7 +687,7 @@ function DashboardContent() {
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-1">הדמיות AI</h3>
                   <p className="text-sm text-gray-500">צור הדמיה של השיפוץ לפני שמתחילים</p>
-                  <span className="inline-block mt-3 text-xs text-blue-600 group-hover:underline">
+                  <span className="inline-block mt-3 text-xs text-amber-600 group-hover:underline">
                     נדרש מנוי AI Vision ←
                   </span>
                 </Link>

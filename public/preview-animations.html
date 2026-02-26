@@ -5,32 +5,65 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
     .card h3 { margin: 0 0 10px; }
     .animation { height: 200px; }
+    .url { font-size: 10px; color: #999; word-break: break-all; margin-top: 10px; }
+    h1 { text-align: center; }
+    .note { text-align: center; color: #666; margin-bottom: 30px; }
   </style>
 </head>
 <body>
   <h1>בחר אנימציית טעינה 👷</h1>
+  <p class="note">לחץ על קישור האנימציה כדי לשלוח לי</p>
+  
   <div class="grid">
     <div class="card">
       <h3>🏠 בית (נוכחי)</h3>
       <div class="animation" id="anim1"></div>
+      <div class="url">home</div>
     </div>
     <div class="card">
       <h3>👨‍💻 Designer Boy</h3>
       <div class="animation" id="anim2"></div>
+      <div class="url">designer</div>
     </div>
     <div class="card">
-      <h3>🎬 AE Animation</h3>
+      <h3>🖥️ Developer</h3>
       <div class="animation" id="anim3"></div>
+      <div class="url">developer</div>
+    </div>
+    <div class="card">
+      <h3>📱 App Loading</h3>
+      <div class="animation" id="anim4"></div>
+      <div class="url">app-loading</div>
+    </div>
+    <div class="card">
+      <h3>⚙️ Working Gears</h3>
+      <div class="animation" id="anim5"></div>
+      <div class="url">gears</div>
+    </div>
+    <div class="card">
+      <h3>📊 Analytics</h3>
+      <div class="animation" id="anim6"></div>
+      <div class="url">analytics</div>
     </div>
   </div>
+  
   <script>
-    lottie.loadAnimation({ container: document.getElementById('anim1'), path: 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json', loop: true, autoplay: true });
-    lottie.loadAnimation({ container: document.getElementById('anim2'), path: 'https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json', loop: true, autoplay: true });
-    lottie.loadAnimation({ container: document.getElementById('anim3'), path: 'https://assets7.lottiefiles.com/packages/lf20_kyu7xb1v.json', loop: true, autoplay: true });
+    const anims = {
+      'anim1': 'https://assets9.lottiefiles.com/private_files/lf30_p5tali1o.json',
+      'anim2': 'https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json',
+      'anim3': 'https://assets7.lottiefiles.com/packages/lf20_kyu7xb1v.json',
+      'anim4': 'https://assets2.lottiefiles.com/packages/lf20_jcikwtux.json',
+      'anim5': 'https://assets5.lottiefiles.com/datafiles/fab7172a9302d416bcdb8ac7e1c71123/data.json',
+      'anim6': 'https://assets10.lottiefiles.com/datafiles/zc3XRzudyWE36ZBJr7PIkkqq0PFIrIBgp4ojqShI/newAnimation.json'
+    };
+    
+    Object.entries(anims).forEach(([id, path]) => {
+      lottie.loadAnimation({ container: document.getElementById(id), path, loop: true, autoplay: true });
+    });
   </script>
 </body>
 </html>

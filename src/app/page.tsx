@@ -314,6 +314,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* House Showcase with Floating Features */}
+      <section className="py-12 px-6 bg-slate-900">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes popupFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+          }
+          .popup-float { animation: popupFloat 3s ease-in-out infinite; }
+          .popup-float-delay-1 { animation-delay: 0.5s; }
+          .popup-float-delay-2 { animation-delay: 1s; }
+        `}} />
+        <div className="max-w-4xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+            <img 
+              src="/images/hero-house.jpg" 
+              alt="בית מודרני" 
+              className="w-full h-auto"
+            />
+            
+            {/* Floating Popups */}
+            <div className="popup-float absolute top-[12%] left-[5%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
+              <div className="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">📋</div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">כתב כמויות</p>
+                <p className="text-gray-500 text-xs">נוצר ב-30 שניות</p>
+              </div>
+            </div>
+            
+            <div className="popup-float popup-float-delay-1 absolute bottom-[18%] left-[10%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
+              <div className="w-11 h-11 bg-pink-100 rounded-xl flex items-center justify-center text-xl">🎨</div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">הדמיית חדר</p>
+                <p className="text-gray-500 text-xs">לפני שקונים</p>
+              </div>
+            </div>
+            
+            <div className="popup-float popup-float-delay-2 absolute top-[35%] right-[5%] bg-white rounded-2xl px-4 py-3 flex items-center gap-3 shadow-lg">
+              <div className="w-11 h-11 bg-orange-100 rounded-xl flex items-center justify-center text-xl">💰</div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">חסכון ממוצע</p>
+                <p className="text-gray-500 text-xs">15,000 ₪ לשיפוץ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Floating Pricing - Compact */}
       {!isPremium && (
       <section className="py-8 px-6">

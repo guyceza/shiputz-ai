@@ -1,27 +1,43 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamic import for Three.js viewer (client-side only)
+const Room3DViewer = dynamic(() => import("@/components/Room3DViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div className="animate-spin text-4xl">🏠</div>
+    </div>
+  ),
+});
+
+type ViewMode = "image" | "walkthrough";
+type Step = "upload" | "analyzing" | "generating" | "done";
 
 export default function BlueprintTo3DPage() {
   const [blueprintImage, setBlueprintImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<any>(null);
   const [render3D, setRender3D] = useState<string | null>(null);
+  const [gltfData, setGltfData] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("walkthrough");
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<"upload" | "analyzing" | "rendering" | "done">("upload");
+  const [step, setStep] = useState<Step>("upload");
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert to base64
     const reader = new FileReader();
     reader.onload = (e) => {
       setBlueprintImage(e.target?.result as string);
       setAnalysis(null);
       setRender3D(null);
+      setGltfData(null);
       setError(null);
       setStep("upload");
     };
@@ -34,6 +50,7 @@ export default function BlueprintTo3DPage() {
     setLoading(true);
     setError(null);
     setStep("analyzing");
+    setProgress("מנתח את התוכנית האדריכלית...");
 
     try {
       // Step 1: Analyze blueprint with Gemini
@@ -44,45 +61,111 @@ export default function BlueprintTo3DPage() {
       });
 
       if (!analyzeRes.ok) {
-        throw new Error("שגיאה בניתוח התוכנית");
+        const err = await analyzeRes.json();
+        throw new Error(err.error || "שגיאה בניתוח התוכנית");
       }
 
       const analyzeData = await analyzeRes.json();
       setAnalysis(analyzeData);
-      setStep("rendering");
+      setStep("generating");
+      
+      if (viewMode === "walkthrough") {
+        setProgress("בונה מודל תלת-ממדי לסיור...");
+        
+        // Generate GLTF for walkthrough
+        const gltfRes = await fetch("/api/lab/render-gltf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomData: analyzeData }),
+        });
 
-      // Step 2: Generate 3D render with Blender
-      const renderRes = await fetch("/api/lab/render-3d", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomData: analyzeData }),
-      });
+        if (!gltfRes.ok) {
+          throw new Error("שגיאה ביצירת המודל התלת-ממדי");
+        }
 
-      if (!renderRes.ok) {
-        throw new Error("שגיאה ביצירת ההדמיה");
+        const gltfResult = await gltfRes.json();
+        // Convert base64 to blob URL
+        const binaryString = atob(gltfResult.gltf);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: "model/gltf-binary" });
+        const url = URL.createObjectURL(blob);
+        setGltfData(url);
+      } else {
+        setProgress("יוצר הדמיה...");
+        
+        // Generate static image
+        const renderRes = await fetch("/api/lab/render-3d", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomData: analyzeData }),
+        });
+
+        if (!renderRes.ok) {
+          throw new Error("שגיאה ביצירת ההדמיה");
+        }
+
+        const renderData = await renderRes.json();
+        setRender3D(renderData.image);
       }
-
-      const renderData = await renderRes.json();
-      setRender3D(renderData.image);
+      
       setStep("done");
     } catch (err: any) {
       setError(err.message || "שגיאה לא צפויה");
       setStep("upload");
     } finally {
       setLoading(false);
+      setProgress("");
     }
   };
 
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (gltfData) {
+        URL.revokeObjectURL(gltfData);
+      }
+    };
+  }, [gltfData]);
+
+  const largestRoom = analysis?.rooms?.[0] || { width: 4, length: 5 };
+
   return (
-    <div className="container mx-auto px-4 py-12" dir="rtl">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">תוכנית → הדמיית 3D</h1>
-        <p className="text-gray-400 mb-8">
-          העלו תוכנית אדריכלית ונהפוך אותה להדמיה תלת-ממדית
+    <div className="container mx-auto px-4 py-8" dir="rtl">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-white mb-2">תוכנית → סיור וירטואלי 3D</h1>
+        <p className="text-gray-400 mb-6">
+          העלו תוכנית אדריכלית וטיילו בתוך הבית בתלת-ממד
         </p>
 
+        {/* Mode selector */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setViewMode("walkthrough")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              viewMode === "walkthrough"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            }`}
+          >
+            🚶 סיור אינטראקטיבי
+          </button>
+          <button
+            onClick={() => setViewMode("image")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              viewMode === "image"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+            }`}
+          >
+            🖼️ תמונה סטטית
+          </button>
+        </div>
+
         {/* Upload area */}
-        <div className="mb-8">
+        <div className="mb-6">
           <input
             type="file"
             ref={fileInputRef}
@@ -94,14 +177,14 @@ export default function BlueprintTo3DPage() {
           {!blueprintImage ? (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-64 border-2 border-dashed border-gray-700 rounded-xl hover:border-blue-500/50 transition-colors flex flex-col items-center justify-center gap-4"
+              className="w-full h-48 border-2 border-dashed border-gray-700 rounded-xl hover:border-blue-500/50 transition-colors flex flex-col items-center justify-center gap-4"
             >
               <span className="text-5xl">📐</span>
               <span className="text-gray-400">לחצו להעלאת תוכנית אדריכלית</span>
             </button>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Blueprint */}
+              {/* Blueprint thumbnail */}
               <div>
                 <h3 className="text-lg font-semibold text-white mb-3">תוכנית מקור</h3>
                 <div className="relative aspect-square bg-gray-900 rounded-xl overflow-hidden">
@@ -119,32 +202,39 @@ export default function BlueprintTo3DPage() {
                 </button>
               </div>
 
-              {/* 3D Render or Placeholder */}
+              {/* 3D View */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3">הדמיה 3D</h3>
-                <div className="relative aspect-square bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center">
-                  {render3D ? (
+                <h3 className="text-lg font-semibold text-white mb-3">
+                  {viewMode === "walkthrough" ? "סיור וירטואלי" : "הדמיה 3D"}
+                </h3>
+                <div className="relative aspect-square bg-gray-900 rounded-xl overflow-hidden">
+                  {step === "done" && viewMode === "walkthrough" && gltfData ? (
+                    <Room3DViewer
+                      modelUrl={gltfData}
+                      roomWidth={largestRoom.width}
+                      roomLength={largestRoom.length}
+                    />
+                  ) : step === "done" && viewMode === "image" && render3D ? (
                     <img
                       src={render3D}
                       alt="3D Render"
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="text-center p-6">
-                      {step === "analyzing" && (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-6">
+                      {loading ? (
                         <>
-                          <div className="animate-spin text-4xl mb-3">🔍</div>
-                          <p className="text-gray-400">מנתח את התוכנית...</p>
+                          <div className="animate-spin text-4xl mb-3">
+                            {step === "analyzing" ? "🔍" : "🏠"}
+                          </div>
+                          <p className="text-gray-400">{progress}</p>
                         </>
-                      )}
-                      {step === "rendering" && (
-                        <>
-                          <div className="animate-pulse text-4xl mb-3">🏠</div>
-                          <p className="text-gray-400">יוצר הדמיה 3D...</p>
-                        </>
-                      )}
-                      {step === "upload" && (
-                        <p className="text-gray-500">ההדמיה תופיע כאן</p>
+                      ) : (
+                        <p className="text-gray-500">
+                          {viewMode === "walkthrough"
+                            ? "הסיור הוירטואלי יופיע כאן"
+                            : "ההדמיה תופיע כאן"}
+                        </p>
                       )}
                     </div>
                   )}
@@ -156,7 +246,7 @@ export default function BlueprintTo3DPage() {
 
         {/* Analysis results */}
         {analysis && (
-          <div className="mb-8 p-6 bg-gray-900 rounded-xl">
+          <div className="mb-6 p-6 bg-gray-900 rounded-xl">
             <h3 className="text-lg font-semibold text-white mb-4">ניתוח התוכנית</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {analysis.rooms?.map((room: any, i: number) => (
@@ -165,6 +255,11 @@ export default function BlueprintTo3DPage() {
                   <p className="text-gray-400 text-sm">
                     {room.width}x{room.length} מ׳
                   </p>
+                  {room.features?.length > 0 && (
+                    <p className="text-gray-500 text-xs mt-1">
+                      {room.features.join(", ")}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -178,7 +273,7 @@ export default function BlueprintTo3DPage() {
 
         {/* Error */}
         {error && (
-          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
             {error}
           </div>
         )}
@@ -189,23 +284,54 @@ export default function BlueprintTo3DPage() {
             onClick={handleGenerate}
             className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors"
           >
-            צור הדמיה 3D
+            {viewMode === "walkthrough" ? "🚶 צור סיור וירטואלי" : "🖼️ צור הדמיה"}
           </button>
         )}
 
         {/* Reset button */}
         {step === "done" && (
-          <button
-            onClick={() => {
-              setBlueprintImage(null);
-              setAnalysis(null);
-              setRender3D(null);
-              setStep("upload");
-            }}
-            className="w-full py-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors"
-          >
-            נסה תוכנית אחרת
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => {
+                setStep("upload");
+                setRender3D(null);
+                if (gltfData) {
+                  URL.revokeObjectURL(gltfData);
+                  setGltfData(null);
+                }
+              }}
+              className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors"
+            >
+              {viewMode === "walkthrough" ? "🔄 צור מחדש" : "🔄 צור הדמיה חדשה"}
+            </button>
+            <button
+              onClick={() => {
+                setBlueprintImage(null);
+                setAnalysis(null);
+                setRender3D(null);
+                if (gltfData) {
+                  URL.revokeObjectURL(gltfData);
+                  setGltfData(null);
+                }
+                setStep("upload");
+              }}
+              className="flex-1 py-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-colors"
+            >
+              📐 תוכנית אחרת
+            </button>
+          </div>
+        )}
+
+        {/* Tips */}
+        {step === "done" && viewMode === "walkthrough" && (
+          <div className="mt-6 p-4 bg-gray-800/50 rounded-xl">
+            <h4 className="text-white font-medium mb-2">💡 טיפים לסיור</h4>
+            <ul className="text-gray-400 text-sm space-y-1">
+              <li>• <strong>במחשב:</strong> לחצו על המסך, WASD לתנועה, עכבר להסתכל</li>
+              <li>• <strong>בנייד:</strong> גררו להסתכל, שתי אצבעות להתקדם</li>
+              <li>• <strong>ESC</strong> לצאת ממצב הסיור</li>
+            </ul>
+          </div>
         )}
       </div>
     </div>

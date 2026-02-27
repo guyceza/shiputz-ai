@@ -1,23 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AI_MODELS, getGeminiUrl } from "@/lib/ai-config";
+import { getGeminiUrl } from "@/lib/ai-config";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
-
-interface Room {
-  name: string;
-  width: number;
-  length: number;
-  height?: number;
-  features?: string[];
-}
-
-interface BlueprintAnalysis {
-  rooms: Room[];
-  totalArea: number;
-  style?: string;
-  notes?: string;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,62 +17,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
-    // Extract base64 data from data URL
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
 
-    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית וחלץ מידע מפורט על כל החדרים.
+    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית ויצור מודל תלת-ממדי.
 
-**חשוב מאוד:**
-- חלץ את כל החדרים שאתה רואה בתוכנית
-- הערך מידות במטרים (אם לא כתוב, הערך לפי פרופורציות)
-- ציין איפה כל חדר נמצא ביחס לאחרים
-- ציין איפה יש דלתות/מעברים בין חדרים
+**מערכת הצירים:**
+- X = ציר אופקי (שמאל לימין), מתחיל מ-0
+- Y = ציר אנכי (מלמטה למעלה), מתחיל מ-0
+- החדר השמאלי-תחתון ביותר מתחיל ב-(0,0)
+- חדרים צמודים צריכים לשתף קואורדינטות (אם חדר A נגמר ב-x=5, חדר B מתחיל ב-x=5)
 
-החזר JSON בפורמט הבא בלבד (ללא markdown):
+**כללים חשובים:**
+1. מדוד מידות במטרים - אם לא כתוב, הערך לפי יחסים
+2. כל חדר חייב position עם x,y שמתחברים לשכנים
+3. דלתות: ציין על איזה קיר (front/back/left/right) ואיפה (0-1)
+4. חדרים חייבים להתחבר - אם סלון מימין למטבח, הם חולקים קיר
+
+**פורמט תגובה (JSON בלבד, בלי markdown):**
 {
   "rooms": [
     {
       "id": "living",
-      "name": "סלון",
+      "name": "סלון", 
       "type": "living",
-      "width": 4.5,
-      "length": 6.0,
+      "width": 5,
+      "length": 4,
       "position": {"x": 0, "y": 0},
-      "doors": [
-        {"to": "kitchen", "wall": "right", "position": 0.5},
-        {"to": "hallway", "wall": "back", "position": 0.3}
-      ],
-      "windows": [{"wall": "front", "position": 0.5, "width": 1.5}],
-      "features": ["מרפסת"]
+      "doors": [{"wall": "right", "position": 0.5}],
+      "windows": [{"wall": "front", "position": 0.5, "width": 1.5}]
     },
     {
       "id": "kitchen",
       "name": "מטבח",
-      "type": "kitchen",
-      "width": 3.0,
-      "length": 4.0,
-      "position": {"x": 4.5, "y": 0},
-      "doors": [{"to": "living", "wall": "left", "position": 0.5}],
-      "windows": [{"wall": "front", "position": 0.5, "width": 1.0}],
-      "features": []
+      "type": "kitchen", 
+      "width": 3,
+      "length": 4,
+      "position": {"x": 5, "y": 0},
+      "doors": [{"wall": "left", "position": 0.5}],
+      "windows": []
     }
   ],
-  "totalArea": 85,
-  "floors": 1,
-  "style": "מודרני",
-  "notes": "דירת 3 חדרים"
+  "totalArea": 32
 }
 
-**סוגי חדרים (type):** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
+**בדוגמה למעלה:** סלון (5x4) נמצא ב-(0,0), מטבח (3x4) נמצא ב-(5,0) - הם צמודים כי סלון נגמר ב-x=5 ומטבח מתחיל ב-x=5.
 
-**קירות (wall):** front (קדמי/דרום), back (אחורי/צפון), left (שמאל/מערב), right (ימין/מזרח)
+**סוגי חדרים:** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
 
-**position:** מיקום הדלת/חלון על הקיר (0=התחלה, 0.5=אמצע, 1=סוף)
+**קירות:** front (y מינימלי), back (y מקסימלי), left (x מינימלי), right (x מקסימלי)
 
-אם זו לא תוכנית אדריכלית, החזר: {"error": "זו לא תוכנית אדריכלית"}`;
+נתח את התוכנית והחזר JSON בלבד:`;
 
-    // Use IMAGE_GEN model for better vision understanding
     const response = await fetch(`${getGeminiUrl("IMAGE_GEN")}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -96,18 +77,13 @@ export async function POST(request: NextRequest) {
           {
             parts: [
               { text: prompt },
-              {
-                inlineData: {
-                  mimeType,
-                  data: base64Data,
-                },
-              },
+              { inlineData: { mimeType, data: base64Data } },
             ],
           },
         ],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096,
         },
       }),
     });
@@ -121,40 +97,73 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // Parse JSON from response
     try {
-      // Remove markdown code blocks if present
       let cleanJson = text.replace(/```json\n?|\n?```/g, "").trim();
-      
-      // Try to extract JSON object if there's extra text
       const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         cleanJson = jsonMatch[0];
       }
       
-      const analysis: BlueprintAnalysis = JSON.parse(cleanJson);
+      const analysis = JSON.parse(cleanJson);
       
       if ("error" in analysis) {
         return NextResponse.json({ error: analysis.error }, { status: 400 });
       }
 
+      // Validate and fix room connections
+      if (analysis.rooms && analysis.rooms.length > 0) {
+        analysis.rooms = validateRoomPositions(analysis.rooms);
+      }
+
+      console.log("Blueprint analysis:", JSON.stringify(analysis, null, 2));
       return NextResponse.json(analysis);
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", text);
-      // Return a more helpful error with a snippet of the response
       return NextResponse.json(
-        { 
-          error: "Failed to parse blueprint analysis",
-          debug: text?.substring(0, 200) 
-        },
+        { error: "Failed to parse blueprint analysis", debug: text?.substring(0, 500) },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Blueprint analysis error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+// Validate and fix room positions to ensure they connect properly
+function validateRoomPositions(rooms: any[]): any[] {
+  if (rooms.length <= 1) return rooms;
+  
+  // Sort rooms by position (left-to-right, bottom-to-top)
+  rooms.sort((a, b) => {
+    const posA = a.position || { x: 0, y: 0 };
+    const posB = b.position || { x: 0, y: 0 };
+    if (posA.y !== posB.y) return posA.y - posB.y;
+    return posA.x - posB.x;
+  });
+  
+  // Ensure first room starts at (0,0)
+  const firstPos = rooms[0].position || { x: 0, y: 0 };
+  const offsetX = firstPos.x;
+  const offsetY = firstPos.y;
+  
+  rooms.forEach(room => {
+    if (!room.position) room.position = { x: 0, y: 0 };
+    room.position.x -= offsetX;
+    room.position.y -= offsetY;
+    
+    // Ensure positive coordinates
+    room.position.x = Math.max(0, room.position.x);
+    room.position.y = Math.max(0, room.position.y);
+    
+    // Default dimensions if missing
+    if (!room.width || room.width <= 0) room.width = 3;
+    if (!room.length || room.length <= 0) room.length = 3;
+    
+    // Ensure doors array exists
+    if (!room.doors) room.doors = [];
+    if (!room.windows) room.windows = [];
+  });
+  
+  return rooms;
 }

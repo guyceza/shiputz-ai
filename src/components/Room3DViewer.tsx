@@ -160,7 +160,7 @@ export default function Room3DViewer({
     const controls = new PointerLockControls(camera, renderer.domElement);
 
     // Movement
-    const moveSpeed = 1.5; // Slower for better control
+    const moveSpeed = 2.5; // Good walking speed
     const velocity = new THREE.Vector3();
     const direction = new THREE.Vector3();
     const keys = { w: false, a: false, s: false, d: false };
@@ -207,9 +207,9 @@ export default function Room3DViewer({
         scene.add(model);
         
         // Position camera at a good starting point inside the model
-        // Start near the front of the house (lower Z) for better initial view
-        const startX = center.x;
-        const startZ = box.min.z + 2; // Start 2m from the front edge
+        // Start in the center of the largest room (usually living room)
+        const startX = box.min.x + 2; // 2m from left edge
+        const startZ = center.z; // Center of the house
         
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
@@ -217,8 +217,8 @@ export default function Room3DViewer({
           camera.position.set(startX, 1.6, startZ);
         }
         
-        console.log('Camera starting at:', { x: camera.position.x, y: camera.position.y, z: camera.position.z });
-        console.log('Model bounds - X:', box.min.x, 'to', box.max.x, '| Z:', box.min.z, 'to', box.max.z);
+        console.log('Camera starting at:', { x: camera.position.x.toFixed(2), z: camera.position.z.toFixed(2) });
+        console.log('Model bounds - X:', box.min.x.toFixed(1), 'to', box.max.x.toFixed(1), '| Z:', box.min.z.toFixed(1), 'to', box.max.z.toFixed(1));
         
         // Apply rotation if provided
         if (startRotation !== undefined) {

@@ -36,24 +36,55 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
 
-    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית הבאה וחלץ את המידע הבא:
+    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית וחלץ מידע מפורט על כל החדרים.
 
-1. רשימת החדרים עם מידות (אורך x רוחב במטרים)
-2. שטח כולל משוער
-3. פיצ'רים מיוחדים (חלונות, דלתות, מרפסת וכו')
+**חשוב מאוד:**
+- חלץ את כל החדרים שאתה רואה בתוכנית
+- הערך מידות במטרים (אם לא כתוב, הערך לפי פרופורציות)
+- ציין איפה כל חדר נמצא ביחס לאחרים
+- ציין איפה יש דלתות/מעברים בין חדרים
 
 החזר JSON בפורמט הבא בלבד (ללא markdown):
 {
   "rooms": [
-    {"name": "סלון", "width": 4.5, "length": 6.0, "features": ["חלון גדול", "דלת למרפסת"]},
-    {"name": "חדר שינה", "width": 3.5, "length": 4.0, "features": ["חלון"]}
+    {
+      "id": "living",
+      "name": "סלון",
+      "type": "living",
+      "width": 4.5,
+      "length": 6.0,
+      "position": {"x": 0, "y": 0},
+      "doors": [
+        {"to": "kitchen", "wall": "right", "position": 0.5},
+        {"to": "hallway", "wall": "back", "position": 0.3}
+      ],
+      "windows": [{"wall": "front", "position": 0.5, "width": 1.5}],
+      "features": ["מרפסת"]
+    },
+    {
+      "id": "kitchen",
+      "name": "מטבח",
+      "type": "kitchen",
+      "width": 3.0,
+      "length": 4.0,
+      "position": {"x": 4.5, "y": 0},
+      "doors": [{"to": "living", "wall": "left", "position": 0.5}],
+      "windows": [{"wall": "front", "position": 0.5, "width": 1.0}],
+      "features": []
+    }
   ],
   "totalArea": 85,
+  "floors": 1,
   "style": "מודרני",
-  "notes": "דירה עם מרפסת שמש"
+  "notes": "דירת 3 חדרים"
 }
 
-אם אתה לא יכול לקרוא מידות מדויקות, תן הערכה סבירה.
+**סוגי חדרים (type):** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
+
+**קירות (wall):** front (קדמי/דרום), back (אחורי/צפון), left (שמאל/מערב), right (ימין/מזרח)
+
+**position:** מיקום הדלת/חלון על הקיר (0=התחלה, 0.5=אמצע, 1=סוף)
+
 אם זו לא תוכנית אדריכלית, החזר: {"error": "זו לא תוכנית אדריכלית"}`;
 
     const response = await fetch(getGeminiUrl("TEXT_FAST"), {

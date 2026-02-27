@@ -126,7 +126,21 @@ export async function POST(request: NextRequest) {
 function validateRoomPositions(rooms: any[]): any[] {
   if (rooms.length <= 1) return rooms;
   
-  // Sort rooms by position (left-to-right, bottom-to-top)
+  // Fix balcony position if it has a door connection to living room's left wall
+  const balcony = rooms.find(r => r.type === 'balcony');
+  const living = rooms.find(r => r.type === 'living');
+  
+  if (balcony && living) {
+    const livingHasLeftDoor = living.doors?.some((d: any) => d.wall === 'left');
+    if (livingHasLeftDoor && balcony.position?.x >= 0) {
+      // Move balcony to the left of the apartment (negative x)
+      balcony.position.x = -(balcony.width || 1.2);
+      // Align Y with living room
+      balcony.position.y = (living.position?.y || 0) + 1;
+    }
+  }
+  
+  // Sort rooms by position (left-to-right, bottom-to-top), excluding negative x
   rooms.sort((a, b) => {
     const posA = a.position || { x: 0, y: 0 };
     const posB = b.position || { x: 0, y: 0 };
@@ -134,19 +148,8 @@ function validateRoomPositions(rooms: any[]): any[] {
     return posA.x - posB.x;
   });
   
-  // Ensure first room starts at (0,0)
-  const firstPos = rooms[0].position || { x: 0, y: 0 };
-  const offsetX = firstPos.x;
-  const offsetY = firstPos.y;
-  
   rooms.forEach(room => {
     if (!room.position) room.position = { x: 0, y: 0 };
-    room.position.x -= offsetX;
-    room.position.y -= offsetY;
-    
-    // Ensure positive coordinates
-    room.position.x = Math.max(0, room.position.x);
-    room.position.y = Math.max(0, room.position.y);
     
     // Default dimensions if missing
     if (!room.width || room.width <= 0) room.width = 3;

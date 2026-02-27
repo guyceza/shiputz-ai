@@ -183,10 +183,18 @@ export default function Room3DViewer({
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
-        console.log('Model bounds:', { center, size, min: box.min, max: box.max });
+        console.log('Model bounds:', { 
+          center: { x: center.x, y: center.y, z: center.z },
+          size: { x: size.x, y: size.y, z: size.z },
+          min: { x: box.min.x, y: box.min.y, z: box.min.z },
+          max: { x: box.max.x, y: box.max.y, z: box.max.z }
+        });
         
         // Store bounds for camera clipping
         modelBoundsRef.current = { min: box.min.clone(), max: box.max.clone(), center: center.clone() };
+        
+        // Log to verify bounds are set
+        console.log('Bounds stored:', modelBoundsRef.current ? 'YES' : 'NO');
         
         // Enable shadows on all meshes
         model.traverse((child) => {
@@ -367,12 +375,16 @@ export default function Room3DViewer({
         // Keep camera at standing height
         camera.position.y = 1.6;
 
-        // Boundary checking using actual model bounds
+        // Boundary checking using actual model bounds or fallback to props
         const bounds = modelBoundsRef.current;
+        const margin = 0.5;
         if (bounds) {
-          const margin = 0.3;
           camera.position.x = Math.max(bounds.min.x + margin, Math.min(bounds.max.x - margin, camera.position.x));
           camera.position.z = Math.max(bounds.min.z + margin, Math.min(bounds.max.z - margin, camera.position.z));
+        } else {
+          // Fallback to prop-based boundaries
+          camera.position.x = Math.max(margin, Math.min(boundaryWidth - margin, camera.position.x));
+          camera.position.z = Math.max(margin, Math.min(boundaryLength - margin, camera.position.z));
         }
       }
 

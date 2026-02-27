@@ -206,12 +206,19 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // Position camera at center of model
+        // Position camera at a good starting point inside the model
+        // Start near the front of the house (lower Z) for better initial view
+        const startX = center.x;
+        const startZ = box.min.z + 2; // Start 2m from the front edge
+        
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
         } else {
-          camera.position.set(center.x, 1.6, center.z);
+          camera.position.set(startX, 1.6, startZ);
         }
+        
+        console.log('Camera starting at:', { x: camera.position.x, y: camera.position.y, z: camera.position.z });
+        console.log('Model bounds - X:', box.min.x, 'to', box.max.x, '| Z:', box.min.z, 'to', box.max.z);
         
         // Apply rotation if provided
         if (startRotation !== undefined) {
@@ -369,47 +376,25 @@ export default function Room3DViewer({
         if (w || s) velocity.z -= direction.z * moveSpeed * delta;
         if (a || d) velocity.x -= direction.x * moveSpeed * delta;
 
-        // Get boundary limits
-        const bounds = modelBoundsRef.current;
-        const margin = 1.0;
-        
-        const minX = bounds ? bounds.min.x + margin : margin;
-        const maxX = bounds ? bounds.max.x - margin : boundaryWidth - margin;
-        const minZ = bounds ? bounds.min.z + margin : margin;
-        const maxZ = bounds ? bounds.max.z - margin : boundaryLength - margin;
-
-        // Calculate where we WOULD move to
-        const moveX = -velocity.x;
-        const moveZ = -velocity.z;
-        
-        // Get camera direction
-        const cameraDirection = new THREE.Vector3();
-        camera.getWorldDirection(cameraDirection);
-        
-        // Calculate new position
-        let newX = camera.position.x;
-        let newZ = camera.position.z;
-        
-        // Forward/backward movement
-        newX += cameraDirection.x * moveZ;
-        newZ += cameraDirection.z * moveZ;
-        
-        // Left/right strafe
-        const rightDir = new THREE.Vector3();
-        rightDir.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize();
-        newX += rightDir.x * moveX;
-        newZ += rightDir.z * moveX;
-        
-        // Only apply movement if within bounds
-        if (newX >= minX && newX <= maxX) {
-          camera.position.x = newX;
-        }
-        if (newZ >= minZ && newZ <= maxZ) {
-          camera.position.z = newZ;
-        }
+        // Use PointerLockControls for movement
+        controls.moveRight(-velocity.x);
+        controls.moveForward(-velocity.z);
 
         // Keep camera at standing height
         camera.position.y = 1.6;
+        
+        // Clamp to model bounds
+        const bounds = modelBoundsRef.current;
+        if (bounds) {
+          const margin = 0.5;
+          camera.position.x = Math.max(bounds.min.x + margin, Math.min(bounds.max.x - margin, camera.position.x));
+          camera.position.z = Math.max(bounds.min.z + margin, Math.min(bounds.max.z - margin, camera.position.z));
+        } else {
+          // Fallback to props
+          const margin = 0.5;
+          camera.position.x = Math.max(margin, Math.min(boundaryWidth - margin, camera.position.x));
+          camera.position.z = Math.max(margin, Math.min(boundaryLength - margin, camera.position.z));
+        }
       }
 
       renderer.render(scene, camera);

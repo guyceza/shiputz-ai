@@ -33,10 +33,20 @@ export default function Room3DViewer({
   const boundaryLength = houseLength || roomLength;
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const modelBoundsRef = useRef<{ min: THREE.Vector3; max: THREE.Vector3; center: THREE.Vector3 } | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Reset camera to starting position
+  const resetCamera = () => {
+    if (!cameraRef.current || !modelBoundsRef.current) return;
+    const { center } = modelBoundsRef.current;
+    cameraRef.current.position.set(center.x, 1.6, center.z);
+    cameraRef.current.rotation.set(0, 0, 0);
+  };
 
   // Fullscreen toggle function
   const toggleFullscreen = async () => {
@@ -94,19 +104,9 @@ export default function Room3DViewer({
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    // Start position - use custom or default to center of largest room
-    if (startPosition) {
-      camera.position.set(startPosition.x, startPosition.y, startPosition.z);
-    } else {
-      // Default: start in the living room area (first room, usually largest)
-      const defaultX = Math.min(3, boundaryWidth / 2);
-      const defaultZ = Math.min(3, boundaryLength / 2);
-      camera.position.set(defaultX, 1.6, defaultZ);
-    }
-    // Apply starting rotation if provided
-    if (startRotation !== undefined) {
-      camera.rotation.y = startRotation;
-    }
+    cameraRef.current = camera;
+    // Start position will be set after model loads
+    camera.position.set(0, 1.6, 0);
 
     // Renderer with high quality settings
     const renderer = new THREE.WebGLRenderer({
@@ -178,12 +178,15 @@ export default function Room3DViewer({
       (gltf) => {
         const model = gltf.scene;
         
-        // Calculate model bounds and center it
+        // Calculate model bounds
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
         console.log('Model bounds:', { center, size, min: box.min, max: box.max });
+        
+        // Store bounds for camera clipping
+        modelBoundsRef.current = { min: box.min.clone(), max: box.max.clone(), center: center.clone() };
         
         // Enable shadows on all meshes
         model.traverse((child) => {
@@ -195,9 +198,16 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // If no custom start position, place camera inside the model
-        if (!startPosition) {
+        // Position camera at center of model
+        if (startPosition) {
+          camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+        } else {
           camera.position.set(center.x, 1.6, center.z);
+        }
+        
+        // Apply rotation if provided
+        if (startRotation !== undefined) {
+          camera.rotation.y = startRotation;
         }
         
         setLoading(false);
@@ -357,9 +367,13 @@ export default function Room3DViewer({
         // Keep camera at standing height
         camera.position.y = 1.6;
 
-        // Boundary checking (use house dimensions if available)
-        camera.position.x = Math.max(0.3, Math.min(boundaryWidth - 0.3, camera.position.x));
-        camera.position.z = Math.max(0.3, Math.min(boundaryLength - 0.3, camera.position.z));
+        // Boundary checking using actual model bounds
+        const bounds = modelBoundsRef.current;
+        if (bounds) {
+          const margin = 0.3;
+          camera.position.x = Math.max(bounds.min.x + margin, Math.min(bounds.max.x - margin, camera.position.x));
+          camera.position.z = Math.max(bounds.min.z + margin, Math.min(bounds.max.z - margin, camera.position.z));
+        }
       }
 
       renderer.render(scene, camera);
@@ -391,12 +405,26 @@ export default function Room3DViewer({
     <div ref={wrapperRef} className="relative w-full h-full bg-black">
       <div ref={containerRef} className="w-full h-full" />
       
-      {/* Fullscreen button */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute top-4 right-4 z-20 bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
-        title={isFullscreen ? "צא ממסך מלא" : "מסך מלא"}
-      >
+      {/* Control buttons */}
+      <div className="absolute top-4 right-4 z-20 flex gap-2">
+        {/* Reset position button */}
+        <button
+          onClick={resetCamera}
+          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          title="אפס מיקום"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className="text-sm hidden sm:inline">אפס</span>
+        </button>
+        
+        {/* Fullscreen button */}
+        <button
+          onClick={toggleFullscreen}
+          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          title={isFullscreen ? "צא ממסך מלא" : "מסך מלא"}
+        >
         {isFullscreen ? (
           <>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,7 +440,8 @@ export default function Room3DViewer({
             <span className="text-sm hidden sm:inline">מסך מלא</span>
           </>
         )}
-      </button>
+        </button>
+      </div>
       
       {/* Loading overlay */}
       {loading && (

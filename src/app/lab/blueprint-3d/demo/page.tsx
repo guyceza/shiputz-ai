@@ -18,15 +18,15 @@ export default function DemoHousePage() {
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-black/50 backdrop-blur-sm p-4">
         <h1 className="text-xl font-bold text-white text-center">
-          🏠 סיור וירטואלי - דירה לדוגמה (6 חדרים, 95 מ״ר)
+          🏠 סיור וירטואלי - דירה לדוגמה (6 חדרים, 78 מ״ר)
         </h1>
       </div>
 
-      {/* 3D Viewer - 6-room house: living, kitchen, hallway, 2 bedrooms, bathroom */}
+      {/* 3D Viewer - 6-room apartment */}
       <Room3DViewer
         modelUrl="/models/test-house.glb"
         houseWidth={9}
-        houseLength={14}
+        houseLength={10}
       />
 
       {/* Controls hint */}

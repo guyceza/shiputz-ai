@@ -221,6 +221,9 @@ export default function Room3DViewer({
     // Touch handlers
     let touchId: number | null = null;
     const handleTouchStart = (e: TouchEvent) => {
+      // Prevent browser gestures (pull-to-refresh, swipe-back)
+      e.preventDefault();
+      
       if (e.touches.length === 1) {
         const touch = e.touches[0];
         // Only use right side of screen for looking (left has joystick)
@@ -234,6 +237,9 @@ export default function Room3DViewer({
       }
     };
     const handleTouchMove = (e: TouchEvent) => {
+      // Prevent browser gestures (pull-to-refresh, swipe-back)
+      e.preventDefault();
+      
       if (!isDragging || touchId === null) return;
       for (const touch of Array.from(e.touches)) {
         if (touch.identifier === touchId) {
@@ -379,8 +385,16 @@ export default function Room3DViewer({
   }
 
   return (
-    <div ref={wrapperRef} className="relative w-full h-full bg-black">
-      <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+    <div 
+      ref={wrapperRef} 
+      className="relative w-full h-full bg-black"
+      style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+    >
+      <div 
+        ref={containerRef} 
+        className="w-full h-full cursor-grab active:cursor-grabbing" 
+        style={{ touchAction: 'none', overscrollBehavior: 'none' }}
+      />
       
       {/* Control buttons */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
 
 interface Room3DViewerProps {
   modelUrl: string;
@@ -12,7 +11,7 @@ interface Room3DViewerProps {
   houseWidth?: number;
   houseLength?: number;
   startPosition?: { x: number; y: number; z: number };
-  startRotation?: number; // Y rotation in radians
+  startRotation?: number;
   onLoad?: () => void;
   onError?: (error: string) => void;
 }
@@ -28,27 +27,26 @@ export default function Room3DViewer({
   onLoad,
   onError,
 }: Room3DViewerProps) {
-  // Use house dimensions if provided, otherwise room dimensions
   const boundaryWidth = houseWidth || roomWidth;
   const boundaryLength = houseLength || roomLength;
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const modelBoundsRef = useRef<{ min: THREE.Vector3; max: THREE.Vector3; center: THREE.Vector3 } | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
+  const eulerRef = useRef<THREE.Euler>(new THREE.Euler(0, 0, 0, 'YXZ'));
   const [loading, setLoading] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Reset camera to starting position
   const resetCamera = () => {
     if (!cameraRef.current || !modelBoundsRef.current) return;
     const { center } = modelBoundsRef.current;
     cameraRef.current.position.set(center.x, 1.6, center.z);
-    cameraRef.current.rotation.set(0, 0, 0);
+    eulerRef.current.set(0, 0, 0);
+    cameraRef.current.quaternion.setFromEuler(eulerRef.current);
   };
 
-  // Fullscreen toggle function
   const toggleFullscreen = async () => {
     if (!wrapperRef.current) return;
     
@@ -56,13 +54,10 @@ export default function Room3DViewer({
       if (!document.fullscreenElement) {
         await wrapperRef.current.requestFullscreen();
         setIsFullscreen(true);
-        // Lock screen orientation to landscape on mobile
         if (screen.orientation && 'lock' in screen.orientation) {
           try {
             await (screen.orientation as any).lock('landscape');
-          } catch (e) {
-            // Orientation lock not supported, ignore
-          }
+          } catch (e) {}
         }
       } else {
         await document.exitFullscreen();
@@ -76,7 +71,6 @@ export default function Room3DViewer({
     }
   };
 
-  // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -88,7 +82,6 @@ export default function Room3DViewer({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Check if mobile
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
@@ -100,15 +93,14 @@ export default function Room3DViewer({
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb); // Sky blue
+    scene.background = new THREE.Color(0x87ceeb);
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     cameraRef.current = camera;
-    // Start position will be set after model loads
     camera.position.set(0, 1.6, 0);
 
-    // Renderer with high quality settings
+    // Renderer
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -123,53 +115,38 @@ export default function Room3DViewer({
     container.appendChild(renderer.domElement);
 
     // Lighting
-    // Ambient light for base illumination
     const ambient = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambient);
 
-    // Main ceiling light
     const ceilingLight = new THREE.PointLight(0xfff5e6, 1, 10);
     ceilingLight.position.set(roomWidth / 2, 2.7, roomLength / 2);
     ceilingLight.castShadow = true;
-    ceilingLight.shadow.mapSize.width = 1024;
-    ceilingLight.shadow.mapSize.height = 1024;
     scene.add(ceilingLight);
 
-    // Window light (directional, like sun)
     const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
     sunLight.position.set(roomWidth / 2, 3, -2);
-    sunLight.target.position.set(roomWidth / 2, 0, roomLength / 2);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.1;
-    sunLight.shadow.camera.far = 20;
-    sunLight.shadow.camera.left = -5;
-    sunLight.shadow.camera.right = 5;
-    sunLight.shadow.camera.top = 5;
-    sunLight.shadow.camera.bottom = -5;
     scene.add(sunLight);
-    scene.add(sunLight.target);
 
-    // Fill light from back
     const fillLight = new THREE.DirectionalLight(0xfff0e0, 0.3);
     fillLight.position.set(roomWidth / 2, 2, roomLength + 2);
     scene.add(fillLight);
 
-    // Controls
-    const controls = new PointerLockControls(camera, renderer.domElement);
-
-    // Movement
-    const moveSpeed = 2.5; // Good walking speed
+    // Movement state
+    const moveSpeed = 3;
+    const lookSpeed = 0.003;
     const velocity = new THREE.Vector3();
     const direction = new THREE.Vector3();
     const keys = { w: false, a: false, s: false, d: false };
 
-    // Touch controls for mobile
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchMoveX = 0;
-    let touchMoveY = 0;
+    // Mouse/touch look state
+    let isDragging = false;
+    let previousMouseX = 0;
+    let previousMouseY = 0;
+    const euler = eulerRef.current;
+    const PI_2 = Math.PI / 2;
 
     // Load GLTF model
     const loader = new GLTFLoader();
@@ -178,25 +155,14 @@ export default function Room3DViewer({
       (gltf) => {
         const model = gltf.scene;
         
-        // Calculate model bounds
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
-        console.log('Model bounds:', { 
-          center: { x: center.x, y: center.y, z: center.z },
-          size: { x: size.x, y: size.y, z: size.z },
-          min: { x: box.min.x, y: box.min.y, z: box.min.z },
-          max: { x: box.max.x, y: box.max.y, z: box.max.z }
-        });
+        console.log('Model loaded:', { center, size });
         
-        // Store bounds for camera clipping
         modelBoundsRef.current = { min: box.min.clone(), max: box.max.clone(), center: center.clone() };
         
-        // Log to verify bounds are set
-        console.log('Bounds stored:', modelBoundsRef.current ? 'YES' : 'NO');
-        
-        // Enable shadows on all meshes
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
@@ -206,10 +172,9 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // Position camera at a good starting point inside the model
-        // Start in the center of the largest room (usually living room)
-        const startX = box.min.x + 2; // 2m from left edge
-        const startZ = center.z; // Center of the house
+        // Start position
+        const startX = box.min.x + 2;
+        const startZ = center.z;
         
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
@@ -217,125 +182,140 @@ export default function Room3DViewer({
           camera.position.set(startX, 1.6, startZ);
         }
         
-        console.log('Camera starting at:', { x: camera.position.x.toFixed(2), z: camera.position.z.toFixed(2) });
-        console.log('Model bounds - X:', box.min.x.toFixed(1), 'to', box.max.x.toFixed(1), '| Z:', box.min.z.toFixed(1), 'to', box.max.z.toFixed(1));
-        
-        // Apply rotation if provided
         if (startRotation !== undefined) {
-          camera.rotation.y = startRotation;
+          euler.y = startRotation;
+          camera.quaternion.setFromEuler(euler);
         }
         
         setLoading(false);
         onLoad?.();
       },
-      (progress) => {
-        console.log("Loading:", (progress.loaded / progress.total) * 100 + "%");
-      },
+      undefined,
       (error: unknown) => {
         console.error("GLTF load error:", error);
         setLoading(false);
-        const errorMessage = error instanceof Error ? error.message : "Failed to load 3D model";
-        onError?.(errorMessage);
+        onError?.(error instanceof Error ? error.message : "Failed to load 3D model");
       }
     );
 
-    // Event handlers
+    // Keyboard handlers
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.code) {
-        case "KeyW":
-        case "ArrowUp":
-          keys.w = true;
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-          keys.a = true;
-          break;
-        case "KeyS":
-        case "ArrowDown":
-          keys.s = true;
-          break;
-        case "KeyD":
-        case "ArrowRight":
-          keys.d = true;
-          break;
+        case "KeyW": case "ArrowUp": keys.w = true; break;
+        case "KeyA": case "ArrowLeft": keys.a = true; break;
+        case "KeyS": case "ArrowDown": keys.s = true; break;
+        case "KeyD": case "ArrowRight": keys.d = true; break;
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       switch (e.code) {
-        case "KeyW":
-        case "ArrowUp":
-          keys.w = false;
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-          keys.a = false;
-          break;
-        case "KeyS":
-        case "ArrowDown":
-          keys.s = false;
-          break;
-        case "KeyD":
-        case "ArrowRight":
-          keys.d = false;
-          break;
+        case "KeyW": case "ArrowUp": keys.w = false; break;
+        case "KeyA": case "ArrowLeft": keys.a = false; break;
+        case "KeyS": case "ArrowDown": keys.s = false; break;
+        case "KeyD": case "ArrowRight": keys.d = false; break;
       }
     };
 
-    const handleClick = () => {
-      if (!mobile) {
-        controls.lock();
-      }
+    // Mouse handlers - drag to look
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      previousMouseX = e.clientX;
+      previousMouseY = e.clientY;
+      setShowInstructions(false);
     };
 
-    const handleLockChange = () => {
-      setIsLocked(controls.isLocked);
+    const handleMouseUp = () => {
+      isDragging = false;
     };
 
-    // Touch handlers for mobile
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - previousMouseX;
+      const deltaY = e.clientY - previousMouseY;
+      
+      euler.y -= deltaX * lookSpeed;
+      euler.x -= deltaY * lookSpeed;
+      euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+      
+      camera.quaternion.setFromEuler(euler);
+      
+      previousMouseX = e.clientX;
+      previousMouseY = e.clientY;
+    };
+
+    // Touch handlers
+    let touchId: number | null = null;
+
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        const touch = e.touches[0];
+        // Only start drag if touch is in the right half (look area) or if there's no joystick
+        const isLookArea = touch.clientX > window.innerWidth * 0.4;
+        if (isLookArea || !mobile) {
+          isDragging = true;
+          touchId = touch.identifier;
+          previousMouseX = touch.clientX;
+          previousMouseY = touch.clientY;
+          setShowInstructions(false);
+        }
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        touchMoveX = (e.touches[0].clientX - touchStartX) * 0.01;
-        touchMoveY = (e.touches[0].clientY - touchStartY) * 0.01;
-        
-        // Rotate camera based on touch movement
-        camera.rotation.y -= touchMoveX;
-        camera.rotation.x -= touchMoveY;
-        camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-        
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      } else if (e.touches.length === 2) {
-        // Two finger touch - move forward
-        keys.w = true;
+      if (!isDragging || touchId === null) return;
+      
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.identifier === touchId) {
+          const deltaX = touch.clientX - previousMouseX;
+          const deltaY = touch.clientY - previousMouseY;
+          
+          euler.y -= deltaX * lookSpeed * 1.5; // Slightly faster on mobile
+          euler.x -= deltaY * lookSpeed * 1.5;
+          euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+          
+          camera.quaternion.setFromEuler(euler);
+          
+          previousMouseX = touch.clientX;
+          previousMouseY = touch.clientY;
+          break;
+        }
       }
     };
 
-    const handleTouchEnd = () => {
-      keys.w = false;
-      touchMoveX = 0;
-      touchMoveY = 0;
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchId !== null) {
+        let found = false;
+        for (let i = 0; i < e.touches.length; i++) {
+          if (e.touches[i].identifier === touchId) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          isDragging = false;
+          touchId = null;
+        }
+      }
+    };
+
+    // Prevent context menu on long press
+    const handleContextMenu = (e: Event) => {
+      e.preventDefault();
     };
 
     // Add event listeners
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
-    container.addEventListener("click", handleClick);
-    controls.addEventListener("lock", handleLockChange);
-    controls.addEventListener("unlock", handleLockChange);
-
-    if (mobile) {
-      container.addEventListener("touchstart", handleTouchStart);
-      container.addEventListener("touchmove", handleTouchMove);
-      container.addEventListener("touchend", handleTouchEnd);
-    }
+    container.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    container.addEventListener("touchstart", handleTouchStart, { passive: false });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchend", handleTouchEnd);
+    container.addEventListener("contextmenu", handleContextMenu);
 
     // Handle resize
     const handleResize = () => {
@@ -357,44 +337,48 @@ export default function Room3DViewer({
       const delta = (time - prevTime) / 1000;
       prevTime = time;
 
-      // Movement - merge keyboard keys with mobile virtual buttons
-      if (controls.isLocked || mobile) {
-        velocity.x -= velocity.x * 10 * delta;
-        velocity.z -= velocity.z * 10 * delta;
+      // Friction
+      velocity.x -= velocity.x * 8 * delta;
+      velocity.z -= velocity.z * 8 * delta;
 
-        // Get mobile virtual button state
-        const mobileKeys = (window as any).__mobileKeys || {};
-        const w = keys.w || mobileKeys.w;
-        const s = keys.s || mobileKeys.s;
-        const a = keys.a || mobileKeys.a;
-        const d = keys.d || mobileKeys.d;
+      // Get mobile virtual button state
+      const mobileKeys = (window as any).__mobileKeys || {};
+      const w = keys.w || mobileKeys.w;
+      const s = keys.s || mobileKeys.s;
+      const a = keys.a || mobileKeys.a;
+      const d = keys.d || mobileKeys.d;
 
-        direction.z = Number(w) - Number(s);
-        direction.x = Number(d) - Number(a);
-        direction.normalize();
+      // Calculate direction
+      direction.z = Number(w) - Number(s);
+      direction.x = Number(d) - Number(a);
+      direction.normalize();
 
-        if (w || s) velocity.z -= direction.z * moveSpeed * delta;
-        if (a || d) velocity.x -= direction.x * moveSpeed * delta;
+      if (w || s) velocity.z -= direction.z * moveSpeed * delta;
+      if (a || d) velocity.x -= direction.x * moveSpeed * delta;
 
-        // Use PointerLockControls for movement
-        controls.moveRight(-velocity.x);
-        controls.moveForward(-velocity.z);
+      // Apply movement relative to camera direction
+      const forward = new THREE.Vector3(0, 0, -1);
+      forward.applyQuaternion(camera.quaternion);
+      forward.y = 0;
+      forward.normalize();
 
-        // Keep camera at standing height
-        camera.position.y = 1.6;
-        
-        // Clamp to model bounds
-        const bounds = modelBoundsRef.current;
-        if (bounds) {
-          const margin = 0.5;
-          camera.position.x = Math.max(bounds.min.x + margin, Math.min(bounds.max.x - margin, camera.position.x));
-          camera.position.z = Math.max(bounds.min.z + margin, Math.min(bounds.max.z - margin, camera.position.z));
-        } else {
-          // Fallback to props
-          const margin = 0.5;
-          camera.position.x = Math.max(margin, Math.min(boundaryWidth - margin, camera.position.x));
-          camera.position.z = Math.max(margin, Math.min(boundaryLength - margin, camera.position.z));
-        }
+      const right = new THREE.Vector3(1, 0, 0);
+      right.applyQuaternion(camera.quaternion);
+      right.y = 0;
+      right.normalize();
+
+      camera.position.addScaledVector(forward, -velocity.z);
+      camera.position.addScaledVector(right, -velocity.x);
+
+      // Keep at standing height
+      camera.position.y = 1.6;
+      
+      // Clamp to bounds
+      const bounds = modelBoundsRef.current;
+      if (bounds) {
+        const margin = 0.5;
+        camera.position.x = Math.max(bounds.min.x + margin, Math.min(bounds.max.x - margin, camera.position.x));
+        camera.position.z = Math.max(bounds.min.z + margin, Math.min(bounds.max.z - margin, camera.position.z));
       }
 
       renderer.render(scene, camera);
@@ -406,29 +390,28 @@ export default function Room3DViewer({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
-      container.removeEventListener("click", handleClick);
-      controls.removeEventListener("lock", handleLockChange);
-      controls.removeEventListener("unlock", handleLockChange);
+      container.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+      container.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("resize", handleResize);
 
-      if (mobile) {
-        container.removeEventListener("touchstart", handleTouchStart);
-        container.removeEventListener("touchmove", handleTouchMove);
-        container.removeEventListener("touchend", handleTouchEnd);
-      }
-
       renderer.dispose();
-      container.removeChild(renderer.domElement);
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
     };
-  }, [modelUrl, roomWidth, roomLength, startPosition, startRotation, onLoad, onError]);
+  }, [modelUrl, roomWidth, roomLength, startPosition, startRotation, onLoad, onError, boundaryWidth, boundaryLength]);
 
   return (
     <div ref={wrapperRef} className="relative w-full h-full bg-black">
-      <div ref={containerRef} className="w-full h-full" />
+      <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
       
       {/* Control buttons */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">
-        {/* Reset position button */}
         <button
           onClick={resetCamera}
           className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -440,33 +423,27 @@ export default function Room3DViewer({
           <span className="text-sm hidden sm:inline">אפס</span>
         </button>
         
-        {/* Fullscreen button */}
         <button
           onClick={toggleFullscreen}
           className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
           title={isFullscreen ? "צא ממסך מלא" : "מסך מלא"}
         >
-        {isFullscreen ? (
-          <>
+          {isFullscreen ? (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span className="text-sm hidden sm:inline">יציאה</span>
-          </>
-        ) : (
-          <>
+          ) : (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
-            <span className="text-sm hidden sm:inline">מסך מלא</span>
-          </>
-        )}
+          )}
+          <span className="text-sm hidden sm:inline">{isFullscreen ? "יציאה" : "מסך מלא"}</span>
         </button>
       </div>
       
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-30">
           <div className="text-center">
             <div className="animate-spin text-4xl mb-3">🏠</div>
             <p className="text-white">טוען מודל תלת-ממדי...</p>
@@ -474,20 +451,27 @@ export default function Room3DViewer({
         </div>
       )}
 
-      {/* Instructions overlay - click anywhere to start */}
-      {!loading && !isLocked && !isMobile && (
+      {/* Instructions overlay */}
+      {!loading && showInstructions && (
         <div 
-          className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer"
-          onClick={() => containerRef.current?.click()}
+          className="absolute inset-0 flex items-center justify-center bg-black/50 z-20 cursor-pointer"
+          onClick={() => setShowInstructions(false)}
+          onTouchStart={() => setShowInstructions(false)}
         >
-          <div className="text-center text-white p-6 bg-gray-900/90 rounded-xl max-w-sm pointer-events-none">
+          <div className="text-center text-white p-6 bg-gray-900/90 rounded-xl max-w-sm">
             <p className="text-2xl mb-4">🏠</p>
             <p className="text-lg font-semibold mb-2">לחצו להתחיל סיור</p>
-            <p className="text-sm text-gray-400">
-              WASD או חצים לתנועה<br />
-              עכבר להסתכל מסביב<br />
-              ESC לצאת
-            </p>
+            {isMobile ? (
+              <p className="text-sm text-gray-400">
+                גררו על המסך להסתכל מסביב<br />
+                השתמשו בכפתורים לתנועה
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400">
+                גררו את העכבר להסתכל מסביב<br />
+                WASD או חצים לתנועה
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -498,8 +482,8 @@ export default function Room3DViewer({
           <div className="grid grid-cols-3 gap-1">
             <div />
             <button
-              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
-              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: true }; }}
+              className="w-14 h-14 bg-white/30 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/50 touch-none select-none"
+              onTouchStart={(e) => { e.preventDefault(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: true }; }}
               onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: false }; }}
             >
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -508,8 +492,8 @@ export default function Room3DViewer({
             </button>
             <div />
             <button
-              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
-              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: true }; }}
+              className="w-14 h-14 bg-white/30 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/50 touch-none select-none"
+              onTouchStart={(e) => { e.preventDefault(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: true }; }}
               onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: false }; }}
             >
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -518,8 +502,8 @@ export default function Room3DViewer({
             </button>
             <div className="w-14 h-14" />
             <button
-              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
-              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: true }; }}
+              className="w-14 h-14 bg-white/30 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/50 touch-none select-none"
+              onTouchStart={(e) => { e.preventDefault(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: true }; }}
               onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: false }; }}
             >
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -528,8 +512,8 @@ export default function Room3DViewer({
             </button>
             <div />
             <button
-              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
-              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: true }; }}
+              className="w-14 h-14 bg-white/30 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/50 touch-none select-none"
+              onTouchStart={(e) => { e.preventDefault(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: true }; }}
               onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: false }; }}
             >
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -542,16 +526,16 @@ export default function Room3DViewer({
       )}
       
       {/* Mobile look hint */}
-      {!loading && isMobile && (
+      {!loading && isMobile && !showInstructions && (
         <div className="absolute bottom-8 right-4 z-20 bg-gray-900/60 text-white text-xs px-3 py-2 rounded-lg">
-          גררו על המסך<br/>להסתכל מסביב
+          👆 גררו להסתכל
         </div>
       )}
 
-      {/* Controls reminder when locked */}
-      {isLocked && (
-        <div className="absolute top-4 left-4 bg-gray-900/70 text-white text-xs px-3 py-2 rounded-lg">
-          WASD לתנועה • ESC לצאת
+      {/* Desktop controls reminder */}
+      {!loading && !isMobile && !showInstructions && (
+        <div className="absolute top-4 left-4 z-10 bg-gray-900/70 text-white text-xs px-3 py-2 rounded-lg">
+          גררו להסתכל • WASD לתנועה
         </div>
       )}
     </div>

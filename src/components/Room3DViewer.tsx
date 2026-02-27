@@ -154,16 +154,15 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // Set start position
+        // Set start position - center of model bounds at eye height
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
         } else {
-          // Start in center of bounds
-          camera.position.set(
-            (bounds.minX + bounds.maxX) / 2,
-            1.6,
-            (bounds.minZ + bounds.maxZ) / 2
-          );
+          // Start in center of model at eye height
+          const centerX = (bounds.minX + bounds.maxX) / 2;
+          const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+          camera.position.set(centerX, 1.6, centerZ);
+          console.log('Camera starting at:', centerX, 1.6, centerZ);
         }
         
         console.log('Camera at:', camera.position);

@@ -299,3 +299,4 @@ export default function BlueprintTo3DPage() {
   // Fallback
   return null;
 }
+// Deploy trigger: Fri Feb 27 19:10:34 UTC 2026

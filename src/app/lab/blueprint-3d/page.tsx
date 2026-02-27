@@ -213,7 +213,6 @@ export default function BlueprintTo3DPage() {
               type="file"
               ref={fileInputRef}
               accept="image/*"
-              capture="environment"
               onChange={handleFileSelect}
               className="hidden"
             />

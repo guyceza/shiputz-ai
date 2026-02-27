@@ -556,7 +556,28 @@ export async function GET(request: NextRequest) {
       const sequence = user.purchased ? PURCHASED_SEQUENCE : NON_PURCHASED_SEQUENCE;
       const sequenceType = user.purchased ? 'purchased' : 'non_purchased';
 
+      // Bug fix: Check if user already received an email TODAY - limit to 1 email per day
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { data: sentToday } = await supabase
+        .from('email_sequences')
+        .select('id')
+        .eq('user_email', user.email)
+        .gte('sent_at', todayStart.toISOString())
+        .eq('status', 'sent')
+        .limit(1);
+      
+      if (sentToday && sentToday.length > 0) {
+        // Already sent an email today, skip this user
+        continue;
+      }
+
+      let emailSentThisRun = false; // Track if we sent an email in this run
+
       for (const step of sequence) {
+        // Only send ONE email per cron run per user
+        if (emailSentThisRun) break;
+        
         if (daysSinceRegistration >= step.day) {
           // Check if already sent
           const { data: existing } = await supabase
@@ -658,6 +679,7 @@ export async function GET(request: NextRequest) {
                 .eq('sequence_type', sequenceType)
                 .eq('day_number', step.day);
               sent++;
+              emailSentThisRun = true; // Only one email per user per run
             } else {
               // Bug #37 partial fix: Mark as failed for potential retry
               await supabase

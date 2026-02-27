@@ -43,3 +43,14 @@ Sending welcome_purchased to test@shiputzai.com (day 0)
 Sending discount_offer to test123@gmail.com (day 3)
 ✅ Sent successfully: 7dfed9df-23dd-47f0-b560-6df747b1e0f8
 [2026-02-26T09:00:13.041Z] Done!
+[2026-02-27T09:00:01.905Z] Starting email sequence processing...
+Found 9 users
+Sending problem_highlight to test@test.com (day 5)
+✅ Sent successfully: 306e385a-dca8-419e-a35e-febe394cbcc8
+Sending budget_tips to dhtdht200@gmail.com (day 5)
+✅ Sent successfully: 44ffcb3d-434b-4653-8d97-2668e55499b1
+Sending discount_offer to dht1dht@gmail.com (day 3)
+✅ Sent successfully: 86d7ab45-1ed6-47a6-8b76-81ad421abe74
+Sending getting_started to test@shiputzai.com (day 1)
+✅ Sent successfully: ebe9afab-7cb6-4c6e-a4a6-d752bc12949b
+[2026-02-27T09:00:13.991Z] Done!

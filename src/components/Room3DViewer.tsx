@@ -4,8 +4,18 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+interface RoomData {
+  id: string;
+  name: string;
+  type: string;
+  width: number;
+  length: number;
+  position: { x: number; y: number };
+}
+
 interface Room3DViewerProps {
   modelUrl: string;
+  rooms?: RoomData[];
   houseWidth?: number;
   houseLength?: number;
   startPosition?: { x: number; y: number; z: number };
@@ -13,8 +23,20 @@ interface Room3DViewerProps {
   onError?: (error: string) => void;
 }
 
+const ROOM_ICONS: Record<string, string> = {
+  living: "🛋️",
+  bedroom: "🛏️",
+  kitchen: "🍳",
+  bathroom: "🚿",
+  hallway: "🚪",
+  balcony: "🌅",
+  storage: "📦",
+  office: "💼",
+};
+
 export default function Room3DViewer({
   modelUrl,
+  rooms = [],
   houseWidth = 10,
   houseLength = 10,
   startPosition,
@@ -37,17 +59,42 @@ export default function Room3DViewer({
   const [showInstructions, setShowInstructions] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentRoom, setCurrentRoom] = useState<string | null>(null);
+  const [showRoomList, setShowRoomList] = useState(true);
+
+  // Teleport to a specific room
+  const teleportToRoom = useCallback((room: RoomData) => {
+    if (!sceneRef.current) return;
+    const { camera, euler } = sceneRef.current;
+    
+    // Calculate room center in 3D space
+    // In Blender: X stays X, Y becomes Z (negative)
+    const centerX = room.position.x + room.width / 2;
+    const centerZ = -(room.position.y + room.length / 2);
+    
+    camera.position.set(centerX, 1.6, centerZ);
+    euler.set(0, 0, 0); // Reset camera rotation
+    camera.quaternion.setFromEuler(euler);
+    
+    setCurrentRoom(room.id);
+    setShowInstructions(false);
+  }, []);
 
   // Reset camera position
   const resetCamera = useCallback(() => {
-    if (!sceneRef.current?.bounds) return;
-    const { bounds, camera, euler } = sceneRef.current;
-    const centerX = (bounds.minX + bounds.maxX) / 2;
-    const centerZ = (bounds.minZ + bounds.maxZ) / 2;
-    camera.position.set(centerX, 1.6, centerZ);
-    euler.set(0, 0, 0);
-    camera.quaternion.setFromEuler(euler);
-  }, []);
+    // Find living room or first room
+    const livingRoom = rooms.find(r => r.type === "living") || rooms[0];
+    if (livingRoom) {
+      teleportToRoom(livingRoom);
+    } else if (sceneRef.current?.bounds) {
+      const { bounds, camera, euler } = sceneRef.current;
+      const centerX = (bounds.minX + bounds.maxX) / 2;
+      const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+      camera.position.set(centerX, 1.6, centerZ);
+      euler.set(0, 0, 0);
+      camera.quaternion.setFromEuler(euler);
+    }
+  }, [rooms, teleportToRoom]);
 
   // Toggle fullscreen
   const toggleFullscreen = useCallback(async () => {
@@ -109,7 +156,7 @@ export default function Room3DViewer({
     container.appendChild(renderer.domElement);
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const sun = new THREE.DirectionalLight(0xffffff, 1.5);
     sun.position.set(5, 10, 5);
     sun.castShadow = true;
@@ -132,17 +179,17 @@ export default function Room3DViewer({
         // Calculate bounds from model
         const box = new THREE.Box3().setFromObject(model);
         bounds = {
-          minX: box.min.x + 0.5,
-          maxX: box.max.x - 0.5,
-          minZ: box.min.z + 0.5,
-          maxZ: box.max.z - 0.5,
+          minX: box.min.x + 0.3,
+          maxX: box.max.x - 0.3,
+          minZ: box.min.z + 0.3,
+          maxZ: box.max.z - 0.3,
         };
         
         if (sceneRef.current) {
           sceneRef.current.bounds = bounds;
         }
         
-        console.log('Model loaded, bounds:', bounds);
+        console.log('Model loaded, bounds:', bounds, 'box:', box);
         
         // Enable shadows
         model.traverse((child) => {
@@ -154,16 +201,19 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // Set start position - near the front of the house (living room area)
+        // Set start position - living room if available
+        const livingRoom = rooms.find(r => r.type === "living");
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+        } else if (livingRoom) {
+          const centerX = livingRoom.position.x + livingRoom.width / 2;
+          const centerZ = -(livingRoom.position.y + livingRoom.length / 2);
+          camera.position.set(centerX, 1.6, centerZ);
+          setCurrentRoom(livingRoom.id);
         } else {
-          // Start in the front area of the house (Z closer to 0, which is front)
-          // This puts us in the living room rather than the narrow hallway
           const centerX = (bounds.minX + bounds.maxX) / 2;
-          const frontZ = bounds.maxZ - 2; // 2 meters from front wall
-          camera.position.set(centerX, 1.6, Math.min(frontZ, -2));
-          console.log('Camera starting at:', centerX, 1.6, Math.min(frontZ, -2));
+          const centerZ = (bounds.minZ + bounds.maxZ) / 2;
+          camera.position.set(centerX, 1.6, centerZ);
         }
         
         console.log('Camera at:', camera.position);
@@ -221,12 +271,10 @@ export default function Room3DViewer({
     // Touch handlers
     let touchId: number | null = null;
     const handleTouchStart = (e: TouchEvent) => {
-      // Prevent browser gestures (pull-to-refresh, swipe-back)
       e.preventDefault();
       
       if (e.touches.length === 1) {
         const touch = e.touches[0];
-        // Only use right side of screen for looking (left has joystick)
         if (touch.clientX > window.innerWidth * 0.4) {
           isDragging = true;
           touchId = touch.identifier;
@@ -237,7 +285,6 @@ export default function Room3DViewer({
       }
     };
     const handleTouchMove = (e: TouchEvent) => {
-      // Prevent browser gestures (pull-to-refresh, swipe-back)
       e.preventDefault();
       
       if (!isDragging || touchId === null) return;
@@ -295,7 +342,7 @@ export default function Room3DViewer({
       requestAnimationFrame(animate);
       
       const now = performance.now();
-      const delta = Math.min((now - lastTime) / 1000, 0.1); // Cap delta to prevent huge jumps
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
       // Get mobile keys
@@ -363,7 +410,7 @@ export default function Room3DViewer({
       }
       sceneRef.current = null;
     };
-  }, [modelUrl, houseWidth, houseLength, startPosition, onLoad, onError]);
+  }, [modelUrl, houseWidth, houseLength, startPosition, rooms, onLoad, onError]);
 
   // Error state
   if (error) {
@@ -396,22 +443,54 @@ export default function Room3DViewer({
         style={{ touchAction: 'none', overscrollBehavior: 'none' }}
       />
       
-      {/* Control buttons */}
+      {/* Control buttons - top right */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">
+        {rooms.length > 0 && (
+          <button
+            onClick={() => setShowRoomList(!showRoomList)}
+            className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg"
+            title="רשימת חדרים"
+          >
+            📋
+          </button>
+        )}
         <button
           onClick={resetCamera}
-          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2"
+          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg"
           title="אפס מיקום"
         >
           🏠
         </button>
         <button
           onClick={toggleFullscreen}
-          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2"
+          className="bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg"
         >
           {isFullscreen ? "✕" : "⛶"}
         </button>
       </div>
+
+      {/* Room list panel - right side */}
+      {!loading && rooms.length > 0 && showRoomList && (
+        <div className="absolute top-20 right-4 z-20 bg-gray-900/90 backdrop-blur-sm rounded-xl p-3 max-h-[60vh] overflow-y-auto" dir="rtl">
+          <h3 className="text-white font-bold text-sm mb-2 border-b border-gray-700 pb-2">🏠 חדרים</h3>
+          <div className="space-y-1">
+            {rooms.map((room) => (
+              <button
+                key={room.id}
+                onClick={() => teleportToRoom(room)}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+                  currentRoom === room.id
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-800/50 text-gray-200 hover:bg-gray-700"
+                }`}
+              >
+                <span>{ROOM_ICONS[room.type] || "🚪"}</span>
+                <span>{room.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Loading */}
       {loading && (
@@ -436,6 +515,11 @@ export default function Room3DViewer({
             <p className="text-sm text-gray-400">
               {isMobile ? "גררו להסתכל • חצים לתנועה" : "גררו להסתכל • WASD לתנועה"}
             </p>
+            {rooms.length > 0 && (
+              <p className="text-xs text-gray-500 mt-2">
+                לחצו על 📋 לרשימת חדרים
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -446,45 +530,45 @@ export default function Room3DViewer({
           <div className="grid grid-cols-3 gap-1">
             <div />
             <button
-              className="w-16 h-16 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
+              className="w-14 h-14 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
               onTouchStart={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: true }; }}
               onTouchEnd={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: false }; }}
             >
-              <span className="text-white text-2xl">▲</span>
+              <span className="text-white text-xl">▲</span>
             </button>
             <div />
             <button
-              className="w-16 h-16 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
+              className="w-14 h-14 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
               onTouchStart={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: true }; }}
               onTouchEnd={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: false }; }}
             >
-              <span className="text-white text-2xl">◀</span>
+              <span className="text-white text-xl">◀</span>
             </button>
-            <div className="w-16 h-16" />
+            <div className="w-14 h-14" />
             <button
-              className="w-16 h-16 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
+              className="w-14 h-14 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
               onTouchStart={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: true }; }}
               onTouchEnd={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: false }; }}
             >
-              <span className="text-white text-2xl">▶</span>
+              <span className="text-white text-xl">▶</span>
             </button>
             <div />
             <button
-              className="w-16 h-16 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
+              className="w-14 h-14 bg-white/30 rounded-xl flex items-center justify-center active:bg-white/50 select-none"
               onTouchStart={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: true }; }}
               onTouchEnd={(e) => { e.stopPropagation(); (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: false }; }}
             >
-              <span className="text-white text-2xl">▼</span>
+              <span className="text-white text-xl">▼</span>
             </button>
             <div />
           </div>
         </div>
       )}
       
-      {/* Hint */}
-      {!loading && isMobile && !showInstructions && (
-        <div className="absolute bottom-6 right-4 z-10 bg-gray-900/60 text-white text-xs px-3 py-2 rounded-lg">
-          👆 גררו להסתכל
+      {/* Current room indicator */}
+      {!loading && currentRoom && rooms.length > 0 && (
+        <div className="absolute bottom-4 right-4 z-10 bg-gray-900/70 text-white text-sm px-3 py-2 rounded-lg">
+          📍 {rooms.find(r => r.id === currentRoom)?.name || currentRoom}
         </div>
       )}
     </div>

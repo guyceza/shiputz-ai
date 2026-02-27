@@ -154,15 +154,16 @@ export default function Room3DViewer({
         
         scene.add(model);
         
-        // Set start position - center of model bounds at eye height
+        // Set start position - near the front of the house (living room area)
         if (startPosition) {
           camera.position.set(startPosition.x, startPosition.y, startPosition.z);
         } else {
-          // Start in center of model at eye height
+          // Start in the front area of the house (Z closer to 0, which is front)
+          // This puts us in the living room rather than the narrow hallway
           const centerX = (bounds.minX + bounds.maxX) / 2;
-          const centerZ = (bounds.minZ + bounds.maxZ) / 2;
-          camera.position.set(centerX, 1.6, centerZ);
-          console.log('Camera starting at:', centerX, 1.6, centerZ);
+          const frontZ = bounds.maxZ - 2; // 2 meters from front wall
+          camera.position.set(centerX, 1.6, Math.min(frontZ, -2));
+          console.log('Camera starting at:', centerX, 1.6, Math.min(frontZ, -2));
         }
         
         console.log('Camera at:', camera.position);

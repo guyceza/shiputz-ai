@@ -123,7 +123,14 @@ export async function POST(request: NextRequest) {
     // Parse JSON from response
     try {
       // Remove markdown code blocks if present
-      const cleanJson = text.replace(/```json\n?|\n?```/g, "").trim();
+      let cleanJson = text.replace(/```json\n?|\n?```/g, "").trim();
+      
+      // Try to extract JSON object if there's extra text
+      const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanJson = jsonMatch[0];
+      }
+      
       const analysis: BlueprintAnalysis = JSON.parse(cleanJson);
       
       if ("error" in analysis) {
@@ -133,8 +140,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(analysis);
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", text);
+      // Return a more helpful error with a snippet of the response
       return NextResponse.json(
-        { error: "Failed to parse blueprint analysis" },
+        { 
+          error: "Failed to parse blueprint analysis",
+          debug: text?.substring(0, 200) 
+        },
         { status: 500 }
       );
     }

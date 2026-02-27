@@ -4,20 +4,20 @@
  * כל שמות המודלים במקום אחד!
  * אם גוגל משנים שמות - מעדכנים רק פה.
  * 
- * Last updated: 2026-02-24
+ * Last updated: 2026-02-27
  * Docs: https://ai.google.dev/models/gemini
  */
 
 export const AI_MODELS = {
   // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  // TODO: Migrate to gemini-3.1-pro-preview before March 9, 2026
   VISION_PRO: "gemini-3-pro-preview",
   
   // For fast text tasks (chat support, simple Q&A)
   TEXT_FAST: "gemini-3-flash-preview",
   
-  // For image generation (Nano Banana Pro)
-  IMAGE_GEN: "gemini-3-pro-image-preview",
+  // For image generation + all AI tasks (Nano Banana 2)
+  // Upgraded 2026-02-27: 63% faster than Nano Banana Pro!
+  IMAGE_GEN: "gemini-3.1-flash-image-preview",
 } as const;
 
 // Base URL for Gemini API
@@ -46,7 +46,7 @@ export const MODEL_CAPABILITIES = {
     vision: true,
     text: true,
     imageGeneration: true,
-    maxTokens: 8192,
-    description: "Nano Banana Pro - image generation"
+    maxTokens: 65536,
+    description: "Nano Banana 2 - 63% faster, double output tokens"
   },
 } as const;

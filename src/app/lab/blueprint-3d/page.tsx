@@ -208,7 +208,13 @@ export default function BlueprintTo3DPage() {
 
             {error && (
               <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center">
-                {error}
+                <p>{error}</p>
+                <button 
+                  onClick={() => setError(null)}
+                  className="mt-2 text-sm underline"
+                >
+                  נסה שוב
+                </button>
               </div>
             )}
 

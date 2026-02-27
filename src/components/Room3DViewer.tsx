@@ -369,42 +369,47 @@ export default function Room3DViewer({
         if (w || s) velocity.z -= direction.z * moveSpeed * delta;
         if (a || d) velocity.x -= direction.x * moveSpeed * delta;
 
-        // Store position before move
-        const prevX = camera.position.x;
-        const prevZ = camera.position.z;
+        // Get boundary limits
+        const bounds = modelBoundsRef.current;
+        const margin = 1.0;
         
-        controls.moveRight(-velocity.x);
-        controls.moveForward(-velocity.z);
+        const minX = bounds ? bounds.min.x + margin : margin;
+        const maxX = bounds ? bounds.max.x - margin : boundaryWidth - margin;
+        const minZ = bounds ? bounds.min.z + margin : margin;
+        const maxZ = bounds ? bounds.max.z - margin : boundaryLength - margin;
+
+        // Calculate where we WOULD move to
+        const moveX = -velocity.x;
+        const moveZ = -velocity.z;
+        
+        // Get camera direction
+        const cameraDirection = new THREE.Vector3();
+        camera.getWorldDirection(cameraDirection);
+        
+        // Calculate new position
+        let newX = camera.position.x;
+        let newZ = camera.position.z;
+        
+        // Forward/backward movement
+        newX += cameraDirection.x * moveZ;
+        newZ += cameraDirection.z * moveZ;
+        
+        // Left/right strafe
+        const rightDir = new THREE.Vector3();
+        rightDir.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)).normalize();
+        newX += rightDir.x * moveX;
+        newZ += rightDir.z * moveX;
+        
+        // Only apply movement if within bounds
+        if (newX >= minX && newX <= maxX) {
+          camera.position.x = newX;
+        }
+        if (newZ >= minZ && newZ <= maxZ) {
+          camera.position.z = newZ;
+        }
 
         // Keep camera at standing height
         camera.position.y = 1.6;
-
-        // Boundary checking using actual model bounds or fallback to props
-        const bounds = modelBoundsRef.current;
-        const margin = 1.0; // Larger margin to stay inside
-        
-        let minX, maxX, minZ, maxZ;
-        if (bounds) {
-          minX = bounds.min.x + margin;
-          maxX = bounds.max.x - margin;
-          minZ = bounds.min.z + margin;
-          maxZ = bounds.max.z - margin;
-        } else {
-          minX = margin;
-          maxX = boundaryWidth - margin;
-          minZ = margin;
-          maxZ = boundaryLength - margin;
-        }
-        
-        // Clamp position to boundaries
-        if (camera.position.x < minX || camera.position.x > maxX ||
-            camera.position.z < minZ || camera.position.z > maxZ) {
-          // Revert to previous position if out of bounds
-          camera.position.x = Math.max(minX, Math.min(maxX, prevX));
-          camera.position.z = Math.max(minZ, Math.min(maxZ, prevZ));
-          velocity.x = 0;
-          velocity.z = 0;
-        }
       }
 
       renderer.render(scene, camera);

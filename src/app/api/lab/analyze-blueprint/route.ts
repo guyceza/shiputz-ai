@@ -53,8 +53,8 @@ Estimate dimensions in meters if not written.
 
 If this is not a floor plan, return: {"error": "Not a floor plan"}`;
 
-    // Use VISION_PRO model for better vision understanding
-    const response = await fetch(`${getGeminiUrl("VISION_PRO")}?key=${apiKey}`, {
+    // Use TEXT_FAST model (has vision capability)
+    const response = await fetch(`${getGeminiUrl("TEXT_FAST")}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -74,6 +74,7 @@ If this is not a floor plan, return: {"error": "Not a floor plan"}`;
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 2048,
+          responseMimeType: "application/json",
         },
       }),
     });

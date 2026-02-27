@@ -9,14 +9,15 @@
  */
 
 export const AI_MODELS = {
-  // For complex text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-2.5-pro",
+  // For text + vision tasks (receipt scanning, quote analysis, etc.)
+  VISION_PRO: "gemini-3-pro-preview",
   
-  // For fast text + vision tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-2.5-flash",
+  // For fast text tasks (chat support, simple Q&A)
+  TEXT_FAST: "gemini-3-flash-preview",
   
-  // For image generation tasks
-  IMAGE_GEN: "gemini-2.5-flash-image",
+  // For image generation + all AI tasks (Nano Banana 2)
+  // Upgraded 2026-02-27: 63% faster than Nano Banana Pro!
+  IMAGE_GEN: "gemini-3.1-flash-image-preview",
 } as const;
 
 // Base URL for Gemini API

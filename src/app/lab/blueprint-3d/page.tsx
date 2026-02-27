@@ -44,19 +44,31 @@ export default function BlueprintTo3DPage() {
     setError(null);
 
     try {
-      // Step 1: Analyze blueprint with Gemini
-      const analyzeRes = await fetch("/api/lab/analyze-blueprint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageData }),
-      });
+      // Step 1: Analyze blueprint with Gemini (with retry)
+      let analyzeData;
+      let retries = 2;
+      
+      while (retries >= 0) {
+        try {
+          const analyzeRes = await fetch("/api/lab/analyze-blueprint", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: imageData }),
+          });
 
-      if (!analyzeRes.ok) {
-        const err = await analyzeRes.json();
-        throw new Error(err.error || "שגיאה בניתוח התוכנית");
+          if (!analyzeRes.ok) {
+            const err = await analyzeRes.json();
+            throw new Error(err.error || "שגיאה בניתוח התוכנית");
+          }
+
+          analyzeData = await analyzeRes.json();
+          break; // Success, exit retry loop
+        } catch (e) {
+          if (retries === 0) throw e;
+          retries--;
+          await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+        }
       }
-
-      const analyzeData = await analyzeRes.json();
       setAnalysis(analyzeData);
       
       // Step 2: Generate GLTF

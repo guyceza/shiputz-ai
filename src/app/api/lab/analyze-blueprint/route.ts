@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
 אם זו לא תוכנית אדריכלית, החזר: {"error": "זו לא תוכנית אדריכלית"}`;
 
-    const response = await fetch(getGeminiUrl("TEXT_FAST"), {
+    const response = await fetch(`${getGeminiUrl("TEXT_FAST")}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

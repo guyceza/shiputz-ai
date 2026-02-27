@@ -23,63 +23,37 @@ export async function POST(request: NextRequest) {
     const prompt = `נתח תוכנית אדריכלית והחזר JSON.
 
 **כללי ברזל:**
-1. לכל חדר position ייחודי - אסור שני חדרים באותו (x,y)
-2. חדרים צמודים חולקים גבול: אם A נגמר ב-x=3, B מתחיל ב-x=3
+1. לכל חדר position ייחודי - אסור חפיפה
+2. חדרים צמודים חולקים גבול (A נגמר ב-x=3, B מתחיל ב-x=3)
 3. מידות בס"מ→מטרים: 645 = 6.45 מטר
-4. wall: front(y נמוך), back(y גבוה), left(x נמוך), right(x גבוה)
+4. סוגים תקפים: living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
 
-**סריקה:**
-1. מצא את הפינה השמאלית-תחתונה = (0,0)
-2. לך משמאל לימין, מלמטה למעלה
-3. לכל חדר רשום: רוחב, אורך, נקודת התחלה
+**חפש בקפידה:**
+- מטבחון/קיטשנט: אפילו משטח עבודה קטן עם כיור = type:"kitchen"
+- מרפסת: קו מקווקו (---) = שטח חיצוני. אם המרפסת משמאל לדירה, position.x יהיה שלילי!
+- מדרגות: type:"hallway" (לא "stairs")
 
-**זיהוי:**
-- מטבח: משטח עבודה עם כיור (גם קטן/קיטשנט)
-- חדר רחצה: אסלה + אמבט/מקלחון
-- סלון: ספה, פינת ישיבה
-- חדר שינה: מיטה
-- מרפסת: קו מקווקו (---), כתוב "מרפסת"
-- מדרגות: מדרגות מצוירות
+**wall:**
+- front = קיר y נמוך (קדמי)
+- back = קיר y גבוה (אחורי)  
+- left = קיר x נמוך (שמאלי)
+- right = קיר x גבוה (ימני)
 
-**חדר משולב:**
-אם סלון+שינה באותו חלל = type:"living", name:"סלון ושינה"
-
-**JSON בלבד:**
+**דוגמה לדירת סטודיו:**
 {
   "rooms": [
-    {
-      "id": "bathroom",
-      "name": "חדר רחצה",
-      "type": "bathroom",
-      "width": 2.5,
-      "length": 2,
-      "position": {"x": 0, "y": 0},
-      "doors": [{"wall": "back", "position": 0.5}],
-      "windows": []
-    },
-    {
-      "id": "kitchen",
-      "name": "מטבחון",
-      "type": "kitchen",
-      "width": 2,
-      "length": 2,
-      "position": {"x": 2.5, "y": 0},
-      "doors": [],
-      "windows": []
-    },
-    {
-      "id": "living",
-      "name": "סלון ושינה",
-      "type": "living",
-      "width": 4.5,
-      "length": 4,
-      "position": {"x": 0, "y": 2},
-      "doors": [{"wall": "front", "position": 0.3}],
-      "windows": [{"wall": "back", "position": 0.5}]
-    }
+    {"id": "bathroom", "name": "חדר רחצה", "type": "bathroom", "width": 2.5, "length": 1.5, "position": {"x": 0, "y": 0}, "doors": [{"wall": "back", "position": 0.5}], "windows": []},
+    {"id": "kitchen", "name": "מטבחון", "type": "kitchen", "width": 1.5, "length": 1.5, "position": {"x": 2.5, "y": 0}, "doors": [], "windows": []},
+    {"id": "stairs", "name": "מדרגות", "type": "hallway", "width": 2, "length": 2.5, "position": {"x": 4, "y": 0}, "doors": [], "windows": []},
+    {"id": "living", "name": "סלון ושינה", "type": "living", "width": 6, "length": 5, "position": {"x": 0, "y": 1.5}, "doors": [{"wall": "front", "position": 0.3}], "windows": [{"wall": "back", "position": 0.5}]},
+    {"id": "balcony", "name": "מרפסת", "type": "balcony", "width": 1.5, "length": 3, "position": {"x": -1.5, "y": 2}, "doors": [], "windows": []}
   ],
-  "totalArea": 27
-}`;
+  "totalArea": 35
+}
+
+**שים לב:** בדוגמה המרפסת ב-x שלילי כי היא משמאל לדירה.
+
+נתח את התמונה והחזר JSON בלבד:`;
 
     const response = await fetch(`${getGeminiUrl("IMAGE_GEN")}?key=${apiKey}`, {
       method: "POST",

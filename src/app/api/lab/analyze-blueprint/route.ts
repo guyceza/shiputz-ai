@@ -20,54 +20,44 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
 
-    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית ויצור מודל תלת-ממדי.
+    const prompt = `נתח תוכנית אדריכלית והחזר JSON של חדרים למודל 3D.
 
-**מערכת הצירים:**
-- X = ציר אופקי (שמאל לימין), מתחיל מ-0
-- Y = ציר אנכי (מלמטה למעלה), מתחיל מ-0
-- החדר השמאלי-תחתון ביותר מתחיל ב-(0,0)
-- חדרים צמודים צריכים לשתף קואורדינטות (אם חדר A נגמר ב-x=5, חדר B מתחיל ב-x=5)
+**מערכת צירים:**
+- (0,0) = פינה שמאלית-תחתונה של הדירה
+- X = ימינה, Y = למעלה
+- חדרים צמודים חולקים קואורדינטות (אם סלון נגמר ב-x=5, מטבח מתחיל ב-x=5)
 
-**כללים חשובים:**
-1. מדוד מידות במטרים - אם לא כתוב, הערך לפי יחסים
-2. כל חדר חייב position עם x,y שמתחברים לשכנים
-3. דלתות: ציין על איזה קיר (front/back/left/right) ואיפה (0-1)
-4. חדרים חייבים להתחבר - אם סלון מימין למטבח, הם חולקים קיר
+**דלתות - חשוב!**
+- דלת בין שני חדרים נרשמת רק בחדר אחד (לא בשניהם)
+- position = מיקום על הקיר (0=התחלה, 0.5=אמצע, 1=סוף)
+- wall: front/back/left/right מנקודת המבט של החדר
 
-**פורמט תגובה (JSON בלבד, בלי markdown):**
+**סוגי חדרים:** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
+
+**פורמט - JSON בלבד:**
 {
   "rooms": [
     {
       "id": "living",
-      "name": "סלון", 
+      "name": "סלון",
       "type": "living",
       "width": 5,
       "length": 4,
       "position": {"x": 0, "y": 0},
       "doors": [{"wall": "right", "position": 0.5}],
-      "windows": [{"wall": "front", "position": 0.5, "width": 1.5}]
-    },
-    {
-      "id": "kitchen",
-      "name": "מטבח",
-      "type": "kitchen", 
-      "width": 3,
-      "length": 4,
-      "position": {"x": 5, "y": 0},
-      "doors": [{"wall": "left", "position": 0.5}],
-      "windows": []
+      "windows": [{"wall": "front", "position": 0.5}]
     }
   ],
-  "totalArea": 32
+  "totalArea": 75
 }
 
-**בדוגמה למעלה:** סלון (5x4) נמצא ב-(0,0), מטבח (3x4) נמצא ב-(5,0) - הם צמודים כי סלון נגמר ב-x=5 ומטבח מתחיל ב-x=5.
+**הנחיות:**
+1. מידות במטרים - אם לא כתוב, הערך לפי פרופורציות סטנדרטיות (דלת=0.9מ')
+2. חלונות רק בקירות חיצוניים
+3. כל חדר חייב דרך גישה (דלת או פתח)
+4. אם התמונה לא ברורה - הערך לפי הגיון (דירה ממוצעת 80-100 מ"ר)
 
-**סוגי חדרים:** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
-
-**קירות:** front (y מינימלי), back (y מקסימלי), left (x מינימלי), right (x מקסימלי)
-
-נתח את התוכנית והחזר JSON בלבד:`;
+החזר JSON בלבד, בלי markdown:`;
 
     const response = await fetch(`${getGeminiUrl("IMAGE_GEN")}?key=${apiKey}`, {
       method: "POST",

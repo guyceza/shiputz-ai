@@ -178,6 +178,13 @@ export default function Room3DViewer({
       (gltf) => {
         const model = gltf.scene;
         
+        // Calculate model bounds and center it
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        
+        console.log('Model bounds:', { center, size, min: box.min, max: box.max });
+        
         // Enable shadows on all meshes
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
@@ -187,6 +194,12 @@ export default function Room3DViewer({
         });
         
         scene.add(model);
+        
+        // If no custom start position, place camera inside the model
+        if (!startPosition) {
+          camera.position.set(center.x, 1.6, center.z);
+        }
+        
         setLoading(false);
         onLoad?.();
       },
@@ -372,7 +385,7 @@ export default function Room3DViewer({
       renderer.dispose();
       container.removeChild(renderer.domElement);
     };
-  }, [modelUrl, roomWidth, roomLength, onLoad, onError]);
+  }, [modelUrl, roomWidth, roomLength, startPosition, startRotation, onLoad, onError]);
 
   return (
     <div ref={wrapperRef} className="relative w-full h-full bg-black">
@@ -411,10 +424,13 @@ export default function Room3DViewer({
         </div>
       )}
 
-      {/* Instructions overlay */}
+      {/* Instructions overlay - click anywhere to start */}
       {!loading && !isLocked && !isMobile && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer">
-          <div className="text-center text-white p-6 bg-gray-900/90 rounded-xl max-w-sm">
+        <div 
+          className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer"
+          onClick={() => containerRef.current?.click()}
+        >
+          <div className="text-center text-white p-6 bg-gray-900/90 rounded-xl max-w-sm pointer-events-none">
             <p className="text-2xl mb-4">🏠</p>
             <p className="text-lg font-semibold mb-2">לחצו להתחיל סיור</p>
             <p className="text-sm text-gray-400">

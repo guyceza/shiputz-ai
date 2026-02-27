@@ -131,6 +131,17 @@ export default function BlueprintTo3DPage() {
   }, [gltfData]);
 
   const largestRoom = analysis?.rooms?.[0] || { width: 4, length: 5 };
+  
+  // Calculate house bounds from all rooms
+  const houseBounds = analysis?.rooms?.reduce((bounds: any, room: any) => {
+    const pos = room.position || { x: 0, y: 0 };
+    const maxX = pos.x + room.width;
+    const maxY = pos.y + room.length;
+    return {
+      width: Math.max(bounds.width, maxX),
+      length: Math.max(bounds.length, maxY),
+    };
+  }, { width: 0, length: 0 }) || { width: largestRoom.width, length: largestRoom.length };
 
   return (
     <div className="container mx-auto px-4 py-8" dir="rtl">
@@ -213,6 +224,8 @@ export default function BlueprintTo3DPage() {
                       modelUrl={gltfData}
                       roomWidth={largestRoom.width}
                       roomLength={largestRoom.length}
+                      houseWidth={houseBounds.width}
+                      houseLength={houseBounds.length}
                     />
                   ) : step === "done" && viewMode === "image" && render3D ? (
                     <img

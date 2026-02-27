@@ -9,6 +9,8 @@ interface Room3DViewerProps {
   modelUrl: string;
   roomWidth?: number;
   roomLength?: number;
+  houseWidth?: number;
+  houseLength?: number;
   onLoad?: () => void;
   onError?: (error: string) => void;
 }
@@ -17,9 +19,14 @@ export default function Room3DViewer({
   modelUrl,
   roomWidth = 4,
   roomLength = 5,
+  houseWidth,
+  houseLength,
   onLoad,
   onError,
 }: Room3DViewerProps) {
+  // Use house dimensions if provided, otherwise room dimensions
+  const boundaryWidth = houseWidth || roomWidth;
+  const boundaryLength = houseLength || roomLength;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,7 +51,10 @@ export default function Room3DViewer({
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(roomWidth / 2, 1.6, roomLength - 0.5); // Standing height, near entrance
+    // Start position - center of house/room, near the "entrance" (high Z)
+    const startX = boundaryWidth / 2;
+    const startZ = Math.min(boundaryLength - 0.5, roomLength - 0.5);
+    camera.position.set(startX, 1.6, startZ); // Standing height
 
     // Renderer with high quality settings
     const renderer = new THREE.WebGLRenderer({
@@ -275,9 +285,9 @@ export default function Room3DViewer({
         // Keep camera at standing height
         camera.position.y = 1.6;
 
-        // Boundary checking
-        camera.position.x = Math.max(0.3, Math.min(roomWidth - 0.3, camera.position.x));
-        camera.position.z = Math.max(0.3, Math.min(roomLength - 0.3, camera.position.z));
+        // Boundary checking (use house dimensions if available)
+        camera.position.x = Math.max(0.3, Math.min(boundaryWidth - 0.3, camera.position.x));
+        camera.position.z = Math.max(0.3, Math.min(boundaryLength - 0.3, camera.position.z));
       }
 
       renderer.render(scene, camera);

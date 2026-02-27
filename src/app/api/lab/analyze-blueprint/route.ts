@@ -74,7 +74,6 @@ If this is not a floor plan, return: {"error": "Not a floor plan"}`;
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 2048,
-          responseMimeType: "application/json",
         },
       }),
     });

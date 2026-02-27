@@ -131,10 +131,11 @@ export default function Room3DViewer({
       (progress) => {
         console.log("Loading:", (progress.loaded / progress.total) * 100 + "%");
       },
-      (error) => {
+      (error: unknown) => {
         console.error("GLTF load error:", error);
         setLoading(false);
-        onError?.(error.message || "Failed to load 3D model");
+        const errorMessage = error instanceof Error ? error.message : "Failed to load 3D model";
+        onError?.(errorMessage);
       }
     );
 

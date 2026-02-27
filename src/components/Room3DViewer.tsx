@@ -11,6 +11,8 @@ interface Room3DViewerProps {
   roomLength?: number;
   houseWidth?: number;
   houseLength?: number;
+  startPosition?: { x: number; y: number; z: number };
+  startRotation?: number; // Y rotation in radians
   onLoad?: () => void;
   onError?: (error: string) => void;
 }
@@ -21,6 +23,8 @@ export default function Room3DViewer({
   roomLength = 5,
   houseWidth,
   houseLength,
+  startPosition,
+  startRotation,
   onLoad,
   onError,
 }: Room3DViewerProps) {
@@ -90,10 +94,19 @@ export default function Room3DViewer({
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    // Start position - center of house/room, near the "entrance" (high Z)
-    const startX = boundaryWidth / 2;
-    const startZ = Math.min(boundaryLength - 0.5, roomLength - 0.5);
-    camera.position.set(startX, 1.6, startZ); // Standing height
+    // Start position - use custom or default to center of largest room
+    if (startPosition) {
+      camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+    } else {
+      // Default: start in the living room area (first room, usually largest)
+      const defaultX = Math.min(3, boundaryWidth / 2);
+      const defaultZ = Math.min(3, boundaryLength / 2);
+      camera.position.set(defaultX, 1.6, defaultZ);
+    }
+    // Apply starting rotation if provided
+    if (startRotation !== undefined) {
+      camera.rotation.y = startRotation;
+    }
 
     // Renderer with high quality settings
     const renderer = new THREE.WebGLRenderer({

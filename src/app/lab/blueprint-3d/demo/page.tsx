@@ -27,6 +27,8 @@ export default function DemoHousePage() {
         modelUrl="/models/demo-house.glb"
         houseWidth={16}
         houseLength={11}
+        startPosition={{ x: 4, y: 1.6, z: 5 }}
+        startRotation={Math.PI}
       />
 
       {/* Controls hint */}

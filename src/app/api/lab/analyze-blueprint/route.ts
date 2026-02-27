@@ -20,44 +20,52 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
 
-    const prompt = `נתח תוכנית אדריכלית והחזר JSON של חדרים למודל 3D.
+    const prompt = `אתה מנתח תוכניות אדריכליות. נתח את התמונה והחזר JSON מדויק.
 
-**מערכת צירים:**
-- (0,0) = פינה שמאלית-תחתונה של הדירה
-- X = ימינה, Y = למעלה
-- חדרים צמודים חולקים קואורדינטות (אם סלון נגמר ב-x=5, מטבח מתחיל ב-x=5)
+**שלב 1 - קרא מידות:**
+- חפש מספרים בתמונה (בד"כ בס"מ: 645 = 6.45 מטר)
+- אם אין מידות, הערך לפי דלת סטנדרטית (90 ס"מ)
 
-**דלתות - חשוב!**
-- דלת בין שני חדרים נרשמת רק בחדר אחד (לא בשניהם)
-- position = מיקום על הקיר (0=התחלה, 0.5=אמצע, 1=סוף)
-- wall: front/back/left/right מנקודת המבט של החדר
+**שלב 2 - זהה חדרים:**
+- סלון/מגורים: ספות, שולחן, טלוויזיה
+- חדר שינה: מיטה
+- מטבח: כיריים, כיור מטבח, משטח עבודה
+- חדר רחצה: אסלה, אמבטיה/מקלחת, כיור
+- מרפסת: קו מקווקו, פתוח לחוץ
+- מסדרון/חדר מדרגות: מדרגות, מעבר
 
-**סוגי חדרים:** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
+**שלב 3 - בנה רשת קואורדינטות:**
+- (0,0) = פינה שמאלית-תחתונה
+- X גדל ימינה, Y גדל למעלה
+- width = מימד ב-X, length = מימד ב-Y
+- חדרים צמודים חייבים לחלוק קואורדינטות:
+  אם חדר A נגמר ב-x=3, חדר B מתחיל ב-x=3
 
-**פורמט - JSON בלבד:**
+**שלב 4 - דלתות:**
+- דלת בין 2 חדרים = רשום רק בחדר אחד
+- wall: front(y נמוך)/back(y גבוה)/left(x נמוך)/right(x גבוה)
+- position: 0-1 לאורך הקיר (0.5=אמצע)
+
+**פורמט JSON (בלי markdown!):**
 {
   "rooms": [
     {
       "id": "living",
       "name": "סלון",
       "type": "living",
-      "width": 5,
-      "length": 4,
-      "position": {"x": 0, "y": 0},
-      "doors": [{"wall": "right", "position": 0.5}],
-      "windows": [{"wall": "front", "position": 0.5}]
+      "width": 4.5,
+      "length": 3.8,
+      "position": {"x": 0, "y": 2.5},
+      "doors": [{"wall": "front", "position": 0.5}],
+      "windows": [{"wall": "back", "position": 0.5}]
     }
   ],
-  "totalArea": 75
+  "totalArea": 55
 }
 
-**הנחיות:**
-1. מידות במטרים - אם לא כתוב, הערך לפי פרופורציות סטנדרטיות (דלת=0.9מ')
-2. חלונות רק בקירות חיצוניים
-3. כל חדר חייב דרך גישה (דלת או פתח)
-4. אם התמונה לא ברורה - הערך לפי הגיון (דירה ממוצעת 80-100 מ"ר)
+סוגי חדרים: living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
 
-החזר JSON בלבד, בלי markdown:`;
+החזר JSON בלבד:`;
 
     const response = await fetch(`${getGeminiUrl("IMAGE_GEN")}?key=${apiKey}`, {
       method: "POST",

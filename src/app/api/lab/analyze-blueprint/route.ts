@@ -36,25 +36,59 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || "image/jpeg";
 
-    const prompt = `Analyze this architectural floor plan. Extract all rooms with their dimensions.
+    const prompt = `אתה מומחה לקריאת תוכניות אדריכליות. נתח את התוכנית וחלץ מידע מפורט על כל החדרים.
 
-Return ONLY valid JSON (no markdown, no explanation):
+**חשוב מאוד:**
+- חלץ את כל החדרים שאתה רואה בתוכנית
+- הערך מידות במטרים (אם לא כתוב, הערך לפי פרופורציות)
+- ציין איפה כל חדר נמצא ביחס לאחרים
+- ציין איפה יש דלתות/מעברים בין חדרים
+
+החזר JSON בפורמט הבא בלבד (ללא markdown):
 {
   "rooms": [
-    {"id": "room1", "name": "Living Room", "type": "living", "width": 4.5, "length": 6.0, "position": {"x": 0, "y": 0}},
-    {"id": "room2", "name": "Kitchen", "type": "kitchen", "width": 3.0, "length": 4.0, "position": {"x": 4.5, "y": 0}}
+    {
+      "id": "living",
+      "name": "סלון",
+      "type": "living",
+      "width": 4.5,
+      "length": 6.0,
+      "position": {"x": 0, "y": 0},
+      "doors": [
+        {"to": "kitchen", "wall": "right", "position": 0.5},
+        {"to": "hallway", "wall": "back", "position": 0.3}
+      ],
+      "windows": [{"wall": "front", "position": 0.5, "width": 1.5}],
+      "features": ["מרפסת"]
+    },
+    {
+      "id": "kitchen",
+      "name": "מטבח",
+      "type": "kitchen",
+      "width": 3.0,
+      "length": 4.0,
+      "position": {"x": 4.5, "y": 0},
+      "doors": [{"to": "living", "wall": "left", "position": 0.5}],
+      "windows": [{"wall": "front", "position": 0.5, "width": 1.0}],
+      "features": []
+    }
   ],
-  "totalArea": 85
+  "totalArea": 85,
+  "floors": 1,
+  "style": "מודרני",
+  "notes": "דירת 3 חדרים"
 }
 
-Room types: living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
-Position: x,y coordinates where the room starts (in meters)
-Estimate dimensions in meters if not written.
+**סוגי חדרים (type):** living, kitchen, bedroom, bathroom, hallway, balcony, storage, office
 
-If this is not a floor plan, return: {"error": "Not a floor plan"}`;
+**קירות (wall):** front (קדמי/דרום), back (אחורי/צפון), left (שמאל/מערב), right (ימין/מזרח)
 
-    // Use TEXT_FAST model (has vision capability)
-    const response = await fetch(`${getGeminiUrl("TEXT_FAST")}?key=${apiKey}`, {
+**position:** מיקום הדלת/חלון על הקיר (0=התחלה, 0.5=אמצע, 1=סוף)
+
+אם זו לא תוכנית אדריכלית, החזר: {"error": "זו לא תוכנית אדריכלית"}`;
+
+    // Use IMAGE_GEN model for better vision understanding
+    const response = await fetch(`${getGeminiUrl("IMAGE_GEN")}?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

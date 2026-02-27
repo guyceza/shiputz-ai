@@ -28,9 +28,48 @@ export default function Room3DViewer({
   const boundaryWidth = houseWidth || roomWidth;
   const boundaryLength = houseLength || roomLength;
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fullscreen toggle function
+  const toggleFullscreen = async () => {
+    if (!wrapperRef.current) return;
+    
+    try {
+      if (!document.fullscreenElement) {
+        await wrapperRef.current.requestFullscreen();
+        setIsFullscreen(true);
+        // Lock screen orientation to landscape on mobile
+        if (screen.orientation && 'lock' in screen.orientation) {
+          try {
+            await (screen.orientation as any).lock('landscape');
+          } catch (e) {
+            // Orientation lock not supported, ignore
+          }
+        }
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+        if (screen.orientation && 'unlock' in screen.orientation) {
+          (screen.orientation as any).unlock();
+        }
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -267,17 +306,24 @@ export default function Room3DViewer({
       const delta = (time - prevTime) / 1000;
       prevTime = time;
 
-      // Movement
+      // Movement - merge keyboard keys with mobile virtual buttons
       if (controls.isLocked || mobile) {
         velocity.x -= velocity.x * 10 * delta;
         velocity.z -= velocity.z * 10 * delta;
 
-        direction.z = Number(keys.w) - Number(keys.s);
-        direction.x = Number(keys.d) - Number(keys.a);
+        // Get mobile virtual button state
+        const mobileKeys = (window as any).__mobileKeys || {};
+        const w = keys.w || mobileKeys.w;
+        const s = keys.s || mobileKeys.s;
+        const a = keys.a || mobileKeys.a;
+        const d = keys.d || mobileKeys.d;
+
+        direction.z = Number(w) - Number(s);
+        direction.x = Number(d) - Number(a);
         direction.normalize();
 
-        if (keys.w || keys.s) velocity.z -= direction.z * moveSpeed * delta;
-        if (keys.a || keys.d) velocity.x -= direction.x * moveSpeed * delta;
+        if (w || s) velocity.z -= direction.z * moveSpeed * delta;
+        if (a || d) velocity.x -= direction.x * moveSpeed * delta;
 
         controls.moveRight(-velocity.x);
         controls.moveForward(-velocity.z);
@@ -316,8 +362,31 @@ export default function Room3DViewer({
   }, [modelUrl, roomWidth, roomLength, onLoad, onError]);
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={wrapperRef} className="relative w-full h-full bg-black">
       <div ref={containerRef} className="w-full h-full" />
+      
+      {/* Fullscreen button */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute top-4 right-4 z-20 bg-gray-900/80 hover:bg-gray-800 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        title={isFullscreen ? "צא ממסך מלא" : "מסך מלא"}
+      >
+        {isFullscreen ? (
+          <>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span className="text-sm hidden sm:inline">יציאה</span>
+          </>
+        ) : (
+          <>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <span className="text-sm hidden sm:inline">מסך מלא</span>
+          </>
+        )}
+      </button>
       
       {/* Loading overlay */}
       {loading && (
@@ -344,12 +413,59 @@ export default function Room3DViewer({
         </div>
       )}
 
-      {/* Mobile instructions */}
+      {/* Mobile controls - virtual joystick */}
       {!loading && isMobile && (
-        <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-gray-900/80 text-white text-sm px-4 py-2 rounded-lg">
-            גררו להסתכל מסביב • שתי אצבעות להתקדם
+        <div className="absolute bottom-8 left-4 z-20">
+          <div className="grid grid-cols-3 gap-1">
+            <div />
+            <button
+              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
+              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: true }; }}
+              onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, w: false }; }}
+            >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 4l-8 8h16z" />
+              </svg>
+            </button>
+            <div />
+            <button
+              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
+              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: true }; }}
+              onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, a: false }; }}
+            >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 12l8-8v16z" />
+              </svg>
+            </button>
+            <div className="w-14 h-14" />
+            <button
+              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
+              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: true }; }}
+              onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, d: false }; }}
+            >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 12l-8 8V4z" />
+              </svg>
+            </button>
+            <div />
+            <button
+              className="w-14 h-14 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center active:bg-white/40 touch-none"
+              onTouchStart={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: true }; }}
+              onTouchEnd={() => { (window as any).__mobileKeys = { ...(window as any).__mobileKeys, s: false }; }}
+            >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 20l8-8H4z" />
+              </svg>
+            </button>
+            <div />
           </div>
+        </div>
+      )}
+      
+      {/* Mobile look hint */}
+      {!loading && isMobile && (
+        <div className="absolute bottom-8 right-4 z-20 bg-gray-900/60 text-white text-xs px-3 py-2 rounded-lg">
+          גררו על המסך<br/>להסתכל מסביב
         </div>
       )}
 

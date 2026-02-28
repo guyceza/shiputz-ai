@@ -120,6 +120,16 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Google Analytics GA4 */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-R50X5M6ZDL" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-R50X5M6ZDL');
+          `}
+        </Script>
         {/* Microsoft Clarity */}
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`

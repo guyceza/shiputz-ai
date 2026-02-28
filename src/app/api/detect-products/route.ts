@@ -152,10 +152,10 @@ Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array,
       console.error("[detect-products] Failed to parse product detection response:", parseError);
     }
 
-    return NextResponse.json({ items: [], debug: "no_items_parsed" });
+    return NextResponse.json({ items: [], debug: "no_items_parsed", responsePreview: responseText.substring(0, 200) });
 
   } catch (error) {
     console.error("Product detection error:", error);
-    return NextResponse.json({ items: [] });
+    return NextResponse.json({ items: [], error: String(error) });
   }
 }

@@ -774,6 +774,7 @@ export default function VisualizePage() {
       });
       
       const data = await res.json();
+      console.log("[Shop the Look] API response:", data);
       if (data.items && data.items.length > 0) {
         setDetectedProducts(data.items);
         

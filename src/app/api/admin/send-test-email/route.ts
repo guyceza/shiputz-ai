@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'guyceza@gmail.com').split(',').map(e => e.trim().toLowerCase());
+import { ADMIN_EMAILS } from '@/lib/admin';
 // Bug #3 fix: Never use hardcoded API keys - use env var only
 const RESEND_KEY = process.env.RESEND_API_KEY;
 

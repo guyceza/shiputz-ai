@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { getUsageStats, checkRateLimitWarning } from '@/lib/usage-monitor';
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Verify admin
 async function verifyAdmin(email: string | null): Promise<boolean> {

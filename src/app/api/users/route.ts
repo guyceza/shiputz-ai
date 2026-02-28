@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Note: Auth check removed - users can only query their own email
 // and the data exposed (purchase status, name) is not sensitive.

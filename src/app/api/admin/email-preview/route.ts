@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Import email templates - we'll read from the scripts file
 // For now, return a placeholder that tells them to check the actual file
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Simplified template generator for preview
 const generatePreview = (templateId: string): string => {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientId } from '@/lib/rate-limit';
 
 // List of admin emails
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'guyceza@gmail.com').split(',').map(e => e.trim().toLowerCase());
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Bug #2 fix: Add rate limiting to prevent email enumeration attacks
 export async function GET(request: NextRequest) {

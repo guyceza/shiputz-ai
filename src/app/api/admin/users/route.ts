@@ -6,7 +6,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
 
 // Admin emails
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Verify admin from auth header
 async function verifyAdmin(request: NextRequest): Promise<string | null> {

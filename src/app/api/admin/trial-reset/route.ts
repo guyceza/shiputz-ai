@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Verify admin exists in database (not just string match)
 async function verifyAdmin(email: string | null): Promise<boolean> {

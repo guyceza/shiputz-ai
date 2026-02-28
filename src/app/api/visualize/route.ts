@@ -8,7 +8,8 @@ import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-const ADMIN_EMAIL = process.env.ADMIN_EMAILS?.split(',')[0] || 'guyceza@gmail.com';
+import { ADMIN_EMAILS, isAdminEmail } from '@/lib/admin';
+const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 // Send notification to admin when API rate limit is hit
 async function notifyAdminRateLimit(apiName: string, status: number, errorDetails: string): Promise<void> {
@@ -448,7 +449,7 @@ export async function POST(request: NextRequest) {
       
       // Check monthly usage limit (10 per month for Vision subscribers)
       // Admin bypass - unlimited for owner
-      const isAdmin = userEmail.toLowerCase() === 'guyceza@gmail.com';
+      const isAdmin = isAdminEmail(userEmail);
       if (!isAdmin && subscription.monthlyUsage >= MONTHLY_VISION_LIMIT) {
         return NextResponse.json({ 
           error: `הגעת למכסה החודשית (${MONTHLY_VISION_LIMIT} יצירות). המכסה מתאפסת בתחילת החודש הבא.`,

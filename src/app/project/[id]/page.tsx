@@ -2057,15 +2057,6 @@ export default function ProjectPage() {
                           <div 
                             className="relative cursor-pointer group"
                             onClick={() => {
-                              // Save image and ID to localStorage for shop-look page
-                              localStorage.setItem('shopLookImage', item.afterImage);
-                              localStorage.setItem('shopLookVisionId', item.id);
-                              // If we have saved products, pass them too
-                              if (item.detectedProducts && item.detectedProducts.length > 0) {
-                                localStorage.setItem('shopLookProducts', JSON.stringify(item.detectedProducts));
-                              } else {
-                                localStorage.removeItem('shopLookProducts');
-                              }
                               window.open('/shop-look', '_blank');
                             }}
                           >

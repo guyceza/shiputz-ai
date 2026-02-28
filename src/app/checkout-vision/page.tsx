@@ -39,9 +39,8 @@ function CheckoutVisionContent() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check localStorage first
+        // Check localStorage
         const userData = localStorage.getItem("user");
-        const shiputzUserData = localStorage.getItem("shiputzai_user");
         
         let userEmail = "";
         let isPurchased = false;
@@ -51,14 +50,6 @@ function CheckoutVisionContent() {
           if (user.email && user.id) {
             userEmail = user.email;
             isPurchased = user.purchased === true;
-          }
-        }
-        
-        if (shiputzUserData) {
-          const shiputzUser = JSON.parse(shiputzUserData);
-          if (shiputzUser.email) {
-            userEmail = shiputzUser.email;
-            isPurchased = isPurchased || shiputzUser.purchased === true;
           }
         }
         

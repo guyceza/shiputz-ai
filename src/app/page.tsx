@@ -76,17 +76,17 @@ export default function Home() {
   const [subscribed, setSubscribed] = useState(false);
   const [showNewsletterPopup, setShowNewsletterPopup] = useState(false);
   
-  // Show newsletter popup after 10 seconds (only for non-logged-in users who haven't subscribed)
+  // Show newsletter popup after 10 seconds (only for LOGGED IN users who haven't subscribed)
   useEffect(() => {
     const checkNewsletter = async () => {
       // First check localStorage for quick response
       const localDismissed = localStorage.getItem('newsletter_popup_dismissed');
       if (localDismissed) return;
       
-      // If user is logged in - don't show popup
+      // Only show to logged in users
       const userData = localStorage.getItem("user");
-      if (userData) {
-        return; // Logged in users don't need newsletter popup
+      if (!userData) {
+        return; // Not logged in - don't show popup
       }
       
       // Check if already subscribed (by email in localStorage)

@@ -1488,6 +1488,7 @@ export default function VisualizePage() {
                 {hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
               </h3>
               <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
+              <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
             </div>
             
             {/* Image Upload */}
@@ -1510,7 +1511,7 @@ export default function VisualizePage() {
                     <p className="text-gray-600 font-medium">
                       {isDragOver ? 'שחרר כאן!' : 'לחץ או גרור תמונה לכאן'}
                     </p>
-                    <p className="text-gray-400 text-sm mt-2">JPG, PNG עד 10MB</p>
+                    <p className="text-gray-400 text-sm mt-2">JPG, PNG עד 10MB • ללא אנשים בתמונה</p>
                   </div>
                   <input
                     type="file"

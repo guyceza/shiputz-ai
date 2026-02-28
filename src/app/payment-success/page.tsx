@@ -14,17 +14,20 @@ function PaymentSuccessContent() {
   useEffect(() => {
     // Update localStorage to reflect purchase
     if (typeof window !== 'undefined') {
-      const userData = localStorage.getItem('shiputzai_user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        user.purchased = true;
-        if (product === 'vision') {
-          user.vision_active = true;
+      // Update both localStorage keys (shiputzai_user is legacy, user is current)
+      for (const key of ['user', 'shiputzai_user']) {
+        const data = localStorage.getItem(key);
+        if (data) {
+          const parsed = JSON.parse(data);
+          parsed.purchased = true;
+          if (product === 'vision') {
+            parsed.vision_active = true;
+          }
+          if (product === 'premium_plus') {
+            parsed.vision_credits = 4;
+          }
+          localStorage.setItem(key, JSON.stringify(parsed));
         }
-        if (product === 'premium_plus') {
-          user.vision_credits = 4; // Bonus credits from Premium Plus
-        }
-        localStorage.setItem('shiputzai_user', JSON.stringify(user));
       }
     }
 

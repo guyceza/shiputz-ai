@@ -3,6 +3,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "הדמיית שיפוץ בAI",
   description: "העלה תמונה של החדר שלך וקבל הדמיה של איך הוא יראה אחרי השיפוץ. כולל הערכת עלויות וקישורים לרכישת המוצרים.",
+  alternates: {
+    canonical: "https://shipazti.com/visualize",
+  },
   openGraph: {
     title: "הדמיית שיפוץ בAI | ShiputzAI",
     description: "העלה תמונה של החדר וקבל הדמיה של התוצאה הסופית עם הערכת עלויות",

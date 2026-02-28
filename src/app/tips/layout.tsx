@@ -3,6 +3,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "מאמרים וטיפים לשיפוץ",
   description: "מדריכים מקצועיים לשיפוץ הבית - טיפים לבחירת קבלן, ניהול תקציב, שיפוץ מטבח ואמבטיה, ועוד. כל מה שצריך לדעת לפני שמתחילים.",
+  alternates: {
+    canonical: "https://shipazti.com/tips",
+  },
   openGraph: {
     title: "מאמרים וטיפים לשיפוץ | ShiputzAI",
     description: "מדריכים מקצועיים לשיפוץ הבית - כל מה שצריך לדעת לפני שמתחילים",

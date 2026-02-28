@@ -56,6 +56,12 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.json",
+  alternates: {
+    canonical: "https://shipazti.com",
+    languages: {
+      "he-IL": "https://shipazti.com",
+    },
+  },
   robots: {
     index: true,
     follow: true,

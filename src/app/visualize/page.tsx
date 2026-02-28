@@ -1839,6 +1839,8 @@ export default function VisualizePage() {
                               ? { ...v, detectedProducts: data.items }
                               : v
                           ));
+                          // Also update selectedHistoryItem so we don't rescan on next open
+                          setSelectedHistoryItem(prev => prev ? { ...prev, detectedProducts: data.items } : null);
                         }).catch(e => console.error('Failed to save products:', e));
                       }
                       setDetectingProducts(false);

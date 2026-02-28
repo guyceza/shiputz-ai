@@ -373,13 +373,21 @@ export default function VisualizePage() {
   const [countdown, setCountdown] = useState(60);
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
-  const [detectedProducts, setDetectedProducts] = useState<{id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>([]);
-  const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null); // Track current visualization for saving products
+  // Products cache: keyed by visualization ID — single source of truth
+  const [productsCache, setProductsCache] = useState<Record<string, {id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>>({});
+  const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null);
   const [detectingProducts, setDetectingProducts] = useState(false);
   
-  // Helper to clear products cache
+  // Get products for current visualization from cache
+  const detectedProducts = currentVisualizationId ? (productsCache[currentVisualizationId] || []) : [];
+  
+  // Helper to set products for a specific visualization
+  const setCachedProducts = (vizId: string, products: any[]) => {
+    setProductsCache(prev => ({ ...prev, [vizId]: products }));
+  };
+  
+  // Helper to clear current visualization context (when starting new image)
   const clearProductsCache = () => {
-    setDetectedProducts([]);
     setCurrentVisualizationId(null);
   };
   
@@ -550,6 +558,15 @@ export default function VisualizePage() {
         detectedProducts: v.detected_products || []
       }));
       setVisualizationHistory(mapped);
+      
+      // Populate products cache from DB data
+      const newCache: Record<string, any[]> = {};
+      mapped.forEach(v => {
+        if (v.detectedProducts && v.detectedProducts.length > 0) {
+          newCache[v.id] = v.detectedProducts;
+        }
+      });
+      setProductsCache(prev => ({ ...prev, ...newCache }));
     } catch (e) {
       console.error("Failed to load history:", e);
     }
@@ -750,20 +767,13 @@ export default function VisualizePage() {
     
     setShowShopModal(true);
     
-    // If we already have products cached in state, don't scan again
+    // Products are derived from cache — if already there, nothing to do
     if (detectedProducts.length > 0) {
       return;
     }
     
-    // Check if products are saved in the current visualization history
-    if (currentVisualizationId) {
-      const historyItem = visualizationHistory.find(v => v.id === currentVisualizationId);
-      if (historyItem?.detectedProducts && historyItem.detectedProducts.length > 0) {
-        setDetectedProducts(historyItem.detectedProducts);
-        return;
-      }
-    }
-    
+    // No products in cache — scan and save
+    if (!currentVisualizationId) return;
     setDetectingProducts(true);
     
     try {
@@ -778,23 +788,15 @@ export default function VisualizePage() {
       
       const data = await res.json();
       if (data.items && data.items.length > 0) {
-        setDetectedProducts(data.items);
+        // Single write to cache — this is the only place products live
+        setCachedProducts(currentVisualizationId, data.items);
         
-        // Save products to database if we have a visualization ID
-        if (currentVisualizationId) {
-          fetch('/api/update-visualization-products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ visualizationId: currentVisualizationId, products: data.items })
-          }).then(() => {
-            // Update local history state
-            setVisualizationHistory(prev => prev.map(v => 
-              v.id === currentVisualizationId 
-                ? { ...v, detectedProducts: data.items }
-                : v
-            ));
-          }).catch(e => console.error('Failed to save products to DB:', e));
-        }
+        // Persist to DB (fire and forget)
+        fetch('/api/update-visualization-products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visualizationId: currentVisualizationId, products: data.items, userId })
+        }).catch(e => console.error('Failed to save products to DB:', e));
       }
     } catch (err) {
       console.error("Failed to detect products:", err);
@@ -1819,16 +1821,10 @@ export default function VisualizePage() {
                   setCurrentVisualizationId(selectedHistoryItem.id);
                   setShowShopModal(true);
                   
-                  // If products already saved in history item OR in local state, use them
-                  const cachedProducts = selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0
-                    ? selectedHistoryItem.detectedProducts
-                    : visualizationHistory.find(v => v.id === selectedHistoryItem.id)?.detectedProducts;
-                  
-                  if (cachedProducts && cachedProducts.length > 0) {
-                    setDetectedProducts(cachedProducts);
-                  } else {
-                    // Otherwise, detect and save
-                    setDetectedProducts([]);
+                  // Products come from cache automatically via currentVisualizationId
+                  // If not in cache, scan and save
+                  const vizId = selectedHistoryItem.id;
+                  if (!productsCache[vizId] || productsCache[vizId].length === 0) {
                     setDetectingProducts(true);
                     const ud = localStorage.getItem("user");
                     const ue = ud ? JSON.parse(ud).email : null;
@@ -1838,21 +1834,13 @@ export default function VisualizePage() {
                       body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
                     }).then(res => res.json()).then(data => {
                       if (data.items?.length > 0) {
-                        setDetectedProducts(data.items);
-                        // Save to database
+                        // Single write to cache
+                        setCachedProducts(vizId, data.items);
+                        // Persist to DB (fire and forget)
                         fetch('/api/update-visualization-products', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ visualizationId: selectedHistoryItem.id, products: data.items })
-                        }).then(() => {
-                          // Update local history state so we don't rescan
-                          setVisualizationHistory(prev => prev.map(v => 
-                            v.id === selectedHistoryItem.id 
-                              ? { ...v, detectedProducts: data.items }
-                              : v
-                          ));
-                          // Also update selectedHistoryItem so we don't rescan on next open
-                          setSelectedHistoryItem(prev => prev ? { ...prev, detectedProducts: data.items } : null);
+                          body: JSON.stringify({ visualizationId: vizId, products: data.items, userId })
                         }).catch(e => console.error('Failed to save products:', e));
                       }
                       setDetectingProducts(false);

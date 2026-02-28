@@ -171,56 +171,14 @@ export default function ShopLookPage() {
 
   // Store vision ID for saving products after detection
   const [visionHistoryId, setVisionHistoryId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
+  // Load user's Shop the Look history from Supabase on mount (no localStorage)
   useEffect(() => {
-    // Check for custom image from localStorage
-    const customImage = localStorage.getItem('shopLookImage');
-    const savedProducts = localStorage.getItem('shopLookProducts');
-    const visionId = localStorage.getItem('shopLookVisionId');
-    
-    if (customImage) {
-      setImageSrc(customImage);
-      setIsCustomImage(true);
-      
-      // Store vision ID for later (to save detected products)
-      if (visionId) {
-        setVisionHistoryId(visionId);
-        localStorage.removeItem('shopLookVisionId');
-      }
-      
-      // Check if we have saved products from previous detection
-      if (savedProducts) {
-        try {
-          const products = JSON.parse(savedProducts);
-          if (products && products.length > 0) {
-            setItems(products);
-            setLoading(false);
-            localStorage.removeItem('shopLookProducts');
-            localStorage.removeItem('shopLookImage');
-            return; // Don't re-analyze, use saved products
-          }
-        } catch (e) {
-          console.error('Failed to parse saved products:', e);
-        }
-        localStorage.removeItem('shopLookProducts');
-      }
-      
-      // No saved products - need to analyze
-      setLoading(true);
-      
-      // Consume trial when analyzing custom image
-      consumeTrial();
-      
-      // Analyze image with AI to detect products
-      analyzeImage(customImage, visionId || undefined);
-      
-      // Clear from localStorage after reading
-      localStorage.removeItem('shopLookImage');
-    } else if (isLoggedIn && userId) {
-      // No localStorage data - check if user has saved Shop the Look history
+    if (isLoggedIn && userId) {
       loadUserHistory();
     }
-  }, [userId, hasSubscription, trialUsed, isLoggedIn]);
+  }, [userId, isLoggedIn]);
 
   // Load user's previous Shop the Look from database
   const loadUserHistory = useCallback(async () => {
@@ -247,14 +205,10 @@ export default function ShopLookPage() {
 
   const analyzeImage = async (imageUrl: string, visionId?: string) => {
     try {
-      const userData = localStorage.getItem("user");
-      const user = userData ? JSON.parse(userData) : null;
-      const userEmailForProducts = user?.email || null;
-      
       const response = await fetch('/api/detect-products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageUrl, userEmail: userEmailForProducts })
+        body: JSON.stringify({ image: imageUrl })
       });
       
       if (response.ok) {
@@ -262,21 +216,21 @@ export default function ShopLookPage() {
         if (data.items && data.items.length > 0) {
           setItems(data.items);
           
-          // Save detected products to vision_history for future use
-          if (visionId && user?.id) {
+          // Save detected products to Supabase vision_history
+          if (visionId && userId) {
             try {
               await fetch('/api/update-vision-history-products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                   id: visionId, 
-                  userId: user.id, 
+                  userId: userId, 
                   products: data.items 
                 })
               });
-              console.log('Saved detected products to vision history');
+              console.log('Saved detected products to Supabase');
             } catch (saveError) {
-              console.error('Failed to save products to history:', saveError);
+              console.error('Failed to save products:', saveError);
             }
           }
         }
@@ -399,20 +353,24 @@ export default function ShopLookPage() {
               התחבר כדי להעלות תמונה
             </Link>
           ) : hasAccess ? (
-            <label className="inline-block cursor-pointer">
+            <label className={`inline-block cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
+                disabled={isUploading}
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file && userId) {
+                    setIsUploading(true);
+                    setLoading(true);
+                    
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                       const imageData = event.target?.result as string;
                       
-                      // Save image to DB and get visionId for persistence
                       try {
+                        // Save image to Supabase and get visionId
                         const response = await fetch('/api/save-shop-look-image', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
@@ -421,28 +379,34 @@ export default function ShopLookPage() {
                         
                         if (response.ok) {
                           const data = await response.json();
-                          // Store visionId for saving products later
-                          localStorage.setItem('shopLookVisionId', data.visionId);
-                          // Use the permanent URL instead of base64
-                          localStorage.setItem('shopLookImage', data.imageUrl);
+                          
+                          // Update state directly - no localStorage
+                          setImageSrc(data.imageUrl);
+                          setIsCustomImage(true);
+                          setVisionHistoryId(data.visionId);
+                          
+                          // Consume trial
+                          consumeTrial();
+                          
+                          // Analyze and save products to DB
+                          await analyzeImage(data.imageUrl, data.visionId);
                         } else {
-                          // Fallback to base64 if API fails
-                          localStorage.setItem('shopLookImage', imageData);
+                          console.error('Failed to save image to server');
+                          setLoading(false);
                         }
                       } catch (error) {
-                        console.error('Failed to save image:', error);
-                        // Fallback to base64
-                        localStorage.setItem('shopLookImage', imageData);
+                        console.error('Failed to upload image:', error);
+                        setLoading(false);
                       }
                       
-                      window.location.reload();
+                      setIsUploading(false);
                     };
                     reader.readAsDataURL(file);
                   }
                 }}
               />
               <span className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-all">
-                {hasSubscription ? '📸 העלה תמונה' : '✨ נסה עכשיו בחינם (ניסיון אחד)'}
+                {isUploading ? '⏳ מעלה...' : hasSubscription ? '📸 העלה תמונה' : '✨ נסה עכשיו בחינם (ניסיון אחד)'}
               </span>
             </label>
           ) : (

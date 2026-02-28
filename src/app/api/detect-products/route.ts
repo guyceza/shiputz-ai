@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from '@/lib/supabase';
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 // Verify user exists (Shop the Look is part of the visualization experience, including trial)
 async function verifyUserExists(userEmail: string): Promise<boolean> {
@@ -22,6 +23,13 @@ async function verifyUserExists(userEmail: string): Promise<boolean> {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 30 requests per minute
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 30, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await request.json();
     const { image, userEmail } = body;
 

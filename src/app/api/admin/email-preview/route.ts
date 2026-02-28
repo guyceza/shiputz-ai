@@ -113,20 +113,25 @@ async function verifyAdmin(email: string | null): Promise<boolean> {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const template = searchParams.get('template');
-  const adminEmail = searchParams.get('adminEmail');
+  try {
+    const { searchParams } = new URL(request.url);
+    const template = searchParams.get('template');
+    const adminEmail = searchParams.get('adminEmail');
 
-  // Bug #M01 fix: Require admin verification
-  const isAdmin = await verifyAdmin(adminEmail);
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    // Bug #M01 fix: Require admin verification
+    const isAdmin = await verifyAdmin(adminEmail);
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    if (!template) {
+      return NextResponse.json({ error: 'Missing template parameter' }, { status: 400 });
+    }
+
+    const html = generatePreview(template);
+    return NextResponse.json({ html });
+  } catch (error) {
+    console.error('Email preview error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  if (!template) {
-    return NextResponse.json({ error: 'Missing template parameter' }, { status: 400 });
-  }
-
-  const html = generatePreview(template);
-  return NextResponse.json({ html });
 }

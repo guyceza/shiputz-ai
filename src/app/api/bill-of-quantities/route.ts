@@ -1,13 +1,21 @@
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 20 requests per minute
+    const clientId = getClientId(request);
+    const rateLimit = checkRateLimit(clientId, 20, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await request.json();
     const { 
       image, 

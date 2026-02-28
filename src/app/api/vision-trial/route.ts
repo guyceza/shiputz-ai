@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
-// Note: Auth simplified - users provide their own email
-
 // Mark vision trial as used for a user
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +11,28 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
+    const normalizedEmail = email.toLowerCase();
+
+    // First verify user exists and trial isn't already used
+    const { data: user, error: findError } = await supabase
+      .from('users')
+      .select('vision_trial_used')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (findError || !user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Already used - no-op, return success
+    if (user.vision_trial_used) {
+      return NextResponse.json({ success: true, alreadyUsed: true });
+    }
 
     const { error } = await supabase
       .from('users')
       .update({ vision_trial_used: true })
-      .eq('email', email.toLowerCase());
+      .eq('email', normalizedEmail);
 
     if (error) {
       console.error('Error marking trial as used:', error);

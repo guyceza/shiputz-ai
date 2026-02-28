@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Sanitize HTML to prevent XSS in emails
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "ShiputzAI <help@shipazti.com>";
 const SUPPORT_EMAIL = "support@shipazti.com";
@@ -7,6 +17,12 @@ const SUPPORT_EMAIL = "support@shipazti.com";
 export async function POST(request: NextRequest) {
   try {
     const { name, email, phone, message } = await request.json();
+
+    // Sanitize inputs
+    const safeName = escapeHtml(name || '');
+    const safeEmail = escapeHtml(email || '');
+    const safePhone = phone ? escapeHtml(phone) : '';
+    const safeMessage = escapeHtml(message || '');
 
     if (!name || !email || !message) {
       return NextResponse.json(
@@ -33,7 +49,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: SUPPORT_EMAIL,
-        subject: `פנייה חדשה מ-${name}`,
+        subject: `פנייה חדשה מ-${safeName}`,
         html: `
           <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
             <h2 style="color: #1d1d1f;">פנייה חדשה מהאתר</h2>
@@ -41,19 +57,19 @@ export async function POST(request: NextRequest) {
             <table style="border-collapse: collapse; width: 100%; max-width: 500px;">
               <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">שם:</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${name}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">${safeName}</td>
               </tr>
               <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">אימייל:</td>
                 <td style="padding: 10px; border-bottom: 1px solid #eee;">
-                  <a href="mailto:${email}">${email}</a>
+                  <a href="mailto:${safeEmail}">${safeEmail}</a>
                 </td>
               </tr>
               ${phone ? `
               <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">טלפון:</td>
                 <td style="padding: 10px; border-bottom: 1px solid #eee;">
-                  <a href="tel:${phone}">${phone}</a>
+                  <a href="tel:${safePhone}">${safePhone}</a>
                 </td>
               </tr>
               ` : ""}
@@ -61,7 +77,7 @@ export async function POST(request: NextRequest) {
             
             <h3 style="color: #1d1d1f; margin-top: 20px;">הודעה:</h3>
             <div style="background: #f5f5f7; padding: 15px; border-radius: 8px; white-space: pre-wrap;">
-              ${message}
+              ${safeMessage}
             </div>
             
             <hr style="margin-top: 30px; border: none; border-top: 1px solid #eee;">
@@ -95,7 +111,7 @@ export async function POST(request: NextRequest) {
         subject: "קיבלנו את הפנייה שלך - ShiputzAI",
         html: `
           <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
-            <h2 style="color: #1d1d1f;">היי ${name},</h2>
+            <h2 style="color: #1d1d1f;">היי ${safeName},</h2>
             
             <p>תודה שפנית אלינו!</p>
             
@@ -103,7 +119,7 @@ export async function POST(request: NextRequest) {
             
             <div style="background: #f5f5f7; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <strong>ההודעה שלך:</strong><br>
-              <span style="white-space: pre-wrap;">${message}</span>
+              <span style="white-space: pre-wrap;">${safeMessage}</span>
             </div>
             
             <p>בברכה,<br>צוות ShiputzAI</p>

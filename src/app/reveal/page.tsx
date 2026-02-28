@@ -1,121 +1,131 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 export default function RevealPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 }); // percentage
   const [isHovering, setIsHovering] = useState(false);
-  const [revealSize, setRevealSize] = useState(150);
+  const [smoothPos, setSmoothPos] = useState({ x: 50, y: 50 });
 
+  // Smooth follow effect
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
-      }
-    };
+    const interval = setInterval(() => {
+      setSmoothPos(prev => ({
+        x: prev.x + (mousePos.x - prev.x) * 0.15,
+        y: prev.y + (mousePos.y - prev.y) * 0.15,
+      }));
+    }, 16);
+    return () => clearInterval(interval);
+  }, [mousePos]);
 
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("mousemove", handleMouseMove);
-      return () => container.removeEventListener("mousemove", handleMouseMove);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePos({
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100,
+      });
     }
-  }, []);
+  };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Full screen container */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center p-8" dir="rtl">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <Link href="/" className="inline-block">
+          <h1 className="text-4xl font-light text-white tracking-wide">
+            SHIPUTZ<span className="text-emerald-400 font-medium">AI</span>
+          </h1>
+        </Link>
+        <p className="text-gray-400 mt-2 text-lg">הזז את העכבר כדי לראות את השינוי</p>
+      </div>
+
+      {/* Main reveal container */}
       <div
         ref={containerRef}
-        className="relative w-full h-screen overflow-hidden cursor-none"
+        className="relative w-full max-w-5xl aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl cursor-none"
+        onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        style={{
+          boxShadow: "0 25px 80px -20px rgba(0,0,0,0.5), 0 0 60px -15px rgba(16, 185, 129, 0.2)",
+        }}
       >
         {/* BEFORE image (base layer) */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/reveal/before.jpg')`,
-          }}
+        <img
+          src="/examples/living-before.jpg"
+          alt="לפני"
+          className="absolute inset-0 w-full h-full object-cover"
+          draggable={false}
         />
 
-        {/* AFTER image (revealed through mask) */}
+        {/* AFTER image with mask */}
         <div
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-300"
+          className="absolute inset-0 transition-opacity duration-500"
           style={{
-            backgroundImage: `url('/reveal/after.jpg')`,
-            clipPath: isHovering
-              ? `circle(${revealSize}px at ${mousePos.x}px ${mousePos.y}px)`
-              : `circle(0px at ${mousePos.x}px ${mousePos.y}px)`,
             opacity: isHovering ? 1 : 0,
+            maskImage: `radial-gradient(circle at ${smoothPos.x}% ${smoothPos.y}%, black 0%, black 15%, transparent 35%)`,
+            WebkitMaskImage: `radial-gradient(circle at ${smoothPos.x}% ${smoothPos.y}%, black 0%, black 15%, transparent 35%)`,
           }}
-        />
+        >
+          <img
+            src="/examples/living-after.jpg"
+            alt="אחרי"
+            className="absolute inset-0 w-full h-full object-cover"
+            draggable={false}
+          />
+        </div>
 
-        {/* Cursor ring */}
+        {/* Glow effect following cursor */}
         {isHovering && (
           <div
-            className="pointer-events-none absolute border-2 border-white/50 rounded-full transition-transform duration-100"
+            className="absolute pointer-events-none transition-all duration-100"
             style={{
-              width: revealSize * 2,
-              height: revealSize * 2,
-              left: mousePos.x - revealSize,
-              top: mousePos.y - revealSize,
-              boxShadow: "0 0 30px rgba(255,255,255,0.3), inset 0 0 30px rgba(255,255,255,0.1)",
+              left: `${smoothPos.x}%`,
+              top: `${smoothPos.y}%`,
+              transform: "translate(-50%, -50%)",
+              width: "300px",
+              height: "300px",
+              background: "radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)",
+              filter: "blur(20px)",
             }}
           />
         )}
 
-        {/* Logo / Title */}
-        <div className="absolute top-8 left-8 z-10">
-          <h1 className="text-white text-4xl font-light tracking-wider" style={{ fontFamily: "Playfair Display, serif" }}>
-            SHIPUTZ<span className="text-emerald-400">AI</span>
-          </h1>
-          <p className="text-white/60 text-sm mt-1">ראה את העתיד של הבית שלך</p>
-        </div>
-
-        {/* CTA */}
-        <div className="absolute bottom-8 left-8 z-10">
-          <a
-            href="/visualize"
-            className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-full font-medium transition-all hover:scale-105"
-          >
-            <span>נסה עכשיו בחינם</span>
-            <span>←</span>
-          </a>
-        </div>
-
-        {/* Instructions */}
-        <div className="absolute bottom-8 right-8 z-10 text-right">
-          <p className="text-white/40 text-sm">הזז את העכבר כדי לחשוף את השינוי</p>
-        </div>
-
         {/* Labels */}
-        <div 
-          className="absolute top-8 right-8 z-10 transition-all duration-300"
-          style={{
-            color: isHovering ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
-          }}
-        >
-          <span className="text-sm font-medium px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm">
-            {isHovering ? "✨ אחרי" : "לפני"}
+        <div className="absolute top-4 right-4 z-10">
+          <span 
+            className="text-sm font-medium px-4 py-2 rounded-full backdrop-blur-md transition-all duration-300"
+            style={{
+              background: isHovering ? "rgba(16, 185, 129, 0.3)" : "rgba(0,0,0,0.4)",
+              color: "white",
+            }}
+          >
+            {isHovering ? "✨ אחרי" : "📷 לפני"}
           </span>
         </div>
 
-        {/* Subtle grid overlay */}
+        {/* Subtle vignette */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-5"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
+            background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%)",
           }}
         />
+      </div>
+
+      {/* CTA */}
+      <div className="mt-10 text-center">
+        <Link
+          href="/visualize"
+          className="inline-flex items-center gap-3 bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-full font-medium text-lg transition-all hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/30"
+        >
+          <span>צור הדמיה לחדר שלך</span>
+          <span className="text-xl">←</span>
+        </Link>
+        <p className="text-gray-500 mt-4 text-sm">חינם לנסיון • ללא כרטיס אשראי</p>
       </div>
     </div>
   );

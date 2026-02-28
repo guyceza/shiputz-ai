@@ -15,7 +15,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
     >
       <div className="flex items-center gap-4">
         {expense.imageUrl && (
-          <img src={expense.imageUrl} alt="" className="w-10 h-10 object-cover rounded-lg print:hidden" />
+          <img src={expense.imageUrl} alt={`קבלה - ${expense.description || 'הוצאה'}`} className="w-10 h-10 object-cover rounded-lg print:hidden" />
         )}
         <div>
           <p className="font-medium text-gray-900">{expense.description}</p>

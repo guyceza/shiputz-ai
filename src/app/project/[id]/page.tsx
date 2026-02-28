@@ -1983,7 +1983,7 @@ export default function ProjectPage() {
                             className="w-5 h-5 rounded border-gray-300"
                           />
                           {quote.imageUrl && (
-                            <img src={quote.imageUrl} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                            <img src={quote.imageUrl} alt={`הצעת מחיר מ-${quote.supplierName}`} className="w-12 h-12 object-cover rounded-lg" />
                           )}
                           <div>
                             <p className="font-semibold text-gray-900">{quote.supplierName}</p>
@@ -2050,7 +2050,7 @@ export default function ProjectPage() {
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
                           <p className="text-xs text-gray-500 mb-1">לפני</p>
-                          <img src={item.beforeImage} alt="Before" className="w-full h-28 object-cover rounded-lg" />
+                          <img src={item.beforeImage} alt="לפני השיפוץ" className="w-full h-28 object-cover rounded-lg" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 mb-1">אחרי</p>
@@ -2060,9 +2060,9 @@ export default function ProjectPage() {
                               window.open('/shop-look', '_blank');
                             }}
                           >
-                            <img src={item.afterImage} alt="After" className="w-full h-28 object-cover rounded-lg" />
+                            <img src={item.afterImage} alt="אחרי השיפוץ" className="w-full h-28 object-cover rounded-lg" />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors rounded-lg flex items-center justify-center">
-                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium flex items-center gap-1"><img src="/icons/cart.png" alt="" className="w-4 h-4" /> קנה את הסגנון</span>
+                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium flex items-center gap-1"><img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-4 h-4" /> קנה את הסגנון</span>
                             </div>
                           </div>
                         </div>
@@ -2138,7 +2138,7 @@ export default function ProjectPage() {
             <div className="mb-6">
               {selectedImage ? (
                 <div className="relative">
-                  <img src={selectedImage} alt="" className="w-full h-40 object-cover rounded-xl" />
+                  <img src={selectedImage} alt="תמונה שנבחרה לסריקה" className="w-full h-40 object-cover rounded-xl" />
                   <button onClick={() => setSelectedImage(null)} className="absolute top-2 left-2 bg-black/50 text-white w-8 h-8 rounded-full">✕</button>
                   {scanning && (
                     <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center rounded-xl p-4">
@@ -2181,7 +2181,7 @@ export default function ProjectPage() {
             {selectedImage && !scanning && (scannedVendor || (scannedItems && scannedItems.length > 0) || scannedFullText) && (
               <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
                 <div className="flex items-center gap-2 mb-3">
-                  <img src="/icons/sparkles.png" alt="" className="w-4 h-4" />
+                  <img src="/icons/sparkles.png" alt="סמל AI" className="w-4 h-4" />
                   <p className="text-sm font-medium text-purple-900">ניתוח AI</p>
                 </div>
                 
@@ -2574,7 +2574,7 @@ export default function ProjectPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">הוסף תמונה</h2>
             
             {selectedPhoto && (
-              <img src={selectedPhoto} alt="" className="w-full h-48 object-cover rounded-xl mb-6" />
+              <img src={selectedPhoto} alt="תמונה שנבחרה להעלאה" className="w-full h-48 object-cover rounded-xl mb-6" />
             )}
             
             <input
@@ -2750,7 +2750,7 @@ export default function ProjectPage() {
                     <p className="text-2xl font-bold text-gray-900 mt-4">₪{quote.amount.toLocaleString()}</p>
                     <p className="text-xs text-gray-400 mt-2">{new Date(quote.date).toLocaleDateString("he-IL")}</p>
                     {quote.imageUrl && (
-                      <img src={quote.imageUrl} alt="" className="w-full h-32 object-cover rounded-lg mt-4" />
+                      <img src={quote.imageUrl} alt={`תמונת הצעת מחיר מ-${quote.supplierName}`} className="w-full h-32 object-cover rounded-lg mt-4" />
                     )}
                   </div>
                 );
@@ -2768,7 +2768,7 @@ export default function ProjectPage() {
           <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                <img src="/icons/sparkles.png" alt="" className="w-6 h-6" />
+                <img src="/icons/sparkles.png" alt="סמל AI" className="w-6 h-6" />
                 <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה? - הדמיית שיפוץ</h2>
               </div>
               <div className="flex items-center gap-3">
@@ -2812,11 +2812,11 @@ export default function ProjectPage() {
                               <div className="grid grid-cols-2 gap-3 mb-3">
                                 <div>
                                   <p className="text-xs text-gray-500 mb-1">לפני</p>
-                                  <img src={item.beforeImage} alt="Before" className="w-full h-32 object-cover rounded-lg" />
+                                  <img src={item.beforeImage} alt="לפני השיפוץ" className="w-full h-32 object-cover rounded-lg" />
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-500 mb-1">אחרי</p>
-                                  <img src={item.afterImage} alt="After" className="w-full h-32 object-cover rounded-lg" />
+                                  <img src={item.afterImage} alt="אחרי השיפוץ" className="w-full h-32 object-cover rounded-lg" />
                                 </div>
                               </div>
                               <p className="text-sm text-gray-700 mb-2">{item.description}</p>
@@ -2840,7 +2840,7 @@ export default function ProjectPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">1. העלה תמונה של החדר</label>
                     {visionImage ? (
                       <div className="relative">
-                        <img src={visionImage} alt="Selected room" className="w-full h-64 object-cover rounded-xl" />
+                        <img src={visionImage} alt="החדר שנבחר" className="w-full h-64 object-cover rounded-xl" />
                         <button 
                           onClick={() => setVisionImage(null)}
                           className="absolute top-3 left-3 bg-black/50 text-white w-8 h-8 rounded-full hover:bg-black/70"
@@ -2884,7 +2884,7 @@ export default function ProjectPage() {
                       </>
                     ) : (
                       <>
-                        <img src="/icons/sparkles.png" alt="" className="w-4 h-4 inline" />
+                        <img src="/icons/sparkles.png" alt="סמל AI" className="w-4 h-4 inline" />
                         תן לי לראות
                       </>
                     )}
@@ -2920,12 +2920,12 @@ export default function ProjectPage() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-2 text-center">לפני</p>
-                      <img src={visionImage!} alt="Before" className="w-full h-64 object-cover rounded-xl border border-gray-200" />
+                      <img src={visionImage!} alt="לפני השיפוץ" className="w-full h-64 object-cover rounded-xl border border-gray-200" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-2 text-center">אחרי (הדמיה)</p>
                       {visionResult.generatedImage ? (
-                        <img src={visionResult.generatedImage} alt="After" className="w-full h-64 object-cover rounded-xl border-2 border-purple-300" />
+                        <img src={visionResult.generatedImage} alt="אחרי השיפוץ" className="w-full h-64 object-cover rounded-xl border-2 border-purple-300" />
                       ) : (
                         <div className="w-full h-64 rounded-xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50 flex items-center justify-center">
                           <div className="text-center p-4">
@@ -3174,7 +3174,7 @@ export default function ProjectPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <img src="/icons/palette.png" alt="" className="w-10 h-10" />
+              <img src="/icons/palette.png" alt="סמל פלטת צבעים - הדמיית שיפוץ" className="w-10 h-10" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">נגמרו ההדמיות להיום</h3>
             <p className="text-gray-500 mb-6">

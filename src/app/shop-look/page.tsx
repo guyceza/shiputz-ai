@@ -277,7 +277,7 @@ export default function ShopLookPage() {
       <section className="pt-20 pb-8 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 mb-6">
-            <img src="/icons/cart.png" alt="" className="w-5 h-5" />
+            <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-5 h-5" />
             <span className="text-sm font-medium text-gray-900">Shop the Look</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4 text-gray-900">
@@ -328,7 +328,7 @@ export default function ShopLookPage() {
           {/* Info */}
           <div className="mt-8 grid md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-blue-50 rounded-2xl">
-              <img src="/icons/search.png" alt="" className="w-8 h-8 mx-auto mb-3" />
+              <img src="/icons/search.png" alt="סמל חיפוש מוצרים" className="w-8 h-8 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-900 mb-2">זיהוי אוטומטי</h4>
               <p className="text-sm text-gray-600">AI מזהה כל מוצר בתמונה</p>
             </div>
@@ -338,7 +338,7 @@ export default function ShopLookPage() {
               <p className="text-sm text-gray-600">מציאת מוצרים דומים בחנויות ישראליות</p>
             </div>
             <div className="text-center p-6 bg-purple-50 rounded-2xl">
-              <img src="/icons/money.png" alt="" className="w-8 h-8 mx-auto mb-3" />
+              <img src="/icons/money.png" alt="סמל השוואת מחירים" className="w-8 h-8 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-900 mb-2">השוואת מחירים</h4>
               <p className="text-sm text-gray-600">מצאו את המחיר הטוב ביותר</p>
             </div>

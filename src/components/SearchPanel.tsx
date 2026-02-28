@@ -106,7 +106,7 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
             {/* Item Info */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <img src="/icons/cart.png" alt="" className="w-10 h-10" />
+                <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-10 h-10" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-2">{item.name}</h3>
               <p className="text-gray-500 text-sm">בחרו חנות לחיפוש הפריט</p>
@@ -146,7 +146,7 @@ export function SearchPanel({ item, onClose }: SearchPanelProps) {
           {/* Footer */}
           <div className="p-6 border-t border-gray-100 bg-gray-50">
             <p className="text-xs text-gray-500 text-center">
-              <img src="/icons/lightbulb.png" alt="" className="w-4 h-4 inline mr-1" /> טיפ: השווה מחירים במספר חנויות לפני הקנייה
+              <img src="/icons/lightbulb.png" alt="סמל טיפ" className="w-4 h-4 inline mr-1" /> טיפ: השווה מחירים במספר חנויות לפני הקנייה
             </p>
           </div>
         </div>

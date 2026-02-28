@@ -76,25 +76,22 @@ export default function Home() {
   const [subscribed, setSubscribed] = useState(false);
   const [showNewsletterPopup, setShowNewsletterPopup] = useState(false);
   
-  // Show newsletter popup after 10 seconds (if not already dismissed)
+  // Show newsletter popup after 10 seconds (only for non-logged-in users who haven't subscribed)
   useEffect(() => {
     const checkNewsletter = async () => {
       // First check localStorage for quick response
       const localDismissed = localStorage.getItem('newsletter_popup_dismissed');
       if (localDismissed) return;
       
-      // For logged in users, also check DB
+      // If user is logged in - don't show popup
       const userData = localStorage.getItem("user");
       if (userData) {
-        const user = JSON.parse(userData);
-        if (user.id) {
-          const dbDismissed = await isNewsletterDismissed(user.id);
-          if (dbDismissed) {
-            localStorage.setItem('newsletter_popup_dismissed', 'true'); // sync to local
-            return;
-          }
-        }
+        return; // Logged in users don't need newsletter popup
       }
+      
+      // Check if already subscribed (by email in localStorage)
+      const subscribedEmail = localStorage.getItem('newsletter_subscribed_email');
+      if (subscribedEmail) return;
       
       // Show popup after delay
       setTimeout(() => {
@@ -116,6 +113,7 @@ export default function Home() {
         });
         if (res.ok) {
           setSubscribed(true);
+          localStorage.setItem('newsletter_subscribed_email', email);
           setEmail("");
         }
       } catch (error) {

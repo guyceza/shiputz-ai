@@ -1,5 +1,12 @@
 import { getSupabaseClient } from './supabase';
 
+export interface DetectedProduct {
+  id: string;
+  name: string;
+  position: { top: number; left: number; width: number; height: number };
+  searchQuery: string;
+}
+
 export interface VisionHistoryItem {
   id: string;
   project_id: string;
@@ -8,6 +15,7 @@ export interface VisionHistoryItem {
   after_image_url: string;
   description: string;
   created_at: string;
+  detected_products?: DetectedProduct[];
 }
 
 // Save vision history item via API (uses service role on server)
@@ -98,6 +106,32 @@ export async function deleteVisionHistory(id: string, userId: string): Promise<b
     return true;
   } catch (e) {
     console.error('Delete vision history failed:', e);
+    return false;
+  }
+}
+
+// Update detected products for a vision history item
+export async function updateVisionHistoryProducts(
+  id: string, 
+  userId: string, 
+  products: DetectedProduct[]
+): Promise<boolean> {
+  try {
+    const response = await fetch('/api/update-vision-history-products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, userId, products })
+    });
+
+    if (!response.ok) {
+      console.error('Update products API error:', response.status);
+      return false;
+    }
+
+    const result = await response.json();
+    return result.success === true;
+  } catch (e) {
+    console.error('Update products failed:', e);
     return false;
   }
 }

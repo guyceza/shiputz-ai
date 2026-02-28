@@ -299,6 +299,7 @@ export default function ProjectPage() {
     description: string;
     analysis: string;
     costs: { total: number; items?: { description: string; total: number }[] };
+    detectedProducts?: any[];
   }
   const [visionHistory, setVisionHistory] = useState<VisionHistoryItem[]>([]);
   const [selectedVisionItem, setSelectedVisionItem] = useState<VisionHistoryItem | null>(null);
@@ -508,7 +509,8 @@ export default function ProjectPage() {
           afterImage: h.after_image_url,
           description: h.description || '',
           analysis: '', // Analysis not stored in DB
-          costs: { total: 0 } // Costs not stored in DB
+          costs: { total: 0 }, // Costs not stored in DB
+          detectedProducts: h.detected_products || undefined
         }));
         setVisionHistory(mapped);
       }
@@ -2055,8 +2057,15 @@ export default function ProjectPage() {
                           <div 
                             className="relative cursor-pointer group"
                             onClick={() => {
-                              // Save image to localStorage for shop-look page
+                              // Save image and ID to localStorage for shop-look page
                               localStorage.setItem('shopLookImage', item.afterImage);
+                              localStorage.setItem('shopLookVisionId', item.id);
+                              // If we have saved products, pass them too
+                              if (item.detectedProducts && item.detectedProducts.length > 0) {
+                                localStorage.setItem('shopLookProducts', JSON.stringify(item.detectedProducts));
+                              } else {
+                                localStorage.removeItem('shopLookProducts');
+                              }
                               window.open('/shop-look', '_blank');
                             }}
                           >

@@ -169,29 +169,61 @@ export default function ShopLookPage() {
     }
   }, [loading]);
 
+  // Store vision ID for saving products after detection
+  const [visionHistoryId, setVisionHistoryId] = useState<string | null>(null);
+
   useEffect(() => {
     // Check for custom image from localStorage
     const customImage = localStorage.getItem('shopLookImage');
+    const savedProducts = localStorage.getItem('shopLookProducts');
+    const visionId = localStorage.getItem('shopLookVisionId');
+    
     if (customImage) {
       setImageSrc(customImage);
       setIsCustomImage(true);
+      
+      // Store vision ID for later (to save detected products)
+      if (visionId) {
+        setVisionHistoryId(visionId);
+        localStorage.removeItem('shopLookVisionId');
+      }
+      
+      // Check if we have saved products from previous detection
+      if (savedProducts) {
+        try {
+          const products = JSON.parse(savedProducts);
+          if (products && products.length > 0) {
+            setItems(products);
+            setLoading(false);
+            localStorage.removeItem('shopLookProducts');
+            localStorage.removeItem('shopLookImage');
+            return; // Don't re-analyze, use saved products
+          }
+        } catch (e) {
+          console.error('Failed to parse saved products:', e);
+        }
+        localStorage.removeItem('shopLookProducts');
+      }
+      
+      // No saved products - need to analyze
       setLoading(true);
       
       // Consume trial when analyzing custom image
       consumeTrial();
       
       // Analyze image with AI to detect products
-      analyzeImage(customImage);
+      analyzeImage(customImage, visionId || undefined);
       
       // Clear from localStorage after reading
       localStorage.removeItem('shopLookImage');
     }
   }, [userId, hasSubscription, trialUsed]);
 
-  const analyzeImage = async (imageUrl: string) => {
+  const analyzeImage = async (imageUrl: string, visionId?: string) => {
     try {
       const userData = localStorage.getItem("user");
-      const userEmailForProducts = userData ? JSON.parse(userData).email : null;
+      const user = userData ? JSON.parse(userData) : null;
+      const userEmailForProducts = user?.email || null;
       
       const response = await fetch('/api/detect-products', {
         method: 'POST',
@@ -203,6 +235,24 @@ export default function ShopLookPage() {
         const data = await response.json();
         if (data.items && data.items.length > 0) {
           setItems(data.items);
+          
+          // Save detected products to vision_history for future use
+          if (visionId && user?.id) {
+            try {
+              await fetch('/api/update-vision-history-products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  id: visionId, 
+                  userId: user.id, 
+                  products: data.items 
+                })
+              });
+              console.log('Saved detected products to vision history');
+            } catch (saveError) {
+              console.error('Failed to save products to history:', saveError);
+            }
+          }
         }
       }
     } catch (error) {

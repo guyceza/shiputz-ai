@@ -193,8 +193,15 @@ export default function ShopLookPage() {
           setIsCustomImage(true);
           setVisionHistoryId(data.visionId);
           
+          // Only use products that have valid position data
           if (data.products && data.products.length > 0) {
-            setItems(data.products);
+            const validProducts = data.products.filter(
+              (p: ShoppableItem) => p.position && typeof p.position.top === 'number'
+            );
+            if (validProducts.length > 0) {
+              setItems(validProducts);
+            }
+            // If no valid products, keep default demo items
           }
         }
       }

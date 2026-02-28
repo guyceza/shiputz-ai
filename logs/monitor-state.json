@@ -1,5 +1,7 @@
 {
-  "lastAlerts": [],
-  "lastCheck": "2026-02-27T22:00:07.211Z",
-  "lastSummaryDate": "2026-02-27"
+  "lastAlerts": [
+    "📊 1 משתמשים מתקרבים למכסה החודשית"
+  ],
+  "lastCheck": "2026-02-28T10:00:07.006Z",
+  "lastSummaryDate": "2026-02-28"
 }

@@ -47,12 +47,43 @@ export async function POST(request: NextRequest) {
 
     const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/visualizations/${filename}`;
 
+    // Get or create a default "Shop the Look" project for this user
+    let projectId: string;
+    
+    const { data: existingProject } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('name', 'Shop the Look')
+      .single();
+    
+    if (existingProject) {
+      projectId = existingProject.id;
+    } else {
+      // Create default project for Shop the Look
+      const { data: newProject, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          user_id: userId,
+          name: 'Shop the Look',
+          budget: 0,
+          spent: 0
+        })
+        .select()
+        .single();
+      
+      if (projectError) {
+        console.error('Project creation error:', projectError);
+        return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
+      }
+      projectId = newProject.id;
+    }
+
     // Create vision_history entry for Shop the Look
-    // Using same image for before/after since it's just product detection
     const { data, error: insertError } = await supabase
       .from('vision_history')
       .insert({
-        project_id: null, // No project for direct Shop the Look
+        project_id: projectId,
         user_id: userId,
         before_image_url: imageUrl,
         after_image_url: imageUrl, // Same image - no transformation

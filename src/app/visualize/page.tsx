@@ -739,7 +739,7 @@ export default function VisualizePage() {
         }
       }
     } catch (err) {
-      setGenerateError("שגיאה בחיבור לשרת");
+      setGenerateError("שגיאה בחיבור לשרת. ייתכן שיש אנשים בתמונה - נסה תמונה ללא אנשים.");
     }
     
     setGenerating(false);
@@ -1511,7 +1511,7 @@ export default function VisualizePage() {
                     <p className="text-gray-600 font-medium">
                       {isDragOver ? 'שחרר כאן!' : 'לחץ או גרור תמונה לכאן'}
                     </p>
-                    <p className="text-gray-400 text-sm mt-2">JPG, PNG עד 10MB • ללא אנשים בתמונה</p>
+                    <p className="text-gray-400 text-sm mt-2">ללא אנשים בתמונה</p>
                   </div>
                   <input
                     type="file"

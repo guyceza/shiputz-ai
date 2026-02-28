@@ -24,6 +24,25 @@ export default function ChatWidget() {
     `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  
+  const placeholderExamples = [
+    "כמה עולה שיפוץ מטבח?",
+    "איך בוחרים קבלן אמין?",
+    "מה כולל שיפוץ קומפלט?",
+    "כמה זמן לוקח שיפוץ דירה?",
+    "איך מתכננים תקציב לשיפוץ?",
+    "מה לבדוק לפני שסוגרים הצעה?",
+    "האם צריך אישורים לשיפוץ?",
+  ];
+
+  // Rotate placeholder every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholderExamples.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Show bubble after 3 seconds
   useEffect(() => {
@@ -237,8 +256,8 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="כתבו הודעה..."
-                className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500 text-right"
+                placeholder={placeholderExamples[placeholderIndex]}
+                className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500 text-right transition-all"
                 dir="rtl"
               />
               <button

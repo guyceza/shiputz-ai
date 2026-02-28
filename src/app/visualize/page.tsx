@@ -750,9 +750,18 @@ export default function VisualizePage() {
     
     setShowShopModal(true);
     
-    // If we already have products cached, don't scan again
+    // If we already have products cached in state, don't scan again
     if (detectedProducts.length > 0) {
       return;
+    }
+    
+    // Check if products are saved in the current visualization history
+    if (currentVisualizationId) {
+      const historyItem = visualizationHistory.find(v => v.id === currentVisualizationId);
+      if (historyItem?.detectedProducts && historyItem.detectedProducts.length > 0) {
+        setDetectedProducts(historyItem.detectedProducts);
+        return;
+      }
     }
     
     setDetectingProducts(true);
@@ -1810,9 +1819,13 @@ export default function VisualizePage() {
                   setCurrentVisualizationId(selectedHistoryItem.id);
                   setShowShopModal(true);
                   
-                  // If products already saved in history, use them
-                  if (selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0) {
-                    setDetectedProducts(selectedHistoryItem.detectedProducts);
+                  // If products already saved in history item OR in local state, use them
+                  const cachedProducts = selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0
+                    ? selectedHistoryItem.detectedProducts
+                    : visualizationHistory.find(v => v.id === selectedHistoryItem.id)?.detectedProducts;
+                  
+                  if (cachedProducts && cachedProducts.length > 0) {
+                    setDetectedProducts(cachedProducts);
                   } else {
                     // Otherwise, detect and save
                     setDetectedProducts([]);

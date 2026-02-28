@@ -1501,6 +1501,7 @@ export default function VisualizePage() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
+                  data-testid="image-upload-label"
                 >
                   <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
                     isDragOver 
@@ -1518,6 +1519,7 @@ export default function VisualizePage() {
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
+                    data-testid="image-upload-input"
                   />
                 </label>
               ) : (
@@ -1542,6 +1544,7 @@ export default function VisualizePage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="למשל: רוצה פרקט במקום אריחים, קירות בגוון אפור, תאורה שקועה, וסגנון מודרני..."
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 resize-none h-24"
+                data-testid="description-input"
               />
             </div>
             
@@ -1576,6 +1579,7 @@ export default function VisualizePage() {
               onClick={handleGenerate}
               disabled={!uploadedImage || !description || generating}
               className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="generate-button"
             >
               {generating ? (
                 <span className="flex items-center justify-center gap-2">

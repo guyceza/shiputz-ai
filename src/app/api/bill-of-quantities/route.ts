@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 import { NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 

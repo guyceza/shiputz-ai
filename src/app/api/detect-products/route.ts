@@ -49,14 +49,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
-    // Extract base64 data if it's a data URL
+    // Extract base64 data - handle both data URLs and regular URLs
     let imageBase64 = image;
     let mimeType = "image/jpeg";
+    
     if (image.startsWith("data:")) {
+      // Data URL - extract base64
       const matches = image.match(/^data:([^;]+);base64,(.+)$/);
       if (matches) {
         mimeType = matches[1];
         imageBase64 = matches[2];
+      }
+    } else if (image.startsWith("http://") || image.startsWith("https://")) {
+      // URL - fetch and convert to base64
+      console.log("[detect-products] Fetching image from URL:", image.substring(0, 100));
+      try {
+        const imageResponse = await fetch(image);
+        if (!imageResponse.ok) {
+          console.error("[detect-products] Failed to fetch image:", imageResponse.status);
+          return NextResponse.json({ items: [], error: "Failed to fetch image" });
+        }
+        const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
+        mimeType = contentType.split(";")[0];
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        imageBase64 = Buffer.from(arrayBuffer).toString("base64");
+        console.log("[detect-products] Fetched image, size:", imageBase64.length);
+      } catch (fetchError) {
+        console.error("[detect-products] Error fetching image:", fetchError);
+        return NextResponse.json({ items: [], error: "Failed to fetch image" });
       }
     }
 
@@ -97,6 +117,9 @@ Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array,
       }]
     };
 
+    console.log("[detect-products] Calling Gemini API...");
+    console.log("[detect-products] Image length:", imageBase64?.length || 0);
+    
     const geminiResponse = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -104,12 +127,15 @@ Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array,
     });
 
     if (!geminiResponse.ok) {
-      console.error("Gemini API error:", geminiResponse.status);
-      return NextResponse.json({ items: [] });
+      const errorText = await geminiResponse.text();
+      console.error("[detect-products] Gemini API error:", geminiResponse.status, errorText);
+      return NextResponse.json({ items: [], error: `Gemini error: ${geminiResponse.status}` });
     }
 
     const geminiData = await geminiResponse.json();
     const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+    console.log("[detect-products] Gemini response text:", responseText.substring(0, 500));
     
     // Parse JSON from response
     try {
@@ -117,13 +143,16 @@ Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array,
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         const items = JSON.parse(jsonMatch[0]);
+        console.log("[detect-products] Parsed items:", items.length);
         return NextResponse.json({ items });
+      } else {
+        console.log("[detect-products] No JSON array found in response");
       }
     } catch (parseError) {
-      console.error("Failed to parse product detection response:", parseError);
+      console.error("[detect-products] Failed to parse product detection response:", parseError);
     }
 
-    return NextResponse.json({ items: [] });
+    return NextResponse.json({ items: [], debug: "no_items_parsed" });
 
   } catch (error) {
     console.error("Product detection error:", error);

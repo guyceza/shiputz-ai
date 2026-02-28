@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
-import PopupBookScroll from "@/components/PopupBookScroll";
 import PricingCard from "@/components/PricingCard";
 import PricingComparison from "@/components/PricingComparison";
 import Footer from "@/components/Footer";
@@ -404,9 +403,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Interactive Popup Book */}
-      <PopupBookScroll />
 
       {/* Problem/Comparison */}
       <ComparisonSection />

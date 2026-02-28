@@ -447,7 +447,9 @@ export async function POST(request: NextRequest) {
       }
       
       // Check monthly usage limit (10 per month for Vision subscribers)
-      if (subscription.monthlyUsage >= MONTHLY_VISION_LIMIT) {
+      // Admin bypass - unlimited for owner
+      const isAdmin = userEmail.toLowerCase() === 'guyceza@gmail.com';
+      if (!isAdmin && subscription.monthlyUsage >= MONTHLY_VISION_LIMIT) {
         return NextResponse.json({ 
           error: `הגעת למכסה החודשית (${MONTHLY_VISION_LIMIT} יצירות). המכסה מתאפסת בתחילת החודש הבא.`,
           code: "MONTHLY_LIMIT_REACHED",

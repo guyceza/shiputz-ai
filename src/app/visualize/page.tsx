@@ -925,7 +925,7 @@ export default function VisualizePage() {
                 <div 
                   key={item.id}
                   className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 hover:shadow-xl transition-all cursor-pointer active:scale-95"
-                  onClick={() => { console.log('History item clicked:', item.id); setSelectedHistoryItem(item); }}
+                  onClick={() => { console.log('History item clicked:', item.id, 'products:', item.detectedProducts?.length || 0); setSelectedHistoryItem(item); }}
                 >
                   {/* Delete button */}
                   <button

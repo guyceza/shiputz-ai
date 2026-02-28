@@ -216,8 +216,34 @@ export default function ShopLookPage() {
       
       // Clear from localStorage after reading
       localStorage.removeItem('shopLookImage');
+    } else if (isLoggedIn && userId) {
+      // No localStorage data - check if user has saved Shop the Look history
+      loadUserHistory();
     }
-  }, [userId, hasSubscription, trialUsed]);
+  }, [userId, hasSubscription, trialUsed, isLoggedIn]);
+
+  // Load user's previous Shop the Look from database
+  const loadUserHistory = useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await fetch(`/api/get-shop-look-history?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.hasHistory && data.imageUrl) {
+          setImageSrc(data.imageUrl);
+          setIsCustomImage(true);
+          setVisionHistoryId(data.visionId);
+          
+          if (data.products && data.products.length > 0) {
+            setItems(data.products);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load user history:', error);
+    }
+  }, [userId]);
 
   const analyzeImage = async (imageUrl: string, visionId?: string) => {
     try {
@@ -378,13 +404,37 @@ export default function ShopLookPage() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
+                  if (file && userId) {
                     const reader = new FileReader();
-                    reader.onload = (event) => {
+                    reader.onload = async (event) => {
                       const imageData = event.target?.result as string;
-                      localStorage.setItem('shopLookImage', imageData);
+                      
+                      // Save image to DB and get visionId for persistence
+                      try {
+                        const response = await fetch('/api/save-shop-look-image', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userId, image: imageData })
+                        });
+                        
+                        if (response.ok) {
+                          const data = await response.json();
+                          // Store visionId for saving products later
+                          localStorage.setItem('shopLookVisionId', data.visionId);
+                          // Use the permanent URL instead of base64
+                          localStorage.setItem('shopLookImage', data.imageUrl);
+                        } else {
+                          // Fallback to base64 if API fails
+                          localStorage.setItem('shopLookImage', imageData);
+                        }
+                      } catch (error) {
+                        console.error('Failed to save image:', error);
+                        // Fallback to base64
+                        localStorage.setItem('shopLookImage', imageData);
+                      }
+                      
                       window.location.reload();
                     };
                     reader.readAsDataURL(file);

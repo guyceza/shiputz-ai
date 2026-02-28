@@ -16,19 +16,18 @@ export default function EpicHomePage() {
   }, []);
 
   return (
-    <div className="bg-black text-white min-h-screen overflow-x-hidden" dir="rtl">
-      {/* Floating Navbar */}
+    <div className="bg-[#0a0a0a] text-white min-h-screen overflow-x-hidden" dir="rtl">
+      {/* Floating Navbar - minimal pill */}
       <nav
-        className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-700 ${
-          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+        className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-1000 ${
+          isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-6"
         }`}
       >
-        <div className="flex items-center gap-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-2 py-2 shadow-2xl">
-          <Link href="/" className="flex items-center gap-2 px-4 py-1.5 text-white font-bold text-sm">
-            <span className="text-lg">🏗️</span>
+        <div className="flex items-center gap-1 bg-black/30 backdrop-blur-2xl border border-white/10 rounded-full px-1.5 py-1.5 shadow-2xl">
+          <Link href="/" className="flex items-center gap-1.5 px-3 py-1 text-white/90 font-semibold text-xs tracking-wide">
             ShiputzAI
           </Link>
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center">
             <NavLink href="#features">יתרונות</NavLink>
             <NavLink href="#how">איך זה עובד</NavLink>
             <NavLink href="/tips">מדריכים</NavLink>
@@ -36,126 +35,120 @@ export default function EpicHomePage() {
           </div>
           <Link
             href="/signup"
-            className="bg-white text-black px-5 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors mr-1"
+            className="bg-white/90 text-black px-4 py-1 rounded-full text-xs font-semibold hover:bg-white transition-colors"
           >
             התחל חינם
           </Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Parallax */}
+      {/* Hero Section - Full Viewport */}
+      <section className="relative h-[100svh] w-full overflow-hidden">
+        {/* Background Image - truly full cover */}
         <div
-          className="absolute inset-0 scale-110"
-          style={{ transform: `scale(1.1) translateY(${scrollY * 0.3}px)` }}
+          className="absolute inset-0"
+          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
         >
           <Image
             src="/hero-epic.jpg"
             alt="שיפוץ בית ים תיכוני"
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority
             quality={90}
+            sizes="100vw"
           />
-          {/* Dark overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-          {/* Badge */}
-          <div
-            className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8 transition-all duration-1000 delay-300 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <span className="bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">חדש</span>
-            <span className="text-white/80 text-sm">הדמיות AI לשיפוץ הבית שלך</span>
-          </div>
+        {/* Gradient overlays - heavier at bottom for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40" />
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent" />
 
-          {/* Main Headline */}
-          <h1
-            className={`text-4xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 transition-all duration-1000 delay-500 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            <span className="text-white">השיפוץ שלך.</span>
-            <br />
-            <span className="bg-gradient-to-l from-amber-300 via-orange-400 to-rose-400 bg-clip-text text-transparent">
-              בשליטה מלאה.
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className={`text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-700 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            בינה מלאכותית שעוזרת לך לנהל תקציב, לסרוק קבלות, לנתח הצעות מחיר
-            ולדמיין את הבית החדש שלך — לפני שמתחילים לשבור קירות.
-          </p>
-
-          {/* CTA Buttons */}
-          <div
-            className={`flex items-center justify-center gap-4 transition-all duration-1000 delay-900 ${
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            <Link
-              href="/signup"
-              className="group bg-white text-black px-8 py-3.5 rounded-full font-bold text-lg hover:bg-gray-100 transition-all hover:shadow-2xl hover:shadow-white/20 hover:-translate-y-0.5"
+        {/* Content - positioned bottom-right (RTL) */}
+        <div className="absolute bottom-0 left-0 right-0 pb-28 md:pb-32 px-6 md:px-16">
+          <div className="max-w-5xl mr-0 md:mr-8">
+            {/* Badge */}
+            <div
+              className={`inline-flex items-center gap-2 bg-white/8 backdrop-blur-md border border-white/15 rounded-full px-3 py-1 mb-5 transition-all duration-1000 delay-300 ${
+                isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
             >
-              התחל בחינם
-              <span className="inline-block mr-2 group-hover:mr-3 transition-all">←</span>
-            </Link>
-            <Link
-              href="#how"
-              className="text-white/70 hover:text-white px-6 py-3.5 font-medium transition-colors text-lg"
-            >
-              איך זה עובד?
-            </Link>
-          </div>
-        </div>
+              <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">חדש</span>
+              <span className="text-white/60 text-xs">הדמיות AI לשיפוץ הבית שלך</span>
+            </div>
 
-        {/* Bottom Logos */}
-        <div
-          className={`absolute bottom-8 left-0 right-0 transition-all duration-1000 delay-1100 ${
-            isLoaded ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="flex items-center justify-center gap-8 md:gap-16 px-6">
-            <span className="text-white/30 text-xs">משתמשים כבר בשירות:</span>
-            <div className="flex items-center gap-8 md:gap-12 text-white/30">
-              <span className="text-sm md:text-base font-semibold tracking-wider">🏠 500+ משפחות</span>
-              <span className="text-sm md:text-base font-semibold tracking-wider">📊 ₪50M+ נוהל</span>
-              <span className="hidden md:block text-sm md:text-base font-semibold tracking-wider">⭐ 4.9/5 דירוג</span>
+            {/* Main Headline - large, left-aligned in RTL = right */}
+            <h1
+              className={`transition-all duration-1000 delay-500 ${
+                isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              }`}
+            >
+              <span className="block text-[clamp(2.5rem,8vw,5.5rem)] font-extrabold leading-[0.95] tracking-tight text-white">
+                השיפוץ שלך.
+              </span>
+              <span className="block text-[clamp(2.5rem,8vw,5.5rem)] font-extrabold leading-[0.95] tracking-tight bg-gradient-to-l from-amber-200 via-orange-300 to-amber-400 bg-clip-text text-transparent">
+                בשליטה מלאה.
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              className={`text-sm md:text-base text-white/50 max-w-md mt-5 mb-7 leading-relaxed transition-all duration-1000 delay-700 ${
+                isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
+              בינה מלאכותית לניהול שיפוצים — מעקב תקציב, סריקת קבלות, 
+              ניתוח הצעות מחיר והדמיות AI. לפני שמתחילים לשבור קירות.
+            </p>
+
+            {/* CTA Buttons - subtle, small */}
+            <div
+              className={`flex items-center gap-4 transition-all duration-1000 delay-900 ${
+                isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
+              <Link
+                href="/signup"
+                className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-white/90 transition-all"
+              >
+                התחל בחינם
+              </Link>
+              <Link
+                href="#how"
+                className="text-white/50 hover:text-white/80 text-sm font-medium transition-colors"
+              >
+                למד עוד
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1.5 h-3 bg-white/50 rounded-full mt-2 animate-pulse" />
+        {/* Bottom stats bar */}
+        <div
+          className={`absolute bottom-6 left-0 right-0 px-6 md:px-16 transition-all duration-1000 delay-1200 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="flex items-center gap-6 md:gap-10 text-white/25 text-[11px] md:text-xs">
+            <span>משתמשים כבר בשירות:</span>
+            <span className="font-medium">500+ משפחות</span>
+            <span className="font-medium hidden sm:inline">₪50M+ נוהל</span>
+            <span className="font-medium hidden md:inline">⭐ 4.9/5 דירוג</span>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-32 px-6 bg-black relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-black" />
-        <div className="relative max-w-6xl mx-auto">
+      <section id="features" className="py-28 md:py-36 px-6 relative">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">הכל במקום אחד</h2>
-            <p className="text-white/50 text-lg max-w-xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">הכל במקום אחד.</h2>
+            <p className="text-white/40 text-base md:text-lg max-w-lg mx-auto">
               כל הכלים שצריך כדי לשפץ בלי הפתעות
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             <FeatureCard
               icon="📊"
               title="מעקב תקציב"
@@ -183,7 +176,7 @@ export default function EpicHomePage() {
             />
             <FeatureCard
               icon="💬"
-              title="צ׳אט תמיכה"
+              title="יועץ שיפוצים AI"
               description="יועץ שיפוצים אישי שזמין 24/7. שאלו כל שאלה וקבלו תשובה מיידית."
             />
           </div>
@@ -191,72 +184,66 @@ export default function EpicHomePage() {
       </section>
 
       {/* How It Works */}
-      <section id="how" className="py-32 px-6 bg-black relative">
-        <div className="relative max-w-4xl mx-auto">
+      <section id="how" className="py-28 md:py-36 px-6 border-t border-white/5">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">3 צעדים פשוטים</h2>
-            <p className="text-white/50 text-lg">מההרשמה ועד שיפוץ מנוהל</p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">3 צעדים.</h2>
+            <p className="text-white/40 text-base md:text-lg">מהרשמה ועד שיפוץ מנוהל</p>
           </div>
 
-          <div className="space-y-16">
+          <div className="space-y-20">
             <StepCard
               number="01"
               title="נרשמים ומגדירים פרויקט"
-              description="הרשמה חינמית, הגדרת תקציב, ובחירת חדרים לשיפוץ. תוך דקה אתם בפנים."
+              description="הרשמה חינמית, הגדרת תקציב ובחירת חדרים לשיפוץ. תוך דקה אתם בפנים."
             />
             <StepCard
               number="02"
               title="מעלים קבלות והצעות מחיר"
-              description="פשוט מצלמים — ה-AI סורק, מנתח, ומסדר הכל אוטומטית בפרויקט שלכם."
+              description="פשוט מצלמים — ה-AI סורק, מנתח ומסדר הכל אוטומטית בפרויקט שלכם."
             />
             <StepCard
               number="03"
-              title="מקבלים שליטה מלאה"
-              description="תקציב מעודכן, התראות חכמות, הדמיות AI, וכל הכלים לשיפוץ בלי הפתעות."
+              title="שליטה מלאה"
+              description="תקציב מעודכן, התראות חכמות, הדמיות AI וכל הכלים לשיפוץ מושלם."
             />
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-32 px-6 relative overflow-hidden">
+      {/* Final CTA */}
+      <section id="pricing" className="py-28 md:py-36 px-6 relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="/hero-epic.jpg"
-            alt=""
-            fill
-            className="object-cover opacity-20 blur-sm"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-black/90 to-black" />
+          <Image src="/hero-epic.jpg" alt="" fill className="object-cover opacity-10 blur-md" />
+          <div className="absolute inset-0 bg-black/80" />
         </div>
-        <div className="relative text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">מוכנים לשפץ בשליטה?</h2>
-          <p className="text-white/60 text-lg mb-10">
-            הצטרפו ל-500+ משפחות שכבר משפצות עם ShiputzAI
+        <div className="relative text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold mb-5">מוכנים לשפץ בשליטה?</h2>
+          <p className="text-white/40 text-base md:text-lg mb-10">
+            הצטרפו ל-500+ משפחות שכבר משפצות חכם
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 bg-white text-black px-10 py-4 rounded-full font-bold text-xl hover:bg-gray-100 transition-all hover:shadow-2xl hover:shadow-white/20 hover:-translate-y-1"
+            className="inline-block bg-white text-black px-8 py-3 rounded-full font-semibold text-base hover:bg-white/90 transition-all"
           >
-            התחל בחינם ←
+            התחל בחינם
           </Link>
-          <p className="text-white/30 text-sm mt-4">ללא כרטיס אשראי • ללא התחייבות</p>
+          <p className="text-white/20 text-xs mt-4">ללא כרטיס אשראי • ללא התחייבות</p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-white/10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-white/50">
-            <span className="text-lg">🏗️</span>
-            <span className="font-bold text-white">ShiputzAI</span>
-            <span className="text-sm">© 2026</span>
+      <footer className="py-10 px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-white/30 text-xs">
+            <span className="font-semibold text-white/50">ShiputzAI</span>
+            <span>© 2026</span>
           </div>
-          <div className="flex items-center gap-6 text-white/40 text-sm">
-            <Link href="/terms" className="hover:text-white transition-colors">תנאי שימוש</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">פרטיות</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">צור קשר</Link>
-            <Link href="/tips" className="hover:text-white transition-colors">מדריכים</Link>
+          <div className="flex items-center gap-5 text-white/25 text-xs">
+            <Link href="/terms" className="hover:text-white/60 transition-colors">תנאי שימוש</Link>
+            <Link href="/privacy" className="hover:text-white/60 transition-colors">פרטיות</Link>
+            <Link href="/contact" className="hover:text-white/60 transition-colors">צור קשר</Link>
+            <Link href="/tips" className="hover:text-white/60 transition-colors">מדריכים</Link>
           </div>
         </div>
       </footer>
@@ -268,7 +255,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="text-white/70 hover:text-white px-3 py-1.5 text-sm transition-colors rounded-full hover:bg-white/10"
+      className="text-white/50 hover:text-white/90 px-2.5 py-1 text-xs transition-colors"
     >
       {children}
     </Link>
@@ -277,23 +264,23 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <div className="group p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-      <span className="text-4xl mb-4 block">{icon}</span>
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-white/50 leading-relaxed">{description}</p>
+    <div className="group p-7 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-500">
+      <span className="text-3xl mb-4 block">{icon}</span>
+      <h3 className="text-lg font-semibold mb-2 text-white/90">{title}</h3>
+      <p className="text-white/35 text-sm leading-relaxed">{description}</p>
     </div>
   );
 }
 
 function StepCard({ number, title, description }: { number: string; title: string; description: string }) {
   return (
-    <div className="flex items-start gap-8">
-      <div className="text-5xl md:text-7xl font-black text-white/10 shrink-0 leading-none">
+    <div className="flex items-start gap-6 md:gap-10">
+      <div className="text-5xl md:text-7xl font-black text-white/[0.06] shrink-0 leading-none select-none">
         {number}
       </div>
-      <div>
-        <h3 className="text-2xl font-bold mb-2">{title}</h3>
-        <p className="text-white/50 text-lg leading-relaxed">{description}</p>
+      <div className="pt-2">
+        <h3 className="text-xl md:text-2xl font-bold mb-2 text-white/90">{title}</h3>
+        <p className="text-white/35 text-sm md:text-base leading-relaxed">{description}</p>
       </div>
     </div>
   );

@@ -540,6 +540,10 @@ export default function VisualizePage() {
       console.log("Loading history for userId:", effectiveUserId);
       const data = await loadVisualizations(effectiveUserId);
       console.log("Loaded history:", data.length, "items");
+      // Debug: check which items have products
+      data.forEach((v, i) => {
+        console.log(`History item ${i}: id=${v.id.slice(0,8)}, products=${v.detected_products?.length || 0}`);
+      });
       // Map Supabase format to local format
       const mapped = data.map(v => ({
         id: v.id,
@@ -1811,10 +1815,16 @@ export default function VisualizePage() {
                   setCurrentVisualizationId(selectedHistoryItem.id);
                   setShowShopModal(true);
                   
+                  // Debug: log what products we have
+                  console.log("Shop the Look clicked, selectedHistoryItem:", selectedHistoryItem.id.slice(0,8));
+                  console.log("detectedProducts in state:", selectedHistoryItem.detectedProducts?.length || 0);
+                  
                   // If products already saved in history, use them
                   if (selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0) {
+                    console.log("Using cached products from history");
                     setDetectedProducts(selectedHistoryItem.detectedProducts);
                   } else {
+                    console.log("No cached products, scanning...");
                     // Otherwise, detect and save
                     setDetectedProducts([]);
                     setDetectingProducts(true);

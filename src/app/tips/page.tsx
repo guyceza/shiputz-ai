@@ -167,6 +167,33 @@ export default function TipsPage() {
         </div>
       </section>
 
+      {/* Quick Navigation - Internal Links */}
+      <section className="py-8 px-6 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">מדריכים פופולריים</h2>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/tips/renovation-costs-2026" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              💰 עלויות שיפוץ 2026
+            </Link>
+            <Link href="/tips/choosing-contractor" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              👷 בחירת קבלן
+            </Link>
+            <Link href="/tips/kitchen-renovation" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              🍳 שיפוץ מטבח
+            </Link>
+            <Link href="/tips/bathroom-renovation" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              🚿 שיפוץ אמבטיה
+            </Link>
+            <Link href="/tips/budget-checklist" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              ✅ צ&apos;קליסט לשיפוץ
+            </Link>
+            <Link href="/tips/common-mistakes" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              ⚠️ טעויות נפוצות
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section - hide when logged in */}
       {!isLoggedIn && (
         <section className="py-16 px-6 bg-gray-50 mt-12">

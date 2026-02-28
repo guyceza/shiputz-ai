@@ -4,7 +4,7 @@ export const dynamic = "force-static";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getArticle, getRelatedArticles, generateFaqSchema, generateArticleSchema } from "../articles";
+import { getArticle, getRelatedArticles, generateFaqSchema, generateArticleSchema, articles } from "../articles";
 import { notFound } from "next/navigation";
 import Head from "next/head";
 
@@ -259,6 +259,11 @@ export default function ArticlePage() {
   }
 
   const relatedArticles = getRelatedArticles(article.relatedSlugs);
+  // Additional articles from same category (for broader internal linking)
+  const sameCategoryArticles = articles.filter(
+    a => a.category === article.category && a.slug !== article.slug && !article.relatedSlugs.includes(a.slug)
+  ).slice(0, 2);
+  const allRelatedArticles = [...relatedArticles, ...sameCategoryArticles];
   const faqSchema = generateFaqSchema(article);
   const articleSchema = generateArticleSchema(article);
 
@@ -340,16 +345,63 @@ export default function ArticlePage() {
         <div className="prose prose-gray max-w-none">
           <MarkdownContent content={article.content} />
         </div>
+
+        {/* In-content cross-links for SEO */}
+        {relatedArticles.length > 0 && (
+          <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              קרא גם
+            </h3>
+            <ul className="space-y-3">
+              {relatedArticles.map((related) => (
+                <li key={related.slug}>
+                  <Link
+                    href={`/tips/${related.slug}`}
+                    className="text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2 group"
+                  >
+                    <svg className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span className="group-hover:underline">{related.title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* FAQ Section for users (also matches JSON-LD) */}
+        {article.faq && article.faq.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">שאלות נפוצות</h2>
+            <div className="space-y-4">
+              {article.faq.map((faq, index) => (
+                <details key={index} className="group border border-gray-100 rounded-xl">
+                  <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
+                    <span className="font-medium text-gray-900">{faq.question}</span>
+                    <svg className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <p className="px-5 pb-5 text-gray-600 leading-relaxed">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
 
       {/* Related Articles */}
-      {relatedArticles.length > 0 && (
+      {allRelatedArticles.length > 0 && (
         <section className="max-w-3xl mx-auto px-6 py-12 border-t border-gray-100">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             מאמרים נוספים שיעניינו אותך
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {relatedArticles.map((related) => (
+            {allRelatedArticles.map((related) => (
               <Link
                 key={related.slug}
                 href={`/tips/${related.slug}`}
@@ -366,6 +418,11 @@ export default function ArticlePage() {
                 </p>
               </Link>
             ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link href="/tips" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              ← לכל המאמרים והטיפים
+            </Link>
           </div>
         </section>
       )}

@@ -537,13 +537,7 @@ export default function VisualizePage() {
     if (!effectiveUserId) return;
     
     try {
-      console.log("Loading history for userId:", effectiveUserId);
       const data = await loadVisualizations(effectiveUserId);
-      console.log("Loaded history:", data.length, "items");
-      // Debug: check which items have products
-      data.forEach((v, i) => {
-        console.log(`History item ${i}: id=${v.id.slice(0,8)}, products=${v.detected_products?.length || 0}`);
-      });
       // Map Supabase format to local format
       const mapped = data.map(v => ({
         id: v.id,
@@ -774,7 +768,6 @@ export default function VisualizePage() {
       });
       
       const data = await res.json();
-      console.log("[Shop the Look] API response:", data);
       if (data.items && data.items.length > 0) {
         setDetectedProducts(data.items);
         
@@ -925,7 +918,7 @@ export default function VisualizePage() {
                 <div 
                   key={item.id}
                   className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 hover:shadow-xl transition-all cursor-pointer active:scale-95"
-                  onClick={() => { console.log('History item clicked:', item.id, 'products:', item.detectedProducts?.length || 0); setSelectedHistoryItem(item); }}
+                  onClick={() => setSelectedHistoryItem(item)}
                 >
                   {/* Delete button */}
                   <button
@@ -1816,28 +1809,20 @@ export default function VisualizePage() {
                   setCurrentVisualizationId(selectedHistoryItem.id);
                   setShowShopModal(true);
                   
-                  // Debug: log what products we have
-                  console.log("Shop the Look clicked, selectedHistoryItem:", selectedHistoryItem.id.slice(0,8));
-                  console.log("detectedProducts in state:", selectedHistoryItem.detectedProducts?.length || 0);
-                  
                   // If products already saved in history, use them
                   if (selectedHistoryItem.detectedProducts && selectedHistoryItem.detectedProducts.length > 0) {
-                    console.log("Using cached products from history");
                     setDetectedProducts(selectedHistoryItem.detectedProducts);
                   } else {
-                    console.log("No cached products, scanning...");
                     // Otherwise, detect and save
                     setDetectedProducts([]);
                     setDetectingProducts(true);
                     const ud = localStorage.getItem("user");
                     const ue = ud ? JSON.parse(ud).email : null;
-                    console.log("[History Shop the Look] Scanning image:", selectedHistoryItem.afterImage?.substring(0, 80));
                     fetch('/api/detect-products', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
                     }).then(res => res.json()).then(data => {
-                      console.log("[History Shop the Look] API response:", data);
                       if (data.items?.length > 0) {
                         setDetectedProducts(data.items);
                         // Save to database

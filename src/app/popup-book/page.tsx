@@ -1,7 +1,17 @@
 "use client";
 
-import PopupBook from "@/components/PopupBook";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+// Critical: Three.js/WebGL cannot run on the server
+const PopupBook = dynamic(() => import("@/components/PopupBook"), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[60vh] flex items-center justify-center">
+      <div className="text-gray-400 animate-pulse text-lg">📖 טוען ספר...</div>
+    </div>
+  )
+});
 
 export default function PopupBookPage() {
   return (

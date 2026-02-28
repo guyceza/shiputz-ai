@@ -9,7 +9,6 @@ import PricingCard from "@/components/PricingCard";
 import PricingComparison from "@/components/PricingComparison";
 import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";
-import PopupBook from "@/components/PopupBook";
 import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
 
 export default function Home() {
@@ -438,9 +437,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Pop-Up Book Interactive Section */}
-      <PopupBook />
 
       {/* Newsletter Popup */}
       {showNewsletterPopup && !subscribed && (

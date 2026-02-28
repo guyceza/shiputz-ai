@@ -1831,11 +1831,13 @@ export default function VisualizePage() {
                     setDetectingProducts(true);
                     const ud = localStorage.getItem("user");
                     const ue = ud ? JSON.parse(ud).email : null;
+                    console.log("[History Shop the Look] Scanning image:", selectedHistoryItem.afterImage?.substring(0, 80));
                     fetch('/api/detect-products', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
                     }).then(res => res.json()).then(data => {
+                      console.log("[History Shop the Look] API response:", data);
                       if (data.items?.length > 0) {
                         setDetectedProducts(data.items);
                         // Save to database

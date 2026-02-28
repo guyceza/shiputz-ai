@@ -9,18 +9,17 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 function verifyPayPlusSignature(rawBody: string, signature: string | null): boolean {
   const secretKey = process.env.PAYPLUS_SECRET_KEY;
   
-  // If no secret key configured, log warning but allow (for development/migration period)
+  // If no secret key configured, log warning but allow (graceful degradation)
+  // TODO: Set PAYPLUS_SECRET_KEY in Vercel env vars when PayPlus provides it
   if (!secretKey) {
     console.warn('PayPlus signature verification skipped: PAYPLUS_SECRET_KEY not configured');
     return true;
   }
   
-  // If signature header missing, reject in production
+  // Secret key is configured — enforce signature check
   if (!signature) {
-    console.warn('PayPlus webhook: Missing signature header');
-    // Allow for now since Cardcom terminal not connected yet
-    // In production with Cardcom connected: return false;
-    return true;
+    console.error('PayPlus webhook: Missing signature header — rejecting');
+    return false;
   }
   
   // Verify HMAC-SHA256 signature

@@ -94,24 +94,21 @@ export async function POST(request: NextRequest) {
             }
           },
           {
-            text: `Analyze this interior room image and identify all furniture and decor items that can be purchased.
+            text: `You are analyzing a room image to identify purchasable furniture and decor items.
 
-For each item, provide:
-1. name (Hebrew name)
-2. position as percentages from top-left (top, left, width, height)
-3. searchQuery (Hebrew search query to find this product)
+CRITICAL: Position values MUST be percentages (0-100), NOT pixels!
+- top: percentage from top of image (0 = top edge, 50 = middle, 100 = bottom)
+- left: percentage from left of image (0 = left edge, 50 = middle, 100 = right)
 
-Return a JSON array with this exact format:
-[
-  {
-    "id": "unique-id",
-    "name": "שם בעברית",
-    "position": { "top": 30, "left": 20, "width": 25, "height": 40 },
-    "searchQuery": "מילות חיפוש בעברית"
-  }
-]
+For each item found, provide:
+1. Hebrew name
+2. Position as percentage values
+3. Hebrew search query
 
-Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array, no other text.`
+Return ONLY a JSON array like this (no markdown, no explanation):
+[{"id":"1","name":"מיטה","position":{"top":60,"left":40},"searchQuery":"מיטה זוגית"}]
+
+Find 5-8 main furniture/decor items. Position should be the CENTER of each item.`
           }
         ]
       }]
@@ -139,12 +136,26 @@ Identify 5-10 main items. Be precise with positions. Return ONLY the JSON array,
     
     // Parse JSON from response
     try {
-      // Try to extract JSON array from response
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        const items = JSON.parse(jsonMatch[0]);
+      // Clean up response - remove markdown code blocks
+      let cleanText = responseText.replace(/```json\n?/g, '').replace(/```/g, '').trim();
+      
+      // Find the first complete JSON array (handle duplicates)
+      const firstArrayEnd = cleanText.indexOf(']') + 1;
+      if (firstArrayEnd > 0) {
+        const jsonStr = cleanText.substring(0, firstArrayEnd);
+        const items = JSON.parse(jsonStr);
         console.log("[detect-products] Parsed items:", items.length);
-        return NextResponse.json({ items });
+        
+        // Validate positions are percentages (0-100)
+        const validItems = items.filter((item: any) => {
+          const pos = item.position;
+          return pos && 
+                 typeof pos.top === 'number' && pos.top >= 0 && pos.top <= 100 &&
+                 typeof pos.left === 'number' && pos.left >= 0 && pos.left <= 100;
+        });
+        
+        console.log("[detect-products] Valid items after position filter:", validItems.length);
+        return NextResponse.json({ items: validItems });
       } else {
         console.log("[detect-products] No JSON array found in response");
       }

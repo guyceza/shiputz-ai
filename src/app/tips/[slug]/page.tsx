@@ -4,8 +4,9 @@ export const dynamic = "force-static";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getArticle, getRelatedArticles } from "../articles";
+import { getArticle, getRelatedArticles, generateFaqSchema, generateArticleSchema } from "../articles";
 import { notFound } from "next/navigation";
+import Head from "next/head";
 
 const categoryColors: Record<string, string> = {
   "תקציב": "bg-emerald-50 text-emerald-700",
@@ -258,9 +259,23 @@ export default function ArticlePage() {
   }
 
   const relatedArticles = getRelatedArticles(article.relatedSlugs);
+  const faqSchema = generateFaqSchema(article);
+  const articleSchema = generateArticleSchema(article);
 
   return (
     <div className="min-h-screen bg-white">
+      {/* SEO: Article structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      {/* SEO: FAQ structured data for rich snippets */}
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       {/* Navigation */}
       <nav className="h-11 border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">

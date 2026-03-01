@@ -87,11 +87,14 @@ export async function GET(request: NextRequest) {
 // Register a new user
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, auth_provider, auth_id } = await request.json();
+    const { email, name: rawName, auth_provider, auth_id } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
+
+    // Sanitize name — strip HTML tags to prevent XSS
+    const name = rawName ? String(rawName).replace(/<[^>]*>/g, '').trim().slice(0, 100) : undefined;
 
     const supabase = createServiceClient();
 

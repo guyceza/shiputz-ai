@@ -5,33 +5,41 @@ import crypto from 'crypto';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// PayPlus signature verification (prepared for when Cardcom terminal is connected)
+// HTML escape to prevent XSS in email templates
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Shared secret for webhook authentication
+const WEBHOOK_SECRET = process.env.PAYPLUS_WEBHOOK_SECRET;
+
+// PayPlus signature verification using Hash header (base64 HMAC-SHA256)
 function verifyPayPlusSignature(rawBody: string, signature: string | null): boolean {
   const secretKey = process.env.PAYPLUS_SECRET_KEY;
   
-  // If no secret key configured, log warning but allow (graceful degradation)
-  // TODO: Set PAYPLUS_SECRET_KEY in Vercel env vars when PayPlus provides it
   if (!secretKey) {
     console.warn('PayPlus signature verification skipped: PAYPLUS_SECRET_KEY not configured');
     return true;
   }
   
-  // Secret key is configured — enforce signature check
   if (!signature) {
-    console.error('PayPlus webhook: Missing signature header — rejecting');
     return false;
   }
   
-  // Verify HMAC-SHA256 signature
-  const expectedSignature = crypto
+  // PayPlus sends base64-encoded HMAC-SHA256 (from WooCommerce plugin)
+  const expectedBase64 = crypto
+    .createHmac('sha256', secretKey)
+    .update(rawBody)
+    .digest('base64');
+  
+  // Also compute hex for compatibility
+  const expectedHex = crypto
     .createHmac('sha256', secretKey)
     .update(rawBody)
     .digest('hex');
   
-  return crypto.timingSafeEqual(
-    Buffer.from(expectedSignature, 'hex'),
-    Buffer.from(signature, 'hex')
-  );
+  // Compare both formats (PayPlus may use either)
+  return signature === expectedBase64 || signature === expectedHex;
 }
 
 export async function POST(request: NextRequest) {
@@ -46,11 +54,33 @@ export async function POST(request: NextRequest) {
     request.headers.forEach((value, key) => { headerObj[key] = key.toLowerCase().includes('key') ? '***' : value; });
     console.log('PayPlus webhook headers:', JSON.stringify(headerObj));
     
-    if (signature) {
+    // Verify webhook authenticity — block unauthorized requests
+    if (WEBHOOK_SECRET) {
+      // Method 1: Check our custom webhook secret (added as query param or header)
+      const urlSecret = new URL(request.url).searchParams.get('secret');
+      const headerSecret = request.headers.get('x-webhook-secret');
+      if (urlSecret !== WEBHOOK_SECRET && headerSecret !== WEBHOOK_SECRET) {
+        // Method 2: Check PayPlus signature (Hash header)
+        if (signature) {
+          const isValid = verifyPayPlusSignature(rawBody, signature);
+          if (!isValid) {
+            console.error('PayPlus webhook: INVALID signature — rejecting');
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+          }
+          console.log('PayPlus webhook: signature valid ✅');
+        } else {
+          console.error('PayPlus webhook: No auth — rejecting');
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+      } else {
+        console.log('PayPlus webhook: secret token valid ✅');
+      }
+    } else if (signature) {
+      // No webhook secret configured, try PayPlus signature
       const isValid = verifyPayPlusSignature(rawBody, signature);
-      console.log(`PayPlus webhook signature ${isValid ? 'valid' : 'INVALID'} (not blocking)`);
+      console.log(`PayPlus webhook signature ${isValid ? 'valid' : 'INVALID'} (WEBHOOK_SECRET not set, allowing)`);
     } else {
-      console.log('PayPlus webhook: No signature header (not blocking)');
+      console.warn('PayPlus webhook: No auth configured (set PAYPLUS_WEBHOOK_SECRET to secure)');
     }
     
     // PayPlus sends callback data as JSON or form-urlencoded
@@ -270,7 +300,7 @@ export async function POST(request: NextRequest) {
             .select('name')
             .eq('email', email.toLowerCase())
             .single();
-          const displayName = userData?.name || 'משפץ יקר';
+          const displayName = escapeHtml(userData?.name || 'משפץ יקר');
           const isPlus = productType === 'premium_plus';
 
           await fetch('https://api.resend.com/emails', {
@@ -336,8 +366,17 @@ export async function POST(request: NextRequest) {
 // Also handle GET requests (PayPlus sometimes redirects via GET)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const data = Object.fromEntries(searchParams);
   
+  // Verify auth for GET webhook too
+  if (WEBHOOK_SECRET) {
+    const urlSecret = searchParams.get('secret');
+    if (urlSecret !== WEBHOOK_SECRET) {
+      console.error('PayPlus GET webhook: No valid secret — rejecting');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+  }
+  
+  const data = Object.fromEntries(searchParams);
   console.log('PayPlus webhook GET received:', JSON.stringify(data));
   
   // Process directly instead of routing through POST (which reads request.text())

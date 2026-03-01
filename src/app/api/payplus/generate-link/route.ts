@@ -117,13 +117,19 @@ export async function POST(request: NextRequest) {
     };
 
     // Add recurring settings for subscription products (Vision)
+    // Per PayPlus docs: charge_method 3 requires recurring_settings object
     if ((pricing as any).recurring) {
       payPlusBody.recurring_settings = {
-        recurring_type: 2,        // 0=daily, 1=weekly, 2=monthly
-        recurring_range: 1,       // every 1 month
-        number_of_charges: 0,     // 0 = unlimited (until cancelled)
-        recurring_amount: finalAmount,
-        start_date: new Date().getDate(), // day of month for recurring charge
+        instant_first_payment: true,       // Charge immediately on signup
+        recurring_type: 2,                 // 0=daily, 1=weekly, 2=monthly
+        recurring_range: 1,                // Every 1 month
+        number_of_charges: 0,              // 0 = unlimited (until cancelled)
+        start_date_on_payment_date: true,  // Start recurring on payment date
+        start_date: new Date().getDate(),  // Day of month for recurring
+        jump_payments: 0,                  // No free trial period
+        successful_invoice: true,          // Auto-generate invoice after each charge
+        customer_failure_email: true,      // Email customer on failed charge
+        send_customer_success_email: true, // Email customer on successful charge
       };
     }
 

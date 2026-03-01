@@ -18,7 +18,7 @@ interface PayPlusRequest {
 
 // Pricing configuration (in ILS)
 const PRICING = {
-  premium: { amount: 299.99, chargeMethod: 1 },
+  premium: { amount: 2, chargeMethod: 1 }, // TEMP TEST
   vision: { amount: 39.99, chargeMethod: 3, recurring: true },
   premium_plus: { amount: 349.99, chargeMethod: 1 },
 };

@@ -18,7 +18,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  */
 export async function POST(request: NextRequest) {
   try {
-    const { page_request_uid } = await request.json();
+    const { page_request_uid, email: clientEmail, product: clientProduct } = await request.json();
 
     if (!page_request_uid) {
       return NextResponse.json({ error: 'Missing page_request_uid' }, { status: 400 });
@@ -67,8 +67,32 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract transaction details
-    const email = tx.more_info_1 || tx.customer_email || tx.email;
-    const productType = tx.more_info || tx.product_type;
+    // For recurring, PayPlus uses extra_info instead of more_info and may not include email
+    let email = tx.more_info_1 || tx.customer_email || tx.email;
+    const productType = tx.more_info || tx.extra_info || tx.product_type || clientProduct;
+
+    // Fallback: look up customer email via customer_uid
+    if (!email && tx.customer_uid) {
+      try {
+        const custRes = await fetch(
+          `${PAYPLUS_BASE_URL}/Customers/${tx.customer_uid}`,
+          { headers: { 'api-key': PAYPLUS_API_KEY!, 'secret-key': PAYPLUS_SECRET_KEY! } }
+        );
+        if (custRes.ok) {
+          const custData = await custRes.json();
+          email = custData.data?.email || custData.email;
+          console.log('IPN check: customer lookup →', email);
+        }
+      } catch (e) {
+        console.error('IPN check: customer lookup failed:', e);
+      }
+    }
+
+    // Last fallback: use email/product from client request
+    if (!email && clientEmail) {
+      email = clientEmail;
+      console.log('IPN check: using client-provided email:', email);
+    }
 
     if (!email) {
       console.error('PayPlus IPN check: No email in transaction data');

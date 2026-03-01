@@ -17,13 +17,22 @@ function PaymentSuccessContent() {
   useEffect(() => {
     // Verify payment via IPN check (fallback for when webhook doesn't fire)
     async function verifyPayment() {
+      // Get email from localStorage (user is logged in)
+      let userEmail = '';
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          userEmail = JSON.parse(userData).email || '';
+        }
+      } catch {}
+
       if (pageRequestUid) {
         try {
           console.log('Verifying payment via IPN check:', pageRequestUid);
           const res = await fetch('/api/payplus/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ page_request_uid: pageRequestUid }),
+            body: JSON.stringify({ page_request_uid: pageRequestUid, email: userEmail, product: product }),
           });
           const data = await res.json();
           console.log('IPN check result:', data);
@@ -36,7 +45,7 @@ function PaymentSuccessContent() {
                 const res2 = await fetch('/api/payplus/check', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ page_request_uid: pageRequestUid }),
+                  body: JSON.stringify({ page_request_uid: pageRequestUid, email: userEmail, product: product }),
                 });
                 const data2 = await res2.json();
                 setVerificationStatus(data2.success ? 'verified' : 'failed');

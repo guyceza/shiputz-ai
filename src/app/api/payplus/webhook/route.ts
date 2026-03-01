@@ -307,11 +307,13 @@ export async function POST(request: NextRequest) {
           console.log(`Welcome email sent to ${email}`);
 
           // Mark day 0 as sent to avoid duplicate from cron
-          await supabase.from('email_sequences').insert({
-            user_email: email.toLowerCase(),
-            sequence_type: 'purchased',
-            day_number: 0,
-          }).then(() => {}).catch(() => {});
+          try {
+            await supabase.from('email_sequences').insert({
+              user_email: email.toLowerCase(),
+              sequence_type: 'purchased',
+              day_number: 0,
+            });
+          } catch { /* ignore duplicates */ }
         }
       } catch (emailErr) {
         console.error('Failed to send welcome email (non-blocking):', emailErr);

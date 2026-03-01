@@ -28,6 +28,10 @@ async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, p
 
 export async function POST(request: NextRequest) {
   try {
+    const contentType = request.headers.get('content-type') || '';
+    if (!contentType.includes('multipart/form-data')) {
+      return NextResponse.json({ error: "Image upload required (multipart/form-data)" }, { status: 400 });
+    }
     const formData = await request.formData();
     const imageFile = formData.get("image") as File;
     const userEmail = formData.get("userEmail") as string;

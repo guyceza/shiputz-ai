@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           .from('users')
           .update({ 
             purchased: false,
-            vision_active: false,
+            vision_subscription: null,
             refunded_at: new Date().toISOString(),
           })
           .eq('email', email.toLowerCase());
@@ -111,18 +111,6 @@ export async function POST(request: NextRequest) {
         } else {
           console.log(`Access revoked for ${email} after refund`);
         }
-
-        // Log the refund transaction
-        await supabase.from('transactions').insert({
-          email: email.toLowerCase(),
-          product_type: productType || 'unknown',
-          amount: parseFloat(amount) || 0,
-          currency: 'ILS',
-          status: 'refunded',
-          payment_provider: 'payplus',
-          transaction_id: transaction_uid || page_request_uid,
-          created_at: new Date().toISOString(),
-        });
       }
 
       return NextResponse.json({ received: true, status: 'refunded' });
@@ -138,8 +126,7 @@ export async function POST(request: NextRequest) {
         const { error: updateError } = await supabase
           .from('users')
           .update({ 
-            vision_active: false,
-            vision_cancelled_at: new Date().toISOString(),
+            vision_subscription: 'canceled',
           })
           .eq('email', email.toLowerCase());
 
@@ -148,18 +135,6 @@ export async function POST(request: NextRequest) {
         } else {
           console.log(`Vision subscription cancelled for ${email}`);
         }
-
-        // Log the cancellation
-        await supabase.from('transactions').insert({
-          email: email.toLowerCase(),
-          product_type: 'vision',
-          amount: 0,
-          currency: 'ILS',
-          status: 'cancelled',
-          payment_provider: 'payplus',
-          transaction_id: transaction_uid || recurring_id || page_request_uid,
-          created_at: new Date().toISOString(),
-        });
       }
 
       return NextResponse.json({ received: true, status: 'cancelled' });
@@ -171,23 +146,7 @@ export async function POST(request: NextRequest) {
     const isSuccess = String(status_code) === '0' || data.status === 'approved';
 
     if (!isSuccess) {
-      console.log('PayPlus transaction failed:', status_description);
-      
-      // Log failed transaction
-      if (email) {
-        await supabase.from('transactions').insert({
-          email: email.toLowerCase(),
-          product_type: productType || 'unknown',
-          amount: parseFloat(amount) || 0,
-          currency: 'ILS',
-          status: 'failed',
-          status_description: status_description,
-          payment_provider: 'payplus',
-          transaction_id: transaction_uid || page_request_uid,
-          created_at: new Date().toISOString(),
-        });
-      }
-      
+      console.log('PayPlus transaction failed:', status_description, { email, productType, amount });
       return NextResponse.json({ received: true, status: 'failed' });
     }
 
@@ -201,24 +160,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user in database based on product type
+    // NOTE: DB columns that exist: purchased, purchased_at, vision_subscription,
+    //       vision_trial_used, vision_usage_count, vision_usage_month
     if (productType === 'premium' || productType === 'premium_plus') {
-      // Mark user as premium - use upsert to handle users who pay before signing up
-      // Bug #8 fix: Use upsert to avoid race condition
+      // Mark user as premium
       const upsertData: any = { 
         email: email.toLowerCase(),
         purchased: true,
-        purchase_date: new Date().toISOString(),
-        payment_method: 'payplus',
-        transaction_id: transaction_uid || page_request_uid,
+        purchased_at: new Date().toISOString(),
       };
 
-      // Premium Plus includes 4 bonus Vision credits
+      // Premium Plus: also activate vision subscription
       if (productType === 'premium_plus') {
-        upsertData.vision_credits = 4;
-        upsertData.vision_credits_source = 'premium_plus_bonus';
+        upsertData.vision_subscription = 'active';
       }
 
-      // Use upsert with conflict on email
       const { error: upsertError } = await supabase
         .from('users')
         .upsert(upsertData, { onConflict: 'email' });
@@ -226,28 +182,17 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user premium status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with 4 Vision credits)' : ''}`);
+        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with Vision)' : ''}`);
       }
     }
 
     if (productType === 'vision' || type === 'recurring_payment') {
-      // Mark user as having Vision subscription (or renewal)
-      // Bug #8 fix: Use upsert to avoid race condition
-      const isRenewal = type === 'recurring_payment';
-      
+      // Mark user as having Vision subscription
       const upsertData: any = { 
         email: email.toLowerCase(),
-        vision_active: true,
-        vision_transaction_id: transaction_uid || recurring_id || page_request_uid,
-        vision_cancelled_at: null, // Clear any previous cancellation
+        vision_subscription: 'active',
       };
       
-      // Only set start date on initial subscription, not renewals
-      if (!isRenewal) {
-        upsertData.vision_start_date = new Date().toISOString();
-      }
-      
-      // Use upsert with conflict on email
       const { error: upsertError } = await supabase
         .from('users')
         .upsert(upsertData, { onConflict: 'email' });
@@ -255,7 +200,7 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user vision status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Vision active${isRenewal ? ' (renewal)' : ''}`);
+        console.log(`User ${email} marked as Vision active`);
       }
     }
 
@@ -274,29 +219,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log the transaction
-    const { error: logError } = await supabase
-      .from('transactions')
-      .insert({
-        email: email.toLowerCase(),
-        product_type: productType,
-        amount: parseFloat(amount) || 0,
-        currency: 'ILS',
-        status: 'completed',
-        payment_provider: 'payplus',
-        transaction_id: transaction_uid || page_request_uid,
-        approval_num: approval_num,
-        voucher_num: voucher_num,
-        discount_code: discountCode || null,
-        created_at: new Date().toISOString(),
-      });
-
-    if (logError) {
-      // Bug #35: Alert when transaction logging fails (important audit trail)
-      console.error('CRITICAL: Failed to log transaction:', logError.message, { email, productType, transaction_uid });
-      // In production, this should send an alert to admin
-      // The transaction still succeeded, but we lost audit trail
-    }
+    // Log the transaction (console only — transactions table doesn't exist yet)
+    console.log(`✅ PayPlus payment completed: ${email} → ${productType} (₪${amount}, tx: ${transaction_uid || page_request_uid})`);
 
     return NextResponse.json({ 
       received: true, 

@@ -19,7 +19,7 @@ function CheckoutContent() {
   
   const isPremiumPlus = searchParams.get("plan") === "plus" || searchParams.get("plan") === "premium_plus";
 
-  const basePrice = isPremiumPlus ? 2 : 2; // TODO: Restore to 349.99 : 299.99 after testing
+  const basePrice = isPremiumPlus ? 349.99 : 299.99;
   const originalPrice = isPremiumPlus ? 699 : 599;
   const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
 

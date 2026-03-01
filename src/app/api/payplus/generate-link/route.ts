@@ -19,7 +19,7 @@ interface PayPlusRequest {
 // Pricing configuration (in ILS)
 const PRICING = {
   premium: { amount: 299.99, chargeMethod: 1 }, // One-time charge
-  vision: { amount: 39.99, chargeMethod: 3 }, // Recurring monthly
+  vision: { amount: 39.99, chargeMethod: 3, recurring: true }, // Recurring monthly
   premium_plus: { amount: 349.99, chargeMethod: 1 }, // One-time (Premium + 4 bonus Vision credits)
 };
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build PayPlus request
-    const payPlusBody = {
+    const payPlusBody: any = {
       payment_page_uid: PAYPLUS_PAGE_UID,
       charge_method: pricing.chargeMethod,
       amount: finalAmount,
@@ -113,6 +113,17 @@ export async function POST(request: NextRequest) {
       // Hebrew language
       language_code: 'he',
     };
+
+    // Add recurring settings for subscription products (Vision)
+    if ((pricing as any).recurring) {
+      payPlusBody.recurring_settings = {
+        recurring_type: 2,        // 0=daily, 1=weekly, 2=monthly
+        recurring_range: 1,       // every 1 month
+        number_of_charges: 0,     // 0 = unlimited (until cancelled)
+        recurring_amount: finalAmount,
+        start_date: new Date().getDate(), // day of month for recurring charge
+      };
+    }
 
     console.log('PayPlus request:', JSON.stringify(payPlusBody, null, 2));
 

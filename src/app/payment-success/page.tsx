@@ -11,8 +11,10 @@ function PaymentSuccessContent() {
   const [verificationStatus, setVerificationStatus] = useState<'checking' | 'verified' | 'failed'>('checking');
   
   const product = searchParams.get('product') || 'premium';
-  // PayPlus may pass page_request_uid or transaction_uid in the redirect URL
-  const pageRequestUid = searchParams.get('page_request_uid') || searchParams.get('payment_request_uid');
+  // PayPlus may pass page_request_uid in redirect URL, or we saved it in localStorage before redirect
+  const pageRequestUid = searchParams.get('page_request_uid') 
+    || searchParams.get('payment_request_uid')
+    || (typeof window !== 'undefined' ? localStorage.getItem('payplus_page_request_uid') : null);
 
   useEffect(() => {
     // Verify payment via IPN check (fallback for when webhook doesn't fire)
@@ -82,6 +84,8 @@ function PaymentSuccessContent() {
         localStorage.setItem('user', JSON.stringify(user));
       }
       localStorage.removeItem('shiputzai_user');
+      localStorage.removeItem('payplus_page_request_uid');
+      localStorage.removeItem('payplus_product');
     }
 
     // Countdown and redirect

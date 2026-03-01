@@ -138,6 +138,11 @@ function CheckoutContent() {
       const data = await response.json();
       
       if (data.success && data.payment_url) {
+        // Save transaction UID for payment verification on success page
+        if (data.transaction_uid) {
+          localStorage.setItem('payplus_page_request_uid', data.transaction_uid);
+          localStorage.setItem('payplus_product', productType);
+        }
         window.location.href = data.payment_url;
       } else {
         throw new Error(data.error || 'Failed to create payment link');

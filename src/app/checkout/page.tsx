@@ -19,8 +19,9 @@ function CheckoutContent() {
   
   const isPremiumPlus = searchParams.get("plan") === "plus" || searchParams.get("plan") === "premium_plus";
 
-  const basePrice = isPremiumPlus ? 349.99 : 299.99;
-  const originalPrice = isPremiumPlus ? 699 : 599;
+  // TODO: Restore real prices after testing! (premium=299.99/599, plus=349.99/699)
+  const basePrice = isPremiumPlus ? 1 : 1;
+  const originalPrice = isPremiumPlus ? 2 : 2;
   const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
 
   // Check if user is logged in - MUST be logged in to checkout

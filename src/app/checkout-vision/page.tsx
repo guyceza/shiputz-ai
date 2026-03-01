@@ -10,7 +10,8 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 // Cute character animation for premium upsell
 const PREMIUM_ANIMATION_URL = "https://assets3.lottiefiles.com/packages/lf20_fcfjwiyb.json";
 
-const REGULAR_PRICE = 39.99;  // ₪39.99
+// TODO: Restore real price after testing! (39.99)
+const REGULAR_PRICE = 1;  // ₪1 for testing
 const DISCOUNT_PRICE = 19.99; // ₪19.99 first month with discount
 
 function CheckoutVisionContent() {

@@ -17,12 +17,10 @@ interface PayPlusRequest {
 }
 
 // Pricing configuration (in ILS)
-// TEST MODE: ₪1 for all products. Restore real prices before go-live:
-// premium=299.99, vision=39.99, premium_plus=349.99
 const PRICING = {
-  premium: { amount: 1, chargeMethod: 1 }, // One-time charge
-  vision: { amount: 1, chargeMethod: 3, recurring: true }, // Recurring monthly
-  premium_plus: { amount: 1, chargeMethod: 1 }, // One-time (Premium + Vision)
+  premium: { amount: 299.99, chargeMethod: 1 }, // One-time charge
+  vision: { amount: 39.99, chargeMethod: 3, recurring: true }, // Recurring monthly
+  premium_plus: { amount: 349.99, chargeMethod: 1 }, // One-time (Premium + Vision)
 };
 
 export async function POST(request: NextRequest) {

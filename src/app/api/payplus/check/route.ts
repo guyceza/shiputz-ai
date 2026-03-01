@@ -133,6 +133,14 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ PayPlus IPN check: ${email} → ${productType} (status: ${statusCode})`);
 
+    // Mark pending payment as completed (so cron doesn't re-process)
+    if (page_request_uid) {
+      await supabase
+        .from('pending_payments')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('page_request_uid', page_request_uid);
+    }
+
     return NextResponse.json({
       success: true,
       status: 'success',

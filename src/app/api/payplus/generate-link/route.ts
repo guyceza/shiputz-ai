@@ -158,9 +158,19 @@ export async function POST(request: NextRequest) {
 
     const pageRequestUid = result.data?.page_request_uid;
 
-    // If we have a page_request_uid, append it to the success URL so the success page
-    // can verify the payment via IPN (fallback for when webhook doesn't fire)
-    // Note: We already set refURL_success in the request, but PayPlus should pass through params
+    // Save pending payment for cron verification (safety net if user closes browser)
+    if (pageRequestUid) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await supabase.from('pending_payments').upsert({
+        page_request_uid: pageRequestUid,
+        email: email.toLowerCase(),
+        product_type: productType,
+        amount: finalAmount,
+        status: 'pending',
+      }, { onConflict: 'page_request_uid' }).then(({ error }) => {
+        if (error) console.error('Error saving pending payment:', error);
+      });
+    }
     
     return NextResponse.json({
       success: true,

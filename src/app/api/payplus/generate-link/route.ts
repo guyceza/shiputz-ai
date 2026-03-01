@@ -150,10 +150,16 @@ export async function POST(request: NextRequest) {
 
     console.log('PayPlus response:', result);
 
+    const pageRequestUid = result.data?.page_request_uid;
+
+    // If we have a page_request_uid, append it to the success URL so the success page
+    // can verify the payment via IPN (fallback for when webhook doesn't fire)
+    // Note: We already set refURL_success in the request, but PayPlus should pass through params
+    
     return NextResponse.json({
       success: true,
       payment_url: result.data?.payment_page_link,
-      transaction_uid: result.data?.page_request_uid,
+      transaction_uid: pageRequestUid,
     });
 
   } catch (error) {

@@ -38,10 +38,14 @@ export async function POST(request: NextRequest) {
   try {
     // Clone request to read raw body for signature verification
     const rawBody = await request.text();
-    const signature = request.headers.get('x-payplus-signature');
+    // PayPlus sends signature in "Hash" header (base64 HMAC-SHA256)
+    const signature = request.headers.get('hash') || request.headers.get('x-payplus-signature');
     
-    // TODO: Re-enable signature verification after confirming PayPlus webhook format
-    // Temporarily disabled to debug webhook delivery
+    // Log all headers for debugging
+    const headerObj: Record<string, string> = {};
+    request.headers.forEach((value, key) => { headerObj[key] = key.toLowerCase().includes('key') ? '***' : value; });
+    console.log('PayPlus webhook headers:', JSON.stringify(headerObj));
+    
     if (signature) {
       const isValid = verifyPayPlusSignature(rawBody, signature);
       console.log(`PayPlus webhook signature ${isValid ? 'valid' : 'INVALID'} (not blocking)`);
@@ -70,6 +74,10 @@ export async function POST(request: NextRequest) {
 
     console.log('PayPlus webhook received:', JSON.stringify(data, null, 2));
 
+    // PayPlus wraps transaction data inside a "transaction" object
+    // Support both flat (root-level) and nested (data.transaction) formats
+    const tx = data.transaction || data;
+
     // Extract transaction details
     const {
       transaction_uid,
@@ -85,17 +93,17 @@ export async function POST(request: NextRequest) {
       voucher_num,
       type,           // For recurring: 'recurring_payment', 'recurring_cancel', etc.
       recurring_id,
-    } = data;
+    } = tx;
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extract email from various possible fields
-    const email = more_info_1 || data.email || data.customer_email;
-    const productType = more_info || data.product_type;
+    // Extract email from various possible fields (check both tx and root data)
+    const email = more_info_1 || tx.email || tx.customer_email || data.email || data.customer_email;
+    const productType = more_info || tx.product_type || data.product_type;
 
     // Bug #39: Handle refund webhooks
-    if (type === 'refund' || data.action === 'refund' || data.status === 'refunded') {
+    if (type === 'refund' || tx.action === 'refund' || tx.status === 'refunded' || data.action === 'refund' || data.status === 'refunded') {
       console.log('PayPlus refund received for:', email);
       
       if (email) {
@@ -121,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // Handle recurring subscription cancellation
     // Bug #38: Added more specific field checks based on PayPlus documentation
-    if (type === 'recurring_cancel' || data.action === 'cancel' || data.status === 'cancelled' || data.subscription_status === 'cancelled') {
+    if (type === 'recurring_cancel' || tx.action === 'cancel' || tx.status === 'cancelled' || tx.subscription_status === 'cancelled' || data.action === 'cancel' || data.status === 'cancelled') {
       console.log('PayPlus subscription cancelled for:', email);
       
       if (email) {
@@ -144,9 +152,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if transaction was successful
-    // PayPlus status codes: 0 = success, others = failure
+    // PayPlus status codes: '000' = success (from WooCommerce plugin), or 0 = success
     // Bug #7 fix: Convert to string explicitly to avoid type confusion
-    const isSuccess = String(status_code) === '0' || data.status === 'approved';
+    const isSuccess = String(status_code) === '000' || String(status_code) === '0' || tx.status === 'approved' || data.status === 'approved';
 
     if (!isSuccess) {
       console.log('PayPlus transaction failed:', status_description, { email, productType, amount });

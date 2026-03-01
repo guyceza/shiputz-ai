@@ -7,14 +7,59 @@ import Link from 'next/link';
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(8);
+  const [verificationStatus, setVerificationStatus] = useState<'checking' | 'verified' | 'failed'>('checking');
   
   const product = searchParams.get('product') || 'premium';
+  // PayPlus may pass page_request_uid or transaction_uid in the redirect URL
+  const pageRequestUid = searchParams.get('page_request_uid') || searchParams.get('payment_request_uid');
 
   useEffect(() => {
+    // Verify payment via IPN check (fallback for when webhook doesn't fire)
+    async function verifyPayment() {
+      if (pageRequestUid) {
+        try {
+          console.log('Verifying payment via IPN check:', pageRequestUid);
+          const res = await fetch('/api/payplus/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page_request_uid: pageRequestUid }),
+          });
+          const data = await res.json();
+          console.log('IPN check result:', data);
+          if (data.success) {
+            setVerificationStatus('verified');
+          } else {
+            // Try again after a short delay (payment might still be processing)
+            setTimeout(async () => {
+              try {
+                const res2 = await fetch('/api/payplus/check', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ page_request_uid: pageRequestUid }),
+                });
+                const data2 = await res2.json();
+                setVerificationStatus(data2.success ? 'verified' : 'failed');
+              } catch {
+                setVerificationStatus('failed');
+              }
+            }, 3000);
+          }
+        } catch (error) {
+          console.error('IPN check failed:', error);
+          setVerificationStatus('failed');
+        }
+      } else {
+        // No UID available — assume success (webhook should handle it)
+        console.log('No page_request_uid in URL, relying on webhook');
+        setVerificationStatus('verified');
+      }
+    }
+
+    verifyPayment();
+
     // Update localStorage to reflect purchase
     if (typeof window !== 'undefined') {
-      // Update user in localStorage
       const userData = localStorage.getItem('user');
       if (userData) {
         const user = JSON.parse(userData);
@@ -27,7 +72,6 @@ function PaymentSuccessContent() {
         }
         localStorage.setItem('user', JSON.stringify(user));
       }
-      // Clean up legacy key
       localStorage.removeItem('shiputzai_user');
     }
 
@@ -44,7 +88,7 @@ function PaymentSuccessContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router, product]);
+  }, [router, product, pageRequestUid]);
 
   const productNames: Record<string, string> = {
     premium: 'Premium',

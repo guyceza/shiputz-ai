@@ -259,6 +259,65 @@ export async function POST(request: NextRequest) {
     // Log the transaction (console only — transactions table doesn't exist yet)
     console.log(`✅ PayPlus payment completed: ${email} → ${productType} (₪${amount}, tx: ${transaction_uid || page_request_uid})`);
 
+    // Send welcome/purchase confirmation email via Resend (fire-and-forget)
+    if (email && (productType === 'premium' || productType === 'premium_plus')) {
+      try {
+        const RESEND_KEY = process.env.RESEND_API_KEY;
+        if (RESEND_KEY) {
+          // Get user name from DB
+          const { data: userData } = await supabase
+            .from('users')
+            .select('name')
+            .eq('email', email.toLowerCase())
+            .single();
+          const displayName = userData?.name || 'משפץ יקר';
+          const isPlus = productType === 'premium_plus';
+
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'ShiputzAI <help@shipazti.com>',
+              to: email,
+              subject: '🎉 ברוך הבא ל-ShiputzAI Premium!',
+              html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Premium${isPlus ? ' Plus' : ''}!</h1>
+                </div>
+                <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
+                <p style="font-size: 16px; color: #333;">תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.</p>
+                <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                  <h3 style="color: #111; margin-top: 0;">✅ מה מחכה לך:</h3>
+                  <ul style="color: #555; line-height: 1.8;">
+                    <li>מעקב תקציב חכם בזמן אמת</li>
+                    <li>סריקת קבלות אוטומטית עם AI</li>
+                    <li>ניתוח הצעות מחיר</li>
+                    <li>עוזר AI אישי לכל שאלה</li>
+                    <li>התראות חכמות לפני חריגות</li>
+                    ${isPlus ? '<li>4 הדמיות AI Vision</li><li>Shop the Look</li>' : ''}
+                  </ul>
+                </div>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">כניסה לדשבורד ←</a>
+                </div>
+                <p style="color: #888; font-size: 14px;">בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
+              </div>`,
+            }),
+          });
+          console.log(`Welcome email sent to ${email}`);
+
+          // Mark day 0 as sent to avoid duplicate from cron
+          await supabase.from('email_sequences').insert({
+            user_email: email.toLowerCase(),
+            sequence_type: 'purchased',
+            day_number: 0,
+          }).then(() => {}).catch(() => {});
+        }
+      } catch (emailErr) {
+        console.error('Failed to send welcome email (non-blocking):', emailErr);
+      }
+    }
+
     return NextResponse.json({ 
       received: true, 
       status: 'success',

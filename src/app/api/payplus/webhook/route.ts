@@ -238,18 +238,46 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Also handle GET requests (PayPlus sometimes sends GET)
+// Also handle GET requests (PayPlus sometimes redirects via GET)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const data = Object.fromEntries(searchParams);
   
-  console.log('PayPlus webhook GET received:', data);
+  console.log('PayPlus webhook GET received:', JSON.stringify(data));
   
-  // Convert to POST-like handling
-  const fakeRequest = {
-    headers: { get: () => 'application/json' },
-    json: async () => data,
-  } as any;
+  // Process directly instead of routing through POST (which reads request.text())
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
   
-  return POST({ ...request, json: async () => data } as any);
+  const email = data.more_info_1 || data.email || data.customer_email;
+  const productType = data.more_info || data.product_type;
+  const statusCode = data.status_code;
+  const isSuccess = String(statusCode) === '0' || data.status === 'approved';
+  
+  if (!isSuccess || !email) {
+    console.log('PayPlus GET webhook: not success or no email', { statusCode, email });
+    return NextResponse.json({ received: true, status: 'ignored' });
+  }
+
+  if (productType === 'premium' || productType === 'premium_plus') {
+    const upsertData: any = { 
+      email: email.toLowerCase(),
+      purchased: true,
+      purchased_at: new Date().toISOString(),
+    };
+    if (productType === 'premium_plus') {
+      upsertData.vision_subscription = 'active';
+    }
+    await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
+    console.log(`GET webhook: ${email} → ${productType} activated`);
+  }
+
+  if (productType === 'vision') {
+    await supabase.from('users').upsert({ 
+      email: email.toLowerCase(),
+      vision_subscription: 'active',
+    }, { onConflict: 'email' });
+    console.log(`GET webhook: ${email} → vision activated`);
+  }
+
+  return NextResponse.json({ received: true, status: 'success', product: productType });
 }

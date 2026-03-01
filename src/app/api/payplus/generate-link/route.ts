@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
         email: email,
       },
 
-      // Callbacks
-      refURL_callback: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/api/payplus/webhook`,
+      // Callbacks — refURL_callback is NOT set here; using the global callback URL
+      // configured in PayPlus dashboard (setting it here overrides and breaks it)
       refURL_success: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-success?product=${productType}`,
       refURL_failure: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-failed`,
 

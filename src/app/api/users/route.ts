@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send welcome email immediately
-    await sendWelcomeEmail(normalizedEmail, name);
+    await sendWelcomeEmail(normalizedEmail, name || '');
 
     // Mark Day 0 as sent (ignore errors if table doesn't exist)
     try {

@@ -99,8 +99,34 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Extract email from various possible fields (check both tx and root data)
-    const email = more_info_1 || tx.email || tx.customer_email || data.email || data.customer_email;
-    const productType = more_info || tx.product_type || data.product_type;
+    // For recurring callbacks, PayPlus uses "extra_info" instead of "more_info"
+    // and may not include email — try customer_uid lookup as fallback
+    let email = more_info_1 || tx.email || tx.customer_email || data.email || data.customer_email || data.more_info_1;
+    const productType = more_info || tx.extra_info || data.extra_info || tx.product_type || data.product_type;
+
+    // Fallback: if no email found but we have customer_uid, look up customer in PayPlus
+    if (!email && (tx.customer_uid || data.customer_uid)) {
+      try {
+        const customerUid = tx.customer_uid || data.customer_uid;
+        console.log('PayPlus webhook: No email found, looking up customer_uid:', customerUid);
+        const customerRes = await fetch(
+          `${process.env.PAYPLUS_BASE_URL || 'https://restapi.payplus.co.il/api/v1.0'}/Customers/${customerUid}`,
+          {
+            headers: {
+              'api-key': process.env.PAYPLUS_API_KEY || '',
+              'secret-key': process.env.PAYPLUS_SECRET_KEY || '',
+            },
+          }
+        );
+        if (customerRes.ok) {
+          const customerData = await customerRes.json();
+          email = customerData.data?.email || customerData.email;
+          console.log('PayPlus customer lookup result:', email);
+        }
+      } catch (e) {
+        console.error('PayPlus customer lookup failed:', e);
+      }
+    }
 
     // Bug #39: Handle refund webhooks
     if (type === 'refund' || tx.action === 'refund' || tx.status === 'refunded' || data.action === 'refund' || data.status === 'refunded') {

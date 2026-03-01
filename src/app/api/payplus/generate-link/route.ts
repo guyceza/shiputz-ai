@@ -17,10 +17,12 @@ interface PayPlusRequest {
 }
 
 // Pricing configuration (in ILS)
+// TODO: Restore real prices after testing!
+// Real prices: premium=299.99, vision=39.99, premium_plus=349.99
 const PRICING = {
-  premium: { amount: 299.99, chargeMethod: 1 }, // One-time charge
-  vision: { amount: 39.99, chargeMethod: 3, recurring: true }, // Recurring monthly
-  premium_plus: { amount: 349.99, chargeMethod: 1 }, // One-time (Premium + 4 bonus Vision credits)
+  premium: { amount: 1, chargeMethod: 1 }, // One-time charge
+  vision: { amount: 1, chargeMethod: 3, recurring: true }, // Recurring monthly
+  premium_plus: { amount: 1, chargeMethod: 1 }, // One-time (Premium + Vision)
 };
 
 export async function POST(request: NextRequest) {

@@ -92,7 +92,8 @@ export async function GET(req: NextRequest) {
             user.name || user.email.split("@")[0],
             projectSummaries,
             totalSpentThisMonth,
-            expensesThisMonth
+            expensesThisMonth,
+            user.email
           );
 
           await fetch("https://api.resend.com/emails", {
@@ -134,8 +135,12 @@ function generateMonthlyReportHtml(
     remaining: number;
   }>,
   totalSpentThisMonth: number,
-  expensesThisMonth: number
+  expensesThisMonth: number,
+  userEmail?: string
 ): string {
+  const unsubscribeUrl = userEmail 
+    ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}`
+    : 'https://shipazti.com/unsubscribe';
   const projectRows = projects
     .map(
       (p) => `
@@ -221,7 +226,7 @@ function generateMonthlyReportHtml(
             קיבלת מייל זה כי הפעלת דוחות חודשיים ב-ShiputzAI
           </p>
           <p style="color: #888; font-size: 12px; margin: 8px 0 0 0;">
-            <a href="https://shipazti.com/unsubscribe" style="color: #666;">ביטול הרשמה</a>
+            <a href="${unsubscribeUrl}" style="color: #666;">ביטול הרשמה</a>
           </p>
         </div>
       </div>

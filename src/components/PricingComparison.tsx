@@ -23,10 +23,8 @@ const businessFeatures = [
   "גישה ללקוחות שלך",
   "תמיכה עדיפות",
   "דוחות מתקדמים",
-  "API לאינטגרציה",
   "מיתוג אישי",
   "הדרכה אישית",
-  "SLA מותאם",
 ];
 
 export default function PricingComparison() {

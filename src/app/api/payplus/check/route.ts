@@ -43,22 +43,30 @@ export async function POST(request: NextRequest) {
     const ipnData = await ipnResponse.json();
     console.log('PayPlus IPN check response:', JSON.stringify(ipnData, null, 2));
 
-    // Check if transaction was successful
-    const result = ipnData.data?.result || ipnData.result || ipnData;
-    const statusCode = result?.status_code || result?.transaction?.status_code;
-    const isSuccess = String(statusCode) === '000' || String(statusCode) === '0';
+    // Check if IPN call itself succeeded
+    if (ipnData.results?.status === 'error') {
+      return NextResponse.json({
+        success: false,
+        status: 'not_found',
+        description: ipnData.results?.description || 'Transaction not found',
+      });
+    }
+
+    // PayPlus IPN returns transaction data directly in ipnData.data
+    const tx = ipnData.data || {};
+    const statusCode = tx.status_code;
+    const isSuccess = String(statusCode) === '000' || String(statusCode) === '0' || tx.status === 'approved';
 
     if (!isSuccess) {
       return NextResponse.json({ 
         success: false, 
         status: 'pending',
         status_code: statusCode,
-        description: result?.status_description || 'Transaction not completed yet',
+        description: tx.status_description || 'Transaction not completed yet',
       });
     }
 
     // Extract transaction details
-    const tx = result.transaction || result;
     const email = tx.more_info_1 || tx.customer_email || tx.email;
     const productType = tx.more_info || tx.product_type;
 

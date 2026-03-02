@@ -38,6 +38,7 @@ export default function FlappyBirdGame() {
   const gameStateRef = useRef<"idle" | "playing" | "dead">("idle");
   const animRef = useRef<number>(0);
   const lastTapTime = useRef(0); // debounce to prevent double-fire on mobile
+  const isTouchDevice = useRef(false); // track if user is using touch
 
   const resetGame = useCallback(() => {
     birdY.current = CANVAS_H / 2;
@@ -48,12 +49,7 @@ export default function FlappyBirdGame() {
     setScore(0);
   }, []);
 
-  const handleTap = useCallback(() => {
-    // Debounce: ignore taps within 50ms of each other (prevents touch+click double-fire)
-    const now = Date.now();
-    if (now - lastTapTime.current < 50) return;
-    lastTapTime.current = now;
-
+  const doJump = useCallback(() => {
     if (gameStateRef.current === "idle") {
       resetGame();
       gameStateRef.current = "playing";
@@ -68,6 +64,17 @@ export default function FlappyBirdGame() {
       birdVel.current = JUMP_FORCE;
     }
   }, [resetGame]);
+
+  const handleTouchTap = useCallback(() => {
+    isTouchDevice.current = true;
+    doJump();
+  }, [doJump]);
+
+  const handleClickTap = useCallback(() => {
+    // On touch devices, ignore click events entirely (they are synthetic duplicates)
+    if (isTouchDevice.current) return;
+    doJump();
+  }, [doJump]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -261,8 +268,8 @@ export default function FlappyBirdGame() {
         height={CANVAS_H}
         className="rounded-xl border border-gray-200 cursor-pointer touch-none"
         style={{ maxWidth: "100%", height: "auto" }}
-        onClick={handleTap}
-        onTouchStart={(e) => { e.preventDefault(); handleTap(); }}
+        onClick={handleClickTap}
+        onTouchStart={(e) => { e.preventDefault(); handleTouchTap(); }}
       />
       {score > 0 && gameState === "playing" && (
         <div className="text-xs text-gray-400 mt-1">ניקוד: {score}</div>

@@ -74,3 +74,24 @@ Sending vision_upsell to test@shiputzai.com (day 3)
 Sending welcome_purchased to test-ollie@shipazti.com (day 0)
 ✅ Sent successfully: 790d2293-5fd8-4381-8f40-91dbaa635b36
 [2026-03-01T09:00:28.654Z] Done!
+[2026-03-02T09:00:02.487Z] Starting email sequence processing...
+Found 11 users
+Sending testimonials to test-check-1234@gmail.com (day 7)
+✅ Sent successfully: 93d18fdb-22fa-48e0-bb1f-576f6a4be0c1
+Sending discount_offer to dhtdht200@gmail.com (day 3)
+✅ Sent successfully: 3c5f72b6-320b-4b8a-880a-905f55415325
+Sending problem_highlight to dhtdht200@gmail.com (day 5)
+✅ Sent successfully: e89eb2f9-dc04-4dd0-902a-3f44ec3de24e
+Sending testimonials to dhtdht200@gmail.com (day 7)
+✅ Sent successfully: d4b329ef-a389-4f6a-9988-e503ebc30b49
+Sending reminder to wed4me4@gmail.com (day 1)
+✅ Sent successfully: 903dd88d-9c41-4d04-b300-4918acfa97e5
+Sending discount_offer to wed4me4@gmail.com (day 3)
+✅ Sent successfully: b5c50bb8-2093-48d4-aca2-3d1331bcb641
+Sending problem_highlight to wed4me4@gmail.com (day 5)
+✅ Sent successfully: 1bc85834-264e-4b7c-8119-59b8cee9c1b2
+Sending testimonials to wed4me4@gmail.com (day 7)
+✅ Sent successfully: 041e4f0d-95ce-426c-b3ed-955e9b1cbfc1
+Sending discount_offer to test@shiputzai.com (day 3)
+✅ Sent successfully: 35d3a41b-c7bf-4fc9-b81d-27d1ad16681a
+[2026-03-02T09:00:54.688Z] Done!

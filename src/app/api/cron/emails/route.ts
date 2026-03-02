@@ -557,6 +557,7 @@ export async function GET(request: NextRequest) {
       const sequenceType = user.purchased ? 'purchased' : 'non_purchased';
 
       // Bug fix: Check if user already received an email TODAY - limit to 1 email per day
+      // Check for ANY status (sent, pending, failed) to prevent duplicates from race conditions
       const todayStart = new Date();
       todayStart.setUTCHours(0, 0, 0, 0);
       const { data: sentToday } = await supabase
@@ -564,11 +565,11 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('user_email', user.email)
         .gte('sent_at', todayStart.toISOString())
-        .eq('status', 'sent')
+        .in('status', ['sent', 'pending'])
         .limit(1);
       
       if (sentToday && sentToday.length > 0) {
-        // Already sent an email today, skip this user
+        // Already sent/processing an email today, skip this user
         continue;
       }
 

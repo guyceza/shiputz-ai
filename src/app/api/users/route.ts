@@ -151,12 +151,13 @@ export async function POST(request: NextRequest) {
     // Send welcome email immediately
     await sendWelcomeEmail(normalizedEmail, name || '');
 
-    // Mark Day 0 as sent (ignore errors if table doesn't exist)
+    // Mark Day 0 as sent so cron skips it and moves to day 1
     try {
       await supabase.from('email_sequences').insert({
         user_email: normalizedEmail,
         sequence_type: 'non_purchased',
         day_number: 0,
+        status: 'sent',
       });
     } catch (e) {
       // Ignore

@@ -414,11 +414,11 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">כל מה שצריך.</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-12">
-            <Feature title="מעקב תקציב" description="ראו בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." />
-            <Feature title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." />
-            <Feature title="ניתוח הצעות מחיר" description="העלו הצעה ותקבלו ניתוח מיידי. האם המחיר הוגן? מה חסר?" />
-            <Feature title="התראות חכמות" description="חרגת מהתקציב? תשלום חריג? המערכת מתריעה בזמן." />
-            <Feature title="עוזר AI" description="שאלו כל שאלה על השיפוץ וקבלו תשובה מקצועית ומותאמת." />
+            <Feature title="מעקב תקציב" description="ראו בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." href="/dashboard" />
+            <Feature title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." href="/dashboard" />
+            <Feature title="ניתוח הצעות מחיר" description="העלו הצעה ותקבלו ניתוח מיידי. האם המחיר הוגן? מה חסר?" href="/dashboard" />
+            <Feature title="התראות חכמות" description="חרגת מהתקציב? תשלום חריג? המערכת מתריעה בזמן." href="/dashboard" />
+            <Feature title="עוזר AI" description="שאלו כל שאלה על השיפוץ וקבלו תשובה מקצועית ומותאמת." href="/dashboard" />
           </div>
         </div>
       </section>
@@ -618,11 +618,23 @@ export default function Home() {
   );
 }
 
-function Feature({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover-lift hover-glow">
+function Feature({ title, description, href }: { title: string; description: string; href?: string }) {
+  const content = (
+    <>
       <h3 className="text-lg font-semibold mb-2 text-gray-900">{title}</h3>
       <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
+    </>
+  );
+  if (href) {
+    return (
+      <a href={href} className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover-lift hover-glow block cursor-pointer">
+        {content}
+      </a>
+    );
+  }
+  return (
+    <div className="group p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover-lift hover-glow">
+      {content}
     </div>
   );
 }

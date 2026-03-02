@@ -374,7 +374,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </div>
       `,
       cta: 'לממש את ההנחה',
-      url: `https://shipazti.com/checkout?code=${discountCode || ''}`
+      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     
     problem_highlight: {
@@ -436,7 +436,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </div>
       `,
       cta: 'לממש עכשיו',
-      url: `https://shipazti.com/checkout?code=${discountCode || ''}`
+      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     
     demo: {

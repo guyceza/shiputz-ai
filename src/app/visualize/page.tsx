@@ -1512,7 +1512,7 @@ export default function VisualizePage() {
       )}
 
       {/* Upload Modal */}
-      {showUploadModal && !generatedResult && (
+      {showUploadModal && (!generatedResult || showGameLoading) && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6 overflow-auto">
           <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative">
             <button

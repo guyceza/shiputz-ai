@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Redirect www → non-www (fixes split analytics + SEO)
+  const host = request.headers.get('host') || '';
+  if (host.startsWith('www.')) {
+    const url = request.nextUrl.clone();
+    url.host = host.replace('www.', '');
+    return NextResponse.redirect(url, 301);
+  }
+
   // PayPlus redirects via POST to payment-success/payment-failed
   // Next.js pages only handle GET, so we redirect POST → GET
   if (request.method === 'POST' && 
@@ -31,5 +39,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/payment-success', '/payment-failed'],
+  // Match all paths for www redirect, plus specific paths for PayPlus
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|js|css)$).*)'],
 };

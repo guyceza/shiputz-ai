@@ -176,6 +176,10 @@ function LoginContent() {
 
           <button
             onClick={async () => {
+              // Save redirect URL before Google OAuth (callback won't have it)
+              if (redirectTo && redirectTo !== '/dashboard') {
+                localStorage.setItem('authRedirect', redirectTo);
+              }
               const { signInWithGoogle } = await import("@/lib/auth");
               await signInWithGoogle();
             }}

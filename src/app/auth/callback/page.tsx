@@ -57,7 +57,14 @@ export default function AuthCallbackPage() {
     if (isNewUser && !hasCompletedOnboarding) {
       router.push('/onboarding');
     } else {
-      router.push('/dashboard');
+      // Check for saved redirect URL (e.g., from discount email → login → Google OAuth)
+      const savedRedirect = localStorage.getItem('authRedirect');
+      if (savedRedirect) {
+        localStorage.removeItem('authRedirect');
+        router.push(savedRedirect);
+      } else {
+        router.push('/dashboard');
+      }
     }
   };
 

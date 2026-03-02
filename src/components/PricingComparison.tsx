@@ -9,7 +9,6 @@ const allFeatures = [
   { name: "מעקב תקציב", free: false, premium: true, plus: true },
   { name: "סריקת קבלות", free: false, premium: true, plus: true },
   { name: "ניתוח הצעות מחיר", free: false, premium: true, plus: true },
-  { name: "בדיקת חוזים", free: false, premium: true, plus: true },
   { name: "התראות חכמות", free: false, premium: true, plus: true },
   { name: "עוזר אישי", free: false, premium: true, plus: true },
   { name: "4 הדמיות במערכת AI Vision", free: false, premium: false, plus: true },

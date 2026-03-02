@@ -12,7 +12,6 @@ const features = [
   { name: "מעקב תקציב ללא הגבלה", includedIn: ["premium", "plus"] },
   { name: "סריקת קבלות", includedIn: ["premium", "plus"] },
   { name: "ניתוח הצעות מחיר", includedIn: ["premium", "plus"] },
-  { name: "בדיקת חוזים", includedIn: ["premium", "plus"] },
   { name: "התראות חכמות", includedIn: ["premium", "plus"] },
   { name: "עוזר אישי", includedIn: ["premium", "plus"] },
   { name: "הדמיית חדר", includedIn: ["plus"] },

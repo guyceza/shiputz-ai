@@ -226,10 +226,6 @@ function CheckoutContent() {
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>בדיקת חוזים</span>
-              </div>
-              <div className="flex items-start gap-0">
-                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>התראות חכמות</span>
               </div>
               <div className="flex items-start gap-0">

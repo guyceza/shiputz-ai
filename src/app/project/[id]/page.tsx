@@ -280,6 +280,7 @@ export default function ProjectPage() {
   const [visionImage, setVisionImage] = useState<string | null>(null);
   const [visionDescription, setVisionDescription] = useState("");
   const [visionLoading, setVisionLoading] = useState(false);
+  const [showVisionGame, setShowVisionGame] = useState(false);
   const [visionResult, setVisionResult] = useState<{
     analysis: string;
     generatedImage: string | null;
@@ -1462,6 +1463,7 @@ export default function ProjectPage() {
     }
     
     setVisionLoading(true);
+    setShowVisionGame(true);
     setVisionResult(null);
     setVisionError(null);
     
@@ -2876,7 +2878,7 @@ export default function ProjectPage() {
                 </div>
               ) : (
               <>
-              {!visionResult ? (
+              {(!visionResult || showVisionGame) ? (
                 <div>
                   {/* Title Section */}
                   <div className="text-center mb-6">
@@ -2951,16 +2953,23 @@ export default function ProjectPage() {
                     </div>
                   )}
                   
-                  {visionLoading && (
+                  {showVisionGame && (
                     <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
                       {/* Flappy Bird mini-game during loading */}
-                      <FlappyBirdGame />
-                      <div className="text-2xl font-bold text-gray-900 mb-2">
-                        {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
-                      </div>
-                      <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
-                        💡 {loadingTips[currentTipIndex]}
-                      </div>
+                      <FlappyBirdGame 
+                        isReady={!!visionResult} 
+                        onShowResult={() => setShowVisionGame(false)} 
+                      />
+                      {visionLoading && (
+                        <>
+                          <div className="text-2xl font-bold text-gray-900 mb-2">
+                            {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
+                          </div>
+                          <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
+                            💡 {loadingTips[currentTipIndex]}
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                   

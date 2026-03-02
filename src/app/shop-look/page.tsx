@@ -36,6 +36,7 @@ export default function ShopLookPage() {
   const [imageSrc, setImageSrc] = useState<string>("/after-room.jpg");
   const [items, setItems] = useState<ShoppableItem[]>(demoItems);
   const [loading, setLoading] = useState(false);
+  const [showGameLoading, setShowGameLoading] = useState(false);
   const [isCustomImage, setIsCustomImage] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -293,15 +294,22 @@ export default function ShopLookPage() {
       {/* Interactive Image */}
       <section className="px-6 pb-16">
         <div className="max-w-5xl mx-auto">
-          {loading ? (
+          {(loading || showGameLoading) ? (
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 aspect-video flex items-center justify-center">
               <div className="text-center max-w-md px-6">
-                <FlappyBirdGame />
-                <p className="text-lg text-gray-800 font-medium mb-2">{loadingMessages[messageIndex]}</p>
-                {countdown > 0 ? (
-                  <p className="text-gray-500">עוד {countdown} שניות...</p>
-                ) : (
-                  <p className="text-orange-600">לוקח קצת יותר זמן, עוד רגע...</p>
+                <FlappyBirdGame 
+                  isReady={!loading && showGameLoading} 
+                  onShowResult={() => setShowGameLoading(false)} 
+                />
+                {loading && (
+                  <>
+                    <p className="text-lg text-gray-800 font-medium mb-2">{loadingMessages[messageIndex]}</p>
+                    {countdown > 0 ? (
+                      <p className="text-gray-500">עוד {countdown} שניות...</p>
+                    ) : (
+                      <p className="text-orange-600">לוקח קצת יותר זמן, עוד רגע...</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -372,6 +380,7 @@ export default function ShopLookPage() {
                   if (file && userId) {
                     setIsUploading(true);
                     setLoading(true);
+                    setShowGameLoading(true);
                     
                     const reader = new FileReader();
                     reader.onload = async (event) => {

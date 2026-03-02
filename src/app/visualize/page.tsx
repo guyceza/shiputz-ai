@@ -393,6 +393,7 @@ export default function VisualizePage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [showGameLoading, setShowGameLoading] = useState(false); // keeps game visible after generation done
   const [selectedPlan, setSelectedPlan] = useState<'plus' | 'separate'>('plus');
   const [generatedResult, setGeneratedResult] = useState<{image: string, beforeImage: string, analysis: string, costs: any} | null>(null);
   const [generateError, setGenerateError] = useState("");
@@ -726,6 +727,7 @@ export default function VisualizePage() {
     if (!uploadedImage || !description) return;
     
     setGenerating(true);
+    setShowGameLoading(true);
     setGenerateError("");
     
     try {
@@ -1590,16 +1592,23 @@ export default function VisualizePage() {
               </div>
             )}
             
-            {generating && (
+            {showGameLoading && (
               <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
                 {/* Flappy Bird mini-game during loading */}
-                <FlappyBirdGame />
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
-                </div>
-                <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
-                  💡 {LOADING_TIPS[currentTip]}
-                </div>
+                <FlappyBirdGame 
+                  isReady={!!generatedResult} 
+                  onShowResult={() => setShowGameLoading(false)} 
+                />
+                {generating && (
+                  <>
+                    <div className="text-2xl font-bold text-gray-900 mb-2">
+                      {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
+                    </div>
+                    <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
+                      💡 {LOADING_TIPS[currentTip]}
+                    </div>
+                  </>
+                )}
               </div>
             )}
             
@@ -1629,7 +1638,7 @@ export default function VisualizePage() {
       )}
 
       {/* Result Modal */}
-      {generatedResult && (
+      {generatedResult && !showGameLoading && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
           <div className="bg-white rounded-3xl p-6 max-w-5xl w-full relative max-h-[95vh] overflow-auto">
             <button

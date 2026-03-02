@@ -5,29 +5,36 @@ import { useRef, useEffect, useState, useCallback } from "react";
 /**
  * Mini Flappy Bird game for loading screens
  * Ultra-lightweight: pure canvas, no dependencies, ~3KB
+ * EASY MODE - meant to be fun while waiting, not frustrating
  */
 
 const CANVAS_W = 280;
 const CANVAS_H = 200;
 const BIRD_SIZE = 14;
-const PIPE_WIDTH = 32;
-const PIPE_GAP = 70;
-const GRAVITY = 0.35;
-const JUMP_FORCE = -5.5;
-const PIPE_SPEED = 1.8;
-const PIPE_INTERVAL = 120; // frames between pipes
+const PIPE_WIDTH = 30;
+const PIPE_GAP = 110; // Very wide gap - easy to pass
+const GRAVITY = 0.22; // Gentle gravity
+const JUMP_FORCE = -4.2; // Soft jump
+const PIPE_SPEED = 1.2; // Slow pipes
+const PIPE_INTERVAL = 160; // More space between pipes
 
 interface Pipe {
   x: number;
-  topH: number; // height of top pipe
+  topH: number;
   scored: boolean;
 }
 
-export default function FlappyBirdGame() {
+interface FlappyBirdGameProps {
+  isReady?: boolean; // When true, show "result ready" banner
+  onShowResult?: () => void; // Callback when user clicks to see result
+}
+
+export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<"idle" | "playing" | "dead">("idle");
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [showReadyBanner, setShowReadyBanner] = useState(false);
 
   // Game state refs (avoid re-renders during animation)
   const birdY = useRef(CANVAS_H / 2);
@@ -37,8 +44,14 @@ export default function FlappyBirdGame() {
   const scoreRef = useRef(0);
   const gameStateRef = useRef<"idle" | "playing" | "dead">("idle");
   const animRef = useRef<number>(0);
-  const lastTapTime = useRef(0); // debounce to prevent double-fire on mobile
-  const isTouchDevice = useRef(false); // track if user is using touch
+  const isTouchDevice = useRef(false);
+
+  // Show ready banner when isReady changes
+  useEffect(() => {
+    if (isReady) {
+      setShowReadyBanner(true);
+    }
+  }, [isReady]);
 
   const resetGame = useCallback(() => {
     birdY.current = CANVAS_H / 2;
@@ -71,7 +84,6 @@ export default function FlappyBirdGame() {
   }, [doJump]);
 
   const handleClickTap = useCallback(() => {
-    // On touch devices, ignore click events entirely (they are synthetic duplicates)
     if (isTouchDevice.current) return;
     doJump();
   }, [doJump]);
@@ -82,7 +94,6 @@ export default function FlappyBirdGame() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Load best score
     try {
       const saved = localStorage.getItem("shipazti_flappy_best");
       if (saved) setBestScore(parseInt(saved, 10));
@@ -109,11 +120,17 @@ export default function FlappyBirdGame() {
         birdVel.current += GRAVITY;
         birdY.current += birdVel.current;
 
+        // Clamp bird so it doesn't go above screen (forgiving)
+        if (birdY.current < 0) {
+          birdY.current = 0;
+          birdVel.current = 0;
+        }
+
         // Update pipes
         frameCount.current++;
         if (frameCount.current % PIPE_INTERVAL === 0) {
-          const minTop = 30;
-          const maxTop = CANVAS_H - PIPE_GAP - 30 - 18;
+          const minTop = 20;
+          const maxTop = CANVAS_H - PIPE_GAP - 20 - 18;
           const topH = minTop + Math.random() * (maxTop - minTop);
           pipes.current.push({ x: CANVAS_W, topH, scored: false });
         }
@@ -121,7 +138,6 @@ export default function FlappyBirdGame() {
         for (const pipe of pipes.current) {
           pipe.x -= PIPE_SPEED;
 
-          // Score
           if (!pipe.scored && pipe.x + PIPE_WIDTH < 40) {
             pipe.scored = true;
             scoreRef.current++;
@@ -129,7 +145,6 @@ export default function FlappyBirdGame() {
           }
         }
 
-        // Remove off-screen pipes
         pipes.current = pipes.current.filter(p => p.x > -PIPE_WIDTH);
 
         // Collision detection
@@ -138,8 +153,8 @@ export default function FlappyBirdGame() {
         const birdTop = birdY.current;
         const birdBottom = birdY.current + BIRD_SIZE;
 
-        // Ground/ceiling
-        if (birdBottom > CANVAS_H - 18 || birdTop < 0) {
+        // Ground only (ceiling is forgiving - just clamp)
+        if (birdBottom > CANVAS_H - 18) {
           gameStateRef.current = "dead";
           setGameState("dead");
           if (scoreRef.current > bestScore) {
@@ -148,12 +163,12 @@ export default function FlappyBirdGame() {
           }
         }
 
-        // Pipes
+        // Pipes - slightly forgiving hitbox (shrink by 2px each side)
         for (const pipe of pipes.current) {
           if (
-            birdRight > pipe.x &&
-            birdLeft < pipe.x + PIPE_WIDTH &&
-            (birdTop < pipe.topH || birdBottom > pipe.topH + PIPE_GAP)
+            birdRight - 2 > pipe.x + 2 &&
+            birdLeft + 2 < pipe.x + PIPE_WIDTH - 2 &&
+            (birdTop + 2 < pipe.topH || birdBottom - 2 > pipe.topH + PIPE_GAP)
           ) {
             gameStateRef.current = "dead";
             setGameState("dead");
@@ -165,20 +180,20 @@ export default function FlappyBirdGame() {
         }
       }
 
-      // Draw pipes
+      // Draw pipes with rounded look
       for (const pipe of pipes.current) {
         // Top pipe
         ctx.fillStyle = "#4CAF50";
         ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topH);
         ctx.fillStyle = "#388E3C";
-        ctx.fillRect(pipe.x - 2, pipe.topH - 12, PIPE_WIDTH + 4, 12);
+        ctx.fillRect(pipe.x - 2, pipe.topH - 10, PIPE_WIDTH + 4, 10);
 
         // Bottom pipe
         const bottomY = pipe.topH + PIPE_GAP;
         ctx.fillStyle = "#4CAF50";
         ctx.fillRect(pipe.x, bottomY, PIPE_WIDTH, CANVAS_H - bottomY - 18);
         ctx.fillStyle = "#388E3C";
-        ctx.fillRect(pipe.x - 2, bottomY, PIPE_WIDTH + 4, 12);
+        ctx.fillRect(pipe.x - 2, bottomY, PIPE_WIDTH + 4, 10);
       }
 
       // Draw bird
@@ -229,7 +244,7 @@ export default function FlappyBirdGame() {
 
       // Idle screen
       if (gameStateRef.current === "idle") {
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 14px Arial";
@@ -241,12 +256,12 @@ export default function FlappyBirdGame() {
 
       // Death screen
       if (gameStateRef.current === "dead") {
-        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(`ניקוד: ${scoreRef.current}`, CANVAS_W / 2, CANVAS_H / 2 - 18);
+        ctx.fillText(`${scoreRef.current} ⭐`, CANVAS_W / 2, CANVAS_H / 2 - 18);
         ctx.font = "12px Arial";
         ctx.fillText(`שיא: ${Math.max(scoreRef.current, bestScore)}`, CANVAS_W / 2, CANVAS_H / 2 + 2);
         ctx.font = "11px Arial";
@@ -261,7 +276,7 @@ export default function FlappyBirdGame() {
   }, [bestScore]);
 
   return (
-    <div className="flex flex-col items-center mt-2 mb-1">
+    <div className="flex flex-col items-center mt-2 mb-1 relative">
       <canvas
         ref={canvasRef}
         width={CANVAS_W}
@@ -271,8 +286,18 @@ export default function FlappyBirdGame() {
         onClick={handleClickTap}
         onTouchStart={(e) => { e.preventDefault(); handleTouchTap(); }}
       />
-      {score > 0 && gameState === "playing" && (
-        <div className="text-xs text-gray-400 mt-1">ניקוד: {score}</div>
+      {/* Ready banner - slides in when result is done */}
+      {showReadyBanner && (
+        <div className="absolute inset-x-0 top-0 flex justify-center z-10 animate-bounce-in">
+          <button
+            onClick={(e) => { e.stopPropagation(); onShowResult?.(); }}
+            onTouchStart={(e) => { e.stopPropagation(); e.preventDefault(); onShowResult?.(); }}
+            className="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-5 py-2.5 rounded-full shadow-xl flex items-center gap-2 transition-colors"
+          >
+            <span>✨</span>
+            <span>ההדמיה מוכנה! לחצו לצפות</span>
+          </button>
+        </div>
       )}
     </div>
   );

@@ -116,6 +116,7 @@ export default function BillOfQuantitiesPage() {
   
   // Results state
   const [generating, setGenerating] = useState(false);
+  const [showBOQGame, setShowBOQGame] = useState(false);
   const [result, setResult] = useState<BOQResult | null>(null);
   const [error, setError] = useState<string>("");
   
@@ -276,6 +277,7 @@ export default function BillOfQuantitiesPage() {
     }
     
     setGenerating(true);
+    setShowBOQGame(true);
     setError("");
     setResult(null);
     
@@ -786,12 +788,17 @@ export default function BillOfQuantitiesPage() {
             </button>
             
             {/* Flappy Bird + Loading Tips */}
-            {generating && (
+            {showBOQGame && (
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                <FlappyBirdGame />
-                <p className="text-sm text-gray-600 transition-all duration-300 mt-2">
-                  {loadingTips[currentTip]}
-                </p>
+                <FlappyBirdGame 
+                  isReady={!!result} 
+                  onShowResult={() => setShowBOQGame(false)} 
+                />
+                {generating && (
+                  <p className="text-sm text-gray-600 transition-all duration-300 mt-2">
+                    {loadingTips[currentTip]}
+                  </p>
+                )}
               </div>
             )}
 

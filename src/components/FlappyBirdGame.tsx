@@ -37,6 +37,7 @@ export default function FlappyBirdGame() {
   const scoreRef = useRef(0);
   const gameStateRef = useRef<"idle" | "playing" | "dead">("idle");
   const animRef = useRef<number>(0);
+  const lastTapTime = useRef(0); // debounce to prevent double-fire on mobile
 
   const resetGame = useCallback(() => {
     birdY.current = CANVAS_H / 2;
@@ -48,6 +49,11 @@ export default function FlappyBirdGame() {
   }, []);
 
   const handleTap = useCallback(() => {
+    // Debounce: ignore taps within 50ms of each other (prevents touch+click double-fire)
+    const now = Date.now();
+    if (now - lastTapTime.current < 50) return;
+    lastTapTime.current = now;
+
     if (gameStateRef.current === "idle") {
       resetGame();
       gameStateRef.current = "playing";

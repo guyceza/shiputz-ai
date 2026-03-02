@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
+
+// Dynamic import for Lottie (client-side only)
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+
+// Popcorn waiting animation URL
+const POPCORN_ANIMATION_URL = '/popcorn-waiting.json';
 import { 
   getProject, 
   saveProjectData, 
@@ -289,6 +296,8 @@ export default function ProjectPage() {
   const [countdown, setCountdown] = useState(60);
   const [visionError, setVisionError] = useState<string | null>(null);
   const [showVisionHistory, setShowVisionHistory] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [waitingAnimationData, setWaitingAnimationData] = useState<object | null>(null);
   
   // Vision history type
   interface VisionHistoryItem {
@@ -346,6 +355,14 @@ export default function ProjectPage() {
       };
     }
   }, [visionLoading]);
+
+  // Load popcorn animation for waiting state
+  useEffect(() => {
+    fetch(POPCORN_ANIMATION_URL)
+      .then(res => res.json())
+      .then(data => setWaitingAnimationData(data))
+      .catch(err => console.error('Failed to load waiting animation:', err));
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -1380,6 +1397,34 @@ export default function ProjectPage() {
         setVisionUsageToday(newCount);
       }
     }
+  };
+
+  const handleVisionDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleVisionDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleVisionDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('התמונה גדולה מדי. גודל מקסימלי: 10MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setVisionImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleVisionImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2764,13 +2809,10 @@ export default function ProjectPage() {
 
       {/* איך השיפוץ שלי יראה? Modal */}
       {showAIVision && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <div className="flex items-center gap-3">
-                <img src="/icons/sparkles.png" alt="סמל AI" className="w-6 h-6" />
-                <h2 className="text-lg font-semibold text-gray-900">איך השיפוץ שלי יראה? - הדמיית שיפוץ</h2>
-              </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 overflow-auto">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+            {/* Header with close + history */}
+            <div className="sticky top-0 bg-white z-10 p-4 flex items-center justify-between border-b border-gray-100">
               <div className="flex items-center gap-3">
                 {visionHistory.length > 0 && (
                   <button 
@@ -2781,11 +2823,11 @@ export default function ProjectPage() {
                     <span>היסטוריה ({visionHistory.length})</span>
                   </button>
                 )}
-                <button onClick={() => { setShowAIVision(false); resetVision(); setShowVisionHistory(false); }} className="text-gray-500 hover:text-gray-900">✕</button>
               </div>
+              <button onClick={() => { setShowAIVision(false); resetVision(); setShowVisionHistory(false); }} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             
-            <div className="p-6">
+            <div className="p-8">
               <input ref={visionInputRef} type="file" accept="image/*" onChange={handleVisionImageSelect} className="hidden" />
               
               {/* History View */}
@@ -2834,85 +2876,116 @@ export default function ProjectPage() {
               ) : (
               <>
               {!visionResult ? (
-                <div className="space-y-6">
+                <div>
+                  {/* Title Section */}
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">🎨 צור הדמיה חדשה</h3>
+                    <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
+                    <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
+                  </div>
+
                   {/* Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">1. העלה תמונה של החדר</label>
-                    {visionImage ? (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">תמונת החדר (לפני)</label>
+                    {!visionImage ? (
+                      <label 
+                        className="block cursor-pointer"
+                        onDragOver={handleVisionDragOver}
+                        onDragLeave={handleVisionDragLeave}
+                        onDrop={handleVisionDrop}
+                      >
+                        <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
+                          isDragOver 
+                            ? 'border-green-500 bg-green-50 scale-[1.02]' 
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}>
+                          <div className="text-4xl mb-4">{isDragOver ? '📥' : '📸'}</div>
+                          <p className="text-gray-600 font-medium">
+                            {isDragOver ? 'שחרר כאן!' : 'לחץ או גרור תמונה לכאן'}
+                          </p>
+                          <p className="text-gray-400 text-sm mt-2">ללא אנשים בתמונה</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleVisionImageSelect}
+                          className="hidden"
+                        />
+                      </label>
+                    ) : (
                       <div className="relative">
-                        <img src={visionImage} alt="החדר שנבחר" className="w-full h-64 object-cover rounded-xl" />
-                        <button 
+                        <img src={visionImage} alt="לפני" className="w-full rounded-2xl max-h-64 object-cover" />
+                        <button
                           onClick={() => setVisionImage(null)}
-                          className="absolute top-3 left-3 bg-black/50 text-white w-8 h-8 rounded-full hover:bg-black/70"
+                          className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600"
                         >
                           ✕
                         </button>
+                        <span className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">לפני</span>
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => visionInputRef.current?.click()}
-                        className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-purple-400 hover:text-purple-600 transition-colors"
-                      >
-                        <span className="text-4xl mb-2">📷</span>
-                        <span>לחץ להעלאת תמונה</span>
-                      </button>
                     )}
                   </div>
                   
                   {/* Description */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">2. תאר את השינויים שאתה רוצה</label>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">מה לשנות?</label>
                     <textarea
                       value={visionDescription}
                       onChange={(e) => setVisionDescription(e.target.value)}
-                      placeholder="לדוגמה: רוצה להחליף את הריצוף לפרקט עץ, להוסיף תאורה שקועה בתקרה, ולצבוע את הקירות באפור כהה..."
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 resize-none"
+                      placeholder="למשל: רוצה פרקט במקום אריחים, קירות בגוון אפור, תאורה שקועה, וסגנון מודרני..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 resize-none h-24"
                     />
                   </div>
                   
-                  {/* Generate Button */}
-                  <button
-                    onClick={handleVisionGenerate}
-                    disabled={!visionImage || !visionDescription.trim() || visionLoading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {visionLoading ? (
-                      <>
-                        <span className="animate-spin">⏳</span>
-                        יוצר הדמיה...
-                      </>
-                    ) : (
-                      <>
-                        <img src="/icons/sparkles.png" alt="סמל AI" className="w-4 h-4 inline" />
-                        תן לי לראות
-                      </>
-                    )}
-                  </button>
-                  
-                  {visionLoading && (
-                    <div className="text-center text-sm space-y-2">
-                      <p className="text-gray-900">{loadingTips[currentTipIndex]}</p>
-                      {countdown > 0 ? (
-                        <p className="text-gray-500">עוד {countdown} שניות...</p>
-                      ) : (
-                        <p className="text-orange-600">לוקח יותר זמן מהרגיל, עוד רגע...</p>
-                      )}
-                    </div>
-                  )}
-                  
                   {visionError && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                      <p className="text-red-600 font-medium mb-2">⚠️ לא הצלחנו לעבד את התמונה</p>
-                      <p className="text-red-500 text-sm">{visionError}</p>
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                      <p className="font-medium mb-1">⚠️ לא הצלחנו לעבד את התמונה</p>
+                      <p>{visionError}</p>
                       <button
                         onClick={() => { setVisionError(null); setVisionImage(null); }}
-                        className="mt-3 text-sm text-red-600 hover:text-red-700 underline"
+                        className="mt-2 text-sm text-red-600 hover:text-red-700 underline"
                       >
                         נסה תמונה אחרת
                       </button>
                     </div>
                   )}
+                  
+                  {visionLoading && (
+                    <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
+                      {/* Popcorn waiting animation */}
+                      {waitingAnimationData && (
+                        <div className="flex justify-center mb-2">
+                          <Lottie 
+                            animationData={waitingAnimationData} 
+                            loop={true}
+                            style={{ width: 200, height: 140 }}
+                          />
+                        </div>
+                      )}
+                      <div className="text-2xl font-bold text-gray-900 mb-2">
+                        {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
+                      </div>
+                      <div className="text-sm text-gray-600 min-h-[40px] flex items-center justify-center">
+                        💡 {loadingTips[currentTipIndex]}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Generate Button */}
+                  <button
+                    onClick={handleVisionGenerate}
+                    disabled={!visionImage || !visionDescription.trim() || visionLoading}
+                    className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {visionLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="animate-spin">⏳</span>
+                        יוצר הדמיה...
+                      </span>
+                    ) : (
+                      '🪄 צור הדמיה'
+                    )}
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-6">

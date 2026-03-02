@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
+import FlappyBirdGame from "@/components/FlappyBirdGame";
 
 // Dynamic import for Lottie (client-side only)
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -2952,16 +2953,8 @@ export default function ProjectPage() {
                   
                   {visionLoading && (
                     <div className="mb-4 p-4 bg-gray-50 rounded-xl text-center">
-                      {/* Popcorn waiting animation */}
-                      {waitingAnimationData && (
-                        <div className="flex justify-center mb-2">
-                          <Lottie 
-                            animationData={waitingAnimationData} 
-                            loop={true}
-                            style={{ width: 200, height: 140 }}
-                          />
-                        </div>
-                      )}
+                      {/* Flappy Bird mini-game during loading */}
+                      <FlappyBirdGame />
                       <div className="text-2xl font-bold text-gray-900 mb-2">
                         {countdown > 0 ? `עוד ${countdown} שניות...` : "לוקח קצת יותר זמן מהרגיל..."}
                       </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
+import FlappyBirdGame from "@/components/FlappyBirdGame";
 // Trial tracking uses /api/vision-trial endpoint
 
 // Fun loading messages
@@ -295,7 +296,7 @@ export default function ShopLookPage() {
           {loading ? (
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 aspect-video flex items-center justify-center">
               <div className="text-center max-w-md px-6">
-                <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-6"></div>
+                <FlappyBirdGame />
                 <p className="text-lg text-gray-800 font-medium mb-2">{loadingMessages[messageIndex]}</p>
                 {countdown > 0 ? (
                   <p className="text-gray-500">עוד {countdown} שניות...</p>

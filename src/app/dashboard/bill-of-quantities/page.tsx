@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen";
+import FlappyBirdGame from "@/components/FlappyBirdGame";
 
 // Types
 interface BOQSummary {
@@ -784,10 +785,11 @@ export default function BillOfQuantitiesPage() {
               )}
             </button>
             
-            {/* Loading Tips */}
+            {/* Flappy Bird + Loading Tips */}
             {generating && (
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                <p className="text-sm text-gray-600 transition-all duration-300">
+                <FlappyBirdGame />
+                <p className="text-sm text-gray-600 transition-all duration-300 mt-2">
                   {loadingTips[currentTip]}
                 </p>
               </div>

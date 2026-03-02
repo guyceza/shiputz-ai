@@ -21,7 +21,9 @@ function CheckoutContent() {
 
   const basePrice = isPremiumPlus ? 349.99 : 299.99;
   const originalPrice = isPremiumPlus ? 699 : 599;
-  const price = codeValid ? Math.round(basePrice * (100 - discountPercent) / 100) : basePrice;
+  // Round discount price to end in .99 for psychological pricing
+  const rawDiscount = basePrice * (100 - discountPercent) / 100;
+  const price = codeValid ? Math.floor(rawDiscount / 10) * 10 + 9.99 : basePrice;
 
   // Check if user is logged in - MUST be logged in to checkout
   useEffect(() => {
@@ -189,12 +191,17 @@ function CheckoutContent() {
             
             <div className="flex items-center justify-center gap-3">
               <span className="text-gray-400 line-through text-4xl">₪{codeValid ? basePrice : originalPrice}</span>
-              <span className="text-3xl font-bold text-gray-900">₪{price}</span>
+              <span className={`text-3xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>₪{price}</span>
             </div>
             
-            <p className="text-gray-500 mt-2">
-              {codeValid ? `הנחה ${discountPercent}% הופעלה` : 'תשלום חד פעמי'}
-            </p>
+            {codeValid ? (
+              <div className="mt-3 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span>🎉</span>
+                <span>קוד הנחה {discountPercent}% הופעל בהצלחה!</span>
+              </div>
+            ) : (
+              <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
+            )}
           </div>
 
           {/* What's included - detailed */}
@@ -281,7 +288,7 @@ function CheckoutContent() {
               <p className="text-gray-500 text-sm mt-2">{codeError}</p>
             )}
             {codeValid && (
-              <p className="text-gray-700 text-sm mt-2">קוד הנחה הופעל - {discountPercent}% הנחה</p>
+              <p className="text-green-600 text-sm mt-2 font-medium">✅ קוד הנחה הופעל — {discountPercent}% הנחה!</p>
             )}
           </div>
 
@@ -289,7 +296,9 @@ function CheckoutContent() {
           <button
             onClick={handlePurchase}
             disabled={loading || !email.trim()}
-            className="w-full bg-gray-900 text-white py-4 rounded-xl text-lg font-semibold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full text-white py-4 rounded-xl text-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              codeValid ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
+            }`}
           >
             {loading ? "מעבד..." : `לתשלום ₪${price}`}
           </button>

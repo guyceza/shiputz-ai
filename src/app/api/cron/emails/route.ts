@@ -37,7 +37,7 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 1, subject: '🎁 מתנה בשבילך — 20% הנחה', template: 'discount_offer' },
+  { day: 1, subject: '🎁 מתנה בשבילך — 30% הנחה', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
   { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
@@ -370,7 +370,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
           <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || 'SHIP-XXXX'}</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>20% הנחה</strong> · תקף ל-48 שעות</p>
+          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>30% הנחה</strong> · תקף ל-48 שעות</p>
         </div>
       `,
       cta: 'לממש את ההנחה',
@@ -432,7 +432,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
           <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || ''}</p>
-          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;"><strong>20% הנחה</strong> · רק עד מחר</p>
+          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;"><strong>30% הנחה</strong> · רק עד מחר</p>
         </div>
       `,
       cta: 'לממש עכשיו',
@@ -635,7 +635,7 @@ export async function GET(request: NextRequest) {
               await supabase.from('discount_codes').insert({
                 code,
                 user_email: user.email,
-                discount_percent: 20,
+                discount_percent: 30,
                 expires_at: expiresAt.toISOString(),
               });
               

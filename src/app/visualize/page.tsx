@@ -32,6 +32,13 @@ const animationStyles = `
   50% { transform: scale(1.8); opacity: 0; }
   100% { transform: scale(1.8); opacity: 0; }
 }
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
 .animate-bounce-in {
   animation: bounce-in 0.4s ease-out;
 }
@@ -918,8 +925,9 @@ export default function VisualizePage() {
           {/* Trial CTA */}
           <div className="flex flex-col items-center gap-3">
             {authLoading ? (
-              <div className="bg-gray-200 text-gray-200 px-10 py-4 rounded-full text-lg font-medium animate-pulse">
-                טוען...
+              <div className="relative bg-gray-900/20 px-10 py-4 rounded-full text-lg font-medium overflow-hidden">
+                <span className="text-transparent">✨ נסו עכשיו בחינם</span>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
               </div>
             ) : (
               <>

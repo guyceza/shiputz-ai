@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientId } from '@/lib/rate-limit';
+import crypto from 'crypto';
 
 // Note: Auth via rate limiting - 1 request per hour per IP
 
@@ -29,6 +30,13 @@ export async function POST(request: NextRequest) {
 
     const displayName = name || 'משפץ יקר';
     
+    // Generate unsubscribe token
+    const unsubSecret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || '';
+    const unsubToken = unsubSecret 
+      ? crypto.createHmac('sha256', unsubSecret).update(email.toLowerCase()).digest('hex').substring(0, 16)
+      : '';
+    const unsubUrl = `https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}${unsubToken ? `&token=${unsubToken}` : ''}`;
+    
     const html = `
       <div dir="rtl" style="font-family: -apple-system, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -40,7 +48,7 @@ export async function POST(request: NextRequest) {
         <p style="color: #333; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">ShiputzAI עוזר לך לעקוב אחרי התקציב, לסרוק קבלות, ולקבל התראות לפני שחורגים.</p>
         <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #111; color: white; padding: 14px 28px; border-radius: 25px; text-decoration: none; font-weight: 500;">כניסה לאזור האישי ←</a>
         <p style="margin-top: 40px; color: #666; font-size: 14px;">בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
-        <p style="margin-top: 30px; text-align: center;"><a href="https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
+        <p style="margin-top: 30px; text-align: center;"><a href="${unsubUrl}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
       </div>
     `;
 

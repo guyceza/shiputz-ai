@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -13,16 +13,7 @@ function UnsubscribeContent() {
   const [processing, setProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    if (!email) {
-      setStatus("error");
-      setErrorMessage("לא נמצאה כתובת מייל");
-      return;
-    }
-    setStatus("confirm");
-  }, [email]);
-
-  const handleUnsubscribe = async () => {
+  const doUnsubscribe = useCallback(async () => {
     setProcessing(true);
     
     try {
@@ -35,22 +26,43 @@ function UnsubscribeContent() {
       if (response.ok) {
         setStatus("success");
       } else {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         setErrorMessage(data.error || "שגיאה בהסרה מדיוור");
         setStatus("error");
       }
     } catch (err) {
-      setErrorMessage("שגיאת תקשורת");
+      setErrorMessage("שגיאת תקשורת — נסו שוב מאוחר יותר");
       setStatus("error");
     }
     
     setProcessing(false);
-  };
+  }, [email, token]);
 
-  if (status === "loading") {
+  useEffect(() => {
+    if (!email) {
+      setStatus("error");
+      setErrorMessage("לא נמצאה כתובת מייל בקישור");
+      return;
+    }
+    
+    // If token is present, auto-unsubscribe (one-click from email)
+    if (token) {
+      doUnsubscribe();
+    } else {
+      // No token — show confirm screen (manual or old links)
+      setStatus("confirm");
+    }
+  }, [email, token, doUnsubscribe]);
+
+  if (status === "loading" || (processing && status !== "error")) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
-        <div className="text-gray-500">טוען...</div>
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <span className="text-3xl">📧</span>
+          </div>
+          <p className="text-gray-500">מסיר מרשימת הדיוור...</p>
+        </div>
       </div>
     );
   }
@@ -64,9 +76,18 @@ function UnsubscribeContent() {
           </div>
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">שגיאה</h1>
           <p className="text-gray-500 mb-6">
-            לא הצלחנו לעבד את הבקשה. נסו שוב או פנו אלינו.
+            {errorMessage || "לא הצלחנו לעבד את הבקשה. נסו שוב או פנו אלינו."}
           </p>
-          <Link href="/" className="text-blue-600 hover:underline">
+          {email && (
+            <button
+              onClick={doUnsubscribe}
+              disabled={processing}
+              className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 mb-4"
+            >
+              {processing ? "מעבד..." : "נסו שוב"}
+            </button>
+          )}
+          <Link href="/" className="text-blue-600 hover:underline text-sm">
             חזרה לאתר
           </Link>
         </div>
@@ -95,7 +116,7 @@ function UnsubscribeContent() {
     );
   }
 
-  // Confirm state
+  // Confirm state (only shown for links without token)
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6" dir="rtl">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
@@ -111,7 +132,7 @@ function UnsubscribeContent() {
         </p>
         
         <button
-          onClick={handleUnsubscribe}
+          onClick={doUnsubscribe}
           disabled={processing}
           className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 mb-4"
         >
@@ -130,7 +151,12 @@ export default function UnsubscribePage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
-        <div className="text-gray-500">טוען...</div>
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <span className="text-3xl">📧</span>
+          </div>
+          <p className="text-gray-500">טוען...</p>
+        </div>
       </div>
     }>
       <UnsubscribeContent />

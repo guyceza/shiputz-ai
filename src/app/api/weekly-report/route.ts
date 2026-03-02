@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import crypto from "crypto";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -138,8 +139,12 @@ function generateMonthlyReportHtml(
   expensesThisMonth: number,
   userEmail?: string
 ): string {
+  const unsubSecret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || '';
+  const unsubToken = (unsubSecret && userEmail) 
+    ? crypto.createHmac('sha256', unsubSecret).update(userEmail.toLowerCase()).digest('hex').substring(0, 16)
+    : '';
   const unsubscribeUrl = userEmail 
-    ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}`
+    ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}${unsubToken ? `&token=${unsubToken}` : ''}`
     : 'https://shipazti.com/unsubscribe';
   const projectRows = projects
     .map(

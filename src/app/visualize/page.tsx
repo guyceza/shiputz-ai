@@ -61,6 +61,28 @@ const animationStyles = `
   animation: tap-ripple 2s ease-out infinite;
   pointer-events: none;
 }
+@keyframes slide-reveal {
+  0% { clip-path: inset(0 100% 0 0); }
+  50% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
+}
+@keyframes pulse-arrow {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(-4px); }
+}
+@keyframes float-badge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-slide-reveal {
+  animation: slide-reveal 6s ease-in-out infinite;
+}
+.animate-pulse-arrow {
+  animation: pulse-arrow 1.5s ease-in-out infinite;
+}
+.animate-float-badge {
+  animation: float-badge 3s ease-in-out infinite;
+}
 `;
 
 interface ShopItem {
@@ -896,29 +918,44 @@ export default function VisualizePage() {
               <span className="text-green-500">✓</span> מבוסס מחירי שוק
             </span>
           </div>
-          
-          {/* Demo Video */}
-          <div className="max-w-4xl mx-auto mb-10">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline
-                preload="metadata"
-                className="w-full cursor-pointer"
-                poster="/demo-video-poster.jpg"
-                onClick={(e) => {
-                  const video = e.currentTarget;
-                  if (video.paused) {
-                    video.play();
-                  } else {
-                    video.pause();
-                  }
-                }}
-              >
-                <source src="/demo-video.mp4" type="video/mp4" />
-              </video>
+
+          {/* Before → After Label */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <span className="text-lg font-bold text-gray-400">לפני</span>
+            <span className="animate-pulse-arrow text-2xl text-emerald-500">←</span>
+            <span className="text-lg font-bold text-emerald-600">אחרי ✨</span>
+          </div>
+
+          {/* Full Width Before/After */}
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 mb-10">
+            <div className="relative aspect-[4/3]">
+              <img 
+                src="/before-room.jpg" 
+                alt="לפני השיפוץ"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 animate-slide-reveal">
+                <img 
+                  src="/after-room.jpg" 
+                  alt="אחרי השיפוץ"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              {/* Labels */}
+              <div className="absolute top-4 right-4 z-10">
+                <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                  📷 לפני
+                </span>
+              </div>
+              <div className="absolute top-4 left-4 z-10">
+                <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate-float-badge">
+                  ✨ אחרי
+                </span>
+              </div>
+              
+              {/* Center divider */}
+              <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/70 z-10" />
             </div>
           </div>
           
@@ -1054,6 +1091,39 @@ export default function VisualizePage() {
             {EXAMPLES.map((example) => (
               <ExampleCardComponent key={example.id} example={example} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video - moved below examples */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
+              ראה איך זה עובד בפועל
+            </h2>
+            <p className="text-gray-500">צפו בהדגמה קצרה של התהליך</p>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              preload="metadata"
+              className="w-full cursor-pointer"
+              poster="/demo-video-poster.jpg"
+              onClick={(e) => {
+                const video = e.currentTarget;
+                if (video.paused) {
+                  video.play();
+                } else {
+                  video.pause();
+                }
+              }}
+            >
+              <source src="/demo-video.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
       </section>

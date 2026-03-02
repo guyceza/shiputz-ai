@@ -335,7 +335,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </div>
       `,
       cta: 'לממש את ההנחה',
-      url: `https://shipazti.com/checkout-vision?code=${visionCode || ''}`
+      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout-vision?code=${visionCode || ''}`)}`
     },
 
     // === NON-PURCHASED SEQUENCE ===

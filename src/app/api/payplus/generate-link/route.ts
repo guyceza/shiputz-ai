@@ -64,8 +64,10 @@ export async function POST(request: NextRequest) {
             // Check if not expired
             if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
               // Apply discount!
-              discountPercent = codeData.discount_percent || 20;
-              finalAmount = Math.round(pricing.amount * (100 - discountPercent) / 100);
+              discountPercent = codeData.discount_percent || 30;
+              // Round to end in .99 for psychological pricing (match checkout UI)
+              const rawAmount = pricing.amount * (100 - discountPercent) / 100;
+              finalAmount = Math.floor(rawAmount / 10) * 10 + 9.99;
               // Minimum ₪1 — PayPlus doesn't accept ₪0
               if (finalAmount < 1) finalAmount = 1;
               console.log(`Discount applied: ${discountPercent}% off, final amount: ${finalAmount}`);

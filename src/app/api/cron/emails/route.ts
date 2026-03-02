@@ -28,7 +28,7 @@ if (!RESEND_KEY) {
 const PURCHASED_SEQUENCE = [
   { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI!', template: 'welcome_purchased' },
   { day: 1, subject: '💡 3 דברים לעשות עכשיו', template: 'getting_started' },
-  { day: 3, subject: '🎨 רוצה לראות איך השיפוץ יראה?', template: 'vision_offer' },
+  { day: 2, subject: '🎨 רוצה לראות איך השיפוץ יראה?', template: 'vision_offer' },
   { day: 5, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
   { day: 7, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
   { day: 10, subject: '❓ איך הולך?', template: 'checkin' },
@@ -36,8 +36,8 @@ const PURCHASED_SEQUENCE = [
 ];
 
 const NON_PURCHASED_SEQUENCE = [
-  { day: 1, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 3, subject: '🎁 מתנה בשבילך — 20% הנחה', template: 'discount_offer' },
+  { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
+  { day: 1, subject: '🎁 מתנה בשבילך — 20% הנחה', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
   { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },

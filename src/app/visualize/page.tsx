@@ -23,11 +23,30 @@ const animationStyles = `
   0% { width: 0%; }
   100% { width: 100%; }
 }
+@keyframes shop-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+@keyframes tap-hint {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  40% { transform: translate(-50%, -50%) scale(0.85); }
+  55% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
 .animate-bounce-in {
   animation: bounce-in 0.4s ease-out;
 }
 .animate-progress-bar {
   animation: progress-bar 2s ease-in-out;
+}
+.animate-shop-pulse {
+  animation: shop-pulse 2s ease-in-out infinite;
+}
+.animate-tap-hint {
+  animation: tap-hint 2.5s ease-in-out infinite;
+  animation-delay: 1s;
 }
 `;
 
@@ -1638,10 +1657,14 @@ export default function VisualizePage() {
               >
                 <img src={generatedResult.image} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
                 <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
-                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
+                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors animate-shop-pulse">
                   <span>🛒</span>
                   <span>Shop the Look</span>
                 </button>
+                {/* Tap hint overlay */}
+                <div className="absolute bottom-10 left-20 animate-tap-hint pointer-events-none">
+                  <span className="text-2xl">👆</span>
+                </div>
               </div>
             </div>
             
@@ -1843,10 +1866,13 @@ export default function VisualizePage() {
               >
                 <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
                 <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
-                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
+                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors animate-shop-pulse">
                   <span>🛒</span>
                   <span>Shop the Look</span>
                 </button>
+                <div className="absolute bottom-10 left-20 animate-tap-hint pointer-events-none">
+                  <span className="text-2xl">👆</span>
+                </div>
               </div>
             </div>
             

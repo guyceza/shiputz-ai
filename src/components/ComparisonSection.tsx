@@ -272,8 +272,8 @@ export default function ComparisonSection() {
                  }} />
             
             <div className="relative z-10 text-center pt-6 pb-4 mb-2">
-              <span className="text-2xl font-black text-stone-700 bg-stone-200/60 px-6 py-2 rounded-full">
-                בלי ShiputzAI
+              <span className="text-2xl font-black text-stone-700 bg-stone-200/60 px-6 py-2 rounded-full" dir="rtl">
+                בלי <span dir="ltr">ShiputzAI</span>
               </span>
             </div>
 
@@ -328,8 +328,8 @@ export default function ComparisonSection() {
             <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
             
             <div className="relative z-10 text-center pt-6 pb-4">
-              <span className="text-2xl font-black text-white bg-white/10 px-6 py-2 rounded-full">
-                עם ShiputzAI
+              <span className="text-2xl font-black text-white bg-white/10 px-6 py-2 rounded-full" dir="rtl">
+                עם <span dir="ltr">ShiputzAI</span>
               </span>
             </div>
 

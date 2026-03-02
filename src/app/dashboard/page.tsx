@@ -512,11 +512,11 @@ function DashboardContent() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900">
+            <h1 className="text-3xl font-semibold text-stone-800">
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
             </h1>
             {user.email && (
-              <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+              <p className="text-sm text-stone-500 mt-1">{user.email}</p>
             )}
           </div>
           <button
@@ -582,13 +582,13 @@ function DashboardContent() {
 
         {/* Premium Status - One time purchase (no cancel needed) */}
         {isPremium && (
-          <div className="mb-8 bg-gradient-to-l from-stone-800 to-stone-900 rounded-2xl p-6">
+          <div className="mb-8 bg-gradient-to-l from-stone-100 to-stone-50 rounded-2xl p-6 border border-stone-200/60 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-stone-100 mb-1">מנוי פרימיום פעיל</p>
-                <p className="text-xs text-stone-400">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
+                <p className="text-sm font-medium text-stone-800 mb-1">✦ מנוי פרימיום פעיל</p>
+                <p className="text-xs text-stone-500">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
               </div>
-              <span className="text-xs text-stone-400 bg-stone-700/50 px-3 py-1 rounded-full">
+              <span className="text-xs text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
                 רכישה חד-פעמית
               </span>
             </div>
@@ -600,21 +600,21 @@ function DashboardContent() {
           <div className="mb-8 bg-white rounded-2xl p-6 border border-stone-200/60 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-1">מנוי הדמיות AI פעיל</p>
+                <p className="text-sm font-medium text-stone-800 mb-1">מנוי הדמיות AI פעיל</p>
                 {visionSubInfo?.cancelAtPeriodEnd ? (
                   <p className="text-xs text-amber-600">
                     יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
                   </p>
                 ) : hasVisionSub ? (
-                  <p className="text-xs text-gray-500">מתחדש אוטומטית כל חודש</p>
+                  <p className="text-xs text-stone-500">מתחדש אוטומטית כל חודש</p>
                 ) : (
-                  <p className="text-xs text-gray-500">גישה מלאה להדמיות</p>
+                  <p className="text-xs text-stone-500">גישה מלאה להדמיות</p>
                 )}
               </div>
               {!visionSubInfo?.cancelAtPeriodEnd && (hasLocalVision || hasVisionSub) && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="text-sm text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+                  className="text-sm text-stone-500 hover:text-stone-700 border border-stone-200 px-4 py-2 rounded-full hover:bg-stone-50 transition-colors"
                 >
                   בטל מנוי
                 </button>
@@ -633,14 +633,14 @@ function DashboardContent() {
                 href="/dashboard/bill-of-quantities"
                 className="group bg-white border border-stone-200/60 rounded-2xl p-6 hover:border-stone-300 hover:shadow-md transition-all shadow-sm"
               >
-                <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-stone-800 mb-1">כתב כמויות AI</h3>
-                <p className="text-sm text-stone-500">העלה תכנית וקבל כתב כמויות מפורט אוטומטית</p>
-                <span className="inline-block mt-3 text-xs text-stone-500 group-hover:text-stone-800 group-hover:underline">
+                <p className="text-sm text-stone-500 mb-3">העלה תכנית וקבל כתב כמויות מפורט אוטומטית</p>
+                <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
                   התחל עכשיו ←
                 </span>
               </Link>
@@ -651,14 +651,14 @@ function DashboardContent() {
                   href="/visualize"
                   className="group bg-white border border-stone-200/60 rounded-2xl p-6 hover:border-stone-300 hover:shadow-md transition-all shadow-sm"
                 >
-                  <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <svg className="w-6 h-6 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <h3 className="font-semibold text-stone-800 mb-1">הדמיות AI</h3>
-                  <p className="text-sm text-stone-500">צור הדמיה של השיפוץ לפני שמתחילים</p>
-                  <span className="inline-block mt-3 text-xs text-stone-500 group-hover:text-stone-800 group-hover:underline">
+                  <p className="text-sm text-stone-500 mb-3">צור הדמיה של השיפוץ לפני שמתחילים</p>
+                  <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
                     צור הדמיה ←
                   </span>
                 </Link>
@@ -670,9 +670,9 @@ function DashboardContent() {
                     </svg>
                   </div>
                   <h3 className="font-semibold text-stone-800 mb-1">הדמיות AI</h3>
-                  <p className="text-sm text-stone-500">צור הדמיה של השיפוץ לפני שמתחילים</p>
-                  <span className="inline-block mt-3 text-xs text-stone-400 group-hover:underline">
-                    נדרש מנוי AI Vision ←
+                  <p className="text-sm text-stone-500 mb-3">צור הדמיה של השיפוץ לפני שמתחילים</p>
+                  <span className="text-xs text-stone-400 group-hover:underline">
+                    נדרש מנוי Vision ←
                   </span>
                 </Link>
               )}
@@ -680,16 +680,16 @@ function DashboardContent() {
               {/* Quote Analysis */}
               <Link 
                 href={projects.length > 0 ? `/project/${projects[0].id}?tab=quote` : "/dashboard"}
-                className={`group border border-gray-200 rounded-2xl p-6 hover:border-gray-400 hover:shadow-lg transition-all ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
+                className={`group bg-white border border-stone-200/60 rounded-2xl p-6 hover:border-stone-300 hover:shadow-md transition-all shadow-sm ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
               >
-                <div className="w-12 h-12 bg-stone-100 rounded-xl flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-stone-800 mb-1">ניתוח הצעות מחיר</h3>
-                <p className="text-sm text-stone-500">השווה הצעות וקבל המלצות AI</p>
-                <span className="inline-block mt-3 text-xs text-stone-500 group-hover:text-stone-800 group-hover:underline">
+                <p className="text-sm text-stone-500 mb-3">השווה הצעות וקבל המלצות AI</p>
+                <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
                   {projects.length > 0 ? 'נתח הצעה ←' : 'צור פרויקט קודם'}
                 </span>
               </Link>
@@ -801,7 +801,7 @@ function DashboardContent() {
 
                   <Link href={`/project/${project.id}`} className="block">
                     <div className="flex items-start justify-between mb-6">
-                      <h3 className="text-xl font-semibold text-gray-900">{project.name}</h3>
+                      <h3 className="text-xl font-semibold text-stone-800">{project.name}</h3>
                       <span className={`text-sm px-3 py-1 rounded-full ${
                         isOverBudget ? 'bg-rose-50 text-rose-600' :
                         isNearLimit ? 'bg-amber-50 text-amber-600' :
@@ -812,15 +812,15 @@ function DashboardContent() {
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">תקציב</p>
-                        <p className="text-lg font-medium text-gray-900">₪{project.budget.toLocaleString()}</p>
+                        <p className="text-sm text-stone-500 mb-1">תקציב</p>
+                        <p className="text-lg font-medium text-stone-800">₪{project.budget.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">הוצאות</p>
-                        <p className="text-lg font-medium text-gray-900">₪{project.spent.toLocaleString()}</p>
+                        <p className="text-sm text-stone-500 mb-1">הוצאות</p>
+                        <p className="text-lg font-medium text-stone-800">₪{project.spent.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500 mb-1">נותר</p>
+                        <p className="text-sm text-stone-500 mb-1">נותר</p>
                         <p className={`text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
                           ₪{remaining.toLocaleString()}
                         </p>

@@ -451,16 +451,6 @@ export default function VisualizePage() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<{id: string, beforeImage: string, afterImage: string, description: string, analysis: string, costs: any, createdAt: string, detectedProducts?: any[]} | null>(null);
   const [savingToCloud, setSavingToCloud] = useState(false);
   const [waitingAnimationData, setWaitingAnimationData] = useState<object | null>(null);
-  const [guestTrialUsed, setGuestTrialUsed] = useState(false);
-  const [isGuestMode, setIsGuestMode] = useState(false);
-  
-  // Initialize guest trial state from localStorage
-  useEffect(() => {
-    try {
-      const used = localStorage.getItem('shiputz_guest_trial');
-      if (used === 'true') setGuestTrialUsed(true);
-    } catch {}
-  }, []);
   
   // Load popcorn animation for waiting state
   useEffect(() => {
@@ -699,14 +689,7 @@ export default function VisualizePage() {
 
   const handleTryNow = () => {
     if (!isLoggedIn) {
-      // Guest flow: allow one free trial without signup
-      if (!guestTrialUsed) {
-        setIsGuestMode(true);
-        setShowUploadModal(true);
-        return;
-      }
-      // Guest trial already used — redirect to signup
-      window.location.href = '/signup?redirect=/visualize';
+      window.location.href = '/login?redirect=/visualize';
       return;
     }
     
@@ -716,7 +699,6 @@ export default function VisualizePage() {
     }
     
     // Show upload modal for trial or subscription users
-    setIsGuestMode(false);
     setShowUploadModal(true);
   };
 
@@ -778,17 +760,10 @@ export default function VisualizePage() {
     setGenerateError("");
     
     try {
-      // Choose endpoint based on guest vs logged-in mode
-      const isGuest = isGuestMode && !isLoggedIn;
-      const endpoint = isGuest ? '/api/visualize-guest' : '/api/visualize';
-      const payload = isGuest
-        ? { image: uploadedImage, description }
-        : { image: uploadedImage, description, userEmail };
-      
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/visualize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ image: uploadedImage, description, userEmail })
       });
       
       const data = await res.json();
@@ -796,25 +771,17 @@ export default function VisualizePage() {
       if (data.error) {
         setGenerateError(data.error);
       } else {
-        if (isGuest) {
-          // Mark guest trial as used in localStorage
+        // Consume trial if not subscribed - save to DB
+        if (!hasSubscription && userEmail) {
           try {
-            localStorage.setItem('shiputz_guest_trial', 'true');
-          } catch {}
-          setGuestTrialUsed(true);
-        } else {
-          // Consume trial if not subscribed - save to DB
-          if (!hasSubscription && userEmail) {
-            try {
-              await fetch('/api/vision-trial', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail })
-              });
-              setTrialUsed(true);
-            } catch (e) {
-              console.error("Failed to mark trial as used:", e);
-            }
+            await fetch('/api/vision-trial', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+            setTrialUsed(true);
+          } catch (e) {
+            console.error("Failed to mark trial as used:", e);
           }
         }
         
@@ -822,21 +789,27 @@ export default function VisualizePage() {
           image: data.generatedImage,
           beforeImage: uploadedImage || '',
           analysis: data.analysis,
-          costs: data.costs || data.costEstimate
+          costs: data.costEstimate
         });
         clearProductsCache(); // Clear products for new image
         
-        // Save to history only for logged-in users (async, don't block UI)
-        if (!isGuest) {
-          const currentUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
-          if (uploadedImage && data.generatedImage && currentUserId) {
-            console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
-            saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costs || data.costEstimate, currentUserId)
-              .then(() => {
-                setTimeout(() => reloadHistory(currentUserId), 1000);
-              })
-              .catch(e => console.error('Failed to save to history:', e));
-          }
+        // Save to history (async, don't block UI)
+        // Pass userId explicitly to avoid closure issues
+        const currentUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+        if (uploadedImage && data.generatedImage && currentUserId) {
+          console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
+          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate, currentUserId)
+            .then(() => {
+              // Reload history to ensure it's up to date
+              setTimeout(() => reloadHistory(currentUserId), 1000);
+            })
+            .catch(e => console.error('Failed to save to history:', e));
+        } else {
+          console.error("handleGenerate: Cannot save - missing data", { 
+            hasUploadedImage: !!uploadedImage, 
+            hasGeneratedImage: !!data.generatedImage, 
+            currentUserId 
+          });
         }
       }
     } catch (err) {
@@ -999,21 +972,12 @@ export default function VisualizePage() {
                   onClick={handleTryNow}
                   className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
                 >
-                  {isLoggedIn
-                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם')
-                    : (guestTrialUsed ? '🔓 הירשם לניסיון נוסף' : '✨ נסו עכשיו בחינם')
-                  }
+                  {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם'}
                 </button>
-                {!isLoggedIn && !guestTrialUsed && (
-                  <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא הרשמה</p>
-                )}
-                {!isLoggedIn && guestTrialUsed && (
-                  <p className="text-sm text-amber-600">השתמשת בניסיון החינמי · <a href="/signup?redirect=/visualize" className="underline">הירשם בחינם</a></p>
-                )}
-                {isLoggedIn && !hasSubscription && !trialUsed && (
+                {!hasSubscription && !trialUsed && (
                   <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
                 )}
-                {isLoggedIn && !hasSubscription && trialUsed && (
+                {!hasSubscription && trialUsed && (
                   <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
                 )}
               </>
@@ -1420,21 +1384,12 @@ export default function VisualizePage() {
           </p>
           {!isLoggedIn && (
             <div className="flex gap-4 flex-wrap justify-center">
-              {!guestTrialUsed ? (
-                <button
-                  onClick={handleTryNow}
-                  className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
-                >
-                  ✨ נסו עכשיו בחינם
-                </button>
-              ) : (
-                <Link
-                  href="/signup?redirect=/visualize"
-                  className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
-                >
-                  🎉 הירשם בחינם
-                </Link>
-              )}
+              <Link
+                href="/checkout"
+                className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
+              >
+                הצטרפו ל-ShiputzAI
+              </Link>
               <Link
                 href="/login"
                 className="text-white px-8 py-4 rounded-full text-base border border-gray-700 hover:bg-gray-800 transition-colors"
@@ -1647,11 +1602,9 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {isGuestMode && !isLoggedIn ? '✨ ניסיון חינמי' : hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
+                {hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
               </h3>
-              <p className="text-gray-500">
-                {isGuestMode && !isLoggedIn ? 'ניסיון חינמי · ללא הרשמה' : 'העלו תמונה של החדר ותאר מה אתה רוצה לשנות'}
-              </p>
+              <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
               <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
             </div>
             
@@ -1753,15 +1706,11 @@ export default function VisualizePage() {
               )}
             </button>
             
-            {(isGuestMode && !isLoggedIn) ? (
-              <p className="text-center text-xs text-gray-400 mt-4">
-                ניסיון חינמי אחד · ללא הרשמה
-              </p>
-            ) : !hasSubscription && !trialUsed ? (
+            {!hasSubscription && !trialUsed && (
               <p className="text-center text-xs text-gray-400 mt-4">
                 זהו הניסיון החינמי היחיד שלך
               </p>
-            ) : null}
+            )}
           </div>
         </div>
       )}
@@ -1840,51 +1789,35 @@ export default function VisualizePage() {
             )}
             
             {/* Actions */}
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-4">
-                <a
-                  href={generatedResult.image}
-                  download="shiputzai-visualization.png"
-                  className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all"
+            <div className="flex gap-4">
+              <a
+                href={generatedResult.image}
+                download="shiputzai-visualization.png"
+                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all"
+              >
+                📥 הורד תמונה
+              </a>
+              {hasSubscription ? (
+                <button
+                  onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
+                  className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
                 >
-                  📥 הורד תמונה
-                </a>
-                {isLoggedIn ? (
-                  hasSubscription ? (
-                    <button
-                      onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
-                      className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
-                    >
-                      🎨 צור הדמיה נוספת
-                    </button>
-                  ) : hasPurchased ? (
-                    <Link
-                      href="/checkout-vision"
-                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
-                    >
-                      ⭐ שדרג להדמיות נוספות
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/checkout"
-                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
-                    >
-                      🔓 הצטרף ל-ShiputzAI
-                    </Link>
-                  )
-                ) : (
-                  <Link
-                    href="/signup?redirect=/visualize"
-                    className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 text-white py-3 rounded-full text-center font-medium hover:from-emerald-600 hover:to-green-700 transition-all animate-pulse"
-                  >
-                    🎉 הירשם בחינם וקבל עוד ניסיון!
-                  </Link>
-                )}
-              </div>
-              {!isLoggedIn && (
-                <p className="text-center text-sm text-gray-500">
-                  אהבת את התוצאה? הירשם בחינם וקבל גישה להדמיות נוספות, שמירת היסטוריה, ועוד!
-                </p>
+                  🎨 צור הדמיה נוספת
+                </button>
+              ) : hasPurchased ? (
+                <Link
+                  href="/checkout-vision"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
+                >
+                  ⭐ שדרג להדמיות נוספות
+                </Link>
+              ) : (
+                <Link
+                  href="/checkout"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
+                >
+                  🔓 הצטרף ל-ShiputzAI
+                </Link>
               )}
             </div>
           </div>

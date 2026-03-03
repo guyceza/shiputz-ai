@@ -128,6 +128,7 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-R50X5M6ZDL');
+            gtag('config', 'AW-17986657494');
           `}
         </Script>
         {/* Microsoft Clarity */}

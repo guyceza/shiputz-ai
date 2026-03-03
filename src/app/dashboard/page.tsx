@@ -84,6 +84,19 @@ function DashboardContent() {
     }
   }, [projectMenuOpen]);
 
+  // Google Ads conversion tracking — fire once per session on dashboard load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      const key = 'gads_signup_fired';
+      if (!sessionStorage.getItem(key)) {
+        (window as any).gtag('event', 'conversion', {
+          send_to: 'AW-17986657494/d13QCJrKn4IcENa52oBD',
+        });
+        sessionStorage.setItem(key, '1');
+      }
+    }
+  }, []);
+
   useEffect(() => {
     // Check for auth session
     const checkAuth = async () => {

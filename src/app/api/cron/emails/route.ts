@@ -568,8 +568,8 @@ export async function GET(request: NextRequest) {
       const sequence = user.purchased ? PURCHASED_SEQUENCE : NON_PURCHASED_SEQUENCE;
       const sequenceType = user.purchased ? 'purchased' : 'non_purchased';
 
-      // Bug fix: Check if user already received an email TODAY - limit to 1 email per day
-      // Check for ANY status (sent, pending, failed) to prevent duplicates from race conditions
+      // Check if user already received a SUCCESSFULLY SENT email TODAY - limit to 1 email per day
+      // Only check 'sent' status - 'pending' records may be stale from previous failed runs
       const todayStart = new Date();
       todayStart.setUTCHours(0, 0, 0, 0);
       const { data: sentToday } = await supabase
@@ -577,11 +577,12 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('user_email', user.email)
         .gte('sent_at', todayStart.toISOString())
-        .in('status', ['sent', 'pending'])
+        .eq('status', 'sent')
+        .not('resend_id', 'is', null)
         .limit(1);
       
       if (sentToday && sentToday.length > 0) {
-        // Already sent/processing an email today, skip this user
+        // Already sent a real email today, skip this user
         continue;
       }
 
@@ -592,25 +593,29 @@ export async function GET(request: NextRequest) {
         if (emailSentThisRun) break;
         
         if (daysSinceRegistration >= step.day) {
-          // Check if already sent
+          // Check if already successfully sent (has resend_id = actually delivered)
           const { data: existing } = await supabase
             .from('email_sequences')
-            .select('id')
+            .select('id, status, resend_id')
             .eq('user_email', user.email)
             .eq('sequence_type', sequenceType)
             .eq('day_number', step.day)
             .single();
 
+          // Skip if already successfully sent (has resend_id)
+          if (existing && existing.status === 'sent' && existing.resend_id) {
+            continue;
+          }
+
           if (!existing) {
-            // Bug #10 fix: Use atomic insert with conflict handling for idempotency
-            // Try to insert the record first - if it already exists (race condition), skip
+            // New record - insert as pending
             const { error: lockError } = await supabase
               .from('email_sequences')
               .insert({
                 user_email: user.email,
                 sequence_type: sequenceType,
                 day_number: step.day,
-                run_id: runId, // Track which cron run claimed this
+                run_id: runId,
                 status: 'pending',
               });
             
@@ -623,7 +628,15 @@ export async function GET(request: NextRequest) {
               console.error('Lock error:', lockError);
               continue;
             }
-            
+          } else {
+            // Existing record is pending/failed/sent-without-resend-id — retry sending
+            // Update run_id to claim this retry
+            await supabase
+              .from('email_sequences')
+              .update({ run_id: runId, status: 'pending' })
+              .eq('id', existing.id);
+          }
+
             // Skip vision_offer email if user already has Vision subscription
             if (step.template === 'vision_offer' && user.vision_subscription === 'active') {
               // Already marked as pending, update to skipped
@@ -703,7 +716,6 @@ export async function GET(request: NextRequest) {
                 .eq('day_number', step.day);
               errors++;
             }
-          }
         }
       }
     }

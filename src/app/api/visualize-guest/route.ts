@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: image and description" }, { status: 400 });
     }
 
-    // Rate limit: check cookie first (persists across serverless instances)
+    // Rate limit: check cookie first (fast client-side check)
     const guestCookie = request.cookies.get('shiputz_guest_trial')?.value;
     if (guestCookie === 'true') {
       return NextResponse.json({ 
@@ -86,8 +86,33 @@ export async function POST(request: NextRequest) {
       }, { status: 429 });
     }
 
-    // Also check in-memory rate limit by IP (backup)
-    const clientId = `guest:${getClientId(request)}`;
+    // Rate limit: check Supabase for IP (persists across incognito, serverless instances)
+    const clientIp = getClientId(request);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (supabaseUrl && supabaseKey) {
+      try {
+        const cutoff = new Date(Date.now() - GUEST_WINDOW_MS).toISOString();
+        const checkRes = await fetch(
+          `${supabaseUrl}/rest/v1/guest_trials?ip=eq.${encodeURIComponent(clientIp)}&created_at=gte.${cutoff}&select=id&limit=1`,
+          { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+        );
+        const existing = await checkRes.json();
+        if (Array.isArray(existing) && existing.length > 0) {
+          return NextResponse.json({ 
+            error: "כבר השתמשת בניסיון החינמי. הירשם כדי ליצור הדמיות נוספות!",
+            code: "GUEST_LIMIT_REACHED"
+          }, { status: 429 });
+        }
+      } catch (e) {
+        console.error("Guest trial Supabase check failed:", e);
+        // Fall through to in-memory check
+      }
+    }
+
+    // Fallback: in-memory rate limit by IP
+    const clientId = `guest:${clientIp}`;
     const rateLimit = checkRateLimit(clientId, GUEST_LIMIT, GUEST_WINDOW_MS);
     if (!rateLimit.success) {
       return NextResponse.json({ 
@@ -272,6 +297,20 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
 
     // Track successful guest request
     trackRequest('/api/visualize-guest', false);
+
+    // Save IP to Supabase for persistent rate limiting (survives incognito, restarts, etc.)
+    if (supabaseUrl && supabaseKey) {
+      fetch(`${supabaseUrl}/rest/v1/guest_trials`, {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ ip: clientIp }),
+      }).catch(e => console.error("Failed to save guest trial to Supabase:", e));
+    }
 
     const response = NextResponse.json({
       success: true,

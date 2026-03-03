@@ -415,6 +415,7 @@ export default function VisualizePage() {
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
+  const [guestUsed, setGuestUsed] = useState(false); // Guest trial (no login)
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -473,6 +474,18 @@ export default function VisualizePage() {
     "✅ בדוק שהקבלן מבוטח ורשום"
   ];
   
+  // Check guest trial status (localStorage + cookie)
+  useEffect(() => {
+    try {
+      if (
+        localStorage.getItem("shiputz_guest_trial") === "true" ||
+        document.cookie.includes("shiputz_guest_trial=true")
+      ) {
+        setGuestUsed(true);
+      }
+    } catch {}
+  }, []);
+
   // Countdown and tips rotation when generating
   useEffect(() => {
     if (!generating) {
@@ -688,8 +701,14 @@ export default function VisualizePage() {
   };
 
   const handleTryNow = () => {
+    // Guest (not logged in): allow one free trial
     if (!isLoggedIn) {
-      window.location.href = '/login?redirect=/visualize';
+      if (guestUsed) {
+        // Already used guest trial — prompt signup
+        setShowPaywall(true);
+        return;
+      }
+      setShowUploadModal(true);
       return;
     }
     
@@ -760,10 +779,17 @@ export default function VisualizePage() {
     setGenerateError("");
     
     try {
-      const res = await fetch('/api/visualize', {
+      // Guest mode: use guest API (no auth required)
+      const isGuest = !isLoggedIn;
+      const apiUrl = isGuest ? '/api/visualize-guest' : '/api/visualize';
+      const apiBody = isGuest
+        ? { image: uploadedImage, description }
+        : { image: uploadedImage, description, userEmail };
+
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: uploadedImage, description, userEmail })
+        body: JSON.stringify(apiBody)
       });
       
       const data = await res.json();
@@ -771,45 +797,55 @@ export default function VisualizePage() {
       if (data.error) {
         setGenerateError(data.error);
       } else {
-        // Consume trial if not subscribed - save to DB
-        if (!hasSubscription && userEmail) {
-          try {
-            await fetch('/api/vision-trial', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userEmail })
-            });
-            setTrialUsed(true);
-          } catch (e) {
-            console.error("Failed to mark trial as used:", e);
+        const generatedImage = data.generatedImage;
+        const analysis = data.analysis;
+        const costs = isGuest ? data.costs : data.costEstimate;
+
+        if (isGuest) {
+          // Mark guest trial as used
+          try { localStorage.setItem("shiputz_guest_trial", "true"); } catch {}
+          setGuestUsed(true);
+        } else {
+          // Consume trial if not subscribed - save to DB
+          if (!hasSubscription && userEmail) {
+            try {
+              await fetch('/api/vision-trial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail })
+              });
+              setTrialUsed(true);
+            } catch (e) {
+              console.error("Failed to mark trial as used:", e);
+            }
           }
         }
         
         setGeneratedResult({
-          image: data.generatedImage,
+          image: generatedImage,
           beforeImage: uploadedImage || '',
-          analysis: data.analysis,
-          costs: data.costEstimate
+          analysis: analysis,
+          costs: costs
         });
         clearProductsCache(); // Clear products for new image
         
-        // Save to history (async, don't block UI)
-        // Pass userId explicitly to avoid closure issues
-        const currentUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
-        if (uploadedImage && data.generatedImage && currentUserId) {
-          console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
-          saveToHistory(uploadedImage, data.generatedImage, description, data.analysis, data.costEstimate, currentUserId)
-            .then(() => {
-              // Reload history to ensure it's up to date
-              setTimeout(() => reloadHistory(currentUserId), 1000);
-            })
-            .catch(e => console.error('Failed to save to history:', e));
-        } else {
-          console.error("handleGenerate: Cannot save - missing data", { 
-            hasUploadedImage: !!uploadedImage, 
-            hasGeneratedImage: !!data.generatedImage, 
-            currentUserId 
-          });
+        // Save to history (only for logged-in users)
+        if (!isGuest) {
+          const currentUserId = userId || JSON.parse(localStorage.getItem("user") || "{}").id;
+          if (uploadedImage && generatedImage && currentUserId) {
+            console.log("handleGenerate: Calling saveToHistory with userId:", currentUserId);
+            saveToHistory(uploadedImage, generatedImage, description, analysis, costs, currentUserId)
+              .then(() => {
+                setTimeout(() => reloadHistory(currentUserId), 1000);
+              })
+              .catch(e => console.error('Failed to save to history:', e));
+          } else {
+            console.error("handleGenerate: Cannot save - missing data", { 
+              hasUploadedImage: !!uploadedImage, 
+              hasGeneratedImage: !!generatedImage, 
+              currentUserId 
+            });
+          }
         }
       }
     } catch (err) {
@@ -972,12 +1008,21 @@ export default function VisualizePage() {
                   onClick={handleTryNow}
                   className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
                 >
-                  {hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם'}
+                  {isLoggedIn
+                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם')
+                    : (guestUsed ? '🎉 הירשם בחינם — צור עוד הדמיות' : '✨ נסו עכשיו בחינם')
+                  }
                 </button>
-                {!hasSubscription && !trialUsed && (
+                {!isLoggedIn && !guestUsed && (
+                  <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא הרשמה · ללא כרטיס אשראי</p>
+                )}
+                {!isLoggedIn && guestUsed && (
+                  <p className="text-sm text-amber-600">השתמשת בניסיון החינמי · <Link href="/signup?redirect=/visualize" className="underline">הירשם להדמיות נוספות</Link></p>
+                )}
+                {isLoggedIn && !hasSubscription && !trialUsed && (
                   <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא כרטיס אשראי</p>
                 )}
-                {!hasSubscription && trialUsed && (
+                {isLoggedIn && !hasSubscription && trialUsed && (
                   <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
                 )}
               </>
@@ -1449,7 +1494,32 @@ export default function VisualizePage() {
               ✕
             </button>
             
-            {hasPurchased ? (
+            {!isLoggedIn ? (
+              // Guest who used trial — prompt signup
+              <>
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">🎉</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">אהבת? יש עוד!</h3>
+                  <p className="text-gray-500 text-sm">השתמשת בניסיון החינמי. הירשם בחינם וקבל גישה להדמיות נוספות, שמירת היסטוריה, הערכת עלויות ועוד.</p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Link
+                    href="/signup?redirect=/visualize"
+                    className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
+                  >
+                    🎉 הירשם בחינם
+                  </Link>
+                  <Link
+                    href="/login?redirect=/visualize"
+                    className="block w-full text-center border border-gray-300 text-gray-700 py-4 rounded-full text-base font-medium hover:bg-gray-50 transition-all"
+                  >
+                    יש לי כבר חשבון
+                  </Link>
+                </div>
+              </>
+            ) : hasPurchased ? (
               // User has main subscription - show Vision upgrade
               <>
                 <div className="text-center mb-8">
@@ -1602,7 +1672,7 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
+                {!isLoggedIn ? '✨ נסו בחינם — הדמיה אחת עלינו!' : hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
               </h3>
               <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
               <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
@@ -1797,7 +1867,14 @@ export default function VisualizePage() {
               >
                 📥 הורד תמונה
               </a>
-              {hasSubscription ? (
+              {!isLoggedIn ? (
+                <Link
+                  href="/signup?redirect=/visualize"
+                  className="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white py-3 rounded-full text-center font-medium hover:from-emerald-600 hover:to-green-600 transition-all"
+                >
+                  🎉 הירשם בחינם — צור עוד הדמיות
+                </Link>
+              ) : hasSubscription ? (
                 <button
                   onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
                   className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"

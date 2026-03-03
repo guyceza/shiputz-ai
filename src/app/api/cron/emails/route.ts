@@ -495,13 +495,25 @@ function generateVisionDiscountCode(email: string): string {
 
 // Send email via Resend
 async function sendEmail(to: string, subject: string, html: string) {
+  const token = generateUnsubscribeToken(to.toLowerCase());
+  const unsubUrl = `https://shipazti.com/unsubscribe?email=${encodeURIComponent(to.toLowerCase())}${token ? `&token=${token}` : ''}`;
+  
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${RESEND_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
+    body: JSON.stringify({ 
+      from: FROM_EMAIL, 
+      to, 
+      subject, 
+      html,
+      headers: {
+        'List-Unsubscribe': `<${unsubUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      }
+    }),
   });
   return response.json();
 }

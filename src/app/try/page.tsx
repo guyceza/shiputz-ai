@@ -73,10 +73,13 @@ export default function TryPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // ── init: check localStorage ───────────────────────────────
+  // ── init: check localStorage + cookie ──────────────────────
   useEffect(() => {
     try {
-      if (localStorage.getItem("shiputz_guest_trial") === "true") {
+      if (
+        localStorage.getItem("shiputz_guest_trial") === "true" ||
+        document.cookie.includes("shiputz_guest_trial=true")
+      ) {
         setGuestUsed(true);
       }
     } catch {}

@@ -77,7 +77,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: image and description" }, { status: 400 });
     }
 
-    // Rate limit by IP: 1 guest generation per 24 hours
+    // Rate limit: check cookie first (persists across serverless instances)
+    const guestCookie = request.cookies.get('shiputz_guest_trial')?.value;
+    if (guestCookie === 'true') {
+      return NextResponse.json({ 
+        error: "כבר השתמשת בניסיון החינמי. הירשם כדי ליצור הדמיות נוספות!",
+        code: "GUEST_LIMIT_REACHED"
+      }, { status: 429 });
+    }
+
+    // Also check in-memory rate limit by IP (backup)
     const clientId = `guest:${getClientId(request)}`;
     const rateLimit = checkRateLimit(clientId, GUEST_LIMIT, GUEST_WINDOW_MS);
     if (!rateLimit.success) {
@@ -264,7 +273,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     // Track successful guest request
     trackRequest('/api/visualize-guest', false);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       analysis: analysisText,
       generatedImage,
@@ -272,6 +281,17 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       description,
       guest: true
     });
+
+    // Set cookie to prevent reuse (survives serverless instance changes + localStorage clears)
+    response.cookies.set('shiputz_guest_trial', 'true', {
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      httpOnly: false, // allow JS to read it too
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    return response;
 
   } catch (error) {
     trackRequest('/api/visualize-guest', true);

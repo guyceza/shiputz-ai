@@ -128,7 +128,7 @@ function UnsubscribeContent() {
           </p>
           {email && (
             <button
-              onClick={doUnsubscribe}
+              onClick={() => doUnsubscribe()}
               disabled={processing}
               className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 mb-4"
             >
@@ -180,7 +180,7 @@ function UnsubscribeContent() {
         </p>
         
         <button
-          onClick={doUnsubscribe}
+          onClick={() => doUnsubscribe()}
           disabled={processing}
           className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 mb-4"
         >

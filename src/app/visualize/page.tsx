@@ -463,12 +463,20 @@ export default function VisualizePage() {
   const [savingToCloud, setSavingToCloud] = useState(false);
   const [waitingAnimationData, setWaitingAnimationData] = useState<object | null>(null);
   
-  // Load popcorn animation for waiting state
+  const [packsAnimationData, setPacksAnimationData] = useState<object | null>(null);
+  
+  // Load animations
   useEffect(() => {
     fetch(POPCORN_ANIMATION_URL)
       .then(res => res.json())
       .then(data => setWaitingAnimationData(data))
       .catch(err => console.error('Failed to load waiting animation:', err));
+    
+    // Load packs modal animation (paint/art supplies)
+    fetch('https://lottie.host/d7954a5f-59e7-4e46-8c1f-3962f498f7dd/4qFmOFcMYR.json')
+      .then(res => res.json())
+      .then(data => setPacksAnimationData(data))
+      .catch(err => console.error('Failed to load packs animation:', err));
   }, []);
   
   const LOADING_TIPS = [
@@ -1543,8 +1551,14 @@ export default function VisualizePage() {
             </button>
             
             <div className="text-center mb-6">
-              <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">📦</span>
+              <div className="w-24 h-24 mx-auto mb-2">
+                {packsAnimationData ? (
+                  <Lottie animationData={packsAnimationData} loop={true} />
+                ) : (
+                  <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
+                    <span className="text-3xl">🎨</span>
+                  </div>
+                )}
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-1">נגמרו ההדמיות</h3>
               <p className="text-gray-500 text-sm">רכוש חבילת הדמיות כדי להמשיך</p>

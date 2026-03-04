@@ -17,9 +17,19 @@ function CheckoutContent() {
   const [codeError, setCodeError] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
 
-  const originalPrice = 99;
-  const purimPrice = 69;
-  const displayPrice = codeValid ? Math.round(originalPrice * (100 - discountPercent) / 100) : purimPrice;
+  // Determine product from URL
+  const productParam = searchParams.get("product");
+  const PACKS: Record<string, {name: string, price: number, credits: number, perViz: string}> = {
+    pack_10: { name: '10 הדמיות', price: 29, credits: 10, perViz: '₪2.90' },
+    pack_30: { name: '30 הדמיות', price: 69, credits: 30, perViz: '₪2.30' },
+    pack_100: { name: '100 הדמיות', price: 149, credits: 100, perViz: '₪1.49' },
+  };
+  const isPack = productParam && productParam in PACKS;
+  const packInfo = isPack ? PACKS[productParam] : null;
+
+  const originalPrice = isPack ? packInfo!.price : 99;
+  const purimPrice = isPack ? packInfo!.price : 69;
+  const displayPrice = (!isPack && codeValid) ? Math.round(99 * (100 - discountPercent) / 100) : purimPrice;
 
   // Check if user is logged in
   useEffect(() => {
@@ -121,9 +131,9 @@ function CheckoutContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productType: 'pro',
+          productType: isPack ? productParam : 'pro',
           email: email.toLowerCase(),
-          discountCode: codeValid ? discountCode.toUpperCase() : undefined,
+          discountCode: (!isPack && codeValid) ? discountCode.toUpperCase() : undefined,
         }),
       });
       
@@ -132,7 +142,7 @@ function CheckoutContent() {
       if (data.success && data.payment_url) {
         if (data.transaction_uid) {
           localStorage.setItem('payplus_page_request_uid', data.transaction_uid);
-          localStorage.setItem('payplus_product', 'pro');
+          localStorage.setItem('payplus_product', isPack ? productParam : 'pro');
         }
         window.location.href = data.payment_url;
       } else {
@@ -173,36 +183,50 @@ function CheckoutContent() {
           
           {/* Title */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
-              🎭 Pro — מבצע פורים
-            </div>
-            
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-gray-400 line-through text-2xl">₪{originalPrice}</span>
-              <span className={`text-4xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>
-                ₪{displayPrice}
-              </span>
-            </div>
-            <p className="text-gray-500 text-sm mt-2">תשלום חד-פעמי · לא מנוי</p>
-            
-            {codeValid && (
-              <div className="mt-3 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
-                <span>🎉</span>
-                <span>הנחה {discountPercent}% הופעלה!</span>
-              </div>
-            )}
-            
-            {!codeValid && (
-              <div className="mt-2">
-                <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                  🎭 30% הנחה לפורים — ₪69 במקום ₪99
-                </span>
-              </div>
+            {isPack ? (
+              <>
+                <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
+                  📦 חבילת הדמיות
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">{packInfo!.name}</h2>
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  <span className="text-4xl font-bold text-gray-900">₪{packInfo!.price}</span>
+                </div>
+                <p className="text-gray-500 text-sm mt-2">{packInfo!.perViz} להדמיה · תשלום חד-פעמי</p>
+              </>
+            ) : (
+              <>
+                <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
+                  🎭 Pro — מבצע פורים
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-gray-400 line-through text-2xl">₪{originalPrice}</span>
+                  <span className={`text-4xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>
+                    ₪{displayPrice}
+                  </span>
+                </div>
+                <p className="text-gray-500 text-sm mt-2">תשלום חד-פעמי · לא מנוי</p>
+                
+                {codeValid && (
+                  <div className="mt-3 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                    <span>🎉</span>
+                    <span>הנחה {discountPercent}% הופעלה!</span>
+                  </div>
+                )}
+                
+                {!codeValid && (
+                  <div className="mt-2">
+                    <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+                      🎭 30% הנחה לפורים — ₪69 במקום ₪99
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
-          {/* What's included */}
-          <div className="border-t border-gray-100 pt-6 mb-6">
+          {/* What's included — only for Pro, not packs */}
+          {!isPack && <div className="border-t border-gray-100 pt-6 mb-6">
             <div className="space-y-3 text-sm text-gray-700">
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
@@ -237,7 +261,19 @@ function CheckoutContent() {
                 <span>צ׳אט תמיכה AI</span>
               </div>
             </div>
-          </div>
+          </div>}
+
+          {/* Pack info */}
+          {isPack && (
+            <div className="border-t border-gray-100 pt-6 mb-6">
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600">
+                  <strong>{packInfo!.credits} קרדיטים</strong> יתווספו לחשבון שלך
+                </p>
+                <p className="text-xs text-gray-400 mt-1">קרדיטים לא פגים · ניתן לרכוש חבילות נוספות בכל עת</p>
+              </div>
+            </div>
+          )}
 
           {/* Email Display */}
           <div className="mb-4">
@@ -247,8 +283,8 @@ function CheckoutContent() {
             </div>
           </div>
 
-          {/* Discount Code */}
-          <div className="mb-6">
+          {/* Discount Code — only for Pro */}
+          {!isPack && <div className="mb-6">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -279,7 +315,7 @@ function CheckoutContent() {
             {codeValid && (
               <p className="text-green-600 text-sm mt-2 font-medium">✅ הנחה {discountPercent}% הופעלה!</p>
             )}
-          </div>
+          </div>}
 
           {/* CTA Button */}
           <button
@@ -289,7 +325,7 @@ function CheckoutContent() {
               codeValid ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
             }`}
           >
-            {loading ? "מעבד..." : `🎭 לרכוש — ₪${displayPrice}`}
+            {loading ? "מעבד..." : isPack ? `📦 לרכוש ${packInfo!.name} — ₪${packInfo!.price}` : `🎭 לרכוש — ₪${displayPrice}`}
           </button>
           
           <p className="text-center text-gray-400 text-xs mt-3">תשלום חד-פעמי מאובטח · לא מנוי · לא חיוב חוזר</p>

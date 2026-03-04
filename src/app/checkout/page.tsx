@@ -186,7 +186,7 @@ function CheckoutContent() {
           {/* Title */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
-              Pro
+              🎭 Pro — מבצע פורים
             </div>
             
             {/* Billing Toggle */}
@@ -210,21 +210,25 @@ function CheckoutContent() {
               </button>
             </div>
             
-            <div className="flex items-baseline justify-center gap-1">
-              {codeValid && (
-                <span className="text-gray-400 line-through text-2xl ml-2">
+            <div className="flex items-center justify-center gap-2">
+              {(!isAnnual || codeValid) && (
+                <span className="text-gray-400 line-through text-2xl">
                   ₪{isAnnual ? annualMonthly : monthlyPrice}
                 </span>
               )}
               <span className={`text-4xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>
-                ₪{displayMonthly}
+                ₪{isAnnual ? displayMonthly : (codeValid ? displayMonthly : 19)}
               </span>
-              <span className="text-gray-500 text-base">/חודש</span>
+              <span className="text-gray-500 text-base">{isAnnual ? '/חודש' : '/חודש ראשון'}</span>
             </div>
+            
+            {!isAnnual && !codeValid && (
+              <p className="text-gray-400 text-sm mt-1">אח״כ ₪29/חודש · ביטול בכל רגע</p>
+            )}
             
             {isAnnual && (
               <p className="text-gray-400 text-sm mt-1">
-                {codeValid ? `₪${finalAnnualPrice}` : `₪${annualPrice}`} לשנה
+                {codeValid ? `₪${finalAnnualPrice}` : `₪${annualPrice}`} לשנה · ביטול בכל רגע
               </p>
             )}
             
@@ -234,8 +238,14 @@ function CheckoutContent() {
                 <span>הנחה {discountPercent}% הופעלה!</span>
               </div>
             )}
-
-            <p className="text-gray-400 text-sm mt-2">ביטול בכל רגע</p>
+            
+            {!isAnnual && !codeValid && (
+              <div className="mt-2">
+                <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+                  🎭 33% הנחה לפורים
+                </span>
+              </div>
+            )}
           </div>
 
           {/* What's included */}

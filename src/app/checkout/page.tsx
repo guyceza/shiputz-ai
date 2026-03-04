@@ -16,20 +16,27 @@ function CheckoutContent() {
   const [checkingCode, setCheckingCode] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+
+  const monthlyPrice = 29;
+  const annualPrice = 228; // ₪19/month
+  const annualMonthly = 19;
   
-  const isPremiumPlus = searchParams.get("plan") === "plus" || searchParams.get("plan") === "premium_plus";
+  // Calculate discounted prices
+  const rawMonthlyDiscount = monthlyPrice * (100 - discountPercent) / 100;
+  const rawAnnualDiscount = annualPrice * (100 - discountPercent) / 100;
+  const finalMonthlyPrice = codeValid ? Math.round(rawMonthlyDiscount) : monthlyPrice;
+  const finalAnnualPrice = codeValid ? Math.round(rawAnnualDiscount) : annualPrice;
+  const finalAnnualMonthly = codeValid ? Math.round(rawAnnualDiscount / 12) : annualMonthly;
+  
+  const isAnnual = billingCycle === "annual";
+  const displayPrice = isAnnual ? finalAnnualPrice : finalMonthlyPrice;
+  const displayMonthly = isAnnual ? finalAnnualMonthly : finalMonthlyPrice;
 
-  const basePrice = isPremiumPlus ? 349.99 : 299.99;
-  const originalPrice = isPremiumPlus ? 699 : 599;
-  // Round discount price to end in .99 for psychological pricing
-  const rawDiscount = basePrice * (100 - discountPercent) / 100;
-  const price = codeValid ? Math.floor(rawDiscount / 10) * 10 + 9.99 : basePrice;
-
-  // Check if user is logged in - MUST be logged in to checkout
+  // Check if user is logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check localStorage first
         const userData = localStorage.getItem("user");
         if (userData) {
           const user = JSON.parse(userData);
@@ -40,7 +47,6 @@ function CheckoutContent() {
           }
         }
         
-        // Check Supabase session
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
         
@@ -50,10 +56,8 @@ function CheckoutContent() {
           return;
         }
         
-        // Not logged in - redirect to login
-        const plan = isPremiumPlus ? "plus" : "";
         const code = searchParams.get("code") || "";
-        const redirectUrl = `/checkout${plan ? `?plan=${plan}` : ""}${code ? `${plan ? "&" : "?"}code=${code}` : ""}`;
+        const redirectUrl = `/checkout${code ? `?code=${code}` : ""}`;
         router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
       } catch (e) {
         console.error("Auth check failed:", e);
@@ -62,7 +66,7 @@ function CheckoutContent() {
     };
     
     checkAuth();
-  }, [router, isPremiumPlus, searchParams]);
+  }, [router, searchParams]);
 
   // Get discount code from URL
   useEffect(() => {
@@ -72,7 +76,7 @@ function CheckoutContent() {
     }
   }, [searchParams]);
 
-  // Auto-validate code when it's from URL and email is set
+  // Auto-validate code
   useEffect(() => {
     const codeFromUrl = searchParams.get("code");
     if (codeFromUrl && email && !codeValid) {
@@ -104,7 +108,7 @@ function CheckoutContent() {
 
       if (data.valid) {
         setCodeValid(true);
-        setDiscountPercent(data.discount || 20);
+        setDiscountPercent(data.discount || 30);
       } else {
         setCodeValid(false);
         setCodeError(data.reason || "קוד לא תקף");
@@ -125,13 +129,11 @@ function CheckoutContent() {
     setLoading(true);
 
     try {
-      const productType = isPremiumPlus ? 'premium_plus' : 'premium';
-      
       const response = await fetch("/api/payplus/generate-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productType,
+          productType: isAnnual ? 'pro_annual' : 'pro_monthly',
           email: email.toLowerCase(),
           discountCode: codeValid ? discountCode.toUpperCase() : undefined,
         }),
@@ -140,10 +142,9 @@ function CheckoutContent() {
       const data = await response.json();
       
       if (data.success && data.payment_url) {
-        // Save transaction UID for payment verification on success page
         if (data.transaction_uid) {
           localStorage.setItem('payplus_page_request_uid', data.transaction_uid);
-          localStorage.setItem('payplus_product', productType);
+          localStorage.setItem('payplus_product', isAnnual ? 'pro_annual' : 'pro_monthly');
         }
         window.location.href = data.payment_url;
       } else {
@@ -156,7 +157,6 @@ function CheckoutContent() {
     }
   };
 
-  // Show loading while checking auth
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#fafafa] flex items-center justify-center" dir="rtl">
@@ -186,71 +186,97 @@ function CheckoutContent() {
           {/* Title */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
-              {isPremiumPlus ? 'Premium Plus' : 'Premium'}
+              Pro
             </div>
             
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-gray-400 line-through text-4xl">₪{codeValid ? basePrice : originalPrice}</span>
-              <span className={`text-3xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>₪{price}</span>
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-xl p-1 mb-5">
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                  !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                חודשי
+              </button>
+              <button
+                onClick={() => setBillingCycle("annual")}
+                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                  isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                שנתי
+                <span className="text-green-600 text-xs mr-1">חסכון 35%</span>
+              </button>
             </div>
             
-            {codeValid ? (
+            <div className="flex items-baseline justify-center gap-1">
+              {codeValid && (
+                <span className="text-gray-400 line-through text-2xl ml-2">
+                  ₪{isAnnual ? annualMonthly : monthlyPrice}
+                </span>
+              )}
+              <span className={`text-4xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>
+                ₪{displayMonthly}
+              </span>
+              <span className="text-gray-500 text-base">/חודש</span>
+            </div>
+            
+            {isAnnual && (
+              <p className="text-gray-400 text-sm mt-1">
+                {codeValid ? `₪${finalAnnualPrice}` : `₪${annualPrice}`} לשנה
+              </p>
+            )}
+            
+            {codeValid && (
               <div className="mt-3 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
                 <span>🎉</span>
-                <span>קוד הנחה {discountPercent}% הופעל בהצלחה!</span>
+                <span>הנחה {discountPercent}% הופעלה!</span>
               </div>
-            ) : (
-              <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
             )}
+
+            <p className="text-gray-400 text-sm mt-2">ביטול בכל רגע</p>
           </div>
 
-          {/* What's included - detailed */}
+          {/* What's included */}
           <div className="border-t border-gray-100 pt-6 mb-6">
-            <div className="space-y-3 text-sm text-gray-600">
+            <div className="space-y-3 text-sm text-gray-700">
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>הדמיה אחת בחינם</span>
-              </div>
-              <div className="flex items-start gap-0">
-                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>טיפים ומאמרים</span>
+                <span>הדמיות שיפוץ AI <strong>ללא הגבלה</strong></span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>הזנת הוצאות ידנית</span>
+                <span>הערכות עלויות מפורטות</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>מעקב תקציב</span>
+                <span>כתב כמויות אוטומטי</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>סריקת קבלות</span>
+                <span>ניתוח הצעות מחיר מקבלנים</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>ניתוח הצעות מחיר</span>
+                <span>סריקת קבלות + מעקב תקציב</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>התראות חכמות</span>
+                <span>Shop the Look — קנייה בקליק</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>עוזר אישי</span>
+                <span>צ׳אט תמיכה AI</span>
               </div>
-              <div className={`flex items-start gap-0 ${isPremiumPlus ? 'text-gray-900 font-medium' : 'text-gray-300'}`}>
-                <span className="flex-shrink-0 ml-0.5">{isPremiumPlus ? '✓' : '✗'}</span>
-                <span>4 הדמיות במערכת AI Vision</span>
-              </div>
-              <div className={`flex items-start gap-0 ${isPremiumPlus ? 'text-gray-900 font-medium' : 'text-gray-300'}`}>
-                <span className="flex-shrink-0 ml-0.5">{isPremiumPlus ? '✓' : '✗'}</span>
-                <span>Shop the Look</span>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>התראות חכמות על חריגות תקציב</span>
               </div>
             </div>
           </div>
 
-          {/* Email Display (read-only - user must be logged in) */}
+          {/* Email Display */}
           <div className="mb-4">
             <label className="block text-sm text-gray-500 mb-2">מחובר בתור:</label>
             <div className="w-full px-4 py-4 bg-gray-100 border-0 rounded-xl text-base text-gray-700" dir="ltr">
@@ -288,7 +314,7 @@ function CheckoutContent() {
               <p className="text-gray-500 text-sm mt-2">{codeError}</p>
             )}
             {codeValid && (
-              <p className="text-green-600 text-sm mt-2 font-medium">✅ קוד הנחה הופעל — {discountPercent}% הנחה!</p>
+              <p className="text-green-600 text-sm mt-2 font-medium">✅ הנחה {discountPercent}% הופעלה!</p>
             )}
           </div>
 
@@ -300,11 +326,11 @@ function CheckoutContent() {
               codeValid ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
             }`}
           >
-            {loading ? "מעבד..." : `לתשלום ₪${price}`}
+            {loading ? "מעבד..." : `להתחיל — ₪${displayMonthly}/חודש`}
           </button>
         </div>
 
-        {/* Trust - minimal */}
+        {/* Trust */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-4 text-gray-400">
             <span className="text-sm">מאובטח</span>
@@ -326,16 +352,6 @@ function CheckoutContent() {
           </div>
         </div>
 
-        {/* Switch plan link */}
-        <div className="text-center mt-6">
-          <Link 
-            href={isPremiumPlus ? "/checkout" : "/checkout?plan=plus"}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            {isPremiumPlus ? "רוצה רק Premium? ₪299.99" : "שדרג ל-Premium Plus עם 4 הדמיות"}
-          </Link>
-        </div>
-
       </div>
     </div>
   );
@@ -352,4 +368,3 @@ export default function CheckoutPage() {
     </Suspense>
   );
 }
-// force rebuild Thu Feb 26 09:46:32 UTC 2026

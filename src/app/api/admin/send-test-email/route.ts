@@ -82,7 +82,7 @@ const generateHtml = (templateId: string, userEmail?: string): string => {
          <h3 style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: #000000;">איך השיפוץ שלך יראה?</h3>
          <p style="margin: 0; font-size: 16px; color: #000000;">העלה תמונה של החדר → תאר מה אתה רוצה → קבל הדמיה של התוצאה</p>
        </div>
-       <p style="font-size: 16px; color: #1e293b; text-align: right;"><strong>מה כלול ב-AI Vision:</strong></p>
+       <p style="font-size: 16px; color: #1e293b; text-align: right;"><strong>מה כלול ב-Pro:</strong></p>
        <ul style="font-size: 15px; color: #475569; text-align: right;">
          <li>הדמיות AI של השיפוץ שלך</li>
          <li>הערכת עלויות אוטומטית</li>
@@ -91,9 +91,9 @@ const generateHtml = (templateId: string, userEmail?: string): string => {
        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 32px; margin: 24px 0; text-align: center;">
          <p style="font-size: 14px; color: #92400e;">🎁 הנחה מיוחדת לחברי Premium:</p>
          <p style="font-size: 40px; font-weight: 700; color: #1e293b; letter-spacing: 3px;">VIS-TEST-123</p>
-         <p style="font-size: 16px; color: #92400e;"><strong>50% הנחה</strong> על החודש הראשון!<br><s>₪39.99</s> → <strong>₪19.99</strong></p>
+         <p style="font-size: 16px; color: #92400e;"><strong>50% הנחה</strong> על החודש הראשון!<br><s>₪29</s> → <strong>₪20</strong></p>
        </div>
-       ${ctaButton('לנסות AI Vision ←', 'https://shipazti.com/checkout-vision', '#a855f7')}`,
+       ${ctaButton('לנסות Pro ←', 'https://shipazti.com/checkout', '#a855f7')}`,
       'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%)',
       'איך השיפוץ שלך יראה? 🏠', 'הדמיות AI + הערכת עלויות', '#000000', '#000000'
     ),

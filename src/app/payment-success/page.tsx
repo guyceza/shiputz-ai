@@ -75,11 +75,11 @@ function PaymentSuccessContent() {
       if (userData) {
         const user = JSON.parse(userData);
         user.purchased = true;
-        if (product === 'vision') {
+        if (product === 'vision' || product === 'pro_monthly' || product === 'pro_annual') {
           user.vision_active = true;
         }
-        if (product === 'premium_plus') {
-          user.vision_credits = 4;
+        if (product === 'premium_plus' || product === 'pro_monthly' || product === 'pro_annual') {
+          user.vision_credits = 999; // Pro = unlimited
         }
         localStorage.setItem('user', JSON.stringify(user));
       }
@@ -104,6 +104,8 @@ function PaymentSuccessContent() {
   }, [router, product, pageRequestUid]);
 
   const productNames: Record<string, string> = {
+    pro_monthly: 'Pro',
+    pro_annual: 'Pro (שנתי)',
     premium: 'Premium',
     vision: 'AI Vision',
     premium_plus: 'Premium Plus',

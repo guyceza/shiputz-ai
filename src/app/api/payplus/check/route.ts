@@ -102,18 +102,18 @@ export async function POST(request: NextRequest) {
     // Update user in database (same logic as webhook)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    if (productType === 'premium' || productType === 'premium_plus') {
+    if (productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
       const upsertData: any = {
         email: email.toLowerCase(),
         purchased: true,
         purchased_at: new Date().toISOString(),
       };
-      if (productType === 'premium_plus') {
+      if (productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
         upsertData.vision_subscription = 'active';
       }
       const { error } = await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
       if (error) {
-        console.error('IPN check: Error upserting premium:', error);
+        console.error('IPN check: Error upserting:', error);
       } else {
         console.log(`IPN check: ${email} → ${productType} activated`);
       }

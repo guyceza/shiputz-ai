@@ -479,7 +479,7 @@ export default function ShopLookPage() {
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₪39.99</span>
+                    <span className="text-4xl font-bold text-gray-900">₪29</span>
                     <span className="text-gray-400">/חודש</span>
                   </div>
                 </div>
@@ -504,7 +504,7 @@ export default function ShopLookPage() {
                 </ul>
                 
                 <Link
-                  href="/checkout-vision"
+                  href="/checkout"
                   className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
                 >
                   🚀 שדרג עכשיו
@@ -531,7 +531,7 @@ export default function ShopLookPage() {
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חד פעמי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₪299.99</span>
+                    <span className="text-4xl font-bold text-gray-900">₪29</span>
                   </div>
                 </div>
                 

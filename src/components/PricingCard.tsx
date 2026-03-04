@@ -9,69 +9,43 @@ interface PricingCardProps {
 }
 
 const features = [
-  { name: "מעקב תקציב ללא הגבלה", includedIn: ["premium", "plus"] },
-  { name: "סריקת קבלות", includedIn: ["premium", "plus"] },
-  { name: "ניתוח הצעות מחיר", includedIn: ["premium", "plus"] },
-  { name: "התראות חכמות", includedIn: ["premium", "plus"] },
-  { name: "עוזר אישי", includedIn: ["premium", "plus"] },
-  { name: "הדמיית חדר", includedIn: ["plus"] },
-  { name: "4 הדמיות כלולות", includedIn: ["plus"] },
-  { name: "Shop the Look", includedIn: ["plus"], link: "/shop-look" },
+  "הדמיות שיפוץ AI ללא הגבלה",
+  "הערכות עלויות מפורטות",
+  "כתב כמויות אוטומטי",
+  "ניתוח הצעות מחיר מקבלנים",
+  "סריקת קבלות + מעקב תקציב",
+  "Shop the Look — קנייה בקליק",
+  "צ׳אט תמיכה AI",
+  "התראות חכמות",
 ];
 
 export default function PricingCard({ 
   variant = "full", 
   className = ""
 }: PricingCardProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'premium' | 'plus'>('plus');
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  const monthlyPrice = 29;
+  const annualMonthly = 19;
+  const annualTotal = 228;
   
-  // Mini variant - wide, black & white only
+  // Mini variant
   if (variant === "mini") {
     return (
       <div className={`relative bg-white border border-gray-200 rounded-2xl px-8 py-6 shadow-sm w-full max-w-lg ${className}`}>
-        {/* Plan Toggle */}
-        <div className="flex justify-center gap-2 mb-5">
-          <button
-            onClick={() => setSelectedPlan('premium')}
-            className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              selectedPlan === 'premium'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            Premium
-          </button>
-          <button
-            onClick={() => setSelectedPlan('plus')}
-            className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              selectedPlan === 'plus'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            Premium Plus
-          </button>
-        </div>
-        
         <div className="flex items-center justify-between">
           <Link
-            href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
+            href="/checkout"
             className="text-white px-8 py-3 rounded-lg text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
           >
-            לרכישה
+            להתחיל
           </Link>
           <div className="text-right">
-            <div className="flex items-baseline gap-3 justify-end">
-              <span className="text-4xl font-bold text-gray-900">
-                {selectedPlan === 'plus' ? '₪349.99' : '₪299.99'}
-              </span>
-              <span className="text-base text-gray-400 line-through">
-                {selectedPlan === 'plus' ? '₪699' : '₪599'}
-              </span>
+            <div className="flex items-baseline gap-1 justify-end">
+              <span className="text-4xl font-bold text-gray-900">₪{monthlyPrice}</span>
+              <span className="text-base text-gray-500">/חודש</span>
             </div>
-            <span className="text-sm text-gray-500">
-              {selectedPlan === 'plus' ? 'חד פעמי · כולל 4 הדמיות' : 'תשלום חד פעמי'}
-            </span>
+            <span className="text-sm text-gray-500">ביטול בכל רגע · הכל כלול</span>
           </div>
         </div>
       </div>
@@ -82,61 +56,31 @@ export default function PricingCard({
   if (variant === "compact") {
     return (
       <div className={`bg-white border border-gray-200 rounded-2xl p-6 shadow-sm max-w-xs ${className}`}>
-        {/* Plan Toggle */}
-        <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-5">
-          <button
-            onClick={() => setSelectedPlan('premium')}
-            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              selectedPlan === 'premium'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Premium
-          </button>
-          <button
-            onClick={() => setSelectedPlan('plus')}
-            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              selectedPlan === 'plus'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Plus
-          </button>
-        </div>
-        
-        {/* Price */}
-        <div className="text-center mb-5">
-          <div className="flex items-baseline justify-center gap-2">
-            <span className="text-4xl font-bold text-gray-900">
-              {selectedPlan === 'plus' ? '₪349.99' : '₪299.99'}
-            </span>
-            <span className="text-gray-400 line-through text-lg">
-              {selectedPlan === 'plus' ? '₪699' : '₪599'}
-            </span>
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-1.5 rounded-lg text-sm font-medium mb-3">
+            Pro
           </div>
-          <p className="text-sm text-gray-500 mt-1">תשלום חד פעמי</p>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-4xl font-bold text-gray-900">₪{isAnnual ? annualMonthly : monthlyPrice}</span>
+            <span className="text-gray-500">/חודש</span>
+          </div>
+          <p className="text-sm text-gray-400 mt-1">ביטול בכל רגע</p>
         </div>
         
-        {/* Features with included/not included */}
-        <ul className="text-right space-y-2.5 mb-6 text-sm">
-          {features.slice(0, 6).map((feature, i) => {
-            const isIncluded = feature.includedIn.includes(selectedPlan);
-            return (
-              <li key={i} className={`flex items-center gap-2 ${isIncluded ? 'text-gray-900' : 'text-gray-300'}`}>
-                <span className={`text-xs ${isIncluded ? 'text-gray-900' : 'text-gray-300'}`}>✦</span>
-                <span>{feature.name}</span>
-              </li>
-            );
-          })}
+        <ul className="text-right space-y-2 mb-5 text-sm">
+          {features.slice(0, 5).map((feature, i) => (
+            <li key={i} className="flex items-center gap-2 text-gray-700">
+              <span className="text-xs text-gray-900">✓</span>
+              <span>{feature}</span>
+            </li>
+          ))}
         </ul>
         
         <Link
-          href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
+          href="/checkout"
           className="block w-full text-white py-3 rounded-lg text-center text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
         >
-          לרכישה
+          להתחיל — ₪{monthlyPrice}/חודש
         </Link>
       </div>
     );
@@ -145,67 +89,56 @@ export default function PricingCard({
   // Full variant
   return (
     <div className={`border border-gray-200 rounded-2xl p-8 bg-white shadow-sm max-w-sm mx-auto ${className}`}>
-      {/* Plan Toggle */}
-      <div className="bg-gray-100 p-1 rounded-lg flex gap-1 mb-6">
-        <button
-          onClick={() => setSelectedPlan('premium')}
-          className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
-            selectedPlan === 'premium'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Premium
-        </button>
-        <button
-          onClick={() => setSelectedPlan('plus')}
-          className={`flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
-            selectedPlan === 'plus'
-              ? 'bg-gray-900 text-white'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Premium Plus
-        </button>
-      </div>
-      
-      {/* Price */}
       <div className="text-center mb-6">
-        <div className="inline-block bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold px-4 py-1.5 rounded-full mb-4">
-          50% הנחה
+        <div className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium mb-4">
+          Pro
         </div>
-        <div className="flex items-baseline justify-center gap-3 flex-row-reverse">
-          <span className="text-5xl font-bold text-gray-900">
-            {selectedPlan === 'plus' ? '₪349.99' : '₪299.99'}
-          </span>
-          <span className="text-xl text-gray-400 line-through">
-            {selectedPlan === 'plus' ? '₪699' : '₪599'}
-          </span>
+
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-xl p-1 mb-5">
+          <button
+            onClick={() => setIsAnnual(false)}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+            }`}
+          >
+            חודשי
+          </button>
+          <button
+            onClick={() => setIsAnnual(true)}
+            className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+            }`}
+          >
+            שנתי
+            <span className="text-green-600 text-xs mr-1">חסכון 35%</span>
+          </button>
         </div>
-        <p className="text-gray-500 mt-2">תשלום חד פעמי</p>
-        <p className="text-amber-600 text-sm font-medium mt-1">
-          חוסך {selectedPlan === 'plus' ? '₪315' : '₪299'}
-        </p>
+        
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-5xl font-bold text-gray-900">₪{isAnnual ? annualMonthly : monthlyPrice}</span>
+          <span className="text-gray-500 text-lg">/חודש</span>
+        </div>
+        {isAnnual && (
+          <p className="text-gray-400 text-sm mt-1">₪{annualTotal} לשנה</p>
+        )}
+        <p className="text-gray-500 mt-2 text-sm">ביטול בכל רגע</p>
       </div>
       
-      {/* Features with included/not included styling */}
       <ul className="text-right space-y-3 mb-8">
-        {features.map((feature, i) => {
-          const isIncluded = feature.includedIn.includes(selectedPlan);
-          return (
-            <li key={i} className={`flex items-center gap-3 ${isIncluded ? 'text-gray-900' : 'text-gray-300'}`}>
-              <span className={`text-sm ${isIncluded ? 'text-gray-900' : 'text-gray-300'}`}>✦</span>
-              <span>{feature.name}</span>
-            </li>
-          );
-        })}
+        {features.map((feature, i) => (
+          <li key={i} className="flex items-center gap-3 text-gray-900">
+            <span className="text-sm text-gray-900">✓</span>
+            <span>{feature}</span>
+          </li>
+        ))}
       </ul>
       
       <Link
-        href={selectedPlan === 'plus' ? '/checkout?plan=plus' : '/checkout'}
+        href="/checkout"
         className="block bg-gray-900 text-white py-4 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors"
       >
-        לרכישה
+        להתחיל — ₪{isAnnual ? annualMonthly : monthlyPrice}/חודש
       </Link>
     </div>
   );

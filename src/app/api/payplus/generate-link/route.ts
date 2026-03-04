@@ -10,14 +10,18 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface PayPlusRequest {
-  productType: 'premium' | 'vision' | 'premium_plus';
+  productType: 'pro_monthly' | 'pro_annual' | 'premium' | 'vision' | 'premium_plus';
   email: string;
   userId?: string;
   discountCode?: string;
 }
 
 // Pricing configuration (in ILS)
-const PRICING = {
+const PRICING: Record<string, { amount: number; chargeMethod: number; recurring?: boolean }> = {
+  // NEW pricing model
+  pro_monthly: { amount: 29, chargeMethod: 3, recurring: true },
+  pro_annual: { amount: 228, chargeMethod: 1 }, // one-time annual = ₪19/month
+  // LEGACY (keep for existing customers)
   premium: { amount: 299.99, chargeMethod: 1 },
   vision: { amount: 39.99, chargeMethod: 3, recurring: true },
   premium_plus: { amount: 349.99, chargeMethod: 1 },
@@ -65,9 +69,11 @@ export async function POST(request: NextRequest) {
             if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
               // Apply discount!
               discountPercent = codeData.discount_percent || 30;
-              // Round to end in .99 for psychological pricing (match checkout UI)
               const rawAmount = pricing.amount * (100 - discountPercent) / 100;
-              finalAmount = Math.floor(rawAmount / 10) * 10 + 9.99;
+              // For subscription (≤₪100): round to whole number. For one-time: .99 pricing
+              finalAmount = pricing.amount <= 100 
+                ? Math.round(rawAmount) 
+                : Math.floor(rawAmount / 10) * 10 + 9.99;
               // Minimum ₪1 — PayPlus doesn't accept ₪0
               if (finalAmount < 1) finalAmount = 1;
               console.log(`Discount applied: ${discountPercent}% off, final amount: ${finalAmount}`);
@@ -106,7 +112,8 @@ export async function POST(request: NextRequest) {
       refURL_callback: `https://shipazti.com/api/payplus/webhook?secret=${process.env.PAYPLUS_WEBHOOK_SECRET || ''}`,
 
       // Custom data to identify the transaction
-      more_info: productType,
+      // Normalize product type for webhook processing
+      more_info: productType === 'pro_monthly' || productType === 'pro_annual' ? productType : productType,
       more_info_1: email,
       more_info_2: userId || '',
       more_info_3: discountCode || '',

@@ -229,15 +229,34 @@ export async function POST(request: NextRequest) {
     // Update user in database based on product type
     // NOTE: DB columns that exist: purchased, purchased_at, vision_subscription,
     //       vision_trial_used, vision_usage_count, vision_usage_month
+    // NEW: Pro monthly/annual subscriptions
+    if (productType === 'pro_monthly' || productType === 'pro_annual') {
+      const upsertData: any = { 
+        email: email.toLowerCase(),
+        purchased: true,
+        purchased_at: new Date().toISOString(),
+        vision_subscription: 'active', // Pro includes everything
+      };
+
+      const { error: upsertError } = await supabase
+        .from('users')
+        .upsert(upsertData, { onConflict: 'email' });
+
+      if (upsertError) {
+        console.error('Error upserting user Pro status:', upsertError);
+      } else {
+        console.log(`User ${email} marked as Pro (${productType})`);
+      }
+    }
+    
+    // LEGACY: Keep support for old premium/premium_plus purchases
     if (productType === 'premium' || productType === 'premium_plus') {
-      // Mark user as premium
       const upsertData: any = { 
         email: email.toLowerCase(),
         purchased: true,
         purchased_at: new Date().toISOString(),
       };
 
-      // Premium Plus: also activate vision subscription
       if (productType === 'premium_plus') {
         upsertData.vision_subscription = 'active';
       }
@@ -249,12 +268,11 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user premium status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Premium${productType === 'premium_plus' ? ' Plus (with Vision)' : ''}`);
+        console.log(`User ${email} marked as Premium (legacy)`);
       }
     }
 
     if (productType === 'vision' || type === 'recurring_payment') {
-      // Mark user as having Vision subscription
       const upsertData: any = { 
         email: email.toLowerCase(),
         vision_subscription: 'active',
@@ -290,7 +308,7 @@ export async function POST(request: NextRequest) {
     console.log(`✅ PayPlus payment completed: ${email} → ${productType} (₪${amount}, tx: ${transaction_uid || page_request_uid})`);
 
     // Send welcome/purchase confirmation email via Resend (fire-and-forget)
-    if (email && (productType === 'premium' || productType === 'premium_plus')) {
+    if (email && (productType === 'pro_monthly' || productType === 'pro_annual' || productType === 'premium' || productType === 'premium_plus')) {
       try {
         const RESEND_KEY = process.env.RESEND_API_KEY;
         if (RESEND_KEY) {
@@ -301,7 +319,7 @@ export async function POST(request: NextRequest) {
             .eq('email', email.toLowerCase())
             .single();
           const displayName = escapeHtml(userData?.name || 'משפץ יקר');
-          const isPlus = productType === 'premium_plus';
+          const isPro = productType === 'pro_monthly' || productType === 'pro_annual';
 
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -309,10 +327,10 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify({
               from: 'ShiputzAI <help@shipazti.com>',
               to: email,
-              subject: '🎉 ברוך הבא ל-ShiputzAI Premium!',
+              subject: '🎉 ברוך הבא ל-ShiputzAI Pro!',
               html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Premium${isPlus ? ' Plus' : ''}!</h1>
+                  <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Pro!</h1>
                 </div>
                 <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
                 <p style="font-size: 16px; color: #333;">תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.</p>
@@ -324,7 +342,7 @@ export async function POST(request: NextRequest) {
                     <li>ניתוח הצעות מחיר</li>
                     <li>עוזר AI אישי לכל שאלה</li>
                     <li>התראות חכמות לפני חריגות</li>
-                    ${isPlus ? '<li>4 הדמיות AI Vision</li><li>Shop the Look</li>' : ''}
+                    ${isPro ? '<li>הדמיות AI ללא הגבלה</li><li>Shop the Look</li>' : ''}
                   </ul>
                 </div>
                 <div style="text-align: center; margin: 30px 0;">

@@ -16,17 +16,19 @@ const BRAND = {
 };
 
 const PRICING = {
+    pro: {
+        monthly: 29,
+        annual: 228,
+        annualMonthly: 19,
+        discountPercent: 30,
+    },
+    // LEGACY
     premium: {
         regular: { ils: 149.99, usd: 49.99 },
         discounted: { ils: 119.99, usd: 39.99 },
         discountPercent: 20,
         code: 'PREMIUM20'
     },
-    visualization: {
-        regular: 14.99,
-        discounted: 9.99,
-        code: 'VISUAL10'
-    }
 };
 
 // Base email wrapper with proper RTL support

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
+import PricingComparison from "@/components/PricingComparison";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -1230,53 +1231,7 @@ export default function VisualizePage() {
               <p className="text-gray-500">שדרג למנוי Pro כדי להמשיך</p>
             </div>
             
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 relative overflow-hidden">
-              <div className="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">
-                🎭 מבצע פורים
-              </div>
-              
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">5 הדמיות בחודש + חבילות</h3>
-              </div>
-              
-              <div className="text-center mb-6">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-2xl text-gray-400 line-through">₪29</span>
-                  <span className="text-5xl font-bold text-gray-900">₪19</span>
-                  <span className="text-gray-500">/חודש ראשון</span>
-                </div>
-                <p className="text-gray-400 text-sm mt-1">אח״כ ₪29/חודש · ביטול בכל רגע</p>
-                <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full mt-2">
-                  🎭 33% הנחה לפורים
-                </span>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">5 הדמיות AI בחודש</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">הערכות עלויות מפורטות</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">כתב כמויות + ניתוח הצעות</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">סריקת קבלות + מעקב תקציב</span>
-                </li>
-              </ul>
-              
-              <Link
-                href="/checkout"
-                className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
-              >
-                🎭 להתחיל ב-₪19 בלבד
-              </Link>
-            </div>
+            <PricingComparison />
           </div>
         </section>
       )}

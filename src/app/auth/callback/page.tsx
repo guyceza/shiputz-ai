@@ -55,7 +55,7 @@ export default function AuthCallbackPage() {
     }
     
     if (isNewUser && !hasCompletedOnboarding) {
-      router.push('/onboarding');
+      router.push('/visualize');
     } else {
       // Check for saved redirect URL (e.g., from discount email → login → Google OAuth)
       const savedRedirect = localStorage.getItem('authRedirect');
@@ -63,7 +63,7 @@ export default function AuthCallbackPage() {
         localStorage.removeItem('authRedirect');
         router.push(savedRedirect);
       } else {
-        router.push('/dashboard');
+        router.push('/visualize');
       }
     }
   };

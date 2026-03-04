@@ -100,7 +100,7 @@ export default function SignupPage() {
           isAdmin: email === "guyceza@gmail.com",
           purchased: false  // New users are not premium yet
         }));
-        router.push("/dashboard");
+        router.push("/visualize");
       } else {
         // Email confirmation required
         setSuccess(true);

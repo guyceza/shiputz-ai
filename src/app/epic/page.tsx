@@ -70,7 +70,7 @@ export default function EpicHomePage() {
           style={{ transform: `scale(${isLoaded ? 1 + scrollY * 0.0002 : 1.1})` }}
         >
           <Image
-            src="/hero-epic.jpg"
+            src="/hero-epic.webp"
             alt="שיפוץ בית ים תיכוני"
             fill
             className="object-cover object-center"
@@ -231,7 +231,7 @@ export default function EpicHomePage() {
       {/* ========== CTA ========== */}
       <section id="pricing" className="py-28 md:py-40 px-7 relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/hero-epic.jpg" alt="" fill className="object-cover opacity-[0.07]" style={{ filter: "blur(20px) saturate(0.5)" }} />
+          <Image src="/hero-epic.webp" alt="" fill className="object-cover opacity-[0.07]" style={{ filter: "blur(20px) saturate(0.5)" }} />
           <div className="absolute inset-0 bg-[#060608]/90" />
         </div>
         <div className="relative text-center max-w-2xl mx-auto">

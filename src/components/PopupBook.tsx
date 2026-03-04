@@ -31,7 +31,7 @@ interface RoomScene {
 const SCENES: RoomScene[] = [
   {
     title: "סלון מודרני",
-    image: "/popup-book/living-room.jpg",
+    image: "/popup-book/living-room.webp",
     tags: [
       { name: "ספה מעוצבת", price: "₪4,200", x: -0.5, z: 0.15, height: 0.7 },
       { name: "שולחן קפה", price: "₪1,800", x: 0.1, z: 0.45, height: 0.5 },
@@ -41,7 +41,7 @@ const SCENES: RoomScene[] = [
   },
   {
     title: "מטבח חלומי",
-    image: "/popup-book/kitchen.jpg",
+    image: "/popup-book/kitchen.webp",
     tags: [
       { name: "אי מטבח", price: "₪8,500", x: -0.1, z: 0.2, height: 0.6 },
       { name: "תאורה תלויה", price: "₪1,200", x: 0.2, z: -0.4, height: 1.1 },
@@ -51,7 +51,7 @@ const SCENES: RoomScene[] = [
   },
   {
     title: "חדר שינה",
-    image: "/popup-book/bedroom.jpg",
+    image: "/popup-book/bedroom.webp",
     tags: [
       { name: "מיטה זוגית", price: "₪5,900", x: 0.0, z: 0.05, height: 0.5 },
       { name: "שידות לילה", price: "₪1,400", x: -0.7, z: 0.1, height: 0.65 },
@@ -168,7 +168,7 @@ function Book({ progress, scene }: { progress: number; scene: RoomScene }) {
   const bookRef = useRef<THREE.Group>(null);
   
   // Load textures
-  const coverTexture = useTexture("/popup-book/cover.jpg");
+  const coverTexture = useTexture("/popup-book/cover.webp");
   const sceneTexture = useTexture(scene.image);
   
   // Make textures look better

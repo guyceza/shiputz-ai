@@ -21,7 +21,7 @@ const rooms: RoomScene[] = [
     id: "living",
     title: "סלון",
     subtitle: "עיצוב מחדש של הסלון",
-    image: "/popup-book/living-room.jpg",
+    image: "/popup-book/living-room.webp",
     totalPrice: "₪18,500",
     items: [
       { name: "ספה", price: "₪2,500" },
@@ -34,7 +34,7 @@ const rooms: RoomScene[] = [
     id: "kitchen",
     title: "מטבח",
     subtitle: "שיפוץ מטבח מודרני",
-    image: "/popup-book/kitchen.jpg",
+    image: "/popup-book/kitchen.webp",
     totalPrice: "₪35,000",
     items: [
       { name: "ארונות", price: "₪4,200" },
@@ -47,7 +47,7 @@ const rooms: RoomScene[] = [
     id: "bedroom",
     title: "חדר שינה",
     subtitle: "חדר שינה חלומי",
-    image: "/popup-book/bedroom.jpg",
+    image: "/popup-book/bedroom.webp",
     totalPrice: "₪22,000",
     items: [
       { name: "מיטה", price: "₪2,100" },
@@ -60,7 +60,7 @@ const rooms: RoomScene[] = [
     id: "bathroom",
     title: "חדר אמבטיה",
     subtitle: "אמבטיה מפנקת",
-    image: "/popup-book/bathroom.jpg",
+    image: "/popup-book/bathroom.webp",
     totalPrice: "₪28,000",
     items: [
       { name: "אמבטיה", price: "₪5,500" },

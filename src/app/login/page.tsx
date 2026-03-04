@@ -9,7 +9,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const redirectTo = searchParams.get("redirect") || "/visualize";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -177,7 +177,7 @@ function LoginContent() {
           <button
             onClick={async () => {
               // Save redirect URL before Google OAuth (callback won't have it)
-              if (redirectTo && redirectTo !== '/dashboard') {
+              if (redirectTo && redirectTo !== '/visualize') {
                 localStorage.setItem('authRedirect', redirectTo);
               }
               const { signInWithGoogle } = await import("@/lib/auth");

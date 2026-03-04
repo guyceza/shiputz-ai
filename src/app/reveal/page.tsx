@@ -55,7 +55,7 @@ export default function RevealPage() {
       >
         {/* BEFORE image (base layer) */}
         <img
-          src="/examples/living-before.jpg"
+          src="/examples/living-before.webp"
           alt="לפני"
           className="absolute inset-0 w-full h-full object-cover"
           draggable={false}
@@ -71,7 +71,7 @@ export default function RevealPage() {
           }}
         >
           <img
-            src="/examples/living-after.jpg"
+            src="/examples/living-after.webp"
             alt="אחרי"
             className="absolute inset-0 w-full h-full object-cover"
             draggable={false}

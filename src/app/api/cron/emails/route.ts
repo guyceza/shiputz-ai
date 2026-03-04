@@ -28,7 +28,7 @@ if (!RESEND_KEY) {
 const PURCHASED_SEQUENCE = [
   { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI!', template: 'welcome_purchased' },
   { day: 1, subject: '💡 3 דברים לעשות עכשיו', template: 'getting_started' },
-  { day: 2, subject: '🎨 רוצה לראות איך השיפוץ יראה?', template: 'vision_offer' },
+  { day: 2, subject: '🎨 ידעת שאפשר לראות את השיפוץ לפני?', template: 'vision_offer' },
   { day: 5, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
   { day: 7, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
   { day: 10, subject: '❓ איך הולך?', template: 'checkin' },
@@ -37,7 +37,7 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 1, subject: '🎁 מתנה בשבילך — 30% הנחה', template: 'discount_offer' },
+  { day: 1, subject: '🎁 מתנה בשבילך — ₪20/חודש במקום ₪29', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
   { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
@@ -306,36 +306,30 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
     },
 
     vision_offer: {
-      title: '🎨 רוצה לראות איך השיפוץ יראה?',
-      subtitle: 'הצצה לעתיד — לפני שמתחילים',
+      title: '🎨 ידעת שאפשר לראות את השיפוץ לפני?',
+      subtitle: 'הכל כלול במנוי Pro שלך',
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
           מתלבט איך לשפץ את הסלון? לא בטוח איזה סגנון מתאים למטבח?
         </p>
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          עכשיו אפשר <strong>לראות את השיפוץ לפני שמתחילים</strong> — פשוט מעלים תמונה של החדר, וה-AI שלנו מדמיין איך זה יראה אחרי.
+          <strong>כמנוי Pro, יש לך גישה מלאה</strong> לכל הכלים — כולל הדמיות AI ללא הגבלה!
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
           <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
             ✨ <strong>הדמיות ויזואליות</strong> של איך השיפוץ יראה<br>
             💰 <strong>הערכת עלויות</strong> מדויקת לפי התמונה<br>
-            🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק
+            🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק<br>
+            📋 <strong>כתב כמויות</strong> אוטומטי מתמונה
           </p>
         </div>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px;">קוד ההנחה שלך:</p>
-          <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${visionCode || ''}</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>50% הנחה</strong> לחודש הראשון</p>
-        </div>
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin: 0; text-decoration: line-through;">₪39.99</p>
-          <p style="font-size: 32px; font-weight: 700; color: #ffffff; margin: 4px 0;">₪19.99<span style="font-size: 16px; font-weight: 400;"> לחודש הראשון</span></p>
-          <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0;">אחר כך ₪39.99/חודש · ביטול בכל עת</p>
-        </div>
+        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
+          פשוט היכנס לדשבורד ונסה!
+        </p>
       `,
-      cta: 'לממש את ההנחה',
-      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout-vision?code=${visionCode || ''}`)}`
+      cta: 'לנסות הדמיה עכשיו',
+      url: 'https://shipazti.com/visualize'
     },
 
     // === NON-PURCHASED SEQUENCE ===
@@ -366,14 +360,29 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          קוד הנחה אישי בשבילך:
+          רצינו לתת לך הזדמנות מיוחדת להצטרף ל-ShiputzAI Pro:
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || 'SHIP-XXXX'}</p>
+          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪29/חודש</p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪20<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
           <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>30% הנחה</strong> · תקף ל-48 שעות</p>
         </div>
+        <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
+          <p style="font-size: 15px; color: #1d1d1f; line-height: 1.8; margin: 0;">
+            ✅ הדמיות שיפוץ ללא הגבלה<br>
+            ✅ הערכות עלויות מפורטות<br>
+            ✅ כתב כמויות אוטומטי<br>
+            ✅ ניתוח הצעות מחיר<br>
+            ✅ סריקת קבלות + מעקב תקציב<br>
+            ✅ ביטול בכל רגע
+          </p>
+        </div>
+        <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: center;">
+          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px;">קוד ההנחה שלך:</p>
+          <p style="font-size: 28px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || 'SHIP-XXXX'}</p>
+        </div>
       `,
-      cta: 'לממש את ההנחה',
+      cta: 'לממש את ההנחה — ₪20/חודש',
       url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     
@@ -424,18 +433,19 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
     
     urgency: {
       title: '⏰ נשארו <span style="color: #e34234;">24 שעות</span>',
-      subtitle: 'להנחה שלך',
+      subtitle: '₪20/חודש במקום ₪29',
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          קוד ההנחה שלך <strong>עומד לפוג</strong>.
+          קוד ההנחה שלך <strong>עומד לפוג</strong>. מחר המחיר חוזר ל-₪29/חודש.
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || ''}</p>
-          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;"><strong>30% הנחה</strong> · רק עד מחר</p>
+          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪29/חודש</p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪20<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
+          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">קוד: <strong>${discountCode || ''}</strong> · רק עד מחר</p>
         </div>
       `,
-      cta: 'לממש עכשיו',
+      cta: 'לממש עכשיו — ₪20/חודש',
       url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     
@@ -466,12 +476,12 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
           אם ShiputzAI לא מתאים לך — <strong>זה בסדר גמור</strong>. נפסיק לשלוח.
         </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          אבל אם בכל זאת רוצה לנסות — <strong>הדלת תמיד פתוחה</strong>.
+        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
+          אבל אם בכל זאת רוצה לנסות — <strong>₪29/חודש, ביטול בכל רגע</strong>. בלי התחייבות.
         </p>
       `,
-      cta: 'להצטרף',
-      url: 'https://shipazti.com/signup'
+      cta: 'להצטרף — ₪29/חודש',
+      url: 'https://shipazti.com/checkout'
     },
   };
   

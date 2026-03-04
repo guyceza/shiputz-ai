@@ -69,7 +69,6 @@ const proFeatures = [
   "צ׳אט תמיכה AI",
   "התראות חכמות",
   "מעקב תקציב מלא",
-  "ביטול בכל רגע",
 ];
 
 export default function PricingComparison() {

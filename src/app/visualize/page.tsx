@@ -1223,8 +1223,8 @@ export default function VisualizePage() {
       {/* Pricing Section - Show if not subscribed to Pro */}
       {isLoggedIn && !hasSubscription && (
         <section className="py-20 px-6 bg-gray-50">
-          <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="mb-8">
               <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
                 רוצה להמשיך?
               </h2>

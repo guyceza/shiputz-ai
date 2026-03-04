@@ -87,7 +87,7 @@ export default function PricingComparison() {
     <div className="flex flex-col lg:flex-row gap-6 w-full px-4 lg:px-8 justify-center items-center lg:items-stretch">
       
       {/* Free Card */}
-      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col w-full lg:flex-1 lg:max-w-[360px] order-2 lg:order-1" dir="rtl">
+      <div className="border border-gray-200 rounded-2xl p-6 lg:p-10 bg-white flex flex-col w-full lg:flex-1 lg:max-w-[360px] order-2 lg:order-2" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
           <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
@@ -116,7 +116,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Pro Card */}
-      <div className="border-2 border-gray-900 rounded-2xl p-6 lg:p-10 bg-white flex flex-col w-full lg:flex-1 lg:max-w-[360px] relative order-1 lg:order-2" dir="rtl">
+      <div className="border-2 border-gray-900 rounded-2xl p-6 lg:p-10 bg-white flex flex-col w-full lg:flex-1 lg:max-w-[360px] relative order-1 lg:order-1" dir="rtl">
         <div className="absolute -top-3 right-6 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
           🎭 מבצע פורים
         </div>

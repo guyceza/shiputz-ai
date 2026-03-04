@@ -80,21 +80,21 @@ export async function GET(request: NextRequest) {
 
         let needsUpdate = false;
 
-        if (productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
+        if (productType === 'pro' || productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
           if (!user?.purchased) needsUpdate = true;
         }
-        if (productType === 'vision' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
+        if (productType === 'pro' || productType === 'vision' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
           if (user?.vision_subscription !== 'active') needsUpdate = true;
         }
 
         if (needsUpdate) {
           const upsertData: Record<string, unknown> = { email: email.toLowerCase() };
 
-          if (productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
+          if (productType === 'pro' || productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
             upsertData.purchased = true;
             upsertData.purchased_at = new Date().toISOString();
           }
-          if (productType === 'vision' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
+          if (productType === 'pro' || productType === 'vision' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
             upsertData.vision_subscription = 'active';
           }
 

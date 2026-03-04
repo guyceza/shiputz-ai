@@ -1524,7 +1524,7 @@ export default function ProjectPage() {
       } else if (data.code === "TRIAL_ALREADY_USED") {
         setVisionError('תקופת הנסיון שלך הסתיימה. שדרג ל-AI Vision להמשך שימוש.');
       } else if (data.code === "MONTHLY_LIMIT_REACHED") {
-        setVisionError(`הגעת למכסה החודשית. המכסה מתאפסת בתחילת החודש הבא.`);
+        setVisionError(`נגמרו ההדמיות שלך. רכוש חבילת הדמיות נוספות.`);
       } else {
         setVisionError(data.error || data.message || 'שגיאה ביצירת ההדמיה. נסה שוב.');
       }
@@ -3257,8 +3257,8 @@ export default function ProjectPage() {
             </p>
             
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 mb-6">
-              <div className="text-3xl font-bold text-gray-900 mb-1">₪29.90</div>
-              <div className="text-sm text-gray-500 mb-4">עבור 20 הדמיות נוספות</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪29</div>
+              <div className="text-sm text-gray-500 mb-4">חבילת 10 הדמיות נוספות</div>
               <ul className="text-sm text-gray-600 space-y-2 text-right">
                 <li className="flex items-center gap-2 justify-end">
                   <span>הדמיות באיכות גבוהה</span>

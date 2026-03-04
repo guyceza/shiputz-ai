@@ -75,10 +75,10 @@ function PaymentSuccessContent() {
       if (userData) {
         const user = JSON.parse(userData);
         user.purchased = true;
-        if (product === 'vision' || product === 'pro_monthly' || product === 'pro_annual') {
+        if (product === 'pro' || product === 'vision' || product === 'pro_monthly' || product === 'pro_annual') {
           user.vision_active = true;
         }
-        if (product === 'premium_plus' || product === 'pro_monthly' || product === 'pro_annual') {
+        if (product === 'pro' || product === 'premium_plus' || product === 'pro_monthly' || product === 'pro_annual') {
           user.vision_credits = 999; // Pro = unlimited
         }
         localStorage.setItem('user', JSON.stringify(user));
@@ -104,8 +104,9 @@ function PaymentSuccessContent() {
   }, [router, product, pageRequestUid]);
 
   const productNames: Record<string, string> = {
-    pro_monthly: 'Pro',
-    pro_annual: 'Pro (שנתי)',
+    pro: 'Pro',
+    pro_monthly: 'Pro (legacy)',
+    pro_annual: 'Pro (שנתי legacy)',
     pack_10: '10 הדמיות',
     pack_30: '30 הדמיות',
     pack_100: '100 הדמיות',

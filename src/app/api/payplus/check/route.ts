@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     // Update user in database (same logic as webhook)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    if (productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
+    if (productType === 'pro' || productType === 'premium' || productType === 'premium_plus' || productType === 'pro_monthly' || productType === 'pro_annual') {
       const upsertData: any = {
         email: email.toLowerCase(),
         purchased: true,

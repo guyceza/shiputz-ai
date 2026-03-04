@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
+import { createServiceClient } from "@/lib/supabase";
 
 // Guest rate limit: 1 generation per IP per 24 hours
 const GUEST_LIMIT = 1;
@@ -88,27 +89,25 @@ export async function POST(request: NextRequest) {
 
     // Rate limit: check Supabase for IP (persists across incognito, serverless instances)
     const clientIp = getClientId(request);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (supabaseUrl && supabaseKey) {
-      try {
-        const cutoff = new Date(Date.now() - GUEST_WINDOW_MS).toISOString();
-        const checkRes = await fetch(
-          `${supabaseUrl}/rest/v1/guest_trials?ip=eq.${encodeURIComponent(clientIp)}&created_at=gte.${cutoff}&select=id&limit=1`,
-          { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
-        );
-        const existing = await checkRes.json();
-        if (Array.isArray(existing) && existing.length > 0) {
-          return NextResponse.json({ 
-            error: "כבר השתמשת בניסיון החינמי. הירשם כדי ליצור הדמיות נוספות!",
-            code: "GUEST_LIMIT_REACHED"
-          }, { status: 429 });
-        }
-      } catch (e) {
-        console.error("Guest trial Supabase check failed:", e);
-        // Fall through to in-memory check
+    try {
+      const supabase = createServiceClient();
+      const cutoff = new Date(Date.now() - GUEST_WINDOW_MS).toISOString();
+      const { data: existing } = await supabase
+        .from('guest_trials')
+        .select('id')
+        .eq('ip', clientIp)
+        .gte('created_at', cutoff)
+        .limit(1);
+      
+      if (existing && existing.length > 0) {
+        return NextResponse.json({ 
+          error: "כבר השתמשת בניסיון החינמי. הירשם כדי ליצור הדמיות נוספות!",
+          code: "GUEST_LIMIT_REACHED"
+        }, { status: 429 });
       }
+    } catch (e) {
+      console.error("Guest trial Supabase check failed:", e);
     }
 
     // Fallback: in-memory rate limit by IP
@@ -298,18 +297,13 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     // Track successful guest request
     trackRequest('/api/visualize-guest', false);
 
-    // Save IP to Supabase for persistent rate limiting (survives incognito, restarts, etc.)
-    if (supabaseUrl && supabaseKey) {
-      fetch(`${supabaseUrl}/rest/v1/guest_trials`, {
-        method: 'POST',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ ip: clientIp }),
-      }).catch(e => console.error("Failed to save guest trial to Supabase:", e));
+    // Save IP to Supabase for persistent rate limiting (BLOCKING - must complete before response)
+    try {
+      const supabase = createServiceClient();
+      const { error: saveError } = await supabase.from('guest_trials').insert({ ip: clientIp });
+      if (saveError) console.error("Failed to save guest trial:", saveError.message);
+    } catch (e) {
+      console.error("Failed to save guest trial to Supabase:", e);
     }
 
     const response = NextResponse.json({

@@ -1714,7 +1714,10 @@ export default function VisualizePage() {
               </a>
               <button
                 onClick={() => {
-                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\nhttps://shipazti.com/visualize`;
+                  const shareUrl = currentVisualizationId 
+                    ? `https://shipazti.com/share/${currentVisualizationId}`
+                    : 'https://shipazti.com/visualize';
+                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\n${shareUrl}`;
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }}
                 className="flex-1 bg-[#25D366] text-white py-3 rounded-full text-center font-medium hover:bg-[#1fbd59] transition-all"
@@ -1941,7 +1944,10 @@ export default function VisualizePage() {
               </a>
               <button
                 onClick={() => {
-                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\nhttps://shipazti.com/visualize`;
+                  const shareUrl = selectedHistoryItem?.id 
+                    ? `https://shipazti.com/share/${selectedHistoryItem.id}`
+                    : 'https://shipazti.com/visualize';
+                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\n${shareUrl}`;
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }}
                 className="flex-1 bg-[#25D366] text-white py-3 rounded-full text-center font-medium hover:bg-[#1fbd59] transition-all text-sm"

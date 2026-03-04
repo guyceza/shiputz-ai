@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     
     if (!premium) {
       return NextResponse.json({ 
-        error: "פיצ'ר זה זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם כדי ליהנות מסריקת קבלות אוטומטית." 
+        error: "פיצ'ר זה זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מסריקת קבלות." 
       }, { status: 403 });
     }
 

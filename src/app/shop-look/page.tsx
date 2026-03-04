@@ -475,12 +475,13 @@ export default function ShopLookPage() {
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">מנוי Pro</span>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
+                    <span className="text-sm text-gray-500">Pro</span>
+                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">🎭 מבצע פורים</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₪29</span>
-                    <span className="text-gray-400">/חודש</span>
+                    <span className="text-lg text-gray-400 line-through">₪99</span>
+                    <span className="text-4xl font-bold text-gray-900">₪69</span>
+                    <span className="text-gray-400">חד-פעמי</span>
                   </div>
                 </div>
                 
@@ -521,17 +522,19 @@ export default function ShopLookPage() {
                   <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <span className="text-3xl">🔒</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">שירות זה דורש מנוי ShiputzAI</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">שירות זה דורש Pro</h3>
                   <p className="text-gray-500">כדי להמשיך, צריך קודם חשבון ShiputzAI פעיל</p>
                 </div>
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">ShiputzAI</span>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
+                    <span className="text-sm text-gray-500">Pro</span>
+                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">🎭 מבצע פורים</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₪29</span>
+                    <span className="text-lg text-gray-400 line-through">₪99</span>
+                    <span className="text-4xl font-bold text-gray-900">₪69</span>
+                    <span className="text-gray-400">חד-פעמי</span>
                   </div>
                 </div>
                 

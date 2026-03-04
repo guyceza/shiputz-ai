@@ -217,7 +217,7 @@ async function rollbackTrial(userEmail: string): Promise<void> {
   }
 }
 
-const MONTHLY_PRO_LIMIT = 5; // Pro subscribers get 5/month, then use credits
+// Credits-only model — no monthly limit
 
 // Cost estimation logic
 interface CostItem {
@@ -433,7 +433,7 @@ export async function POST(request: NextRequest) {
         const recheckSub = await verifySubscription(userEmail);
         if (!recheckSub.hasPurchased || !recheckSub.hasVision) {
           return NextResponse.json({ 
-            error: "התקופת הנסיון שלך כבר נוצלה. נדרש מנוי Pro.",
+            error: "התקופת הנסיון שלך כבר נוצלה. נדרש רכישת Pro.",
             code: "TRIAL_ALREADY_USED"
           }, { status: 403 });
         }

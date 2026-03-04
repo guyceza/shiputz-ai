@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       alerts.push(rateLimitWarning.message!);
     }
     if (highUsageUsers && highUsageUsers.length > 0) {
-      alerts.push(`📊 ${highUsageUsers.length} משתמשים מתקרבים למכסה החודשית`);
+      alerts.push(`📊 ${highUsageUsers.length} משתמשים עם קרדיטים נמוכים`);
     }
     
     return NextResponse.json({

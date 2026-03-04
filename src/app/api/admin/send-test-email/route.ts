@@ -91,7 +91,7 @@ const generateHtml = (templateId: string, userEmail?: string): string => {
        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 32px; margin: 24px 0; text-align: center;">
          <p style="font-size: 14px; color: #92400e;">🎁 הנחה מיוחדת לחברי Premium:</p>
          <p style="font-size: 40px; font-weight: 700; color: #1e293b; letter-spacing: 3px;">VIS-TEST-123</p>
-         <p style="font-size: 16px; color: #92400e;"><strong>50% הנחה</strong> על החודש הראשון!<br><s>₪29</s> → <strong>₪20</strong></p>
+         <p style="font-size: 16px; color: #92400e;"><strong>50% הנחה</strong> על החודש הראשון!<br><s>₪99</s> → <strong>₪69</strong></p>
        </div>
        ${ctaButton('לנסות Pro ←', 'https://shipazti.com/checkout', '#a855f7')}`,
       'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%)',

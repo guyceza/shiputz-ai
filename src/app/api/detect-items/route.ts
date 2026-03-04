@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     
     if (!premium) {
       return NextResponse.json({ 
-        error: "זיהוי פריטים זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם." 
+        error: "זיהוי פריטים זמין למשתמשי Pro בלבד. רכשו Pro." 
       }, { status: 403 });
     }
 

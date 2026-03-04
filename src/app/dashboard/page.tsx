@@ -598,8 +598,8 @@ function DashboardContent() {
           <div className="mb-8 bg-gradient-to-l from-violet-50 to-indigo-50 rounded-2xl p-6 border border-violet-100/60">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-violet-900 mb-1">✦ מנוי פרימיום פעיל</p>
-                <p className="text-xs text-violet-600/70">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
+                <p className="text-sm font-medium text-violet-900 mb-1">✦ Pro פעיל</p>
+                <p className="text-xs text-violet-600/70">יש לך גישה לכל הכלים המתקדמים</p>
               </div>
               <span className="text-xs text-violet-600/70 bg-white/60 px-3 py-1 rounded-full border border-violet-200/60">
                 מנוי Pro

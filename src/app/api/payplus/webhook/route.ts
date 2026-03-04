@@ -380,7 +380,7 @@ export async function POST(request: NextRequest) {
                     <li>ניתוח הצעות מחיר</li>
                     <li>עוזר AI אישי לכל שאלה</li>
                     <li>התראות חכמות לפני חריגות</li>
-                    ${isPro ? '<li>5 הדמיות AI בחודש + חבילות</li><li>Shop the Look</li>' : ''}
+                    ${isPro ? '<li>4 הדמיות AI + חבילות נוספות</li><li>Shop the Look</li>' : ''}
                   </ul>
                 </div>
                 <div style="text-align: center; margin: 30px 0;">

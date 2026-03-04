@@ -1520,7 +1520,7 @@ export default function ProjectPage() {
         setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
         setVisionResult(null);  // Don't show any results
       } else if (data.code === "VISION_SUBSCRIPTION_REQUIRED" || data.code === "SUBSCRIPTION_REQUIRED") {
-        setVisionError('נדרש מנוי Pro פעיל לשימוש בשירות זה.');
+        setVisionError('נדרש רכישת Pro לשימוש בשירות זה.');
       } else if (data.code === "TRIAL_ALREADY_USED") {
         setVisionError('תקופת הנסיון שלך הסתיימה. שדרג ל-AI Vision להמשך שימוש.');
       } else if (data.code === "MONTHLY_LIMIT_REACHED") {
@@ -1723,7 +1723,7 @@ export default function ProjectPage() {
                 <h2 className="text-lg font-semibold text-gray-900">כלי AI</h2>
                 {!isPremium && (
                   <a href="/checkout" className="text-sm text-purple-600 hover:text-purple-700">
-                    🔒 דורש מנוי Premium
+                    🔒 דורש Pro
                   </a>
                 )}
               </div>

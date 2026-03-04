@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     
     if (!premium) {
       return NextResponse.json({ 
-        error: "העוזר החכם זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם כדי ליהנות מייעוץ AI." 
+        error: "העוזר החכם זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מייעוץ AI." 
       }, { status: 403 });
     }
 

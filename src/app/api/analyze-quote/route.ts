@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     
     if (!premium) {
       return NextResponse.json({ 
-        error: "ניתוח הצעות מחיר זמין למנויי פרימיום בלבד. שדרגו את החשבון שלכם כדי ליהנות מניתוח AI." 
+        error: "ניתוח הצעות מחיר זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מניתוח AI." 
       }, { status: 403 });
     }
 

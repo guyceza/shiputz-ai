@@ -84,10 +84,10 @@ export default function PricingComparison() {
   const currentOriginal = isAnnual ? monthlyOriginal : monthlyOriginal;
 
   return (
-    <div dir="ltr" className="flex flex-col md:flex-row gap-6 w-full px-4 md:px-8 justify-center items-center md:items-stretch">
+    <div className="flex flex-col md:flex-row gap-6 w-full px-4 md:px-8 justify-center items-center md:items-stretch">
       
       {/* Free Card */}
-      <div className="border border-gray-200 rounded-2xl p-6 md:p-10 bg-white flex flex-col w-full md:flex-1 md:max-w-[360px]" dir="rtl">
+      <div className="border border-gray-200 rounded-2xl p-6 md:p-10 bg-white flex flex-col w-full md:flex-1 md:max-w-[360px] order-2 md:order-1" dir="rtl">
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">חינם</h3>
           <p className="text-gray-500 text-sm">לטעימה ראשונה</p>
@@ -116,7 +116,7 @@ export default function PricingComparison() {
       </div>
 
       {/* Pro Card */}
-      <div className="border-2 border-gray-900 rounded-2xl p-6 md:p-10 bg-white flex flex-col w-full md:flex-1 md:max-w-[360px] relative" dir="rtl">
+      <div className="border-2 border-gray-900 rounded-2xl p-6 md:p-10 bg-white flex flex-col w-full md:flex-1 md:max-w-[360px] relative order-1 md:order-2" dir="rtl">
         <div className="absolute -top-3 right-6 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
           🎭 מבצע פורים
         </div>

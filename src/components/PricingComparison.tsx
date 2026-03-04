@@ -74,11 +74,14 @@ const proFeatures = [
 export default function PricingComparison() {
   const [isAnnual, setIsAnnual] = useState(false);
 
-  const monthlyPrice = 29;
-  const annualMonthly = 19;
-  const annualTotal = 228;
+  // Purim sale: 33% off on both plans
+  const monthlyOriginal = 29;
+  const monthlyPrice = 19; // Purim price
+  const annualMonthly = 13; // ~₪156/year (33% off ₪228)
+  const annualTotal = 156;
 
   const currentPrice = isAnnual ? annualMonthly : monthlyPrice;
+  const currentOriginal = isAnnual ? 19 : monthlyOriginal;
 
   return (
     <div dir="ltr" className="flex flex-col md:flex-row gap-4 md:gap-6 w-full px-4 md:px-8 justify-center">
@@ -115,7 +118,7 @@ export default function PricingComparison() {
       {/* Pro Card */}
       <div className="border-2 border-gray-900 rounded-2xl p-6 md:p-10 bg-white flex flex-col flex-1 max-w-[360px] relative" dir="rtl">
         <div className="absolute -top-3 right-6 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
-          מומלץ
+          🎭 מבצע פורים
         </div>
         
         <div className="mb-6">
@@ -140,21 +143,27 @@ export default function PricingComparison() {
             }`}
           >
             שנתי
-            <span className="text-green-600 text-xs mr-1">-35%</span>
+            <span className="text-green-600 text-xs mr-1">-55%</span>
           </button>
         </div>
         
         <div className="mb-6">
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg text-gray-400 line-through tabular-nums">₪{currentOriginal}</span>
             <span className="text-3xl font-bold text-gray-900 tabular-nums">
               ₪<AnimatedPrice value={currentPrice} />
             </span>
             <span className="text-gray-500">/חודש</span>
           </div>
+          <div className="mt-2">
+            <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+              🎭 33% הנחה לפורים
+            </span>
+          </div>
           <div className="h-5 mt-1">
             {isAnnual ? (
               <p className="text-green-600 text-sm font-medium animate-fade-in">
-                ₪{annualTotal} לשנה — חוסך ₪{monthlyPrice * 12 - annualTotal} בשנה
+                ₪{annualTotal} לשנה — חוסך ₪{monthlyOriginal * 12 - annualTotal} בשנה
               </p>
             ) : (
               <p className="text-gray-400 text-sm">ביטול בכל רגע</p>
@@ -175,7 +184,7 @@ export default function PricingComparison() {
           href="/checkout"
           className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors mt-auto"
         >
-          להתחיל — ₪{isAnnual ? annualMonthly : monthlyPrice}/חודש
+          🎭 להתחיל — ₪{isAnnual ? annualMonthly : monthlyPrice}/חודש
         </Link>
       </div>
 

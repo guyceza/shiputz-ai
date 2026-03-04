@@ -9,7 +9,7 @@ import PricingCard from "@/components/PricingCard";
 import PricingComparison from "@/components/PricingComparison";
 import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";
-import { isNewsletterDismissed, dismissNewsletter } from "@/lib/user-settings";
+// Newsletter imports removed — replaced with Purim promo popup
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -72,55 +72,29 @@ export default function Home() {
     checkAuth();
   }, []);
   
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [showNewsletterPopup, setShowNewsletterPopup] = useState(false);
+  const [showPromoPopup, setShowPromoPopup] = useState(false);
   
-  // Show newsletter popup after 10 seconds (only for LOGGED IN users who haven't subscribed)
+  // Show Purim promo popup after 8 seconds (non-premium users only)
   useEffect(() => {
-    const checkNewsletter = async () => {
-      // First check localStorage for quick response
-      const localDismissed = localStorage.getItem('newsletter_popup_dismissed');
-      if (localDismissed) return;
-      
-      // Only show to logged in users
-      const userData = localStorage.getItem("user");
-      if (!userData) {
-        return; // Not logged in - don't show popup
-      }
-      
-      // Check if already subscribed (by email in localStorage)
-      const subscribedEmail = localStorage.getItem('newsletter_subscribed_email');
-      if (subscribedEmail) return;
-      
-      // Show popup after delay
-      setTimeout(() => {
-        setShowNewsletterPopup(true);
-      }, 10000);
-    };
+    const dismissed = localStorage.getItem('purim_promo_dismissed');
+    if (dismissed) return;
     
-    checkNewsletter();
+    // Don't show to premium users
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.purchased) return;
+      } catch {}
+    }
+    
+    const timer = setTimeout(() => {
+      setShowPromoPopup(true);
+    }, 8000);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      try {
-        const res = await fetch('/api/newsletter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        if (res.ok) {
-          setSubscribed(true);
-          localStorage.setItem('newsletter_subscribed_email', email);
-          setEmail("");
-        }
-      } catch (error) {
-        console.error("Newsletter subscription failed:", error);
-      }
-    }
-  };
+  // handleSubscribe removed — newsletter popup replaced with Purim promo
 
   return (
     <div className="min-h-screen">
@@ -437,21 +411,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter Popup */}
-      {showNewsletterPopup && !subscribed && (
+      {/* Purim Promo Popup */}
+      {showPromoPopup && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in zoom-in-95 duration-300">
-            {/* Close button */}
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in zoom-in-95 duration-300" dir="rtl">
             <button
               onClick={() => {
-                setShowNewsletterPopup(false);
-                localStorage.setItem('newsletter_popup_dismissed', 'true');
-                // Also save to DB for logged in users
-                const userData = localStorage.getItem("user");
-                if (userData) {
-                  const user = JSON.parse(userData);
-                  if (user.id) dismissNewsletter(user.id);
-                }
+                setShowPromoPopup(false);
+                localStorage.setItem('purim_promo_dismissed', 'true');
               }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -459,31 +426,33 @@ export default function Home() {
             </button>
             
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-3">קבלו טיפים לשיפוץ חכם</h2>
-              <p className="text-gray-500 mb-6">הצטרפו ל-500+ משפצים שמקבלים טיפים שבועיים</p>
+              <div className="text-5xl mb-4">🎭</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">מבצע פורים!</h2>
+              <p className="text-gray-500 mb-5">33% הנחה על מנוי Pro — לזמן מוגבל</p>
               
-              <form onSubmit={(e) => { handleSubscribe(e); setShowNewsletterPopup(false); }} className="flex flex-col gap-3">
-                <label htmlFor="newsletter-email" className="sr-only">כתובת אימייל</label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  aria-label="כתובת אימייל להרשמה לניוזלטר"
-                  className="w-full px-5 py-4 border border-gray-200 rounded-full text-base focus:outline-none focus:border-gray-900 text-left"
-                  dir="ltr"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors"
-                  style={{ backgroundColor: '#101010' }}
-                >
-                  הרשמה
-                </button>
-              </form>
-              <p className="text-xs text-gray-500 mt-4">ללא ספאם. אפשר להסיר בכל עת.</p>
+              <div className="bg-gray-50 rounded-2xl p-5 mb-5">
+                <div className="flex items-center justify-center gap-3 mb-1">
+                  <span className="text-gray-400 line-through text-lg">₪29/חודש</span>
+                  <span className="text-3xl font-bold text-gray-900">₪19<span className="text-base font-normal text-gray-400">/חודש</span></span>
+                </div>
+                <p className="text-sm text-green-600 font-medium">חוסכים ₪120 בשנה 🎭</p>
+              </div>
+              
+              <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
+                <li className="flex items-center gap-2"><span>✓</span>הדמיות שיפוץ AI ללא הגבלה</li>
+                <li className="flex items-center gap-2"><span>✓</span>הערכות עלויות + כתב כמויות</li>
+                <li className="flex items-center gap-2"><span>✓</span>סריקת קבלות + מעקב תקציב</li>
+                <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>
+              </ul>
+
+              <a
+                href="/checkout"
+                className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
+                style={{ backgroundColor: '#101010' }}
+              >
+                🎭 לממש את ההנחה — ₪19/חודש
+              </a>
+              <p className="text-xs text-gray-400 mt-3">ביטול בכל רגע · תקף עד סוף פורים</p>
             </div>
           </div>
         </div>
@@ -493,8 +462,8 @@ export default function Home() {
       {!isPremium && (
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">פשוט.</h2>
-          <p className="text-gray-500 mb-12">תשלום אחד. לכל משך הפרויקט.</p>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">🎭 מבצע פורים!</h2>
+          <p className="text-gray-500 mb-12">33% הנחה על מנוי Pro — לזמן מוגבל</p>
           
           <PricingComparison />
         </div>

@@ -37,7 +37,7 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 1, subject: '🎁 מתנה בשבילך — ₪20/חודש במקום ₪29', template: 'discount_offer' },
+  { day: 1, subject: '🎁 מתנה בשבילך — ₪19.99/חודש במקום ₪29', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
   { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
@@ -364,7 +364,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
           <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪29/חודש</p>
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪20<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪19.99<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
           <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>30% הנחה</strong> · תקף ל-48 שעות</p>
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
@@ -382,7 +382,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
           <p style="font-size: 28px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || 'SHIP-XXXX'}</p>
         </div>
       `,
-      cta: 'לממש את ההנחה — ₪20/חודש',
+      cta: 'לממש את ההנחה — ₪19.99/חודש',
       url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     
@@ -433,7 +433,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
     
     urgency: {
       title: '⏰ נשארו <span style="color: #e34234;">24 שעות</span>',
-      subtitle: '₪20/חודש במקום ₪29',
+      subtitle: '₪19.99/חודש במקום ₪29',
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
@@ -441,11 +441,11 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
           <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪29/חודש</p>
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪20<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪19.99<span style="font-size: 16px; font-weight: 400; color: #86868b;">/חודש</span></p>
           <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">קוד: <strong>${discountCode || ''}</strong> · רק עד מחר</p>
         </div>
       `,
-      cta: 'לממש עכשיו — ₪20/חודש',
+      cta: 'לממש עכשיו — ₪19.99/חודש',
       url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
     },
     

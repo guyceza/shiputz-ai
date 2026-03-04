@@ -947,7 +947,7 @@ export default function ProjectPage() {
       const response = await fetch("/api/analyze-quote-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: quoteText, budget: project?.budget }),
+        body: JSON.stringify({ text: quoteText, budget: project?.budget, userEmail }),
       });
       const data = await response.json();
       if (response.ok) {

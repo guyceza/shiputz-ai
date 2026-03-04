@@ -297,7 +297,8 @@ export default function BillOfQuantitiesPage() {
           hasElectricalPlan,
           hasPlumbingPlan,
           additionalNotes,
-          accuracyScore
+          accuracyScore,
+          userEmail
         })
       });
       

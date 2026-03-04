@@ -23,6 +23,17 @@ export default function BlueprintTo3DPage() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUserEmail(user.email || null);
+      }
+    } catch {}
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,7 +64,7 @@ export default function BlueprintTo3DPage() {
           const analyzeRes = await fetch("/api/lab/analyze-blueprint", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageData }),
+            body: JSON.stringify({ image: imageData, userEmail }),
           });
 
           if (!analyzeRes.ok) {

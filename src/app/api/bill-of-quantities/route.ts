@@ -7,6 +7,22 @@ import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+import { createServiceClient } from '@/lib/supabase';
+
+async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id, purchased')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    return { exists: !!data, premium: data?.purchased === true };
+  } catch {
+    return { exists: false, premium: false };
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limit: 20 requests per minute
@@ -17,6 +33,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Auth check
+    const userEmail = body.userEmail;
+    if (!userEmail) {
+      return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
+    }
+    const { exists, premium } = await verifyUserPremium(userEmail);
+    if (!exists) {
+      return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
+    }
+    if (!premium) {
+      return NextResponse.json({ error: "כתב כמויות זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מהכלי." }, { status: 403 });
+    }
+
     const { 
       image, 
       fileName,

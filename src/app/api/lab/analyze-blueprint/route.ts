@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGeminiUrl } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { createServiceClient } from '@/lib/supabase';
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
+
+async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id, purchased')
+      .eq('email', userEmail.toLowerCase())
+      .single();
+    return { exists: !!data, premium: data?.purchased === true };
+  } catch {
+    return { exists: false, premium: false };
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +29,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
-    const { image } = await request.json();
+    const body = await request.json();
+    const { image, userEmail } = body;
+
+    // Auth check
+    if (!userEmail) {
+      return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
+    }
+    const { exists, premium } = await verifyUserPremium(userEmail);
+    if (!exists) {
+      return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
+    }
+    if (!premium) {
+      return NextResponse.json({ error: "ניתוח תכניות זמין למשתמשי Pro בלבד." }, { status: 403 });
+    }
 
     if (!image) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });

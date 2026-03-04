@@ -676,18 +676,8 @@ export async function GET(request: NextRequest) {
               
               html = getEmailHTML(step.template, user, code);
             } else if (step.template === 'vision_offer') {
-              // Create new discount code for Vision
-              const visionCode = generateVisionDiscountCode(user.email);
-              const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-              
-              await supabase.from('discount_codes').insert({
-                code: visionCode,
-                user_email: user.email,
-                discount_percent: 50,
-                expires_at: expiresAt.toISOString(),
-              });
-              
-              html = getEmailHTML(step.template, user, undefined, visionCode);
+              // Vision is now included in Pro — no discount code needed
+              html = getEmailHTML(step.template, user);
             } else if (step.template === 'urgency') {
               // Fetch existing discount code for urgency reminder
               const { data: discountData } = await supabase

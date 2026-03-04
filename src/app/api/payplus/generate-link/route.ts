@@ -10,7 +10,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface PayPlusRequest {
-  productType: 'pro_monthly' | 'pro_annual' | 'premium' | 'vision' | 'premium_plus';
+  productType: 'pro_monthly' | 'pro_annual' | 'pack_10' | 'pack_30' | 'pack_100' | 'premium' | 'vision' | 'premium_plus';
   email: string;
   userId?: string;
   discountCode?: string;
@@ -21,10 +21,14 @@ interface PayPlusRequest {
 const PURIM_SALE = true; // Toggle off after Purim
 const PURIM_FIRST_MONTH = 19;
 
-const PRICING: Record<string, { amount: number; chargeMethod: number; recurring?: boolean }> = {
+const PRICING: Record<string, { amount: number; chargeMethod: number; recurring?: boolean; credits?: number }> = {
   // NEW pricing model
   pro_monthly: { amount: 29, chargeMethod: 3, recurring: true },
   pro_annual: { amount: 228, chargeMethod: 1 }, // one-time annual = ₪19/month
+  // Visualization packs (one-time, never expire)
+  pack_10: { amount: 29, chargeMethod: 1, credits: 10 },
+  pack_30: { amount: 69, chargeMethod: 1, credits: 30 },
+  pack_100: { amount: 149, chargeMethod: 1, credits: 100 },
   // LEGACY (keep for existing customers)
   premium: { amount: 299.99, chargeMethod: 1 },
   vision: { amount: 39.99, chargeMethod: 3, recurring: true },

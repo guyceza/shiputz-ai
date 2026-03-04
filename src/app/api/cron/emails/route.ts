@@ -314,7 +314,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
           מתלבט איך לשפץ את הסלון? לא בטוח איזה סגנון מתאים למטבח?
         </p>
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          <strong>כמנוי Pro, יש לך גישה מלאה</strong> לכל הכלים — כולל הדמיות AI ללא הגבלה!
+          <strong>כמנוי Pro, יש לך גישה מלאה</strong> לכל הכלים — כולל 5 הדמיות AI בחודש + חבילות נוספות!
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
           <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
@@ -369,7 +369,7 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
           <p style="font-size: 15px; color: #1d1d1f; line-height: 1.8; margin: 0;">
-            ✅ הדמיות שיפוץ ללא הגבלה<br>
+            ✅ 5 הדמיות שיפוץ AI בחודש<br>
             ✅ הערכות עלויות מפורטות<br>
             ✅ כתב כמויות אוטומטי<br>
             ✅ ניתוח הצעות מחיר<br>

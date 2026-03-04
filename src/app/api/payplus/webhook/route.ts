@@ -227,8 +227,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user in database based on product type
-    // NOTE: DB columns that exist: purchased, purchased_at, vision_subscription,
-    //       vision_trial_used, vision_usage_count, vision_usage_month
+    // NOTE: DB columns: purchased, purchased_at, vision_subscription,
+    //       vision_trial_used, vision_usage_count, vision_usage_month,
+    //       viz_credits, viz_monthly_used, viz_monthly_reset
+    
     // NEW: Pro monthly/annual subscriptions
     if (productType === 'pro_monthly' || productType === 'pro_annual') {
       const upsertData: any = { 
@@ -246,6 +248,31 @@ export async function POST(request: NextRequest) {
         console.error('Error upserting user Pro status:', upsertError);
       } else {
         console.log(`User ${email} marked as Pro (${productType})`);
+      }
+    }
+    
+    // Visualization pack purchases — add credits
+    const PACK_CREDITS: Record<string, number> = { pack_10: 10, pack_30: 30, pack_100: 100 };
+    if (PACK_CREDITS[productType]) {
+      const credits = PACK_CREDITS[productType];
+      // First get current credits
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', email.toLowerCase())
+        .single();
+      
+      const currentCredits = currentUser?.viz_credits || 0;
+      
+      const { error: creditError } = await supabase
+        .from('users')
+        .update({ viz_credits: currentCredits + credits })
+        .eq('email', email.toLowerCase());
+
+      if (creditError) {
+        console.error('Error adding viz credits:', creditError);
+      } else {
+        console.log(`Added ${credits} viz credits to ${email} (total: ${currentCredits + credits})`);
       }
     }
     
@@ -342,7 +369,7 @@ export async function POST(request: NextRequest) {
                     <li>ניתוח הצעות מחיר</li>
                     <li>עוזר AI אישי לכל שאלה</li>
                     <li>התראות חכמות לפני חריגות</li>
-                    ${isPro ? '<li>הדמיות AI ללא הגבלה</li><li>Shop the Look</li>' : ''}
+                    ${isPro ? '<li>5 הדמיות AI בחודש + חבילות</li><li>Shop the Look</li>' : ''}
                   </ul>
                 </div>
                 <div style="text-align: center; margin: 30px 0;">

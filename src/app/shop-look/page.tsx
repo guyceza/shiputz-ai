@@ -470,7 +470,7 @@ export default function ShopLookPage() {
                     <span className="text-3xl">✨</span>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">השתמשת בניסיון החינמי</h3>
-                  <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות ללא הגבלה</p>
+                  <p className="text-gray-500">אהבת את מה שראית? המשך ליצור הדמיות עם Pro</p>
                 </div>
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
@@ -487,7 +487,7 @@ export default function ShopLookPage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center gap-3 text-sm">
                     <span className="text-green-500">✓</span>
-                    <span>העלאת תמונות ללא הגבלה</span>
+                    <span>העלאת תמונות</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm">
                     <span className="text-green-500">✓</span>

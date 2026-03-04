@@ -439,7 +439,7 @@ export default function Home() {
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><span>✓</span>הדמיות שיפוץ AI ללא הגבלה</li>
+                <li className="flex items-center gap-2"><span>✓</span>5 הדמיות שיפוץ AI בחודש</li>
                 <li className="flex items-center gap-2"><span>✓</span>הערכות עלויות + כתב כמויות</li>
                 <li className="flex items-center gap-2"><span>✓</span>סריקת קבלות + מעקב תקציב</li>
                 <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>

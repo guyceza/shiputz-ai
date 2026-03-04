@@ -50,7 +50,7 @@ const freeFeatures = [
   { name: "הדמיה אחת בחינם", included: true },
   { name: "טיפים ומאמרים", included: true },
   { name: "הזנת הוצאות ידנית", included: true },
-  { name: "הדמיות ללא הגבלה", included: false },
+  { name: "5 הדמיות בחודש + חבילות", included: false },
   { name: "הערכות עלויות מפורטות", included: false },
   { name: "כתב כמויות אוטומטי", included: false },
   { name: "ניתוח הצעות מחיר", included: false },
@@ -60,14 +60,14 @@ const freeFeatures = [
 ];
 
 const proFeatures = [
-  "הדמיות שיפוץ AI ללא הגבלה",
+  "5 הדמיות שיפוץ AI בחודש",
+  "אפשרות לרכישת חבילות נוספות",
   "הערכות עלויות מפורטות",
   "כתב כמויות אוטומטי",
   "ניתוח הצעות מחיר מקבלנים",
   "סריקת קבלות + מעקב תקציב",
   "Shop the Look — קנייה בקליק",
   "צ׳אט תמיכה AI",
-  "התראות חכמות",
   "מעקב תקציב מלא",
 ];
 
@@ -123,7 +123,7 @@ export default function PricingComparison() {
         
         <div className="mb-6">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Pro</h3>
-          <p className="text-gray-500 text-sm">הכל ללא הגבלה</p>
+          <p className="text-gray-500 text-sm">5 הדמיות בחודש + חבילות</p>
         </div>
 
         {/* Billing Toggle */}

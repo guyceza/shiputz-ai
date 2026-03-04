@@ -84,34 +84,42 @@ async function verifyUserExists(userEmail: string): Promise<boolean> {
 
 // Verify user has BOTH main subscription AND vision subscription
 // After trial, users need: purchased = true AND vision_subscription = true
-async function verifySubscription(userEmail: string | null): Promise<{ hasPurchased: boolean, hasVision: boolean, trialUsed: boolean, monthlyUsage: number }> {
-  if (!userEmail) return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0 };
+async function verifySubscription(userEmail: string | null): Promise<{ 
+  hasPurchased: boolean, hasVision: boolean, trialUsed: boolean, monthlyUsage: number, vizCredits: number, isPro: boolean 
+}> {
+  if (!userEmail) return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0, vizCredits: 0, isPro: false };
   
   try {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('users')
-      .select('purchased, vision_subscription, vision_trial_used, vision_usage_count, vision_usage_month')
+      .select('purchased, vision_subscription, vision_trial_used, vision_usage_count, vision_usage_month, viz_credits, viz_monthly_used, viz_monthly_reset')
       .eq('email', userEmail.toLowerCase())
       .single();
     
-    // Check if we're in a new month - reset count if so
-    const currentMonth = new Date().toISOString().slice(0, 7); // "2026-02"
+    // Check if we're in a new month - reset monthly count if so
+    const currentMonth = new Date().toISOString().slice(0, 7); // "2026-03"
     let usageCount = data?.vision_usage_count || 0;
+    let monthlyUsed = data?.viz_monthly_used || 0;
     
     if (data?.vision_usage_month !== currentMonth) {
-      // New month - count should be treated as 0
       usageCount = 0;
+      monthlyUsed = 0;
     }
+    
+    const isPro = data?.purchased === true && 
+      (data?.vision_subscription === true || data?.vision_subscription === 'active');
     
     return { 
       hasPurchased: data?.purchased === true,
       hasVision: data?.vision_subscription === true || data?.vision_subscription === 'active',
       trialUsed: data?.vision_trial_used === true,
-      monthlyUsage: usageCount
+      monthlyUsage: usageCount,
+      vizCredits: data?.viz_credits || 0,
+      isPro
     };
   } catch {
-    return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0 };
+    return { hasPurchased: false, hasVision: false, trialUsed: false, monthlyUsage: 0, vizCredits: 0, isPro: false };
   }
 }
 
@@ -209,7 +217,7 @@ async function rollbackTrial(userEmail: string): Promise<void> {
   }
 }
 
-const MONTHLY_VISION_LIMIT = 10;
+const MONTHLY_PRO_LIMIT = 5; // Pro subscribers get 5/month, then use credits
 
 // Cost estimation logic
 interface CostItem {
@@ -433,30 +441,32 @@ export async function POST(request: NextRequest) {
         isTrialRun = true;
       }
     } else {
-      // Trial used - need both subscriptions
-      if (!subscription.hasPurchased) {
-        return NextResponse.json({ 
-          error: "שירות זה דורש מנוי ShiputzAI פעיל",
-          code: "SUBSCRIPTION_REQUIRED"
-        }, { status: 403 });
-      }
-      if (!subscription.hasVision) {
-        return NextResponse.json({ 
-          error: "שירות AI Vision דורש מנוי Vision פעיל בנוסף למנוי הרגיל",
-          code: "VISION_SUBSCRIPTION_REQUIRED"
-        }, { status: 403 });
-      }
-      
-      // Check monthly usage limit (10 per month for Vision subscribers)
-      // Admin bypass - unlimited for owner
+      // Trial used - check access
       const isAdmin = isAdminEmail(userEmail);
-      if (!isAdmin && subscription.monthlyUsage >= MONTHLY_VISION_LIMIT) {
-        return NextResponse.json({ 
-          error: `הגעת למכסה החודשית (${MONTHLY_VISION_LIMIT} יצירות). המכסה מתאפסת בתחילת החודש הבא.`,
-          code: "MONTHLY_LIMIT_REACHED",
-          usage: subscription.monthlyUsage,
-          limit: MONTHLY_VISION_LIMIT
-        }, { status: 429 });
+      
+      if (!isAdmin) {
+        if (!subscription.isPro && subscription.vizCredits <= 0) {
+          // No Pro subscription and no credits — need to subscribe or buy pack
+          return NextResponse.json({ 
+            error: "נדרש מנוי Pro או חבילת הדמיות",
+            code: "SUBSCRIPTION_REQUIRED"
+          }, { status: 403 });
+        }
+        
+        if (subscription.isPro && subscription.monthlyUsage >= MONTHLY_PRO_LIMIT && subscription.vizCredits <= 0) {
+          // Pro user exceeded 5/month AND has no credits
+          return NextResponse.json({ 
+            error: `השתמשת ב-${MONTHLY_PRO_LIMIT} ההדמיות החודשיות שלך. רכוש חבילת הדמיות נוספות.`,
+            code: "MONTHLY_LIMIT_REACHED",
+            usage: subscription.monthlyUsage,
+            limit: MONTHLY_PRO_LIMIT,
+            vizCredits: subscription.vizCredits
+          }, { status: 429 });
+        }
+        
+        if (!subscription.isPro && subscription.vizCredits > 0) {
+          // Not Pro but has credits — allow (will deduct credit below)
+        }
       }
     }
 
@@ -701,15 +711,33 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       });
     }
 
-    // Step 4: Increment usage counter (for subscribed users, not trial)
+    // Step 4: Increment usage counter and deduct credits if needed
     // Bug #12: Trial was already marked used before generation
+    let usedCredit = false;
     if (userEmail && !isTrialRun) {
       await incrementUsage(userEmail);
+      
+      // Deduct credit if: Pro user over monthly limit, OR non-Pro user with credits
+      const newUsage = subscription.monthlyUsage + 1;
+      const isAdmin = isAdminEmail(userEmail);
+      if (!isAdmin) {
+        if ((subscription.isPro && newUsage > MONTHLY_PRO_LIMIT) || !subscription.isPro) {
+          if (subscription.vizCredits > 0) {
+            const supabase = createServiceClient();
+            await supabase
+              .from('users')
+              .update({ viz_credits: subscription.vizCredits - 1 })
+              .eq('email', userEmail.toLowerCase());
+            usedCredit = true;
+          }
+        }
+      }
     }
 
     // Step 5: Track successful request and return results
     trackRequest('/api/visualize', false);
     
+    const newUsage = subscription.trialUsed ? subscription.monthlyUsage + 1 : 0;
     return NextResponse.json({
       success: true,
       analysis: analysisText,
@@ -717,8 +745,10 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       costs: costEstimate,
       prompt: editPrompt,
       description: description,
-      usage: subscription.trialUsed ? subscription.monthlyUsage + 1 : 0,
-      limit: MONTHLY_VISION_LIMIT
+      usage: newUsage,
+      limit: MONTHLY_PRO_LIMIT,
+      vizCredits: usedCredit ? subscription.vizCredits - 1 : subscription.vizCredits,
+      usedCredit
     });
 
   } catch (error) {

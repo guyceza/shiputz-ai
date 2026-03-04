@@ -106,6 +106,9 @@ function PaymentSuccessContent() {
   const productNames: Record<string, string> = {
     pro_monthly: 'Pro',
     pro_annual: 'Pro (שנתי)',
+    pack_10: '10 הדמיות',
+    pack_30: '30 הדמיות',
+    pack_100: '100 הדמיות',
     premium: 'Premium',
     vision: 'AI Vision',
     premium_plus: 'Premium Plus',

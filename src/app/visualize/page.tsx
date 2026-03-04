@@ -1236,7 +1236,7 @@ export default function VisualizePage() {
               </div>
               
               <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">הכל ללא הגבלה</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">5 הדמיות בחודש + חבילות</h3>
               </div>
               
               <div className="text-center mb-6">
@@ -1254,7 +1254,7 @@ export default function VisualizePage() {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
                   <span className="text-green-500">✓</span>
-                  <span className="text-gray-700">הדמיות ללא הגבלה</span>
+                  <span className="text-gray-700">5 הדמיות AI בחודש</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="text-green-500">✓</span>
@@ -1307,7 +1307,7 @@ export default function VisualizePage() {
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
               </summary>
               <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                עם מנוי לשירות ההדמיה אפשר ליצור עד הדמיות ללא הגבלה. המכסה מתאפסת בתחילת כל חודש.
+                עם מנוי לשירות ההדמיה אפשר ליצור עד 5 הדמיות AI בחודש. המכסה מתאפסת בתחילת כל חודש.
               </p>
             </details>
             
@@ -1464,7 +1464,7 @@ export default function VisualizePage() {
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs">✓</span>
                     </div>
-                    <span className="text-gray-700">הדמיות ללא הגבלה</span>
+                    <span className="text-gray-700">5 הדמיות AI בחודש</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm">
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1520,7 +1520,7 @@ export default function VisualizePage() {
                 <ul className="space-y-3 mb-6 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>
-                    <span className="text-gray-700">הדמיות ללא הגבלה</span>
+                    <span className="text-gray-700">5 הדמיות AI בחודש</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>

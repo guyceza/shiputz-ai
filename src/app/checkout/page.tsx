@@ -253,7 +253,7 @@ function CheckoutContent() {
             <div className="space-y-3 text-sm text-gray-700">
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>הדמיות שיפוץ AI <strong>ללא הגבלה</strong></span>
+                <span>5 הדמיות שיפוץ AI <strong>בחודש</strong> + חבילות נוספות</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>

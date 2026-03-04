@@ -131,6 +131,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Handle pack purchases
+    const PACK_CREDITS: Record<string, number> = { pack_10: 10, pack_30: 30, pack_100: 100 };
+    if (PACK_CREDITS[productType]) {
+      const credits = PACK_CREDITS[productType];
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', email.toLowerCase())
+        .single();
+      
+      const currentCredits = currentUser?.viz_credits || 0;
+      await supabase
+        .from('users')
+        .update({ viz_credits: currentCredits + credits })
+        .eq('email', email.toLowerCase());
+      
+      console.log(`IPN check: Added ${credits} viz credits to ${email}`);
+    }
+
     console.log(`✅ PayPlus IPN check: ${email} → ${productType} (status: ${statusCode})`);
 
     // Mark pending payment as completed (so cron doesn't re-process)

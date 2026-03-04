@@ -1712,6 +1712,15 @@ export default function VisualizePage() {
               >
                 📥 הורד תמונה
               </a>
+              <button
+                onClick={() => {
+                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\nhttps://shipazti.com/visualize`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+                className="flex-1 bg-[#25D366] text-white py-3 rounded-full text-center font-medium hover:bg-[#1fbd59] transition-all"
+              >
+                💬 שתף בוואטסאפ
+              </button>
               {!isLoggedIn ? (
                 <Link
                   href="/signup?redirect=/visualize"

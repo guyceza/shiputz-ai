@@ -472,8 +472,8 @@ export default function VisualizePage() {
       .then(data => setWaitingAnimationData(data))
       .catch(err => console.error('Failed to load waiting animation:', err));
     
-    // Load packs modal animation (paint/art supplies)
-    fetch('https://lottie.host/d7954a5f-59e7-4e46-8c1f-3962f498f7dd/4qFmOFcMYR.json')
+    // Load packs modal animation (local file — reliable)
+    fetch('/lottie-image-pack.json')
       .then(res => res.json())
       .then(data => setPacksAnimationData(data))
       .catch(err => console.error('Failed to load packs animation:', err));

@@ -1931,17 +1931,26 @@ export default function VisualizePage() {
             )}
             
             {/* Actions */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <a
                 href={selectedHistoryItem.afterImage}
                 download="shiputzai-visualization.png"
-                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all"
+                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-center font-medium hover:bg-gray-800 transition-all text-sm"
               >
-                📥 הורד תמונה
+                📥 הורד
               </a>
               <button
+                onClick={() => {
+                  const text = `תראו מה ShiputzAI עשה לי 😍 הדמיית שיפוץ ב-AI!\nhttps://shipazti.com/visualize`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+                className="flex-1 bg-[#25D366] text-white py-3 rounded-full text-center font-medium hover:bg-[#1fbd59] transition-all text-sm"
+              >
+                💬 שתף
+              </button>
+              <button
                 onClick={() => setSelectedHistoryItem(null)}
-                className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
+                className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all text-sm"
               >
                 סגור
               </button>

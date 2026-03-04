@@ -28,10 +28,16 @@ function UnsubscribeContent() {
         body: JSON.stringify({ email: emailToUse.toLowerCase(), token }),
       });
 
-      if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      
+      if (data.success) {
+        setStatus("success");
+      } else if (data.needs_confirm) {
+        // Token invalid — show confirmation screen instead of error
+        setStatus("confirm");
+      } else if (response.ok) {
         setStatus("success");
       } else {
-        const data = await response.json().catch(() => ({}));
         setErrorMessage(data.error || "שגיאה בהסרה מדיוור");
         setStatus("error");
       }
@@ -180,7 +186,27 @@ function UnsubscribeContent() {
         </p>
         
         <button
-          onClick={() => doUnsubscribe()}
+          onClick={async () => {
+            setProcessing(true);
+            try {
+              // Send WITHOUT token — confirmed by user clicking button
+              const response = await fetch("/api/unsubscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email.toLowerCase() }),
+              });
+              if (response.ok) {
+                setStatus("success");
+              } else {
+                setErrorMessage("שגיאה בהסרה מדיוור");
+                setStatus("error");
+              }
+            } catch {
+              setErrorMessage("שגיאת תקשורת — נסו שוב מאוחר יותר");
+              setStatus("error");
+            }
+            setProcessing(false);
+          }}
           disabled={processing}
           className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 mb-4"
         >

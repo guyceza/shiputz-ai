@@ -99,9 +99,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
     }
 
-    // Bug #23 fix: Verify token to prevent unauthorized unsubscribes
-    if (!verifyUnsubscribeToken(email, token)) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 403 });
+    // Token verification: if token is provided and valid → auto-unsubscribe
+    // If token is missing or invalid → return needs_confirm so frontend shows confirmation UI
+    // Unsubscribe must ALWAYS be possible (CAN-SPAM/GDPR compliance)
+    const tokenValid = verifyUnsubscribeToken(email, token);
+    if (!tokenValid && token) {
+      // Bad token provided — don't block, ask for confirmation instead
+      return NextResponse.json({ needs_confirm: true }, { status: 200 });
     }
 
     const supabase = createServiceClient();

@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
-import FlappyBirdGame from "@/components/FlappyBirdGame";
+const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -18,6 +18,13 @@ const animationStyles = `
   0% { transform: scale(0.8); opacity: 0; }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bounce-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }
 @keyframes progress-bar {
   0% { width: 0%; }
@@ -927,94 +934,43 @@ export default function VisualizePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 px-6">
+      {/* Hero Section - optimized for mobile ad traffic */}
+      <section className="pt-20 pb-12 px-4 md:px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center bg-gray-100 px-4 py-2 rounded-full mb-6">
-            <span className="text-sm font-medium text-gray-700">חדש! ראה איך השיפוץ שלך יראה</span>
-          </div>
           
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6 text-gray-900">
-            ראה את השיפוץ<br />
-            <span className="text-gray-900">לפני שמתחיל.</span>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-gray-900 leading-tight">
+            העלה תמונה של החדר.<br />
+            <span className="text-emerald-600">קבל הדמיית שיפוץ תוך 30 שניות.</span>
           </h1>
           
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed">
-            העלו תמונה של החדר, תאר מה אתה רוצה לשנות, וה-AI ייצור לך תמונה של התוצאה הסופית עם הערכת עלויות מדויקת.
+          <p className="text-lg text-gray-500 max-w-xl mx-auto mb-6 leading-relaxed">
+            AI שמראה לך איך השיפוץ יראה — עם הערכת עלויות מדויקת
           </p>
-          
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-8">
-            <span className="flex items-center gap-1">
-              <span className="text-green-500">✓</span> תמונה תוך שניות
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="text-green-500">✓</span> הערכת עלויות מדויקת
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="text-green-500">✓</span> מבוסס מחירי שוק
-            </span>
-          </div>
 
-          {/* Before → After Label */}
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-lg font-bold text-gray-400">לפני</span>
-            <span className="animate-pulse-arrow text-2xl text-emerald-500">←</span>
-            <span className="text-lg font-bold text-emerald-600">אחרי ✨</span>
-          </div>
-
-          {/* Full Width Before/After */}
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 mb-10">
-            <div className="relative aspect-[4/3]">
-              <img 
-                src="/before-room.jpg" 
-                alt="לפני השיפוץ"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 animate-slide-reveal">
-                <img 
-                  src="/after-room.jpg" 
-                  alt="אחרי השיפוץ"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              {/* Labels */}
-              <div className="absolute top-4 right-4 z-10">
-                <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-sm font-bold px-4 py-2 rounded-full shadow-lg">
-                  📷 לפני
-                </span>
-              </div>
-              <div className="absolute top-4 left-4 z-10">
-                <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate-float-badge">
-                  ✨ אחרי
-                </span>
-              </div>
-              
-              {/* Center divider */}
-              <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/70 z-10" />
-            </div>
-          </div>
-          
-          {/* Trial CTA */}
-          <div className="flex flex-col items-center gap-3">
+          {/* CTA FIRST on mobile - before the image */}
+          <div className="flex flex-col items-center gap-3 mb-8">
             {authLoading ? (
               <div className="relative bg-gray-900/20 px-10 py-4 rounded-full text-lg font-medium overflow-hidden">
-                <span className="text-transparent">✨ נסו עכשיו בחינם</span>
+                <span className="text-transparent">נסו עכשיו בחינם</span>
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
               </div>
             ) : (
               <>
                 <button
                   onClick={handleTryNow}
-                  className="bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+                  className="bg-gray-900 text-white px-10 py-5 rounded-full text-xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105 animate-bounce-subtle"
                 >
                   {isLoggedIn
-                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : '✨ נסו עכשיו בחינם')
-                    : (guestUsed ? '🎉 הירשם בחינם — צור עוד הדמיות' : '✨ נסו עכשיו בחינם')
+                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🔓 שדרג לגישה מלאה' : 'נסו עכשיו בחינם →')
+                    : (guestUsed ? 'הירשם בחינם — צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
                   }
                 </button>
                 {!isLoggedIn && !guestUsed && (
-                  <p className="text-sm text-gray-400">ניסיון אחד חינם · ללא הרשמה · ללא כרטיס אשראי</p>
+                  <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> בחינם</span>
+                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> בלי הרשמה</span>
+                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> תוך 30 שניות</span>
+                  </div>
                 )}
                 {!isLoggedIn && guestUsed && (
                   <p className="text-sm text-amber-600">השתמשת בניסיון החינמי · <Link href="/signup?redirect=/visualize" className="underline">הירשם להדמיות נוספות</Link></p>
@@ -1028,6 +984,53 @@ export default function VisualizePage() {
               </>
             )}
           </div>
+
+          {/* Before → After */}
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <span className="text-base font-bold text-gray-400">לפני</span>
+            <span className="animate-pulse-arrow text-xl text-emerald-500">←</span>
+            <span className="text-base font-bold text-emerald-600">אחרי</span>
+          </div>
+
+          {/* Before/After Image - lazy loaded */}
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 mb-6">
+            <div className="relative aspect-[4/3]">
+              <img 
+                src="/before-room.jpg" 
+                alt="לפני השיפוץ"
+                className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
+              />
+              <div className="absolute inset-0 animate-slide-reveal">
+                <img 
+                  src="/after-room.jpg" 
+                  alt="אחרי השיפוץ"
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                  fetchPriority="high"
+                />
+              </div>
+              
+              {/* Labels */}
+              <div className="absolute top-3 right-3 z-10">
+                <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                  לפני
+                </span>
+              </div>
+              <div className="absolute top-3 left-3 z-10">
+                <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-float-badge">
+                  אחרי
+                </span>
+              </div>
+              
+              {/* Center divider */}
+              <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/70 z-10" />
+            </div>
+          </div>
+
+          {/* Social proof */}
+          <p className="text-sm text-gray-400 mb-2">127+ משתמשים כבר ניסו השבוע</p>
         </div>
       </section>
 

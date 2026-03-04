@@ -423,6 +423,8 @@ export default function VisualizePage() {
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
+  const [vizCredits, setVizCredits] = useState<number | null>(null); // null = not loaded yet
+  const [showPacksModal, setShowPacksModal] = useState(false);
   const [guestUsed, setGuestUsed] = useState(false); // Guest trial (no login)
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
@@ -586,6 +588,15 @@ export default function VisualizePage() {
           } catch (e) {
             console.error("Failed to check premium:", e);
           }
+          
+          // Fetch viz credits
+          try {
+            const creditsRes = await fetch(`/api/viz-credits?email=${encodeURIComponent(userEmail)}`);
+            const creditsData = await creditsRes.json();
+            setVizCredits(creditsData.vizCredits || 0);
+          } catch (e) {
+            console.error("Failed to fetch viz credits:", e);
+          }
         }
         
         // Check trial status from database
@@ -725,6 +736,12 @@ export default function VisualizePage() {
       return;
     }
     
+    // Pro user with 0 credits — show packs modal
+    if (hasSubscription && vizCredits === 0) {
+      setShowPacksModal(true);
+      return;
+    }
+    
     // Show upload modal for trial or subscription users
     setShowUploadModal(true);
   };
@@ -835,6 +852,10 @@ export default function VisualizePage() {
           analysis: analysis,
           costs: costs
         });
+        // Update credits after successful generation
+        if (data.usedCredit && vizCredits !== null) {
+          setVizCredits(Math.max(0, vizCredits - 1));
+        }
         clearProductsCache(); // Clear products for new image
         
         // Save to history (only for logged-in users)
@@ -962,7 +983,9 @@ export default function VisualizePage() {
                   className="bg-gray-900 text-white px-10 py-5 rounded-full text-xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105 animate-bounce-subtle"
                 >
                   {isLoggedIn
-                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🎭 שדרג ב-₪69 בלבד' : 'נסו עכשיו בחינם →')
+                    ? (hasSubscription 
+                        ? (vizCredits === 0 ? '📦 רכוש חבילת הדמיות' : `🎨 צור הדמיה (${vizCredits} נותרו)`)
+                        : trialUsed ? '🎭 שדרג ב-₪69 בלבד' : 'נסו עכשיו בחינם →')
                     : (guestUsed ? 'הירשם בחינם — צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
                   }
                 </button>
@@ -981,6 +1004,12 @@ export default function VisualizePage() {
                 )}
                 {isLoggedIn && !hasSubscription && trialUsed && (
                   <p className="text-sm text-amber-600">השתמשת בניסיון החינמי</p>
+                )}
+                {isLoggedIn && hasSubscription && vizCredits !== null && vizCredits > 0 && (
+                  <p className="text-sm text-gray-400">{vizCredits} הדמיות נותרו</p>
+                )}
+                {isLoggedIn && hasSubscription && vizCredits === 0 && (
+                  <p className="text-sm text-amber-600">נגמרו ההדמיות · <button onClick={() => setShowPacksModal(true)} className="underline font-medium">רכוש חבילה</button></p>
                 )}
               </>
             )}
@@ -1502,13 +1531,74 @@ export default function VisualizePage() {
         </div>
       )}
 
+      {/* Packs Modal — Pro user with 0 credits */}
+      {showPacksModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6" onClick={() => setShowPacksModal(false)}>
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative" dir="rtl" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowPacksModal(false)}
+              className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 rounded-full text-xl transition-colors"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">📦</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">נגמרו ההדמיות</h3>
+              <p className="text-gray-500 text-sm">רכוש חבילת הדמיות כדי להמשיך</p>
+            </div>
+            
+            <div className="space-y-3 mb-6">
+              {/* Pack 10 */}
+              <a href="/checkout?product=pack_10" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="text-right">
+                    <div className="font-medium text-gray-900">10 הדמיות</div>
+                    <div className="text-xs text-gray-400">₪2.90 להדמיה</div>
+                  </div>
+                  <div className="text-xl font-bold text-gray-900">₪29</div>
+                </div>
+              </a>
+              
+              {/* Pack 30 — Popular */}
+              <a href="/checkout?product=pack_30" className="block border-2 border-gray-900 rounded-2xl p-4 relative hover:bg-gray-50 transition-colors">
+                <div className="absolute -top-2.5 right-4 bg-gray-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי משתלם</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-right">
+                    <div className="font-medium text-gray-900">30 הדמיות</div>
+                    <div className="text-xs text-gray-400">₪2.30 להדמיה</div>
+                  </div>
+                  <div className="text-xl font-bold text-gray-900">₪69</div>
+                </div>
+              </a>
+              
+              {/* Pack 100 */}
+              <a href="/checkout?product=pack_100" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="text-right">
+                    <div className="font-medium text-gray-900">100 הדמיות</div>
+                    <div className="text-xs text-green-600 font-medium">49% הנחה — ₪1.49 להדמיה</div>
+                  </div>
+                  <div className="text-xl font-bold text-gray-900">₪149</div>
+                </div>
+              </a>
+            </div>
+            
+            <p className="text-center text-xs text-gray-400">קרדיטים לא פגים · תשלום חד-פעמי</p>
+          </div>
+        </div>
+      )}
+
       {/* Upload Modal */}
       {showUploadModal && (!generatedResult || showGameLoading) && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6 overflow-auto">
           <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative">
             <button
-              onClick={() => { setShowUploadModal(false); setUploadedImage(null); setDescription(""); }}
-              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 text-xl"
+              onClick={() => { setShowUploadModal(false); setUploadedImage(null); setDescription(""); setGenerateError(""); }}
+              className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 rounded-full text-xl transition-colors z-10"
+              aria-label="חזרה"
             >
               ✕
             </button>

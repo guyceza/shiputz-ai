@@ -428,14 +428,14 @@ export default function Home() {
             <div className="text-center">
               <div className="text-5xl mb-4">🎭</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">מבצע פורים!</h2>
-              <p className="text-gray-500 mb-5">33% הנחה על מנוי Pro — לזמן מוגבל</p>
+              <p className="text-gray-500 mb-5">חודש ראשון ב-33% הנחה — לזמן מוגבל</p>
               
               <div className="bg-gray-50 rounded-2xl p-5 mb-5">
                 <div className="flex items-center justify-center gap-3 mb-1">
-                  <span className="text-gray-400 line-through text-lg">₪29/חודש</span>
-                  <span className="text-3xl font-bold text-gray-900">₪19<span className="text-base font-normal text-gray-400">/חודש</span></span>
+                  <span className="text-gray-400 line-through text-lg">₪29</span>
+                  <span className="text-3xl font-bold text-gray-900">₪19<span className="text-base font-normal text-gray-400"> לחודש הראשון</span></span>
                 </div>
-                <p className="text-sm text-green-600 font-medium">חוסכים ₪120 בשנה 🎭</p>
+                <p className="text-sm text-gray-500">אח״כ ₪29/חודש · ביטול בכל רגע</p>
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
@@ -450,9 +450,9 @@ export default function Home() {
                 className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
                 style={{ backgroundColor: '#101010' }}
               >
-                🎭 לממש את ההנחה — ₪19/חודש
+                🎭 להתחיל ב-₪19 בלבד
               </a>
-              <p className="text-xs text-gray-400 mt-3">ביטול בכל רגע · תקף עד סוף פורים</p>
+              <p className="text-xs text-gray-400 mt-3">חודש ראשון ₪19, אח״כ ₪29/חודש · ביטול בכל רגע</p>
             </div>
           </div>
         </div>

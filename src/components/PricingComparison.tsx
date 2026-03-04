@@ -74,14 +74,14 @@ const proFeatures = [
 export default function PricingComparison() {
   const [isAnnual, setIsAnnual] = useState(false);
 
-  // Purim sale: 33% off on both plans
+  // Purim sale: first month ₪19, then ₪29/month
   const monthlyOriginal = 29;
-  const monthlyPrice = 19; // Purim price
-  const annualMonthly = 13; // ~₪156/year (33% off ₪228)
-  const annualTotal = 156;
+  const monthlyPrice = 19; // Purim first month
+  const annualMonthly = 19; // annual = ₪228/year
+  const annualTotal = 228;
 
   const currentPrice = isAnnual ? annualMonthly : monthlyPrice;
-  const currentOriginal = isAnnual ? 19 : monthlyOriginal;
+  const currentOriginal = isAnnual ? monthlyOriginal : monthlyOriginal;
 
   return (
     <div dir="ltr" className="flex flex-col md:flex-row gap-4 md:gap-6 w-full px-4 md:px-8 justify-center">
@@ -143,7 +143,7 @@ export default function PricingComparison() {
             }`}
           >
             שנתי
-            <span className="text-green-600 text-xs mr-1">-55%</span>
+            <span className="text-green-600 text-xs mr-1">-35%</span>
           </button>
         </div>
         
@@ -166,7 +166,7 @@ export default function PricingComparison() {
                 ₪{annualTotal} לשנה — חוסך ₪{monthlyOriginal * 12 - annualTotal} בשנה
               </p>
             ) : (
-              <p className="text-gray-400 text-sm">ביטול בכל רגע</p>
+              <p className="text-gray-400 text-sm">חודש ראשון ₪19, אח״כ ₪29/חודש</p>
             )}
           </div>
         </div>

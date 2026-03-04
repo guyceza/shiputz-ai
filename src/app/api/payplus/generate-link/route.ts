@@ -17,6 +17,10 @@ interface PayPlusRequest {
 }
 
 // Pricing configuration (in ILS)
+// Purim sale: first month ₪19, then ₪29/month
+const PURIM_SALE = true; // Toggle off after Purim
+const PURIM_FIRST_MONTH = 19;
+
 const PRICING: Record<string, { amount: number; chargeMethod: number; recurring?: boolean }> = {
   // NEW pricing model
   pro_monthly: { amount: 29, chargeMethod: 3, recurring: true },
@@ -128,6 +132,14 @@ export async function POST(request: NextRequest) {
     // Add recurring settings for subscription products (Vision)
     // Per PayPlus docs: charge_method 3 requires recurring_settings object
     if ((pricing as any).recurring) {
+      // Purim sale: first month at intro price, then regular price
+      const isProMonthly = productType === 'pro_monthly';
+      const usePurimPrice = PURIM_SALE && isProMonthly && finalAmount === pricing.amount; // Only if no other discount applied
+      
+      if (usePurimPrice) {
+        payPlusBody.amount = PURIM_FIRST_MONTH; // First charge = ₪19
+      }
+      
       payPlusBody.recurring_settings = {
         instant_first_payment: true,       // Charge immediately on signup
         recurring_type: 2,                 // 0=daily, 1=weekly, 2=monthly
@@ -139,6 +151,8 @@ export async function POST(request: NextRequest) {
         successful_invoice: true,          // Auto-generate invoice after each charge
         customer_failure_email: true,      // Email customer on failed charge
         send_customer_success_email: true, // Email customer on successful charge
+        // Recurring charges at full price (₪29), first charge is the amount above
+        ...(usePurimPrice ? { recurring_amount: pricing.amount } : {}),
       };
     }
 

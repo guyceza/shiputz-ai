@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
-import PricingCard from "@/components/PricingCard";
+import PricingComparison from "@/components/PricingComparison";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -1231,9 +1231,7 @@ export default function VisualizePage() {
               <p className="text-gray-500">שדרג למנוי Pro כדי להמשיך</p>
             </div>
             
-            <div className="max-w-sm mx-auto">
-              <PricingCard />
-            </div>
+            <PricingComparison />
           </div>
         </section>
       )}

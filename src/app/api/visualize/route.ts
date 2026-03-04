@@ -433,7 +433,7 @@ export async function POST(request: NextRequest) {
         const recheckSub = await verifySubscription(userEmail);
         if (!recheckSub.hasPurchased || !recheckSub.hasVision) {
           return NextResponse.json({ 
-            error: "התקופת הנסיון שלך כבר נוצלה. נדרש מנוי Vision פעיל.",
+            error: "התקופת הנסיון שלך כבר נוצלה. נדרש מנוי Pro.",
             code: "TRIAL_ALREADY_USED"
           }, { status: 403 });
         }

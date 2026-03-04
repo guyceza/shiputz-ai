@@ -1564,7 +1564,7 @@ export default function VisualizePage() {
               
               {/* Pack 30 — Popular */}
               <a href="/checkout?product=pack_30" className="block border-2 border-gray-900 rounded-2xl p-4 relative hover:bg-gray-50 transition-colors">
-                <div className="absolute -top-2.5 right-4 bg-gray-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי משתלם</div>
+                <div className="absolute -top-2.5 right-4 bg-gray-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי פופולרי</div>
                 <div className="flex items-center justify-between">
                   <div className="text-right">
                     <div className="font-medium text-gray-900">30 הדמיות</div>
@@ -1574,8 +1574,9 @@ export default function VisualizePage() {
                 </div>
               </a>
               
-              {/* Pack 100 */}
-              <a href="/checkout?product=pack_100" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
+              {/* Pack 100 — Best value */}
+              <a href="/checkout?product=pack_100" className="block border border-green-200 bg-green-50/30 rounded-2xl p-4 relative hover:border-green-400 transition-colors">
+                <div className="absolute -top-2.5 right-4 bg-green-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי משתלם</div>
                 <div className="flex items-center justify-between">
                   <div className="text-right">
                     <div className="font-medium text-gray-900">100 הדמיות</div>

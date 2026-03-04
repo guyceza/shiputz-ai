@@ -243,7 +243,7 @@ export default function AdminDashboard() {
               <p className="text-2xl font-semibold text-green-600">{stats.premium}</p>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-100">
-              <p className="text-sm text-gray-500">Vision מנויים</p>
+              <p className="text-sm text-gray-500">Pro מנויים</p>
               <p className="text-2xl font-semibold text-purple-600">{stats.vision}</p>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-100">

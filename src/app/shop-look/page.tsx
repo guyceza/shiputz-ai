@@ -475,7 +475,7 @@ export default function ShopLookPage() {
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">מנוי Vision</span>
+                    <span className="text-sm text-gray-500">מנוי Pro</span>
                     <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -528,7 +528,7 @@ export default function ShopLookPage() {
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm text-gray-500">ShiputzAI</span>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חד פעמי</span>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">חודשי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-gray-900">₪29</span>
@@ -543,7 +543,7 @@ export default function ShopLookPage() {
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  תשלום חד פעמי · גישה לכל הכלים
+                  תשלום חודשי · גישה לכל הכלים
                 </p>
               </>
             )}

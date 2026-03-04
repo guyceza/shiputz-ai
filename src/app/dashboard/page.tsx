@@ -602,7 +602,7 @@ function DashboardContent() {
                 <p className="text-xs text-violet-600/70">יש לך גישה לכל הפיצ׳רים המתקדמים</p>
               </div>
               <span className="text-xs text-violet-600/70 bg-white/60 px-3 py-1 rounded-full border border-violet-200/60">
-                רכישה חד-פעמית
+                מנוי Pro
               </span>
             </div>
           </div>
@@ -685,7 +685,7 @@ function DashboardContent() {
                   <h3 className="font-semibold text-stone-800 mb-1">הדמיות AI</h3>
                   <p className="text-sm text-stone-500 mb-3">צור הדמיה של השיפוץ לפני שמתחילים</p>
                   <span className="text-xs text-stone-400 group-hover:underline">
-                    נדרש מנוי Vision ←
+                    נדרש מנוי Pro ←
                   </span>
                 </Link>
               )}

@@ -1520,7 +1520,7 @@ export default function ProjectPage() {
         setVisionError(data.message || 'לא ניתן לעבד את התמונה הזו. נסה להעלות תמונה אחרת של החדר.');
         setVisionResult(null);  // Don't show any results
       } else if (data.code === "VISION_SUBSCRIPTION_REQUIRED" || data.code === "SUBSCRIPTION_REQUIRED") {
-        setVisionError('נדרש מנוי AI Vision פעיל לשימוש בשירות זה.');
+        setVisionError('נדרש מנוי Pro פעיל לשימוש בשירות זה.');
       } else if (data.code === "TRIAL_ALREADY_USED") {
         setVisionError('תקופת הנסיון שלך הסתיימה. שדרג ל-AI Vision להמשך שימוש.');
       } else if (data.code === "MONTHLY_LIMIT_REACHED") {
@@ -1712,7 +1712,7 @@ export default function ProjectPage() {
                   href="/visualize"
                   className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-center hover:from-purple-700 hover:to-indigo-700 transition-all"
                 >
-                  🔒 שדרג למנוי Vision - נסה חינם
+                  🔒 שדרג ל-Pro
                 </a>
               )}
             </div>

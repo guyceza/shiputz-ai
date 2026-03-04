@@ -39,7 +39,7 @@ export function VisionSection({ hasVisionSub, remainingVisions, onCreateVision }
           href="/visualize"
           className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl font-medium text-center hover:from-purple-700 hover:to-indigo-700 transition-all"
         >
-          🔒 שדרג למנוי Vision - נסה חינם
+          🔒 שדרג ל-Pro
         </a>
       )}
     </div>

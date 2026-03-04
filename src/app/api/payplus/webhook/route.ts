@@ -231,13 +231,24 @@ export async function POST(request: NextRequest) {
     //       vision_trial_used, vision_usage_count, vision_usage_month,
     //       viz_credits, viz_monthly_used, viz_monthly_reset
     
-    // NEW: Pro monthly/annual subscriptions
-    if (productType === 'pro_monthly' || productType === 'pro_annual') {
+    // NEW: Pro one-time purchase (₪99 = 4 viz + all tools)
+    if (productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual') {
+      // Get current credits
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', email.toLowerCase())
+        .single();
+      
+      const currentCredits = currentUser?.viz_credits || 0;
+      const proCredits = productType === 'pro' ? 4 : 0; // Pro gives 4 viz credits
+      
       const upsertData: any = { 
         email: email.toLowerCase(),
         purchased: true,
         purchased_at: new Date().toISOString(),
         vision_subscription: 'active', // Pro includes everything
+        ...(proCredits > 0 ? { viz_credits: currentCredits + proCredits } : {}),
       };
 
       const { error: upsertError } = await supabase
@@ -247,7 +258,7 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user Pro status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Pro (${productType})`);
+        console.log(`User ${email} marked as Pro (${productType}), credits: ${currentCredits + proCredits}`);
       }
     }
     
@@ -335,7 +346,7 @@ export async function POST(request: NextRequest) {
     console.log(`✅ PayPlus payment completed: ${email} → ${productType} (₪${amount}, tx: ${transaction_uid || page_request_uid})`);
 
     // Send welcome/purchase confirmation email via Resend (fire-and-forget)
-    if (email && (productType === 'pro_monthly' || productType === 'pro_annual' || productType === 'premium' || productType === 'premium_plus')) {
+    if (email && (productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual' || productType === 'premium' || productType === 'premium_plus')) {
       try {
         const RESEND_KEY = process.env.RESEND_API_KEY;
         if (RESEND_KEY) {
@@ -346,7 +357,7 @@ export async function POST(request: NextRequest) {
             .eq('email', email.toLowerCase())
             .single();
           const displayName = escapeHtml(userData?.name || 'משפץ יקר');
-          const isPro = productType === 'pro_monthly' || productType === 'pro_annual';
+          const isPro = productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual';
 
           await fetch('https://api.resend.com/emails', {
             method: 'POST',

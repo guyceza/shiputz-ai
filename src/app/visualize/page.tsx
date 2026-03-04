@@ -962,7 +962,7 @@ export default function VisualizePage() {
                   className="bg-gray-900 text-white px-10 py-5 rounded-full text-xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105 animate-bounce-subtle"
                 >
                   {isLoggedIn
-                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🎭 שדרג ב-₪19 בלבד' : 'נסו עכשיו בחינם →')
+                    ? (hasSubscription ? '🎨 צור הדמיה' : trialUsed ? '🎭 שדרג ב-₪69 בלבד' : 'נסו עכשיו בחינם →')
                     : (guestUsed ? 'הירשם בחינם — צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
                   }
                 </button>
@@ -1228,7 +1228,7 @@ export default function VisualizePage() {
               <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
                 רוצה להמשיך?
               </h2>
-              <p className="text-gray-500">שדרג למנוי Pro כדי להמשיך</p>
+              <p className="text-gray-500">שדרג ל-Pro כדי להמשיך</p>
             </div>
             
             <PricingComparison />
@@ -1262,7 +1262,7 @@ export default function VisualizePage() {
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
               </summary>
               <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                עם מנוי לשירות ההדמיה אפשר ליצור עד 5 הדמיות AI בחודש. המכסה מתאפסת בתחילת כל חודש.
+                עם Pro אפשר ליצור 4 הדמיות שיפוץ AI. צריך עוד? קנה חבילת הדמיות נוספות.
               </p>
             </details>
             
@@ -1404,14 +1404,13 @@ export default function VisualizePage() {
                 <div className="border border-gray-200 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-gray-900">🎭 מבצע פורים</span>
-                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">33% הנחה</span>
+                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">30% הנחה</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl text-gray-400 line-through">₪29</span>
-                    <span className="text-4xl font-semibold text-gray-900">₪19</span>
-                    <span className="text-gray-400">/חודש ראשון</span>
+                    <span className="text-xl text-gray-400 line-through">₪99</span>
+                    <span className="text-4xl font-semibold text-gray-900">₪69</span>
                   </div>
-                  <p className="text-gray-400 text-xs mt-1">אח״כ ₪29/חודש · ביטול בכל רגע</p>
+                  <p className="text-gray-400 text-xs mt-1">תשלום חד-פעמי · לא מנוי</p>
                 </div>
                 
                 <ul className="space-y-4 mb-8">
@@ -1419,7 +1418,7 @@ export default function VisualizePage() {
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs">✓</span>
                     </div>
-                    <span className="text-gray-700">5 הדמיות AI בחודש</span>
+                    <span className="text-gray-700">4 הדמיות שיפוץ AI</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm">
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1445,11 +1444,11 @@ export default function VisualizePage() {
                   href="/checkout"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  🎭 להתחיל ב-₪19 בלבד
+                  🎭 לרכוש — ₪69
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  חודש ראשון ₪19, אח״כ ₪29/חודש
+                  תשלום חד-פעמי · לא חיוב חוזר
                 </p>
               </>
             ) : (
@@ -1460,22 +1459,21 @@ export default function VisualizePage() {
                     <span className="text-white text-lg">✦</span>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">🎭 מבצע פורים!</h3>
-                  <p className="text-gray-500 text-sm">חודש ראשון ב-33% הנחה</p>
+                  <p className="text-gray-500 text-sm">30% הנחה — תשלום חד-פעמי</p>
                 </div>
                 
                 <div className="text-center mb-6">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-xl text-gray-400 line-through">₪29</span>
-                    <span className="text-4xl font-semibold text-gray-900">₪19</span>
-                    <span className="text-gray-400">/חודש ראשון</span>
+                    <span className="text-xl text-gray-400 line-through">₪99</span>
+                    <span className="text-4xl font-semibold text-gray-900">₪69</span>
                   </div>
-                  <p className="text-gray-400 text-xs mt-1">אח״כ ₪29/חודש · ביטול בכל רגע</p>
+                  <p className="text-gray-400 text-xs mt-1">תשלום חד-פעמי · לא מנוי</p>
                 </div>
                 
                 <ul className="space-y-3 mb-6 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>
-                    <span className="text-gray-700">5 הדמיות AI בחודש</span>
+                    <span className="text-gray-700">4 הדמיות שיפוץ AI</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>
@@ -1495,9 +1493,9 @@ export default function VisualizePage() {
                   href="/checkout"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-xl text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  🎭 להתחיל ב-₪19 בלבד
+                  🎭 לרכוש — ₪69
                 </Link>
-                <p className="text-center text-xs text-gray-400 mt-3">חודש ראשון ₪19, אח״כ ₪29/חודש</p>
+                <p className="text-center text-xs text-gray-400 mt-3">תשלום חד-פעמי · לא חיוב חוזר</p>
               </>
             )}
           </div>

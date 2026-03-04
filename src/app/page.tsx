@@ -428,18 +428,18 @@ export default function Home() {
             <div className="text-center">
               <div className="text-5xl mb-4">🎭</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">מבצע פורים!</h2>
-              <p className="text-gray-500 mb-5">חודש ראשון ב-33% הנחה — לזמן מוגבל</p>
+              <p className="text-gray-500 mb-5">30% הנחה — לזמן מוגבל</p>
               
               <div className="bg-gray-50 rounded-2xl p-5 mb-5">
                 <div className="flex items-center justify-center gap-3 mb-1">
-                  <span className="text-gray-400 line-through text-lg">₪29</span>
-                  <span className="text-3xl font-bold text-gray-900">₪19<span className="text-base font-normal text-gray-400"> לחודש הראשון</span></span>
+                  <span className="text-gray-400 line-through text-lg">₪99</span>
+                  <span className="text-3xl font-bold text-gray-900">₪69</span>
                 </div>
-                <p className="text-sm text-gray-500">אח״כ ₪29/חודש · ביטול בכל רגע</p>
+                <p className="text-sm text-gray-500">תשלום חד-פעמי · לא מנוי</p>
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><span>✓</span>5 הדמיות שיפוץ AI בחודש</li>
+                <li className="flex items-center gap-2"><span>✓</span>4 הדמיות שיפוץ AI</li>
                 <li className="flex items-center gap-2"><span>✓</span>הערכות עלויות + כתב כמויות</li>
                 <li className="flex items-center gap-2"><span>✓</span>סריקת קבלות + מעקב תקציב</li>
                 <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>
@@ -450,9 +450,9 @@ export default function Home() {
                 className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
                 style={{ backgroundColor: '#101010' }}
               >
-                🎭 להתחיל ב-₪19 בלבד
+                🎭 לרכוש — ₪69
               </a>
-              <p className="text-xs text-gray-400 mt-3">חודש ראשון ₪19, אח״כ ₪29/חודש · ביטול בכל רגע</p>
+              <p className="text-xs text-gray-400 mt-3">תשלום חד-פעמי · לא חיוב חוזר</p>
             </div>
           </div>
         </div>
@@ -463,7 +463,7 @@ export default function Home() {
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">🎭 מבצע פורים!</h2>
-          <p className="text-gray-500 mb-12">33% הנחה על מנוי Pro — לזמן מוגבל</p>
+          <p className="text-gray-500 mb-12">30% הנחה על Pro — ₪69 במקום ₪99</p>
           
           <PricingComparison />
         </div>

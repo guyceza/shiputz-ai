@@ -16,22 +16,10 @@ function CheckoutContent() {
   const [checkingCode, setCheckingCode] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
 
-  const monthlyPrice = 29;
-  const annualPrice = 228; // ₪19/month
-  const annualMonthly = 19;
-  
-  // Calculate discounted prices
-  const rawMonthlyDiscount = monthlyPrice * (100 - discountPercent) / 100;
-  const rawAnnualDiscount = annualPrice * (100 - discountPercent) / 100;
-  const finalMonthlyPrice = codeValid ? Math.round(rawMonthlyDiscount) : monthlyPrice;
-  const finalAnnualPrice = codeValid ? Math.round(rawAnnualDiscount) : annualPrice;
-  const finalAnnualMonthly = codeValid ? Math.round(rawAnnualDiscount / 12) : annualMonthly;
-  
-  const isAnnual = billingCycle === "annual";
-  const displayPrice = isAnnual ? finalAnnualPrice : finalMonthlyPrice;
-  const displayMonthly = isAnnual ? finalAnnualMonthly : finalMonthlyPrice;
+  const originalPrice = 99;
+  const purimPrice = 69;
+  const displayPrice = codeValid ? Math.round(originalPrice * (100 - discountPercent) / 100) : purimPrice;
 
   // Check if user is logged in
   useEffect(() => {
@@ -133,7 +121,7 @@ function CheckoutContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productType: isAnnual ? 'pro_annual' : 'pro_monthly',
+          productType: 'pro',
           email: email.toLowerCase(),
           discountCode: codeValid ? discountCode.toUpperCase() : undefined,
         }),
@@ -144,7 +132,7 @@ function CheckoutContent() {
       if (data.success && data.payment_url) {
         if (data.transaction_uid) {
           localStorage.setItem('payplus_page_request_uid', data.transaction_uid);
-          localStorage.setItem('payplus_product', isAnnual ? 'pro_annual' : 'pro_monthly');
+          localStorage.setItem('payplus_product', 'pro');
         }
         window.location.href = data.payment_url;
       } else {
@@ -189,48 +177,13 @@ function CheckoutContent() {
               🎭 Pro — מבצע פורים
             </div>
             
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-xl p-1 mb-5">
-              <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
-                  !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
-                }`}
-              >
-                חודשי
-              </button>
-              <button
-                onClick={() => setBillingCycle("annual")}
-                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
-                  isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
-                }`}
-              >
-                שנתי
-                <span className="text-green-600 text-xs mr-1">חסכון 35%</span>
-              </button>
-            </div>
-            
             <div className="flex items-center justify-center gap-2">
-              {(!isAnnual || codeValid) && (
-                <span className="text-gray-400 line-through text-2xl">
-                  ₪{isAnnual ? annualMonthly : monthlyPrice}
-                </span>
-              )}
+              <span className="text-gray-400 line-through text-2xl">₪{originalPrice}</span>
               <span className={`text-4xl font-bold ${codeValid ? 'text-green-600' : 'text-gray-900'}`}>
-                ₪{isAnnual ? displayMonthly : (codeValid ? displayMonthly : 19)}
+                ₪{displayPrice}
               </span>
-              <span className="text-gray-500 text-base">{isAnnual ? '/חודש' : '/חודש ראשון'}</span>
             </div>
-            
-            {!isAnnual && !codeValid && (
-              <p className="text-gray-400 text-sm mt-1">אח״כ ₪29/חודש · ביטול בכל רגע</p>
-            )}
-            
-            {isAnnual && (
-              <p className="text-gray-400 text-sm mt-1">
-                {codeValid ? `₪${finalAnnualPrice}` : `₪${annualPrice}`} לשנה · ביטול בכל רגע
-              </p>
-            )}
+            <p className="text-gray-500 text-sm mt-2">תשלום חד-פעמי · לא מנוי</p>
             
             {codeValid && (
               <div className="mt-3 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
@@ -239,10 +192,10 @@ function CheckoutContent() {
               </div>
             )}
             
-            {!isAnnual && !codeValid && (
+            {!codeValid && (
               <div className="mt-2">
                 <span className="inline-block bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                  🎭 33% הנחה לפורים
+                  🎭 30% הנחה לפורים — ₪69 במקום ₪99
                 </span>
               </div>
             )}
@@ -253,7 +206,11 @@ function CheckoutContent() {
             <div className="space-y-3 text-sm text-gray-700">
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>5 הדמיות שיפוץ AI <strong>בחודש</strong> + חבילות נוספות</span>
+                <span><strong>4 הדמיות שיפוץ AI</strong></span>
+              </div>
+              <div className="flex items-start gap-0">
+                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
+                <span>אפשרות לרכישת חבילות נוספות</span>
               </div>
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
@@ -278,10 +235,6 @@ function CheckoutContent() {
               <div className="flex items-start gap-0">
                 <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
                 <span>צ׳אט תמיכה AI</span>
-              </div>
-              <div className="flex items-start gap-0">
-                <span className="flex-shrink-0 ml-0.5 text-gray-900">✓</span>
-                <span>התראות חכמות על חריגות תקציב</span>
               </div>
             </div>
           </div>
@@ -336,8 +289,10 @@ function CheckoutContent() {
               codeValid ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
             }`}
           >
-            {loading ? "מעבד..." : `להתחיל — ₪${displayMonthly}/חודש`}
+            {loading ? "מעבד..." : `🎭 לרכוש — ₪${displayPrice}`}
           </button>
+          
+          <p className="text-center text-gray-400 text-xs mt-3">תשלום חד-פעמי מאובטח · לא מנוי · לא חיוב חוזר</p>
         </div>
 
         {/* Trust */}

@@ -445,27 +445,15 @@ export async function POST(request: NextRequest) {
       const isAdmin = isAdminEmail(userEmail);
       
       if (!isAdmin) {
-        if (!subscription.isPro && subscription.vizCredits <= 0) {
-          // No Pro subscription and no credits — need to subscribe or buy pack
+        if (subscription.vizCredits <= 0) {
+          // No credits left — need to buy Pro or a pack
           return NextResponse.json({ 
-            error: "נדרש מנוי Pro או חבילת הדמיות",
-            code: "SUBSCRIPTION_REQUIRED"
-          }, { status: 403 });
-        }
-        
-        if (subscription.isPro && subscription.monthlyUsage >= MONTHLY_PRO_LIMIT && subscription.vizCredits <= 0) {
-          // Pro user exceeded 5/month AND has no credits
-          return NextResponse.json({ 
-            error: `השתמשת ב-${MONTHLY_PRO_LIMIT} ההדמיות החודשיות שלך. רכוש חבילת הדמיות נוספות.`,
-            code: "MONTHLY_LIMIT_REACHED",
-            usage: subscription.monthlyUsage,
-            limit: MONTHLY_PRO_LIMIT,
+            error: subscription.isPro 
+              ? "נגמרו ההדמיות שלך. רכוש חבילת הדמיות נוספות."
+              : "נדרש רכישת Pro או חבילת הדמיות",
+            code: subscription.isPro ? "NO_CREDITS" : "SUBSCRIPTION_REQUIRED",
             vizCredits: subscription.vizCredits
-          }, { status: 429 });
-        }
-        
-        if (!subscription.isPro && subscription.vizCredits > 0) {
-          // Not Pro but has credits — allow (will deduct credit below)
+          }, { status: subscription.isPro ? 429 : 403 });
         }
       }
     }
@@ -717,27 +705,21 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     if (userEmail && !isTrialRun) {
       await incrementUsage(userEmail);
       
-      // Deduct credit if: Pro user over monthly limit, OR non-Pro user with credits
-      const newUsage = subscription.monthlyUsage + 1;
+      // Deduct credit for every visualization (except admin)
       const isAdmin = isAdminEmail(userEmail);
-      if (!isAdmin) {
-        if ((subscription.isPro && newUsage > MONTHLY_PRO_LIMIT) || !subscription.isPro) {
-          if (subscription.vizCredits > 0) {
-            const supabase = createServiceClient();
-            await supabase
-              .from('users')
-              .update({ viz_credits: subscription.vizCredits - 1 })
-              .eq('email', userEmail.toLowerCase());
-            usedCredit = true;
-          }
-        }
+      if (!isAdmin && subscription.vizCredits > 0) {
+        const supabase = createServiceClient();
+        await supabase
+          .from('users')
+          .update({ viz_credits: subscription.vizCredits - 1 })
+          .eq('email', userEmail.toLowerCase());
+        usedCredit = true;
       }
     }
 
     // Step 5: Track successful request and return results
     trackRequest('/api/visualize', false);
     
-    const newUsage = subscription.trialUsed ? subscription.monthlyUsage + 1 : 0;
     return NextResponse.json({
       success: true,
       analysis: analysisText,
@@ -745,8 +727,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       costs: costEstimate,
       prompt: editPrompt,
       description: description,
-      usage: newUsage,
-      limit: MONTHLY_PRO_LIMIT,
       vizCredits: usedCredit ? subscription.vizCredits - 1 : subscription.vizCredits,
       usedCredit
     });

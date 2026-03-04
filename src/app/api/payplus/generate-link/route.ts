@@ -10,28 +10,29 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface PayPlusRequest {
-  productType: 'pro_monthly' | 'pro_annual' | 'pack_10' | 'pack_30' | 'pack_100' | 'premium' | 'vision' | 'premium_plus';
+  productType: 'pro' | 'pack_10' | 'pack_30' | 'pack_100' | 'pro_monthly' | 'pro_annual' | 'premium' | 'vision' | 'premium_plus';
   email: string;
   userId?: string;
   discountCode?: string;
 }
 
 // Pricing configuration (in ILS)
-// Purim sale: first month ₪19, then ₪29/month
+// Purim sale: ₪69 instead of ₪99
 const PURIM_SALE = true; // Toggle off after Purim
-const PURIM_FIRST_MONTH = 19;
+const PURIM_PRO_PRICE = 69;
 
-const PRICING: Record<string, { amount: number; chargeMethod: number; recurring?: boolean; credits?: number }> = {
-  // NEW pricing model
-  pro_monthly: { amount: 29, chargeMethod: 3, recurring: true },
-  pro_annual: { amount: 228, chargeMethod: 1 }, // one-time annual = ₪19/month
+const PRICING: Record<string, { amount: number; chargeMethod: number; credits?: number }> = {
+  // NEW pricing model — one-time Pro + packs
+  pro: { amount: 99, chargeMethod: 1, credits: 4 }, // ₪99 one-time, 4 visualizations
   // Visualization packs (one-time, never expire)
   pack_10: { amount: 29, chargeMethod: 1, credits: 10 },
   pack_30: { amount: 69, chargeMethod: 1, credits: 30 },
   pack_100: { amount: 149, chargeMethod: 1, credits: 100 },
   // LEGACY (keep for existing customers)
+  pro_monthly: { amount: 29, chargeMethod: 1 },
+  pro_annual: { amount: 228, chargeMethod: 1 },
   premium: { amount: 299.99, chargeMethod: 1 },
-  vision: { amount: 39.99, chargeMethod: 3, recurring: true },
+  vision: { amount: 39.99, chargeMethod: 1 },
   premium_plus: { amount: 349.99, chargeMethod: 1 },
 };
 
@@ -133,30 +134,25 @@ export async function POST(request: NextRequest) {
       language_code: 'he',
     };
 
-    // Add recurring settings for subscription products (Vision)
-    // Per PayPlus docs: charge_method 3 requires recurring_settings object
-    if ((pricing as any).recurring) {
-      // Purim sale: first month at intro price, then regular price
-      const isProMonthly = productType === 'pro_monthly';
-      const usePurimPrice = PURIM_SALE && isProMonthly && finalAmount === pricing.amount; // Only if no other discount applied
-      
-      if (usePurimPrice) {
-        payPlusBody.amount = PURIM_FIRST_MONTH; // First charge = ₪19
-      }
-      
+    // Apply Purim sale for Pro
+    if (PURIM_SALE && productType === 'pro' && finalAmount === pricing.amount) {
+      payPlusBody.amount = PURIM_PRO_PRICE;
+    }
+
+    // Legacy: Add recurring settings for old subscription products
+    if (productType === 'vision') {
+      payPlusBody.charge_method = 3;
       payPlusBody.recurring_settings = {
-        instant_first_payment: true,       // Charge immediately on signup
-        recurring_type: 2,                 // 0=daily, 1=weekly, 2=monthly
-        recurring_range: 1,                // Every 1 month
-        number_of_charges: 0,              // 0 = unlimited (until cancelled)
-        start_date_on_payment_date: true,  // Start recurring on payment date
-        start_date: new Date().getDate(),  // Day of month for recurring
-        jump_payments: 0,                  // No free trial period
-        successful_invoice: true,          // Auto-generate invoice after each charge
-        customer_failure_email: true,      // Email customer on failed charge
-        send_customer_success_email: true, // Email customer on successful charge
-        // Recurring charges at full price (₪29), first charge is the amount above
-        ...(usePurimPrice ? { recurring_amount: pricing.amount } : {}),
+        instant_first_payment: true,
+        recurring_type: 2,
+        recurring_range: 1,
+        number_of_charges: 0,
+        start_date_on_payment_date: true,
+        start_date: new Date().getDate(),
+        jump_payments: 0,
+        successful_invoice: true,
+        customer_failure_email: true,
+        send_customer_success_email: true,
       };
     }
 

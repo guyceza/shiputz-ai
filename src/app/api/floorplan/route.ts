@@ -93,10 +93,16 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const err = await response.text();
       console.error("Gemini error:", err);
-      return NextResponse.json({ error: "AI generation failed" }, { status: 500 });
+      return NextResponse.json({ error: `AI generation failed: ${err.substring(0, 200)}` }, { status: 500 });
     }
 
     const data = await response.json();
+    
+    // Check for blocked/filtered response
+    if (data.candidates?.[0]?.finishReason === "SAFETY") {
+      return NextResponse.json({ error: "Content was filtered by safety settings. Try a different image." }, { status: 400 });
+    }
+    
     const parts = data.candidates?.[0]?.content?.parts || [];
 
     let resultImage = null;
@@ -115,9 +121,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!resultImage) {
+      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
       return NextResponse.json({
-        error: "No image generated",
-        text: resultText,
+        error: resultText || "No image generated — the AI returned text only. Try again.",
       }, { status: 500 });
     }
 

@@ -120,10 +120,12 @@ export default function FloorplanPage() {
       formData.append("email", getEmail() || "");
       const res = await fetch("/api/floorplan", { method: "POST", body: formData });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || "AI generation failed");
       if (data.image) {
         setFloorplanResult(`data:${data.image.mimeType};base64,${data.image.data}`);
         setPhase("floorplan");
+      } else {
+        throw new Error(data.text || "No image returned");
       }
     } catch (err: any) {
       setError(err.message);

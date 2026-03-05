@@ -560,7 +560,20 @@ export async function GET(request: NextRequest) {
       .not('unsubscribed_at', 'is', null);
     const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()));
 
+    // Admin/test emails that should never receive marketing emails
+    const EXCLUDED_EMAILS = new Set([
+      'test@test.com',
+      'test@shiputzai.com',
+      'test-ollie@shipazti.com',
+      'test-ollie-2028@test.com',
+    ]);
+
     for (const user of users || []) {
+      // Skip excluded test/admin accounts
+      if (EXCLUDED_EMAILS.has(user.email.toLowerCase())) {
+        continue;
+      }
+      
       // Skip users who unsubscribed from marketing emails
       if (user.marketing_unsubscribed_at) {
         continue;
@@ -615,6 +628,33 @@ export async function GET(request: NextRequest) {
           // Skip if already successfully sent (has resend_id)
           if (existing && existing.status === 'sent' && existing.resend_id) {
             continue;
+          }
+
+          // Skip purchased day 0 (welcome) if user already got ANY welcome email
+          // This prevents re-sending welcome when user transitions from non_purchased → purchased
+          if (sequenceType === 'purchased' && step.day === 0 && !existing) {
+            const { data: anyWelcome } = await supabase
+              .from('email_sequences')
+              .select('id')
+              .eq('user_email', user.email)
+              .eq('day_number', 0)
+              .eq('status', 'sent')
+              .not('resend_id', 'is', null)
+              .limit(1);
+            
+            if (anyWelcome && anyWelcome.length > 0) {
+              // Already got a welcome email (from non_purchased or webhook) — mark and skip
+              await supabase.from('email_sequences').insert({
+                user_email: user.email,
+                sequence_type: sequenceType,
+                day_number: 0,
+                run_id: runId,
+                status: 'skipped',
+                reason: 'already_welcomed',
+              });
+              skipped++;
+              continue;
+            }
           }
 
           if (!existing) {

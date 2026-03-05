@@ -392,14 +392,19 @@ export async function POST(request: NextRequest) {
           });
           console.log(`Welcome email sent to ${email}`);
 
-          // Mark day 0 as sent to avoid duplicate from cron
+          // Mark day 0 of purchased sequence as sent to avoid duplicate from cron
           try {
-            await supabase.from('email_sequences').insert({
+            const welcomeResendId = 'webhook-inline'; // Sentinel: sent inline by webhook
+            await supabase.from('email_sequences').upsert({
               user_email: email.toLowerCase(),
               sequence_type: 'purchased',
               day_number: 0,
-            });
-          } catch { /* ignore duplicates */ }
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              resend_id: welcomeResendId,
+              run_id: 'payplus-webhook',
+            }, { onConflict: 'user_email,sequence_type,day_number' });
+          } catch (e) { console.error('Failed to mark day 0 as sent:', e); }
         }
       } catch (emailErr) {
         console.error('Failed to send welcome email (non-blocking):', emailErr);

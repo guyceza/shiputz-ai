@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const normalizedEmail = email.toLowerCase();
     
-    // Check both tables
-    const [newsletterResult, userResult] = await Promise.all([
+    // Check all tables
+    const [newsletterResult, userResult, leadsResult] = await Promise.all([
       supabase
         .from('newsletter_subscribers')
         .select('unsubscribed_at')
@@ -76,13 +76,23 @@ export async function GET(request: NextRequest) {
         .from('users')
         .select('marketing_unsubscribed_at')
         .eq('email', normalizedEmail)
+        .single(),
+      supabase
+        .from('leads')
+        .select('unsubscribed_at')
+        .eq('email', normalizedEmail)
         .single()
     ]);
 
+    const nlUnsub = newsletterResult.data?.unsubscribed_at !== null;
+    const mktUnsub = userResult.data?.marketing_unsubscribed_at !== null;
+    const leadUnsub = leadsResult.data?.unsubscribed_at !== null;
+
     return NextResponse.json({ 
-      newsletter_unsubscribed: newsletterResult.data?.unsubscribed_at !== null,
-      marketing_unsubscribed: userResult.data?.marketing_unsubscribed_at !== null,
-      unsubscribed: newsletterResult.data?.unsubscribed_at !== null || userResult.data?.marketing_unsubscribed_at !== null
+      newsletter_unsubscribed: nlUnsub,
+      marketing_unsubscribed: mktUnsub,
+      leads_unsubscribed: leadUnsub,
+      unsubscribed: nlUnsub || mktUnsub || leadUnsub
     });
   } catch (error) {
     return NextResponse.json({ unsubscribed: false });
@@ -166,8 +176,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 3. Try to unsubscribe from leads table (cold outreach)
+    const { data: existingLead } = await supabase
+      .from('leads')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (existingLead) {
+      const { error } = await supabase
+        .from('leads')
+        .update({ unsubscribed_at: now, status: 'unsubscribed' })
+        .eq('email', normalizedEmail);
+
+      if (!error) {
+        unsubscribedFrom.push('leads');
+      }
+    }
+
     if (unsubscribedFrom.length === 0) {
-      return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 });
+      // Even if not found anywhere, create a newsletter record to prevent future emails
+      await supabase
+        .from('newsletter_subscribers')
+        .insert({ email: normalizedEmail, unsubscribed_at: now })
+        .single();
+      unsubscribedFrom.push('newsletter');
     }
 
     return NextResponse.json({ 

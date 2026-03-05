@@ -8,6 +8,8 @@ function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const emailFromUrl = searchParams.get("email") || "";
   const token = searchParams.get("token") || "";
+  const source = searchParams.get("source") || ""; // "leads" for cold outreach
+  const isLead = source === "leads";
   
   const [email, setEmail] = useState(emailFromUrl);
   const [manualEmail, setManualEmail] = useState("");
@@ -158,12 +160,18 @@ function UnsubscribeContent() {
           </div>
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">הוסרת מהדיוור</h1>
           <p className="text-gray-500 mb-6">
-            לא תקבלו יותר מיילים שיווקיים מ-ShiputzAI.
-            <br />
-            <span className="text-sm">(מיילים חשובים על החשבון שלכם עדיין ישלחו)</span>
+            {isLead ? (
+              <>לא תקבלו יותר מיילים מ-ShiputzAI. מתנצלים על ההפרעה!</>
+            ) : (
+              <>
+                לא תקבלו יותר מיילים שיווקיים מ-ShiputzAI.
+                <br />
+                <span className="text-sm">(מיילים חשובים על החשבון שלכם עדיין ישלחו)</span>
+              </>
+            )}
           </p>
           <Link href="/" className="text-blue-600 hover:underline">
-            חזרה לאתר
+            {isLead ? "גלו מה זה ShiputzAI" : "חזרה לאתר"}
           </Link>
         </div>
       </div>

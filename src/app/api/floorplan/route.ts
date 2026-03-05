@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { isAdminEmail } from "@/lib/admin";
-import { createServiceClient } from "@/lib/supabase-server";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 

@@ -39,7 +39,7 @@ Identify the furniture or object the user clicked on. Respond in JSON format onl
 Respond with ONLY the JSON, no other text.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/models/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

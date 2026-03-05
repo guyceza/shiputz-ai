@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     const prompt = `Analyze the provided floor plan and generate a photorealistic top-down (true 90° orthographic) rendering of the entire apartment, strictly preserving the exact dimensions, proportions, walls, doors, windows, and furniture placement as shown. Do not modify layout, scale, structure, or orientation. ${style.prompt} Architectural visualization style, ultra-realistic materials, physically accurate lighting, no perspective distortion, no added or removed structural elements. The output must be a single cohesive image showing the full apartment from directly above.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/models/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -36,7 +36,7 @@ Identify which room or area the user clicked on. Respond in JSON format only:
 If the click is on a wall, door, or unclear area, pick the nearest room. Respond with ONLY the JSON, no other text.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/models/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

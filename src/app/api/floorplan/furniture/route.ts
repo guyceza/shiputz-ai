@@ -37,7 +37,7 @@ Instruction: ${instruction}
 Replace or add the furniture from the second image into the room shown in the first image. Keep the room's lighting, style, perspective, and all other elements exactly the same. Only change the specific furniture piece mentioned. The result should look completely natural and photorealistic, as if the new furniture was always part of the room. Match the lighting and shadows precisely.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/models/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

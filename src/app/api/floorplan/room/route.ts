@@ -60,7 +60,7 @@ The layout, dimensions, and furniture placement must match the floor plan precis
 Output a single photorealistic interior photograph.`;
 
     const response = await fetch(
-      `${GEMINI_BASE_URL}/models/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

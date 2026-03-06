@@ -13,7 +13,7 @@ export function AIToolsSection({ isPremium, onQuoteAnalysis, onAIChat, onScanRec
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900">כלי AI</h2>
         {!isPremium && (
-          <a href="/checkout" className="text-sm text-purple-600 hover:text-purple-700">
+          <a href="/pricing" className="text-sm text-purple-600 hover:text-purple-700">
             🔒 דורש מנוי Premium
           </a>
         )}

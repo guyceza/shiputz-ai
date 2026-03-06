@@ -1722,7 +1722,7 @@ export default function ProjectPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">כלי AI</h2>
                 {!isPremium && (
-                  <a href="/checkout" className="text-sm text-purple-600 hover:text-purple-700">
+                  <a href="/pricing" className="text-sm text-purple-600 hover:text-purple-700">
                     🔒 דורש Pro
                   </a>
                 )}
@@ -2078,7 +2078,7 @@ export default function ProjectPage() {
                   </button>
                 ) : (
                   <Link
-                    href="/checkout"
+                    href="/pricing"
                     className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full text-sm hover:from-purple-700 hover:to-blue-700"
                   >
                     שדרג ל-AI Vision

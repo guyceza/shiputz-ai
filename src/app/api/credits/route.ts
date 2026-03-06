@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCredits, canPerformAction, CREDIT_COSTS, PLANS, CREDIT_PACKS } from '@/lib/credits';
+import { getCredits, canPerformAction, CREDIT_COSTS, PLANS, CREDIT_ANCHORS } from '@/lib/credits';
 
 // GET /api/credits?email=...
 // GET /api/credits?email=...&check=visualize
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       ...balance,
       costs: CREDIT_COSTS,
       plans: PLANS,
-      packs: CREDIT_PACKS,
+      creditAnchors: CREDIT_ANCHORS,
     });
   } catch (err) {
     console.error('credits API error:', err);

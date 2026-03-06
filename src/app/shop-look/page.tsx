@@ -505,7 +505,7 @@ export default function ShopLookPage() {
                 </ul>
                 
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
                 >
                   🚀 שדרג עכשיו
@@ -539,7 +539,7 @@ export default function ShopLookPage() {
                 </div>
                 
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-bold hover:bg-gray-800 transition-all shadow-lg"
                 >
                   הצטרף ל-ShiputzAI

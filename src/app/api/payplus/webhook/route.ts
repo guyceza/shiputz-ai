@@ -228,8 +228,90 @@ export async function POST(request: NextRequest) {
 
     // Update user in database based on product type
     // NOTE: DB columns: purchased, purchased_at, vision_subscription,
-    //       vision_trial_used, vision_usage_count, vision_usage_month,
-    //       viz_credits, viz_monthly_used, viz_monthly_reset
+    //       viz_credits, plan, plan_started_at + credit_transactions table
+
+    // ====== NEW CREDIT SYSTEM ======
+
+    // Plan subscriptions: plan_starter_monthly, plan_pro_annual, etc.
+    const planMatch = productType?.match?.(/^plan_(starter|pro|business)_(monthly|annual)$/);
+    if (planMatch) {
+      const planId = planMatch[1];
+      const cycle = planMatch[2];
+      const planCredits: Record<string, number> = { starter: 50, pro: 200, business: 600 };
+      const credits = planCredits[planId] || 0;
+
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      const currentCredits = currentUser?.viz_credits || 0;
+      const newCredits = currentCredits + credits;
+
+      await supabase.from('users').upsert({
+        email: email.toLowerCase(),
+        purchased: true,
+        purchased_at: new Date().toISOString(),
+        plan: planId,
+        plan_started_at: new Date().toISOString(),
+        vision_subscription: 'active',
+        viz_credits: newCredits,
+      }, { onConflict: 'email' });
+
+      // Log transaction
+      await supabase.from('credit_transactions').insert({
+        user_email: email.toLowerCase(),
+        action: `plan_${planId}_${cycle}`,
+        amount: credits,
+        balance_after: newCredits,
+        created_at: new Date().toISOString(),
+      });
+
+      console.log(`✅ Plan ${planId} (${cycle}) activated for ${email}, +${credits} credits (total: ${newCredits})`);
+
+      // Send plan welcome email
+      await sendPlanEmail(email, planId, credits, supabase);
+
+      return NextResponse.json({ received: true, status: 'success', product: productType });
+    }
+
+    // Credit slider purchases: credits_50, credits_100, etc.
+    const creditsMatch = productType?.match?.(/^credits_(\d+)$/);
+    if (creditsMatch) {
+      const purchasedCredits = parseInt(creditsMatch[1]);
+
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      const currentCredits = currentUser?.viz_credits || 0;
+      const newCredits = currentCredits + purchasedCredits;
+
+      await supabase.from('users').update({
+        viz_credits: newCredits,
+      }).eq('email', email.toLowerCase());
+
+      // Log transaction
+      await supabase.from('credit_transactions').insert({
+        user_email: email.toLowerCase(),
+        action: `purchase_credits`,
+        amount: purchasedCredits,
+        balance_after: newCredits,
+        created_at: new Date().toISOString(),
+      });
+
+      console.log(`✅ ${purchasedCredits} credits added to ${email} (total: ${newCredits})`);
+
+      // Send credits purchase email
+      await sendCreditsEmail(email, purchasedCredits, newCredits, supabase);
+
+      return NextResponse.json({ received: true, status: 'success', product: productType });
+    }
+
+    // ====== LEGACY HANDLERS ======
     
     // NEW: Pro one-time purchase (₪99 = 4 viz + all tools)
     if (productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual') {
@@ -422,6 +504,77 @@ export async function POST(request: NextRequest) {
     console.error('PayPlus webhook error:', error);
     return NextResponse.json({ received: true, error: 'Internal error' }, { status: 200 });
   }
+}
+
+// ====== Email helpers for new credit system ======
+
+async function sendPlanEmail(email: string, planId: string, credits: number, supabase: any) {
+  try {
+    const RESEND_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_KEY) return;
+
+    const { data: userData } = await supabase.from('users').select('name').eq('email', email.toLowerCase()).single();
+    const name = escapeHtml(userData?.name || 'משפץ יקר');
+    const planNames: Record<string, string> = { starter: 'Starter', pro: 'Pro', business: 'Business' };
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'ShiputzAI <help@shipazti.com>',
+        to: email,
+        subject: `ברוך הבא לתוכנית ${planNames[planId] || planId}!`,
+        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #111; text-align: center;">ברוך הבא לתוכנית ${planNames[planId]}!</h1>
+          <p style="font-size: 16px; color: #333;">היי ${name},</p>
+          <p style="font-size: 16px; color: #333;">התוכנית הופעלה בהצלחה. קיבלת <strong>${credits} קרדיטים</strong> לחשבון שלך.</p>
+          <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+            <div style="font-size: 48px; font-weight: bold; color: #10b981;">${credits}</div>
+            <div style="color: #666;">קרדיטים זמינים</div>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
+          </div>
+          <p style="color: #888; font-size: 14px;">הקרדיטים מתחדשים כל חודש. בהצלחה!<br>צוות ShiputzAI</p>
+        </div>`,
+      }),
+    });
+    console.log(`Plan welcome email sent to ${email}`);
+  } catch (e) { console.error('Failed to send plan email:', e); }
+}
+
+async function sendCreditsEmail(email: string, purchased: number, total: number, supabase: any) {
+  try {
+    const RESEND_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_KEY) return;
+
+    const { data: userData } = await supabase.from('users').select('name').eq('email', email.toLowerCase()).single();
+    const name = escapeHtml(userData?.name || 'משפץ יקר');
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'ShiputzAI <help@shipazti.com>',
+        to: email,
+        subject: `${purchased} קרדיטים נוספו לחשבון שלך`,
+        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #111; text-align: center;">הקרדיטים נוספו בהצלחה!</h1>
+          <p style="font-size: 16px; color: #333;">היי ${name},</p>
+          <p style="font-size: 16px; color: #333;">רכשת <strong>${purchased} קרדיטים</strong>. הם זמינים לשימוש מיידי.</p>
+          <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+            <div style="font-size: 48px; font-weight: bold; color: #10b981;">${total}</div>
+            <div style="color: #666;">סה"כ קרדיטים בחשבון</div>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
+          </div>
+          <p style="color: #888; font-size: 14px;">הקרדיטים לא פגים. בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
+        </div>`,
+      }),
+    });
+    console.log(`Credits email sent to ${email}`);
+  } catch (e) { console.error('Failed to send credits email:', e); }
 }
 
 // Also handle GET requests (PayPlus sometimes redirects via GET)

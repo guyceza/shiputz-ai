@@ -60,11 +60,14 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
-// ====== Credit Packs ======
-export const CREDIT_PACKS = [
-  { id: 'pack_20', credits: 20, price: 19, perCredit: 0.95 },
-  { id: 'pack_60', credits: 60, price: 49, perCredit: 0.82, popular: true },
-  { id: 'pack_200', credits: 200, price: 129, perCredit: 0.65, discount: '32%' },
+// ====== Credit Slider Anchors (for dynamic pricing) ======
+export const CREDIT_ANCHORS = [
+  { credits: 10, price: 10 },   // ₪1.00/credit
+  { credits: 20, price: 19 },   // ₪0.95
+  { credits: 50, price: 42 },   // ₪0.84
+  { credits: 100, price: 75 },  // ₪0.75
+  { credits: 200, price: 129 }, // ₪0.65
+  { credits: 300, price: 179 }, // ₪0.60
 ] as const;
 
 // ====== Admin emails (bypass credits) ======

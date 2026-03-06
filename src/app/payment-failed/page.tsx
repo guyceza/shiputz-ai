@@ -33,7 +33,7 @@ export default function PaymentFailedPage() {
 
         <div className="space-y-3">
           <Link 
-            href="/checkout"
+            href="/pricing"
             className="inline-block w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
             נסה שוב

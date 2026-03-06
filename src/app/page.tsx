@@ -446,11 +446,11 @@ export default function Home() {
               </ul>
 
               <a
-                href="/checkout"
+                href="/pricing"
                 className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
                 style={{ backgroundColor: '#101010' }}
               >
-                🎭 לרכוש — ₪69
+                לצפייה בתוכניות ←
               </a>
               <p className="text-xs text-gray-400 mt-3">תשלום חד-פעמי · לא חיוב חוזר</p>
             </div>

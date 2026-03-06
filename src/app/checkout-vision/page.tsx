@@ -8,7 +8,7 @@ export default function CheckoutVisionRedirect() {
   const router = useRouter();
   
   useEffect(() => {
-    router.replace("/checkout");
+    router.replace("/pricing");
   }, [router]);
 
   return (

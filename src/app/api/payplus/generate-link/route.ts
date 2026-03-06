@@ -9,28 +9,42 @@ const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplu
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-interface PayPlusRequest {
-  productType: 'pro' | 'pack_10' | 'pack_30' | 'pack_100' | 'pro_monthly' | 'pro_annual' | 'premium' | 'vision' | 'premium_plus';
-  email: string;
-  userId?: string;
-  discountCode?: string;
+// Credit slider pricing — same anchors as frontend
+const CREDIT_ANCHORS = [
+  { credits: 10, price: 10 },
+  { credits: 20, price: 19 },
+  { credits: 50, price: 42 },
+  { credits: 100, price: 75 },
+  { credits: 200, price: 129 },
+  { credits: 300, price: 179 },
+];
+
+function getCreditPrice(credits: number): number {
+  if (credits <= CREDIT_ANCHORS[0].credits) return CREDIT_ANCHORS[0].price;
+  const last = CREDIT_ANCHORS[CREDIT_ANCHORS.length - 1];
+  if (credits >= last.credits) return Math.round(credits * (last.price / last.credits));
+  for (let i = 0; i < CREDIT_ANCHORS.length - 1; i++) {
+    if (credits >= CREDIT_ANCHORS[i].credits && credits <= CREDIT_ANCHORS[i + 1].credits) {
+      const t = (credits - CREDIT_ANCHORS[i].credits) / (CREDIT_ANCHORS[i + 1].credits - CREDIT_ANCHORS[i].credits);
+      return Math.round(CREDIT_ANCHORS[i].price + t * (CREDIT_ANCHORS[i + 1].price - CREDIT_ANCHORS[i].price));
+    }
+  }
+  return 0;
 }
 
-// Pricing configuration (in ILS)
-// Purim sale: ₪69 instead of ₪99
-const PURIM_SALE = true; // Toggle off after Purim
-const PURIM_PRO_PRICE = 69;
+// Plan pricing
+const PLAN_PRICING: Record<string, { monthly: number; annual: number; credits: number }> = {
+  starter: { monthly: 29, annual: 15, credits: 50 },
+  pro: { monthly: 79, annual: 39, credits: 200 },
+  business: { monthly: 199, annual: 99, credits: 600 },
+};
 
-const PRICING: Record<string, { amount: number; chargeMethod: number; credits?: number }> = {
-  // NEW pricing model — one-time Pro + packs
-  pro: { amount: 99, chargeMethod: 1, credits: 4 }, // ₪99 one-time, 4 visualizations
-  // Visualization packs (one-time, never expire)
-  pack_10: { amount: 29, chargeMethod: 1, credits: 10 },
-  pack_30: { amount: 69, chargeMethod: 1, credits: 30 },
-  pack_100: { amount: 149, chargeMethod: 1, credits: 100 },
-  // LEGACY (keep for existing customers)
-  pro_monthly: { amount: 29, chargeMethod: 1 },
-  pro_annual: { amount: 228, chargeMethod: 1 },
+// Legacy pricing (keep for old customers)
+const LEGACY_PRICING: Record<string, { amount: number; chargeMethod: number }> = {
+  pro: { amount: 99, chargeMethod: 1 },
+  pack_10: { amount: 29, chargeMethod: 1 },
+  pack_30: { amount: 69, chargeMethod: 1 },
+  pack_100: { amount: 149, chargeMethod: 1 },
   premium: { amount: 299.99, chargeMethod: 1 },
   vision: { amount: 39.99, chargeMethod: 1 },
   premium_plus: { amount: 349.99, chargeMethod: 1 },
@@ -38,110 +52,109 @@ const PRICING: Record<string, { amount: number; chargeMethod: number; credits?: 
 
 export async function POST(request: NextRequest) {
   try {
-    const body: PayPlusRequest = await request.json();
-    const { productType, email, userId, discountCode } = body;
+    const body = await request.json();
+    const { productType, email, billing, discountCode } = body;
 
     if (!PAYPLUS_API_KEY || !PAYPLUS_SECRET_KEY || !PAYPLUS_PAGE_UID) {
-      console.error('PayPlus credentials not configured');
       return NextResponse.json({ error: 'Payment service not configured' }, { status: 500 });
     }
 
     if (!productType || !email) {
-      return NextResponse.json({ error: 'Missing required fields: productType, email' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const pricing = PRICING[productType];
-    if (!pricing) {
+    let amount = 0;
+    let chargeMethod = 1; // 1 = one-time
+    let isRecurring = false;
+    let description = '';
+
+    // NEW: Plan subscriptions (plan_starter_monthly, plan_pro_annual, etc.)
+    const planMatch = productType.match(/^plan_(starter|pro|business)_(monthly|annual)$/);
+    if (planMatch) {
+      const planId = planMatch[1];
+      const cycle = planMatch[2] as 'monthly' | 'annual';
+      const plan = PLAN_PRICING[planId];
+      
+      if (cycle === 'annual') {
+        amount = plan.annual * 12; // Charge full year
+        description = `תוכנית ${planId} — שנתית (${plan.credits} קרדיטים/חודש)`;
+      } else {
+        amount = plan.monthly;
+        isRecurring = true;
+        chargeMethod = 3; // recurring
+        description = `תוכנית ${planId} — חודשית (${plan.credits} קרדיטים/חודש)`;
+      }
+    }
+
+    // NEW: Credit slider purchase (credits_50, credits_100, etc.)
+    const creditsMatch = productType.match(/^credits_(\d+)$/);
+    if (creditsMatch) {
+      const credits = parseInt(creditsMatch[1]);
+      if (credits < 10 || credits > 300) {
+        return NextResponse.json({ error: 'Invalid credit amount' }, { status: 400 });
+      }
+      amount = getCreditPrice(credits);
+      description = `${credits} קרדיטים`;
+    }
+
+    // LEGACY support
+    if (!amount && LEGACY_PRICING[productType]) {
+      const legacy = LEGACY_PRICING[productType];
+      amount = legacy.amount;
+      chargeMethod = legacy.chargeMethod;
+    }
+
+    if (!amount) {
       return NextResponse.json({ error: 'Invalid product type' }, { status: 400 });
     }
 
-    // Apply discount if code provided
-    let finalAmount = pricing.amount;
+    // Apply discount code if provided
     let discountPercent = 0;
-    
     if (discountCode) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      
-      // Validate discount code
-      const { data: codeData, error: codeError } = await supabase
+      const { data: codeData } = await supabase
         .from('discount_codes')
         .select('*')
         .eq('code', discountCode.toUpperCase())
         .single();
-      
-      if (!codeError && codeData) {
-        // Check if code belongs to this email
-        if (codeData.user_email.toLowerCase() === email.toLowerCase()) {
-          // Check if not used
-          if (!codeData.used_at) {
-            // Check if not expired
-            if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
-              // Apply discount!
-              discountPercent = codeData.discount_percent || 30;
-              const rawAmount = pricing.amount * (100 - discountPercent) / 100;
-              // For subscription (≤₪100): round to whole number. For one-time: .99 pricing
-              finalAmount = pricing.amount <= 100 
-                ? Math.round(rawAmount) 
-                : Math.floor(rawAmount / 10) * 10 + 9.99;
-              // Minimum ₪1 — PayPlus doesn't accept ₪0
-              if (finalAmount < 1) finalAmount = 1;
-              console.log(`Discount applied: ${discountPercent}% off, final amount: ${finalAmount}`);
-            } else {
-              console.log('Discount code expired');
-            }
-          } else {
-            console.log('Discount code already used');
-          }
-        } else {
-          console.log('Discount code belongs to different email');
+
+      if (codeData && !codeData.used_at && codeData.user_email?.toLowerCase() === email.toLowerCase()) {
+        if (!codeData.expires_at || new Date(codeData.expires_at) > new Date()) {
+          discountPercent = codeData.discount_percent || 30;
+          amount = Math.max(1, Math.round(amount * (100 - discountPercent) / 100));
         }
-      } else {
-        console.log('Discount code not found:', discountCode);
       }
     }
 
     // Build PayPlus request
     const payPlusBody: any = {
       payment_page_uid: PAYPLUS_PAGE_UID,
-      charge_method: pricing.chargeMethod,
-      amount: finalAmount,
+      charge_method: chargeMethod,
+      amount,
       currency_code: 'ILS',
       sendEmailApproval: true,
       sendEmailFailure: false,
-      
-      // Customer info
       customer: {
         customer_name: email.split('@')[0],
-        email: email,
+        email,
       },
-
-      // Callbacks — per PayPlus docs, refURL_callback MUST be in the API call
       refURL_success: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-success?product=${productType}`,
       refURL_failure: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-failed`,
       refURL_callback: `https://shipazti.com/api/payplus/webhook?secret=${process.env.PAYPLUS_WEBHOOK_SECRET || ''}`,
-
-      // Custom data to identify the transaction
-      // Normalize product type for webhook processing
-      more_info: productType === 'pro_monthly' || productType === 'pro_annual' ? productType : productType,
+      more_info: productType,
       more_info_1: email,
-      more_info_2: userId || '',
+      more_info_2: billing || '',
       more_info_3: discountCode || '',
-
-      // Invoice generation
       initial_invoice: true,
-
-      // Hebrew language
       language_code: 'he',
     };
 
-    // Apply Purim sale for Pro
-    if (PURIM_SALE && productType === 'pro' && finalAmount === pricing.amount) {
-      payPlusBody.amount = PURIM_PRO_PRICE;
+    if (description) {
+      payPlusBody.product_name = description;
     }
 
-    // Legacy: Add recurring settings for old subscription products
-    if (productType === 'vision') {
-      payPlusBody.charge_method = 3;
+    // Recurring settings for monthly plans
+    if (isRecurring) {
       payPlusBody.recurring_settings = {
         instant_first_payment: true,
         recurring_type: 2,
@@ -153,6 +166,19 @@ export async function POST(request: NextRequest) {
         successful_invoice: true,
         customer_failure_email: true,
         send_customer_success_email: true,
+      };
+    }
+
+    // Legacy vision recurring
+    if (productType === 'vision') {
+      payPlusBody.charge_method = 3;
+      payPlusBody.recurring_settings = {
+        instant_first_payment: true,
+        recurring_type: 2,
+        recurring_range: 1,
+        number_of_charges: 0,
+        start_date_on_payment_date: true,
+        start_date: new Date().getDate(),
       };
     }
 
@@ -172,29 +198,26 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok || result.results?.status === 'error') {
       console.error('PayPlus error:', result);
-      return NextResponse.json({ 
-        error: result.message || result.results?.description || 'Payment service error' 
+      return NextResponse.json({
+        error: result.message || result.results?.description || 'Payment service error',
       }, { status: 400 });
     }
 
-    console.log('PayPlus response:', result);
-
     const pageRequestUid = result.data?.page_request_uid;
 
-    // Save pending payment for cron verification (safety net if user closes browser)
+    // Save pending payment
     if (pageRequestUid) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       await supabase.from('pending_payments').upsert({
         page_request_uid: pageRequestUid,
         email: email.toLowerCase(),
         product_type: productType,
-        amount: finalAmount,
+        amount,
         status: 'pending',
-      }, { onConflict: 'page_request_uid' }).then(({ error }) => {
-        if (error) console.error('Error saving pending payment:', error);
-      });
+      }, { onConflict: 'page_request_uid' });
+      // Fire-and-forget, ignore errors
     }
-    
+
     return NextResponse.json({
       success: true,
       payment_url: result.data?.payment_page_link,

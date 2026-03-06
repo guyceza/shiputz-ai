@@ -827,7 +827,9 @@ export default function VisualizePage() {
       
       const data = await res.json();
       
-      if (data.error) {
+      if (res.status === 402 || data.creditError) {
+        setGenerateError(`אין מספיק קרדיטים (נדרש: ${data.required || '?'}, יתרה: ${data.balance || 0}). <a href="/pricing" style="color:#10b981;text-decoration:underline">רכישת קרדיטים</a>`);
+      } else if (data.error) {
         setGenerateError(data.error);
       } else {
         const generatedImage = data.generatedImage;
@@ -1338,7 +1340,7 @@ export default function VisualizePage() {
           {!isLoggedIn && (
             <div className="flex gap-4 flex-wrap justify-center">
               <Link
-                href="/checkout"
+                href="/pricing"
                 className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
               >
                 הצטרפו ל-ShiputzAI
@@ -1478,7 +1480,7 @@ export default function VisualizePage() {
                 </ul>
                 
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
                   🎭 לרכוש — ₪69
@@ -1527,7 +1529,7 @@ export default function VisualizePage() {
                 </ul>
                 
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-xl text-base font-medium hover:bg-gray-800 transition-all"
                 >
                   🎭 לרכוש — ₪69
@@ -1683,9 +1685,7 @@ export default function VisualizePage() {
             </div>
             
             {generateError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                {generateError}
-              </div>
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm" dangerouslySetInnerHTML={{ __html: generateError }} />
             )}
             
             {showGameLoading && (
@@ -1843,14 +1843,14 @@ export default function VisualizePage() {
                 </button>
               ) : hasPurchased ? (
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
                 >
                   ⭐ שדרג להדמיות נוספות
                 </Link>
               ) : (
                 <Link
-                  href="/checkout"
+                  href="/pricing"
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
                 >
                   🔓 הצטרף ל-ShiputzAI

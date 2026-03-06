@@ -97,7 +97,7 @@ export default function PricingComparison() {
         </ul>
         
         <Link
-          href="/checkout"
+          href="/pricing"
           className="block w-full bg-gray-900 text-white py-3 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors mt-auto"
         >
           🎭 לרכוש — ₪{purimPrice}

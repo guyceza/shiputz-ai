@@ -32,7 +32,7 @@ export default function PricingCard({
       <div className={`relative bg-white border border-gray-200 rounded-2xl px-8 py-6 shadow-sm w-full max-w-lg ${className}`}>
         <div className="flex items-center justify-between">
           <Link
-            href="/checkout"
+            href="/pricing"
             className="text-white px-8 py-3 rounded-lg text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
           >
             לרכוש
@@ -74,7 +74,7 @@ export default function PricingCard({
         </ul>
         
         <Link
-          href="/checkout"
+          href="/pricing"
           className="block w-full text-white py-3 rounded-lg text-center text-sm font-medium hover:opacity-90 transition-colors" style={{ backgroundColor: '#101010' }}
         >
           🎭 לרכוש — ₪{purimPrice}
@@ -118,7 +118,7 @@ export default function PricingCard({
       </ul>
       
       <Link
-        href="/checkout"
+        href="/pricing"
         className="block bg-gray-900 text-white py-4 rounded-lg text-center font-medium hover:bg-gray-800 transition-colors"
       >
         🎭 לרכוש — ₪{purimPrice}

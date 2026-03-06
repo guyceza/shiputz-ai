@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/check-payments",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/credit-renewal",
+      "schedule": "5 0 * * *"
     }
   ],
   "functions": {
@@ -45,6 +49,9 @@
       "maxDuration": 60
     },
     "src/app/api/bill-of-quantities/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/credit-renewal/route.ts": {
       "maxDuration": 60
     }
   }

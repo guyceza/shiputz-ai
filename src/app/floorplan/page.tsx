@@ -2,6 +2,15 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import CreditBadge from "@/components/CreditBadge";
+
+function checkCredits(res: Response, data: any) {
+  if (res.status === 402 || data?.creditError) {
+    const msg = `אין מספיק קרדיטים (נדרש: ${data?.required || '?'}, יתרה: ${data?.balance || 0})`;
+    window.open('/pricing', '_blank');
+    throw new Error(msg);
+  }
+}
 
 const STYLES = [
   { key: "modern-cabin", nameHe: "בקתה מודרנית", desc: "עץ חם, קורות חשופות, חלונות גדולים" },
@@ -181,7 +190,7 @@ export default function FloorplanPage() {
       formData.append("email", getEmail() || "");
       const res = await fetch("/api/floorplan", { method: "POST", body: formData });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "AI generation failed");
+      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "AI generation failed");
       if (data.image) {
         setFloorplanResult(`data:${data.image.mimeType};base64,${data.image.data}`);
         setPhase("floorplan-ready");
@@ -212,7 +221,7 @@ export default function FloorplanPage() {
       fd1.append("email", getEmail() || "");
       const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
       const roomInfo = await detectRes.json();
-      if (!detectRes.ok) throw new Error(roomInfo.error);
+      checkCredits(detectRes, roomInfo); if (!detectRes.ok) throw new Error(roomInfo.error);
       setDetectedRoom(roomInfo);
       setLoadingLabel(`יוצר צילום של ה${roomInfo.roomHe}...`);
       const fd2 = new FormData();
@@ -222,7 +231,7 @@ export default function FloorplanPage() {
       fd2.append("email", getEmail() || "");
       const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
       const roomData = await roomRes.json();
-      if (!roomRes.ok) throw new Error(roomData.error);
+      checkCredits(roomRes, roomData); if (!roomRes.ok) throw new Error(roomData.error);
       if (roomData.image) {
         const photo: RoomPhoto = {
           roomName: roomInfo.room, roomNameHe: roomInfo.roomHe,
@@ -265,7 +274,7 @@ export default function FloorplanPage() {
       fd.append("email", getEmail() || "");
       const res = await fetch("/api/floorplan/detect-furniture", { method: "POST", body: fd });
       const info = await res.json();
-      if (!res.ok) throw new Error(info.error);
+      checkCredits(res, info); if (!res.ok) throw new Error(info.error);
       setDetectedFurniture(info);
       setPhase("furniture-select");
     } catch (err: any) { setError(err.message); }
@@ -295,7 +304,7 @@ export default function FloorplanPage() {
       fd.append("email", getEmail() || "");
       const res = await fetch("/api/floorplan/furniture", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      checkCredits(res, data); if (!res.ok) throw new Error(data.error);
       if (data.image) {
         setFurnitureResult(`data:${data.image.mimeType};base64,${data.image.data}`);
         setPhase("furniture-result");
@@ -345,7 +354,7 @@ export default function FloorplanPage() {
       setVideoProgress("מייצר סרטון... (עד דקה)");
       const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Video generation failed");
+      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "Video generation failed");
       if (data.video) {
         setVideoResult(`data:${data.video.mimeType};base64,${data.video.data}`);
         setPhase("video-result");
@@ -416,8 +425,8 @@ export default function FloorplanPage() {
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
           <div className="flex items-center gap-3">
+            <CreditBadge />
             <span className="text-xs text-gray-900 bg-gray-100 px-3 py-1.5 rounded-full">Floor Plan Studio</span>
-            <span className="text-[10px] text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">BETA</span>
           </div>
         </div>
       </nav>

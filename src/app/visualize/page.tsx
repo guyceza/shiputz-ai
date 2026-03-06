@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
 import PricingComparison from "@/components/PricingComparison";
+import CreditBadge from "@/components/CreditBadge";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -947,9 +948,7 @@ export default function VisualizePage() {
             ShiputzAI
           </Link>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-900 bg-gray-100 px-3 py-1.5 rounded-full">
-              🎨 AI Vision
-            </span>
+            <CreditBadge />
             <Link href="/tips" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
               מאמרים וטיפים
             </Link>

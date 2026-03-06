@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import CreditBadge from "@/components/CreditBadge";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
 // Trial tracking uses /api/vision-trial endpoint
@@ -220,8 +221,14 @@ export default function ShopLookPage() {
         body: JSON.stringify({ image: imageUrl })
       });
       
+      const data = await response.json();
+      if (response.status === 402 || data?.creditError) {
+        alert(`אין מספיק קרדיטים (נדרש: ${data?.required || '?'}, יתרה: ${data?.balance || 0})`);
+        window.open('/pricing', '_blank');
+        setLoading(false);
+        return;
+      }
       if (response.ok) {
-        const data = await response.json();
         if (data.items && data.items.length > 0) {
           setItems(data.items);
           
@@ -258,7 +265,8 @@ export default function ShopLookPage() {
           <Link href="/" className="text-base font-semibold text-gray-900">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <CreditBadge />
             <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
               מאמרים וטיפים
             </Link>

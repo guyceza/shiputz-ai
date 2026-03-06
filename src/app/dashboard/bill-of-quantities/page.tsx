@@ -304,7 +304,10 @@ export default function BillOfQuantitiesPage() {
       
       const data = await res.json();
       
-      if (data.error) {
+      if (res.status === 402 || data.creditError) {
+        setError(`אין מספיק קרדיטים (נדרש: ${data.required || '?'}, יתרה: ${data.balance || 0})`);
+        window.open('/pricing', '_blank');
+      } else if (data.error) {
         setError(data.error);
         if (data.suggestion) {
           setError(`${data.error}\n${data.suggestion}`);

@@ -3,6 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+
+function handleCreditError(res: Response, data: any): boolean {
+  if (res.status === 402 || data?.creditError) {
+    alert(`אין מספיק קרדיטים (נדרש: ${data?.required || '?'}, יתרה: ${data?.balance || 0})`);
+    window.open('/pricing', '_blank');
+    return true;
+  }
+  return false;
+}
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
 
@@ -727,8 +736,9 @@ export default function ProjectPage() {
           body: JSON.stringify({ image: images[i], userEmail }),
         });
         
+        const data = await response.json();
+        if (handleCreditError(response, data)) return;
         if (response.ok) {
-          const data = await response.json();
           console.log("Scan result for image", i + 1, ":", data);
           
           if (!data.error && currentProject && data.description && data.amount) {
@@ -907,8 +917,9 @@ export default function ProjectPage() {
         body: JSON.stringify({ image: base64, userEmail }),
       });
       
+      const data = await response.json();
+      if (handleCreditError(response, data)) return;
       if (response.ok) {
-        const data = await response.json();
         if (data.error) {
           alert("שגיאה בסריקה: " + data.error);
         } else {
@@ -950,6 +961,7 @@ export default function ProjectPage() {
         body: JSON.stringify({ text: quoteText, budget: project?.budget, userEmail }),
       });
       const data = await response.json();
+      if (handleCreditError(response, data)) { setAnalyzing(false); return; }
       if (response.ok) {
         setQuoteAnalysis(data.analysis);
         setQuoteVerdict(data.verdict || null);
@@ -1483,6 +1495,7 @@ export default function ProjectPage() {
       
       const data = await response.json();
       
+      if (handleCreditError(response, data)) { setVisionLoading(false); return; }
       if (response.ok && data.success) {
         setVisionResult({
           analysis: data.analysis,
@@ -1557,8 +1570,9 @@ export default function ProjectPage() {
         body: JSON.stringify({ image: imageUrl, userEmail: userEmailForProducts })
       });
       
+      const data = await response.json();
+      if (handleCreditError(response, data)) return;
       if (response.ok) {
-        const data = await response.json();
         setDetectedProducts(data.products || []);
       }
     } catch {

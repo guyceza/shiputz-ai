@@ -9,6 +9,7 @@ import { trackRequest } from "@/lib/usage-monitor";
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 import { ADMIN_EMAILS, isAdminEmail } from '@/lib/admin';
+import { creditGuard } from '@/lib/credit-guard';
 const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 // Send notification to admin when API rate limit is hit
@@ -402,6 +403,10 @@ export async function POST(request: NextRequest) {
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
     }
+
+    // Credit check
+    const creditCheck = await creditGuard(userEmail, 'visualize');
+    if ('error' in creditCheck) return creditCheck.error;
 
     // Rate limiting - 10 requests per minute (expensive operation)
     const clientId = getClientId(request);

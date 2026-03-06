@@ -3,6 +3,7 @@ export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { creditGuard } from "@/lib/credit-guard";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { getMidragPricingReference } from "@/lib/pricing-data";
 
@@ -44,11 +45,9 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    if (!premium) {
-      return NextResponse.json({ 
-        error: "ניתוח הצעות מחיר זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מניתוח AI." 
-      }, { status: 403 });
-    }
+    // Credit check
+    const creditCheck = await creditGuard(userEmail, 'analyze-quote');
+    if ('error' in creditCheck) return creditCheck.error;
 
     // Rate limiting - 15 requests per minute
     const clientId = getClientId(request);

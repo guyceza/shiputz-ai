@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { isAdminEmail } from "@/lib/admin";
+import { creditGuard } from "@/lib/credit-guard";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -16,9 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing room image, furniture image, or instruction" }, { status: 400 });
     }
 
-    if (!userEmail || !isAdminEmail(userEmail)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    const creditCheck = await creditGuard(userEmail, 'furniture-swap');
+    if ('error' in creditCheck) return creditCheck.error;
 
     const roomBytes = await roomImage.arrayBuffer();
     const roomBase64 = Buffer.from(roomBytes).toString("base64");

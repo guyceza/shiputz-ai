@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from '@/lib/supabase';
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { creditGuard } from "@/lib/credit-guard";
 
 // Verify user exists (Shop the Look is part of the visualization experience, including trial)
 async function verifyUserExists(userEmail: string): Promise<boolean> {
@@ -40,13 +41,14 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    // Shop the Look is part of the visualization experience (including free trial)
     const userExists = await verifyUserExists(userEmail);
     if (!userExists) {
-      return NextResponse.json({ 
-        error: "נדרשת התחברות לשימוש בשירות זה" 
-      }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
     }
+
+    // Credit check
+    const creditCheck = await creditGuard(userEmail, 'shop-look');
+    if ('error' in creditCheck) return creditCheck.error;
 
     if (!image) {
       return NextResponse.json({ error: "Missing image" }, { status: 400 });

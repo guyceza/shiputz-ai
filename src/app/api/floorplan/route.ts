@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { isAdminEmail } from "@/lib/admin";
+import { creditGuard } from "@/lib/credit-guard";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -51,10 +52,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image or style" }, { status: 400 });
     }
 
-    // Auth check - admin only for now
-    if (!userEmail || !isAdminEmail(userEmail)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    // Credit check
+    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    const creditCheck = await creditGuard(userEmail, 'floorplan');
+    if ('error' in creditCheck) return creditCheck.error;
 
     const style = STYLES[styleKey];
     if (!style) {

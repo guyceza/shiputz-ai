@@ -16,9 +16,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image or click position" }, { status: 400 });
     }
 
-    if (!userEmail || !isAdminEmail(userEmail)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    // Auth only — detect is free (credit charged on furniture swap)
+    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
 
     const bytes = await image.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminEmail } from "@/lib/admin";
+import { creditGuard } from "@/lib/credit-guard";
 
 // Vertex AI Veo 3.1 Fast — video generation with first/last frame
 // Uses OAuth via service account or user credentials
@@ -43,9 +44,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing first or last frame" }, { status: 400 });
     }
 
-    if (!userEmail || !isAdminEmail(userEmail)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    const creditCheck = await creditGuard(userEmail, 'video-walkthrough');
+    if ('error' in creditCheck) return creditCheck.error;
 
     // Convert to base64
     const firstBytes = await firstFrameFile.arrayBuffer();

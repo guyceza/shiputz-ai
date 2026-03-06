@@ -3,6 +3,7 @@ export const maxDuration = 60; // 60 second timeout
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { creditGuard } from "@/lib/credit-guard";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
 
@@ -44,11 +45,9 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    if (!premium) {
-      return NextResponse.json({ 
-        error: "פיצ'ר זה זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מסריקת קבלות." 
-      }, { status: 403 });
-    }
+    // Credit check
+    const creditCheck = await creditGuard(userEmail, 'scan-receipt');
+    if ('error' in creditCheck) return creditCheck.error;
 
     // Rate limiting - 30 requests per minute
     const clientId = getClientId(request);

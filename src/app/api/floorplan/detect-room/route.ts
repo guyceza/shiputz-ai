@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { isAdminEmail } from "@/lib/admin";
+import { creditGuard } from "@/lib/credit-guard";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -16,9 +17,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image or click position" }, { status: 400 });
     }
 
-    if (!userEmail || !isAdminEmail(userEmail)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
+    // Auth only — detect-room is free (credit charged on room photo generation)
+    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
 
     const bytes = await image.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");

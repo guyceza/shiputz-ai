@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import CreditBadge from "@/components/CreditBadge";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
@@ -478,7 +479,10 @@ export default function BillOfQuantitiesPage() {
         <nav className="h-11 border-b border-gray-100">
           <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
             <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900">חזרה לדשבורד</Link>
+            <div className="flex items-center gap-3">
+              <CreditBadge />
+              <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900">חזרה לדשבורד</Link>
+            </div>
           </div>
         </nav>
         

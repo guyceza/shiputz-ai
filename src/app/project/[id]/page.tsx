@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import CreditBadge from "@/components/CreditBadge";
 
 function handleCreditError(res: Response, data: any): boolean {
   if (res.status === 402 || data?.creditError) {
@@ -1643,7 +1644,8 @@ export default function ProjectPage() {
             <span className="hidden md:inline text-gray-300">|</span>
             <span className="text-xs md:text-sm text-gray-900 truncate max-w-[100px] md:max-w-none">{project.name}</span>
           </div>
-          <div className="hidden md:flex gap-2">
+          <div className="hidden md:flex items-center gap-2">
+            <CreditBadge />
             <button 
               onClick={generateShareLink} 
               disabled={shareLoading}

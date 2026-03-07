@@ -796,17 +796,15 @@ export default function BillOfQuantitiesPage() {
             </button>
             
             {/* Flappy Bird + Loading Tips */}
-            {showBOQGame && (
+            {showBOQGame && generating && (
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
                 <FlappyBirdGame 
-                  isReady={!!result} 
+                  isReady={false} 
                   onShowResult={() => setShowBOQGame(false)} 
                 />
-                {generating && (
-                  <p className="text-sm text-gray-600 transition-all duration-300 mt-2">
-                    {loadingTips[currentTip]}
-                  </p>
-                )}
+                <p className="text-sm text-gray-600 transition-all duration-300 mt-2">
+                  {loadingTips[currentTip]}
+                </p>
               </div>
             )}
 

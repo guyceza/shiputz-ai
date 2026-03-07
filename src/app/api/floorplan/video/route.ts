@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const accessToken = await getAccessToken();
 
-    const defaultPrompt = "ONE CONTINUOUS SINGLE TAKE with NO CUTS. Steadicam smoothly glides from the first room to the second room in one unbroken fluid motion. No transitions, no cuts, no scene changes. The camera physically moves through the connected space. Eye-level perspective, warm natural lighting. Photorealistic architectural walkthrough.";
+    const defaultPrompt = "ABSOLUTELY ONE CONTINUOUS UNBROKEN SINGLE TAKE. NO cuts, NO fades, NO fade-to-black, NO dissolves, NO transitions of any kind. The screen must NEVER go dark or dim at any point. A steadicam smoothly and physically glides from the first room through a doorway or hallway into the second room in one seamless uninterrupted fluid motion. The camera never stops moving forward. Constant visible environment throughout — walls, floors, ceiling always in frame. Eye-level perspective, warm natural lighting, photorealistic interior architectural walkthrough. The entire video is one single continuous camera movement with zero interruptions.";
 
     // Start Veo generation
     const veoRes = await fetch(

@@ -73,6 +73,15 @@ const features = [
     poster: "/images/ai-vision/visualize.jpg",
     duration: 14380,
   },
+  {
+    id: "style-match",
+    title: "Style Matcher",
+    description: "זיהוי סגנון עיצוב + רשימת קניות לשחזור",
+    href: "/style-match",
+    type: "image" as const,
+    image: "/images/ai-vision/style-match.jpg",
+    duration: 4000,
+  },
 ];
 
 export default function FeaturesCarousel() {

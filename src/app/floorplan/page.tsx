@@ -1257,41 +1257,43 @@ export default function FloorplanPage() {
             )}
 
             {/* Optional custom prompt */}
-            <div className="max-w-2xl mx-auto">
-              <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
-              <input
-                type="text"
-                value={videoCustomPrompt}
-                onChange={(e) => setVideoCustomPrompt(e.target.value)}
-                placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
-                dir="rtl"
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                <p className="text-sm text-red-600">{error}</p>
+            <div className="max-w-2xl mx-auto space-y-4">
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
+                <input
+                  type="text"
+                  value={videoCustomPrompt}
+                  onChange={(e) => setVideoCustomPrompt(e.target.value)}
+                  placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+                  dir="rtl"
+                />
               </div>
-            )}
 
-            <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
-              className={`w-full py-4 rounded-full font-bold text-lg transition-all max-w-2xl mx-auto ${
-                videoFirstImage && videoLastImage && !videoLoading
-                  ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}>
-              {videoLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Spinner className="h-5 w-5" />
-                  {videoProgress || "מייצר סרטון..."}
-                </span>
-              ) : "🎬 צור סרטון סיור"}
-            </button>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
 
-            <div className="text-center">
-              <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}
-                className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה לתוכנית קומה</button>
+              <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
+                className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
+                  videoFirstImage && videoLastImage && !videoLoading
+                    ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}>
+                {videoLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner className="h-5 w-5" />
+                    {videoProgress || "מייצר סרטון..."}
+                  </span>
+                ) : "🎬 צור סרטון סיור"}
+              </button>
+
+              <div className="text-center">
+                <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}
+                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה לתוכנית קומה</button>
+              </div>
             </div>
           </>
         )}

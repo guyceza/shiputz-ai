@@ -60,7 +60,8 @@ const features = [
     description: "העלו הצעת מחיר מקבלן וקבלו ניתוח AI — מה סביר ומה חסר",
     credits: 3,
     href: "/dashboard",
-    image: "/images/ai-vision/quote.jpg",
+    image: "/images/ai-vision/quote-analysis.gif",
+    hasRealImage: true,
     gradient: "from-rose-500/10 to-red-500/10",
   },
   {

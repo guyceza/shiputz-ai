@@ -215,6 +215,36 @@ export default function FloorplanPage() {
   const isAnyLoading = loading || loadingRoom || loadingFurniture || swapping || videoLoading;
 
   // Shared: submit video + poll for result
+  // Resize image to 1280x720 JPEG — handles both data URLs and remote URLs
+  const resizeToJpeg = async (src: string): Promise<Blob> => {
+    // If it's a remote URL, fetch it first to avoid CORS canvas tainting
+    let imgSrc = src;
+    if (src.startsWith("http")) {
+      const resp = await fetch(src);
+      const blob = await resp.blob();
+      imgSrc = URL.createObjectURL(blob);
+    }
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1280; canvas.height = 720;
+        const ctx = canvas.getContext("2d")!;
+        const scale = Math.max(1280 / img.width, 720 / img.height);
+        const w = img.width * scale; const h = img.height * scale;
+        ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error("Failed to convert image"));
+          if (imgSrc !== src) URL.revokeObjectURL(imgSrc);
+        }, "image/jpeg", 0.85);
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = imgSrc;
+    });
+  };
+
   const submitAndPollVideo = async (fd: FormData) => {
     setVideoProgress("שולח לייצור סרטון...");
     const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
@@ -525,21 +555,6 @@ export default function FloorplanPage() {
     setLoadingLabel("מייצר סרטון סיור...");
     setError(null);
     try {
-      const resizeToJpeg = async (dataUrl: string): Promise<Blob> => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1280; canvas.height = 720;
-            const ctx = canvas.getContext("2d")!;
-            const scale = Math.max(1280 / img.width, 720 / img.height);
-            const w = img.width * scale; const h = img.height * scale;
-            ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
-            canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85);
-          };
-          img.src = dataUrl;
-        });
-      };
       setVideoProgress("ממיר תמונות...");
       const firstBlob = await resizeToJpeg(fromPhoto.imageData);
       const lastBlob = await resizeToJpeg(toPhoto.imageData);
@@ -564,21 +579,6 @@ export default function FloorplanPage() {
     setLoadingLabel("מייצר סרטון סיור...");
     setError(null);
     try {
-      const resizeToJpeg = async (dataUrl: string): Promise<Blob> => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1280; canvas.height = 720;
-            const ctx = canvas.getContext("2d")!;
-            const scale = Math.max(1280 / img.width, 720 / img.height);
-            const w = img.width * scale; const h = img.height * scale;
-            ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
-            canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85);
-          };
-          img.src = dataUrl;
-        });
-      };
       setVideoProgress("ממיר תמונות...");
       const firstBlob = await resizeToJpeg(videoFirstImage);
       const lastBlob = await resizeToJpeg(videoLastImage);

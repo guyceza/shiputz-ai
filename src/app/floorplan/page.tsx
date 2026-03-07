@@ -270,13 +270,12 @@ export default function FloorplanPage() {
       const pollData = await pollRes.json();
 
       if (pollData.status === "succeeded") {
-        if (pollData.video?.data) {
-          const videoUrl = `data:${pollData.video.mimeType || "video/mp4"};base64,${pollData.video.data}`;
-          setVideoResult(videoUrl);
+        if (pollData.videoUrl) {
+          setVideoResult(pollData.videoUrl);
           setPhase("video-result");
           return;
         }
-        throw new Error("No video data in response");
+        throw new Error("No video URL in response");
       }
 
       if (pollData.status === "failed" || pollData.error) {

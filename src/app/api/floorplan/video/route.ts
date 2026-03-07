@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { creditGuard } from "@/lib/credit-guard";
+import { createServiceClient } from "@/lib/supabase";
 
 // Replicate API — google/veo-3.1-fast
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || "";
@@ -90,15 +91,28 @@ export async function GET(req: NextRequest) {
       const videoUrl = pollData.output;
       if (!videoUrl) return NextResponse.json({ error: "No video in response" }, { status: 500 });
 
-      // Proxy the video download through our server to avoid CORS issues
+      // Download video from Replicate and upload to Supabase Storage
       const videoRes = await fetch(videoUrl);
       if (!videoRes.ok) return NextResponse.json({ error: "Failed to download video" }, { status: 500 });
-      const videoBuffer = await videoRes.arrayBuffer();
-      const videoB64 = Buffer.from(videoBuffer).toString("base64");
+      const videoBuffer = Buffer.from(await videoRes.arrayBuffer());
+
+      const supabase = createServiceClient();
+      const filename = `videos/${predictionId}-${Date.now()}.mp4`;
+      const { error: uploadError } = await supabase.storage
+        .from("visualizations")
+        .upload(filename, videoBuffer, { contentType: "video/mp4", upsert: true });
+
+      if (uploadError) {
+        console.error("Video upload error:", uploadError);
+        return NextResponse.json({ error: "Failed to save video" }, { status: 500 });
+      }
+
+      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const storedUrl = `${SUPABASE_URL}/storage/v1/object/public/visualizations/${filename}`;
 
       return NextResponse.json({
         status: "succeeded",
-        video: { mimeType: "video/mp4", data: videoB64 },
+        videoUrl: storedUrl,
         metrics: pollData.metrics,
       });
     }

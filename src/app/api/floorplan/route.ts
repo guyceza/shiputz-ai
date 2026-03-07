@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       image: resultImage,
       text: resultText,
-      style: style.name,
+      style: style?.name || styleKey,
     });
   } catch (error: any) {
     console.error("Floorplan API error:", error);

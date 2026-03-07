@@ -1567,43 +1567,41 @@ export default function VisualizePage() {
             </div>
             
             <div className="space-y-3 mb-6">
-              {/* Pack 10 */}
-              <a href="/checkout?product=pack_10" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
+              {/* Quick buy options */}
+              <a href="/pricing#credits" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <div className="font-medium text-gray-900">10 הדמיות</div>
-                    <div className="text-xs text-gray-400">₪2.90 להדמיה</div>
+                    <div className="font-medium text-gray-900">20 קרדיטים</div>
+                    <div className="text-xs text-gray-400">₪0.95 לקרדיט</div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">₪29</div>
+                  <div className="text-xl font-bold text-gray-900">₪19</div>
                 </div>
               </a>
               
-              {/* Pack 30 — Popular */}
-              <a href="/checkout?product=pack_30" className="block border-2 border-gray-900 rounded-2xl p-4 relative hover:bg-gray-50 transition-colors">
+              <a href="/pricing#credits" className="block border-2 border-gray-900 rounded-2xl p-4 relative hover:bg-gray-50 transition-colors">
                 <div className="absolute -top-2.5 right-4 bg-gray-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי פופולרי</div>
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <div className="font-medium text-gray-900">30 הדמיות</div>
-                    <div className="text-xs text-gray-400">₪2.30 להדמיה</div>
+                    <div className="font-medium text-gray-900">50 קרדיטים</div>
+                    <div className="text-xs text-gray-400">₪0.84 לקרדיט</div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">₪69</div>
+                  <div className="text-xl font-bold text-gray-900">₪42</div>
                 </div>
               </a>
               
-              {/* Pack 100 — Best value */}
-              <a href="/checkout?product=pack_100" className="block border border-green-200 bg-green-50/30 rounded-2xl p-4 relative hover:border-green-400 transition-colors">
+              <a href="/pricing#credits" className="block border border-green-200 bg-green-50/30 rounded-2xl p-4 relative hover:border-green-400 transition-colors">
                 <div className="absolute -top-2.5 right-4 bg-green-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי משתלם</div>
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <div className="font-medium text-gray-900">100 הדמיות</div>
-                    <div className="text-xs text-green-600 font-medium">49% הנחה — ₪1.49 להדמיה</div>
+                    <div className="font-medium text-gray-900">200 קרדיטים</div>
+                    <div className="text-xs text-green-600 font-medium">35% הנחה — ₪0.65 לקרדיט</div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">₪149</div>
+                  <div className="text-xl font-bold text-gray-900">₪129</div>
                 </div>
               </a>
             </div>
             
-            <p className="text-center text-xs text-gray-400">קרדיטים לא פגים · תשלום חד-פעמי</p>
+            <p className="text-center text-xs text-gray-400">קרדיטים לא פגים · או <a href="/pricing" className="underline hover:text-gray-600">שדרגו לתוכנית חודשית</a></p>
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import HeroAnimation from "@/components/HeroAnimation";
 import ComparisonSection from "@/components/ComparisonSection";
-import PricingCard from "@/components/PricingCard";
+
 import PricingComparison from "@/components/PricingComparison";
 import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";

@@ -37,10 +37,10 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 1, subject: '🎁 מתנה בשבילך — ₪69 במקום ₪99', template: 'discount_offer' },
+  { day: 1, subject: '🎁 10 קרדיטים חינם מחכים לך', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
   { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
-  { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
+  { day: 9, subject: '⏰ התחילו עם 10 קרדיטים חינם', template: 'urgency' },
   { day: 11, subject: '📊 ראה איך זה עובד', template: 'demo' },
   { day: 14, subject: '🤝 אולי לא בשבילך?', template: 'last_chance' },
 ];
@@ -355,35 +355,30 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
     },
     
     discount_offer: {
-      title: '🎁 מתנה בשבילך',
-      subtitle: '',
+      title: '🎁 10 קרדיטים חינם',
+      subtitle: 'מחכים לך',
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          רצינו לתת לך הזדמנות מיוחדת להצטרף ל-ShiputzAI Pro:
+          נרשמת ל-ShiputzAI אבל עוד לא ניצלת את הקרדיטים החינמיים שלך!
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪99</p>
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪69</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;"><strong>30% הנחה</strong> · תקף ל-48 שעות</p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">10 קרדיטים</p>
+          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">מספיק להדמיה אחת של חדר — בחינם</p>
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
           <p style="font-size: 15px; color: #1d1d1f; line-height: 1.8; margin: 0;">
-            ✅ 4 הדמיות שיפוץ AI<br>
+            ✅ הדמיות שיפוץ AI<br>
             ✅ הערכות עלויות מפורטות<br>
             ✅ כתב כמויות אוטומטי<br>
             ✅ ניתוח הצעות מחיר<br>
             ✅ סריקת קבלות + מעקב תקציב<br>
-            ✅ ביטול בכל רגע
+            ✅ תוכניות מ-₪29/חודש
           </p>
         </div>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: center;">
-          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px;">קוד ההנחה שלך:</p>
-          <p style="font-size: 28px; font-weight: 700; color: #1d1d1f; margin: 0; letter-spacing: 2px;">${discountCode || 'SHIP-XXXX'}</p>
-        </div>
       `,
-      cta: 'לממש את ההנחה — ₪69',
-      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
+      cta: 'לנצל את הקרדיטים ←',
+      url: 'https://shipazti.com/login?redirect=/ai-vision'
     },
     
     problem_highlight: {
@@ -432,21 +427,20 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
     },
     
     urgency: {
-      title: '⏰ נשארו <span style="color: #e34234;">24 שעות</span>',
-      subtitle: '₪69 במקום ₪99',
+      title: '⏰ עוד לא ניצלת את הקרדיטים',
+      subtitle: 'החינמיים שלך',
       content: `
         ${greeting}
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          קוד ההנחה שלך <strong>עומד לפוג</strong>. מחר המחיר חוזר ל-₪99.
+          יש לך <strong>10 קרדיטים חינם</strong> שמחכים — מספיק להדמיה אחת של חדר.
         </p>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 14px; color: #86868b; margin: 0 0 8px; text-decoration: line-through;">₪99</p>
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">₪69</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">קוד: <strong>${discountCode || ''}</strong> · רק עד מחר</p>
+          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">10 קרדיטים</p>
+          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">ללא כרטיס אשראי · ללא התחייבות</p>
         </div>
       `,
-      cta: 'לממש עכשיו — ₪69',
-      url: `https://shipazti.com/login?redirect=${encodeURIComponent(`/checkout?code=${discountCode || ''}`)}`
+      cta: 'להתחיל עכשיו ←',
+      url: 'https://shipazti.com/login?redirect=/ai-vision'
     },
     
     demo: {
@@ -477,11 +471,11 @@ function getEmailHTML(template: string, user: any, discountCode?: string, vision
           אם ShiputzAI לא מתאים לך — <strong>זה בסדר גמור</strong>. נפסיק לשלוח.
         </p>
         <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          אבל אם בכל זאת רוצה לנסות — <strong>₪69 חד-פעמי (במקום ₪99)</strong>. בלי התחייבות.
+          אבל אם בכל זאת רוצה לנסות — יש לך <strong>10 קרדיטים חינם</strong>. בלי התחייבות, בלי כרטיס אשראי.
         </p>
       `,
-      cta: 'להצטרף — ₪69',
-      url: 'https://shipazti.com/checkout'
+      cta: 'לנסות בחינם ←',
+      url: 'https://shipazti.com/signup'
     },
   };
   

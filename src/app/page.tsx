@@ -269,108 +269,101 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AI Vision — 7 Features */}
+      {/* AI Vision — Bento Grid */}
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">AI Vision</p>
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל הכלים. מקום אחד.</h2>
-            <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך — מהרעיון ועד הביצוע</p>
+            <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך</p>
           </div>
 
-          {/* Top row — 3 main features */}
-          <div className="grid md:grid-cols-3 gap-5 mb-5">
-            <Link href="/visualize" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-6">
-                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/palette.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">10 קרדיטים</span>
+          {/* Bento grid */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Hero — עיצוב מחדש (spans 2 cols) */}
+            <Link href="/visualize" className="group relative md:col-span-2 rounded-2xl overflow-hidden aspect-[2/1] md:aspect-auto md:min-h-[340px]">
+              <Image src="/before-room.webp" alt="הדמיית חדר לפני שיפוץ" fill className="object-cover transition-opacity duration-700 group-hover:opacity-0" />
+              <Image src="/after-room.webp" alt="הדמיית חדר אחרי שיפוץ" fill className="object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-8" dir="rtl">
+                <h3 className="text-2xl font-bold text-white mb-1">עיצוב מחדש</h3>
+                <p className="text-white/70 text-sm mb-3">העלו תמונה — קבלו הדמיה של איך החדר יראה אחרי שיפוץ</p>
+                <span className="inline-block text-xs text-white/50 border border-white/20 rounded-full px-3 py-1">העבירו את העכבר לראות את ה-״אחרי״</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">עיצוב מחדש</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">העלו תמונה של החדר וקבלו הדמיית AI של איך הוא יראה אחרי שיפוץ</p>
-              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
             </Link>
 
-            <Link href="/floorplan" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-6">
-                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/house.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">10 קרדיטים</span>
+            {/* תוכנית קומה */}
+            <Link href="/floorplan" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto md:min-h-[340px]">
+              <Image src="/images/ai-vision/floorplan.jpg" alt="תוכנית קומה" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">תוכנית קומה</h3>
+                <p className="text-white/70 text-xs">הדמיה תלת-ממדית מתוכנית אדריכלית</p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">תוכנית קומה</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">העלו תוכנית אדריכלית וקבלו הדמיה תלת-ממדית של כל חדר בדירה</p>
-              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
             </Link>
 
-            <Link href="/shop-look" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-6">
-                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/cart.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">3 קרדיטים</span>
+            {/* Shop the Look */}
+            <Link href="/shop-look" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+              <Image src="/images/ai-vision/shop-look.jpg" alt="Shop the Look" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">Shop the Look</h3>
+                <p className="text-white/70 text-xs">קנו מוצרים מההדמיה ישירות מחנויות בישראל</p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Shop the Look</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">מצאו וקנו מוצרים דומים למה שרואים בהדמיה — ישירות מחנויות בישראל</p>
-              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
-            </Link>
-          </div>
-
-          {/* Bottom row — 4 secondary features */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            <Link href="/floorplan" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/camera.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">25 קרדיטים</span>
-              </div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">סיור וידאו</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">סרטון AI שמדמה הליכה בחדר לפני ואחרי השיפוץ</p>
             </Link>
 
-            <Link href="/dashboard/boq" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/search.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
+            {/* סיור וידאו */}
+            <Link href="/floorplan" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+              <img src="/images/ai-vision/video-tour.gif" alt="סיור וידאו" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute top-4 left-4">
+                <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                  <div className="w-0 h-0 border-y-[5px] border-y-transparent border-l-[8px] border-l-white ml-0.5" />
                 </div>
-                <span className="text-[11px] text-gray-400 font-medium">5 קרדיטים</span>
               </div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">כתב כמויות</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">פירוט מדויק של חומרים, כמויות ועלויות לפרויקט</p>
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">סיור וידאו</h3>
+                <p className="text-white/70 text-xs">סרטון AI שמדמה הליכה בדירה</p>
+              </div>
             </Link>
 
-            <Link href="/dashboard" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/money.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">3 קרדיטים</span>
+            {/* כתב כמויות */}
+            <Link href="/dashboard/boq" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+              <img src="/images/ai-vision/boq.gif" alt="כתב כמויות" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">כתב כמויות</h3>
+                <p className="text-white/70 text-xs">פירוט חומרים, כמויות ועלויות</p>
               </div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">ניתוח הצעת מחיר</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">העלו הצעה מקבלן וקבלו ניתוח AI — מה סביר ומה חסר</p>
             </Link>
 
-            <Link href="/dashboard" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
-                  <img src="/icons/star.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
-                </div>
-                <span className="text-[11px] text-gray-400 font-medium">2 קרדיטים</span>
+            {/* Row 3 — 2 smaller + CTA */}
+            {/* ניתוח הצעת מחיר */}
+            <Link href="/dashboard" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+              <img src="/images/ai-vision/quote-analysis.gif" alt="ניתוח הצעת מחיר" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">ניתוח הצעת מחיר</h3>
+                <p className="text-white/70 text-xs">מה סביר ומה חסר בהצעה מהקבלן</p>
               </div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">סריקת קבלות</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">צלמו קבלה — ה-AI קורא סכום, תאריך וקטגוריה אוטומטית</p>
             </Link>
-          </div>
 
-          <div className="text-center mt-10">
-            <Link
-              href="/ai-vision"
-              className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              לכל הכלים
-              <span>←</span>
+            {/* סריקת קבלות */}
+            <Link href="/dashboard" className="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto">
+              <img src="/images/ai-vision/receipt-scanner.gif" alt="סריקת קבלות" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute bottom-0 right-0 left-0 p-6" dir="rtl">
+                <h3 className="text-lg font-bold text-white mb-1">סריקת קבלות</h3>
+                <p className="text-white/70 text-xs">צלמו קבלה — סכום, תאריך וקטגוריה אוטומטית</p>
+              </div>
+            </Link>
+
+            {/* CTA card */}
+            <Link href="/ai-vision" className="group relative rounded-2xl overflow-hidden bg-gray-950 flex items-center justify-center min-h-[200px]">
+              <div className="text-center p-6">
+                <p className="text-white/40 text-sm mb-2">7 כלים · מנוע AI אחד</p>
+                <p className="text-white font-semibold text-lg group-hover:underline underline-offset-4 transition-all">לכל הכלים ←</p>
+              </div>
             </Link>
           </div>
         </div>

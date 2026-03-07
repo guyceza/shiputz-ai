@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 
 const features = [
   {
@@ -20,7 +21,9 @@ const features = [
     credits: 10,
     href: "/visualize",
     image: "/images/ai-vision/visualize.jpg",
-    hasRealImage: true,
+    hasSlider: true,
+    sliderBefore: "/examples/living-before.webp",
+    sliderAfter: "/examples/living-after.webp",
     gradient: "from-emerald-500/10 to-teal-500/10",
   },
   {
@@ -107,7 +110,14 @@ export default function AIVisionPage() {
               >
                 {/* Image */}
                 <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
-                  {feature.image && feature.hasRealImage ? (
+                  {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
+                    <BeforeAfterSlider
+                      beforeImg={feature.sliderBefore}
+                      afterImg={feature.sliderAfter}
+                      className="w-full h-full"
+                      compact
+                    />
+                  ) : feature.image && feature.hasRealImage ? (
                     <img 
                       src={feature.image} 
                       alt={feature.title} 

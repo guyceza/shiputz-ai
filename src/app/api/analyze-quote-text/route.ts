@@ -148,8 +148,15 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
       else if (verdictText === "יקר") verdict = "expensive";
       else if (verdictText === "יקר_מדי") verdict = "very_expensive";
       
-      // Remove the VERDICT line from analysis
-      analysis = rawAnalysis.replace(/VERDICT:\s*(מציאה|סביר|יקר|יקר_מדי)\n?/i, "").trim();
+      // Remove the VERDICT line and any standalone verdict words from analysis
+      analysis = rawAnalysis
+        .replace(/VERDICT:\s*(מציאה|סביר|יקר|יקר_מדי)\n?/i, "")
+        .replace(/^(מציאה|סביר|יקר|יקר_מדי)\s*$/gm, "")
+        .replace(/^\*{0,2}(מציאה|סביר|יקר|יקר_מדי)\*{0,2}\s*$/gm, "")
+        .replace(/^סיכום\s*$/gm, "")
+        .replace(/^\*{0,2}סיכום\*{0,2}\s*$/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
     }
 
     return NextResponse.json({ analysis, verdict });

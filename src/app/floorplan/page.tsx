@@ -101,10 +101,13 @@ const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
 };
 
 export default function FloorplanPage() {
-  const [phase, setPhase] = useState<Phase>(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "video") return "video-upload";
-    return "upload";
-  });
+  const [phase, setPhase] = useState<Phase>("upload");
+
+  // Check URL param on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "video") setPhase("video-upload");
+  }, []);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [customStyle, setCustomStyle] = useState("");
 

@@ -4,6 +4,7 @@ import { creditGuard } from "@/lib/credit-guard";
 // Replicate API — google/veo-3.1-fast
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || "";
 
+// POST — start video generation, return prediction ID
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -60,51 +61,58 @@ export async function POST(req: NextRequest) {
     }
 
     const prediction = await createRes.json();
-    const predictionId = prediction.id;
 
-    if (!predictionId) {
+    if (!prediction.id) {
       return NextResponse.json({ error: "No prediction ID returned" }, { status: 500 });
     }
 
-    // Poll for completion (max ~5 minutes)
-    for (let i = 0; i < 40; i++) {
-      await new Promise((r) => setTimeout(r, 8000)); // 8 sec intervals
-
-      const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
-        headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
-      });
-
-      const pollData = await pollRes.json();
-
-      if (pollData.status === "succeeded") {
-        // Replicate returns a URL to the video
-        const videoUrl = pollData.output;
-        if (!videoUrl) {
-          return NextResponse.json({ error: "No video in response" }, { status: 500 });
-        }
-
-        // Fetch the video and return as base64
-        const videoRes = await fetch(videoUrl);
-        const videoBuffer = await videoRes.arrayBuffer();
-        const videoB64 = Buffer.from(videoBuffer).toString("base64");
-
-        return NextResponse.json({
-          video: {
-            mimeType: "video/mp4",
-            data: videoB64,
-          },
-        });
-      }
-
-      if (pollData.status === "failed" || pollData.status === "canceled") {
-        console.error("Replicate prediction failed:", pollData.error);
-        return NextResponse.json({ error: pollData.error || "Video generation failed" }, { status: 500 });
-      }
-    }
-
-    return NextResponse.json({ error: "Video generation timed out" }, { status: 504 });
+    // Return immediately with prediction ID — client will poll
+    return NextResponse.json({ predictionId: prediction.id, status: "starting" });
   } catch (err: any) {
     console.error("Video route error:", err);
     return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+  }
+}
+
+// GET — poll prediction status
+export async function GET(req: NextRequest) {
+  const predictionId = req.nextUrl.searchParams.get("id");
+  if (!predictionId) return NextResponse.json({ error: "Missing prediction ID" }, { status: 400 });
+
+  try {
+    const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+      headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
+    });
+
+    const pollData = await pollRes.json();
+
+    if (pollData.status === "succeeded") {
+      const videoUrl = pollData.output;
+      if (!videoUrl) return NextResponse.json({ error: "No video in response" }, { status: 500 });
+
+      return NextResponse.json({
+        status: "succeeded",
+        videoUrl,
+        metrics: pollData.metrics,
+      });
+    }
+
+    if (pollData.status === "failed" || pollData.status === "canceled") {
+      return NextResponse.json({ status: "failed", error: pollData.error || "Generation failed" }, { status: 500 });
+    }
+
+    // Still processing
+    const logs = pollData.logs || "";
+    const progressMatch = logs.match(/(\d+)%/g);
+    const lastProgress = progressMatch ? parseInt(progressMatch[progressMatch.length - 1]) : null;
+
+    return NextResponse.json({
+      status: pollData.status,
+      progress: lastProgress,
+      started_at: pollData.started_at,
+      created_at: pollData.created_at,
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

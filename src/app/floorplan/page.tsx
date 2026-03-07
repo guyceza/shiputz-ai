@@ -214,6 +214,51 @@ export default function FloorplanPage() {
 
   const isAnyLoading = loading || loadingRoom || loadingFurniture || swapping || videoLoading;
 
+  // Shared: submit video + poll for result
+  const submitAndPollVideo = async (fd: FormData) => {
+    setVideoProgress("שולח לייצור סרטון...");
+    const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
+    const data = await res.json();
+    checkCredits(res, data);
+    if (!res.ok) throw new Error(data.error || "Video generation failed");
+    
+    const predictionId = data.predictionId;
+    if (!predictionId) throw new Error("No prediction ID");
+
+    // Poll every 4 seconds from client
+    for (let i = 0; i < 75; i++) { // 75 * 4s = 5 min max
+      await new Promise((r) => setTimeout(r, 4000));
+      
+      const pollRes = await fetch(`/api/floorplan/video?id=${predictionId}`);
+      const pollData = await pollRes.json();
+
+      if (pollData.status === "succeeded") {
+        // Download video from URL
+        setVideoProgress("מוריד סרטון...");
+        const videoRes = await fetch(pollData.videoUrl);
+        const videoBlob = await videoRes.blob();
+        const videoUrl = URL.createObjectURL(videoBlob);
+        setVideoResult(videoUrl);
+        setPhase("video-result");
+        return;
+      }
+
+      if (pollData.status === "failed" || pollData.error) {
+        throw new Error(pollData.error || "Video generation failed");
+      }
+
+      // Update progress
+      const progress = pollData.progress;
+      if (progress) {
+        setVideoProgress(`מייצר סרטון... ${progress}%`);
+      } else {
+        const elapsed = Math.min(Math.round((i * 4) / 60 * 100), 95);
+        setVideoProgress(`מייצר סרטון... ${elapsed}%`);
+      }
+    }
+    throw new Error("Video generation timed out");
+  };
+
   // Save room photo to DB (fire and forget)
   const saveRoomToDB = useCallback((photo: RoomPhoto) => {
     const email = getEmail();
@@ -498,7 +543,6 @@ export default function FloorplanPage() {
       setVideoProgress("ממיר תמונות...");
       const firstBlob = await resizeToJpeg(fromPhoto.imageData);
       const lastBlob = await resizeToJpeg(toPhoto.imageData);
-      setVideoProgress("שולח לייצור סרטון...");
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
@@ -506,16 +550,7 @@ export default function FloorplanPage() {
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
-      setVideoProgress("מייצר סרטון... (עד דקה)");
-      const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
-      const data = await res.json();
-      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "Video generation failed");
-      if (data.video) {
-        setVideoResult(`data:${data.video.mimeType};base64,${data.video.data}`);
-        setPhase("video-result");
-      } else {
-        throw new Error(data.error || "לא התקבל סרטון מהשרת");
-      }
+      await submitAndPollVideo(fd);
     } catch (err: any) { setError(err.message); }
     finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
   };
@@ -547,7 +582,6 @@ export default function FloorplanPage() {
       setVideoProgress("ממיר תמונות...");
       const firstBlob = await resizeToJpeg(videoFirstImage);
       const lastBlob = await resizeToJpeg(videoLastImage);
-      setVideoProgress("שולח לייצור סרטון...");
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
@@ -555,16 +589,7 @@ export default function FloorplanPage() {
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
-      setVideoProgress("מייצר סרטון... (עד דקה)");
-      const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
-      const data = await res.json();
-      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "Video generation failed");
-      if (data.video) {
-        setVideoResult(`data:${data.video.mimeType};base64,${data.video.data}`);
-        setPhase("video-result");
-      } else {
-        throw new Error(data.error || "לא התקבל סרטון מהשרת");
-      }
+      await submitAndPollVideo(fd);
     } catch (err: any) { setError(err.message); }
     finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
   };

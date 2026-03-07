@@ -131,6 +131,10 @@ export default function FloorplanPage() {
 
   const [videoFromRoom, setVideoFromRoom] = useState<string | null>(null);
   const [videoToRoom, setVideoToRoom] = useState<string | null>(null);
+  const [videoClickMode, setVideoClickMode] = useState(false);
+  const [videoClickA, setVideoClickA] = useState<ClickMarker | null>(null);
+  const [videoClickB, setVideoClickB] = useState<ClickMarker | null>(null);
+  const [generatingBothRooms, setGeneratingBothRooms] = useState(false);
   const [videoCustomPrompt, setVideoCustomPrompt] = useState("");
   const [videoResult, setVideoResult] = useState<string | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
@@ -255,6 +259,76 @@ export default function FloorplanPage() {
       }
     } catch (err: any) { setError(err.message); }
     finally { setLoadingRoom(false); setLoadingLabel(""); }
+  };
+
+  // === Video click mode: select 2 rooms from floorplan ===
+  const handleVideoFloorplanClick = async (e: React.MouseEvent<HTMLImageElement>) => {
+    if (loadingRoom || generatingBothRooms) return;
+    const img = floorplanImgRef.current;
+    if (!img) return;
+    const rect = img.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const click = { x, y };
+
+    if (!videoClickA) {
+      setVideoClickA(click);
+    } else if (!videoClickB) {
+      setVideoClickB(click);
+      // Both clicks ready — generate both rooms in parallel
+      setGeneratingBothRooms(true);
+      setLoadingLabel("מזהה ויוצר 2 חדרים...");
+      setError(null);
+      try {
+        const blob = await (await fetch(floorplanResult!)).blob();
+        const email = getEmail() || "";
+
+        const generateRoom = async (clickPos: ClickMarker) => {
+          const fd1 = new FormData();
+          fd1.append("image", blob, "floorplan.png");
+          fd1.append("clickX", clickPos.x.toFixed(1));
+          fd1.append("clickY", clickPos.y.toFixed(1));
+          fd1.append("email", email);
+          const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
+          const roomInfo = await detectRes.json();
+          if (!detectRes.ok) throw new Error(roomInfo.error);
+
+          const fd2 = new FormData();
+          fd2.append("floorplan", blob, "floorplan.png");
+          fd2.append("room", roomInfo.room);
+          fd2.append("style", customStyle || selectedStyle || "modern-cabin");
+          fd2.append("email", email);
+          const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
+          const roomData = await roomRes.json();
+          if (!roomRes.ok) throw new Error(roomData.error);
+
+          return {
+            roomName: roomInfo.room,
+            roomNameHe: roomInfo.roomHe,
+            imageData: `data:${roomData.image.mimeType};base64,${roomData.image.data}`,
+          } as RoomPhoto;
+        };
+
+        const [roomA, roomB] = await Promise.all([
+          generateRoom(videoClickA),
+          generateRoom(click),
+        ]);
+
+        // Add to allRoomPhotos
+        setAllRoomPhotos((prev) => {
+          const updated = [...prev];
+          if (!updated.some(p => p.roomName === roomA.roomName)) updated.push(roomA);
+          if (!updated.some(p => p.roomName === roomB.roomName)) updated.push(roomB);
+          return updated;
+        });
+
+        // Go directly to video select with these 2 rooms pre-selected
+        setVideoFromRoom(roomA.roomName);
+        setVideoToRoom(roomB.roomName);
+        setPhase("video-select");
+      } catch (err: any) { setError(err.message); }
+      finally { setGeneratingBothRooms(false); setLoadingLabel(""); setVideoClickA(null); setVideoClickB(null); }
+    }
   };
 
   // === Step 3: Furniture ===
@@ -630,18 +704,14 @@ export default function FloorplanPage() {
               {/* Video */}
               <button onClick={() => {
                 if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
-                else { setPhase("floorplan"); }
+                else { setVideoClickMode(true); setVideoClickA(null); setVideoClickB(null); setPhase("floorplan"); }
               }}
                 className="bg-white border-2 border-gray-200 hover:border-emerald-500 rounded-2xl p-5 text-center transition-all group">
                 <div className="w-11 h-11 mx-auto rounded-full bg-emerald-50 group-hover:bg-emerald-500 flex items-center justify-center transition-colors mb-3">
                   <svg className="w-5 h-5 text-emerald-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" /></svg>
                 </div>
                 <div className="font-bold text-gray-900 text-sm">סרטון סיור</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {allRoomPhotos.length >= 2
-                    ? `סיור בין ${allRoomPhotos.length} חדרים`
-                    : "צרו 2 חדרים קודם"}
-                </div>
+                <div className="text-xs text-gray-400 mt-1">לחצו על 2 חדרים בתוכנית</div>
               </button>
 
               {/* Furniture */}
@@ -696,37 +766,57 @@ export default function FloorplanPage() {
         {phase === "floorplan" && floorplanResult && (
           <>
             <div className="flex items-center justify-between mb-2">
-              <div />
-              <button onClick={() => setPhase("floorplan-ready")}
+              {videoClickMode ? (
+                <button onClick={() => { setVideoClickMode(false); setVideoClickA(null); setVideoClickB(null); }}
+                  className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">ביטול מצב סרטון</button>
+              ) : <div />}
+              <button onClick={() => { setPhase("floorplan-ready"); setVideoClickMode(false); }}
                 className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">← חזרה</button>
             </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-              <p className="text-emerald-800 font-medium text-sm">לחצו על חדר בהדמיה כדי לראות אותו מבפנים</p>
-              <p className="text-emerald-600/60 text-xs mt-1">ה-AI יזהה את החדר וייצור צילום פנים ריאליסטי</p>
-            </div>
+
+            {videoClickMode ? (
+              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center">
+                <p className="text-purple-800 font-medium text-sm">
+                  {!videoClickA ? "🎬 לחצו על החדר הראשון (A) — תחילת הסרטון" :
+                   generatingBothRooms ? "מזהה ויוצר 2 חדרים במקביל..." :
+                   "עכשיו לחצו על החדר השני (B) — סוף הסרטון"}
+                </p>
+                <p className="text-purple-600/60 text-xs mt-1">שני החדרים ייוצרו במקביל ותעברו ישר ליצירת הסרטון</p>
+              </div>
+            ) : (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+                <p className="text-emerald-800 font-medium text-sm">לחצו על חדר בהדמיה כדי לראות אותו מבפנים</p>
+                <p className="text-emerald-600/60 text-xs mt-1">ה-AI יזהה את החדר וייצור צילום פנים ריאליסטי</p>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                 <img src={uploadedImage!} alt="Original" className="w-full" />
                 <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">תוכנית מקורית</div>
               </div>
-              <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-sm relative">
+              <div className={`rounded-2xl overflow-hidden border-2 shadow-sm relative ${videoClickMode ? "border-purple-200" : "border-emerald-200"}`}>
                 <img ref={floorplanImgRef} src={floorplanResult} alt="Rendering"
-                  className={`w-full ${loadingRoom ? "opacity-50" : "cursor-crosshair"}`}
-                  onClick={handleFloorplanClick} />
-                {floorplanClick && <ClickPin marker={floorplanClick} />}
-                {loadingRoom && (
+                  className={`w-full ${(loadingRoom || generatingBothRooms) ? "opacity-50" : "cursor-crosshair"}`}
+                  onClick={videoClickMode ? handleVideoFloorplanClick : handleFloorplanClick} />
+                {!videoClickMode && floorplanClick && <ClickPin marker={floorplanClick} />}
+                {videoClickA && <ClickPin marker={videoClickA} />}
+                {videoClickB && <ClickPin marker={videoClickB} />}
+                {(loadingRoom || generatingBothRooms) && (
                   <div className="absolute inset-0 flex items-center justify-center bg-white/60">
                     <div className="bg-white rounded-2xl px-6 py-4 text-center shadow-xl border border-gray-100">
                       <Spinner className="h-8 w-8 text-emerald-600 mx-auto" />
                       <p className="text-sm text-gray-600 mt-2">
-                        {detectedRoom ? `יוצר צילום של ה${detectedRoom.roomHe}...` : "מזהה חדר..."}
+                        {generatingBothRooms ? "יוצר 2 חדרים במקביל..." :
+                         detectedRoom ? `יוצר צילום של ה${detectedRoom.roomHe}...` : "מזהה חדר..."}
                       </p>
                     </div>
                   </div>
                 )}
-                <div className="text-center text-xs text-emerald-600 py-1.5 bg-emerald-50">
-                  {STYLES.find((s) => s.key === selectedStyle)?.nameHe} — לחצו על חדר
+                <div className={`text-center text-xs py-1.5 ${videoClickMode ? "text-purple-600 bg-purple-50" : "text-emerald-600 bg-emerald-50"}`}>
+                  {videoClickMode
+                    ? `🎬 מצב סרטון — ${videoClickA ? "1/2 נבחרו" : "בחרו חדר A"}`
+                    : `${customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || ""} — לחצו על חדר`}
                 </div>
               </div>
             </div>

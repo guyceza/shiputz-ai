@@ -1040,59 +1040,107 @@ export default function FloorplanPage() {
               <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
-              {/* First frame */}
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה ראשונה (התחלה)</label>
-                <input ref={videoFirstInputRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (ev) => setVideoFirstImage(ev.target?.result as string);
-                      reader.readAsDataURL(file);
-                    }
-                  }} />
-                <button onClick={() => videoFirstInputRef.current?.click()}
-                  className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                    videoFirstImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                  }`}>
-                  {videoFirstImage ? (
-                    <img src={videoFirstImage} alt="First frame" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center p-4">
-                      <div className="text-3xl mb-2 opacity-40">A</div>
-                      <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                    </div>
-                  )}
-                </button>
+            {/* Previously generated rooms */}
+            {allRoomPhotos.length > 0 && (
+              <div className="max-w-2xl mx-auto space-y-3">
+                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים מההדמיה — לחצו לבחור</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {allRoomPhotos.map((photo) => {
+                    const isFirst = videoFirstImage === photo.imageData;
+                    const isLast = videoLastImage === photo.imageData;
+                    return (
+                      <button key={photo.roomName} onClick={() => {
+                        if (isFirst) { setVideoFirstImage(null); return; }
+                        if (isLast) { setVideoLastImage(null); return; }
+                        if (!videoFirstImage) setVideoFirstImage(photo.imageData);
+                        else if (!videoLastImage) setVideoLastImage(photo.imageData);
+                      }}
+                        className={`rounded-xl overflow-hidden border-2 transition-all relative ${
+                          isFirst || isLast ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                        }`}>
+                        <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
+                        {(isFirst || isLast) && (
+                          <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
+                            {isFirst ? "A" : "B"}
+                          </div>
+                        )}
+                        <div className={`text-center text-[10px] py-1 ${
+                          isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
+                        }`}>
+                          {photo.roomNameHe}
+                          {isFirst && " — התחלה"}
+                          {isLast && " — סיום"}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+            )}
 
-              {/* Last frame */}
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה שנייה (סיום)</label>
-                <input ref={videoLastInputRef} type="file" accept="image/*" className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (ev) => setVideoLastImage(ev.target?.result as string);
-                      reader.readAsDataURL(file);
-                    }
-                  }} />
-                <button onClick={() => videoLastInputRef.current?.click()}
-                  className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                    videoLastImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                  }`}>
-                  {videoLastImage ? (
-                    <img src={videoLastImage} alt="Last frame" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center p-4">
-                      <div className="text-3xl mb-2 opacity-40">B</div>
-                      <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                    </div>
-                  )}
-                </button>
+            {/* Or upload custom images */}
+            <div className="max-w-2xl mx-auto">
+              {allRoomPhotos.length > 0 && (
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400">או העלו תמונות</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                {/* First frame */}
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה ראשונה (התחלה)</label>
+                  <input ref={videoFirstInputRef} type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => setVideoFirstImage(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  <button onClick={() => videoFirstInputRef.current?.click()}
+                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
+                      videoFirstImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                    }`}>
+                    {videoFirstImage ? (
+                      <img src={videoFirstImage} alt="First frame" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center p-4">
+                        <div className="text-3xl mb-2 opacity-40">A</div>
+                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                {/* Last frame */}
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה שנייה (סיום)</label>
+                  <input ref={videoLastInputRef} type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => setVideoLastImage(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  <button onClick={() => videoLastInputRef.current?.click()}
+                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
+                      videoLastImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                    }`}>
+                    {videoLastImage ? (
+                      <img src={videoLastImage} alt="Last frame" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center p-4">
+                        <div className="text-3xl mb-2 opacity-40">B</div>
+                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
+                      </div>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 

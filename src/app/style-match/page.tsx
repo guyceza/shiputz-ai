@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import CreditBadge from "@/components/CreditBadge";
+
 
 // Demo data for preview
 const DEMO_RESULT = {
@@ -83,7 +83,7 @@ export default function StyleMatchPage() {
             <h1 className="text-2xl font-bold text-gray-900 mt-1">Style Matcher</h1>
             <p className="text-gray-500 text-sm mt-1">העלו תמונה של חדר שאהבתם — נזהה את הסגנון ונעזור לכם לשחזר אותו</p>
           </div>
-          <CreditBadge cost={5} feature="style-match" />
+          <span className="bg-gray-100 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-full">5 קרדיטים</span>
         </div>
       </div>
 

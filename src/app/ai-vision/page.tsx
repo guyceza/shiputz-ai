@@ -5,11 +5,13 @@ import Link from "next/link";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 
 const shopLookHotspots = [
-  { id: "bed", name: "מיטה זוגית מרופדת", top: 55, left: 45, price: "₪4,200" },
-  { id: "closet", name: "ארון הזזה מראה", top: 40, left: 85, price: "₪6,800" },
-  { id: "nightstand", name: "שידת לילה", top: 70, left: 15, price: "₪890" },
-  { id: "lights", name: "תאורה שקועה LED", top: 12, left: 50, price: "₪1,200" },
-  { id: "carpet", name: "שטיח אפור", top: 88, left: 40, price: "₪1,600" },
+  { id: "closet", name: "ארון הזזה עם מראה", top: 38, left: 18, price: "₪6,800" },
+  { id: "painting", name: "תמונת קיר דקורטיבית", top: 22, left: 76, price: "₪350" },
+  { id: "bed", name: "מיטה זוגית מרופדת", top: 48, left: 68, price: "₪4,200" },
+  { id: "lamp", name: "מנורת שידה", top: 38, left: 93, price: "₪280" },
+  { id: "nightstand", name: "שידת לילה", top: 55, left: 91, price: "₪890" },
+  { id: "chair", name: "כיסא עץ מעוצב", top: 75, left: 10, price: "₪1,100" },
+  { id: "rug", name: "שטיח אזור", top: 88, left: 38, price: "₪1,600" },
 ];
 
 function ShopLookPreview({ image }: { image: string }) {
@@ -22,14 +24,9 @@ function ShopLookPreview({ image }: { image: string }) {
         <div key={spot.id}>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHotspot(activeHotspot === spot.id ? null : spot.id); }}
-            className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2 z-10"
+            className="absolute w-7 h-7 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer rounded-full"
             style={{ top: `${spot.top}%`, left: `${spot.left}%` }}
-          >
-            <span className="absolute inset-0 bg-emerald-500 rounded-full opacity-30 animate-ping" />
-            <span className="absolute inset-1 bg-emerald-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-[10px] font-bold leading-none">+</span>
-            </span>
-          </button>
+          />
           {activeHotspot === spot.id && (
             <div
               className="absolute z-20 bg-white rounded-lg shadow-xl border border-gray-200 p-2.5 w-36 text-right"

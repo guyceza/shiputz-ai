@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const creditCheck = await creditGuard(userEmail, 'room-photo');
     if ('error' in creditCheck) return creditCheck.error;
 
-    const styleDesc = STYLE_PROMPTS[styleKey] || STYLE_PROMPTS["modern-cabin"];
+    const styleDesc = STYLE_PROMPTS[styleKey] || (styleKey ? `${styleKey} style — apply this design aesthetic with appropriate materials, colors, furniture, and atmosphere` : STYLE_PROMPTS["modern-cabin"]);
 
     const bytes = await floorplanImage.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");

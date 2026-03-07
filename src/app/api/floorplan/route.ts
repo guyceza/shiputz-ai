@@ -58,16 +58,17 @@ export async function POST(req: NextRequest) {
     if ('error' in creditCheck) return creditCheck.error;
 
     const style = STYLES[styleKey];
-    if (!style) {
-      return NextResponse.json({ error: "Invalid style" }, { status: 400 });
-    }
+    // Allow custom style text (not in STYLES dict)
+    const stylePrompt = style
+      ? style.prompt
+      : `Style: ${styleKey} — apply this design style throughout the apartment with appropriate materials, colors, furniture, and atmosphere that match this aesthetic.`;
 
     // Convert image to base64
     const bytes = await image.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");
     const mimeType = image.type || "image/jpeg";
 
-    const prompt = `Analyze the provided floor plan and generate a photorealistic top-down (true 90° orthographic) rendering of the entire apartment, strictly preserving the exact dimensions, proportions, walls, doors, windows, and furniture placement as shown. Do not modify layout, scale, structure, or orientation. ${style.prompt} Architectural visualization style, ultra-realistic materials, physically accurate lighting, no perspective distortion, no added or removed structural elements. The output must be a single cohesive image showing the full apartment from directly above.`;
+    const prompt = `Analyze the provided floor plan and generate a photorealistic top-down (true 90° orthographic) rendering of the entire apartment, strictly preserving the exact dimensions, proportions, walls, doors, windows, and furniture placement as shown. Do not modify layout, scale, structure, or orientation. ${stylePrompt} Architectural visualization style, ultra-realistic materials, physically accurate lighting, no perspective distortion, no added or removed structural elements. The output must be a single cohesive image showing the full apartment from directly above.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,

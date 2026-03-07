@@ -121,7 +121,7 @@ export default function AIVisionPage() {
                       <img 
                         src={feature.image} 
                         alt={feature.title} 
-                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${feature.imagePosition || ""}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">

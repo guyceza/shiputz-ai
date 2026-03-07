@@ -12,6 +12,7 @@ interface BeforeAfterSliderProps {
 export default function BeforeAfterSlider({ beforeImg, afterImg, className = "", compact = false }: BeforeAfterSliderProps) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [wasDragged, setWasDragged] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMove = (clientX: number) => {
@@ -26,12 +27,12 @@ export default function BeforeAfterSlider({ beforeImg, afterImg, className = "",
     <div
       ref={containerRef}
       className={`relative w-full overflow-hidden bg-gray-100 select-none touch-none ${className}`}
-      onMouseMove={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); handleMove(e.clientX); } }}
-      onMouseUp={() => setIsDragging(false)}
-      onMouseLeave={() => setIsDragging(false)}
-      onTouchMove={(e) => { if (isDragging) { e.stopPropagation(); handleMove(e.touches[0].clientX); } }}
-      onTouchEnd={() => setIsDragging(false)}
-      onClick={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } }}
+      onMouseMove={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); setWasDragged(true); handleMove(e.clientX); } }}
+      onMouseUp={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
+      onMouseLeave={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
+      onTouchMove={(e) => { if (isDragging) { e.stopPropagation(); setWasDragged(true); handleMove(e.touches[0].clientX); } }}
+      onTouchEnd={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
+      onClickCapture={(e) => { if (wasDragged || isDragging) { e.preventDefault(); e.stopPropagation(); } }}
     >
       {/* After image (LEFT side) */}
       <div

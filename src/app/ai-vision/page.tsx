@@ -102,59 +102,72 @@ export default function AIVisionPage() {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((feature) => (
-              <Link
-                key={feature.href + feature.title}
-                href={feature.href}
-                className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
-              >
-                {/* Image */}
-                <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
-                  {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
-                    <div className="w-full h-full" onClick={(e) => e.preventDefault()} onMouseDown={(e) => e.stopPropagation()}>
+            {features.map((feature) => {
+              const cardContent = (
+                <>
+                  {/* Image */}
+                  <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
+                    {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
                       <BeforeAfterSlider
                         beforeImg={feature.sliderBefore}
                         afterImg={feature.sliderAfter}
                         className="w-full aspect-[4/3]"
                         compact
                       />
-                    </div>
-                  ) : feature.image && feature.hasRealImage ? (
-                    <img 
-                      src={feature.image} 
-                      alt={feature.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
-                  ) : (
-                    <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">
-                      {feature.title === "תוכנית קומה" && "📐"}
-                      {feature.title === "עיצוב מחדש" && "🎨"}
-                      {feature.title === "Shop the Look" && "🛒"}
-                      {feature.title === "סיור וידאו" && "🎬"}
-                      {feature.title === "כתב כמויות" && "📋"}
-                      {feature.title === "ניתוח הצעת מחיר" && "📊"}
-                      {feature.title === "סריקת קבלות" && "🧾"}
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-gray-700">
-                      {feature.title}
-                    </h3>
-                    <span className="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap mr-2">
-                      {feature.credits} קרדיטים
-                    </span>
+                    ) : feature.image && feature.hasRealImage ? (
+                      <img 
+                        src={feature.image} 
+                        alt={feature.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      />
+                    ) : (
+                      <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">
+                        {feature.title === "תוכנית קומה" && "📐"}
+                        {feature.title === "עיצוב מחדש" && "🎨"}
+                        {feature.title === "Shop the Look" && "🛒"}
+                        {feature.title === "סיור וידאו" && "🎬"}
+                        {feature.title === "כתב כמויות" && "📋"}
+                        {feature.title === "ניתוח הצעת מחיר" && "📊"}
+                        {feature.title === "סריקת קבלות" && "🧾"}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-400 mb-2">{feature.subtitle}</p>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {feature.description}
-                  </p>
+
+                  {/* Content */}
+                  <Link href={feature.href} className="block p-4">
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-gray-700">
+                        {feature.title}
+                      </h3>
+                      <span className="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap mr-2">
+                        {feature.credits} קרדיטים
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-2">{feature.subtitle}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </Link>
+                </>
+              );
+
+              return feature.hasSlider ? (
+                <div
+                  key={feature.href + feature.title}
+                  className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
+                >
+                  {cardContent}
                 </div>
-              </Link>
-            ))}
+              ) : (
+                <Link
+                  key={feature.href + feature.title}
+                  href={feature.href}
+                  className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
+                >
+                  {cardContent}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Footer note */}

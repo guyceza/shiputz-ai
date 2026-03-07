@@ -90,9 +90,15 @@ export async function GET(req: NextRequest) {
       const videoUrl = pollData.output;
       if (!videoUrl) return NextResponse.json({ error: "No video in response" }, { status: 500 });
 
+      // Proxy the video download through our server to avoid CORS issues
+      const videoRes = await fetch(videoUrl);
+      if (!videoRes.ok) return NextResponse.json({ error: "Failed to download video" }, { status: 500 });
+      const videoBuffer = await videoRes.arrayBuffer();
+      const videoB64 = Buffer.from(videoBuffer).toString("base64");
+
       return NextResponse.json({
         status: "succeeded",
-        videoUrl,
+        video: { mimeType: "video/mp4", data: videoB64 },
         metrics: pollData.metrics,
       });
     }

@@ -29,7 +29,7 @@ const STEPS = [
   { num: 3, label: "פעולה" },
 ];
 
-type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-select" | "video-result";
+type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-upload" | "video-select" | "video-result";
 
 interface ClickMarker { x: number; y: number; }
 interface RoomInfo { room: string; roomHe: string; description: string; }
@@ -101,7 +101,10 @@ const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
 };
 
 export default function FloorplanPage() {
-  const [phase, setPhase] = useState<Phase>("upload");
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "video") return "video-upload";
+    return "upload";
+  });
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -131,6 +134,10 @@ export default function FloorplanPage() {
   const [videoResult, setVideoResult] = useState<string | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoProgress, setVideoProgress] = useState("");
+  const [videoFirstImage, setVideoFirstImage] = useState<string | null>(null);
+  const [videoLastImage, setVideoLastImage] = useState<string | null>(null);
+  const videoFirstInputRef = useRef<HTMLInputElement>(null);
+  const videoLastInputRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [loadingLabel, setLoadingLabel] = useState("");
@@ -351,6 +358,55 @@ export default function FloorplanPage() {
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
       const basePrompt = `Photorealistic architectural walkthrough video. The camera starts inside a ${fromPhoto.roomName} (shown in first frame) and smoothly moves through a doorway/hallway into a ${toPhoto.roomName} (shown in last frame). ONE continuous steadicam shot, no cuts, no transitions, no scene changes. The camera physically glides at eye level through the connected interior space. Warm natural daylight, interior design showcase quality. The first frame is the starting room and the last frame is the destination room.`;
+      const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
+      fd.append("prompt", fullPrompt);
+      fd.append("email", getEmail() || "");
+      setVideoProgress("מייצר סרטון... (עד דקה)");
+      const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
+      const data = await res.json();
+      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "Video generation failed");
+      if (data.video) {
+        setVideoResult(`data:${data.video.mimeType};base64,${data.video.data}`);
+        setPhase("video-result");
+      } else {
+        throw new Error(data.error || "לא התקבל סרטון מהשרת");
+      }
+    } catch (err: any) { setError(err.message); }
+    finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
+  };
+
+  // === Step 4b: Direct video from uploaded images ===
+  const generateDirectVideo = async () => {
+    if (!videoFirstImage || !videoLastImage) return;
+    setVideoLoading(true);
+    setVideoResult(null);
+    setVideoProgress("מכין תמונות...");
+    setLoadingLabel("מייצר סרטון סיור...");
+    setError(null);
+    try {
+      const resizeToJpeg = async (dataUrl: string): Promise<Blob> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1280; canvas.height = 720;
+            const ctx = canvas.getContext("2d")!;
+            const scale = Math.max(1280 / img.width, 720 / img.height);
+            const w = img.width * scale; const h = img.height * scale;
+            ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
+            canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85);
+          };
+          img.src = dataUrl;
+        });
+      };
+      setVideoProgress("ממיר תמונות...");
+      const firstBlob = await resizeToJpeg(videoFirstImage);
+      const lastBlob = await resizeToJpeg(videoLastImage);
+      setVideoProgress("שולח לייצור סרטון...");
+      const fd = new FormData();
+      fd.append("firstFrame", firstBlob, "first.jpg");
+      fd.append("lastFrame", lastBlob, "last.jpg");
+      const basePrompt = "Photorealistic architectural walkthrough video. The camera starts inside the room shown in the first frame and smoothly moves through the space to arrive at the room shown in the last frame. ONE continuous steadicam shot, no cuts, no transitions, no scene changes. The camera physically glides at eye level through the connected interior space. Warm natural daylight, interior design showcase quality.";
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
@@ -871,6 +927,117 @@ export default function FloorplanPage() {
         )}
 
         {/* ======== STEP 4: Video select ======== */}
+        {phase === "video-upload" && (
+          <>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900">סרטון סיור AI</h2>
+              <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+              {/* First frame */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה ראשונה (התחלה)</label>
+                <input ref={videoFirstInputRef} type="file" accept="image/*" className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (ev) => setVideoFirstImage(ev.target?.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }} />
+                <button onClick={() => videoFirstInputRef.current?.click()}
+                  className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
+                    videoFirstImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                  }`}>
+                  {videoFirstImage ? (
+                    <img src={videoFirstImage} alt="First frame" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4">
+                      <div className="text-3xl mb-2 opacity-40">A</div>
+                      <p className="text-xs text-gray-400">לחצו להעלאה</p>
+                    </div>
+                  )}
+                </button>
+              </div>
+
+              {/* Last frame */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה שנייה (סיום)</label>
+                <input ref={videoLastInputRef} type="file" accept="image/*" className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (ev) => setVideoLastImage(ev.target?.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }} />
+                <button onClick={() => videoLastInputRef.current?.click()}
+                  className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
+                    videoLastImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
+                  }`}>
+                  {videoLastImage ? (
+                    <img src={videoLastImage} alt="Last frame" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4">
+                      <div className="text-3xl mb-2 opacity-40">B</div>
+                      <p className="text-xs text-gray-400">לחצו להעלאה</p>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {videoFirstImage && videoLastImage && (
+              <div className="flex items-center justify-center gap-3 text-sm">
+                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר A</span>
+                <span className="text-gray-300">→</span>
+                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר B</span>
+              </div>
+            )}
+
+            {/* Optional custom prompt */}
+            <div className="max-w-2xl mx-auto">
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
+              <input
+                type="text"
+                value={videoCustomPrompt}
+                onChange={(e) => setVideoCustomPrompt(e.target.value)}
+                placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+                dir="rtl"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
+              className={`w-full py-4 rounded-full font-bold text-lg transition-all max-w-2xl mx-auto ${
+                videoFirstImage && videoLastImage && !videoLoading
+                  ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}>
+              {videoLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner className="h-5 w-5" />
+                  {videoProgress || "מייצר סרטון..."}
+                </span>
+              ) : "🎬 צור סרטון סיור"}
+            </button>
+
+            <div className="text-center">
+              <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}
+                className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה לתוכנית קומה</button>
+            </div>
+          </>
+        )}
+
         {phase === "video-select" && (
           <>
             {(() => {

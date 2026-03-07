@@ -20,6 +20,7 @@ const features = [
     credits: 10,
     href: "/visualize",
     image: "/images/ai-vision/visualize.jpg",
+    hasRealImage: true,
     gradient: "from-emerald-500/10 to-teal-500/10",
   },
   {

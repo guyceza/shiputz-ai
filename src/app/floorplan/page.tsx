@@ -568,7 +568,7 @@ export default function FloorplanPage() {
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = `Photorealistic architectural walkthrough video. The camera starts inside a ${fromPhoto.roomName} (shown in first frame) and smoothly moves through a doorway/hallway into a ${toPhoto.roomName} (shown in last frame). ONE continuous steadicam shot, no cuts, no transitions, no scene changes. The camera physically glides at eye level through the connected interior space. Warm natural daylight, interior design showcase quality. The first frame is the starting room and the last frame is the destination room.`;
+      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts in the ${fromPhoto.roomName} and physically glides forward at eye level through a bright doorway or well-lit hallway, continuously moving into the ${toPhoto.roomName}. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition corridor is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.`;
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
@@ -592,7 +592,7 @@ export default function FloorplanPage() {
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = "Photorealistic architectural walkthrough video. The camera starts inside the room shown in the first frame and smoothly moves through the space to arrive at the room shown in the last frame. ONE continuous steadicam shot, no cuts, no transitions, no scene changes. The camera physically glides at eye level through the connected interior space. Warm natural daylight, interior design showcase quality.";
+      const basePrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level through a bright open doorway or well-lit hallway, continuously moving into the next room. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition area is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.";
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");

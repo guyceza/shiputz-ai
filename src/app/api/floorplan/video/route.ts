@@ -30,9 +30,9 @@ export async function POST(req: NextRequest) {
     const lastB64 = Buffer.from(lastBytes).toString("base64");
     const lastDataUri = `data:image/jpeg;base64,${lastB64}`;
 
-    const noCutSuffix = " ABSOLUTELY ONE CONTINUOUS UNBROKEN SINGLE TAKE. NO cuts, NO fades, NO fade-to-black, NO dissolves, NO transitions of any kind. The screen must NEVER go dark or dim at any point. The camera never stops moving forward. Constant visible environment throughout. The entire video is one single continuous camera movement with zero interruptions.";
+    const noCutSuffix = " CRITICAL RULES: This is ONE SINGLE CONTINUOUS UNBROKEN CAMERA TAKE with ZERO cuts. The camera NEVER stops. The screen NEVER goes dark, black, or dim — not even for a single frame. There are NO fade-to-black transitions, NO dissolves, NO wipes, NO scene changes. The brightness stays consistent and high throughout the ENTIRE video. Every single frame shows a well-lit interior. The camera physically travels through space without any interruption whatsoever.";
 
-    const defaultPrompt = "A steadicam smoothly and physically glides from the first room through a doorway or hallway into the second room in one seamless uninterrupted fluid motion. Eye-level perspective, warm natural lighting, photorealistic interior architectural walkthrough.";
+    const defaultPrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level, traveling through an open doorway or bright hallway corridor, continuously moving into the next room. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The hallway or transition area between rooms is well-lit and visible. Photorealistic interior design showcase. The camera movement is fluid, slow, and cinematic — never stopping, always revealing more of the space.";
 
     const finalPrompt = (prompt || defaultPrompt) + noCutSuffix;
 

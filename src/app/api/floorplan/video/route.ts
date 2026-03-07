@@ -88,9 +88,6 @@ export async function POST(req: NextRequest) {
         const videoBuffer = await videoRes.arrayBuffer();
         const videoB64 = Buffer.from(videoBuffer).toString("base64");
 
-        // Deduct credits
-        if (creditCheck.deduct) await creditCheck.deduct();
-
         return NextResponse.json({
           video: {
             mimeType: "video/mp4",

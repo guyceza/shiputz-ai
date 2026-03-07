@@ -994,7 +994,7 @@ export default function VisualizePage() {
                   {isLoggedIn
                     ? (hasSubscription 
                         ? (vizCredits === 0 ? '📦 רכוש חבילת הדמיות' : `🎨 צור הדמיה (${vizCredits} נותרו)`)
-                        : trialUsed ? '🎭 שדרג ב-₪69 בלבד' : 'נסו עכשיו בחינם →')
+                        : trialUsed ? 'שדרגו לתוכנית מנוי' : 'נסו עכשיו בחינם →')
                     : (guestUsed ? 'הירשם בחינם — צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
                   }
                 </button>
@@ -1441,14 +1441,14 @@ export default function VisualizePage() {
                 
                 <div className="border border-gray-200 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium text-gray-900">🎭 מבצע פורים</span>
-                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">30% הנחה</span>
+                    <span className="text-sm font-medium text-gray-900">תוכניות מנוי</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl text-gray-400 line-through">₪99</span>
-                    <span className="text-4xl font-semibold text-gray-900">₪69</span>
+                    <span className="text-sm text-gray-500">החל מ-</span>
+                    <span className="text-4xl font-semibold text-gray-900">₪29</span>
+                    <span className="text-gray-500 text-sm">/חודש</span>
                   </div>
-                  <p className="text-gray-400 text-xs mt-1">תשלום חד-פעמי · לא מנוי</p>
+                  <p className="text-gray-400 text-xs mt-1">50 קרדיטים · בטלו בכל עת</p>
                 </div>
                 
                 <ul className="space-y-4 mb-8">
@@ -1456,7 +1456,7 @@ export default function VisualizePage() {
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs">✓</span>
                     </div>
-                    <span className="text-gray-700">4 הדמיות שיפוץ AI</span>
+                    <span className="text-gray-700">הדמיות שיפוץ AI</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm">
                     <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1482,11 +1482,11 @@ export default function VisualizePage() {
                   href="/pricing"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  🎭 לרכוש — ₪69
+                  לצפייה בתוכניות ←
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  תשלום חד-פעמי · לא חיוב חוזר
+                  10 קרדיטים חינם · ללא כרטיס אשראי
                 </p>
               </>
             ) : (
@@ -1496,22 +1496,23 @@ export default function VisualizePage() {
                   <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <span className="text-white text-lg">✦</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">🎭 מבצע פורים!</h3>
-                  <p className="text-gray-500 text-sm">30% הנחה — תשלום חד-פעמי</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">שדרגו לתוכנית מנוי</h3>
+                  <p className="text-gray-500 text-sm">קרדיטים חודשיים לכל הכלים</p>
                 </div>
                 
                 <div className="text-center mb-6">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-xl text-gray-400 line-through">₪99</span>
-                    <span className="text-4xl font-semibold text-gray-900">₪69</span>
+                    <span className="text-sm text-gray-500">החל מ-</span>
+                    <span className="text-4xl font-semibold text-gray-900">₪29</span>
+                    <span className="text-gray-500 text-sm">/חודש</span>
                   </div>
-                  <p className="text-gray-400 text-xs mt-1">תשלום חד-פעמי · לא מנוי</p>
+                  <p className="text-gray-400 text-xs mt-1">50 קרדיטים · בטלו בכל עת</p>
                 </div>
                 
                 <ul className="space-y-3 mb-6 text-sm">
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>
-                    <span className="text-gray-700">4 הדמיות שיפוץ AI</span>
+                    <span className="text-gray-700">הדמיות שיפוץ AI</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <span className="text-green-500">✓</span>
@@ -1531,9 +1532,9 @@ export default function VisualizePage() {
                   href="/pricing"
                   className="block w-full text-center bg-gray-900 text-white py-4 rounded-xl text-base font-medium hover:bg-gray-800 transition-all"
                 >
-                  🎭 לרכוש — ₪69
+                  לצפייה בתוכניות ←
                 </Link>
-                <p className="text-center text-xs text-gray-400 mt-3">תשלום חד-פעמי · לא חיוב חוזר</p>
+                <p className="text-center text-xs text-gray-400 mt-3">10 קרדיטים חינם · ללא כרטיס אשראי</p>
               </>
             )}
           </div>

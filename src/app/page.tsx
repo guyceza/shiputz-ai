@@ -9,7 +9,7 @@ import PricingCard from "@/components/PricingCard";
 import PricingComparison from "@/components/PricingComparison";
 import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";
-// Newsletter imports removed — replaced with Purim promo popup
+// Promo popup for non-premium users
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -74,7 +74,7 @@ export default function Home() {
   
   const [showPromoPopup, setShowPromoPopup] = useState(false);
   
-  // Show Purim promo popup after 8 seconds (non-premium users only)
+  // Show promo popup after 8 seconds (non-premium users only)
   useEffect(() => {
     const dismissed = localStorage.getItem('purim_promo_dismissed');
     if (dismissed) return;
@@ -94,7 +94,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // handleSubscribe removed — newsletter popup replaced with Purim promo
+  // handleSubscribe removed
 
   return (
     <div className="min-h-screen">
@@ -412,7 +412,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Purim Promo Popup */}
+      {/* Pricing Popup */}
       {showPromoPopup && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in zoom-in-95 duration-300" dir="rtl">
@@ -427,21 +427,20 @@ export default function Home() {
             </button>
             
             <div className="text-center">
-              <div className="text-5xl mb-4">🎭</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">מבצע פורים!</h2>
-              <p className="text-gray-500 mb-5">30% הנחה — לזמן מוגבל</p>
+              <div className="text-5xl mb-4">✨</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">התחילו בחינם!</h2>
+              <p className="text-gray-500 mb-5">10 קרדיטים חינם — בלי כרטיס אשראי</p>
               
               <div className="bg-gray-50 rounded-2xl p-5 mb-5">
                 <div className="flex items-center justify-center gap-3 mb-1">
-                  <span className="text-gray-400 line-through text-lg">₪99</span>
-                  <span className="text-3xl font-bold text-gray-900">₪69</span>
+                  <span className="text-3xl font-bold text-gray-900">10 קרדיטים</span>
                 </div>
-                <p className="text-sm text-gray-500">תשלום חד-פעמי · לא מנוי</p>
+                <p className="text-sm text-gray-500">מספיק להדמיה אחת של חדר</p>
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><span>✓</span>4 הדמיות שיפוץ AI</li>
-                <li className="flex items-center gap-2"><span>✓</span>הערכות עלויות + כתב כמויות</li>
+                <li className="flex items-center gap-2"><span>✓</span>הדמיות שיפוץ AI</li>
+                <li className="flex items-center gap-2"><span>✓</span>כתב כמויות אוטומטי</li>
                 <li className="flex items-center gap-2"><span>✓</span>סריקת קבלות + מעקב תקציב</li>
                 <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>
               </ul>
@@ -453,7 +452,7 @@ export default function Home() {
               >
                 לצפייה בתוכניות ←
               </a>
-              <p className="text-xs text-gray-400 mt-3">תשלום חד-פעמי · לא חיוב חוזר</p>
+              <p className="text-xs text-gray-400 mt-3">תוכניות מ-₪29/חודש · בטלו בכל עת</p>
             </div>
           </div>
         </div>
@@ -463,8 +462,8 @@ export default function Home() {
       {!isPremium && (
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">🎭 מבצע פורים!</h2>
-          <p className="text-gray-500 mb-12">30% הנחה על Pro — ₪69 במקום ₪99</p>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">תוכניות ומחירים</h2>
+          <p className="text-gray-500 mb-12">התחילו בחינם — שדרגו כשתרצו</p>
           
           <PricingComparison />
         </div>

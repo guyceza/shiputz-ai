@@ -473,14 +473,14 @@ export default function ShopLookPage() {
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">Pro</span>
-                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">🎭 מבצע פורים</span>
+                    <span className="text-sm text-gray-500">תוכניות מנוי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-lg text-gray-400 line-through">₪99</span>
-                    <span className="text-4xl font-bold text-gray-900">₪69</span>
-                    <span className="text-gray-400">חד-פעמי</span>
+                    <span className="text-sm text-gray-500">החל מ-</span>
+                    <span className="text-4xl font-bold text-gray-900">₪29</span>
+                    <span className="text-gray-400">/חודש</span>
                   </div>
+                  <p className="text-gray-400 text-xs mt-1">50 קרדיטים · בטלו בכל עת</p>
                 </div>
                 
                 <ul className="space-y-3 mb-6">
@@ -504,13 +504,13 @@ export default function ShopLookPage() {
                 
                 <Link
                   href="/pricing"
-                  className="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
+                  className="block w-full text-center bg-gray-900 text-white py-4 rounded-full text-base font-bold hover:bg-gray-800 transition-all shadow-lg"
                 >
-                  🚀 שדרג עכשיו
+                  לצפייה בתוכניות ←
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  תשלום מאובטח · ביטול בלחיצה
+                  10 קרדיטים חינם · ללא כרטיס אשראי
                 </p>
               </>
             ) : (
@@ -526,14 +526,14 @@ export default function ShopLookPage() {
                 
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-500">Pro</span>
-                    <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-bold">🎭 מבצע פורים</span>
+                    <span className="text-sm text-gray-500">תוכניות מנוי</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-lg text-gray-400 line-through">₪99</span>
-                    <span className="text-4xl font-bold text-gray-900">₪69</span>
-                    <span className="text-gray-400">חד-פעמי</span>
+                    <span className="text-sm text-gray-500">החל מ-</span>
+                    <span className="text-4xl font-bold text-gray-900">₪29</span>
+                    <span className="text-gray-400">/חודש</span>
                   </div>
+                  <p className="text-gray-400 text-xs mt-1">50 קרדיטים · בטלו בכל עת</p>
                 </div>
                 
                 <Link
@@ -544,7 +544,7 @@ export default function ShopLookPage() {
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  תשלום חודשי · גישה לכל הכלים
+                  10 קרדיטים חינם · ללא כרטיס אשראי
                 </p>
               </>
             )}

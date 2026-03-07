@@ -33,6 +33,7 @@ const features = [
     credits: 3,
     href: "/shop-look",
     image: "/images/ai-vision/shop-look.jpg",
+    hasRealImage: true,
     gradient: "from-amber-500/10 to-orange-500/10",
   },
   {

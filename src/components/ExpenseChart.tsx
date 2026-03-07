@@ -195,7 +195,7 @@ export function MonthlyTrendChart({ expenses }: { expenses: Array<{ date: string
               ₪{(item.amount / 1000).toFixed(item.amount >= 1000 ? 1 : 0)}k
             </div>
             <div 
-              className="w-full bg-blue-500 rounded-t-lg transition-all duration-500 hover:bg-blue-600"
+              className="w-full bg-stone-400 rounded-t-lg transition-all duration-500 hover:bg-stone-500"
               style={{ 
                 height: `${(item.amount / maxAmount) * (chartHeight - 40)}px`,
                 animationDelay: `${idx * 0.1}s`

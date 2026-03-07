@@ -304,35 +304,7 @@ export default function Home() {
 
 
 
-      {/* Features */}
-      <section id="features" className="py-24 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">כל מה שצריך.</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12">
-            <Feature title="מעקב תקציב" description="ראו בדיוק כמה הוצאת, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." href="/dashboard" />
-            <Feature title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." href="/dashboard" />
-            <Feature title="ניתוח הצעות מחיר" description="העלו הצעה ותקבלו ניתוח מיידי. האם המחיר הוגן? מה חסר?" href="/dashboard" />
-            <Feature title="התראות חכמות" description="חרגת מהתקציב? תשלום חריג? המערכת מתריעה בזמן." href="/dashboard" />
-            <Feature title="עוזר AI" description="שאלו כל שאלה על השיפוץ וקבלו תשובה מקצועית ומותאמת." href="/dashboard" />
-          </div>
-        </div>
-      </section>
 
-      {/* How it works */}
-      <section className="py-24 px-6 border-t border-gray-100">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">שלושה צעדים.</h2>
-          </div>
-          <div className="space-y-16">
-            <Step number="01" title="הגדירו פרויקט" description="תנו שם, הגדירו תקציב, והתחילו. לוקח 30 שניות." />
-            <Step number="02" title="תעדו הוצאות" description="צלמו קבלות, העלו מסמכים, סמנו תשלומים." />
-            <Step number="03" title="קבלו שליטה" description="ראו את המצב בזמן אמת, קבלו התראות, קבלו החלטות." />
-          </div>
-        </div>
-      </section>
 
       {/* Pricing Popup */}
       {showPromoPopup && (

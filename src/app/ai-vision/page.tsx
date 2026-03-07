@@ -70,7 +70,8 @@ const features = [
     description: "צלמו קבלה — ה-AI קורא סכום, תאריך וקטגוריה אוטומטית",
     credits: 2,
     href: "/dashboard",
-    image: "/images/ai-vision/receipt.jpg",
+    image: "/images/ai-vision/receipt-scanner.gif",
+    hasRealImage: true,
     gradient: "from-cyan-500/10 to-sky-500/10",
   },
 ];

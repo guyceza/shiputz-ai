@@ -10,6 +10,7 @@ const features = [
     credits: 10,
     href: "/floorplan",
     image: "/images/ai-vision/floorplan.jpg",
+    hasRealImage: true,
     gradient: "from-blue-500/10 to-indigo-500/10",
   },
   {
@@ -104,16 +105,24 @@ export default function AIVisionPage() {
                 className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
               >
                 {/* Image */}
-                <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center`}>
-                  <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">
-                    {feature.title === "תוכנית קומה" && "📐"}
-                    {feature.title === "עיצוב מחדש" && "🎨"}
-                    {feature.title === "Shop the Look" && "🛒"}
-                    {feature.title === "סיור וידאו" && "🎬"}
-                    {feature.title === "כתב כמויות" && "📋"}
-                    {feature.title === "ניתוח הצעת מחיר" && "📊"}
-                    {feature.title === "סריקת קבלות" && "🧾"}
-                  </div>
+                <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
+                  {feature.image && feature.hasRealImage ? (
+                    <img 
+                      src={feature.image} 
+                      alt={feature.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
+                  ) : (
+                    <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">
+                      {feature.title === "תוכנית קומה" && "📐"}
+                      {feature.title === "עיצוב מחדש" && "🎨"}
+                      {feature.title === "Shop the Look" && "🛒"}
+                      {feature.title === "סיור וידאו" && "🎬"}
+                      {feature.title === "כתב כמויות" && "📋"}
+                      {feature.title === "ניתוח הצעת מחיר" && "📊"}
+                      {feature.title === "סריקת קבלות" && "🧾"}
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}

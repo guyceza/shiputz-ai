@@ -269,92 +269,109 @@ export default function Home() {
         </div>
       </section>
 
-      {/* איך השיפוץ שלי יראה? Teaser */}
+      {/* AI Vision — 7 Features */}
       <section className="py-24 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-16">
-            {/* Preview - Real Before/After Images */}
-            <div className="flex-1 relative">
-              <div className="grid grid-cols-2 gap-3 rounded-2xl overflow-hidden">
-                <div className="relative aspect-[4/3]">
-                  <Image 
-                    src="/before-room.webp" 
-                    alt="לפני השיפוץ"
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm py-2 text-center">
-                    לפני
-                  </div>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">AI Vision</p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל הכלים. מקום אחד.</h2>
+            <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך — מהרעיון ועד הביצוע</p>
+          </div>
+
+          {/* Top row — 3 main features */}
+          <div className="grid md:grid-cols-3 gap-5 mb-5">
+            <Link href="/visualize" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/palette.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
                 </div>
-                <Link 
-                  href="/shop-look"
-                  className="relative aspect-[4/3] group cursor-pointer"
-                >
-                  <Image 
-                    src="/after-room.webp" 
-                    alt="אחרי השיפוץ"
-                    width={400}
-                    height={300}
-                    className="w-full h-full object-cover group-hover:brightness-110 transition-all"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 text-white text-sm py-2 text-center" style={{ backgroundColor: '#101010' }}>
-                    אחרי
-                  </div>
-                  
-                  {/* Product Hotspots - visual only, click goes to shop-look */}
-                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '15%', top: '40%'}} />
-                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '75%', top: '35%'}} />
-                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '45%', top: '20%'}} />
-                  <div className="absolute w-4 h-4 bg-white/90 rounded-full shadow-lg animate-pulse" style={{left: '8%', top: '55%'}} />
-                  
-                  {/* Shop the Look badge */}
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                    <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-4 h-4" />
-                    <span>לחצו לצפייה גדולה</span>
-                  </div>
-                </Link>
+                <span className="text-[11px] text-gray-400 font-medium">10 קרדיטים</span>
               </div>
-              <div className="absolute -top-3 -right-3 text-white text-xs font-medium px-3 py-1 rounded-full" style={{ backgroundColor: '#101010' }}>
-                חדש
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">עיצוב מחדש</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">העלו תמונה של החדר וקבלו הדמיית AI של איך הוא יראה אחרי שיפוץ</p>
+              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
+            </Link>
+
+            <Link href="/floorplan" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/house.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">10 קרדיטים</span>
               </div>
-            </div>
-            
-            {/* Content */}
-            <div className="flex-1 text-center md:text-right">
-              <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">
-                איך השיפוץ שלי יראה?
-              </h2>
-              <p className="text-gray-500 mb-4 leading-relaxed">
-                העלו תמונה של החדר, תארו מה אתם רוצים לשנות, וקבלו הדמיית AI של התוצאה הסופית עם הערכת עלויות.
-                <span className="text-gray-400 text-sm block mt-1">ההדמיות נוצרות באמצעות בינה מלאכותית להמחשה בלבד</span>
-              </p>
-              <p className="text-gray-700 mb-8 leading-relaxed font-medium">
-                🛒 <span className="text-gray-900">Shop the Look</span> — אהבתם משהו בהדמיה? לחצו וקנו את המוצרים ישירות מחנויות בישראל.
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-8">
-                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הדמיה חכמה</span>
-                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">הערכת עלויות</span>
-                <span className="text-sm text-gray-600 border border-gray-200 rounded-full px-4 py-2">Shop the Look</span>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">תוכנית קומה</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">העלו תוכנית אדריכלית וקבלו הדמיה תלת-ממדית של כל חדר בדירה</p>
+              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
+            </Link>
+
+            <Link href="/shop-look" className="group relative bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-6">
+                <div className="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/cart.png" alt="" className="w-5 h-5 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">3 קרדיטים</span>
               </div>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                <Link
-                  href="/visualize"
-                  className="inline-block text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine"
-                  style={{ backgroundColor: '#101010' }}
-                >
-                  🎨 צור הדמיה
-                </Link>
-                <Link
-                  href="/shop-look"
-                  className="inline-flex items-center gap-2 border border-gray-200 text-gray-900 px-6 py-4 rounded-full text-base hover:bg-gray-50 transition-colors"
-                >
-                  <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-5 h-5" />
-                  <span>Shop the Look</span>
-                </Link>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Shop the Look</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">מצאו וקנו מוצרים דומים למה שרואים בהדמיה — ישירות מחנויות בישראל</p>
+              <div className="mt-6 text-sm text-gray-400 group-hover:text-gray-900 transition-colors">נסו עכשיו ←</div>
+            </Link>
+          </div>
+
+          {/* Bottom row — 4 secondary features */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <Link href="/floorplan" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/camera.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">25 קרדיטים</span>
               </div>
-            </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">סיור וידאו</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">סרטון AI שמדמה הליכה בחדר לפני ואחרי השיפוץ</p>
+            </Link>
+
+            <Link href="/dashboard/boq" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/search.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">5 קרדיטים</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">כתב כמויות</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">פירוט מדויק של חומרים, כמויות ועלויות לפרויקט</p>
+            </Link>
+
+            <Link href="/dashboard" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/money.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">3 קרדיטים</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">ניתוח הצעת מחיר</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">העלו הצעה מקבלן וקבלו ניתוח AI — מה סביר ומה חסר</p>
+            </Link>
+
+            <Link href="/dashboard" className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-400 transition-all duration-300" dir="rtl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-900 transition-colors">
+                  <img src="/icons/star.png" alt="" className="w-4 h-4 group-hover:invert transition-all" />
+                </div>
+                <span className="text-[11px] text-gray-400 font-medium">2 קרדיטים</span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">סריקת קבלות</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">צלמו קבלה — ה-AI קורא סכום, תאריך וקטגוריה אוטומטית</p>
+            </Link>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link
+              href="/ai-vision"
+              className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              לכל הכלים
+              <span>←</span>
+            </Link>
           </div>
         </div>
       </section>

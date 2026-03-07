@@ -121,6 +121,7 @@ export default function FloorplanPage() {
   const [furnitureImage, setFurnitureImage] = useState<string | null>(null);
   const [furnitureFile, setFurnitureFile] = useState<File | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
+  const [customFurnitureText, setCustomFurnitureText] = useState<string | null>(null);
   const [furnitureResult, setFurnitureResult] = useState<string | null>(null);
   const [swapping, setSwapping] = useState(false);
 
@@ -282,13 +283,15 @@ export default function FloorplanPage() {
   };
 
   const doSwap = async () => {
-    if (!currentRoomPhoto || (!selectedSuggestion && !furnitureFile) || !detectedFurniture) return;
+    if (!currentRoomPhoto || (!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || !detectedFurniture) return;
     setSwapping(true);
     setLoadingLabel(`מחליף ${detectedFurniture.itemHe}...`);
     setError(null);
     try {
       const roomBlob = await (await fetch(currentRoomPhoto.imageData)).blob();
-      const instruction = selectedSuggestion
+      const instruction = customFurnitureText?.trim()
+        ? `Replace the ${detectedFurniture.item} with: ${customFurnitureText.trim()}. Keep everything else exactly the same.`
+        : selectedSuggestion
         ? `Replace the ${detectedFurniture.item} with: ${selectedSuggestion}. Keep everything else exactly the same.`
         : `Replace the ${detectedFurniture.item} with the furniture shown in the second image. Keep everything else exactly the same.`;
       const fd = new FormData();
@@ -791,7 +794,7 @@ export default function FloorplanPage() {
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">בחרו חלופה</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {detectedFurniture.suggestions.map((sug, i) => (
-                      <button key={i} onClick={() => { setSelectedSuggestion(sug); setFurnitureImage(null); setFurnitureFile(null); }}
+                      <button key={i} onClick={() => { setSelectedSuggestion(sug); setFurnitureImage(null); setFurnitureFile(null); setCustomFurnitureText(null); }}
                         className={`text-right rounded-xl p-3 border-2 transition-all text-sm ${
                           selectedSuggestion === sug ? "bg-emerald-50 border-emerald-400 text-emerald-800" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
                         }`}>{sug}</button>
@@ -800,19 +803,31 @@ export default function FloorplanPage() {
                 </div>
 
                 <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או — תארו מה אתם רוצים</h3>
+                  <input
+                    type="text"
+                    placeholder={`למשל: מיטה לבנה מעץ אלון בסגנון כפרי`}
+                    value={customFurnitureText || ""}
+                    onChange={(e) => { setCustomFurnitureText(e.target.value); if (e.target.value) { setSelectedSuggestion(null); setFurnitureImage(null); setFurnitureFile(null); } }}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-right focus:outline-none focus:border-emerald-400 transition-colors"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div>
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">או — העלו רהיט ספציפי</h3>
                   <div className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all ${
                     furnitureImage ? "border-emerald-300 bg-emerald-50/50" : "border-gray-300 hover:border-gray-400"
                   }`} onClick={() => furnitureInputRef.current?.click()}>
                     <input ref={furnitureInputRef} type="file" accept="image/*" className="hidden"
-                      onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; setFurnitureFile(f); setSelectedSuggestion(null);
+                      onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; setFurnitureFile(f); setSelectedSuggestion(null); setCustomFurnitureText(null);
                         const reader = new FileReader(); reader.onload = (ev) => setFurnitureImage(ev.target?.result as string); reader.readAsDataURL(f); }} />
                     {furnitureImage ? <img src={furnitureImage} alt="Furniture" className="max-h-28 mx-auto rounded-xl" />
                       : <p className="text-gray-400 text-sm py-2">העלו תמונת רהיט</p>}
                   </div>
                 </div>
 
-                <button onClick={doSwap} disabled={(!selectedSuggestion && !furnitureFile) || swapping}
+                <button onClick={doSwap} disabled={(!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || swapping}
                   className={`w-full py-3.5 rounded-full font-bold transition-all ${
                     (!selectedSuggestion && !furnitureFile) || swapping ? "bg-gray-200 text-gray-400"
                       : "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"

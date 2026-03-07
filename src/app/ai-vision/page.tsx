@@ -111,11 +111,11 @@ export default function AIVisionPage() {
                 {/* Image */}
                 <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
                   {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
-                    <div onClick={(e) => e.preventDefault()} onMouseDown={(e) => e.stopPropagation()}>
+                    <div className="w-full h-full" onClick={(e) => e.preventDefault()} onMouseDown={(e) => e.stopPropagation()}>
                       <BeforeAfterSlider
                         beforeImg={feature.sliderBefore}
                         afterImg={feature.sliderAfter}
-                        className="w-full h-full"
+                        className="w-full aspect-[4/3]"
                         compact
                       />
                     </div>

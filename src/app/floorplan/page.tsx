@@ -217,31 +217,38 @@ export default function FloorplanPage() {
   // Shared: submit video + poll for result
   // Resize image to 1280x720 JPEG — handles both data URLs and remote URLs
   const resizeToJpeg = async (src: string): Promise<Blob> => {
-    // If it's a remote URL, fetch it first to avoid CORS canvas tainting
-    let imgSrc = src;
+    // For remote URLs: fetch as blob, convert to data URL, THEN load in Image
+    // This avoids CORS canvas tainting issues
+    let dataUrl = src;
     if (src.startsWith("http")) {
       const resp = await fetch(src);
+      if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
       const blob = await resp.blob();
-      imgSrc = URL.createObjectURL(blob);
+      if (blob.size === 0) throw new Error("Fetched image is empty");
+      dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
     }
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = "anonymous";
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 1280; canvas.height = 720;
-        const ctx = canvas.getContext("2d")!;
-        const scale = Math.max(1280 / img.width, 720 / img.height);
-        const w = img.width * scale; const h = img.height * scale;
-        ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
-        canvas.toBlob((b) => {
-          if (b) resolve(b);
-          else reject(new Error("Failed to convert image"));
-          if (imgSrc !== src) URL.revokeObjectURL(imgSrc);
-        }, "image/jpeg", 0.85);
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = 1280; canvas.height = 720;
+          const ctx = canvas.getContext("2d")!;
+          const scale = Math.max(1280 / img.width, 720 / img.height);
+          const w = img.width * scale; const h = img.height * scale;
+          ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
+          canvas.toBlob((b) => {
+            if (b && b.size > 0) resolve(b);
+            else reject(new Error("Canvas toBlob returned empty"));
+          }, "image/jpeg", 0.85);
+        } catch (e) { reject(e); }
       };
-      img.onerror = () => reject(new Error("Failed to load image"));
-      img.src = imgSrc;
+      img.onerror = () => reject(new Error("Failed to load image for resize"));
+      img.src = dataUrl;
     });
   };
 

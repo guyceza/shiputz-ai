@@ -1,53 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
-
-const shopLookHotspots = [
-  { id: "closet", name: "ארון הזזה עם מראה", top: 38, left: 18, price: "₪6,800" },
-  { id: "painting", name: "תמונת קיר דקורטיבית", top: 22, left: 76, price: "₪350" },
-  { id: "bed", name: "מיטה זוגית מרופדת", top: 48, left: 68, price: "₪4,200" },
-  { id: "lamp", name: "מנורת שידה", top: 38, left: 93, price: "₪280" },
-  { id: "nightstand", name: "שידת לילה", top: 55, left: 91, price: "₪890" },
-  { id: "chair", name: "כיסא עץ מעוצב", top: 75, left: 10, price: "₪1,100" },
-  { id: "rug", name: "שטיח אזור", top: 88, left: 38, price: "₪1,600" },
-];
-
-function ShopLookPreview({ image }: { image: string }) {
-  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
-
-  return (
-    <div className="relative w-full h-full">
-      <img src={image} alt="Shop the Look" className="w-full h-full object-cover" />
-      {shopLookHotspots.map((spot) => (
-        <div key={spot.id}>
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveHotspot(activeHotspot === spot.id ? null : spot.id); }}
-            className="absolute w-7 h-7 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer rounded-full"
-            style={{ top: `${spot.top}%`, left: `${spot.left}%` }}
-          />
-          {activeHotspot === spot.id && (
-            <div
-              className="absolute z-20 bg-white rounded-lg shadow-xl border border-gray-200 p-2.5 w-36 text-right"
-              style={{ top: `${Math.min(spot.top, 70)}%`, left: `${Math.min(spot.left + 4, 60)}%` }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-xs font-semibold text-gray-900 mb-0.5">{spot.name}</p>
-              <p className="text-[11px] text-emerald-600 font-medium">{spot.price}</p>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = "/shop-look"; }}
-                className="mt-1.5 w-full bg-gray-900 text-white text-[10px] py-1 rounded-full hover:bg-gray-800"
-              >
-                חפש מוצר
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 const features = [
   {
@@ -79,7 +33,7 @@ const features = [
     credits: 3,
     href: "/shop-look",
     image: "/images/ai-vision/shop-look.jpg",
-    hasShopLook: true,
+    hasRealImage: true,
     gradient: "from-amber-500/10 to-orange-500/10",
   },
   {
@@ -154,9 +108,7 @@ export default function AIVisionPage() {
                 <>
                   {/* Image */}
                   <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
-                    {feature.hasShopLook && feature.image ? (
-                      <ShopLookPreview image={feature.image} />
-                    ) : feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
+                    {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
                       <BeforeAfterSlider
                         beforeImg={feature.sliderBefore}
                         afterImg={feature.sliderAfter}
@@ -200,7 +152,7 @@ export default function AIVisionPage() {
                 </>
               );
 
-              return (feature.hasSlider || feature.hasShopLook) ? (
+              return feature.hasSlider ? (
                 <div
                   key={feature.href + feature.title}
                   className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"

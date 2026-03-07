@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import HeroAnimation from "@/components/HeroAnimation";
-import ComparisonSection from "@/components/ComparisonSection";
+
 
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesCarousel from "@/components/FeaturesCarousel";
@@ -302,8 +302,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Problem/Comparison */}
-      <ComparisonSection />
+
 
       {/* Features */}
       <section id="features" className="py-24 px-6 border-t border-gray-100">

@@ -105,7 +105,7 @@ export default function Home() {
             ShiputzAI
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/visualize" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
+            <Link href="/ai-vision" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
               🎨 AI Vision
             </Link>
             <Link href="/tips" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">

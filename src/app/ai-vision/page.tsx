@@ -62,7 +62,7 @@ const features = [
     href: "/dashboard",
     image: "/images/ai-vision/quote-analysis.gif",
     hasRealImage: true,
-
+    imageContain: true,
     gradient: "from-rose-500/10 to-red-500/10",
   },
   {
@@ -121,7 +121,7 @@ export default function AIVisionPage() {
                       <img 
                         src={feature.image} 
                         alt={feature.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className={`w-full h-full ${feature.imageContain ? "object-contain" : "object-cover"} group-hover:scale-105 transition-transform duration-500`}
                       />
                     ) : (
                       <div className="text-4xl opacity-50 group-hover:opacity-70 transition-opacity">

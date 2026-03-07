@@ -51,7 +51,8 @@ const features = [
     description: "קבלו פירוט מדויק של חומרים, כמויות ועלויות לפרויקט",
     credits: 5,
     href: "/dashboard/bill-of-quantities",
-    image: "/images/ai-vision/boq.jpg",
+    image: "/images/ai-vision/boq.gif",
+    hasRealImage: true,
     gradient: "from-gray-500/10 to-slate-500/10",
   },
   {

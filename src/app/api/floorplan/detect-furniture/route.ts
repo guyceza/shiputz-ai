@@ -28,12 +28,12 @@ export async function POST(req: NextRequest) {
 Identify the furniture or object the user clicked on. Respond in JSON format only:
 {
   "item": "the furniture/object name in English (e.g. sofa, dining table, bed, armchair, bookshelf, rug, curtains, lamp, coffee table)",
-  "itemHe": "the furniture name in Hebrew",
-  "description": "brief description (color, style, material)",
-  "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
+  "itemHe": "שם הרהיט בעברית",
+  "description": "תיאור קצר בעברית (צבע, סגנון, חומר)",
+  "suggestions": ["הצעה 1 בעברית", "הצעה 2 בעברית", "הצעה 3 בעברית"]
 }
 
-"suggestions" should be 3 alternative furniture styles the user might want to replace it with (e.g., for a sofa: "modern L-shaped sectional in gray fabric", "mid-century leather sofa in cognac", "Scandinavian linen sofa in cream").
+"suggestions" should be 3 alternative furniture styles in HEBREW that the user might want (e.g., for a sofa: "ספה פינתית מודרנית באפור", "ספת עור קוניאק בסגנון רטרו", "ספת פשתן סקנדינבית בקרם"). "description" must also be in Hebrew.
 
 Respond with ONLY the JSON, no other text.`;
 

@@ -62,7 +62,7 @@ const features = [
     href: "/dashboard",
     image: "/images/ai-vision/quote-analysis.gif",
     hasRealImage: true,
-    imagePosition: "object-top" as const,
+
     gradient: "from-rose-500/10 to-red-500/10",
   },
   {

@@ -48,6 +48,7 @@ export default function ShopLookPage() {
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
   const [showPaywall, setShowPaywall] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [userHistory, setUserHistory] = useState<any>(null);
 
   // Auth check
   useEffect(() => {
@@ -192,20 +193,9 @@ export default function ShopLookPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.hasHistory && data.imageUrl) {
-          setImageSrc(data.imageUrl);
-          setIsCustomImage(true);
-          setVisionHistoryId(data.visionId);
-          
-          // Only use products that have valid position data
-          if (data.products && data.products.length > 0) {
-            const validProducts = data.products.filter(
-              (p: ShoppableItem) => p.position && typeof p.position.top === 'number'
-            );
-            if (validProducts.length > 0) {
-              setItems(validProducts);
-            }
-            // If no valid products, keep default demo items
-          }
+          // Store history but don't auto-replace the demo image
+          // User can load their history from the upload section
+          setUserHistory(data);
         }
       }
     } catch (error) {

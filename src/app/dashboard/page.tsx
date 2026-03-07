@@ -544,23 +544,23 @@ function DashboardContent() {
         {projects.length > 0 && (
           <div className="mb-8">
             <div className="grid md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-blue-50 to-sky-50 p-5 rounded-xl border border-blue-100/80">
-                <p className="text-xs text-blue-600/70 mb-1">סה״כ תקציב</p>
-                <p className="text-2xl font-semibold text-blue-900">₪{totalBudget.toLocaleString()}</p>
+              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-1">סה״כ תקציב</p>
+                <p className="text-2xl font-semibold text-stone-800">₪{totalBudget.toLocaleString()}</p>
               </div>
-              <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-5 rounded-xl border border-violet-100/80">
-                <p className="text-xs text-violet-600/70 mb-1">סה״כ הוצאות</p>
-                <p className="text-2xl font-semibold text-violet-900">₪{totalSpent.toLocaleString()}</p>
+              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-1">סה״כ הוצאות</p>
+                <p className="text-2xl font-semibold text-stone-800">₪{totalSpent.toLocaleString()}</p>
               </div>
-              <div className={`p-5 rounded-xl border ${totalRemaining < 0 ? 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-100/80' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100/80'}`}>
-                <p className={`text-xs mb-1 ${totalRemaining < 0 ? 'text-rose-600/70' : 'text-emerald-600/70'}`}>נותר</p>
-                <p className={`text-2xl font-semibold ${totalRemaining < 0 ? 'text-rose-800' : 'text-emerald-900'}`}>
+              <div className={`p-5 rounded-xl border ${totalRemaining < 0 ? 'bg-rose-50/50 border-rose-200/60' : 'bg-white border-stone-200/80'}`}>
+                <p className={`text-xs mb-1 ${totalRemaining < 0 ? 'text-rose-500' : 'text-stone-500'}`}>נותר</p>
+                <p className={`text-2xl font-semibold ${totalRemaining < 0 ? 'text-rose-700' : 'text-stone-800'}`}>
                   ₪{totalRemaining.toLocaleString()}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-xl border border-amber-100/80">
-                <p className="text-xs text-amber-600/70 mb-1">פרויקטים</p>
-                <p className="text-2xl font-semibold text-amber-900">{projects.length}</p>
+              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-1">פרויקטים</p>
+                <p className="text-2xl font-semibold text-stone-800">{projects.length}</p>
               </div>
             </div>
             {/* Progress bar */}
@@ -578,15 +578,15 @@ function DashboardContent() {
         )}
 
         {/* Did You Know? Tip Box */}
-        <div className="mb-8 bg-gradient-to-l from-amber-50/80 to-orange-50/50 rounded-2xl p-6 border border-amber-100/60">
+        <div className="mb-8 bg-stone-50 rounded-2xl p-6 border border-stone-200/60">
           <div className="flex items-start gap-4">
             <div className="flex-1">
-              <p className="text-xs font-medium text-amber-800 mb-1">💡 הידעת?</p>
-              <p className="text-amber-900/70 text-sm leading-relaxed">{randomTip}</p>
+              <p className="text-xs font-medium text-stone-700 mb-1">💡 הידעת?</p>
+              <p className="text-stone-600 text-sm leading-relaxed">{randomTip}</p>
             </div>
             <Link 
               href="/tips"
-              className="text-xs text-amber-600/70 hover:text-amber-800 whitespace-nowrap"
+              className="text-xs text-stone-500 hover:text-stone-700 whitespace-nowrap"
             >
               עוד טיפים ←
             </Link>
@@ -595,13 +595,13 @@ function DashboardContent() {
 
         {/* Premium Status - One time purchase (no cancel needed) */}
         {isPremium && (
-          <div className="mb-8 bg-gradient-to-l from-violet-50 to-indigo-50 rounded-2xl p-6 border border-violet-100/60">
+          <div className="mb-8 bg-white rounded-2xl p-6 border border-stone-200/60">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-violet-900 mb-1">✦ Pro פעיל</p>
-                <p className="text-xs text-violet-600/70">יש לך גישה לכל הכלים המתקדמים</p>
+                <p className="text-sm font-medium text-stone-800 mb-1">✦ Pro פעיל</p>
+                <p className="text-xs text-stone-500">יש לך גישה לכל הכלים המתקדמים</p>
               </div>
-              <span className="text-xs text-violet-600/70 bg-white/60 px-3 py-1 rounded-full border border-violet-200/60">
+              <span className="text-xs text-stone-600 bg-stone-100 px-3 py-1 rounded-full border border-stone-200/60">
                 מנוי Pro
               </span>
             </div>
@@ -610,24 +610,24 @@ function DashboardContent() {
 
         {/* Vision AI Subscription - Monthly (can cancel) */}
         {(hasVisionSub || hasLocalVision) && (
-          <div className="mb-8 bg-gradient-to-l from-sky-50 to-cyan-50 rounded-2xl p-6 border border-sky-100/60">
+          <div className="mb-8 bg-white rounded-2xl p-6 border border-stone-200/60">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-900 mb-1">מנוי הדמיות AI פעיל</p>
+                <p className="text-sm font-medium text-stone-800 mb-1">מנוי הדמיות AI פעיל</p>
                 {visionSubInfo?.cancelAtPeriodEnd ? (
                   <p className="text-xs text-amber-600">
                     יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
                   </p>
                 ) : hasVisionSub ? (
-                  <p className="text-xs text-sky-600/70">מתחדש אוטומטית כל חודש</p>
+                  <p className="text-xs text-stone-500">מתחדש אוטומטית כל חודש</p>
                 ) : (
-                  <p className="text-xs text-sky-600/70">גישה מלאה להדמיות</p>
+                  <p className="text-xs text-stone-500">גישה מלאה להדמיות</p>
                 )}
               </div>
               {!visionSubInfo?.cancelAtPeriodEnd && (hasLocalVision || hasVisionSub) && (
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  className="text-sm text-sky-700/70 hover:text-sky-900 border border-sky-200/60 px-4 py-2 rounded-full hover:bg-sky-50 transition-colors"
+                  className="text-sm text-stone-600 hover:text-stone-800 border border-stone-200/60 px-4 py-2 rounded-full hover:bg-stone-50 transition-colors"
                 >
                   בטל מנוי
                 </button>
@@ -644,10 +644,10 @@ function DashboardContent() {
               {/* Bill of Quantities */}
               <Link 
                 href="/dashboard/bill-of-quantities"
-                className="group bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100/60 rounded-2xl p-6 hover:shadow-md transition-all"
+                className="group bg-gradient-to-br from-amber-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all"
               >
                 <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <svg className="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-amber-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
@@ -662,10 +662,10 @@ function DashboardContent() {
               {(hasVisionSub || hasLocalVision) ? (
                 <Link 
                   href="/visualize"
-                  className="group bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-100/60 rounded-2xl p-6 hover:shadow-md transition-all"
+                  className="group bg-gradient-to-br from-sky-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all"
                 >
                   <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <svg className="w-6 h-6 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-sky-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -693,10 +693,10 @@ function DashboardContent() {
               {/* Quote Analysis */}
               <Link 
                 href={projects.length > 0 ? `/project/${projects[0].id}?tab=quote` : "/dashboard"}
-                className={`group bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100/60 rounded-2xl p-6 hover:shadow-md transition-all ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
+                className={`group bg-gradient-to-br from-emerald-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
               >
                 <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-emerald-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>

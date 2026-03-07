@@ -103,10 +103,54 @@ const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
 export default function FloorplanPage() {
   const [phase, setPhase] = useState<Phase>("upload");
 
-  // Check URL param on mount
+  // Check URL param on mount + load saved rooms
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("mode") === "video") setPhase("video-upload");
+
+    // Generate or restore session ID
+    let sessionId = sessionStorage.getItem("floorplan_session_id");
+    if (!sessionId) {
+      sessionId = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      sessionStorage.setItem("floorplan_session_id", sessionId);
+    }
+    setFloorplanSessionId(sessionId);
+
+    // Load saved rooms for this user
+    const loadRooms = async () => {
+      const email = getEmail();
+      if (!email) return;
+      try {
+        // Load rooms for current session
+        const res = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}&sessionId=${encodeURIComponent(sessionId!)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.rooms?.length > 0) {
+            const photos: RoomPhoto[] = data.rooms.map((r: any) => ({
+              roomName: r.room_name,
+              roomNameHe: r.room_name_he,
+              imageData: r.image_url,
+            }));
+            setAllRoomPhotos(photos);
+          }
+        }
+
+        // Load ALL rooms for video page (grouped by session)
+        const allRes = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}`);
+        if (allRes.ok) {
+          const allData = await allRes.json();
+          if (allData.rooms?.length > 0) {
+            const grouped: Record<string, RoomPhoto[]> = {};
+            for (const r of allData.rooms) {
+              if (!grouped[r.session_id]) grouped[r.session_id] = [];
+              grouped[r.session_id].push({ roomName: r.room_name, roomNameHe: r.room_name_he, imageData: r.image_url });
+            }
+            setAllUserRooms(Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms })));
+          }
+        }
+      } catch (e) { console.error("Failed to load rooms:", e); }
+    };
+    loadRooms();
   }, []);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [customStyle, setCustomStyle] = useState("");
@@ -121,6 +165,7 @@ export default function FloorplanPage() {
   const [loadingRoom, setLoadingRoom] = useState(false);
   const [currentRoomPhoto, setCurrentRoomPhoto] = useState<RoomPhoto | null>(null);
   const [allRoomPhotos, setAllRoomPhotos] = useState<RoomPhoto[]>([]);
+  const [floorplanSessionId, setFloorplanSessionId] = useState<string>("");
 
   const [roomClick, setRoomClick] = useState<ClickMarker | null>(null);
   const [detectedFurniture, setDetectedFurniture] = useState<FurnitureInfo | null>(null);
@@ -144,6 +189,7 @@ export default function FloorplanPage() {
   const [videoProgress, setVideoProgress] = useState("");
   const [videoFirstImage, setVideoFirstImage] = useState<string | null>(null);
   const [videoLastImage, setVideoLastImage] = useState<string | null>(null);
+  const [allUserRooms, setAllUserRooms] = useState<{sessionId: string; rooms: RoomPhoto[]}[]>([]);
   const videoFirstInputRef = useRef<HTMLInputElement>(null);
   const videoLastInputRef = useRef<HTMLInputElement>(null);
 
@@ -167,6 +213,24 @@ export default function FloorplanPage() {
   };
 
   const isAnyLoading = loading || loadingRoom || loadingFurniture || swapping || videoLoading;
+
+  // Save room photo to DB (fire and forget)
+  const saveRoomToDB = useCallback((photo: RoomPhoto) => {
+    const email = getEmail();
+    if (!email || !floorplanSessionId) return;
+    fetch("/api/floorplan/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: email,
+        sessionId: floorplanSessionId,
+        roomName: photo.roomName,
+        roomNameHe: photo.roomNameHe,
+        imageData: photo.imageData,
+        style: customStyle || selectedStyle,
+      }),
+    }).catch((e) => console.error("Failed to save room:", e));
+  }, [floorplanSessionId, customStyle, selectedStyle]);
 
   // === File handlers ===
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,6 +322,7 @@ export default function FloorplanPage() {
           if (prev.some(p => p.roomName === photo.roomName)) return prev;
           return [...prev, photo];
         });
+        saveRoomToDB(photo);
         setPhase("room-actions");
       }
     } catch (err: any) { setError(err.message); }
@@ -317,13 +382,15 @@ export default function FloorplanPage() {
           generateRoom(click),
         ]);
 
-        // Add to allRoomPhotos
+        // Add to allRoomPhotos + save to DB
         setAllRoomPhotos((prev) => {
           const updated = [...prev];
           if (!updated.some(p => p.roomName === roomA.roomName)) updated.push(roomA);
           if (!updated.some(p => p.roomName === roomB.roomName)) updated.push(roomB);
           return updated;
         });
+        saveRoomToDB(roomA);
+        saveRoomToDB(roomB);
 
         // Go directly to video select with these 2 rooms pre-selected
         setVideoFromRoom(roomA.roomName);
@@ -759,7 +826,12 @@ export default function FloorplanPage() {
 
             {/* Start fresh */}
             <div className="text-center">
-              <button onClick={() => { setPhase("upload"); setFloorplanResult(null); setUploadedImage(null); setUploadedFile(null); setAllRoomPhotos([]); }}
+              <button onClick={() => { 
+                setPhase("upload"); setFloorplanResult(null); setUploadedImage(null); setUploadedFile(null); setAllRoomPhotos([]); 
+                const newSession = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                sessionStorage.setItem("floorplan_session_id", newSession);
+                setFloorplanSessionId(newSession);
+              }}
                 className="text-sm text-gray-400 hover:text-gray-600 transition-colors">תוכנית חדשה</button>
             </div>
           </>
@@ -1040,41 +1112,48 @@ export default function FloorplanPage() {
               <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
             </div>
 
-            {/* Previously generated rooms */}
-            {allRoomPhotos.length > 0 && (
-              <div className="max-w-2xl mx-auto space-y-3">
-                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים מההדמיה — לחצו לבחור</h3>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {allRoomPhotos.map((photo) => {
-                    const isFirst = videoFirstImage === photo.imageData;
-                    const isLast = videoLastImage === photo.imageData;
-                    return (
-                      <button key={photo.roomName} onClick={() => {
-                        if (isFirst) { setVideoFirstImage(null); return; }
-                        if (isLast) { setVideoLastImage(null); return; }
-                        if (!videoFirstImage) setVideoFirstImage(photo.imageData);
-                        else if (!videoLastImage) setVideoLastImage(photo.imageData);
-                      }}
-                        className={`rounded-xl overflow-hidden border-2 transition-all relative ${
-                          isFirst || isLast ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                        }`}>
-                        <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                        {(isFirst || isLast) && (
-                          <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                            {isFirst ? "A" : "B"}
-                          </div>
-                        )}
-                        <div className={`text-center text-[10px] py-1 ${
-                          isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
-                        }`}>
-                          {photo.roomNameHe}
-                          {isFirst && " — התחלה"}
-                          {isLast && " — סיום"}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Previously generated rooms — grouped by session (house) */}
+            {allUserRooms.length > 0 && (
+              <div className="max-w-2xl mx-auto space-y-4">
+                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים שנוצרו — בחרו 2 מאותו בית</h3>
+                {allUserRooms.filter(g => g.rooms.length >= 1).map((group, gi) => (
+                  <div key={group.sessionId} className="space-y-2">
+                    {allUserRooms.length > 1 && (
+                      <p className="text-xs text-gray-400 font-medium">הדמיה {gi + 1}</p>
+                    )}
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {group.rooms.map((photo) => {
+                        const isFirst = videoFirstImage === photo.imageData;
+                        const isLast = videoLastImage === photo.imageData;
+                        return (
+                          <button key={photo.roomName + group.sessionId} onClick={() => {
+                            if (isFirst) { setVideoFirstImage(null); return; }
+                            if (isLast) { setVideoLastImage(null); return; }
+                            if (!videoFirstImage) setVideoFirstImage(photo.imageData);
+                            else if (!videoLastImage) setVideoLastImage(photo.imageData);
+                          }}
+                            className={`rounded-xl overflow-hidden border-2 transition-all relative ${
+                              isFirst || isLast ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                            }`}>
+                            <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
+                            {(isFirst || isLast) && (
+                              <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
+                                {isFirst ? "A" : "B"}
+                              </div>
+                            )}
+                            <div className={`text-center text-[10px] py-1 ${
+                              isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
+                            }`}>
+                              {photo.roomNameHe}
+                              {isFirst && " — התחלה"}
+                              {isLast && " — סיום"}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

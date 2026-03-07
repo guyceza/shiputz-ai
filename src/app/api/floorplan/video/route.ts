@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
 
     const accessToken = await getAccessToken();
 
-    const defaultPrompt = "ABSOLUTELY ONE CONTINUOUS UNBROKEN SINGLE TAKE. NO cuts, NO fades, NO fade-to-black, NO dissolves, NO transitions of any kind. The screen must NEVER go dark or dim at any point. A steadicam smoothly and physically glides from the first room through a doorway or hallway into the second room in one seamless uninterrupted fluid motion. The camera never stops moving forward. Constant visible environment throughout — walls, floors, ceiling always in frame. Eye-level perspective, warm natural lighting, photorealistic interior architectural walkthrough. The entire video is one single continuous camera movement with zero interruptions.";
+    const noCutSuffix = " ABSOLUTELY ONE CONTINUOUS UNBROKEN SINGLE TAKE. NO cuts, NO fades, NO fade-to-black, NO dissolves, NO transitions of any kind. The screen must NEVER go dark or dim at any point. The camera never stops moving forward. Constant visible environment throughout. The entire video is one single continuous camera movement with zero interruptions.";
+
+    const defaultPrompt = "A steadicam smoothly and physically glides from the first room through a doorway or hallway into the second room in one seamless uninterrupted fluid motion. Eye-level perspective, warm natural lighting, photorealistic interior architectural walkthrough.";
+
+    const finalPrompt = (prompt || defaultPrompt) + noCutSuffix;
 
     // Start Veo generation
     const veoRes = await fetch(
@@ -69,7 +73,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           instances: [{
-            prompt: prompt || defaultPrompt,
+            prompt: finalPrompt,
             firstFrameImage: { bytesBase64Encoded: firstB64, mimeType: "image/jpeg" },
             lastFrameImage: { bytesBase64Encoded: lastB64, mimeType: "image/jpeg" },
           }],

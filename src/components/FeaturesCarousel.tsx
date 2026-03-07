@@ -33,7 +33,7 @@ const features = [
   {
     id: "video-tour",
     title: "סיור וידאו",
-    description: "סרטון AI שמדמה הליכה בדירה לפני ואחרי",
+    description: "סרטון AI המדמה הליכה בדירה בעיצוב החדש",
     href: "/floorplan",
     type: "gif" as const,
     gif: "/images/ai-vision/video-tour.gif",

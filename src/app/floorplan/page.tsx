@@ -106,6 +106,7 @@ export default function FloorplanPage() {
     return "upload";
   });
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [customStyle, setCustomStyle] = useState("");
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -194,7 +195,7 @@ export default function FloorplanPage() {
     try {
       const formData = new FormData();
       formData.append("image", uploadedFile);
-      formData.append("style", selectedStyle);
+      formData.append("style", customStyle || selectedStyle);
       formData.append("email", getEmail() || "");
       const res = await fetch("/api/floorplan", { method: "POST", body: formData });
       const data = await res.json();
@@ -235,7 +236,7 @@ export default function FloorplanPage() {
       const fd2 = new FormData();
       fd2.append("floorplan", blob, "floorplan.png");
       fd2.append("room", roomInfo.room);
-      fd2.append("style", selectedStyle || "modern-cabin");
+      fd2.append("style", customStyle || selectedStyle || "modern-cabin");
       fd2.append("email", getEmail() || "");
       const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
       const roomData = await roomRes.json();
@@ -545,9 +546,9 @@ export default function FloorplanPage() {
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {STYLES.map((s) => (
-                  <button key={s.key} onClick={() => setSelectedStyle(s.key)}
+                  <button key={s.key} onClick={() => { setSelectedStyle(s.key); setCustomStyle(""); }}
                     className={`rounded-xl p-3.5 text-right transition-all border-2 bg-white ${
-                      selectedStyle === s.key
+                      selectedStyle === s.key && !customStyle
                         ? "border-gray-900 shadow-md"
                         : "border-gray-200 hover:border-gray-300"
                     }`}>
@@ -556,11 +557,23 @@ export default function FloorplanPage() {
                   </button>
                 ))}
               </div>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={customStyle}
+                  onChange={(e) => { setCustomStyle(e.target.value); if (e.target.value) setSelectedStyle("custom"); }}
+                  placeholder="או כתבו סגנון משלכם... למשל: לופט ניו יורקי עם בטון ועץ כהה"
+                  className={`w-full px-4 py-3 rounded-xl border-2 bg-white text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none transition-all ${
+                    customStyle ? "border-gray-900 shadow-md" : "border-gray-200 focus:border-gray-400"
+                  }`}
+                  dir="rtl"
+                />
+              </div>
             </div>
 
-            <button onClick={generateFloorplan} disabled={!uploadedFile || !selectedStyle || loading}
+            <button onClick={generateFloorplan} disabled={!uploadedFile || (!selectedStyle && !customStyle) || loading}
               className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
-                !uploadedFile || !selectedStyle || loading
+                !uploadedFile || (!selectedStyle && !customStyle) || loading
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800 shadow-xl hover:shadow-2xl"
               }`}>

@@ -57,6 +57,15 @@ const features = [
     image: "/images/ai-vision/quote.jpg",
     gradient: "from-rose-500/10 to-red-500/10",
   },
+  {
+    title: "סריקת קבלות",
+    subtitle: "Receipt Scanner",
+    description: "צלמו קבלה — ה-AI קורא סכום, תאריך וקטגוריה אוטומטית",
+    credits: 2,
+    href: "/dashboard",
+    image: "/images/ai-vision/receipt.jpg",
+    gradient: "from-cyan-500/10 to-sky-500/10",
+  },
 ];
 
 export default function AIVisionPage() {
@@ -103,6 +112,7 @@ export default function AIVisionPage() {
                     {feature.title === "סיור וידאו" && "🎬"}
                     {feature.title === "כתב כמויות" && "📋"}
                     {feature.title === "ניתוח הצעת מחיר" && "📊"}
+                    {feature.title === "סריקת קבלות" && "🧾"}
                   </div>
                 </div>
 

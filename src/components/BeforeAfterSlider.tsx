@@ -26,11 +26,12 @@ export default function BeforeAfterSlider({ beforeImg, afterImg, className = "",
     <div
       ref={containerRef}
       className={`relative w-full overflow-hidden bg-gray-100 select-none touch-none ${className}`}
-      onMouseMove={(e) => { if (isDragging) handleMove(e.clientX); }}
+      onMouseMove={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); handleMove(e.clientX); } }}
       onMouseUp={() => setIsDragging(false)}
       onMouseLeave={() => setIsDragging(false)}
-      onTouchMove={(e) => { if (isDragging) handleMove(e.touches[0].clientX); }}
+      onTouchMove={(e) => { if (isDragging) { e.stopPropagation(); handleMove(e.touches[0].clientX); } }}
       onTouchEnd={() => setIsDragging(false)}
+      onClick={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); } }}
     >
       {/* After image (LEFT side) */}
       <div

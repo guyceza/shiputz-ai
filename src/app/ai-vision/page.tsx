@@ -22,8 +22,8 @@ const features = [
     href: "/visualize",
     image: "/images/ai-vision/visualize.jpg",
     hasSlider: true,
-    sliderBefore: "/examples/living-before.webp",
-    sliderAfter: "/examples/living-after.webp",
+    sliderBefore: "/before-room.jpg",
+    sliderAfter: "/after-room.jpg",
     gradient: "from-emerald-500/10 to-teal-500/10",
   },
   {
@@ -111,12 +111,14 @@ export default function AIVisionPage() {
                 {/* Image */}
                 <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
                   {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
-                    <BeforeAfterSlider
-                      beforeImg={feature.sliderBefore}
-                      afterImg={feature.sliderAfter}
-                      className="w-full h-full"
-                      compact
-                    />
+                    <div onClick={(e) => e.preventDefault()} onMouseDown={(e) => e.stopPropagation()}>
+                      <BeforeAfterSlider
+                        beforeImg={feature.sliderBefore}
+                        afterImg={feature.sliderAfter}
+                        className="w-full h-full"
+                        compact
+                      />
+                    </div>
                   ) : feature.image && feature.hasRealImage ? (
                     <img 
                       src={feature.image} 

@@ -42,7 +42,8 @@ const features = [
     description: "צרו סרטון AI שמדמה הליכה בחדר לפני ואחרי השיפוץ",
     credits: 25,
     href: "/floorplan?mode=video",
-    image: "/images/ai-vision/video.jpg",
+    image: "/images/ai-vision/video-tour.gif",
+    hasRealImage: true,
     gradient: "from-purple-500/10 to-pink-500/10",
   },
   {

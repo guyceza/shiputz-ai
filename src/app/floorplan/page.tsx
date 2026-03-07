@@ -526,6 +526,7 @@ export default function FloorplanPage() {
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-gray-900">ההדמיה מוכנה</h2>
               <p className="text-gray-500">מה תרצו לעשות עם התוכנית?</p>
+              <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד</p>
             </div>
 
             {/* Before / After side by side */}

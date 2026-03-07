@@ -104,12 +104,25 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">9. יצירת קשר</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">9. עיבוד נתונים באמצעות AI</h2>
+              <p>
+                השירות משתמש בטכנולוגיות בינה מלאכותית (AI) לעיבוד תמונות, מסמכים ונתונים שתעלו. 
+                העיבוד מתבצע באמצעות ספקי שירות צד שלישי (כגון Google Cloud) בהתאם לתנאי האבטחה והפרטיות שלהם. 
+                התמונות והמסמכים שלכם אינם נשמרים לצורכי אימון מודלים של צד שלישי.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">10. יצירת קשר</h2>
               <p>
                 לשאלות בנוגע למדיניות הפרטיות שלנו, ניתן לפנות אלינו בכתובת:
               </p>
               <p className="mt-4">
-                <strong>דוא״ל:</strong> privacy@shiputzai.co.il
+                <strong>דוא״ל:</strong> support@shipazti.com
+              </p>
+              <p className="mt-2">
+                <strong>טופס יצירת קשר:</strong>{" "}
+                <a href="/contact" className="text-emerald-600 hover:underline">לחצו כאן</a>
               </p>
             </section>
           </div>

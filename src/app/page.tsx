@@ -327,7 +327,8 @@ export default function Home() {
                 איך השיפוץ שלי יראה?
               </h2>
               <p className="text-gray-500 mb-4 leading-relaxed">
-                העלו תמונה של החדר, תארו מה אתם רוצים לשנות, וקבלו הדמיה של התוצאה הסופית עם הערכת עלויות.
+                העלו תמונה של החדר, תארו מה אתם רוצים לשנות, וקבלו הדמיית AI של התוצאה הסופית עם הערכת עלויות.
+                <span className="text-gray-400 text-sm block mt-1">ההדמיות נוצרות באמצעות בינה מלאכותית להמחשה בלבד</span>
               </p>
               <p className="text-gray-700 mb-8 leading-relaxed font-medium">
                 🛒 <span className="text-gray-900">Shop the Look</span> — אהבתם משהו בהדמיה? לחצו וקנו את המוצרים ישירות מחנויות בישראל.

@@ -34,10 +34,18 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">2. תיאור השירות</h2>
               <p>
-                ShiputzAI היא אפליקציה לניהול שיפוצים המציעה כלים לניהול תקציב, 
-                סריקת קבלות, ניתוח הצעות מחיר ועוד. השירות משתמש בטכנולוגיות בינה מלאכותית 
-                לסיוע בניהול פרויקטי שיפוץ.
+                ShiputzAI היא פלטפורמה דיגיטלית המבוססת על בינה מלאכותית (AI) לסיוע בתכנון וניהול שיפוצים. 
+                השירות מציע כלים לניהול תקציב, סריקת קבלות, ניתוח הצעות מחיר, הדמיות חזותיות ועוד.
               </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+                <p className="font-semibold text-gray-900 mb-2">הבהרה חשובה בנוגע להדמיות AI:</p>
+                <ul className="list-disc list-inside space-y-2">
+                  <li>כל ההדמיות החזותיות נוצרות באמצעות בינה מלאכותית <strong>להמחשה בלבד</strong> ואינן מייצגות תוצאה סופית מובטחת</li>
+                  <li>הניתוחים, ההערכות והמלצות המחירים הם הערכות אוטומטיות ועשויים להשתנות בפועל</li>
+                  <li>ShiputzAI הוא <strong>כלי עזר דיגיטלי בלבד</strong> — אינו קבלן שיפוצים, מהנדס, אדריכל או יועץ מקצועי מוסמך</li>
+                  <li>אין להסתמך על תוצאות השירות כייעוץ מקצועי. מומלץ להתייעץ עם בעלי מקצוע מוסמכים לפני קבלת החלטות</li>
+                </ul>
+              </div>
             </section>
 
             <section>
@@ -124,12 +132,27 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">11. יצירת קשר</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">11. פרטי החברה</h2>
+              <p>
+                ShiputzAI הוא מוצר של גיא סזנה.
+              </p>
+              <ul className="list-none space-y-2 mt-4">
+                <li><strong>דוא״ל:</strong> support@shipazti.com</li>
+                <li><strong>אתר:</strong> shipazti.com</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">12. יצירת קשר</h2>
               <p>
                 לשאלות בנוגע לתנאי השימוש, ניתן לפנות אלינו:
               </p>
               <p className="mt-4">
-                <strong>דוא״ל:</strong> support@shiputzai.co.il
+                <strong>דוא״ל:</strong> support@shipazti.com
+              </p>
+              <p className="mt-2">
+                <strong>טופס יצירת קשר:</strong>{" "}
+                <a href="/contact" className="text-emerald-600 hover:underline">לחצו כאן</a>
               </p>
             </section>
           </div>

@@ -1745,6 +1745,7 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">🎉 ההדמיה שלך מוכנה!</h3>
+              <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד — התוצאה בפועל עשויה להשתנות</p>
             </div>
             
             {/* Before/After Comparison */}

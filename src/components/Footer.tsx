@@ -80,6 +80,17 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* AI Disclaimer */}
+      <div className="border-t border-gray-200 bg-gray-100/50">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+            ShiputzAI הוא כלי דיגיטלי המבוסס על בינה מלאכותית (AI) לסיוע בתכנון וניהול שיפוצים. 
+            כל ההדמיות, הניתוחים וההמלצות נוצרים באמצעות AI להמחשה בלבד ואינם מהווים תחליף לייעוץ מקצועי. 
+            התוצאות עשויות להשתנות בפועל. ShiputzAI אינו קבלן שיפוצים, מהנדס או יועץ מקצועי.
+          </p>
+        </div>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-5">

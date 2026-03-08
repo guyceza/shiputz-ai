@@ -128,75 +128,93 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
 </html>`;
 }
 
-// Rate limiter: 200ms between sends to avoid Resend burst limits
-let lastSendTime = 0;
-async function rateLimitDelay(): Promise<void> {
-  const now = Date.now();
-  const elapsed = now - lastSendTime;
-  if (elapsed < 200) {
-    await new Promise(r => setTimeout(r, 200 - elapsed));
-  }
-  lastSendTime = Date.now();
+// Send single email via Resend (fallback for one-offs)
+async function sendEmail(to: string, subject: string, html: string): Promise<{ id?: string; message?: string }> {
+  const unsubUrl = getUnsubscribeUrl(to);
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to,
+      subject,
+      html,
+      headers: {
+        'List-Unsubscribe': `<${unsubUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    }),
+  });
+  return response.json();
 }
 
-// Send email via Resend with List-Unsubscribe header + retry
-async function sendEmail(to: string, subject: string, html: string, maxRetries = 3): Promise<{ id?: string; message?: string }> {
-  const unsubUrl = getUnsubscribeUrl(to);
-  const payload = JSON.stringify({
+// Batch send via Resend Batch API — up to 100 emails per request
+// Returns array of { id } or { message } per email (same order as input)
+interface BatchEmailInput { to: string; subject: string; html: string; }
+async function sendBatchEmails(emails: BatchEmailInput[], maxRetries = 3): Promise<Array<{ id?: string; message?: string }>> {
+  if (emails.length === 0) return [];
+
+  const payload = emails.map(e => ({
     from: FROM_EMAIL,
-    to,
-    subject,
-    html,
+    to: e.to,
+    subject: e.subject,
+    html: e.html,
     headers: {
-      'List-Unsubscribe': `<${unsubUrl}>`,
+      'List-Unsubscribe': `<${getUnsubscribeUrl(e.to)}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
-  });
+  }));
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    await rateLimitDelay();
-
     try {
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${RESEND_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: payload,
+        body: JSON.stringify(payload),
       });
 
       // Rate limited — respect Retry-After
       if (response.status === 429) {
         const retryAfter = parseInt(response.headers.get('Retry-After') || '2', 10);
         const waitMs = Math.min(retryAfter * 1000, 10000);
-        console.warn(`Resend rate limit hit for ${to}, waiting ${waitMs}ms (attempt ${attempt + 1})`);
+        console.warn(`Resend batch rate limit, waiting ${waitMs}ms (attempt ${attempt + 1}/${maxRetries})`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
 
       // Server error — retry with backoff
       if (response.status >= 500) {
-        const waitMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
-        console.warn(`Resend server error ${response.status} for ${to}, retrying in ${waitMs}ms`);
+        const waitMs = Math.pow(2, attempt) * 1000;
+        console.warn(`Resend batch server error ${response.status}, retrying in ${waitMs}ms`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
 
-      return await response.json();
+      const result = await response.json();
+      // Batch API returns { data: [{ id },...] } on success
+      if (result.data && Array.isArray(result.data)) {
+        return result.data;
+      }
+      // Error response
+      return emails.map(() => ({ message: result.message || 'Batch send failed' }));
     } catch (err: any) {
-      // Network error — retry with backoff
       if (attempt < maxRetries - 1) {
         const waitMs = Math.pow(2, attempt) * 1000;
-        console.warn(`Network error sending to ${to}: ${err.message}, retrying in ${waitMs}ms`);
+        console.warn(`Batch network error: ${err.message}, retrying in ${waitMs}ms`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
-      return { message: `Network error after ${maxRetries} retries: ${err.message}` };
+      return emails.map(() => ({ message: `Network error after ${maxRetries} retries: ${err.message}` }));
     }
   }
 
-  return { message: `Failed after ${maxRetries} retries` };
+  return emails.map(() => ({ message: `Failed after ${maxRetries} retries` }));
 }
 
 // Helper: greeting
@@ -1132,101 +1150,101 @@ export async function GET(request: NextRequest) {
     }
 
     // ================================================================
-    // BATCH SEND — process 5 users in parallel for speed + reliability
-    // Handles 500+ users within 60s timeout
+    // BATCH SEND via Resend Batch API (up to 100 per request)
+    // 2,000 users = 20 API calls, ~10 seconds total
     // ================================================================
-    const BATCH_SIZE = 5;
+    const BATCH_SIZE = 100; // Resend max per batch request
 
-    for (let i = 0; i < pendingActions.length; i += BATCH_SIZE) {
-      const batch = pendingActions.slice(i, i + BATCH_SIZE);
+    // Step 1: Idempotency check — filter out already-sent emails
+    const toSend: Array<{ user: UserData; action: EmailAction }> = [];
+    for (const { user, action } of pendingActions) {
+      const { data: existing } = await supabase
+        .from('email_sequences')
+        .select('id, status, resend_id')
+        .eq('user_email', user.email)
+        .eq('sequence_type', action.flowName)
+        .eq('day_number', action.dayNumber)
+        .single();
 
-      const results = await Promise.allSettled(
-        batch.map(async ({ user, action }) => {
-          // Idempotency: check if already sent this exact email
-          const { data: existing } = await supabase
+      if (existing?.status === 'sent' && existing?.resend_id) {
+        skipped++;
+        continue;
+      }
+
+      // Insert or update pending record
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from('email_sequences')
+          .insert({
+            user_email: user.email,
+            sequence_type: action.flowName,
+            day_number: action.dayNumber,
+            run_id: runId,
+            status: 'pending',
+            reason: action.reason,
+          });
+        if (insertError?.code === '23505') {
+          skipped++;
+          continue;
+        }
+      } else {
+        await supabase
+          .from('email_sequences')
+          .update({ run_id: runId, status: 'pending', reason: action.reason })
+          .eq('id', existing.id);
+      }
+
+      toSend.push({ user, action });
+    }
+
+    // Step 2: Send in batches of 100 via Resend Batch API
+    for (let i = 0; i < toSend.length; i += BATCH_SIZE) {
+      const batch = toSend.slice(i, i + BATCH_SIZE);
+
+      const batchEmails: BatchEmailInput[] = batch.map(({ user, action }) => ({
+        to: user.email,
+        subject: action.subject,
+        html: action.html,
+      }));
+
+      const results = await sendBatchEmails(batchEmails);
+
+      // Step 3: Update DB with results
+      for (let j = 0; j < batch.length; j++) {
+        const { user, action } = batch[j];
+        const result = results[j] || { message: 'No result returned' };
+
+        if (result.id) {
+          await supabase
             .from('email_sequences')
-            .select('id, status, resend_id')
+            .update({
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              resend_id: result.id,
+            })
             .eq('user_email', user.email)
             .eq('sequence_type', action.flowName)
-            .eq('day_number', action.dayNumber)
-            .single();
-
-          if (existing?.status === 'sent' && existing?.resend_id) {
-            return { type: 'skipped' as const, email: user.email };
-          }
-
-          // Insert or update pending record
-          if (!existing) {
-            const { error: insertError } = await supabase
-              .from('email_sequences')
-              .insert({
-                user_email: user.email,
-                sequence_type: action.flowName,
-                day_number: action.dayNumber,
-                run_id: runId,
-                status: 'pending',
-                reason: action.reason,
-              });
-            if (insertError?.code === '23505') {
-              return { type: 'skipped' as const, email: user.email };
-            }
-          } else {
-            await supabase
-              .from('email_sequences')
-              .update({ run_id: runId, status: 'pending', reason: action.reason })
-              .eq('id', existing.id);
-          }
-
-          // Send!
-          const result = await sendEmail(user.email, action.subject, action.html);
-
-          if (result.id) {
-            await supabase
-              .from('email_sequences')
-              .update({
-                status: 'sent',
-                sent_at: new Date().toISOString(),
-                resend_id: result.id,
-              })
-              .eq('user_email', user.email)
-              .eq('sequence_type', action.flowName)
-              .eq('day_number', action.dayNumber);
-            return {
-              type: 'sent' as const,
-              email: user.email,
-              detail: `${user.email}: ${action.flowName}#${action.dayNumber} (${action.reason})`,
-            };
-          } else {
-            await supabase
-              .from('email_sequences')
-              .update({
-                status: 'failed',
-                error: result.message || 'Unknown error',
-              })
-              .eq('user_email', user.email)
-              .eq('sequence_type', action.flowName)
-              .eq('day_number', action.dayNumber);
-            return {
-              type: 'failed' as const,
-              email: user.email,
-              detail: `FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`,
-            };
-          }
-        })
-      );
-
-      // Tally batch results
-      for (const r of results) {
-        if (r.status === 'fulfilled') {
-          switch (r.value.type) {
-            case 'sent': sent++; details.push(r.value.detail!); break;
-            case 'failed': errors++; details.push(r.value.detail!); break;
-            case 'skipped': skipped++; break;
-          }
+            .eq('day_number', action.dayNumber);
+          sent++;
+          details.push(`${user.email}: ${action.flowName}#${action.dayNumber} (${action.reason})`);
         } else {
+          await supabase
+            .from('email_sequences')
+            .update({
+              status: 'failed',
+              error: result.message || 'Unknown error',
+            })
+            .eq('user_email', user.email)
+            .eq('sequence_type', action.flowName)
+            .eq('day_number', action.dayNumber);
           errors++;
-          details.push(`ERROR batch: ${r.reason?.message || r.reason}`);
+          details.push(`FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`);
         }
+      }
+
+      // Rate limit: 500ms between batch requests (Resend allows 2 req/sec)
+      if (i + BATCH_SIZE < toSend.length) {
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 

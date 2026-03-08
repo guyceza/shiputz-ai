@@ -1309,33 +1309,28 @@ export default function FloorplanPage() {
               )}
 
               <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
-                className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
-                  videoFirstImage && videoLastImage && !videoLoading
+                className={`w-full py-4 rounded-full font-bold text-lg transition-all relative overflow-hidden ${
+                  videoLoading
+                    ? "bg-emerald-800 text-white"
+                    : videoFirstImage && videoLastImage
                     ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}>
+                {videoLoading && (
+                  <div
+                    className="absolute inset-0 bg-emerald-600 transition-all duration-1000 ease-out"
+                    style={{ width: `${parseInt(videoProgress.match?.(/\d+/)?.[0] || "5")}%` }}
+                  />
+                )}
+                <span className="relative z-10">
                 {videoLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <Spinner className="h-5 w-5" />
                     {videoProgress || "מייצר סרטון..."}
                   </span>
                 ) : "🎬 צור סרטון סיור"}
+                </span>
               </button>
-
-              {/* Real video progress bar */}
-              {videoLoading && videoProgress && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-emerald-800">{videoProgress}</span>
-                  </div>
-                  <div className="h-3 bg-emerald-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${parseInt(videoProgress.match(/\d+/)?.[0] || "5")}%` }}
-                    />
-                  </div>
-                </div>
-              )}
 
 
               <div className="text-center">

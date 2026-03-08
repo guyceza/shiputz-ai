@@ -7,9 +7,10 @@ interface BeforeAfterSliderProps {
   afterImg: string;
   className?: string;
   height?: string;
+  compact?: boolean;
 }
 
-export default function BeforeAfterSlider({ beforeImg, afterImg, className = "", height = "h-64" }: BeforeAfterSliderProps) {
+export default function BeforeAfterSlider({ beforeImg, afterImg, className = "", height = "h-64", compact = false }: BeforeAfterSliderProps) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

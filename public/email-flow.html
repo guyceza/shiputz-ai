@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fff; font-family: Arial, Helvetica, sans-serif; padding: 30px 10px; }
+
+svg { display: block; margin: 0 auto; }
+
+/* Shapes */
+.start-end { fill: #4CAF50; stroke: #2E7D32; stroke-width: 2; }
+.process { fill: #2196F3; stroke: #1565C0; stroke-width: 2; }
+.decision { fill: #FF9800; stroke: #E65100; stroke-width: 2; }
+.email-box { fill: #E3F2FD; stroke: #1565C0; stroke-width: 1.5; }
+.discount-box { fill: #FFF3E0; stroke: #E65100; stroke-width: 1.5; }
+.gift-box { fill: #E8F5E9; stroke: #2E7D32; stroke-width: 1.5; }
+.inactive-box { fill: #F3E5F5; stroke: #7B1FA2; stroke-width: 1.5; }
+.milestone-box { fill: #FFF8E1; stroke: #F57F17; stroke-width: 1.5; }
+.purchase-box { fill: #E0F2F1; stroke: #00695C; stroke-width: 1.5; }
+
+text { font-family: Arial, Helvetica, sans-serif; }
+.label { font-size: 13px; fill: #fff; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+.label-dark { font-size: 12px; fill: #333; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+.label-small { font-size: 10px; fill: #333; text-anchor: middle; dominant-baseline: central; }
+.label-tiny { font-size: 9px; fill: #666; text-anchor: middle; dominant-baseline: central; }
+.yes-no { font-size: 11px; fill: #E65100; font-weight: bold; }
+.arrow { fill: none; stroke: #555; stroke-width: 2; marker-end: url(#arrowhead); }
+.arrow-yes { fill: none; stroke: #4CAF50; stroke-width: 2; marker-end: url(#arrowhead-green); }
+.arrow-no { fill: none; stroke: #f44336; stroke-width: 2; marker-end: url(#arrowhead-red); }
+
+.title { font-size: 22px; font-weight: bold; fill: #222; text-anchor: middle; }
+.subtitle { font-size: 12px; fill: #888; text-anchor: middle; }
+</style>
+</head>
+<body>
+
+<svg viewBox="0 0 900 2400" width="900" height="2400">
+<defs>
+  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555"/></marker>
+  <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/></marker>
+  <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f44336"/></marker>
+</defs>
+
+<!-- Title -->
+<text x="450" y="30" class="title">ShiputzAI — Email Flow System</text>
+<text x="450" y="50" class="subtitle">7 flows · 23 emails · behavioral triggers</text>
+
+<!-- ==================== START ==================== -->
+<ellipse cx="450" cy="100" rx="70" ry="25" class="start-end"/>
+<text x="450" y="100" class="label">משתמש נרשם</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="125" x2="450" y2="155" class="arrow"/>
+
+<!-- Process: Give 10 credits -->
+<rect x="360" y="155" width="180" height="40" rx="5" class="process"/>
+<text x="450" y="170" class="label">+10 קרדיטים חינם</text>
+<text x="450" y="183" class="label" style="font-size:9px">welcome email #1</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="195" x2="450" y2="225" class="arrow"/>
+
+<!-- Email: Welcome #2 (24h) -->
+<rect x="350" y="225" width="200" height="35" rx="8" class="email-box"/>
+<text x="450" y="238" class="label-dark">+24h: טיפ חיסכון בשיפוץ</text>
+<text x="450" y="250" class="label-tiny">email #2 — ערך + CTA ניתוח הצעה</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="260" x2="450" y2="295" class="arrow"/>
+
+<!-- Decision: Used tool? -->
+<polygon points="450,295 540,340 450,385 360,340" class="decision"/>
+<text x="450" y="335" class="label" style="font-size:11px">השתמש</text>
+<text x="450" y="350" class="label" style="font-size:11px">בכלי?</text>
+
+<!-- NO branch (left) — Welcome #3 -->
+<line x1="360" y1="340" x2="220" y2="340" class="arrow-no"/>
+<text x="300" y="332" class="yes-no" style="fill:#f44336">לא</text>
+<rect x="120" y="320" width="200" height="35" rx="8" class="email-box"/>
+<text x="220" y="333" class="label-dark">+72h: עדיין לא ניסית?</text>
+<text x="220" y="345" class="label-tiny">Before/After + CTA הדמיה</text>
+
+<!-- Arrow from welcome #3 back down -->
+<line x1="220" y1="355" x2="220" y2="460" class="arrow"/>
+<line x1="220" y1="460" x2="440" y2="460" class="arrow"/>
+
+<!-- YES branch (right) — Activation -->
+<line x1="540" y1="340" x2="680" y2="340" class="arrow-yes"/>
+<text x="600" y="332" class="yes-no" style="fill:#4CAF50">כן</text>
+
+<!-- Activation Flow -->
+<rect x="580" y="320" width="210" height="35" rx="8" class="email-box" style="fill:#E8F5E9;stroke:#2E7D32"/>
+<text x="685" y="333" class="label-dark" style="fill:#1B5E20">ההדמיה הראשונה מוכנה!</text>
+<text x="685" y="345" class="label-tiny">Activation email #1</text>
+
+<line x1="685" y1="355" x2="685" y2="385" class="arrow"/>
+
+<rect x="580" y="385" width="210" height="35" rx="8" class="email-box" style="fill:#E8F5E9;stroke:#2E7D32"/>
+<text x="685" y="398" class="label-dark" style="fill:#1B5E20">+48h: 3 כלים לנסות</text>
+<text x="685" y="410" class="label-tiny">Activation email #2 — cross-sell</text>
+
+<!-- Arrow from activation back to main flow -->
+<line x1="685" y1="420" x2="685" y2="460" class="arrow"/>
+<line x1="685" y1="460" x2="460" y2="460" class="arrow"/>
+
+<!-- ==================== CREDIT CHECK LOOP ==================== -->
+<!-- Arrow down from merge -->
+<line x1="450" y1="460" x2="450" y2="500" class="arrow"/>
+
+<!-- Decision: Credits ≤ 5? -->
+<polygon points="450,500 550,550 450,600 350,550" class="decision"/>
+<text x="450" y="543" class="label" style="font-size:11px">קרדיטים</text>
+<text x="450" y="558" class="label" style="font-size:11px">≤ 5?</text>
+
+<!-- NO branch (right) — continue to activity check -->
+<line x1="550" y1="550" x2="680" y2="550" class="arrow-no"/>
+<text x="610" y="542" class="yes-no" style="fill:#f44336">לא</text>
+<!-- Label -->
+<text x="720" y="550" class="label-tiny" style="font-size:11px;fill:#888">ממשיך להשתמש ←</text>
+
+<!-- YES branch (down) -->
+<line x1="450" y1="600" x2="450" y2="640" class="arrow-yes"/>
+<text x="470" y="620" class="yes-no" style="fill:#4CAF50">כן</text>
+
+<!-- Low credits email -->
+<rect x="340" y="640" width="220" height="35" rx="8" class="discount-box"/>
+<text x="450" y="653" class="label-dark">נשארו לך X קרדיטים</text>
+<text x="450" y="665" class="label-tiny">טיפ: מה לעשות עם מה שנשאר</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="675" x2="450" y2="715" class="arrow"/>
+
+<!-- Decision: Credits = 0? -->
+<polygon points="450,715 550,765 450,815 350,765" class="decision"/>
+<text x="450" y="758" class="label" style="font-size:11px">קרדיטים</text>
+<text x="450" y="773" class="label" style="font-size:11px">= 0?</text>
+
+<!-- NO — wait -->
+<line x1="550" y1="765" x2="680" y2="765" class="arrow-no"/>
+<text x="610" y="757" class="yes-no" style="fill:#f44336">לא</text>
+<text x="720" y="765" class="label-tiny" style="font-size:11px;fill:#888">ממתין ←</text>
+
+<!-- YES — zero credits flow -->
+<line x1="450" y1="815" x2="450" y2="855" class="arrow-yes"/>
+<text x="470" y="835" class="yes-no" style="fill:#4CAF50">כן</text>
+
+<!-- Zero credits email #1 -->
+<rect x="330" y="855" width="240" height="40" rx="8" class="discount-box" style="fill:#FFEBEE;stroke:#c62828"/>
+<text x="450" y="870" class="label-dark" style="fill:#b71c1c">נגמרו הקרדיטים!</text>
+<text x="450" y="884" class="label-tiny">"10 קרדיטים מ-₪10" + טבלת חבילות</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="895" x2="450" y2="935" class="arrow"/>
+
+<!-- Decision: Purchased? -->
+<polygon points="450,935 540,980 450,1025 360,980" class="decision"/>
+<text x="450" y="975" class="label" style="font-size:11px">קנה?</text>
+
+<!-- YES — go to post-purchase -->
+<line x1="540" y1="980" x2="700" y2="980" class="arrow-yes"/>
+<text x="610" y="972" class="yes-no" style="fill:#4CAF50">כן</text>
+
+<!-- Post-purchase box on right -->
+<rect x="700" y="955" width="180" height="50" rx="10" class="purchase-box"/>
+<text x="790" y="973" class="label-dark" style="fill:#00695C;font-size:13px">Post-Purchase</text>
+<text x="790" y="988" class="label-tiny">→ Flow 6 (למטה)</text>
+
+<!-- NO — discount escalation -->
+<line x1="450" y1="1025" x2="450" y2="1065" class="arrow-no"/>
+<text x="470" y="1045" class="yes-no" style="fill:#f44336">לא</text>
+
+<!-- Discount #1: 20% -->
+<rect x="330" y="1065" width="240" height="40" rx="8" class="discount-box"/>
+<text x="450" y="1080" class="label-dark">+48h: הנחה 20%</text>
+<text x="450" y="1094" class="label-tiny">קוד ייחודי · "₪8 במקום ₪10" · 48h</text>
+
+<!-- Arrow down -->
+<line x1="450" y1="1105" x2="450" y2="1145" class="arrow"/>
+
+<!-- Decision: Purchased now? -->
+<polygon points="450,1145 530,1185 450,1225 370,1185" class="decision"/>
+<text x="450" y="1185" class="label" style="font-size:11px">קנה?</text>
+
+<!-- YES -->
+<line x1="530" y1="1185" x2="700" y2="1185" class="arrow-yes"/>
+<text x="610" y="1177" class="yes-no" style="fill:#4CAF50">כן</text>
+<rect x="700" y="1168" width="140" height="35" rx="8" class="purchase-box"/>
+<text x="770" y="1186" class="label-dark" style="fill:#00695C">→ Post-Purchase</text>
+
+<!-- NO -->
+<line x1="450" y1="1225" x2="450" y2="1265" class="arrow-no"/>
+<text x="470" y="1245" class="yes-no" style="fill:#f44336">לא</text>
+
+<!-- Discount #2: 25% + feature -->
+<rect x="320" y="1265" width="260" height="40" rx="8" class="discount-box"/>
+<text x="450" y="1280" class="label-dark">+7 ימים: פיצ'ר חדש + 25% הנחה</text>
+<text x="450" y="1294" class="label-tiny">"כדי לנסות, צריך קרדיטים"</text>
+
+<!-- Arrow down to inactive check -->
+<line x1="450" y1="1305" x2="450" y2="1350" class="arrow"/>
+
+<!-- ==================== INACTIVITY SECTION ==================== -->
+<rect x="320" y="1340" width="260" height="4" rx="2" fill="#7B1FA2" opacity="0.3"/>
+
+<!-- Decision: Inactive 7 days? -->
+<polygon points="450,1360 550,1410 450,1460 350,1410" class="decision"/>
+<text x="450" y="1403" class="label" style="font-size:10px">לא פעיל</text>
+<text x="450" y="1418" class="label" style="font-size:10px">7+ ימים?</text>
+
+<!-- NO — all good -->
+<line x1="550" y1="1410" x2="700" y2="1410" class="arrow-no"/>
+<text x="610" y="1402" class="yes-no" style="fill:#f44336">לא</text>
+<text x="745" y="1410" class="label-tiny" style="font-size:11px;fill:#4CAF50">פעיל ✓</text>
+
+<!-- YES -->
+<line x1="450" y1="1460" x2="450" y2="1500" class="arrow-yes"/>
+<text x="470" y="1480" class="yes-no" style="fill:#4CAF50">כן</text>
+
+<!-- Inactive email #1 -->
+<rect x="340" y="1500" width="220" height="35" rx="8" class="inactive-box"/>
+<text x="450" y="1513" class="label-dark" style="fill:#4A148C">7 ימים: השיפוץ מתקדם?</text>
+<text x="450" y="1525" class="label-tiny">"הכלים שלנו מחכים"</text>
+
+<line x1="450" y1="1535" x2="450" y2="1565" class="arrow"/>
+
+<!-- Inactive email #2 -->
+<rect x="340" y="1565" width="220" height="35" rx="8" class="inactive-box"/>
+<text x="450" y="1578" class="label-dark" style="fill:#4A148C">14 ימים: כלי חדש!</text>
+<text x="450" y="1590" class="label-tiny">Feature highlight</text>
+
+<line x1="450" y1="1600" x2="450" y2="1630" class="arrow"/>
+
+<!-- Inactive email #3 — gift -->
+<rect x="330" y="1630" width="240" height="40" rx="8" class="gift-box"/>
+<text x="450" y="1645" class="label-dark" style="fill:#1B5E20">30 ימים: 5 קרדיטים מתנה!</text>
+<text x="450" y="1659" class="label-tiny">מוסיף אוטומטית + "חזור ותראה"</text>
+
+<line x1="450" y1="1670" x2="450" y2="1700" class="arrow"/>
+
+<!-- Decision: came back? -->
+<polygon points="450,1700 530,1740 450,1780 370,1740" class="decision"/>
+<text x="450" y="1737" class="label" style="font-size:10px">חזר?</text>
+
+<!-- YES -->
+<line x1="530" y1="1740" x2="700" y2="1740" class="arrow-yes"/>
+<text x="610" y="1732" class="yes-no" style="fill:#4CAF50">כן</text>
+<text x="745" y="1740" class="label-tiny" style="font-size:11px;fill:#4CAF50">חוזר ל-loop ✓</text>
+
+<!-- NO — last chance -->
+<line x1="450" y1="1780" x2="450" y2="1820" class="arrow-no"/>
+<text x="470" y="1800" class="yes-no" style="fill:#f44336">לא</text>
+
+<rect x="330" y="1820" width="240" height="40" rx="8" class="inactive-box" style="fill:#EDE7F6"/>
+<text x="450" y="1835" class="label-dark" style="fill:#4A148C">60 ימים: עדיין שם?</text>
+<text x="450" y="1849" class="label-tiny">unsubscribe בולט · "אם נגמר, מעולה!"</text>
+
+<!-- ==================== POST-PURCHASE FLOW ==================== -->
+<line x1="450" y1="1860" x2="450" y2="1910" class="arrow"/>
+
+<rect x="320" y="1900" width="260" height="4" rx="2" fill="#00695C" opacity="0.3"/>
+
+<!-- Post-purchase section header -->
+<rect x="350" y="1920" width="200" height="30" rx="15" fill="#00695C"/>
+<text x="450" y="1937" class="label" style="font-size:12px">Flow 6: Post-Purchase</text>
+
+<line x1="450" y1="1950" x2="450" y2="1975" class="arrow"/>
+
+<rect x="340" y="1975" width="220" height="35" rx="8" class="purchase-box"/>
+<text x="450" y="1988" class="label-dark" style="fill:#00695C">מיידי: הקרדיטים מוכנים!</text>
+<text x="450" y="2000" class="label-tiny">אישור + 3 דברים מומלצים</text>
+
+<line x1="450" y1="2010" x2="450" y2="2035" class="arrow"/>
+
+<rect x="340" y="2035" width="220" height="35" rx="8" class="purchase-box"/>
+<text x="450" y="2048" class="label-dark" style="fill:#00695C">+3 ימים: טיפים למקסימום</text>
+<text x="450" y="2060" class="label-tiny">"סריקת קבלה = 2 קרדיטים"</text>
+
+<line x1="450" y1="2070" x2="450" y2="2095" class="arrow"/>
+
+<rect x="340" y="2095" width="220" height="35" rx="8" class="purchase-box"/>
+<text x="450" y="2108" class="label-dark" style="fill:#00695C">+7 ימים: מה דעתך? (NPS)</text>
+<text x="450" y="2120" class="label-tiny">שאלה אחת 1-10</text>
+
+<!-- ==================== MILESTONE FLOW ==================== -->
+<line x1="450" y1="2130" x2="450" y2="2170" class="arrow"/>
+
+<rect x="320" y="2160" width="260" height="4" rx="2" fill="#F57F17" opacity="0.3"/>
+
+<rect x="350" y="2180" width="200" height="30" rx="15" fill="#E65100"/>
+<text x="450" y="2197" class="label" style="font-size:12px">Flow 7: Milestones</text>
+
+<line x1="450" y1="2210" x2="450" y2="2235" class="arrow"/>
+
+<!-- Milestone boxes side by side -->
+<rect x="130" y="2235" width="190" height="45" rx="8" class="milestone-box"/>
+<text x="225" y="2252" class="label-dark" style="fill:#E65100">5 שימושים</text>
+<text x="225" y="2268" class="label-tiny">"אתה מקצוען" + כלי חדש</text>
+
+<rect x="355" y="2235" width="190" height="45" rx="8" class="milestone-box"/>
+<text x="450" y="2252" class="label-dark" style="fill:#E65100">10 שימושים</text>
+<text x="450" y="2268" class="label-tiny">"טופ 10%" + הצעת Pro</text>
+
+<rect x="580" y="2235" width="190" height="45" rx="8" class="milestone-box"/>
+<text x="675" y="2252" class="label-dark" style="fill:#E65100">סיום פרויקט</text>
+<text x="675" y="2268" class="label-tiny">"כל הכבוד!" + פרויקט חדש</text>
+
+<!-- Arrows to milestones -->
+<line x1="450" y1="2235" x2="225" y2="2235" class="arrow" style="stroke:#E65100"/>
+<line x1="450" y1="2235" x2="675" y2="2235" class="arrow" style="stroke:#E65100"/>
+
+<!-- End -->
+<line x1="450" y1="2280" x2="450" y2="2330" class="arrow"/>
+<ellipse cx="450" cy="2355" rx="60" ry="25" class="start-end" style="fill:#f44336;stroke:#b71c1c"/>
+<text x="450" y="2355" class="label">סוף / Unsubscribe</text>
+
+<!-- ==================== LEGEND ==================== -->
+<rect x="30" y="80" width="180" height="220" rx="10" fill="#f9f9f9" stroke="#ddd" stroke-width="1"/>
+<text x="120" y="102" style="font-size:13px;font-weight:bold;fill:#333;text-anchor:middle">מקרא</text>
+
+<ellipse cx="55" cy="125" rx="15" ry="10" class="start-end"/>
+<text x="75" y="128" style="font-size:11px;fill:#333;text-anchor:start">התחלה / סוף</text>
+
+<rect x="40" y="145" width="30" height="20" rx="3" class="process"/>
+<text x="75" y="158" style="font-size:11px;fill:#333;text-anchor:start">פעולה</text>
+
+<polygon points="55,175 70,185 55,195 40,185" class="decision"/>
+<text x="75" y="188" style="font-size:11px;fill:#333;text-anchor:start">תנאי / שאלה</text>
+
+<rect x="40" y="205" width="30" height="18" rx="5" class="email-box"/>
+<text x="75" y="217" style="font-size:11px;fill:#333;text-anchor:start">מייל</text>
+
+<rect x="40" y="232" width="30" height="18" rx="5" class="discount-box"/>
+<text x="75" y="244" style="font-size:11px;fill:#333;text-anchor:start">הנחה / push</text>
+
+<rect x="40" y="259" width="30" height="18" rx="5" class="gift-box"/>
+<text x="75" y="271" style="font-size:11px;fill:#333;text-anchor:start">מתנה</text>
+
+</svg>
+
+</body>
+</html>

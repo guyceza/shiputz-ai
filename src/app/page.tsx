@@ -461,6 +461,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Referral */}
+      <section className="py-16 px-6 bg-gradient-to-l from-emerald-50 to-teal-50">
+        <div className="max-w-3xl mx-auto text-center">
+          <span className="text-4xl mb-4 block">🎁</span>
+          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">הזמינו חבר — שניכם מרוויחים</h2>
+          <p className="text-gray-600 mb-6">שתפו את הלינק שלכם עם חברים ועמיתים. על כל חבר שנרשם — <strong>שניכם מקבלים 20 קרדיטים חינם</strong>.</p>
+          <Link
+            href={isLoggedIn ? "/dashboard#referral" : "/signup"}
+            className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-base hover:bg-gray-800 transition-all"
+          >
+            {isLoggedIn ? "קבלו את הלינק שלכם" : "הירשמו וקבלו לינק אישי"}
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 px-6 text-white" style={{ backgroundColor: '#101010' }}>
         <div className="max-w-3xl mx-auto text-center">

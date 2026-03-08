@@ -1860,6 +1860,21 @@ export default function VisualizePage() {
                 </Link>
               )}
             </div>
+            {/* Referral CTA */}
+            {isLoggedIn && (
+              <div className="mt-4 bg-gradient-to-l from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl shrink-0">🎁</span>
+                  <p className="text-sm text-gray-700">הזמינו חבר — <strong>שניכם מקבלים 20 קרדיטים</strong></p>
+                </div>
+                <Link
+                  href="/dashboard#referral"
+                  className="shrink-0 text-xs font-medium bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all"
+                >
+                  לקוד שלי
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

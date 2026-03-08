@@ -6,13 +6,12 @@ interface BeforeAfterSliderProps {
   beforeImg: string;
   afterImg: string;
   className?: string;
-  compact?: boolean;
+  height?: string;
 }
 
-export default function BeforeAfterSlider({ beforeImg, afterImg, className = "", compact = false }: BeforeAfterSliderProps) {
+export default function BeforeAfterSlider({ beforeImg, afterImg, className = "", height = "h-64" }: BeforeAfterSliderProps) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-  const [wasDragged, setWasDragged] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMove = (clientX: number) => {
@@ -26,32 +25,31 @@ export default function BeforeAfterSlider({ beforeImg, afterImg, className = "",
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden bg-gray-100 select-none touch-none ${className}`}
-      onMouseMove={(e) => { if (isDragging) { e.preventDefault(); e.stopPropagation(); setWasDragged(true); handleMove(e.clientX); } }}
-      onMouseUp={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
-      onMouseLeave={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
-      onTouchMove={(e) => { if (isDragging) { e.stopPropagation(); setWasDragged(true); handleMove(e.touches[0].clientX); } }}
-      onTouchEnd={() => { setIsDragging(false); setTimeout(() => setWasDragged(false), 100); }}
-      onClickCapture={(e) => { if (wasDragged || isDragging) { e.preventDefault(); e.stopPropagation(); } }}
+      className={`relative w-full ${height} overflow-hidden bg-gray-100 select-none touch-none ${className}`}
+      onMouseMove={(e) => { if (isDragging) handleMove(e.clientX); }}
+      onMouseUp={() => setIsDragging(false)}
+      onMouseLeave={() => setIsDragging(false)}
+      onTouchMove={(e) => { if (isDragging) handleMove(e.touches[0].clientX); }}
+      onTouchEnd={() => setIsDragging(false)}
     >
-      {/* After image (LEFT side) */}
+      {/* After image (LEFT side in RTL) */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
         <img src={afterImg} alt="אחרי" className="w-full h-full object-cover" />
-        <div className={`absolute top-2 left-2 bg-gray-900 text-white px-2 py-0.5 rounded ${compact ? "text-[10px]" : "text-xs"}`}>
+        <div className="absolute top-2 left-2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded">
           אחרי
         </div>
       </div>
 
-      {/* Before image (RIGHT side) */}
+      {/* Before image (RIGHT side in RTL) */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
       >
         <img src={beforeImg} alt="לפני" className="w-full h-full object-cover" />
-        <div className={`absolute bottom-2 right-2 bg-black/60 text-white px-2 py-0.5 rounded ${compact ? "text-[10px]" : "text-xs"}`}>
+        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
           לפני
         </div>
       </div>
@@ -64,8 +62,8 @@ export default function BeforeAfterSlider({ beforeImg, afterImg, className = "",
         onTouchStart={() => setIsDragging(true)}
       >
         <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white shadow-lg -translate-x-1/2" />
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full shadow-lg flex items-center justify-center ${compact ? "w-7 h-7" : "w-10 h-10"}`}>
-          <span className={`text-gray-400 ${compact ? "text-xs" : ""}`}>↔</span>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
+          <span className="text-gray-400 text-xs">↔</span>
         </div>
       </div>
     </div>

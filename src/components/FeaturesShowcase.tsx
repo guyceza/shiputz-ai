@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import BeforeAfterSlider from "./BeforeAfterSlider";
 
 const mainFeatures = [
   {
@@ -38,6 +39,10 @@ const teaserFeatures = [
     description: "הדמיית AI של החדר בעיצוב חדש",
     href: "/visualize",
     image: "/images/ai-vision/visualize-teaser.jpg",
+    beforeAfter: {
+      before: "/before-room.webp",
+      after: "/after-room.webp",
+    },
   },
   {
     title: "כתב כמויות",
@@ -131,34 +136,43 @@ export default function FeaturesShowcase() {
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {teaserFeatures.map((feature) => (
-            <Link
+            <div
               key={feature.title}
-              href={feature.href}
               className="group bg-white border border-gray-100 hover:border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg"
             >
-              <div className="aspect-[4/3] overflow-hidden">
-                {feature.isGif ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={feature.image}
-                    alt={feature.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <Image
-                    src={feature.image}
-                    alt={feature.title}
-                    width={300}
-                    height={225}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-              </div>
-              <div className="p-4 text-center">
+              {'beforeAfter' in feature && feature.beforeAfter ? (
+                <BeforeAfterSlider
+                  beforeImg={feature.beforeAfter.before}
+                  afterImg={feature.beforeAfter.after}
+                  height="aspect-[4/3]"
+                />
+              ) : (
+                <Link href={feature.href} className="block">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    {feature.isGif ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={feature.image}
+                        alt={feature.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        width={300}
+                        height={225}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                  </div>
+                </Link>
+              )}
+              <Link href={feature.href} className="block p-4 text-center">
                 <h4 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{feature.title}</h4>
                 <p className="text-gray-500 text-xs md:text-sm leading-snug">{feature.description}</p>
-              </div>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
       </div>

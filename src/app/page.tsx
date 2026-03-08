@@ -7,7 +7,7 @@ import HeroAnimation from "@/components/HeroAnimation";
 
 
 import PricingComparison from "@/components/PricingComparison";
-import FeaturesCarousel from "@/components/FeaturesCarousel";
+import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
 import StatsCounter from "@/components/StatsCounter";
 // Promo popup for non-premium users
@@ -270,16 +270,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AI Vision — Carousel */}
-      <section className="py-24 border-t border-gray-100">
+      {/* AI Vision — Features Showcase */}
+      <section id="features" className="py-24 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-8">
+          <div className="text-center mb-16">
             <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">AI Vision</p>
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל הכלים. מקום אחד.</h2>
             <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך</p>
           </div>
+          <FeaturesShowcase />
         </div>
-        <FeaturesCarousel />
       </section>
 
       {/* Stats */}

@@ -1,184 +1,236 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
 // ============================================
-// DEMO - Floating Circles Animation
+// DEMO - Floating Circles Animation (CSS-based)
 // URL: /demo-float (internal only)
 // ============================================
 
-interface Circle {
-  x: number;
-  y: number;
-  radius: number;
-  dx: number;
-  dy: number;
-  opacity: number;
-  opacityDir: number;
-  lineWidth: number;
-}
+const floatStyles = `
+  .float-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
 
-function FloatingCirclesCanvas({ className = "" }: { className?: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
+  .float-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+  }
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  /* Circle 1 - Large, slow drift top-left */
+  .fc-1 {
+    width: 160px; height: 160px;
+    top: 10%; left: 5%;
+    animation: drift1 18s ease-in-out infinite, breathe 6s ease-in-out infinite;
+  }
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(80px, 40px); }
+    50% { transform: translate(120px, -20px); }
+    75% { transform: translate(40px, -50px); }
+  }
 
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener("resize", resize);
+  /* Circle 2 - Medium, drift right */
+  .fc-2 {
+    width: 100px; height: 100px;
+    top: 20%; right: 15%;
+    animation: drift2 22s ease-in-out infinite, breathe 5s ease-in-out infinite 1s;
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-60px, 50px); }
+    50% { transform: translate(-30px, 90px); }
+    75% { transform: translate(30px, 40px); }
+  }
 
-    // Create circles
-    const count = 12;
-    const circles: Circle[] = [];
-    const w = () => canvas.getBoundingClientRect().width;
-    const h = () => canvas.getBoundingClientRect().height;
+  /* Circle 3 - Small, fast */
+  .fc-3 {
+    width: 50px; height: 50px;
+    top: 60%; left: 20%;
+    animation: drift3 14s ease-in-out infinite, breathe 4s ease-in-out infinite 0.5s;
+  }
+  @keyframes drift3 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(100px, -30px); }
+    50% { transform: translate(60px, -70px); }
+    75% { transform: translate(-20px, -40px); }
+  }
 
-    for (let i = 0; i < count; i++) {
-      circles.push({
-        x: Math.random() * w(),
-        y: Math.random() * h(),
-        radius: 20 + Math.random() * 80,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-        opacity: 0.05 + Math.random() * 0.15,
-        opacityDir: (Math.random() - 0.5) * 0.001,
-        lineWidth: 1 + Math.random() * 1.5,
-      });
-    }
+  /* Circle 4 - Large, slow bottom-right */
+  .fc-4 {
+    width: 200px; height: 200px;
+    bottom: 5%; right: 10%;
+    animation: drift4 25s ease-in-out infinite, breathe 7s ease-in-out infinite 2s;
+  }
+  @keyframes drift4 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-70px, -60px); }
+    50% { transform: translate(-120px, -30px); }
+    75% { transform: translate(-50px, 20px); }
+  }
 
-    const draw = () => {
-      const cw = w();
-      const ch = h();
-      ctx.clearRect(0, 0, cw, ch);
+  /* Circle 5 - Medium, center area */
+  .fc-5 {
+    width: 80px; height: 80px;
+    top: 40%; left: 45%;
+    animation: drift5 20s ease-in-out infinite, breathe 5.5s ease-in-out infinite 3s;
+  }
+  @keyframes drift5 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(50px, 60px); }
+    50% { transform: translate(-40px, 80px); }
+    75% { transform: translate(-70px, 20px); }
+  }
 
-      for (const c of circles) {
-        // Move
-        c.x += c.dx;
-        c.y += c.dy;
+  /* Circle 6 - Small, top-center */
+  .fc-6 {
+    width: 40px; height: 40px;
+    top: 15%; left: 40%;
+    animation: drift6 16s ease-in-out infinite, breathe 4.5s ease-in-out infinite 1.5s;
+  }
+  @keyframes drift6 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(30px, 40px); }
+    50% { transform: translate(70px, 20px); }
+    75% { transform: translate(50px, -30px); }
+  }
 
-        // Wrap around
-        if (c.x < -c.radius) c.x = cw + c.radius;
-        if (c.x > cw + c.radius) c.x = -c.radius;
-        if (c.y < -c.radius) c.y = ch + c.radius;
-        if (c.y > ch + c.radius) c.y = -c.radius;
+  /* Circle 7 - Large, left side */
+  .fc-7 {
+    width: 130px; height: 130px;
+    top: 50%; left: -3%;
+    animation: drift7 23s ease-in-out infinite, breathe 6.5s ease-in-out infinite 0.8s;
+  }
+  @keyframes drift7 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(60px, -40px); }
+    50% { transform: translate(90px, 30px); }
+    75% { transform: translate(30px, 50px); }
+  }
 
-        // Breathe opacity
-        c.opacity += c.opacityDir;
-        if (c.opacity > 0.22 || c.opacity < 0.04) c.opacityDir *= -1;
+  /* Circle 8 - Small, bottom-left */
+  .fc-8 {
+    width: 60px; height: 60px;
+    bottom: 20%; left: 30%;
+    animation: drift8 17s ease-in-out infinite, breathe 5s ease-in-out infinite 2.5s;
+  }
+  @keyframes drift8 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-40px, -50px); }
+    50% { transform: translate(20px, -80px); }
+    75% { transform: translate(50px, -30px); }
+  }
 
-        // Draw
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${c.opacity})`;
-        ctx.lineWidth = c.lineWidth;
-        ctx.stroke();
-      }
+  /* Circle 9 - Medium, right edge */
+  .fc-9 {
+    width: 110px; height: 110px;
+    top: 35%; right: -2%;
+    animation: drift9 21s ease-in-out infinite, breathe 6s ease-in-out infinite 1.2s;
+  }
+  @keyframes drift9 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-50px, 30px); }
+    50% { transform: translate(-80px, -20px); }
+    75% { transform: translate(-30px, -60px); }
+  }
 
-      animRef.current = requestAnimationFrame(draw);
-    };
+  /* Circle 10 - Tiny accent */
+  .fc-10 {
+    width: 30px; height: 30px;
+    top: 70%; right: 35%;
+    animation: drift10 13s ease-in-out infinite, breathe 3.5s ease-in-out infinite 0.3s;
+  }
+  @keyframes drift10 {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(40px, -20px); }
+    50% { transform: translate(20px, -50px); }
+    75% { transform: translate(-20px, -30px); }
+  }
 
-    animRef.current = requestAnimationFrame(draw);
+  /* Breathing opacity */
+  @keyframes breathe {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.2; }
+  }
 
-    return () => {
-      cancelAnimationFrame(animRef.current);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
+  /* Glow pulse for center element */
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
+  }
+  .glow-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: glowPulse 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+`;
 
+function FloatingCircles() {
   return (
-    <canvas
-      ref={canvasRef}
-      className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
-    />
-  );
-}
-
-// Pulsing glow element
-function PulsingGlow() {
-  return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.15); }
-        }
-        .glow-ring {
-          animation: glowPulse 4s ease-in-out infinite;
-        }
-      `}} />
-      <div className="glow-ring absolute inset-0 rounded-full bg-white/5 blur-2xl" />
-    </>
+    <div className="float-container">
+      <div className="float-circle fc-1" />
+      <div className="float-circle fc-2" />
+      <div className="float-circle fc-3" />
+      <div className="float-circle fc-4" />
+      <div className="float-circle fc-5" />
+      <div className="float-circle fc-6" />
+      <div className="float-circle fc-7" />
+      <div className="float-circle fc-8" />
+      <div className="float-circle fc-9" />
+      <div className="float-circle fc-10" />
+      <div className="glow-center" />
+    </div>
   );
 }
 
 export default function DemoFloatPage() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
+      <style dangerouslySetInnerHTML={{ __html: floatStyles }} />
+
       {/* Banner */}
       <div className="fixed top-0 left-0 right-0 bg-red-500/90 backdrop-blur-sm text-white text-center py-2 text-sm z-50 font-medium">
         דף דמו פנימי — לא מקושר מהאתר
       </div>
 
-      {/* Spacer */}
       <div className="h-16" />
 
-      {/* ============================================ */}
-      {/* OPTION A: CTA Section with floating circles */}
-      {/* ============================================ */}
-      <section className="py-8 px-6">
-        <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-2">אופציה A — סקשן CTA</p>
+      {/* OPTION A: CTA */}
+      <section className="py-6 px-6">
+        <p className="text-center text-sm text-gray-400 tracking-widest uppercase">אופציה A — CTA</p>
       </section>
-
       <section className="relative py-32 px-6 overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
-        <FloatingCirclesCanvas />
-        
+        <FloatingCircles />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="relative inline-block mb-8">
-            <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center mx-auto relative">
-              <PulsingGlow />
-              <span className="text-3xl relative z-10">✦</span>
-            </div>
-          </div>
           <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4">מוכנים?</h2>
           <p className="text-gray-400 text-lg mb-10">התחילו לנהל את השיפוץ בצורה חכמה.</p>
-          <a
-            href="#"
-            className="inline-block bg-white text-gray-900 px-10 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
-          >
+          <a href="#" className="inline-block bg-white text-gray-900 px-10 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors">
             התחילו בחינם
           </a>
         </div>
       </section>
 
-      <div className="h-24" />
+      <div className="h-20" />
 
-      {/* ============================================ */}
-      {/* OPTION B: Features / Stats with circles */}
-      {/* ============================================ */}
-      <section className="py-8 px-6">
-        <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-2">אופציה B — סטטיסטיקות</p>
+      {/* OPTION B: Stats */}
+      <section className="py-6 px-6">
+        <p className="text-center text-sm text-gray-400 tracking-widest uppercase">אופציה B — סטטיסטיקות</p>
       </section>
-
       <section className="relative py-28 px-6 overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
-        <FloatingCirclesCanvas />
-
+        <FloatingCircles />
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-gray-500 text-sm tracking-widest uppercase mb-4">למה ShiputzAI</p>
             <h2 className="text-3xl md:text-4xl font-semibold text-white">המספרים מדברים</h2>
           </div>
-
           <div className="grid md:grid-cols-3 gap-12 text-center">
             <div>
               <p className="text-5xl font-bold text-white mb-3">₪15B</p>
@@ -196,26 +248,21 @@ export default function DemoFloatPage() {
         </div>
       </section>
 
-      <div className="h-24" />
+      <div className="h-20" />
 
-      {/* ============================================ */}
-      {/* OPTION C: About / Story section */}
-      {/* ============================================ */}
-      <section className="py-8 px-6">
-        <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-2">אופציה C — מי אנחנו</p>
+      {/* OPTION C: About */}
+      <section className="py-6 px-6">
+        <p className="text-center text-sm text-gray-400 tracking-widest uppercase">אופציה C — מי אנחנו</p>
       </section>
-
       <section className="relative py-28 px-6 overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
-        <FloatingCirclesCanvas />
-
+        <FloatingCircles />
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-gray-500 text-sm tracking-widest uppercase mb-4">הסיפור שלנו</p>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">מי אנחנו</h2>
             <div className="w-16 h-px bg-white/20 mx-auto"></div>
           </div>
-
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-10 md:p-14 border border-white/10 text-right space-y-6">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-10 border border-white/10 text-right space-y-6">
             <p className="text-xl text-white font-light leading-relaxed">
               בנינו את <span className="font-semibold">ShiputzAI</span> כי עברנו את זה בעצמנו.
             </p>
@@ -227,40 +274,6 @@ export default function DemoFloatPage() {
                 המטרה שלנו: שכל מי שנכנס לשיפוץ ירגיש בשליטה.
               </p>
             </div>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              שידע בדיוק לאן הולך הכסף, שיקבל התראה לפני שחורג, ושיוכל לבדוק אם המחיר שמציעים לו הגיוני.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <div className="h-24" />
-
-      {/* ============================================ */}
-      {/* OPTION D: Hero-style with floating circles */}
-      {/* ============================================ */}
-      <section className="py-8 px-6">
-        <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-2">אופציה D — Hero כהה</p>
-      </section>
-
-      <section className="relative py-32 px-6 overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
-        <FloatingCirclesCanvas />
-
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <p className="text-sm text-gray-500 mb-4">ניהול שיפוצים חכם</p>
-          <h1 className="text-5xl md:text-7xl font-semibold tracking-tight mb-6 text-white">
-            שיפוץ בשליטה מלאה.
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            בינה מלאכותית שמנהלת את התקציב, מנתחת הצעות מחיר, ומתריעה לפני שנכנסים לבעיה.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <a href="#" className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors">
-              התחילו בחינם
-            </a>
-            <a href="#" className="text-white px-8 py-4 rounded-full text-base border border-white/30 hover:border-white/60 transition-colors">
-              גלו עוד
-            </a>
           </div>
         </div>
       </section>

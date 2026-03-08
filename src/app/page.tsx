@@ -160,10 +160,10 @@ export default function Home() {
                   </Link>
                 )}
                 <Link
-                  href="/visualize"
+                  href="/ai-vision"
                   className="text-gray-900 px-8 py-4 rounded-full text-base border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all"
                 >
-                  נסו הדמיה עכשיו
+                  גלו את הכלים
                 </Link>
               </div>
               {!isLoggedIn && (

@@ -7,6 +7,29 @@ import { useState, useEffect, useRef, useCallback } from "react";
 // URL: /demo-scroll (not linked anywhere)
 // ============================================
 
+// --- Global styles for fade-in animations ---
+const fadeStyles = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-section {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  
+  .fade-section.is-visible {
+    animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+`;
+
 // --- Fade-in on Scroll Component ---
 function FadeInSection({ children, className = "", delay = 0 }: { 
   children: React.ReactNode; 
@@ -17,27 +40,32 @@ function FadeInSection({ children, className = "", delay = 0 }: {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+    const el = ref.current;
+    if (!el) return;
+    
+    // Small initial delay to ensure CSS is ready
+    const startTimeout = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => setIsVisible(true), delay);
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -80px 0px" }
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, 100);
+    
+    return () => clearTimeout(startTimeout);
   }, [delay]);
 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        isVisible 
-          ? "opacity-100 translate-y-0" 
-          : "opacity-0 translate-y-8"
-      } ${className}`}
+      className={`fade-section ${isVisible ? "is-visible" : ""} ${className}`}
+      style={isVisible && delay > 0 ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}
     </div>
@@ -158,6 +186,7 @@ function StaggerChildren({ children, className = "" }: { children: React.ReactNo
 export default function DemoScrollPage() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
+      <style dangerouslySetInnerHTML={{ __html: fadeStyles }} />
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 bg-red-500/90 backdrop-blur-sm text-white text-center py-2 text-sm z-50 font-medium">
         דף דמו פנימי — לא מקושר מהאתר

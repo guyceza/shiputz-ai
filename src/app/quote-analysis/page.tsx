@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase-client";
+import { getSupabaseClient } from "@/lib/supabase";
 
 const loadingMessages = [
   "קורא את ההצעה...",
@@ -44,7 +44,7 @@ export default function QuoteAnalysisPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient();
+        const supabase = getSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) {
           setUserEmail(user.email);

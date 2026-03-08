@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from "next/server";
 import { creditGuard } from "@/lib/credit-guard";
 import { createServiceClient } from "@/lib/supabase";
@@ -104,7 +107,12 @@ export async function GET(req: NextRequest) {
 
       if (uploadError) {
         console.error("Video upload error:", uploadError);
-        return NextResponse.json({ error: "Failed to save video" }, { status: 500 });
+        // Fallback: return Replicate URL directly instead of failing
+        return NextResponse.json({
+          status: "succeeded",
+          videoUrl: videoUrl,
+          metrics: pollData.metrics,
+        });
       }
 
       const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;

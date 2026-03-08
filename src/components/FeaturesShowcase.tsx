@@ -9,7 +9,7 @@ const mainFeatures = [
     title: "Style Matcher",
     subtitle: "זיהוי סגנון + רשימת קניות",
     description: "העלו תמונה של חדר שאהבתם — ה-AI מזהה את סגנון העיצוב, מפרט את כל המוצרים ומציע לינקים ישירים לקנייה בישראל. כולל מפת חומרים וטקסטורות.",
-    image: "/images/ai-vision/style-match.jpg",
+    image: "/images/ai-vision/style-match-showcase.jpg",
     href: "/style-match",
     cta: "נסו עכשיו",
   },

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase-client";
 
 const loadingMessages = [
   "קורא את ההצעה...",
@@ -35,7 +36,26 @@ export default function QuoteAnalysisPage() {
   const [verdict, setVerdict] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingMsg, setLoadingMsg] = useState(0);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          setUserEmail(user.email);
+          setIsLoggedIn(true);
+        }
+      } catch {} finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,6 +85,7 @@ export default function QuoteAnalysisPage() {
         const fd = new FormData();
         const blob = await fetch(quoteImage).then(r => r.blob());
         fd.append("image", blob, "quote.jpg");
+        if (userEmail) fd.append("userEmail", userEmail);
         const res = await fetch("/api/analyze-quote", { method: "POST", body: fd });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -75,7 +96,7 @@ export default function QuoteAnalysisPage() {
         const res = await fetch("/api/analyze-quote-text", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: quoteText }),
+          body: JSON.stringify({ text: quoteText, userEmail }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -120,8 +141,25 @@ export default function QuoteAnalysisPage() {
           <p className="text-gray-500 text-lg">העלו הצעה מקבלן או כתבו את הפרטים — נבדוק אם המחיר סביר</p>
         </div>
 
+        {/* Login Required */}
+        {!checkingAuth && !isLoggedIn && (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <span className="text-3xl">🔒</span>
+            </div>
+            <p className="text-gray-900 font-medium text-lg mb-2">נדרשת התחברות</p>
+            <p className="text-gray-500 text-sm mb-6">התחברו כדי לנתח הצעות מחיר עם AI</p>
+            <Link
+              href="/login?redirect=/quote-analysis"
+              className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800"
+            >
+              התחברות
+            </Link>
+          </div>
+        )}
+
         {/* Input State */}
-        {!analysis && !analyzing && !error && (
+        {isLoggedIn && !analysis && !analyzing && !error && (
           <div className="space-y-6">
             {/* Image Upload */}
             <div

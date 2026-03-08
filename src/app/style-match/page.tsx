@@ -18,14 +18,14 @@ const DEMO_RESULT = {
   ],
   lighting: { type: "טבעית וחמה", description: "חלונות גדולים עם תאורת LED חמה משלימה" },
   shoppingList: [
-    { item: "ספה", description: "ספת בד פשתן בגוון שמנת, 3 מושבים", material: "פשתן", priceRange: "₪4,000-8,000" },
-    { item: "שולחן קפה", description: "שולחן עגול עץ אלון עם רגלי מתכת", material: "עץ + מתכת", priceRange: "₪800-2,000" },
-    { item: "שטיח", description: "שטיח צמר בגוון טבעי 200×300", material: "צמר", priceRange: "₪1,500-4,000" },
-    { item: "מנורת רצפה", description: "מנורת קשת שחורה עם אהיל לבן", material: "מתכת", priceRange: "₪400-1,200" },
-    { item: "כריות נוי", description: "סט 4 כריות בגוונים טבעיים", material: "כותנה/פשתן", priceRange: "₪200-600" },
-    { item: "אגרטל", description: "אגרטל קרמיקה לבן מינימליסטי", material: "קרמיקה", priceRange: "₪100-400" },
-    { item: "מדף קיר", description: "מדף עץ אלון צף 120 ס״מ", material: "עץ", priceRange: "₪200-500" },
-    { item: "שמיכת טלוויזיה", description: "שמיכה ארוגה בגוון שמנת", material: "כותנה", priceRange: "₪150-400" },
+    { item: "ספה", description: "ספת בד פשתן בגוון שמנת, 3 מושבים", material: "פשתן", priceRange: "₪4,000-8,000", searchQuery: "ספה פשתן שמנת סקנדינבית 3 מושבים" },
+    { item: "שולחן קפה", description: "שולחן עגול עץ אלון עם רגלי מתכת", material: "עץ + מתכת", priceRange: "₪800-2,000", searchQuery: "שולחן קפה עגול עץ אלון רגלי מתכת" },
+    { item: "שטיח", description: "שטיח צמר בגוון טבעי 200×300", material: "צמר", priceRange: "₪1,500-4,000", searchQuery: "שטיח צמר טבעי 200x300 סקנדינבי" },
+    { item: "מנורת רצפה", description: "מנורת קשת שחורה עם אהיל לבן", material: "מתכת", priceRange: "₪400-1,200", searchQuery: "מנורת רצפה קשת שחורה אהיל לבן" },
+    { item: "כריות נוי", description: "סט 4 כריות בגוונים טבעיים", material: "כותנה/פשתן", priceRange: "₪200-600", searchQuery: "כריות נוי לספה בז טבעי סקנדינבי" },
+    { item: "אגרטל", description: "אגרטל קרמיקה לבן מינימליסטי", material: "קרמיקה", priceRange: "₪100-400", searchQuery: "אגרטל קרמיקה לבן מינימליסטי" },
+    { item: "מדף קיר", description: "מדף עץ אלון צף 120 ס״מ", material: "עץ", priceRange: "₪200-500", searchQuery: "מדף צף עץ אלון 120 סמ" },
+    { item: "שמיכת טלוויזיה", description: "שמיכה ארוגה בגוון שמנת", material: "כותנה", priceRange: "₪150-400", searchQuery: "שמיכה ארוגה כותנה שמנת סלון" },
   ],
   tips: [
     "הוסיפו צמחייה ירוקה — פיקוס או מונסטרה משלימים מושלם",
@@ -248,21 +248,30 @@ function StyleResults({ data, isDemo }: { data: any; isDemo: boolean }) {
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {data.shoppingList?.map((item: any, i: number) => (
-            <div key={i} className="group flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
+            <a
+              key={i}
+              href={`https://www.google.com/search?q=${encodeURIComponent((item.searchQuery || item.description || item.item) + ' לקנות בישראל')}&tbm=shop`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
+            >
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-lg font-bold text-gray-300 border border-gray-100 flex-shrink-0">
                 {String(i + 1).padStart(2, "0")}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900 text-sm">{item.item}</span>
+                  <span className="font-semibold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{item.item}</span>
                   <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-100 flex-shrink-0 mr-2">
                     {item.priceRange}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5 truncate">{item.description}</p>
-                <span className="inline-block mt-1 text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded">{item.material}</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded">{item.material}</span>
+                  <span className="text-[10px] text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">חפש ב-Google Shopping →</span>
+                </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>

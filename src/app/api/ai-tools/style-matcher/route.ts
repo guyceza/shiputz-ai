@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   "materials": [{"name": "עץ אלון", "usage": "רצפה ורהיטים"}],
   "lighting": {"type": "חמה/קרה/טבעית", "description": "תיאור"},
   "shoppingList": [
-    {"item": "ספה", "description": "ספת בד פשתן בגוון טבעי", "material": "פשתן", "priceRange": "₪3,000-8,000"}
+    {"item": "ספה", "description": "ספת בד פשתן בגוון טבעי", "material": "פשתן", "priceRange": "₪3,000-8,000", "searchQuery": "ספה פשתן סקנדינבית מודרנית"}
   ],
   "tips": ["טיפ 1", "טיפ 2"]
 }` }

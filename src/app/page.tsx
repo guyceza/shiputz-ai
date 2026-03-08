@@ -75,8 +75,9 @@ export default function Home() {
   }, []);
   
   const [showPromoPopup, setShowPromoPopup] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
   
-  // Show promo popup after 8 seconds (non-premium users only)
+  // Exit intent popup (desktop: mouse leaves viewport, mobile: scroll up after 30s)
   useEffect(() => {
     const dismissed = localStorage.getItem('promo_dismissed');
     if (dismissed) return;
@@ -90,10 +91,30 @@ export default function Home() {
       } catch {}
     }
     
-    const timer = setTimeout(() => {
-      setShowPromoPopup(true);
-    }, 8000);
-    return () => clearTimeout(timer);
+    let shown = false;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+    
+    // Desktop: mouse leaves top of viewport
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && !shown) {
+        shown = true;
+        setShowPromoPopup(true);
+      }
+    };
+    
+    // Mobile fallback: show after 30s of engagement
+    scrollTimeout = setTimeout(() => {
+      if (!shown) {
+        shown = true;
+        setShowPromoPopup(true);
+      }
+    }, 30000);
+    
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(scrollTimeout);
+    };
   }, []);
 
   // handleSubscribe removed
@@ -110,7 +131,8 @@ export default function Home() {
           <Link href="/" className="text-base font-semibold text-gray-900">
             ShiputzAI
           </Link>
-          <div className="flex items-center gap-3">
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/ai-vision" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
               🎨 AI Vision
             </Link>
@@ -127,8 +149,60 @@ export default function Home() {
               </Link>
             )}
           </div>
+          {/* Mobile hamburger */}
+          <div className="md:hidden flex items-center gap-2">
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="text-xs text-white bg-gray-900 px-3 py-1.5 rounded-full">
+                לאזור האישי
+              </Link>
+            ) : (
+              <Link href="/login" className="text-xs text-white bg-gray-900 px-3 py-1.5 rounded-full">
+                התחברות
+              </Link>
+            )}
+            <button
+              onClick={() => setMobileMenu(!mobileMenu)}
+              className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900"
+              aria-label="תפריט"
+              aria-expanded={mobileMenu}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenu ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
       </nav>
+
+      {/* Mobile menu dropdown */}
+      {mobileMenu && (
+        <div className="fixed top-11 left-0 right-0 bg-white border-b border-gray-200 z-40 md:hidden shadow-lg" dir="rtl">
+          <div className="px-6 py-4 space-y-3">
+            <Link href="/ai-vision" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              🎨 AI Vision — כלי העיצוב
+            </Link>
+            <Link href="/visualize" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              הדמיית עיצוב
+            </Link>
+            <Link href="/style-match" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              זיהוי סגנון
+            </Link>
+            <Link href="/pricing" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              תוכניות ומחירים
+            </Link>
+            <Link href="/tips" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              מאמרים וטיפים
+            </Link>
+            <Link href="/contact" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              צור קשר
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="pt-20 pb-8 px-6">

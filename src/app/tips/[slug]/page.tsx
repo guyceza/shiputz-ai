@@ -427,21 +427,29 @@ export default function ArticlePage() {
         </section>
       )}
 
-      {/* CTA Section */}
+      {/* Tool CTA */}
       <section className="py-16 px-6 bg-gray-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            רוצה לנהל את השיפוץ בצורה חכמה?
-          </h2>
-          <p className="text-gray-500 mb-8">
-            ShiputzAI יעזור לך לעקוב אחרי התקציב, לנתח הצעות מחיר ולהימנע מהפתעות.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
-          >
-            התחל בחינם
-          </Link>
+        <div className="max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <Link href="/visualize" className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-md transition-all">
+              <span className="text-2xl mb-2 block">🎨</span>
+              <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-gray-600">הדמיית עיצוב AI</h3>
+              <p className="text-sm text-gray-500">העלו תמונה וקבלו הדמיה תוך 30 שניות</p>
+            </Link>
+            <Link href="/quote-analysis" className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-md transition-all">
+              <span className="text-2xl mb-2 block">📋</span>
+              <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-gray-600">ניתוח הצעת מחיר</h3>
+              <p className="text-sm text-gray-500">בדקו אם המחיר הגיוני לפני שחותמים</p>
+            </Link>
+          </div>
+          <div className="text-center">
+            <Link
+              href="/ai-vision"
+              className="inline-block bg-gray-900 text-white px-8 py-4 rounded-full text-base hover:bg-gray-800 transition-colors"
+            >
+              גלו את כל הכלים
+            </Link>
+          </div>
         </div>
       </section>
 

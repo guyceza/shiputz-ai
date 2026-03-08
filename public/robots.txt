@@ -9,6 +9,7 @@ Disallow: /project/
 Disallow: /onboarding/
 Disallow: /checkout/
 Disallow: /checkout-vision/
+Disallow: /lp/
 
 # Sitemap
 Sitemap: https://shipazti.com/sitemap.xml

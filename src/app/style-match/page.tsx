@@ -140,6 +140,36 @@ export default function StyleMatchPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 text-sm">{error}</div>
         )}
 
+        {/* How it works — shown only when no image and no results */}
+        {!imageSrc && !activeResult && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">איך זה עובד?</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">🎨</div>
+                <p className="font-medium text-gray-900 text-sm mb-1">זיהוי סגנון</p>
+                <p className="text-xs text-gray-500">סקנדינבי, תעשייתי, בוהו, מודרני ועוד</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">🪵</div>
+                <p className="font-medium text-gray-900 text-sm mb-1">חומרים וצבעים</p>
+                <p className="text-xs text-gray-500">פירוט החומרים, הגוונים והטקסטורות</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">🛒</div>
+                <p className="font-medium text-gray-900 text-sm mb-1">רשימת קניות</p>
+                <p className="text-xs text-gray-500">פריטים ספציפיים עם קישורים לקנייה</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">💡</div>
+                <p className="font-medium text-gray-900 text-sm mb-1">טיפים לשחזור</p>
+                <p className="text-xs text-gray-500">איך להשיג את הלוק הזה אצלכם בבית</p>
+              </div>
+            </div>
+            <p className="text-center text-sm text-gray-400">מצאתם חדר שאהבתם ב-Pinterest או באינסטגרם? העלו את התמונה ונעזור לכם לשחזר את הסגנון</p>
+          </div>
+        )}
+
         {/* Results */}
         {activeResult && <StyleResults data={activeResult} isDemo={showDemo && !result} />}
       </div>

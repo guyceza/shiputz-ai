@@ -652,7 +652,7 @@ export default function FloorplanPage() {
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
-      <ProgressBar active={isAnyLoading} label={loadingLabel} />
+      {!videoLoading && <ProgressBar active={isAnyLoading} label={loadingLabel} />}
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
@@ -1311,6 +1311,22 @@ export default function FloorplanPage() {
                   </span>
                 ) : "🎬 צור סרטון סיור"}
               </button>
+
+              {/* Real video progress bar */}
+              {videoLoading && videoProgress && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-emerald-800">{videoProgress}</span>
+                  </div>
+                  <div className="h-3 bg-emerald-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${parseInt(videoProgress.match(/\d+/)?.[0] || "5")}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
 
               <div className="text-center">
                 <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}

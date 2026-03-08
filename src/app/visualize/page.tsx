@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
 import PricingComparison from "@/components/PricingComparison";
 import CreditBadge from "@/components/CreditBadge";
+import { trackAction, clearAction } from "@/lib/track-action";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -782,6 +783,7 @@ export default function VisualizePage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       setUploadedImage(event.target?.result as string);
+      trackAction('visualize', '/visualize');
     };
     reader.readAsDataURL(file);
   };
@@ -863,6 +865,7 @@ export default function VisualizePage() {
           analysis: analysis,
           costs: costs
         });
+        clearAction(); // User completed — clear abandoned tracking
         // Update credits after successful generation
         if (data.usedCredit && vizCredits !== null) {
           setVizCredits(Math.max(0, vizCredits - 1));

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { trackAction, clearAction } from "@/lib/track-action";
 
 
 // Demo data for preview
@@ -49,7 +50,7 @@ export default function StyleMatchPage() {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { setError("קובץ גדול מדי — עד 10MB"); return; }
     const reader = new FileReader();
-    reader.onload = () => { setImageSrc(reader.result as string); setResult(null); setError(""); setShowDemo(false); };
+    reader.onload = () => { setImageSrc(reader.result as string); setResult(null); setError(""); setShowDemo(false); trackAction('style-match', '/style-match'); };
     reader.readAsDataURL(file);
   };
 
@@ -65,6 +66,7 @@ export default function StyleMatchPage() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      clearAction();
     } catch (err: any) {
       setError(err.message || "שגיאה בניתוח");
     } finally {

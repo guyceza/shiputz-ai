@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import CreditBadge from "@/components/CreditBadge";
+import { trackAction, clearAction } from "@/lib/track-action";
 
 function checkCredits(res: Response, data: any) {
   if (res.status === 402 || data?.creditError) {
@@ -323,7 +324,7 @@ export default function FloorplanPage() {
     setError(null);
     setPhase("upload");
     const reader = new FileReader();
-    reader.onload = (ev) => setUploadedImage(ev.target?.result as string);
+    reader.onload = (ev) => { setUploadedImage(ev.target?.result as string); trackAction('floorplan', '/floorplan'); };
     reader.readAsDataURL(file);
   }, []);
 
@@ -335,7 +336,7 @@ export default function FloorplanPage() {
     setFloorplanResult(null);
     setError(null);
     const reader = new FileReader();
-    reader.onload = (ev) => setUploadedImage(ev.target?.result as string);
+    reader.onload = (ev) => { setUploadedImage(ev.target?.result as string); trackAction('floorplan', '/floorplan'); };
     reader.readAsDataURL(file);
   }, []);
 
@@ -356,6 +357,7 @@ export default function FloorplanPage() {
       if (data.image) {
         setFloorplanResult(`data:${data.image.mimeType};base64,${data.image.data}`);
         setPhase("floorplan-ready");
+        clearAction();
       } else throw new Error(data.text || "No image returned");
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); setLoadingLabel(""); }

@@ -119,7 +119,7 @@ export default function FloorplanPage() {
     // Load saved rooms for this user
     const loadRooms = async () => {
       const email = getEmail();
-      if (!email) return;
+      if (!email) { setRoomsLoaded(true); return; }
       try {
         // Load rooms for current session
         const res = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}&sessionId=${encodeURIComponent(sessionId!)}`);
@@ -149,6 +149,7 @@ export default function FloorplanPage() {
           }
         }
       } catch (e) { console.error("Failed to load rooms:", e); }
+      finally { setRoomsLoaded(true); }
     };
     loadRooms();
   }, []);
@@ -190,6 +191,7 @@ export default function FloorplanPage() {
   const [videoFirstImage, setVideoFirstImage] = useState<string | null>(null);
   const [videoLastImage, setVideoLastImage] = useState<string | null>(null);
   const [allUserRooms, setAllUserRooms] = useState<{sessionId: string; rooms: RoomPhoto[]}[]>([]);
+  const [roomsLoaded, setRoomsLoaded] = useState(false);
   const videoFirstInputRef = useRef<HTMLInputElement>(null);
   const videoLastInputRef = useRef<HTMLInputElement>(null);
 
@@ -1142,8 +1144,16 @@ export default function FloorplanPage() {
               <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
             </div>
 
+            {/* Loading rooms */}
+            {!roomsLoaded && (
+              <div className="flex items-center justify-center py-12 gap-3">
+                <Spinner className="h-5 w-5 text-gray-400" />
+                <span className="text-gray-400 text-sm">טוען הדמיות...</span>
+              </div>
+            )}
+
             {/* No images yet — friendly redirect */}
-            {allUserRooms.length === 0 && !loading && (
+            {roomsLoaded && allUserRooms.length === 0 && (
               <div className="max-w-md mx-auto text-center bg-amber-50 border border-amber-200 rounded-2xl p-8 space-y-4">
                 <div className="text-4xl">🎬</div>
                 <h3 className="text-lg font-semibold text-gray-900">אין עדיין הדמיות לסרטון</h3>

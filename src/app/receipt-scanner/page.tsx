@@ -129,22 +129,14 @@ export default function ReceiptScannerPage() {
                     <p className="text-sm text-gray-500">צלמו קבלה — ה-AI מזהה הכל תוך שניות</p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-2xl mb-1">💰</div>
-                      <p className="text-xs font-medium text-gray-700">סכום</p>
-                      <p className="text-[10px] text-gray-400">זיהוי אוטומטי</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-2xl mb-1">📅</div>
-                      <p className="text-xs font-medium text-gray-700">תאריך</p>
-                      <p className="text-[10px] text-gray-400">חילוץ מהקבלה</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-2xl mb-1">🏪</div>
-                      <p className="text-xs font-medium text-gray-700">ספק + קטגוריה</p>
-                      <p className="text-[10px] text-gray-400">סיווג חכם</p>
-                    </div>
+                  <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
+                    <span>סכום</span>
+                    <span className="text-gray-300">·</span>
+                    <span>תאריך</span>
+                    <span className="text-gray-300">·</span>
+                    <span>ספק</span>
+                    <span className="text-gray-300">·</span>
+                    <span>קטגוריה</span>
                   </div>
 
                   <button

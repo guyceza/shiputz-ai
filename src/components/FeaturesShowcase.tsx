@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, Home, Video, FileText, Receipt, ShoppingBag, Palette } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const mainFeatures = [
   {
@@ -34,28 +34,31 @@ const mainFeatures = [
 
 const teaserFeatures = [
   {
-    icon: Sparkles,
     title: "עיצוב מחדש",
     description: "הדמיית AI של החדר בעיצוב חדש",
     href: "/visualize",
+    image: "/images/ai-vision/visualize.jpg",
   },
   {
-    icon: FileText,
     title: "כתב כמויות",
     description: "פירוט חומרים, כמויות ועלויות",
     href: "/dashboard/boq",
+    image: "/images/ai-vision/boq.gif",
+    isGif: true,
   },
   {
-    icon: Receipt,
     title: "ניתוח הצעת מחיר",
     description: "בדיקה אוטומטית של הצעות מקבלנים",
     href: "/dashboard",
+    image: "/images/ai-vision/quote-analysis.gif",
+    isGif: true,
   },
   {
-    icon: ShoppingBag,
     title: "סריקת קבלות",
     description: "צילום קבלה → סכום, תאריך וקטגוריה",
     href: "/dashboard",
+    image: "/images/ai-vision/receipt-scanner.gif",
+    isGif: true,
   },
 ];
 
@@ -131,11 +134,30 @@ export default function FeaturesShowcase() {
             <Link
               key={feature.title}
               href={feature.href}
-              className="group bg-gray-50 hover:bg-white border border-gray-100 hover:border-gray-200 rounded-2xl p-5 md:p-6 text-center transition-all duration-200 hover:shadow-lg"
+              className="group bg-white border border-gray-100 hover:border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg"
             >
-              <feature.icon className="w-8 h-8 text-gray-400 group-hover:text-gray-900 mx-auto mb-3 transition-colors" />
-              <h4 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{feature.title}</h4>
-              <p className="text-gray-500 text-xs md:text-sm leading-snug">{feature.description}</p>
+              <div className="aspect-[4/3] overflow-hidden">
+                {feature.isGif ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={feature.image}
+                    alt={feature.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    width={300}
+                    height={225}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                )}
+              </div>
+              <div className="p-4 text-center">
+                <h4 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{feature.title}</h4>
+                <p className="text-gray-500 text-xs md:text-sm leading-snug">{feature.description}</p>
+              </div>
             </Link>
           ))}
         </div>

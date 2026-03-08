@@ -78,9 +78,10 @@ const features = [
     title: "Style Matcher",
     description: "זיהוי סגנון עיצוב + רשימת קניות לשחזור",
     href: "/style-match",
-    type: "image" as const,
-    image: "/images/ai-vision/style-match.jpg",
-    duration: 4000,
+    type: "before-after" as const,
+    before: "/images/style-match-demo-1.jpg",
+    after: "/images/style-match-demo-2.jpg",
+    duration: 6000,
   },
 ];
 

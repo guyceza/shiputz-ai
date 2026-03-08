@@ -11,6 +11,8 @@ export const CREDIT_COSTS = {
   'bill-of-quantities': 5, // כתב כמויות
   'scan-receipt': 2,       // Receipt scanning
   'analyze-quote': 3,      // Quote analysis
+  'style-match': 3,        // Style Matcher
+  'detect-items': 3,       // Detect items in image
 } as const;
 
 export type CreditAction = keyof typeof CREDIT_COSTS;

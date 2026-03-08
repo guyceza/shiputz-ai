@@ -3,51 +3,19 @@ export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { creditGuard } from "@/lib/credit-guard";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-import { createServiceClient } from '@/lib/supabase';
-
-// Verify user exists and has premium
-async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, premium: boolean}> {
-  try {
-    const supabase = createServiceClient();
-    const { data } = await supabase
-      .from('users')
-      .select('id, purchased')
-      .eq('email', userEmail.toLowerCase())
-      .single();
-    return { exists: !!data, premium: data?.purchased === true };
-  } catch {
-    return { exists: false, premium: false };
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { message, context, userEmail } = body;
 
-    // Auth check - verify user exists in DB
-    if (!userEmail) {
-      return NextResponse.json({ 
-        error: "נדרשת התחברות לשימוש בשירות זה" 
-      }, { status: 401 });
-    }
-    
-    const { exists, premium } = await verifyUserPremium(userEmail);
-    if (!exists) {
-      return NextResponse.json({ 
-        error: "נדרשת התחברות לשימוש בשירות זה" 
-      }, { status: 401 });
-    }
-    
-    if (!premium) {
-      return NextResponse.json({ 
-        error: "העוזר החכם זמין למשתמשי Pro בלבד. רכשו Pro כדי ליהנות מייעוץ AI." 
-      }, { status: 403 });
-    }
+    // Credit check (guests allowed with rate limit only)
+    const guard = await creditGuard(userEmail, 'analyze-quote');
+    if ('error' in guard) return guard.error;
 
     // Rate limiting - 20 requests per minute
     const clientId = getClientId(request);

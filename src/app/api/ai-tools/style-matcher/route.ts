@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { creditGuard } from "@/lib/credit-guard";
 
 export async function POST(request: NextRequest) {
   try {
-    const { image } = await request.json();
+    const { image, userEmail } = await request.json();
     if (!image) return NextResponse.json({ error: "Missing image" }, { status: 400 });
+
+    // Credit check
+    const guard = await creditGuard(userEmail, 'style-match');
+    if ('error' in guard) return guard.error;
 
     const base64 = image.replace(/^data:image\/\w+;base64,/, "");
     const apiKey = process.env.GEMINI_API_KEY;

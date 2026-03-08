@@ -14,6 +14,7 @@ interface Feature {
   cta: string;
   video?: string;
   isGif?: boolean;
+  beforeAfter?: { before: string; after: string };
 }
 
 const mainFeatures: Feature[] = [

@@ -211,6 +211,7 @@ export default function QuoteAnalysisPage() {
             >
               נתח הצעה
             </button>
+            <p className="text-xs text-gray-400 text-center mt-2">3 קרדיטים</p>
           </div>
         )}
 

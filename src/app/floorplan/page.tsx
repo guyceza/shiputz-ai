@@ -755,6 +755,7 @@ export default function FloorplanPage() {
               }`}>
               {loading ? <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> יוצר הדמיה...</span> : "צור הדמיה →"}
             </button>
+            <p className="text-xs text-gray-400 text-center mt-2">10 קרדיטים להדמיה · 5 לצילום חדר · 25 לסרטון</p>
 
             {/* How it works */}
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">

@@ -1360,6 +1360,7 @@ export default function VisualizePage() {
               ✨ צור הדמיה חדשה
             </button>
           )}
+          <p className="text-xs text-white/60 mt-3">10 קרדיטים להדמיה</p>
         </div>
       </section>
 

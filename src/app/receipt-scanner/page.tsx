@@ -145,7 +145,7 @@ export default function ReceiptScannerPage() {
                   >
                     📸 צלמו או העלו קבלות
                   </button>
-                  <p className="text-xs text-gray-400 text-center">עד 3 קבלות · JPG, PNG, HEIC</p>
+                  <p className="text-xs text-gray-400 text-center">עד 3 קבלות · JPG, PNG, HEIC · 2 קרדיטים לקבלה</p>
                 </div>
               )}
 

@@ -47,6 +47,13 @@ const mainFeatures: Feature[] = [
 
 const teaserFeatures: Feature[] = [
   {
+    title: "עוזר AI לשיפוץ",
+    description: "שאל כל שאלה על השיפוץ וקבל תשובה מיידית",
+    href: "/dashboard",
+    image: "/images/ai-vision/chat-support-thumb.jpg",
+    video: "/images/ai-vision/chat-support-showcase.mp4",
+  },
+  {
     title: "עיצוב מחדש",
     description: "הדמיית AI של החדר בעיצוב חדש",
     href: "/visualize",
@@ -171,7 +178,17 @@ export default function FeaturesShowcase() {
               ) : (
                 <Link href={feature.href} className="block">
                   <div className="aspect-[4/3] overflow-hidden">
-                    {feature.isGif ? (
+                    {feature.video ? (
+                      <video
+                        src={feature.video}
+                        poster={feature.image}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : feature.isGif ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={feature.image}

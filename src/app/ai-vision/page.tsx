@@ -175,6 +175,19 @@ export default function AIVisionPage() {
             })}
           </div>
 
+          {/* Coming Soon Teaser */}
+          <div className="mt-16 relative overflow-hidden rounded-2xl border border-dashed border-gray-300 bg-gradient-to-l from-gray-50 to-white p-8 md:p-10 text-center">
+            <div className="absolute top-3 left-3 bg-gray-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider uppercase">
+              Coming Soon
+            </div>
+            <span className="text-4xl mb-4 block">🔥</span>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">יש לנו עוד המון בתנור</h3>
+            <p className="text-gray-500 max-w-lg mx-auto leading-relaxed">
+              אנחנו כבר לא יכולים לחכות להוציא לכם את מה שאנחנו בונים עכשיו. כלים חדשים, יכולות מטורפות, ודברים שעוד לא ראיתם באף מקום.
+            </p>
+            <p className="text-sm text-gray-400 mt-4">הישארו בקשר — זה הולך להיות שווה.</p>
+          </div>
+
           {/* Footer note */}
           <p className="text-center text-xs text-gray-400 mt-10">
             כל ההדמיות נוצרות באמצעות AI להמחשה בלבד

@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
 5. **רשימת קניות**: 8-10 פריטים ספציפיים שצריך לקנות כדי לשחזר את הסגנון הזה (כולל סוג, חומר, צבע, טווח מחירים משוער בשקלים). לכל פריט, ציין את המיקום שלו בתמונה כאחוזים (0-100) מלמעלה ומשמאל.
 6. **טיפים לשחזור**: 3-5 טיפים פרקטיים
 
+IMPORTANT: For each material, include textureType from this list: wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork.
+
 IMPORTANT: Position values (top, left) MUST be percentages from 0 to 100, NOT pixels! top=0 is the top edge, top=100 is the bottom. left=0 is the left edge, left=100 is the right edge.
 
 החזר JSON בלבד:
@@ -36,7 +38,7 @@ IMPORTANT: Position values (top, left) MUST be percentages from 0 to 100, NOT pi
   "styleEnglish": "Style Name",
   "confidence": 85,
   "characteristics": ["מאפיין 1", "מאפיין 2"],
-  "materials": [{"name": "עץ אלון", "usage": "רצפה ורהיטים"}],
+  "materials": [{"name": "עץ אלון", "usage": "רצפה ורהיטים", "textureType": "wood"}],
   "lighting": {"type": "חמה/קרה/טבעית", "description": "תיאור"},
   "shoppingList": [
     {"item": "ספה", "description": "ספת בד פשתן בגוון טבעי", "material": "פשתן", "priceRange": "₪3,000-8,000", "searchQuery": "ספה פשתן סקנדינבית מודרנית", "position": {"top": 60, "left": 45}}

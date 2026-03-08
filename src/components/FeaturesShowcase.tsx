@@ -7,11 +7,11 @@ import BeforeAfterSlider from "./BeforeAfterSlider";
 
 interface Feature {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   description: string;
   image: string;
   href: string;
-  cta: string;
+  cta?: string;
   video?: string;
   isGif?: boolean;
   beforeAfter?: { before: string; after: string };

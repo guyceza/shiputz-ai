@@ -159,7 +159,8 @@ function CardDeck({ features }: { features: Feature[] }) {
               key={feature.title}
               href={feature.href}
               className={`group rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-gradient-to-br ${cardAccents[i % cardAccents.length]}`}
-              style={{ animationDelay: `${i * 80}ms`, animation: 'fadeSlideUp 0.4s ease-out both' }}
+              style={{ animationDelay: `${i * 80}ms` }}
+              data-animate
             >
               <div className="aspect-[4/3] overflow-hidden bg-white/50 m-2 rounded-xl">
                 {feature.video ? (
@@ -180,12 +181,7 @@ function CardDeck({ features }: { features: Feature[] }) {
             </Link>
           ))}
         </div>
-        <style jsx>{`
-          @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
+
       )}
     </div>
   );

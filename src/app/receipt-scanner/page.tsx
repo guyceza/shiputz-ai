@@ -115,9 +115,49 @@ export default function ReceiptScannerPage() {
         {userEmail && results.length === 0 && (
           <>
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-500 mb-4 text-center">צלמו או העלו עד 3 קבלות — ה-AI יזהה סכום, תאריך, ספק וקטגוריה</p>
+              {/* Empty state - attractive showcase */}
+              {images.length === 0 && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 mb-4">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <path d="M7 15h0M7 11h0M7 8h4M12 15h5M12 11h5"/>
+                      </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">סריקת קבלות חכמה</h2>
+                    <p className="text-sm text-gray-500">צלמו קבלה — ה-AI מזהה הכל תוך שניות</p>
+                  </div>
 
-              {/* Image grid */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-2xl mb-1">💰</div>
+                      <p className="text-xs font-medium text-gray-700">סכום</p>
+                      <p className="text-[10px] text-gray-400">זיהוי אוטומטי</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-2xl mb-1">📅</div>
+                      <p className="text-xs font-medium text-gray-700">תאריך</p>
+                      <p className="text-[10px] text-gray-400">חילוץ מהקבלה</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                      <div className="text-2xl mb-1">🏪</div>
+                      <p className="text-xs font-medium text-gray-700">ספק + קטגוריה</p>
+                      <p className="text-[10px] text-gray-400">סיווג חכם</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full py-4 rounded-full font-bold text-lg bg-gray-900 hover:bg-gray-800 text-white shadow-lg transition-all"
+                  >
+                    📸 צלמו או העלו קבלות
+                  </button>
+                  <p className="text-xs text-gray-400 text-center">עד 3 קבלות · JPG, PNG, HEIC</p>
+                </div>
+              )}
+
+              {/* Image grid - after upload */}
               {images.length > 0 && (
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {images.map((img, i) => (
@@ -154,18 +194,6 @@ export default function ReceiptScannerPage() {
                       <span className="text-xs text-gray-400 mt-1">הוסף קבלה</span>
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* Empty state - upload area */}
-              {images.length === 0 && (
-                <div
-                  onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-12 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-all"
-                >
-                  <div className="text-4xl mb-3">📸</div>
-                  <p className="font-medium text-gray-700">צלמו או העלו קבלות</p>
-                  <p className="text-sm text-gray-400 mt-1">עד 3 קבלות · JPG, PNG, HEIC</p>
                 </div>
               )}
 

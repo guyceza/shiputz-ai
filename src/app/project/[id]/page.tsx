@@ -1671,7 +1671,7 @@ export default function ProjectPage() {
               { id: "overview", label: "סקירה", Icon: BarChart3 },
               { id: "timeline", label: "ציר זמן", Icon: Calendar },
               { id: "suppliers", label: "ספקים", Icon: Users },
-              { id: "photos", label: "תמונות", Icon: Camera },
+              /* { id: "photos", label: "תמונות", Icon: Camera }, */
             ].map(tab => (
               <button
                 key={tab.id}

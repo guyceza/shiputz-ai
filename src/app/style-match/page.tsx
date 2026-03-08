@@ -116,15 +116,15 @@ export default function StyleMatchPage() {
                     ✕
                   </button>
                 </div>
-                {/* Numbered markers on image */}
+                {/* Product thumbnail markers on image */}
                 {activeResult?.shoppingList?.map((item: any, i: number) => (
                   item.position && (
                     <div
                       key={i}
-                      className={`absolute z-10 flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold cursor-pointer transition-all duration-200 ${
+                      className={`absolute z-10 cursor-pointer transition-all duration-200 ${
                         highlightedItem === i
-                          ? "bg-gray-900 text-white scale-125 ring-2 ring-white shadow-lg"
-                          : "bg-white/90 text-gray-900 border border-gray-300 shadow-md hover:scale-110"
+                          ? "scale-[1.35] z-20"
+                          : "hover:scale-110"
                       }`}
                       style={{
                         top: `${item.position.top}%`,
@@ -134,7 +134,25 @@ export default function StyleMatchPage() {
                       onMouseEnter={() => setHighlightedItem(i)}
                       onMouseLeave={() => setHighlightedItem(null)}
                     >
-                      {String(i + 1).padStart(2, "0")}
+                      {/* Circular crop from the original image */}
+                      <div
+                        className={`w-11 h-11 rounded-full border-2 shadow-lg overflow-hidden ${
+                          highlightedItem === i ? "border-gray-900 shadow-xl" : "border-white"
+                        }`}
+                        style={{
+                          backgroundImage: `url(${imageSrc})`,
+                          backgroundSize: '500% 500%',
+                          backgroundPosition: `${item.position.left}% ${item.position.top}%`,
+                        }}
+                      />
+                      {/* Number badge */}
+                      <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                        highlightedItem === i
+                          ? "bg-gray-900 text-white"
+                          : "bg-white text-gray-700 border border-gray-200"
+                      } shadow-sm`}>
+                        {i + 1}
+                      </div>
                     </div>
                   )
                 ))}

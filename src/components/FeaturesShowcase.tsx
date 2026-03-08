@@ -110,8 +110,8 @@ export default function FeaturesShowcase() {
                 href={feature.href}
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
               >
+                <ArrowLeft className="w-4 h-4 rotate-180" />
                 {feature.cta}
-                <ArrowLeft className="w-4 h-4" />
               </Link>
             </div>
           </div>

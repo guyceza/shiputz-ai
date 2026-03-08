@@ -104,33 +104,33 @@ export default function StyleMatchPage() {
               <input type="file" accept="image/*" onChange={handleImage} className="hidden" ref={fileRef} />
             </label>
           ) : (
-            <div className="relative rounded-2xl overflow-hidden bg-gray-100 max-h-[400px]">
-              <img src={imageSrc} alt="uploaded" className="w-full max-h-[400px] object-contain" />
-              <div className="absolute top-4 left-4 flex gap-2">
-                <button
-                  onClick={() => { setImageSrc(null); setResult(null); setShowDemo(false); }}
-                  className="w-10 h-10 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 backdrop-blur-sm transition-all"
-                >
-                  ✕
-                </button>
-              </div>
-              {!result && !loading && (
-                <div className="absolute bottom-4 inset-x-4">
+            <div>
+              <div className="relative rounded-2xl overflow-hidden bg-gray-100">
+                <img src={imageSrc} alt="uploaded" className="w-full max-h-[400px] object-contain" />
+                <div className="absolute top-4 left-4 flex gap-2">
                   <button
-                    onClick={analyze}
-                    className="w-full bg-gray-900 text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg"
+                    onClick={() => { setImageSrc(null); setResult(null); setShowDemo(false); }}
+                    className="w-10 h-10 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 backdrop-blur-sm transition-all"
                   >
-                    זהה סגנון
+                    ✕
                   </button>
                 </div>
-              )}
-              {loading && (
-                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-12 h-12 border-3 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-gray-600 font-medium">מנתח סגנון...</p>
+                {loading && (
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-12 h-12 border-3 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3" />
+                      <p className="text-gray-600 font-medium">מנתח סגנון...</p>
+                    </div>
                   </div>
-                </div>
+                )}
+              </div>
+              {!result && !loading && (
+                <button
+                  onClick={analyze}
+                  className="w-full mt-4 bg-gray-900 text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg"
+                >
+                  זהה סגנון
+                </button>
               )}
             </div>
           )}

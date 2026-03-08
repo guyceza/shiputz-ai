@@ -90,88 +90,88 @@ const teaserFeatures: Feature[] = [
 function CardDeck({ features }: { features: Feature[] }) {
   const [fanned, setFanned] = useState(false);
   const total = features.length;
-  // Each fanned card shows ~60px of the card above (title visible) + full last card
-  const cardPeek = 60;
-  const cardHeight = 300;
-  const fannedHeight = (total - 1) * cardPeek + cardHeight + 80;
 
   return (
     <div className="pt-12 pb-4">
-      {/* Title always on top */}
-      <div className="text-center mb-6 cursor-pointer" onClick={() => setFanned(!fanned)}>
+      {/* Title + toggle */}
+      <div className="text-center mb-8 cursor-pointer" onClick={() => setFanned(!fanned)}>
         <h3 className="text-2xl md:text-3xl font-bold text-gray-900">ועוד הרבה...</h3>
-        <p className="text-sm text-gray-500 mt-1">{fanned ? 'לחצו לסגור' : 'לחצו לגלות'}</p>
+        <p className="text-sm text-gray-500 mt-1">{fanned ? 'לחצו לסגור ✕' : 'לחצו לגלות ↓'}</p>
       </div>
 
-      {/* Card stack */}
-      <div
-        className="relative mx-auto cursor-pointer"
-        style={{ height: fanned ? `${fannedHeight}px` : '260px', maxWidth: '340px', transition: 'height 0.5s ease-out' }}
-        onClick={() => setFanned(!fanned)}
-      >
-        {features.map((feature, i) => {
-          // Collapsed: stacked with rotation fan
-          const spreadAngle = 36;
-          const angleStep = total > 1 ? spreadAngle / (total - 1) : 0;
-          const collapsedRotate = -spreadAngle / 2 + i * angleStep;
-          const collapsedY = Math.abs(collapsedRotate) * 0.6;
-          
-          // Fanned: cascading down, each card offset so title of card below is visible
-          const fannedY = i * cardPeek;
+      {!fanned ? (
+        /* Collapsed: stacked card deck */
+        <div
+          className="relative mx-auto cursor-pointer"
+          style={{ height: '220px', maxWidth: '300px' }}
+          onClick={() => setFanned(true)}
+        >
+          {features.map((feature, i) => {
+            const spreadAngle = 30;
+            const angleStep = total > 1 ? spreadAngle / (total - 1) : 0;
+            const rotate = -spreadAngle / 2 + i * angleStep;
+            const yOffset = Math.abs(rotate) * 0.5;
 
-          return (
-            <div
-              key={feature.title}
-              className="absolute left-1/2 transition-all duration-500 ease-out"
-              style={{
-                width: '280px',
-                marginLeft: '-140px',
-                transform: fanned
-                  ? `translateY(${fannedY}px) rotate(0deg)`
-                  : `translateY(${collapsedY}px) rotate(${collapsedRotate}deg)`,
-                zIndex: fanned ? total - i : total - i,
-                transformOrigin: 'bottom center',
-              }}
-            >
-              <Link
-                href={feature.href}
-                onClick={(e) => { if (!fanned) e.preventDefault(); }}
-                className={`block bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg ${fanned ? 'hover:shadow-xl' : 'pointer-events-none'} transition-shadow`}
+            return (
+              <div
+                key={feature.title}
+                className="absolute left-1/2 transition-all duration-500 ease-out"
+                style={{
+                  width: '240px',
+                  marginLeft: '-120px',
+                  transform: `translateY(${yOffset}px) rotate(${rotate}deg)`,
+                  zIndex: total - i,
+                  transformOrigin: 'bottom center',
+                }}
               >
-                {/* Title bar — always visible when fanned */}
-                <div className="p-3 text-center border-b border-gray-100 bg-white">
-                  <h4 className="font-semibold text-gray-900 text-sm">{feature.title}</h4>
-                  <p className="text-gray-400 text-[11px]">{feature.description}</p>
+                <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
+                  <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+                    {feature.video ? (
+                      <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                    ) : feature.isGif ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <Image src={feature.image} alt={feature.title} width={300} height={225} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div className="p-3 text-center">
+                    <h4 className="font-semibold text-gray-900 text-sm">{feature.title}</h4>
+                  </div>
                 </div>
-                <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                  {feature.video ? (
-                    <video
-                      src={feature.video}
-                      poster={feature.image}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : feature.beforeAfter ? (
-                    <BeforeAfterSlider
-                      beforeImg={feature.beforeAfter.before}
-                      afterImg={feature.beforeAfter.after}
-                      height="aspect-[4/3]"
-                    />
-                  ) : feature.isGif ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <Image src={feature.image} alt={feature.title} width={300} height={225} className="w-full h-full object-cover" />
-                  )}
-                </div>
-              </Link>
-            </div>
-          );
-        })}
-      </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Fanned: clean grid */
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto animate-fade-in-up">
+          {features.map((feature) => (
+            <Link
+              key={feature.title}
+              href={feature.href}
+              className="group bg-white border border-gray-100 hover:border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+                {feature.video ? (
+                  <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                ) : feature.beforeAfter ? (
+                  <BeforeAfterSlider beforeImg={feature.beforeAfter.before} afterImg={feature.beforeAfter.after} height="aspect-[4/3]" />
+                ) : feature.isGif ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={feature.image} alt={feature.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <Image src={feature.image} alt={feature.title} width={300} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                )}
+              </div>
+              <div className="p-4 text-center">
+                <h4 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{feature.title}</h4>
+                <p className="text-gray-500 text-xs md:text-sm leading-snug">{feature.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

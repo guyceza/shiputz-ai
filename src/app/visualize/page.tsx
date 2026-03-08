@@ -1412,7 +1412,7 @@ export default function VisualizePage() {
               <>
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">🎉</span>
+                    <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">אהבת? יש עוד!</h3>
                   <p className="text-gray-500 text-sm">השתמשת בניסיון החינמי. הירשם בחינם וקבל גישה להדמיות נוספות, שמירת היסטוריה, הערכת עלויות ועוד.</p>
@@ -1562,7 +1562,7 @@ export default function VisualizePage() {
                   <Lottie animationData={packsAnimationData} loop={true} />
                 ) : (
                   <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
-                    <span className="text-3xl">🎨</span>
+                    <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
                   </div>
                 )}
               </div>

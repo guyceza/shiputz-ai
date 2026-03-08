@@ -145,7 +145,7 @@ export default function QuoteAnalysisPage() {
         {!checkingAuth && !isLoggedIn && (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <span className="text-3xl">🔒</span>
+              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             </div>
             <p className="text-gray-900 font-medium text-lg mb-2">נדרשת התחברות</p>
             <p className="text-gray-500 text-sm mb-6">התחברו כדי לנתח הצעות מחיר עם AI</p>
@@ -228,7 +228,7 @@ export default function QuoteAnalysisPage() {
         {error && !analyzing && (
           <div className="py-16 flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-5">
-              <span className="text-3xl">⚠️</span>
+              <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
             <p className="text-gray-900 font-medium text-lg mb-2">לא הצלחנו לנתח את ההצעה</p>
             <p className="text-gray-500 text-sm mb-6">{error}</p>

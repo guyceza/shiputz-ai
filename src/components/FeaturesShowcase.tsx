@@ -5,7 +5,18 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 
-const mainFeatures = [
+interface Feature {
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  href: string;
+  cta: string;
+  video?: string;
+  isGif?: boolean;
+}
+
+const mainFeatures: Feature[] = [
   {
     title: "Style Matcher",
     subtitle: "זיהוי סגנון + רשימת קניות",
@@ -33,7 +44,7 @@ const mainFeatures = [
   },
 ];
 
-const teaserFeatures = [
+const teaserFeatures: Feature[] = [
   {
     title: "עיצוב מחדש",
     description: "הדמיית AI של החדר בעיצוב חדש",

@@ -17,11 +17,11 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   title: {
-    default: "ShiputzAI - ניהול שיפוצים חכם",
+    default: "ShiputzAI - עיצוב הבית ב-AI",
     template: "%s | ShiputzAI",
   },
-  description: "בינה מלאכותית לניהול שיפוצים - מעקב תקציב, סריקת קבלות, ניתוח הצעות מחיר והתראות חכמות. התחל לשפץ בשליטה מלאה.",
-  keywords: ["שיפוץ", "שיפוצים", "ניהול תקציב", "קבלות", "הצעות מחיר", "AI", "בינה מלאכותית", "שיפוץ דירה", "שיפוץ בית"],
+  description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים — הדמיות, זיהוי סגנון, רשימת קניות, סרטון סיור וניתוח הצעות מחיר.",
+  keywords: ["עיצוב פנים", "הדמיות AI", "עיצוב הבית", "הדמיית חדר", "Style Match", "Shop the Look", "AI", "בינה מלאכותית", "עיצוב דירה", "שיפוץ"],
   authors: [{ name: "ShiputzAI" }],
   creator: "ShiputzAI",
   metadataBase: new URL("https://shipazti.com"),
@@ -30,21 +30,21 @@ export const metadata: Metadata = {
     locale: "he_IL",
     url: "https://shipazti.com",
     siteName: "ShiputzAI",
-    title: "ShiputzAI - ניהול שיפוצים חכם",
-    description: "בינה מלאכותית לניהול שיפוצים - מעקב תקציב, סריקת קבלות, ניתוח הצעות מחיר והתראות חכמות.",
+    title: "ShiputzAI - עיצוב הבית ב-AI",
+    description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים — הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "ShiputzAI - ניהול שיפוצים חכם",
+        alt: "ShiputzAI - עיצוב הבית ב-AI",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ShiputzAI - ניהול שיפוצים חכם",
-    description: "בינה מלאכותית לניהול שיפוצים - מעקב תקציב, סריקת קבלות והתראות חכמות.",
+    title: "ShiputzAI - עיצוב הבית ב-AI",
+    description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים.",
     images: ["/og-image.jpg"],
   },
   icons: {
@@ -79,14 +79,14 @@ const jsonLd = {
       "@id": "https://shipazti.com/#website",
       "url": "https://shipazti.com",
       "name": "ShiputzAI",
-      "description": "בינה מלאכותית לניהול שיפוצים",
+      "description": "AI לעיצוב הבית — הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור",
       "inLanguage": "he-IL",
     },
     {
       "@type": "SoftwareApplication",
       "@id": "https://shipazti.com/#app",
       "name": "ShiputzAI",
-      "applicationCategory": "FinanceApplication",
+      "applicationCategory": "DesignApplication",
       "operatingSystem": "Web",
       "offers": {
         "@type": "Offer",

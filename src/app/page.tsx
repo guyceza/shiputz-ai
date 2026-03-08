@@ -77,7 +77,7 @@ export default function Home() {
   
   // Show promo popup after 8 seconds (non-premium users only)
   useEffect(() => {
-    const dismissed = localStorage.getItem('purim_promo_dismissed');
+    const dismissed = localStorage.getItem('promo_dismissed');
     if (dismissed) return;
     
     // Don't show to premium users
@@ -131,12 +131,12 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-right">
-              <p className="text-sm text-gray-500 mb-4">ניהול שיפוצים חכם</p>
+              <p className="text-sm text-gray-500 mb-4">AI לעיצוב הבית</p>
               <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-4 text-gray-900">
-                שיפוץ בשליטה מלאה.
+                עצבו את הבית. בלחיצה.
               </h1>
               <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                בינה מלאכותית שמנהלת את התקציב, מנתחת הצעות מחיר, ומתריעה לפני שנכנסים לבעיה.
+                העלו תמונה של חדר — קבלו הדמיית עיצוב, רשימת קניות, וסרטון סיור. הכל ב-AI.
               </p>
               <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
                 {isLoggedIn ? (
@@ -157,10 +157,10 @@ export default function Home() {
                   </Link>
                 )}
                 <Link
-                  href="#features"
+                  href="/visualize"
                   className="text-gray-900 px-8 py-4 rounded-full text-base border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all"
                 >
-                  גלו עוד
+                  נסו הדמיה עכשיו
                 </Link>
               </div>
               {!isLoggedIn && (
@@ -282,26 +282,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Social Proof / Testimonials */}
       <section className="py-20 px-6 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-12 text-center">
-            <div>
-              <p className="text-4xl font-semibold text-gray-900 mb-2">₪15B</p>
-              <p className="text-gray-500">שוק השיפוצים בישראל</p>
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-12">מה אומרים המשתמשים</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
+              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;העליתי תמונה של הסלון וקיבלתי הדמיה תוך 30 שניות. הלקוחה שלי התלהבה ואישרה את הפרויקט באותו יום.&quot;</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">ר</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">רונית א.</p>
+                  <p className="text-xs text-gray-500">מעצבת פנים, תל אביב</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-4xl font-semibold text-gray-900 mb-2">70%</p>
-              <p className="text-gray-500">משיפוצים חורגים מהתקציב</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
+              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;השתמשתי בניתוח הצעת מחיר וגיליתי שהקבלן חייב אותי ₪8,000 יותר מהמחיר הנכון. שווה כל שקל.&quot;</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">י</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">יוסי כ.</p>
+                  <p className="text-xs text-gray-500">בעל דירה, רמת גן</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-4xl font-semibold text-gray-900 mb-2">3 מתוך 4</p>
-              <p className="text-gray-500">מדווחים על בעיות עם קבלנים</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
+              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;הכלי Style Match זיהה בדיוק את הסגנון שחיפשתי ונתן לי רשימת מוצרים עם לינקים. חסך לי שעות של חיפושים.&quot;</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">מ</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">מיכל ל.</p>
+                  <p className="text-xs text-gray-500">מעצבת פנים, הרצליה</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
-
 
 
 
@@ -313,7 +334,7 @@ export default function Home() {
             <button
               onClick={() => {
                 setShowPromoPopup(false);
-                localStorage.setItem('purim_promo_dismissed', 'true');
+                localStorage.setItem('promo_dismissed', 'true');
               }}
               className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -321,32 +342,32 @@ export default function Home() {
             </button>
             
             <div className="text-center">
-              <div className="text-5xl mb-4">✨</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">התחילו בחינם!</h2>
-              <p className="text-gray-500 mb-5">10 קרדיטים חינם — בלי כרטיס אשראי</p>
+              <div className="text-5xl mb-4">🎨</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">רוצים לראות איך הבית ייראה?</h2>
+              <p className="text-gray-500 mb-5">העלו תמונה וקבלו הדמיית עיצוב תוך 30 שניות</p>
               
               <div className="bg-gray-50 rounded-2xl p-5 mb-5">
                 <div className="flex items-center justify-center gap-3 mb-1">
-                  <span className="text-3xl font-bold text-gray-900">10 קרדיטים</span>
+                  <span className="text-3xl font-bold text-gray-900">10 קרדיטים חינם</span>
                 </div>
-                <p className="text-sm text-gray-500">מספיק להדמיה אחת של חדר</p>
+                <p className="text-sm text-gray-500">בהרשמה — בלי כרטיס אשראי</p>
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><span>✓</span>הדמיות שיפוץ AI</li>
-                <li className="flex items-center gap-2"><span>✓</span>כתב כמויות אוטומטי</li>
-                <li className="flex items-center gap-2"><span>✓</span>סריקת קבלות + מעקב תקציב</li>
+                <li className="flex items-center gap-2"><span>✓</span>הדמיות עיצוב AI</li>
+                <li className="flex items-center gap-2"><span>✓</span>זיהוי סגנון + רשימת קניות</li>
+                <li className="flex items-center gap-2"><span>✓</span>ניתוח הצעות מחיר</li>
                 <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>
               </ul>
 
               <a
-                href="/pricing"
+                href="/visualize"
                 className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
                 style={{ backgroundColor: '#101010' }}
               >
-                לצפייה בתוכניות ←
+                נסו הדמיה עכשיו
               </a>
-              <p className="text-xs text-gray-400 mt-3">תוכניות מ-₪29/חודש · בטלו בכל עת</p>
+              <p className="text-xs text-gray-400 mt-3">חבילות מ-₪29 · או הירשמו בחינם</p>
             </div>
           </div>
         </div>
@@ -392,29 +413,29 @@ export default function Home() {
             <div className="relative bg-black/60 backdrop-blur-sm rounded-2xl p-10 md:p-14 border border-white/10">
               <div className="space-y-8 text-right">
                 <p className="text-xl md:text-2xl text-white font-light leading-relaxed">
-                  בנינו את <span className="font-semibold">ShiputzAI</span> כי עברנו את זה בעצמנו.
+                  בנינו את <span className="font-semibold">ShiputzAI</span> כי רצינו לראות את הבית החדש — לפני שמתחילים.
                 </p>
                 
                 <p className="text-gray-400 text-lg leading-relaxed">
-                  שיפוצים שיצאו משליטה, קבלות שהלכו לאיבוד, והרגשה שמישהו תמיד מנפח לנו את המחיר.
+                  להבין איך הסלון ייראה עם רצפת עץ, איזה צבע מתאים לקירות, ואם הספה הזאת בכלל עובדת פה.
                 </p>
                 
                 <p className="text-gray-400 text-lg leading-relaxed">
-                  רצינו כלי פשוט שעושה את העבודה. בלי סיבוכים, בלי להתעסק עם אקסלים, בלי להרגיש אבודים.
+                  אז בנינו כלי שעושה את זה תוך שניות. מעלים תמונה, כותבים מה רוצים, ומקבלים הדמיה מלאה.
                 </p>
                 
                 <div className="border-r-2 border-white/30 pr-6 my-10">
                   <p className="text-white text-xl md:text-2xl font-medium leading-relaxed">
-                    המטרה שלנו: שכל מי שנכנס לשיפוץ ירגיש בשליטה.
+                    המטרה שלנו: שכל מי שמעצב בית יוכל לדמיין אותו לפני שמוציא שקל.
                   </p>
                 </div>
                 
                 <p className="text-gray-400 text-lg leading-relaxed">
-                  שידע בדיוק לאן הולך הכסף, שיקבל התראה לפני שחורג, ושיוכל לבדוק אם המחיר שמציעים לו הגיוני.
+                  7 כלי AI. הדמיות, זיהוי סגנון, רשימת קניות, סרטון סיור, ניתוח הצעות מחיר. הכל ממקום אחד.
                 </p>
                 
                 <p className="text-gray-500 text-lg leading-relaxed">
-                  אנחנו צוות קטן שאוהב לפתור בעיות אמיתיות. אם יש לכם רעיון לשיפור, נשמח לשמוע.
+                  נבנה בישראל, בעברית, עם מחירי שוק ישראליים. אם יש לכם רעיון לשיפור — נשמח לשמוע.
                 </p>
                 
                 <div className="pt-8 border-t border-white/10">
@@ -432,30 +453,30 @@ export default function Home() {
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">שאלות ששאלנו את עצמנו</h2>
-            <p className="text-gray-500">לפני ששפצנו. אולי גם אתם שואלים.</p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">שאלות נפוצות</h2>
+            <p className="text-gray-500">תשובות לשאלות שמשתמשים שואלים</p>
           </div>
           
           <div className="space-y-6">
             <FaqItem 
-              question="אני מרגיש שהקבלן מנפח לי את המחיר. איך אני בודק?"
-              answer="גם אנחנו הרגשנו ככה. בנינו את ShiputzAI בדיוק בגלל זה - העלו הצעת מחיר והמערכת תגיד לכם אם המחיר סביר לאזור שלכם, ומה בדרך כלל חסר בהצעות כאלה."
+              question="מה זה קרדיט ולמה צריך אותו?"
+              answer="קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."
             />
             <FaqItem 
-              question="התחלתי עם אקסל אבל אחרי שבוע כבר לא עדכנתי..."
-              answer="קלאסי. גם לנו קרה בדיוק אותו דבר. לכן פה אתם רק מצלמים קבלה והמערכת עושה את השאר - מזהה סכום, תאריך, קטגוריה, ומוסיפה לתקציב. אפס מאמץ."
+              question="אפשר לנסות בלי להירשם?"
+              answer="כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."
             />
             <FaqItem 
-              question="אני מפחד להגיע לסוף השיפוץ ולגלות שאין לי כסף"
-              answer="הפחד הזה שמר אותנו ערים בלילות. המערכת מתריעה ברגע שמתקרבים לחריגה - לא בסוף כשכבר מאוחר, אלא באמצע כשעוד אפשר לעשות משהו."
+              question="מה קורה עם התמונות שאני מעלה?"
+              answer="התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."
             />
             <FaqItem 
-              question="יש לי 3 הצעות מחיר ואני לא מצליח להשוות ביניהן"
-              answer="כי כל קבלן כותב אחרת. אחד מפרט, אחד כולל הכל בשורה אחת, והשלישי שכח חצי מהדברים. ה-AI מנתח את ההצעות ומראה לכם בדיוק מה כל אחד כולל ומה חסר."
+              question="איך ההדמיה עובדת?"
+              answer="מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."
             />
             <FaqItem 
-              question="מה אם אני לא מבין בטכנולוגיה?"
-              answer="אם אתם יודעים לצלם תמונה בטלפון, אתם יודעים להשתמש ב-ShiputzAI. רציני. זה פשוט."
+              question="מתאים גם למעצבי פנים?"
+              answer="בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."
             />
           </div>
         </div>
@@ -479,8 +500,8 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24 px-6 text-white" style={{ backgroundColor: '#101010' }}>
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-4">{isLoggedIn ? "הפרויקטים שלך מחכים" : "מוכנים?"}</h2>
-          <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "התחילו לנהל את השיפוץ בצורה חכמה."}</p>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-4">{isLoggedIn ? "הפרויקטים שלך מחכים" : "מוכנים לראות את הבית החדש?"}</h2>
+          <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "העלו תמונה וקבלו הדמיה תוך 30 שניות. בחינם."}</p>
           <Link
             href={isLoggedIn ? "/dashboard" : "/signup"}
             className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base hover:bg-gray-100 hover-bounce hover-shine"

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShiputzAI Email Flow</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; padding: 40px 20px; direction: rtl; }
+h1 { text-align: center; font-size: 32px; margin-bottom: 8px; }
+.subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 14px; }
+
+.canvas { max-width: 1200px; margin: 0 auto; position: relative; }
+
+/* User enters */
+.entry-point {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.entry-box {
+  display: inline-block;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 16px 40px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 0 30px rgba(99,102,241,0.3);
+}
+.arrow-down {
+  text-align: center;
+  color: #555;
+  font-size: 28px;
+  margin: 12px 0;
+  line-height: 1;
+}
+
+/* Flow row */
+.flow-section {
+  margin-bottom: 50px;
+  position: relative;
+}
+.flow-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.flow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.trigger-label {
+  color: #999;
+  font-size: 13px;
+  padding: 4px 12px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+/* Email cards */
+.email-chain {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  padding-right: 4px;
+}
+.email-card {
+  min-width: 220px;
+  max-width: 260px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 16px;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.email-card:hover {
+  transform: translateY(-2px);
+  border-color: #444;
+}
+.email-num {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.email-timing {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.email-subject {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.email-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.email-cta {
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.chain-arrow {
+  display: flex;
+  align-items: center;
+  color: #444;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Condition badges */
+.condition {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #1a1a1a;
+  border: 1px dashed #555;
+  color: #aaa;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+/* Flow colors */
+.flow-welcome .flow-badge { background: #1e3a5f; color: #60a5fa; }
+.flow-welcome .email-card { border-right: 3px solid #3b82f6; }
+.flow-welcome .email-cta { background: #1e3a5f; color: #60a5fa; }
+
+.flow-activation .flow-badge { background: #1a3d2e; color: #4ade80; }
+.flow-activation .email-card { border-right: 3px solid #22c55e; }
+.flow-activation .email-cta { background: #1a3d2e; color: #4ade80; }
+
+.flow-low .flow-badge { background: #3d3a1a; color: #facc15; }
+.flow-low .email-card { border-right: 3px solid #eab308; }
+.flow-low .email-cta { background: #3d3a1a; color: #facc15; }
+
+.flow-zero .flow-badge { background: #3d1a1a; color: #f87171; }
+.flow-zero .email-card { border-right: 3px solid #ef4444; }
+.flow-zero .email-cta { background: #3d1a1a; color: #f87171; }
+
+.flow-inactive .flow-badge { background: #2d1a3d; color: #c084fc; }
+.flow-inactive .email-card { border-right: 3px solid #a855f7; }
+.flow-inactive .email-cta { background: #2d1a3d; color: #c084fc; }
+
+.flow-purchase .flow-badge { background: #1a3d3d; color: #2dd4bf; }
+.flow-purchase .email-card { border-right: 3px solid #14b8a6; }
+.flow-purchase .email-cta { background: #1a3d3d; color: #2dd4bf; }
+
+.flow-milestone .flow-badge { background: #3d2e1a; color: #fb923c; }
+.flow-milestone .email-card { border-right: 3px solid #f97316; }
+.flow-milestone .email-cta { background: #3d2e1a; color: #fb923c; }
+
+/* Rules section */
+.rules {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 16px;
+  padding: 24px 30px;
+  margin-top: 40px;
+}
+.rules h3 { margin-bottom: 14px; font-size: 16px; color: #ccc; }
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.rule-item {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.rule-icon { flex-shrink: 0; }
+
+/* Stats */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+.stat-box {
+  text-align: center;
+  padding: 14px 24px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+}
+.stat-num { font-size: 28px; font-weight: 800; }
+.stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+
+/* Priority */
+.priority-bar {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+.priority-item {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.priority-arrow { color: #555; display: flex; align-items: center; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<h1>ShiputzAI — Email Flow System</h1>
+<p class="subtitle">7 flows · 23 מיילים · behavioral triggers · מותאם אישית לכל משתמש</p>
+
+<div class="canvas">
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-box"><div class="stat-num" style="color:#6366f1">7</div><div class="stat-label">Flows</div></div>
+  <div class="stat-box"><div class="stat-num" style="color:#60a5fa">23</div><div class="stat-label">מיילים</div></div>
+  <div class="stat-box"><div class="stat-num" style="color:#22c55e">48h</div><div class="stat-label">מרווח מינימלי</div></div>
+  <div class="stat-box"><div class="stat-num" style="color:#facc15">10:00</div><div class="stat-label">שעת שליחה (IST)</div></div>
+</div>
+
+<!-- Entry -->
+<div class="entry-point">
+  <div class="entry-box">👤 משתמש נרשם → 10 קרדיטים חינם</div>
+</div>
+<div class="arrow-down">↓</div>
+
+<!-- Flow 1: Welcome -->
+<div class="flow-section flow-welcome">
+  <div class="flow-header">
+    <div class="flow-badge">1 — Welcome</div>
+    <span class="trigger-label">⚡ trigger: הרשמה</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">מיידי</div>
+      <div class="email-subject">ברוכים הבאים — יש לך 10 קרדיטים</div>
+      <div class="email-desc">מה אפשר לעשות: הדמיה (10), סריקת קבלה (2), ניתוח הצעה (3)</div>
+      <span class="email-cta">→ צור הדמיה ראשונה</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">+24 שעות</div>
+      <div class="email-subject">הטיפ שחוסך הכי הרבה כסף בשיפוץ</div>
+      <div class="email-desc">ערך אמיתי — השוואת הצעות מחיר + AI בודק מחיר הוגן</div>
+      <span class="email-cta">→ נתח הצעת מחיר</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">3</div>
+      <div class="email-timing">+72 שעות</div>
+      <div class="condition">רק אם לא השתמש</div>
+      <div class="email-subject">עדיין לא ניסית? הנה מה שמפספסים</div>
+      <div class="email-desc">Before/After של חדר אמיתי, "10 שניות זה כל מה שצריך"</div>
+      <span class="email-cta">→ נסה עכשיו</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-down">↓ שימוש ראשון</div>
+
+<!-- Flow 2: Activation -->
+<div class="flow-section flow-activation">
+  <div class="flow-header">
+    <div class="flow-badge">2 — Activation</div>
+    <span class="trigger-label">⚡ trigger: שימוש ראשון בכלי</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">מיידי</div>
+      <div class="email-subject">ההדמיה הראשונה שלך מוכנה</div>
+      <div class="email-desc">"יפה, נכון? נסה עוד סגנון — כל הדמיה שונה לגמרי"</div>
+      <span class="email-cta">→ נסה סגנון אחר</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">+48 שעות</div>
+      <div class="email-subject">3 כלים שכדאי לנסות הבא</div>
+      <div class="email-desc">כלים שהמשתמש עוד לא ניסה + עלות קרדיטים</div>
+      <span class="email-cta">→ Deep link לכלי</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-down">↓ צריכת קרדיטים</div>
+
+<!-- Flow 3: Low Credits -->
+<div class="flow-section flow-low">
+  <div class="flow-header">
+    <div class="flow-badge">3 — קרדיטים נמוכים</div>
+    <span class="trigger-label">⚡ trigger: ≤5 קרדיטים</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">מיידי</div>
+      <div class="email-subject">נשארו לך X קרדיטים</div>
+      <div class="email-desc">"מספיק ל-Y פעולות. טיפ: הדמיה=10, סריקת קבלה=2"</div>
+      <span class="email-cta">→ ראה את הכלים שלך</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-down">↓ 0 קרדיטים</div>
+
+<!-- Flow 4: Zero Credits -->
+<div class="flow-section flow-zero">
+  <div class="flow-header">
+    <div class="flow-badge">4 — אפס קרדיטים</div>
+    <span class="trigger-label">⚡ trigger: 0 קרדיטים</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">מיידי</div>
+      <div class="email-subject">נגמרו הקרדיטים</div>
+      <div class="email-desc">"השיפוץ לא מחכה. 10 קרדיטים מ-₪10 בלבד" + טבלת חבילות</div>
+      <span class="email-cta">→ רכוש קרדיטים</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">+48 שעות</div>
+      <div class="condition">אם לא קנה</div>
+      <div class="email-subject">20% הנחה — 48 שעות בלבד</div>
+      <div class="email-desc">קוד הנחה ייחודי + "₪8 במקום ₪10 ל-10 קרדיטים"</div>
+      <span class="email-cta">→ מימוש הנחה</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">3</div>
+      <div class="email-timing">+7 ימים</div>
+      <div class="condition">אם עדיין לא קנה</div>
+      <div class="email-subject">חדש: [פיצ'ר אחרון] + 25% הנחה</div>
+      <div class="email-desc">Feature announcement + "כדי לנסות, צריך קרדיטים"</div>
+      <span class="email-cta">→ רכוש עם הנחה</span>
+    </div>
+  </div>
+</div>
+
+<!-- Priority bar -->
+<div class="priority-bar">
+  <div class="priority-item" style="background:#3d1a1a;color:#f87171;">קרדיטים</div>
+  <div class="priority-arrow">←</div>
+  <div class="priority-item" style="background:#1a3d2e;color:#4ade80;">activation</div>
+  <div class="priority-arrow">←</div>
+  <div class="priority-item" style="background:#1e3a5f;color:#60a5fa;">welcome</div>
+  <div class="priority-arrow">←</div>
+  <div class="priority-item" style="background:#2d1a3d;color:#c084fc;">inactive</div>
+  <div class="priority-arrow">←</div>
+  <div class="priority-item" style="background:#3d2e1a;color:#fb923c;">milestone</div>
+  <div style="color:#555;font-size:11px;display:flex;align-items:center;padding-right:12px;">סדר עדיפות ←</div>
+</div>
+
+<!-- Flow 5: Inactive -->
+<div class="flow-section flow-inactive">
+  <div class="flow-header">
+    <div class="flow-badge">5 — אי-פעילות</div>
+    <span class="trigger-label">⚡ trigger: לא נכנס X ימים</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">7 ימים</div>
+      <div class="email-subject">השיפוץ מתקדם?</div>
+      <div class="email-desc">"הכלים שלנו מחכים לך" + מה חדש מאז הביקור האחרון</div>
+      <span class="email-cta">→ חזרה לפרויקט</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">14 ימים</div>
+      <div class="email-subject">ראית את הכלי החדש?</div>
+      <div class="email-desc">Feature highlight של כלי שלא ניסה + דוגמה חיה</div>
+      <span class="email-cta">→ נסה עכשיו</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">3</div>
+      <div class="email-timing">30 ימים</div>
+      <div class="email-subject">מתגעגעים — 5 קרדיטים מתנה</div>
+      <div class="email-desc">מוסיף 5 קרדיטים אוטומטית + "חזור ותראה מה חדש"</div>
+      <span class="email-cta">→ השתמש בקרדיטים</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">4</div>
+      <div class="email-timing">60 ימים</div>
+      <div class="email-subject">עדיין שם?</div>
+      <div class="email-desc">"אם השיפוץ נגמר — מעולה! אם לא, אנחנו פה" + unsubscribe בולט</div>
+      <span class="email-cta">→ אני עדיין פה</span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 6: Post-Purchase -->
+<div class="flow-section flow-purchase">
+  <div class="flow-header">
+    <div class="flow-badge">6 — Post-Purchase</div>
+    <span class="trigger-label">⚡ trigger: רכישת קרדיטים / מנוי</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">מיידי</div>
+      <div class="email-subject">הקרדיטים מוכנים</div>
+      <div class="email-desc">אישור + כמה קרדיטים + "3 דברים מומלצים" לפי מה שעוד לא ניסה</div>
+      <span class="email-cta">→ התחל</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">+3 ימים</div>
+      <div class="email-subject">ככה מנצלים כל קרדיט למקסימום</div>
+      <div class="email-desc">"סריקת קבלה = 2 קרדיטים, חוסכת שעות ארגון"</div>
+      <span class="email-cta">→ סרוק קבלה</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">3</div>
+      <div class="email-timing">+7 ימים</div>
+      <div class="email-subject">מה דעתך? 15 שניות</div>
+      <div class="email-desc">NPS מינימלי — שאלה אחת (1-10) + שדה פתוח</div>
+      <span class="email-cta">→ דרג אותנו</span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 7: Milestone -->
+<div class="flow-section flow-milestone">
+  <div class="flow-header">
+    <div class="flow-badge">7 — Milestone</div>
+    <span class="trigger-label">⚡ trigger: הישגים</span>
+  </div>
+  <div class="email-chain">
+    <div class="email-card">
+      <div class="email-num">1</div>
+      <div class="email-timing">5 שימושים</div>
+      <div class="email-subject">חמש פעם! אתה מקצוען</div>
+      <div class="email-desc">חגיגת milestone + "ידעת שיש גם X?" (כלי שלא ניסה)</div>
+      <span class="email-cta">→ גלה כלי חדש</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">2</div>
+      <div class="email-timing">10 שימושים</div>
+      <div class="email-subject">אין מילים</div>
+      <div class="email-desc">"ניצלת יותר מ-90% מהמשתמשים" + הצעת Pro</div>
+      <span class="email-cta">→ שדרג ל-Pro</span>
+    </div>
+    <div class="chain-arrow">←</div>
+    <div class="email-card">
+      <div class="email-num">3</div>
+      <div class="email-timing">סיום פרויקט</div>
+      <div class="email-subject">הפרויקט הסתיים?</div>
+      <div class="email-desc">"כל הכבוד! מתכננים עוד שיפוץ?"</div>
+      <span class="email-cta">→ צור פרויקט חדש</span>
+    </div>
+  </div>
+</div>
+
+<!-- Rules -->
+<div class="rules">
+  <h3>כללי ברזל</h3>
+  <div class="rules-grid">
+    <div class="rule-item"><span class="rule-icon">⏰</span> מרווח מינימלי 48 שעות בין מיילים</div>
+    <div class="rule-item"><span class="rule-icon">🎯</span> CTA אחד ויחיד לכל מייל</div>
+    <div class="rule-item"><span class="rule-icon">📱</span> Subject עד 40 תווים (מובייל)</div>
+    <div class="rule-item"><span class="rule-icon">🕐</span> שליחה ב-10:00 שעון ישראל</div>
+    <div class="rule-item"><span class="rule-icon">🚫</span> אין אימוג'ים ב-Subject</div>
+    <div class="rule-item"><span class="rule-icon">📝</span> Plain text > HTML כבד</div>
+    <div class="rule-item"><span class="rule-icon">👤</span> Personalization: שם + קרדיטים + כלים</div>
+    <div class="rule-item"><span class="rule-icon">💰</span> הנחות: 20% → 25% → מתנת קרדיטים</div>
+    <div class="rule-item"><span class="rule-icon">🔕</span> Unsubscribe ברור בכל מייל</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

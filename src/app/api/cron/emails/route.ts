@@ -239,15 +239,15 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
         'ברוכים הבאים',
         'יש לך 10 קרדיטים חינם לניסיון',
         greet(user.name || undefined) +
-        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לדמיין את השיפוץ לפני שמתחילים</strong>, לנתח הצעות מחיר, ולעקוב אחרי התקציב.') +
+        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> — לפני שמוציאים שקל.') +
         infoBox([
-          '✅ הדמיית חדר בלחיצה',
-          '✅ ניתוח הצעות מחיר',
-          '✅ סריקת קבלות אוטומטית',
-          '✅ כתב כמויות מתמונה',
+          '✅ <strong>הדמיית חדר</strong> — צלם ותראה עיצוב חדש תוך שניות',
+          '✅ <strong>Style Match</strong> — מצא את הסגנון שמתאים לך',
+          '✅ <strong>Shop the Look</strong> — זיהוי מוצרים וקנייה ישירה',
+          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר',
         ]) +
-        para('התחל עם הדמיה ראשונה — זה לוקח <strong>30 שניות</strong>.'),
-        'לנסות הדמיה',
+        para('התחל עם הדמיה ראשונה — מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה <strong>תוך 30 שניות</strong>.'),
+        'צור הדמיה ראשונה',
         `${BASE_URL}/visualize`,
         user.email,
       ),
@@ -265,14 +265,14 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
         'הטיפ שחוסך הכי הרבה כסף',
         'בשיפוץ',
         greet(user.name || undefined) +
-        para('<strong>70% מהשיפוצים חורגים מהתקציב.</strong> הטיפ הכי חשוב? לבדוק כל הצעת מחיר לפני שחותמים.') +
-        para('ה-AI שלנו מנתח הצעות מחיר ובודק:') +
+        para('לפני שמתחילים שיפוץ — <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלת הצעת מחיר מקבלן?') +
+        para('ה-AI שלנו מנתח את ההצעה ובודק:') +
         infoBox([
           '🔍 האם <strong>המחיר הוגן</strong> לעומת השוק?',
           '📋 מה <strong>חסר</strong> בהצעה?',
-          '⚠️ סעיפים שצריך <strong>לשים לב</strong> אליהם',
+          '⚠️ סעיפים <strong>לשים לב</strong> אליהם לפני שחותמים',
         ]) +
-        para('קיבלת הצעת מחיר? <strong>העלה אותה ותקבל ניתוח תוך שניות.</strong>'),
+        para('מצלמים או מעלים את ההצעה — ו<strong>תוך שניות מקבלים ניתוח מלא</strong>.'),
         'לנתח הצעת מחיר',
         `${BASE_URL}/quote-analysis`,
         user.email,
@@ -293,8 +293,8 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
           'עדיין לא ניסית?',
           'ההדמיה לוקחת 30 שניות',
           greet(user.name || undefined) +
-          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong>. זה הכלי הכי פופולרי שלנו!') +
-          para('פשוט מצלמים את החדר, בוחרים סגנון — ותוך שניות רואים <strong>איך זה ייראה אחרי השיפוץ</strong>.') +
+          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong> — הכלי הכי פופולרי שלנו!') +
+          para('מצלמים את החדר, בוחרים סגנון עיצוב — ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
           bigNumber('10 קרדיטים', 'מחכים לך בחשבון — מספיק להדמיה אחת'),
           'לנסות עכשיו',
           `${BASE_URL}/visualize`,
@@ -330,9 +330,9 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
         'כל הכבוד',
         'השתמשת בכלי הראשון שלך',
         greet(user.name || undefined) +
-        para('מעולה! עשית את הצעד הראשון. <strong>ההדמיה שלך מוכנה</strong> בדשבורד.') +
-        para('רוצה לראות את זה מזווית אחרת? נסה סגנון אחר או חדר נוסף.'),
-        'לצפות בתוצאה',
+        para('מעולה! עשית את הצעד הראשון. <strong>התוצאה שלך מוכנה</strong>.') +
+        para('רוצה לראות את החדר בסגנון אחר? <strong>כל סגנון נותן תוצאה שונה לגמרי</strong> — מודרני, כפרי, מינימליסטי, ועוד.'),
+        'לנסות סגנון אחר',
         `${BASE_URL}/visualize`,
         user.email,
       ),
@@ -344,11 +344,11 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
     const usedActions = new Set(deductions.map(t => t.action));
     const allTools = [
       { action: 'visualize', name: 'הדמיית חדר', url: '/visualize' },
+      { action: 'style-match', name: 'Style Match — מצא את הסגנון שלך', url: '/style-match' },
+      { action: 'shop-look', name: 'Shop the Look — קנה את הסגנון', url: '/shop-the-look' },
       { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
       { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
       { action: 'bill-of-quantities', name: 'כתב כמויות', url: '/bill-of-quantities' },
-      { action: 'shop-look', name: 'קנה את הסגנון', url: '/shop-the-look' },
-      { action: 'detect-items', name: 'זיהוי פריטים', url: '/detect-items' },
     ];
     const unused = allTools.filter(t => !usedActions.has(t.action)).slice(0, 3);
 
@@ -363,7 +363,7 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
           'עוד כלים שיעזרו לך',
           'כדאי לנסות',
           greet(user.name || undefined) +
-          para('בנוסף לכלי שכבר השתמשת בו, יש לנו עוד כמה <strong>שיכולים לחסוך לך זמן וכסף</strong>:') +
+          para('בנוסף לכלי שכבר ניסית, יש עוד כלי AI <strong>שיעזרו לך לעצב את הבית</strong>:') +
           infoBox(toolLines) +
           para('כל כלי עולה רק <strong>כמה קרדיטים</strong> ונותן תוצאה מיידית.'),
           'לנסות עכשיו',
@@ -545,8 +545,8 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'השיפוץ מתקדם?',
         '',
         greet(user.name || undefined) +
-        para('לא ראינו אותך כבר שבוע. הכל בסדר עם השיפוץ?') +
-        para('הדשבורד שלך מחכה — <strong>כל הנתונים שמורים</strong>.'),
+        para('לא ראינו אותך כבר שבוע. יש לנו <strong>כלי עיצוב חדשים</strong> שחבל לפספס!') +
+        para('החשבון שלך מחכה — <strong>כל מה שעשית שמור</strong>.'),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -565,13 +565,13 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'יש לנו כלים חדשים',
         '',
         greet(user.name || undefined) +
-        para('בזמן שלא היית, הוספנו כלים חדשים:') +
+        para('כלי עיצוב שכדאי לנסות:') +
         infoBox([
-          '✅ <strong>קנה את הסגנון</strong> — מזהה מוצרים בתמונה ומוצא אותם לקנייה',
-          '✅ <strong>כתב כמויות</strong> — מפרט מלא מתמונה אחת',
-          '✅ <strong>ניתוח הצעות מחיר</strong> — בודק אם המחיר הוגן',
+          '✅ <strong>Style Match</strong> — מצא את סגנון העיצוב שמתאים לך',
+          '✅ <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה',
+          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר שלך',
         ]),
-        'לנסות את הכלים',
+        'לנסות עכשיו',
         `${BASE_URL}/visualize`,
         user.email,
       ),
@@ -615,7 +615,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         greet(user.name || undefined) +
         para('עבר חודש מהשימוש האחרון שלך. רצינו להגיד שלום ולתת לך <strong>מתנה קטנה</strong>.') +
         bigNumber('5 קרדיטים', 'כבר בחשבון שלך — מוכנים לשימוש') +
-        para('מספיק לסריקת קבלות, ניתוח הצעת מחיר, או כתב כמויות.'),
+        para('מספיק ל-Style Match, ניתוח הצעת מחיר, או סריקת קבלות.'),
         'להשתמש במתנה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -635,8 +635,8 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'עדיין שם?',
         '',
         greet(user.name || undefined) +
-        para('עברו חודשיים מאז ביקורך האחרון. אם השיפוץ הסתיים — מעולה!') +
-        para('אם רוצה להמשיך לקבל מאיתנו עדכונים, <strong>פשוט לחץ על הכפתור</strong>.') +
+        para('עברו חודשיים מהביקור האחרון שלך. אם מצאת את הסגנון המושלם — מעולה!') +
+        para('אם רוצה להמשיך לקבל עדכונים על כלים חדשים, <strong>פשוט לחץ על הכפתור</strong>.') +
         para(`לא רוצה לשמוע מאיתנו? <a href="${unsubUrl}" style="color: #0071e3; text-decoration: underline;">להסרה מרשימת התפוצה</a>`),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
@@ -692,13 +692,13 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
         greet(user.name || undefined) +
         para('הנה כמה טיפים <strong>לנצל כל קרדיט בצורה חכמה</strong>:') +
         infoBox([
-          '📸 <strong>סריקת קבלות</strong> — רק 2 קרדיטים, חוסך שעות הקלדה',
-          '📋 <strong>כתב כמויות</strong> — 5 קרדיטים, מפרט מלא מתמונה',
-          '🔍 <strong>ניתוח הצעת מחיר</strong> — 3 קרדיטים, יכול לחסוך אלפי שקלים',
+          '🎨 <strong>הדמיה בסגנונות שונים</strong> — נסה מודרני, כפרי, מינימליסטי (10 קרדיטים)',
+          '🛋️ <strong>Style Match</strong> — AI מזהה את הסגנון שלך ומציע מוצרים (3 קרדיטים)',
+          '🛒 <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה (3 קרדיטים)',
         ]) +
-        para('הכלי הכי משתלם? <strong>סריקת קבלות</strong> — שני קרדיטים ומקבלים פירוט מלא.'),
-        'לסרוק קבלה',
-        `${BASE_URL}/receipt-scanner`,
+        para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> — 30 שניות ואתה רואה את העתיד.'),
+        'צור הדמיה',
+        `${BASE_URL}/visualize`,
         user.email,
       ),
     };
@@ -752,7 +752,7 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
         'שבוע מעולה',
         greet(user.name || undefined) +
         bigNumber(`${weeklyActionCount} שימושים`, 'השבוע') +
-        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> — כל שימוש בכלים מקרב אותך לשיפוץ מושלם.') +
+        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> — כל הדמיה מקרבת אותך לעיצוב המושלם.') +
         para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
         'לדשבורד',
         `${BASE_URL}/dashboard`,
@@ -772,7 +772,7 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
       '',
       greet(user.name || undefined) +
       bigNumber(`${weeklyActionCount}`, `שימוש${weeklyActionCount > 1 ? 'ים' : ''} השבוע`) +
-      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>ניתוח הצעת מחיר</strong> או <strong>כתב כמויות</strong> — שניהם חוסכים זמן וכסף.') +
+      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>Style Match</strong> או <strong>Shop the Look</strong> — מצא וקנה את הסגנון שמתאים לך.') +
       para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
       'לנסות כלי נוסף',
       `${BASE_URL}/visualize`,
@@ -810,7 +810,7 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
         'אתה מקצוען',
         greet(user.name || undefined) +
         bigNumber('5', 'שימושים בכלים') +
-        para('כבר השתמשת ב-5 כלים! <strong>אתה יודע מה אתה עושה.</strong>') +
+        para('כבר השתמשת ב-5 כלי עיצוב! <strong>אתה יודע מה אתה עושה.</strong>') +
         para(suggestText),
         'להמשיך',
         suggestUrl,

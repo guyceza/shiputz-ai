@@ -271,6 +271,12 @@ export default function ReceiptScannerPage() {
             >
               סרוק קבלות נוספות
             </button>
+            <Link
+              href="/dashboard"
+              className="block w-full py-3 rounded-full font-medium text-center text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              תעביר אותי לאוסף הקבלות/חשבוניות שלי ←
+            </Link>
           </div>
         )}
 

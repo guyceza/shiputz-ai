@@ -6,3 +6,6 @@ export function isAdmin(email: string | null | undefined): boolean {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email.toLowerCase());
 }
+
+// Alias for convenience
+export const isAdminEmail = isAdmin;

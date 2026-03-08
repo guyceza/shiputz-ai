@@ -90,40 +90,34 @@ const teaserFeatures: Feature[] = [
 function CardDeck({ features }: { features: Feature[] }) {
   const [fanned, setFanned] = useState(false);
   const total = features.length;
+  // Each fanned card shows ~60px of the card above (title visible) + full last card
+  const cardPeek = 60;
+  const cardHeight = 300;
+  const fannedHeight = (total - 1) * cardPeek + cardHeight + 80;
 
   return (
     <div className="pt-12 pb-4">
-      {/* Stacked / Fanned cards */}
+      {/* Title always on top */}
+      <div className="text-center mb-6 cursor-pointer" onClick={() => setFanned(!fanned)}>
+        <h3 className="text-2xl md:text-3xl font-bold text-gray-900">ועוד הרבה...</h3>
+        <p className="text-sm text-gray-500 mt-1">{fanned ? 'לחצו לסגור' : 'לחצו לגלות'}</p>
+      </div>
+
+      {/* Card stack */}
       <div
         className="relative mx-auto cursor-pointer"
-        style={{ height: fanned ? `${total * 220 + 80}px` : '320px', maxWidth: '380px' }}
+        style={{ height: fanned ? `${fannedHeight}px` : '260px', maxWidth: '340px', transition: 'height 0.5s ease-out' }}
         onClick={() => setFanned(!fanned)}
       >
-        {/* Label when collapsed */}
-        {!fanned && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-2xl font-bold text-gray-900 mb-2 drop-shadow-sm">ועוד הרבה...</p>
-            <p className="text-sm text-gray-500">לחצו לגלות</p>
-          </div>
-        )}
-        
-        {fanned && (
-          <div className="text-center mb-6">
-            <p className="text-2xl font-bold text-gray-900">ועוד הרבה...</p>
-            <p className="text-xs text-gray-400 mt-1">לחצו לסגור</p>
-          </div>
-        )}
-
         {features.map((feature, i) => {
-          // Collapsed: stack with slight rotation spread
-          const spreadAngle = 40; // total spread in degrees
+          // Collapsed: stacked with rotation fan
+          const spreadAngle = 36;
           const angleStep = total > 1 ? spreadAngle / (total - 1) : 0;
           const collapsedRotate = -spreadAngle / 2 + i * angleStep;
-          const collapsedY = Math.abs(collapsedRotate) * 0.8;
+          const collapsedY = Math.abs(collapsedRotate) * 0.6;
           
-          // Fanned: vertical list with slight alternating tilt
-          const fannedY = i * 220 + 50;
-          const fannedRotate = i % 2 === 0 ? -1.5 : 1.5;
+          // Fanned: cascading down, each card offset so title of card below is visible
+          const fannedY = i * cardPeek;
 
           return (
             <div
@@ -133,17 +127,22 @@ function CardDeck({ features }: { features: Feature[] }) {
                 width: '280px',
                 marginLeft: '-140px',
                 transform: fanned
-                  ? `translateY(${fannedY}px) rotate(${fannedRotate}deg)`
+                  ? `translateY(${fannedY}px) rotate(0deg)`
                   : `translateY(${collapsedY}px) rotate(${collapsedRotate}deg)`,
-                zIndex: fanned ? i + 1 : total - i,
+                zIndex: fanned ? total - i : total - i,
                 transformOrigin: 'bottom center',
               }}
             >
               <Link
                 href={feature.href}
                 onClick={(e) => { if (!fanned) e.preventDefault(); }}
-                className={`block bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl transition-shadow ${!fanned ? 'pointer-events-none' : ''}`}
+                className={`block bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg ${fanned ? 'hover:shadow-xl' : 'pointer-events-none'} transition-shadow`}
               >
+                {/* Title bar — always visible when fanned */}
+                <div className="p-3 text-center border-b border-gray-100 bg-white">
+                  <h4 className="font-semibold text-gray-900 text-sm">{feature.title}</h4>
+                  <p className="text-gray-400 text-[11px]">{feature.description}</p>
+                </div>
                 <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                   {feature.video ? (
                     <video
@@ -167,10 +166,6 @@ function CardDeck({ features }: { features: Feature[] }) {
                   ) : (
                     <Image src={feature.image} alt={feature.title} width={300} height={225} className="w-full h-full object-cover" />
                   )}
-                </div>
-                <div className="p-4 text-center">
-                  <h4 className="font-semibold text-gray-900 text-sm">{feature.title}</h4>
-                  <p className="text-gray-500 text-xs mt-1">{feature.description}</p>
                 </div>
               </Link>
             </div>

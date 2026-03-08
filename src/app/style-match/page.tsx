@@ -219,6 +219,54 @@ function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: an
         </div>
       )}
 
+      {/* Shopping List — Visual Cards (first, right below image) */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-semibold text-gray-900">רשימת קניות לשחזור הסגנון</h3>
+          <span className="text-sm text-gray-400">{data.shoppingList?.length} פריטים</span>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          {data.shoppingList?.map((item: any, i: number) => (
+            <a
+              key={i}
+              href={`https://www.google.com/search?q=${encodeURIComponent((item.searchQuery || item.description || item.item) + ' לקנות בישראל')}&tbm=shop`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group flex items-center gap-4 p-4 rounded-xl transition-all duration-200 border ${
+                highlightedItem === i
+                  ? "bg-gray-900 border-gray-900 shadow-lg scale-[1.02]"
+                  : "bg-gray-50 hover:bg-gray-100 border-transparent hover:border-gray-200"
+              }`}
+              onMouseEnter={() => onHighlight(i)}
+              onMouseLeave={() => onHighlight(null)}
+            >
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0 transition-colors ${
+                highlightedItem === i
+                  ? "bg-white text-gray-900"
+                  : "bg-white text-gray-300 border border-gray-100"
+              }`}>
+                {String(i + 1).padStart(2, "0")}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className={`font-semibold text-sm transition-colors ${highlightedItem === i ? "text-white" : "text-gray-900 group-hover:text-blue-600"}`}>{item.item}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 mr-2 ${
+                    highlightedItem === i ? "bg-white/20 text-white border border-white/20" : "text-gray-500 bg-white border border-gray-100"
+                  }`}>
+                    {item.priceRange}
+                  </span>
+                </div>
+                <p className={`text-xs mt-0.5 truncate ${highlightedItem === i ? "text-gray-300" : "text-gray-500"}`}>{item.description}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-[10px] px-2 py-0.5 rounded ${highlightedItem === i ? "bg-white/10 text-gray-300" : "text-gray-400 bg-gray-100"}`}>{item.material}</span>
+                  <span className={`text-[10px] transition-opacity ${highlightedItem === i ? "text-gray-300 opacity-100" : "text-blue-500 opacity-0 group-hover:opacity-100"}`}>חפש ב-Google Shopping →</span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Style Hero Card */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-8">
         <div className="absolute inset-0 opacity-10">
@@ -290,54 +338,6 @@ function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: an
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Shopping List — Visual Cards */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-semibold text-gray-900">רשימת קניות לשחזור הסגנון</h3>
-          <span className="text-sm text-gray-400">{data.shoppingList?.length} פריטים</span>
-        </div>
-        <div className="grid md:grid-cols-2 gap-4">
-          {data.shoppingList?.map((item: any, i: number) => (
-            <a
-              key={i}
-              href={`https://www.google.com/search?q=${encodeURIComponent((item.searchQuery || item.description || item.item) + ' לקנות בישראל')}&tbm=shop`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`group flex items-center gap-4 p-4 rounded-xl transition-all duration-200 border ${
-                highlightedItem === i
-                  ? "bg-gray-900 border-gray-900 shadow-lg scale-[1.02]"
-                  : "bg-gray-50 hover:bg-gray-100 border-transparent hover:border-gray-200"
-              }`}
-              onMouseEnter={() => onHighlight(i)}
-              onMouseLeave={() => onHighlight(null)}
-            >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0 transition-colors ${
-                highlightedItem === i
-                  ? "bg-white text-gray-900"
-                  : "bg-white text-gray-300 border border-gray-100"
-              }`}>
-                {String(i + 1).padStart(2, "0")}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className={`font-semibold text-sm transition-colors ${highlightedItem === i ? "text-white" : "text-gray-900 group-hover:text-blue-600"}`}>{item.item}</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 mr-2 ${
-                    highlightedItem === i ? "bg-white/20 text-white border border-white/20" : "text-gray-500 bg-white border border-gray-100"
-                  }`}>
-                    {item.priceRange}
-                  </span>
-                </div>
-                <p className={`text-xs mt-0.5 truncate ${highlightedItem === i ? "text-gray-300" : "text-gray-500"}`}>{item.description}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-[10px] px-2 py-0.5 rounded ${highlightedItem === i ? "bg-white/10 text-gray-300" : "text-gray-400 bg-gray-100"}`}>{item.material}</span>
-                  <span className={`text-[10px] transition-opacity ${highlightedItem === i ? "text-gray-300 opacity-100" : "text-blue-500 opacity-0 group-hover:opacity-100"}`}>חפש ב-Google Shopping →</span>
-                </div>
-              </div>
-            </a>
-          ))}
         </div>
       </div>
 

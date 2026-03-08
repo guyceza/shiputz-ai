@@ -104,7 +104,7 @@ export default function QuoteAnalysisPage() {
       <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.svg" alt="ShiputzAI" width={24} height={24} />
+            <Image src="/logo.png" alt="ShiputzAI" width={24} height={24} />
             <span className="text-sm font-medium text-gray-900">ShiputzAI</span>
           </Link>
           <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">

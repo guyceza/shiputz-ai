@@ -30,14 +30,8 @@ interface DisplayProject {
 }
 
 const TIPS = [
-  "בקש מהקבלן אחריות בכתב על העבודה - רוב הקבלנים הטובים נותנים שנה לפחות.",
-  "תמיד השאר 10-15% מהתקציב לבלת״מים - הם תמיד מגיעים בשיפוץ.",
-  "צלם כל שלב בעבודה - זה יעזור אם יהיו בעיות בעתיד.",
-  "אל תשלם יותר מ-30% מראש - עדיף לשלם לפי התקדמות.",
-  "בדוק שהקבלן רשום בפנקס הקבלנים לפני שסוגרים.",
-  "קבל לפחות 3 הצעות מחיר לפני שמחליטים - ההבדלים יפתיעו אותך.",
-  "וודא שיש לקבלן ביטוח צד ג׳ - זה חובה חוקית.",
-  "תכנן את לוח הזמנים עם באפר של 20% - עיכובים הם נורמה בשיפוצים."
+  "בקש מהקבלן אחריות בכתב על העבודה",
+  "תמיד השאר 10-15% מהתקציב לבלת״מים",
 ];
 
 function DashboardContent() {
@@ -563,150 +557,25 @@ function DashboardContent() {
                 <p className="text-2xl font-semibold text-stone-800">{projects.length}</p>
               </div>
             </div>
-            {/* Progress bar */}
-            <div className="mt-4 bg-stone-200/40 rounded-full h-1.5 overflow-hidden">
-              <div 
-                className={`h-full rounded-full transition-all duration-500 ${
-                  spentPercentage > 90 ? 'bg-rose-400' : 
-                  spentPercentage > 70 ? 'bg-amber-400' : 'bg-emerald-400'
-                }`}
-                style={{ width: `${Math.min(spentPercentage, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-stone-400 mt-2 text-center">{spentPercentage.toFixed(0)}% מהתקציב נוצל</p>
+            
           </div>
         )}
 
-        {/* Did You Know? Tip Box */}
-        <div className="mb-8 bg-stone-50 rounded-2xl p-6 border border-stone-200/60">
-          <div className="flex items-start gap-4">
-            <div className="flex-1">
-              <p className="text-xs font-medium text-stone-700 mb-1">💡 הידעת?</p>
-              <p className="text-stone-600 text-sm leading-relaxed">{randomTip}</p>
-            </div>
-            <Link 
-              href="/tips"
-              className="text-xs text-stone-500 hover:text-stone-700 whitespace-nowrap"
-            >
-              עוד טיפים ←
-            </Link>
-          </div>
-        </div>
-
-        {/* Premium Status - One time purchase (no cancel needed) */}
-        {isPremium && (
-          <div className="mb-8 bg-white rounded-2xl p-6 border border-stone-200/60">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-stone-800 mb-1">✦ Pro פעיל</p>
-                <p className="text-xs text-stone-500">יש לך גישה לכל הכלים המתקדמים</p>
-              </div>
-              <span className="text-xs text-stone-600 bg-stone-100 px-3 py-1 rounded-full border border-stone-200/60">
-                מנוי Pro
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Vision AI Subscription - Monthly (can cancel) */}
-        {(hasVisionSub || hasLocalVision) && (
-          <div className="mb-8 bg-white rounded-2xl p-6 border border-stone-200/60">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-stone-800 mb-1">מנוי הדמיות AI פעיל</p>
-                {visionSubInfo?.cancelAtPeriodEnd ? (
-                  <p className="text-xs text-amber-600">
-                    יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}
-                  </p>
-                ) : hasVisionSub ? (
-                  <p className="text-xs text-stone-500">מתחדש אוטומטית כל חודש</p>
-                ) : (
-                  <p className="text-xs text-stone-500">גישה מלאה להדמיות</p>
+        {/* Account status line */}
+        {(isPremium || hasVisionSub || hasLocalVision) && (
+          <div className="mb-8 flex items-center gap-3 text-xs text-stone-500">
+            {isPremium && <span className="bg-stone-100 px-3 py-1 rounded-full">✦ Pro</span>}
+            {(hasVisionSub || hasLocalVision) && (
+              <>
+                <span className="bg-stone-100 px-3 py-1 rounded-full">הדמיות AI</span>
+                {!visionSubInfo?.cancelAtPeriodEnd && (
+                  <button onClick={() => setShowCancelModal(true)} className="text-stone-400 hover:text-stone-600 underline">בטל מנוי</button>
                 )}
-              </div>
-              {!visionSubInfo?.cancelAtPeriodEnd && (hasLocalVision || hasVisionSub) && (
-                <button
-                  onClick={() => setShowCancelModal(true)}
-                  className="text-sm text-stone-600 hover:text-stone-800 border border-stone-200/60 px-4 py-2 rounded-full hover:bg-stone-50 transition-colors"
-                >
-                  בטל מנוי
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Premium Tools Section */}
-        {isPremium && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-stone-800 mb-4">כלים מתקדמים</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {/* Bill of Quantities */}
-              <Link 
-                href="/dashboard/bill-of-quantities"
-                className="group bg-gradient-to-br from-amber-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all"
-              >
-                <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <svg className="w-6 h-6 text-amber-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-stone-800 mb-1">כתב כמויות AI</h3>
-                <p className="text-sm text-stone-500 mb-3">העלה תכנית וקבל כתב כמויות מפורט אוטומטית</p>
-                <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
-                  התחל עכשיו ←
-                </span>
-              </Link>
-
-              {/* Visualize */}
-              {(hasVisionSub || hasLocalVision) ? (
-                <Link 
-                  href="/visualize"
-                  className="group bg-gradient-to-br from-sky-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all"
-                >
-                  <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <svg className="w-6 h-6 text-sky-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-stone-800 mb-1">הדמיות AI</h3>
-                  <p className="text-sm text-stone-500 mb-3">צור הדמיה של השיפוץ לפני שמתחילים</p>
-                  <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
-                    צור הדמיה ←
-                  </span>
-                </Link>
-              ) : (
-                <Link href="/visualize" className="group bg-gradient-to-br from-stone-50 to-stone-100/50 border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all opacity-75">
-                  <div className="w-12 h-12 bg-white/50 rounded-xl flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-stone-800 mb-1">הדמיות AI</h3>
-                  <p className="text-sm text-stone-500 mb-3">צור הדמיה של השיפוץ לפני שמתחילים</p>
-                  <span className="text-xs text-stone-400 group-hover:underline">
-                    נדרש מנוי Pro ←
-                  </span>
-                </Link>
-              )}
-
-              {/* Quote Analysis */}
-              <Link 
-                href={projects.length > 0 ? `/project/${projects[0].id}?tab=quote` : "/dashboard"}
-                className={`group bg-gradient-to-br from-emerald-50/40 to-white border border-stone-200/60 rounded-2xl p-6 hover:shadow-md transition-all ${projects.length === 0 ? 'opacity-60 pointer-events-none' : ''}`}
-              >
-                <div className="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                  <svg className="w-6 h-6 text-emerald-600/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="font-semibold text-stone-800 mb-1">ניתוח הצעות מחיר</h3>
-                <p className="text-sm text-stone-500 mb-3">השווה הצעות וקבל המלצות AI</p>
-                <span className="text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
-                  {projects.length > 0 ? 'נתח הצעה ←' : 'צור פרויקט קודם'}
-                </span>
-              </Link>
-            </div>
+                {visionSubInfo?.cancelAtPeriodEnd && (
+                  <span className="text-amber-500">יבוטל ב-{visionSubInfo.periodEnd ? new Date(visionSubInfo.periodEnd).toLocaleDateString('he-IL') : 'סוף התקופה'}</span>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -729,33 +598,6 @@ function DashboardContent() {
             >
               + צור פרויקט
             </button>
-            
-            <div className="mt-16 pt-12 border-t border-gray-100 text-right max-w-md mx-auto">
-              <p className="text-sm text-gray-500 mb-6">מה תוכל לעשות:</p>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <span className="text-gray-400">—</span>
-                  <div>
-                    <p className="font-medium text-gray-900">מעקב תקציב</p>
-                    <p className="text-sm text-gray-500">ראה בדיוק כמה הוצאת וכמה נשאר</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <span className="text-gray-400">—</span>
-                  <div>
-                    <p className="font-medium text-gray-900">סריקת קבלות</p>
-                    <p className="text-sm text-gray-500">צלם קבלה וה-AI יוסיף אוטומטית</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <span className="text-gray-400">—</span>
-                  <div>
-                    <p className="font-medium text-gray-900">ניתוח הצעות</p>
-                    <p className="text-sm text-gray-500">בדוק אם המחירים הוגנים</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         ) : (
           <div className="space-y-4">

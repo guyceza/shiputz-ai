@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS, isAdmin as isAdminEmail } from '@/lib/admin';
 
 // Email template metadata
 const EMAIL_TEMPLATES = [

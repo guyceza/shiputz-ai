@@ -135,7 +135,7 @@ function CardDeck({ features }: { features: Feature[] }) {
                 <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
                   <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                     {feature.video ? (
-                      <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                      <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover" />
                     ) : feature.isGif ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
@@ -164,7 +164,7 @@ function CardDeck({ features }: { features: Feature[] }) {
             >
               <div className="aspect-[4/3] overflow-hidden bg-white/50 m-2 rounded-xl">
                 {feature.video ? (
-                  <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline className="w-full h-full object-cover rounded-xl" />
+                  <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover rounded-xl" />
                 ) : feature.beforeAfter ? (
                   <BeforeAfterSlider beforeImg={feature.beforeAfter.before} afterImg={feature.beforeAfter.after} height="aspect-[4/3]" />
                 ) : feature.isGif ? (

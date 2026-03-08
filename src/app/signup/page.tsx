@@ -3,6 +3,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { isAdminEmail } from "@/lib/admin";
 import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
@@ -97,7 +98,7 @@ export default function SignupPage() {
           email: data.user?.email,
           id: data.user?.id,
           name,
-          isAdmin: email === "guyceza@gmail.com",
+          isAdmin: isAdminEmail(email),
           purchased: false  // New users are not premium yet
         }));
         router.push("/visualize");

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
 import ReferralWidget from "@/components/ReferralWidget";
+import { isAdminEmail } from "@/lib/admin";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
@@ -110,7 +111,7 @@ function DashboardContent() {
             name: session.user.user_metadata?.name 
           });
           // Check if admin
-          if (session.user.email === "guyceza@gmail.com") {
+          if (isAdminEmail(session.user.email || "")) {
             setIsAdmin(true);
           }
           

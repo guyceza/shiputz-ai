@@ -9,6 +9,7 @@ import HeroAnimation from "@/components/HeroAnimation";
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
+import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
 // Promo popup for non-premium users
 
@@ -42,7 +43,7 @@ export default function Home() {
           const session = await getSession();
           if (session?.user) {
             setIsLoggedIn(true);
-            setIsAdmin(session.user.email === "guyceza@gmail.com");
+            setIsAdmin(isAdminEmail(session.user.email || ""));
             userEmail = session.user.email || null;
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
             setIsPremium(storedUser.purchased === true);
@@ -99,8 +100,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* Skip to content */}
+      <a href="#features" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 focus:z-[60] focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg">
+        דלג לתוכן
+      </a>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
+      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50" aria-label="ניווט ראשי">
         <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
           <Link href="/" className="text-base font-semibold text-gray-900">
             ShiputzAI
@@ -142,16 +147,14 @@ export default function Home() {
                 {isLoggedIn ? (
                   <Link
                     href="/dashboard"
-                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 transition-colors"
-                    style={{ backgroundColor: '#101010' }}
+                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 transition-colors bg-[#101010]"
                   >
                     לאזור האישי
                   </Link>
                 ) : (
                   <Link
                     href="/signup"
-                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine"
-                    style={{ backgroundColor: '#101010' }}
+                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine bg-[#101010]"
                   >
                     התחילו בחינם
                   </Link>
@@ -180,28 +183,19 @@ export default function Home() {
       </section>
 
       {/* Trust Bar */}
-      <section className="py-4 px-6 border-b border-gray-100">
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes livePulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-          }
-          .live-dot {
-            animation: livePulse 2s ease-in-out infinite;
-          }
-        `}} />
+      <section className="py-4 px-6 border-b border-gray-100" aria-label="תכונות עיקריות">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-sm text-gray-500">
             <span className="flex items-center gap-2">
-              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50"></span>
+              <span className="w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50 animate-pulse"></span>
               מאובטח ופרטי
             </span>
             <span className="flex items-center gap-2">
-              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50" style={{ animationDelay: '0.3s' }}></span>
+              <span className="w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50 animate-pulse"></span>
               ללא עלות לנסות
             </span>
             <span className="flex items-center gap-2">
-              <span className="live-dot w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50" style={{ animationDelay: '0.6s' }}></span>
+              <span className="w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50 animate-pulse"></span>
               מבוסס AI
             </span>
           </div>
@@ -209,65 +203,9 @@ export default function Home() {
       </section>
 
       {/* Trusted Sources Bar - Infinite Carousel */}
-      <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden" dir="ltr">
-        <style dangerouslySetInnerHTML={{ __html: `
-          .brands-marquee {
-            display: flex;
-            width: max-content;
-            animation: brands-scroll 25s linear infinite;
-          }
-          .brands-marquee .brand-item {
-            padding: 0 1.5rem;
-            white-space: nowrap;
-          }
-          @keyframes brands-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-25%); }
-          }
-        `}} />
+      <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden" dir="ltr" aria-label="מקורות מידע">
         <p className="text-center text-sm text-gray-500 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
-        <div className="brands-marquee">
-          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
-          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
-          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
-          <span className="brand-item"><img src="/logos/ace.png" alt="ACE" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/homecenter.png" alt="הום סנטר" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/tambur.png" alt="טמבור" className="h-6 rounded" /></span>
-          <span className="brand-item"><img src="/logos/ikea.svg" alt="IKEA" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/foxhome.png" alt="FOX home" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/castro.png" alt="Castro HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/idesign.png" alt="iDesign" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/zara-home.svg" alt="ZARA HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/hm-home.svg" alt="H&M HOME" className="h-6" /></span>
-          <span className="brand-item"><img src="/logos/midrag.png" alt="מידרג" className="h-8" /></span>
-        </div>
+        <BrandsMarquee />
       </section>
 
       {/* AI Vision — Features Showcase */}
@@ -362,8 +300,7 @@ export default function Home() {
 
               <a
                 href="/visualize"
-                className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center"
-                style={{ backgroundColor: '#101010' }}
+                className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center bg-[#101010]"
               >
                 נסו הדמיה עכשיו
               </a>
@@ -498,7 +435,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-6 text-white" style={{ backgroundColor: '#101010' }}>
+      <section className="py-24 px-6 text-white bg-[#101010]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4">{isLoggedIn ? "הפרויקטים שלך מחכים" : "מוכנים לראות את הבית החדש?"}</h2>
           <p className="text-gray-400 mb-8">{isLoggedIn ? "חזור לאזור האישי ותמשיך מאיפה שהפסקת." : "העלו תמונה וקבלו הדמיה תוך 30 שניות. בחינם."}</p>
@@ -552,22 +489,64 @@ function Step({ number, title, description }: { number: string; title: string; d
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const id = question.slice(0, 20).replace(/\s/g, '-');
   
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-5 text-right flex items-center justify-between hover:bg-gray-50 transition-colors"
+      <h3>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-6 py-5 text-right flex items-center justify-between hover:bg-gray-50 transition-colors"
+          aria-expanded={isOpen}
+          aria-controls={`faq-${id}`}
+        >
+          <span className="text-base font-medium text-gray-900">{question}</span>
+          <span className={`text-2xl text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`} aria-hidden="true">+</span>
+        </button>
+      </h3>
+      <div 
+        id={`faq-${id}`}
+        role="region"
+        aria-labelledby={`faq-${id}`}
+        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}
       >
-        <span className="text-base font-medium text-gray-900">{question}</span>
-        <span className={`text-2xl text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>+</span>
-      </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
         <p className="px-6 pb-5 text-gray-600 leading-relaxed">{answer}</p>
       </div>
     </div>
   );
 }
 
-// ProductHotspot component removed - was unused
+const BRAND_LOGOS = [
+  { src: '/logos/ace.png', alt: 'ACE', h: 'h-6' },
+  { src: '/logos/homecenter.png', alt: 'הום סנטר', h: 'h-6 rounded' },
+  { src: '/logos/tambur.png', alt: 'טמבור', h: 'h-6 rounded' },
+  { src: '/logos/ikea.svg', alt: 'IKEA', h: 'h-6' },
+  { src: '/logos/foxhome.png', alt: 'FOX home', h: 'h-6' },
+  { src: '/logos/castro.png', alt: 'Castro HOME', h: 'h-6' },
+  { src: '/logos/idesign.png', alt: 'iDesign', h: 'h-6' },
+  { src: '/logos/zara-home.svg', alt: 'ZARA HOME', h: 'h-6' },
+  { src: '/logos/hm-home.svg', alt: 'H&M HOME', h: 'h-6' },
+  { src: '/logos/midrag.png', alt: 'מידרג', h: 'h-8' },
+];
+
+function BrandsMarquee() {
+  // Render 4 copies for seamless loop, but from a single array
+  const items = [...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS, ...BRAND_LOGOS];
+  return (
+    <>
+      <style>{`
+        .brands-marquee { display:flex; width:max-content; animation:brands-scroll 25s linear infinite; }
+        .brands-marquee .brand-item { padding:0 1.5rem; white-space:nowrap; }
+        @keyframes brands-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-25%)} }
+      `}</style>
+      <div className="brands-marquee" aria-hidden="true">
+        {items.map((logo, i) => (
+          <span key={i} className="brand-item">
+            <img src={logo.src} alt={logo.alt} className={logo.h} loading="lazy" />
+          </span>
+        ))}
+      </div>
+    </>
+  );
+}
 

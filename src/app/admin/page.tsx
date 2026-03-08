@@ -25,7 +25,7 @@ interface Stats {
   newsletter: number;
 }
 
-const ADMIN_EMAILS = ['guyceza@gmail.com'];
+import { ADMIN_EMAILS, isAdmin as isAdminCheck } from '@/lib/admin';
 
 export default function AdminDashboard() {
   const router = useRouter();

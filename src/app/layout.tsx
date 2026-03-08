@@ -8,6 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import { Suspense } from "react";
 import ReferralCapture from "@/components/ReferralCapture";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -150,14 +151,16 @@ export default function RootLayout({
           height={3}
           showSpinner={false}
         />
-        <ThemeProvider>
-          <Suspense fallback={null}><ReferralCapture /></Suspense>
-          <main id="main-content">
-            {children}
-          </main>
-          <ChatWidget />
-          <CookieConsent />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Suspense fallback={null}><ReferralCapture /></Suspense>
+            <main id="main-content">
+              {children}
+            </main>
+            <ChatWidget />
+            <CookieConsent />
+          </ThemeProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

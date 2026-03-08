@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { isAdminEmail } from "@/lib/admin";
 import { Suspense } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 
@@ -80,7 +81,7 @@ function LoginContent() {
           email: data.user.email,
           id: data.user.id,
           name: userName,
-          isAdmin: data.user.email === "guyceza@gmail.com",
+          isAdmin: isAdminEmail(data.user.email || ""),
           purchased: purchased
         }));
         router.push(redirectTo);

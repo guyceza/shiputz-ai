@@ -110,16 +110,12 @@ export default function StyleMatchPage() {
                 {/* Image wrapper — markers are positioned relative to this */}
                 <div className="relative inline-block max-w-full">
                   <img src={imageSrc} alt="uploaded" className="block max-w-full max-h-[500px] rounded-2xl" />
-                  {/* Product thumbnail markers on image */}
+                  {/* Numbered markers on image */}
                   {activeResult?.shoppingList?.map((item: any, i: number) => (
                     item.position && (
                       <div
                         key={i}
-                        className={`absolute z-10 cursor-pointer transition-all duration-200 ${
-                          highlightedItem === i
-                            ? "scale-[1.35] z-20"
-                            : "hover:scale-110"
-                        }`}
+                        className="absolute z-10"
                         style={{
                           top: `${item.position.top}%`,
                           left: `${item.position.left}%`,
@@ -128,25 +124,22 @@ export default function StyleMatchPage() {
                         onMouseEnter={() => setHighlightedItem(i)}
                         onMouseLeave={() => setHighlightedItem(null)}
                       >
-                        {/* Circular crop from the original image */}
-                        <div
-                          className={`w-11 h-11 rounded-full border-2 shadow-lg overflow-hidden ${
-                            highlightedItem === i ? "border-gray-900 shadow-xl" : "border-white"
-                          }`}
-                          style={{
-                            backgroundImage: `url(${imageSrc})`,
-                            backgroundSize: '500% 500%',
-                            backgroundPosition: `${item.position.left}% ${item.position.top}%`,
-                          }}
-                        />
-                        {/* Number badge */}
-                        <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                        {/* Number dot */}
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-all duration-200 shadow-md ${
                           highlightedItem === i
-                            ? "bg-gray-900 text-white"
-                            : "bg-white text-gray-700 border border-gray-200"
-                        } shadow-sm`}>
+                            ? "bg-gray-900 text-white scale-125 ring-2 ring-white"
+                            : "bg-white/90 text-gray-800 border border-gray-300 hover:scale-110"
+                        }`}>
                           {i + 1}
                         </div>
+                        {/* Popup tooltip on hover */}
+                        {highlightedItem === i && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl pointer-events-none">
+                            {item.item}
+                            <span className="text-gray-400 mr-2"> · {item.priceRange}</span>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45 -mt-1" />
+                          </div>
+                        )}
                       </div>
                     )
                   ))}

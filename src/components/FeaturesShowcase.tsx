@@ -54,7 +54,7 @@ const teaserFeatures = [
   {
     title: "ניתוח הצעת מחיר",
     description: "בדיקה אוטומטית של הצעות מקבלנים",
-    href: "/dashboard",
+    href: "/quote-analysis",
     image: "/images/ai-vision/quote-analysis.gif",
     isGif: true,
   },

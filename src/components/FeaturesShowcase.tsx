@@ -47,7 +47,7 @@ const teaserFeatures = [
   {
     title: "כתב כמויות",
     description: "פירוט חומרים, כמויות ועלויות",
-    href: "/dashboard/boq",
+    href: "/dashboard/bill-of-quantities",
     image: "/images/ai-vision/boq.gif",
     isGif: true,
   },

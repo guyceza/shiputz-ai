@@ -18,14 +18,14 @@ const DEMO_RESULT = {
   ],
   lighting: { type: "טבעית וחמה", description: "חלונות גדולים עם תאורת LED חמה משלימה" },
   shoppingList: [
-    { item: "ספה", description: "ספת בד פשתן בגוון שמנת, 3 מושבים", material: "פשתן", priceRange: "₪4,000-8,000", searchQuery: "ספה פשתן שמנת סקנדינבית 3 מושבים" },
-    { item: "שולחן קפה", description: "שולחן עגול עץ אלון עם רגלי מתכת", material: "עץ + מתכת", priceRange: "₪800-2,000", searchQuery: "שולחן קפה עגול עץ אלון רגלי מתכת" },
-    { item: "שטיח", description: "שטיח צמר בגוון טבעי 200×300", material: "צמר", priceRange: "₪1,500-4,000", searchQuery: "שטיח צמר טבעי 200x300 סקנדינבי" },
-    { item: "מנורת רצפה", description: "מנורת קשת שחורה עם אהיל לבן", material: "מתכת", priceRange: "₪400-1,200", searchQuery: "מנורת רצפה קשת שחורה אהיל לבן" },
-    { item: "כריות נוי", description: "סט 4 כריות בגוונים טבעיים", material: "כותנה/פשתן", priceRange: "₪200-600", searchQuery: "כריות נוי לספה בז טבעי סקנדינבי" },
-    { item: "אגרטל", description: "אגרטל קרמיקה לבן מינימליסטי", material: "קרמיקה", priceRange: "₪100-400", searchQuery: "אגרטל קרמיקה לבן מינימליסטי" },
-    { item: "מדף קיר", description: "מדף עץ אלון צף 120 ס״מ", material: "עץ", priceRange: "₪200-500", searchQuery: "מדף צף עץ אלון 120 סמ" },
-    { item: "שמיכת טלוויזיה", description: "שמיכה ארוגה בגוון שמנת", material: "כותנה", priceRange: "₪150-400", searchQuery: "שמיכה ארוגה כותנה שמנת סלון" },
+    { item: "ספה", description: "ספת בד פשתן בגוון שמנת, 3 מושבים", material: "פשתן", priceRange: "₪4,000-8,000", searchQuery: "ספה פשתן שמנת סקנדינבית 3 מושבים", position: { top: 55, left: 50 } },
+    { item: "שולחן קפה", description: "שולחן עגול עץ אלון עם רגלי מתכת", material: "עץ + מתכת", priceRange: "₪800-2,000", searchQuery: "שולחן קפה עגול עץ אלון רגלי מתכת", position: { top: 70, left: 40 } },
+    { item: "שטיח", description: "שטיח צמר בגוון טבעי 200×300", material: "צמר", priceRange: "₪1,500-4,000", searchQuery: "שטיח צמר טבעי 200x300 סקנדינבי", position: { top: 85, left: 50 } },
+    { item: "מנורת רצפה", description: "מנורת קשת שחורה עם אהיל לבן", material: "מתכת", priceRange: "₪400-1,200", searchQuery: "מנורת רצפה קשת שחורה אהיל לבן", position: { top: 25, left: 85 } },
+    { item: "כריות נוי", description: "סט 4 כריות בגוונים טבעיים", material: "כותנה/פשתן", priceRange: "₪200-600", searchQuery: "כריות נוי לספה בז טבעי סקנדינבי", position: { top: 50, left: 55 } },
+    { item: "אגרטל", description: "אגרטל קרמיקה לבן מינימליסטי", material: "קרמיקה", priceRange: "₪100-400", searchQuery: "אגרטל קרמיקה לבן מינימליסטי", position: { top: 35, left: 70 } },
+    { item: "מדף קיר", description: "מדף עץ אלון צף 120 ס״מ", material: "עץ", priceRange: "₪200-500", searchQuery: "מדף צף עץ אלון 120 סמ", position: { top: 15, left: 30 } },
+    { item: "שמיכת טלוויזיה", description: "שמיכה ארוגה בגוון שמנת", material: "כותנה", priceRange: "₪150-400", searchQuery: "שמיכה ארוגה כותנה שמנת סלון", position: { top: 60, left: 35 } },
   ],
   tips: [
     "הוסיפו צמחייה ירוקה — פיקוס או מונסטרה משלימים מושלם",
@@ -41,6 +41,7 @@ export default function StyleMatchPage() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [showDemo, setShowDemo] = useState(false);
+  const [highlightedItem, setHighlightedItem] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,17 +107,39 @@ export default function StyleMatchPage() {
           ) : (
             <div>
               <div className="relative rounded-2xl overflow-hidden bg-gray-100">
-                <img src={imageSrc} alt="uploaded" className="w-full max-h-[400px] object-contain" />
-                <div className="absolute top-4 left-4 flex gap-2">
+                <img src={imageSrc} alt="uploaded" className="w-full object-contain" style={{ maxHeight: result ? '500px' : '400px' }} />
+                <div className="absolute top-4 left-4 flex gap-2 z-20">
                   <button
-                    onClick={() => { setImageSrc(null); setResult(null); setShowDemo(false); }}
+                    onClick={() => { setImageSrc(null); setResult(null); setShowDemo(false); setHighlightedItem(null); }}
                     className="w-10 h-10 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 backdrop-blur-sm transition-all"
                   >
                     ✕
                   </button>
                 </div>
+                {/* Numbered markers on image */}
+                {activeResult?.shoppingList?.map((item: any, i: number) => (
+                  item.position && (
+                    <div
+                      key={i}
+                      className={`absolute z-10 flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold cursor-pointer transition-all duration-200 ${
+                        highlightedItem === i
+                          ? "bg-gray-900 text-white scale-125 ring-2 ring-white shadow-lg"
+                          : "bg-white/90 text-gray-900 border border-gray-300 shadow-md hover:scale-110"
+                      }`}
+                      style={{
+                        top: `${item.position.top}%`,
+                        left: `${item.position.left}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      onMouseEnter={() => setHighlightedItem(i)}
+                      onMouseLeave={() => setHighlightedItem(null)}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+                  )
+                ))}
                 {loading && (
-                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20">
                     <div className="text-center">
                       <div className="w-12 h-12 border-3 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3" />
                       <p className="text-gray-600 font-medium">מנתח סגנון...</p>
@@ -171,13 +194,13 @@ export default function StyleMatchPage() {
         )}
 
         {/* Results */}
-        {activeResult && <StyleResults data={activeResult} isDemo={showDemo && !result} />}
+        {activeResult && <StyleResults data={activeResult} isDemo={showDemo && !result} highlightedItem={highlightedItem} onHighlight={setHighlightedItem} />}
       </div>
     </div>
   );
 }
 
-function StyleResults({ data, isDemo }: { data: any; isDemo: boolean }) {
+function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: any; isDemo: boolean; highlightedItem: number | null; onHighlight: (i: number | null) => void }) {
   // Color map for material badges
   const materialColors = [
     "bg-amber-50 text-amber-800 border-amber-200",
@@ -283,22 +306,34 @@ function StyleResults({ data, isDemo }: { data: any; isDemo: boolean }) {
               href={`https://www.google.com/search?q=${encodeURIComponent((item.searchQuery || item.description || item.item) + ' לקנות בישראל')}&tbm=shop`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
+              className={`group flex items-center gap-4 p-4 rounded-xl transition-all duration-200 border ${
+                highlightedItem === i
+                  ? "bg-gray-900 border-gray-900 shadow-lg scale-[1.02]"
+                  : "bg-gray-50 hover:bg-gray-100 border-transparent hover:border-gray-200"
+              }`}
+              onMouseEnter={() => onHighlight(i)}
+              onMouseLeave={() => onHighlight(null)}
             >
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-lg font-bold text-gray-300 border border-gray-100 flex-shrink-0">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0 transition-colors ${
+                highlightedItem === i
+                  ? "bg-white text-gray-900"
+                  : "bg-white text-gray-300 border border-gray-100"
+              }`}>
                 {String(i + 1).padStart(2, "0")}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{item.item}</span>
-                  <span className="text-xs font-medium text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-100 flex-shrink-0 mr-2">
+                  <span className={`font-semibold text-sm transition-colors ${highlightedItem === i ? "text-white" : "text-gray-900 group-hover:text-blue-600"}`}>{item.item}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 mr-2 ${
+                    highlightedItem === i ? "bg-white/20 text-white border border-white/20" : "text-gray-500 bg-white border border-gray-100"
+                  }`}>
                     {item.priceRange}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">{item.description}</p>
+                <p className={`text-xs mt-0.5 truncate ${highlightedItem === i ? "text-gray-300" : "text-gray-500"}`}>{item.description}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded">{item.material}</span>
-                  <span className="text-[10px] text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">חפש ב-Google Shopping →</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded ${highlightedItem === i ? "bg-white/10 text-gray-300" : "text-gray-400 bg-gray-100"}`}>{item.material}</span>
+                  <span className={`text-[10px] transition-opacity ${highlightedItem === i ? "text-gray-300 opacity-100" : "text-blue-500 opacity-0 group-hover:opacity-100"}`}>חפש ב-Google Shopping →</span>
                 </div>
               </div>
             </a>

@@ -1142,6 +1142,23 @@ export default function FloorplanPage() {
               <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
             </div>
 
+            {/* No images yet — friendly redirect */}
+            {allUserRooms.length === 0 && !loading && (
+              <div className="max-w-md mx-auto text-center bg-amber-50 border border-amber-200 rounded-2xl p-8 space-y-4">
+                <div className="text-4xl">🎬</div>
+                <h3 className="text-lg font-semibold text-gray-900">אין עדיין הדמיות לסרטון</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  כדי ליצור סרטון סיור, צריך קודם להעלות תוכנית קומה וליצור הדמיות של החדרים. אחרי שיהיו לכם לפחות 2 חדרים — תוכלו ליצור סרטון מדהים!
+                </p>
+                <a
+                  href="/floorplan"
+                  className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                >
+                  עברו לתוכנית קומה חכמה ←
+                </a>
+              </div>
+            )}
+
             {/* Previously generated rooms — grouped by session (house) */}
             {allUserRooms.length > 0 && (
               <div className="max-w-2xl mx-auto space-y-4">

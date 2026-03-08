@@ -26,8 +26,8 @@ const mainFeatures = [
     subtitle: "הליכה וירטואלית בדירה החדשה",
     description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן — כולם רואים את אותה חזון.",
     image: "/images/ai-vision/video-tour.gif",
-    href: "/floorplan",
-    cta: "נסו עכשיו",
+    href: "/floorplan?mode=video",
+    cta: "צרו סרטון",
     isGif: true,
   },
 ];

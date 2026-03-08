@@ -27,6 +27,7 @@ const mainFeatures = [
     subtitle: "הליכה וירטואלית בדירה החדשה",
     description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן — כולם רואים את אותה חזון.",
     image: "/images/ai-vision/video-tour-thumb.jpg",
+    video: "/images/ai-vision/video-tour-showcase.mp4",
     href: "/floorplan?mode=video",
     cta: "צרו סרטון",
   },
@@ -82,7 +83,17 @@ export default function FeaturesShowcase() {
             <div className="w-full md:w-1/2">
               <Link href={feature.href} className="block group">
                 <div className="relative rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl transition-shadow duration-300">
-                  {feature.isGif ? (
+                  {'video' in feature && feature.video ? (
+                    <video
+                      src={feature.video}
+                      poster={feature.image}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-auto object-cover"
+                    />
+                  ) : feature.isGif ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={feature.image}

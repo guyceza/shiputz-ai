@@ -214,32 +214,18 @@ export default function StyleMatchPage() {
   );
 }
 
-// Material texture images (Unsplash, reliable permanent URLs)
-const TEXTURE_MAP: Record<string, string> = {
-  wood: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop",
-  metal: "https://images.unsplash.com/photo-1519482816300-1490fdf2c2bd?w=400&h=300&fit=crop",
-  glass: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=400&h=300&fit=crop",
-  fabric: "https://images.unsplash.com/photo-1528459105426-b9548367069b?w=400&h=300&fit=crop",
-  linen: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&h=300&fit=crop",
-  stone: "https://images.unsplash.com/photo-1502581827344-ebe6882a6e53?w=400&h=300&fit=crop",
-  marble: "https://images.unsplash.com/photo-1566041510394-cf7ad2006a74?w=400&h=300&fit=crop",
-  ceramic: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=300&fit=crop",
-  concrete: "https://images.unsplash.com/photo-1517089596392-fb9a9033e05b?w=400&h=300&fit=crop",
-  leather: "https://images.unsplash.com/photo-1531685250784-7569952593d2?w=400&h=300&fit=crop",
-  wool: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=400&h=300&fit=crop",
-  rattan: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=400&h=300&fit=crop",
-  bamboo: "https://images.unsplash.com/photo-1567225591450-06036b3392a6?w=400&h=300&fit=crop",
-  brick: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=400&h=300&fit=crop",
-  tile: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
-  velvet: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=300&fit=crop",
-  cotton: "https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?w=400&h=300&fit=crop",
-  cork: "https://images.unsplash.com/photo-1601225998662-a1123073aa42?w=400&h=300&fit=crop",
-};
-const DEFAULT_TEXTURE = "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop";
+// Material texture images (AI-generated, stored locally)
+const TEXTURE_TYPES = [
+  "wood", "metal", "glass", "fabric", "linen", "stone", "marble",
+  "ceramic", "concrete", "leather", "wool", "rattan", "bamboo",
+  "brick", "tile", "velvet", "cotton", "cork",
+];
+const DEFAULT_TEXTURE = "/textures/wood.jpg";
 
 function getTextureUrl(textureType?: string): string {
   if (!textureType) return DEFAULT_TEXTURE;
-  return TEXTURE_MAP[textureType.toLowerCase()] || DEFAULT_TEXTURE;
+  const key = textureType.toLowerCase();
+  return TEXTURE_TYPES.includes(key) ? `/textures/${key}.jpg` : DEFAULT_TEXTURE;
 }
 
 function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: any; isDemo: boolean; highlightedItem: number | null; onHighlight: (i: number | null) => void }) {

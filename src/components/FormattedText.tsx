@@ -18,12 +18,12 @@ export function FormattedText({ text, className = '' }: FormattedTextProps) {
   return (
     <div className={`space-y-4 ${className}`}>
       {paragraphs.map((paragraph, pIdx) => {
-        // Check if this is a numbered list item
-        const isNumberedList = /^\d+\.\s/.test(paragraph.trim());
+        // Check if this paragraph contains numbered list items (at start or after newlines)
+        const isNumberedList = /(?:^|\n)\d+\.\s/.test(paragraph.trim());
         
         if (isNumberedList) {
-          // Parse numbered list items within this paragraph
-          const items = paragraph.split(/(?=\d+\.\s)/g).filter(Boolean);
+          // Parse numbered list items — split on newline followed by digit
+          const items = paragraph.split(/\n(?=\d+\.\s)/g).filter(Boolean);
           return (
             <div key={pIdx} className="space-y-3">
               {items.map((item, iIdx) => {

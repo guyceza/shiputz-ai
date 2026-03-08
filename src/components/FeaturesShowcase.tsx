@@ -73,7 +73,7 @@ const teaserFeatures: Feature[] = [
   {
     title: "סריקת קבלות",
     description: "צילום קבלה → סכום, תאריך וקטגוריה",
-    href: "/dashboard",
+    href: "/receipt-scanner",
     image: "/images/ai-vision/receipt-scanner.gif",
     isGif: true,
   },

@@ -37,7 +37,7 @@ const teaserFeatures = [
     title: "עיצוב מחדש",
     description: "הדמיית AI של החדר בעיצוב חדש",
     href: "/visualize",
-    image: "/images/ai-vision/visualize.jpg",
+    image: "/images/ai-vision/visualize-teaser.jpg",
   },
   {
     title: "כתב כמויות",

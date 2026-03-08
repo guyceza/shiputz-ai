@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -86,6 +87,100 @@ const teaserFeatures: Feature[] = [
   },
 ];
 
+function CardDeck({ features }: { features: Feature[] }) {
+  const [fanned, setFanned] = useState(false);
+  const total = features.length;
+
+  return (
+    <div className="pt-12 pb-4">
+      {/* Stacked / Fanned cards */}
+      <div
+        className="relative mx-auto cursor-pointer"
+        style={{ height: fanned ? `${total * 220 + 80}px` : '320px', maxWidth: '380px' }}
+        onClick={() => setFanned(!fanned)}
+      >
+        {/* Label when collapsed */}
+        {!fanned && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+            <p className="text-2xl font-bold text-gray-900 mb-2 drop-shadow-sm">ועוד הרבה...</p>
+            <p className="text-sm text-gray-500">לחצו לגלות</p>
+          </div>
+        )}
+        
+        {fanned && (
+          <div className="text-center mb-6">
+            <p className="text-2xl font-bold text-gray-900">ועוד הרבה...</p>
+            <p className="text-xs text-gray-400 mt-1">לחצו לסגור</p>
+          </div>
+        )}
+
+        {features.map((feature, i) => {
+          // Collapsed: stack with slight rotation spread
+          const spreadAngle = 40; // total spread in degrees
+          const angleStep = total > 1 ? spreadAngle / (total - 1) : 0;
+          const collapsedRotate = -spreadAngle / 2 + i * angleStep;
+          const collapsedY = Math.abs(collapsedRotate) * 0.8;
+          
+          // Fanned: vertical list with slight alternating tilt
+          const fannedY = i * 220 + 50;
+          const fannedRotate = i % 2 === 0 ? -1.5 : 1.5;
+
+          return (
+            <div
+              key={feature.title}
+              className="absolute left-1/2 transition-all duration-500 ease-out"
+              style={{
+                width: '280px',
+                marginLeft: '-140px',
+                transform: fanned
+                  ? `translateY(${fannedY}px) rotate(${fannedRotate}deg)`
+                  : `translateY(${collapsedY}px) rotate(${collapsedRotate}deg)`,
+                zIndex: fanned ? i + 1 : total - i,
+                transformOrigin: 'bottom center',
+              }}
+            >
+              <Link
+                href={feature.href}
+                onClick={(e) => { if (!fanned) e.preventDefault(); }}
+                className={`block bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl transition-shadow ${!fanned ? 'pointer-events-none' : ''}`}
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+                  {feature.video ? (
+                    <video
+                      src={feature.video}
+                      poster={feature.image}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : feature.beforeAfter ? (
+                    <BeforeAfterSlider
+                      beforeImg={feature.beforeAfter.before}
+                      afterImg={feature.beforeAfter.after}
+                      height="aspect-[4/3]"
+                    />
+                  ) : feature.isGif ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <Image src={feature.image} alt={feature.title} width={300} height={225} className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div className="p-4 text-center">
+                  <h4 className="font-semibold text-gray-900 text-sm">{feature.title}</h4>
+                  <p className="text-gray-500 text-xs mt-1">{feature.description}</p>
+                </div>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturesShowcase() {
   return (
     <div className="space-y-24 md:space-y-32">
@@ -155,66 +250,8 @@ export default function FeaturesShowcase() {
         );
       })}
 
-      {/* "ועוד הרבה" Teaser Section */}
-      <div className="pt-8">
-        <h3 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-4">
-          ועוד הרבה...
-        </h3>
-        <p className="text-gray-500 text-center mb-10 max-w-md mx-auto">
-          כלים נוספים שיעזרו לכם בכל שלב של השיפוץ
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {teaserFeatures.map((feature) => (
-            <div
-              key={feature.title}
-              className="group bg-white border border-gray-100 hover:border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg"
-            >
-              {'beforeAfter' in feature && feature.beforeAfter ? (
-                <BeforeAfterSlider
-                  beforeImg={feature.beforeAfter.before}
-                  afterImg={feature.beforeAfter.after}
-                  height="aspect-[4/3]"
-                />
-              ) : (
-                <Link href={feature.href} className="block">
-                  <div className="aspect-[4/3] overflow-hidden">
-                    {feature.video ? (
-                      <video
-                        src={feature.video}
-                        poster={feature.image}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : feature.isGif ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={feature.image}
-                        alt={feature.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <Image
-                        src={feature.image}
-                        alt={feature.title}
-                        width={300}
-                        height={225}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    )}
-                  </div>
-                </Link>
-              )}
-              <Link href={feature.href} className="block p-4 text-center">
-                <h4 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">{feature.title}</h4>
-                <p className="text-gray-500 text-xs md:text-sm leading-snug">{feature.description}</p>
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Card Deck Section */}
+      <CardDeck features={teaserFeatures} />
     </div>
   );
 }

@@ -218,12 +218,41 @@ export default function ProjectPage() {
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<{role: string, content: string}[]>([]);
   
-  // Auto-scroll chat to bottom when new messages arrive
+  const [showScrollArrow, setShowScrollArrow] = useState(false);
+  const lastAiRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to start of last AI response (not bottom)
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === "assistant") {
+      // Wait for render, then scroll to the AI message
+      setTimeout(() => {
+        if (lastAiRef.current && chatContainerRef.current) {
+          const container = chatContainerRef.current;
+          const msgTop = lastAiRef.current.offsetTop - container.offsetTop;
+          container.scrollTo({ top: msgTop - 8, behavior: "smooth" });
+          // Check if there's more to scroll
+          setTimeout(() => {
+            if (container.scrollHeight - container.scrollTop - container.clientHeight > 40) {
+              setShowScrollArrow(true);
+            }
+          }, 500);
+        }
+      }, 100);
     }
   }, [chatHistory]);
+
+  // Track scroll to hide arrow
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+    const onScroll = () => {
+      if (container.scrollHeight - container.scrollTop - container.clientHeight < 40) {
+        setShowScrollArrow(false);
+      }
+    };
+    container.addEventListener("scroll", onScroll);
+    return () => container.removeEventListener("scroll", onScroll);
+  }, [showAIChat]);
   
   // Rotate scan tips while scanning
   useEffect(() => {
@@ -3133,7 +3162,11 @@ export default function ProjectPage() {
                 </div>
               )}
               {chatHistory.map((msg, i) => (
-                <div key={i} className={`p-4 rounded-xl ${msg.role === "user" ? "bg-gray-900 text-white mr-8" : "border border-gray-100 ml-8"}`}>
+                <div
+                  key={i}
+                  ref={msg.role === "assistant" && i === chatHistory.length - 1 ? lastAiRef : undefined}
+                  className={`p-4 rounded-xl ${msg.role === "user" ? "bg-gray-900 text-white mr-8" : "border border-gray-100 ml-8"}`}
+                >
                   {msg.role === "user" ? (
                     <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                   ) : (
@@ -3143,6 +3176,23 @@ export default function ProjectPage() {
               ))}
               {chatLoading && <div className="border border-gray-100 ml-8 p-4 rounded-xl text-gray-500">חושב...</div>}
             </div>
+            
+            {/* Bounce arrow indicating more content */}
+            {showScrollArrow && (
+              <div className="flex justify-center py-1 border-t border-gray-100 bg-white">
+                <button
+                  onClick={() => {
+                    const c = chatContainerRef.current;
+                    if (c) c.scrollTo({ top: c.scrollHeight, behavior: "smooth" });
+                  }}
+                  className="animate-bounce text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             
             <div className="p-4 border-t border-gray-100">
               <div className="flex gap-2">

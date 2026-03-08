@@ -2,16 +2,51 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
 
+// ============================================================
+// ShiputzAI Email Flow System — Behavioral Triggers
+// 10 Flows, 29 emails total
+// Replaces old day-based sequence system
+// ============================================================
+
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
+const BASE_URL = 'https://shipazti.com';
 
-// Generate unsubscribe token for email
-// Bug fix: Don't use predictable fallback - require proper configuration
+// Admin/test emails — never send marketing
+const EXCLUDED_EMAILS = new Set([
+  'test@test.com',
+  'test@shiputzai.com',
+  'test-ollie@shipazti.com',
+  'test-ollie-2028@test.com',
+]);
+
+// 48h minimum between emails (in ms)
+const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
+
+// Flow priority (lower = higher priority, checked first)
+// credits flows > activation > welcome > post_purchase > inactive > summary > milestone
+const FLOW_PRIORITY: string[] = [
+  'zero_credits',
+  'low_credits',
+  // 'abandoned' — TODO: needs frontend tracking
+  'activation',
+  'welcome',
+  'post_purchase',
+  'inactive',
+  // 'referral' — TODO: needs referral system
+  'usage_summary',
+  'milestone',
+];
+
+// ============================================================
+// HELPERS
+// ============================================================
+
 function generateUnsubscribeToken(email: string): string {
   const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET;
   if (!secret) {
     console.error('SECURITY WARNING: UNSUBSCRIBE_SECRET or CRON_SECRET not configured!');
-    return ''; // Return empty token - link will still work but without verification
+    return '';
   }
   return crypto
     .createHmac('sha256', secret)
@@ -20,37 +55,14 @@ function generateUnsubscribeToken(email: string): string {
     .substring(0, 16);
 }
 
-if (!RESEND_KEY) {
-  console.error('RESEND_API_KEY not configured');
+function getUnsubscribeUrl(email: string): string {
+  const token = generateUnsubscribeToken(email);
+  return `${BASE_URL}/unsubscribe?email=${encodeURIComponent(email.toLowerCase())}${token ? `&token=${token}` : ''}`;
 }
 
-// Email sequences
-const PURCHASED_SEQUENCE = [
-  { day: 0, subject: '🎉 ברוך הבא ל-ShiputzAI!', template: 'welcome_purchased' },
-  { day: 1, subject: '💡 3 דברים לעשות עכשיו', template: 'getting_started' },
-  { day: 2, subject: '🎨 ידעת שאפשר לראות את השיפוץ לפני?', template: 'vision_offer' },
-  { day: 5, subject: '📸 הטריק שיחסוך לך שעות', template: 'receipt_scanning' },
-  { day: 7, subject: '💰 איך לא לחרוג מהתקציב', template: 'budget_tips' },
-  { day: 10, subject: '❓ איך הולך?', template: 'checkin' },
-  { day: 14, subject: '⭐ 30 שניות מזמנך?', template: 'feedback_request' },
-];
-
-const NON_PURCHASED_SEQUENCE = [
-  { day: 0, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 1, subject: '🎁 10 קרדיטים חינם מחכים לך', template: 'discount_offer' },
-  { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
-  { day: 7, subject: '💬 "חסכתי ₪15,000" — יעל מת"א', template: 'testimonials' },
-  { day: 9, subject: '⏰ התחילו עם 10 קרדיטים חינם', template: 'urgency' },
-  { day: 11, subject: '📊 ראה איך זה עובד', template: 'demo' },
-  { day: 14, subject: '🤝 אולי לא בשבילך?', template: 'last_chance' },
-];
-
-// Apple-style email wrapper
-function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail?: string): string {
-  const token = userEmail ? generateUnsubscribeToken(userEmail) : '';
-  const unsubscribeUrl = userEmail 
-    ? `https://shipazti.com/unsubscribe?email=${encodeURIComponent(userEmail)}&token=${token}` 
-    : 'https://shipazti.com/unsubscribe';
+// Apple-style email wrapper — clean, RTL, Hebrew
+function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail: string): string {
+  const unsubscribeUrl = getUnsubscribeUrl(userEmail);
   return `
 <!DOCTYPE html>
 <html dir="rtl" lang="he">
@@ -67,7 +79,7 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom: 40px;">
-              <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; vertical-align: middle;">ShiputzAI</span>
+              <img src="${BASE_URL}/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; vertical-align: middle;">ShiputzAI</span>
             </td>
           </tr>
           
@@ -77,15 +89,9 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
               <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
                 <tr>
                   <td style="padding: 60px 50px; text-align: right;" dir="rtl">
-                    
-                    <!-- Title -->
                     <h1 style="font-size: 34px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px; letter-spacing: -0.5px; text-align: center;">${title}</h1>
                     ${subtitle ? `<p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">${subtitle}</p>` : '<div style="margin-bottom: 50px;"></div>'}
-                    
-                    <!-- Content -->
                     ${content}
-                    
-                    <!-- CTA Button -->
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 40px;">
                       <tr>
                         <td align="center">
@@ -93,7 +99,6 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
                         </td>
                       </tr>
                     </table>
-                    
                   </td>
                 </tr>
               </table>
@@ -103,7 +108,7 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
           <!-- Footer -->
           <tr>
             <td style="padding: 40px 20px; text-align: center;">
-              <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ! 🏠</p>
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ!</p>
               <p style="font-size: 12px; color: #86868b; margin: 0 0 16px;">ShiputzAI · ניהול שיפוצים חכם</p>
               <p style="font-size: 11px; color: #aeaeb2; margin: 0;">
                 <a href="${unsubscribeUrl}" style="color: #aeaeb2; text-decoration: underline;">להסרה מרשימת התפוצה</a>
@@ -119,652 +124,1042 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
 </html>`;
 }
 
-// Generate email HTML based on template
-function getEmailHTML(template: string, user: any, discountCode?: string, visionCode?: string): string {
-  const name = user.name || 'משפץ יקר';
-  const userEmail = user.email || '';
-  
-  const greeting = `<p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${name}</strong>,</p>`;
-  
-  const templates: Record<string, { title: string; subtitle: string; content: string; cta: string; url: string }> = {
-    
-    // === PURCHASED SEQUENCE ===
-    
-    welcome_purchased: {
-      title: '🎉 ברוך הבא ל-ShiputzAI!',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 20px; text-align: right;">
-          תודה שהצטרפת! אנחנו כאן כדי לעזור לך <strong>לנהל את השיפוץ בצורה חכמה</strong>.
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          בדשבורד שלך תוכל לעקוב אחרי התקציב, לסרוק קבלות, ולקבל <strong>התראות לפני שחורגים</strong>.
-        </p>
-      `,
-      cta: 'כניסה לדשבורד',
-      url: 'https://shipazti.com/dashboard'
-    },
-    
-    getting_started: {
-      title: '3 דברים לעשות <span style="color: #0071e3;">עכשיו</span>',
-      subtitle: 'כדי להתחיל נכון עם ShiputzAI',
-      content: `
-        ${greeting}
-        <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
-          <tr>
-            <td style="padding: 24px 0; border-bottom: 1px solid #f5f5f7; text-align: right;" dir="rtl">
-              <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
-                <tr>
-                  <td width="50" valign="top" style="text-align: right;">
-                    <div style="width: 40px; height: 40px; background: #f5f5f7; border-radius: 50%; text-align: center; line-height: 40px; font-size: 17px; font-weight: 600; color: #1d1d1f;">1</div>
-                  </td>
-                  <td valign="top" style="text-align: right; padding-right: 15px;">
-                    <p style="font-size: 17px; font-weight: 700; color: #1d1d1f; margin: 0 0 4px; text-align: right;">צור פרויקט חדש</p>
-                    <p style="font-size: 15px; color: #86868b; margin: 0; text-align: right;">תן <strong>שם</strong> והגדר <strong>תקציב התחלתי</strong></p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 24px 0; border-bottom: 1px solid #f5f5f7; text-align: right;" dir="rtl">
-              <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
-                <tr>
-                  <td width="50" valign="top" style="text-align: right;">
-                    <div style="width: 40px; height: 40px; background: #f5f5f7; border-radius: 50%; text-align: center; line-height: 40px; font-size: 17px; font-weight: 600; color: #1d1d1f;">2</div>
-                  </td>
-                  <td valign="top" style="text-align: right; padding-right: 15px;">
-                    <p style="font-size: 17px; font-weight: 700; color: #1d1d1f; margin: 0 0 4px; text-align: right;">צלם קבלה ראשונה</p>
-                    <p style="font-size: 15px; color: #86868b; margin: 0; text-align: right;">ה-AI יזהה את <strong>כל הפרטים</strong> אוטומטית</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 24px 0; text-align: right;" dir="rtl">
-              <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
-                <tr>
-                  <td width="50" valign="top" style="text-align: right;">
-                    <div style="width: 40px; height: 40px; background: #f5f5f7; border-radius: 50%; text-align: center; line-height: 40px; font-size: 17px; font-weight: 600; color: #1d1d1f;">3</div>
-                  </td>
-                  <td valign="top" style="text-align: right; padding-right: 15px;">
-                    <p style="font-size: 17px; font-weight: 700; color: #1d1d1f; margin: 0 0 4px; text-align: right;">הגדר התראות</p>
-                    <p style="font-size: 15px; color: #86868b; margin: 0; text-align: right;">נודיע לך <strong>לפני שחורגים</strong> מהתקציב</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      `,
-      cta: 'להתחיל עכשיו',
-      url: 'https://shipazti.com/dashboard'
-    },
-    
-    receipt_scanning: {
-      title: '📸 הטריק שיחסוך לך <span style="color: #0071e3;">שעות</span>',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          ידעת שאפשר <strong>לסרוק קבלות בשנייה</strong>?
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 1.8; margin: 0;">
-            📱 מצלמים את הקבלה<br>
-            🤖 ה-AI קורא את כל הפרטים<br>
-            ✅ הכל נכנס לרשימה אוטומטית
-          </p>
-        </div>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          <strong>לא עוד הקלדה ידנית!</strong>
-        </p>
-      `,
-      cta: 'לסרוק קבלה',
-      url: 'https://shipazti.com/dashboard?action=scan'
-    },
-    
-    budget_tips: {
-      title: '💰 איך <span style="color: #0071e3;">לא לחרוג</span> מהתקציב',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          <strong>70% מהשיפוצים חורגים מהתקציב.</strong> הנה איך לא להיות חלק מהסטטיסטיקה:
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
-            ✅ הגדר <strong>תקציב ריאלי</strong> מראש<br>
-            ✅ תעד <strong>כל הוצאה</strong> מיד<br>
-            ✅ בדוק את הדשבורד <strong>פעם בשבוע</strong><br>
-            ✅ השאר <strong>10-15%</strong> לבלת"מים
-          </p>
-        </div>
-      `,
-      cta: 'לצפות בדשבורד',
-      url: 'https://shipazti.com/dashboard'
-    },
-    
-    checkin: {
-      title: '❓ איך הולך?',
-      subtitle: 'עבר שבוע מאז שהתחלת',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          רצינו לבדוק איך הולך!
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          יש שאלות? משהו לא ברור? <strong>פשוט שלח לנו מייל</strong> ונשמח לעזור.
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          אם הכל טוב — מעולה! <strong>תמשיך לתעד</strong> ולעקוב.
-        </p>
-      `,
-      cta: 'לשלוח הודעה',
-      url: 'mailto:help@shipazti.com'
-    },
-    
-    quote_analysis: {
-      title: '🔥 הכלי שרוב המשפצים <span style="color: #0071e3;">לא מכירים</span>',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          קיבלת הצעת מחיר מקבלן? <strong>לפני שאתה חותם</strong> — תן לנו לבדוק.
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          ה-AI שלנו מנתח הצעות מחיר ובודק:
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
-            🔍 האם <strong>המחיר הוגן</strong>?<br>
-            📋 מה <strong>חסר</strong> בהצעה?<br>
-            ⚠️ אילו סעיפים <strong>צריך לשים לב</strong> אליהם?
-          </p>
-        </div>
-      `,
-      cta: 'לנתח הצעת מחיר',
-      url: 'https://shipazti.com/dashboard'
-    },
-    
-    feedback_request: {
-      title: '⭐ 30 שניות מזמנך?',
-      subtitle: 'עברו שבועיים מאז שהתחלת',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          נשמח לשמוע מה אתה חושב!
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          <strong>הפידבק שלך עוזר לנו להשתפר</strong> ולבנות מוצר טוב יותר בשבילך.
-        </p>
-      `,
-      cta: 'לשתף פידבק',
-      url: 'mailto:help@shipazti.com?subject=פידבק על ShiputzAI'
-    },
-
-    vision_offer: {
-      title: '🎨 ידעת שאפשר לראות את השיפוץ לפני?',
-      subtitle: 'הכל כלול במנוי Pro שלך',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          מתלבט איך לשפץ את הסלון? לא בטוח איזה סגנון מתאים למטבח?
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          <strong>כמנוי Pro, יש לך גישה מלאה</strong> לכל הכלים — כולל 4 הדמיות AI + חבילות נוספות!
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
-            ✨ <strong>הדמיות ויזואליות</strong> של איך השיפוץ יראה<br>
-            💰 <strong>הערכת עלויות</strong> מדויקת לפי התמונה<br>
-            🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק<br>
-            📋 <strong>כתב כמויות</strong> אוטומטי מתמונה
-          </p>
-        </div>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          פשוט היכנס לדשבורד ונסה!
-        </p>
-      `,
-      cta: 'לנסות הדמיה עכשיו',
-      url: 'https://shipazti.com/visualize'
-    },
-
-    // === NON-PURCHASED SEQUENCE ===
-    
-    reminder: {
-      title: '👋 שכחת משהו?',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          שמנו לב שנרשמת ל-ShiputzAI אבל <strong>עדיין לא התחלת</strong>.
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 24px; font-weight: 700; color: #1d1d1f; margin: 0;">70%</p>
-          <p style="font-size: 15px; color: #86868b; margin: 8px 0 0;">מהשיפוצים חורגים מהתקציב</p>
-        </div>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          <strong>אנחנו יכולים לעזור.</strong>
-        </p>
-      `,
-      cta: 'להתחיל עכשיו',
-      url: 'https://shipazti.com/signup'
-    },
-    
-    discount_offer: {
-      title: '🎁 10 קרדיטים חינם',
-      subtitle: 'מחכים לך',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          נרשמת ל-ShiputzAI אבל עוד לא ניצלת את הקרדיטים החינמיים שלך!
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">10 קרדיטים</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">מספיק להדמיה אחת של חדר — בחינם</p>
-        </div>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; text-align: right; margin-bottom: 25px;">
-          <p style="font-size: 15px; color: #1d1d1f; line-height: 1.8; margin: 0;">
-            ✅ הדמיות שיפוץ AI<br>
-            ✅ הערכות עלויות מפורטות<br>
-            ✅ כתב כמויות אוטומטי<br>
-            ✅ ניתוח הצעות מחיר<br>
-            ✅ סריקת קבלות + מעקב תקציב<br>
-            ✅ תוכניות מ-₪29/חודש
-          </p>
-        </div>
-      `,
-      cta: 'לנצל את הקרדיטים ←',
-      url: 'https://shipazti.com/login?redirect=/ai-vision'
-    },
-    
-    problem_highlight: {
-      title: '😱 70% מהשיפוצים <span style="color: #e34234;">חורגים</span>',
-      subtitle: 'מהתקציב',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          זה לא מקרי. <strong>רוב האנשים מנהלים שיפוץ בלי כלים מתאימים.</strong>
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          ShiputzAI נבנה בדיוק בשביל זה:
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
-            ✅ מעקב תקציב <strong>בזמן אמת</strong><br>
-            ✅ סריקת קבלות <strong>אוטומטית</strong><br>
-            ✅ התראות <strong>לפני חריגות</strong>
-          </p>
-        </div>
-      `,
-      cta: 'להתחיל בחינם',
-      url: 'https://shipazti.com/signup'
-    },
-    
-    testimonials: {
-      title: '💬 מה אומרים משפצים אחרים',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 20px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 1.6; margin: 0 0 12px; font-style: italic;">
-            "שפצתי דירת 4 חדרים והאפליקציה עזרה לי <strong>לחסוך ₪15,000</strong> בהשוואת הצעות מחיר"
-          </p>
-          <p style="font-size: 14px; color: #86868b; margin: 0;">— יעל מ., תל אביב</p>
-        </div>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; line-height: 1.6; margin: 0 0 12px; font-style: italic;">
-            "סוף סוף הצלחתי <strong>לעקוב אחרי כל ההוצאות</strong> במקום אחד. ממליץ בחום!"
-          </p>
-          <p style="font-size: 14px; color: #86868b; margin: 0;">— אבי כ., רמת גן</p>
-        </div>
-      `,
-      cta: 'להצטרף עכשיו',
-      url: 'https://shipazti.com/signup'
-    },
-    
-    urgency: {
-      title: '⏰ עוד לא ניצלת את הקרדיטים',
-      subtitle: 'החינמיים שלך',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          יש לך <strong>10 קרדיטים חינם</strong> שמחכים — מספיק להדמיה אחת של חדר.
-        </p>
-        <div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
-          <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">10 קרדיטים</p>
-          <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">ללא כרטיס אשראי · ללא התחייבות</p>
-        </div>
-      `,
-      cta: 'להתחיל עכשיו ←',
-      url: 'https://shipazti.com/login?redirect=/ai-vision'
-    },
-    
-    demo: {
-      title: '📊 ראה איך זה עובד',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          רוצה לראות בדיוק <strong>איך ShiputzAI יכול לעזור לך</strong>?
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-          באתר שלנו יש הדגמה מלאה — תוכל לראות את <strong>הדשבורד</strong>, <strong>סריקת הקבלות</strong>, וכל הפיצ'רים.
-        </p>
-      `,
-      cta: 'לצפות בהדגמה',
-      url: 'https://shipazti.com'
-    },
-    
-    last_chance: {
-      title: '🤝 אולי לא בשבילך?',
-      subtitle: '',
-      content: `
-        ${greeting}
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          שלחנו לך כמה מיילים ולא שמענו ממך.
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          אם ShiputzAI לא מתאים לך — <strong>זה בסדר גמור</strong>. נפסיק לשלוח.
-        </p>
-        <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-          אבל אם בכל זאת רוצה לנסות — יש לך <strong>10 קרדיטים חינם</strong>. בלי התחייבות, בלי כרטיס אשראי.
-        </p>
-      `,
-      cta: 'לנסות בחינם ←',
-      url: 'https://shipazti.com/signup'
-    },
-  };
-  
-  const t = templates[template] || templates.reminder;
-  return wrapEmail(t.title, t.subtitle, t.content, t.cta, t.url, userEmail);
-}
-
-// Generate unique discount code for Premium
-function generateDiscountCode(email: string): string {
-  const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `SHIP-${prefix}-${random}`;
-}
-
-// Generate unique discount code for Vision
-function generateVisionDiscountCode(email: string): string {
-  const prefix = email.split('@')[0].slice(0, 4).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `VIS-${prefix}-${random}`;
-}
-
-// Send email via Resend
-async function sendEmail(to: string, subject: string, html: string) {
-  const token = generateUnsubscribeToken(to.toLowerCase());
-  const unsubUrl = `https://shipazti.com/unsubscribe?email=${encodeURIComponent(to.toLowerCase())}${token ? `&token=${token}` : ''}`;
-  
+// Send email via Resend with List-Unsubscribe header
+async function sendEmail(to: string, subject: string, html: string): Promise<{ id?: string; message?: string }> {
+  const unsubUrl = getUnsubscribeUrl(to);
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${RESEND_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ 
-      from: FROM_EMAIL, 
-      to, 
-      subject, 
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to,
+      subject,
       html,
       headers: {
         'List-Unsubscribe': `<${unsubUrl}>`,
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      }
+      },
     }),
   });
   return response.json();
 }
 
+// Helper: greeting
+function greet(name?: string): string {
+  const n = name || 'משפץ יקר';
+  return `<p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${n}</strong>,</p>`;
+}
+
+// Helper: info box
+function infoBox(lines: string[]): string {
+  return `<div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
+    <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">${lines.join('<br>')}</p>
+  </div>`;
+}
+
+// Helper: paragraph
+function para(text: string): string {
+  return `<p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">${text}</p>`;
+}
+
+// Helper: big number box
+function bigNumber(number: string, caption: string): string {
+  return `<div style="background: #f5f5f7; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 25px;">
+    <p style="font-size: 36px; font-weight: 700; color: #1d1d1f; margin: 0;">${number}</p>
+    <p style="font-size: 15px; color: #86868b; margin: 12px 0 0;">${caption}</p>
+  </div>`;
+}
+
+// Generate unique discount code
+function generateDiscountCode(prefix: string, email: string): string {
+  const emailPart = email.split('@')[0].slice(0, 4).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `${prefix}-${emailPart}-${random}`;
+}
+
+// ============================================================
+// TYPES
+// ============================================================
+
+interface UserData {
+  id: string;
+  email: string;
+  name: string | null;
+  purchased: boolean;
+  purchased_at: string | null;
+  created_at: string;
+  vision_subscription: string | null;
+  viz_credits: number;
+  plan: string | null;
+  marketing_unsubscribed_at: string | null;
+}
+
+interface EmailAction {
+  flowName: string;
+  dayNumber: number;
+  subject: string;
+  html: string;
+  reason: string;
+}
+
+interface FlowContext {
+  user: UserData;
+  sentEmails: Map<string, Set<number>>; // flowName → Set of day_numbers sent
+  lastEmailAt: Date | null;
+  creditTransactions: Array<{ action: string; amount: number; created_at: string }>;
+  totalUsageCount: number;
+  daysSinceSignup: number;
+  daysSinceLastActivity: number;
+  daysSincePurchase: number;
+  isSunday: boolean;
+  weeklyActionCount: number;
+}
+
+// ============================================================
+// FLOW EVALUATORS
+// Each returns an EmailAction or null
+// ============================================================
+
+// Flow 1: Welcome (trigger: signup)
+function evaluateWelcome(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, daysSinceSignup } = ctx;
+  const sent = sentEmails.get('welcome') || new Set();
+
+  // #1 IMMEDIATE (day 0): Welcome with free credits
+  if (!sent.has(0)) {
+    return {
+      flowName: 'welcome',
+      dayNumber: 0,
+      subject: 'ברוכים הבאים — יש לך קרדיטים חינם',
+      reason: 'new_signup',
+      html: wrapEmail(
+        'ברוכים הבאים',
+        'יש לך 10 קרדיטים חינם לניסיון',
+        greet(user.name || undefined) +
+        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לדמיין את השיפוץ לפני שמתחילים</strong>, לנתח הצעות מחיר, ולעקוב אחרי התקציב.') +
+        infoBox([
+          '✅ הדמיית חדר בלחיצה',
+          '✅ ניתוח הצעות מחיר',
+          '✅ סריקת קבלות אוטומטית',
+          '✅ כתב כמויות מתמונה',
+        ]) +
+        para('התחל עם הדמיה ראשונה — זה לוקח <strong>30 שניות</strong>.'),
+        'לנסות הדמיה',
+        `${BASE_URL}/visualize`,
+        user.email,
+      ),
+    };
+  }
+
+  // #2 +24h: Tip email
+  if (!sent.has(1) && daysSinceSignup >= 1) {
+    return {
+      flowName: 'welcome',
+      dayNumber: 1,
+      subject: 'הטיפ שחוסך הכי הרבה כסף בשיפוץ',
+      reason: 'welcome_day1',
+      html: wrapEmail(
+        'הטיפ שחוסך הכי הרבה כסף',
+        'בשיפוץ',
+        greet(user.name || undefined) +
+        para('<strong>70% מהשיפוצים חורגים מהתקציב.</strong> הטיפ הכי חשוב? לבדוק כל הצעת מחיר לפני שחותמים.') +
+        para('ה-AI שלנו מנתח הצעות מחיר ובודק:') +
+        infoBox([
+          '🔍 האם <strong>המחיר הוגן</strong> לעומת השוק?',
+          '📋 מה <strong>חסר</strong> בהצעה?',
+          '⚠️ סעיפים שצריך <strong>לשים לב</strong> אליהם',
+        ]) +
+        para('קיבלת הצעת מחיר? <strong>העלה אותה ותקבל ניתוח תוך שניות.</strong>'),
+        'לנתח הצעת מחיר',
+        `${BASE_URL}/quote-analysis`,
+        user.email,
+      ),
+    };
+  }
+
+  // #3 +72h: Only if user hasn't used visualization
+  if (!sent.has(2) && daysSinceSignup >= 3) {
+    const hasUsedVision = ctx.creditTransactions.some(t => t.action === 'visualize');
+    if (!hasUsedVision) {
+      return {
+        flowName: 'welcome',
+        dayNumber: 2,
+        subject: 'עדיין לא ניסית את ההדמיה?',
+        reason: 'welcome_no_vision_use',
+        html: wrapEmail(
+          'עדיין לא ניסית?',
+          'ההדמיה לוקחת 30 שניות',
+          greet(user.name || undefined) +
+          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong>. זה הכלי הכי פופולרי שלנו!') +
+          para('פשוט מצלמים את החדר, בוחרים סגנון — ותוך שניות רואים <strong>איך זה ייראה אחרי השיפוץ</strong>.') +
+          bigNumber('10 קרדיטים', 'מחכים לך בחשבון — מספיק להדמיה אחת'),
+          'לנסות עכשיו',
+          `${BASE_URL}/visualize`,
+          user.email,
+        ),
+      };
+    }
+  }
+
+  return null;
+}
+
+// Flow 2: Activation (trigger: first tool use)
+function evaluateActivation(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, creditTransactions } = ctx;
+  const sent = sentEmails.get('activation') || new Set();
+
+  // Need at least one deduction (negative amount = usage)
+  const deductions = creditTransactions.filter(t => t.amount < 0);
+  if (deductions.length === 0) return null;
+
+  const firstUse = new Date(deductions[0].created_at);
+  const hoursSinceFirstUse = (Date.now() - firstUse.getTime()) / (1000 * 60 * 60);
+
+  // #1 IMMEDIATE after first deduction
+  if (!sent.has(0)) {
+    return {
+      flowName: 'activation',
+      dayNumber: 0,
+      subject: 'ההדמיה הראשונה שלך מוכנה',
+      reason: 'first_tool_use',
+      html: wrapEmail(
+        'כל הכבוד',
+        'השתמשת בכלי הראשון שלך',
+        greet(user.name || undefined) +
+        para('מעולה! עשית את הצעד הראשון. <strong>ההדמיה שלך מוכנה</strong> בדשבורד.') +
+        para('רוצה לראות את זה מזווית אחרת? נסה סגנון אחר או חדר נוסף.'),
+        'לצפות בתוצאה',
+        `${BASE_URL}/visualize`,
+        user.email,
+      ),
+    };
+  }
+
+  // #2 +48h: Suggest unused tools
+  if (!sent.has(1) && hoursSinceFirstUse >= 48) {
+    const usedActions = new Set(deductions.map(t => t.action));
+    const allTools = [
+      { action: 'visualize', name: 'הדמיית חדר', url: '/visualize' },
+      { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
+      { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
+      { action: 'bill-of-quantities', name: 'כתב כמויות', url: '/bill-of-quantities' },
+      { action: 'shop-look', name: 'קנה את הסגנון', url: '/shop-the-look' },
+      { action: 'detect-items', name: 'זיהוי פריטים', url: '/detect-items' },
+    ];
+    const unused = allTools.filter(t => !usedActions.has(t.action)).slice(0, 3);
+
+    if (unused.length > 0) {
+      const toolLines = unused.map(t => `✅ <strong>${t.name}</strong>`);
+      return {
+        flowName: 'activation',
+        dayNumber: 1,
+        subject: 'כלים שכדאי לנסות',
+        reason: 'suggest_unused_tools',
+        html: wrapEmail(
+          'עוד כלים שיעזרו לך',
+          'כדאי לנסות',
+          greet(user.name || undefined) +
+          para('בנוסף לכלי שכבר השתמשת בו, יש לנו עוד כמה <strong>שיכולים לחסוך לך זמן וכסף</strong>:') +
+          infoBox(toolLines) +
+          para('כל כלי עולה רק <strong>כמה קרדיטים</strong> ונותן תוצאה מיידית.'),
+          'לנסות עכשיו',
+          `${BASE_URL}${unused[0].url}`,
+          user.email,
+        ),
+      };
+    }
+  }
+
+  return null;
+}
+
+// Flow 3: Abandoned Action — TODO: needs frontend tracking
+// function evaluateAbandoned(ctx: FlowContext): EmailAction | null { return null; }
+
+// Flow 4: Low Credits (viz_credits <= 3 AND > 0)
+function evaluateLowCredits(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails } = ctx;
+  const sent = sentEmails.get('low_credits') || new Set();
+
+  if (user.viz_credits > 3 || user.viz_credits <= 0) return null;
+
+  if (!sent.has(0)) {
+    return {
+      flowName: 'low_credits',
+      dayNumber: 0,
+      subject: `נשארו לך ${user.viz_credits} קרדיטים`,
+      reason: 'credits_running_low',
+      html: wrapEmail(
+        `נשארו ${user.viz_credits} קרדיטים`,
+        'כדאי להשלים לפני שנגמרים',
+        greet(user.name || undefined) +
+        para(`נשארו לך <strong>${user.viz_credits} קרדיטים</strong> בחשבון. מספיק לעוד שימוש אחד או שניים.`) +
+        para('כדי להמשיך להשתמש בכל הכלים — <strong>השלם קרדיטים בכל רגע</strong>.') +
+        bigNumber(`${user.viz_credits}`, 'קרדיטים נותרו'),
+        'לצפות בדשבורד',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  return null;
+}
+
+// Flow 5: Zero Credits (viz_credits = 0)
+async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<EmailAction | null> {
+  const { user, sentEmails, creditTransactions } = ctx;
+  const sent = sentEmails.get('zero_credits') || new Set();
+
+  if (user.viz_credits !== 0) return null;
+  // Only trigger if user actually used credits before (not a brand new account)
+  const hadDeductions = creditTransactions.some(t => t.amount < 0);
+  if (!hadDeductions) return null;
+
+  // #1 IMMEDIATE: credits depleted
+  if (!sent.has(0)) {
+    const deductions = creditTransactions.filter(t => t.amount < 0);
+    const usageCount = deductions.length;
+    const totalSpent = deductions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    return {
+      flowName: 'zero_credits',
+      dayNumber: 0,
+      subject: 'נגמרו הקרדיטים',
+      reason: 'credits_depleted',
+      html: wrapEmail(
+        'הקרדיטים נגמרו',
+        '',
+        greet(user.name || undefined) +
+        para(`השתמשת ב-<strong>${usageCount} כלים</strong> וצרכת <strong>${totalSpent} קרדיטים</strong>. עכשיו הגיע הזמן להשלים.`) +
+        infoBox([
+          `📊 ${usageCount} שימושים בכלים`,
+          `💰 ${totalSpent} קרדיטים נוצלו`,
+        ]) +
+        para('חבילות מתחילות מ-<strong>₪10 בלבד</strong>.'),
+        'לרכוש קרדיטים',
+        `${BASE_URL}/pricing`,
+        user.email,
+      ),
+    };
+  }
+
+  // #2 +48h: 20% discount (if didn't buy)
+  if (!sent.has(1) && sent.has(0)) {
+    // Check if user bought since flow started
+    const flow0Sent = await getFlowSentDate(supabase, user.email, 'zero_credits', 0);
+    if (flow0Sent) {
+      const hoursSince = (Date.now() - flow0Sent.getTime()) / (1000 * 60 * 60);
+      if (hoursSince >= 48 && !user.purchased) {
+        const code = generateDiscountCode('SAVE20', user.email);
+        const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        await supabase.from('discount_codes').insert({
+          code,
+          user_email: user.email,
+          discount_percent: 20,
+          expires_at: expiresAt.toISOString(),
+        });
+
+        return {
+          flowName: 'zero_credits',
+          dayNumber: 1,
+          subject: 'הנחה מיוחדת — 48 שעות בלבד',
+          reason: 'zero_credits_discount_20',
+          html: wrapEmail(
+            'הנחה מיוחדת בשבילך',
+            '48 שעות בלבד',
+            greet(user.name || undefined) +
+            para('כי ראינו שאתה משתמש פעיל, יש לנו הצעה:') +
+            bigNumber('20% הנחה', `קוד: <strong>${code}</strong>`) +
+            para('ההנחה תקפה ל-<strong>48 השעות הקרובות בלבד</strong>.'),
+            'לרכוש עם הנחה',
+            `${BASE_URL}/pricing?code=${code}`,
+            user.email,
+          ),
+        };
+      }
+    }
+  }
+
+  // #3 +7 days: 25% discount (last attempt)
+  if (!sent.has(2) && sent.has(0)) {
+    const flow0Sent = await getFlowSentDate(supabase, user.email, 'zero_credits', 0);
+    if (flow0Sent) {
+      const daysSince = (Date.now() - flow0Sent.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSince >= 7 && !user.purchased) {
+        const code = generateDiscountCode('BACK25', user.email);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await supabase.from('discount_codes').insert({
+          code,
+          user_email: user.email,
+          discount_percent: 25,
+          expires_at: expiresAt.toISOString(),
+        });
+
+        return {
+          flowName: 'zero_credits',
+          dayNumber: 2,
+          subject: 'הצעה אחרונה — 25 אחוז הנחה',
+          reason: 'zero_credits_discount_25',
+          html: wrapEmail(
+            'הצעה אחרונה',
+            'הנחה הכי גבוהה שלנו',
+            greet(user.name || undefined) +
+            para('לא רוצים לוותר עליך. הנה <strong>ההנחה הכי גבוהה שלנו</strong>:') +
+            bigNumber('25% הנחה', `קוד: <strong>${code}</strong>`) +
+            para('חבילות קרדיטים מ-₪10 — <strong>עם ההנחה עוד פחות</strong>.'),
+            'לנצל את ההנחה',
+            `${BASE_URL}/pricing?code=${code}`,
+            user.email,
+          ),
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+// Flow 6: Inactive (no credit_transactions in X days)
+async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailAction | null> {
+  const { user, sentEmails, daysSinceLastActivity } = ctx;
+  const sent = sentEmails.get('inactive') || new Set();
+
+  // User must have been active at some point
+  if (ctx.creditTransactions.length === 0) return null;
+  // If user is still active, skip
+  if (daysSinceLastActivity < 7) return null;
+
+  // #1: 7 days inactive
+  if (!sent.has(0) && daysSinceLastActivity >= 7) {
+    return {
+      flowName: 'inactive',
+      dayNumber: 0,
+      subject: 'השיפוץ מתקדם?',
+      reason: 'inactive_7d',
+      html: wrapEmail(
+        'השיפוץ מתקדם?',
+        '',
+        greet(user.name || undefined) +
+        para('לא ראינו אותך כבר שבוע. הכל בסדר עם השיפוץ?') +
+        para('הדשבורד שלך מחכה — <strong>כל הנתונים שמורים</strong>.'),
+        'לצפות בדשבורד',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  // #2: 14 days inactive
+  if (!sent.has(1) && daysSinceLastActivity >= 14) {
+    return {
+      flowName: 'inactive',
+      dayNumber: 1,
+      subject: 'ראית את הכלי החדש?',
+      reason: 'inactive_14d',
+      html: wrapEmail(
+        'יש לנו כלים חדשים',
+        '',
+        greet(user.name || undefined) +
+        para('בזמן שלא היית, הוספנו כלים חדשים:') +
+        infoBox([
+          '✅ <strong>קנה את הסגנון</strong> — מזהה מוצרים בתמונה ומוצא אותם לקנייה',
+          '✅ <strong>כתב כמויות</strong> — מפרט מלא מתמונה אחת',
+          '✅ <strong>ניתוח הצעות מחיר</strong> — בודק אם המחיר הוגן',
+        ]),
+        'לנסות את הכלים',
+        `${BASE_URL}/visualize`,
+        user.email,
+      ),
+    };
+  }
+
+  // #3: 30 days — gift 5 credits
+  if (!sent.has(2) && daysSinceLastActivity >= 30) {
+    // Actually add 5 credits
+    try {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('viz_credits')
+        .eq('email', user.email)
+        .single();
+      const currentCredits = userData?.viz_credits || 0;
+      const newBalance = currentCredits + 5;
+      await supabase
+        .from('users')
+        .update({ viz_credits: newBalance })
+        .eq('email', user.email);
+      await supabase.from('credit_transactions').insert({
+        user_email: user.email,
+        action: 'gift_inactive',
+        amount: 5,
+        balance_after: newBalance,
+        created_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.error(`Failed to gift credits to ${user.email}:`, e);
+    }
+
+    return {
+      flowName: 'inactive',
+      dayNumber: 2,
+      subject: 'מתגעגעים — יש לך מתנה',
+      reason: 'inactive_30d_gift',
+      html: wrapEmail(
+        'מתגעגעים',
+        'יש לך 5 קרדיטים מתנה',
+        greet(user.name || undefined) +
+        para('עבר חודש מהשימוש האחרון שלך. רצינו להגיד שלום ולתת לך <strong>מתנה קטנה</strong>.') +
+        bigNumber('5 קרדיטים', 'כבר בחשבון שלך — מוכנים לשימוש') +
+        para('מספיק לסריקת קבלות, ניתוח הצעת מחיר, או כתב כמויות.'),
+        'להשתמש במתנה',
+        `${BASE_URL}/visualize`,
+        user.email,
+      ),
+    };
+  }
+
+  // #4: 60 days — last email with prominent unsubscribe
+  if (!sent.has(3) && daysSinceLastActivity >= 60) {
+    const unsubUrl = getUnsubscribeUrl(user.email);
+    return {
+      flowName: 'inactive',
+      dayNumber: 3,
+      subject: 'עדיין שם?',
+      reason: 'inactive_60d_final',
+      html: wrapEmail(
+        'עדיין שם?',
+        '',
+        greet(user.name || undefined) +
+        para('עברו חודשיים מאז ביקורך האחרון. אם השיפוץ הסתיים — מעולה!') +
+        para('אם רוצה להמשיך לקבל מאיתנו עדכונים, <strong>פשוט לחץ על הכפתור</strong>.') +
+        para(`לא רוצה לשמוע מאיתנו? <a href="${unsubUrl}" style="color: #0071e3; text-decoration: underline;">להסרה מרשימת התפוצה</a>`),
+        'לצפות בדשבורד',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  return null;
+}
+
+// Flow 7: Referral — TODO: needs referral system
+// function evaluateReferral(ctx: FlowContext): EmailAction | null { return null; }
+
+// Flow 8: Post-Purchase (trigger: purchased=true)
+function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, daysSincePurchase } = ctx;
+  const sent = sentEmails.get('post_purchase') || new Set();
+
+  if (!user.purchased || !user.purchased_at) return null;
+
+  // #1 IMMEDIATE: Credits ready
+  if (!sent.has(0)) {
+    return {
+      flowName: 'post_purchase',
+      dayNumber: 0,
+      subject: 'הקרדיטים מוכנים',
+      reason: 'purchase_confirmed',
+      html: wrapEmail(
+        'הקרדיטים מוכנים',
+        'אפשר להתחיל',
+        greet(user.name || undefined) +
+        para('הקרדיטים החדשים שלך <strong>כבר בחשבון</strong> ומוכנים לשימוש.') +
+        bigNumber(`${user.viz_credits}`, 'קרדיטים בחשבון שלך') +
+        para('היכנס לדשבורד ותתחיל להשתמש.'),
+        'לדשבורד',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  // #2 +3 days: Tips for maximizing credits
+  if (!sent.has(1) && daysSincePurchase >= 3) {
+    return {
+      flowName: 'post_purchase',
+      dayNumber: 1,
+      subject: 'ככה מנצלים כל קרדיט למקסימום',
+      reason: 'post_purchase_tips',
+      html: wrapEmail(
+        'ניצול מקסימלי',
+        'של הקרדיטים שלך',
+        greet(user.name || undefined) +
+        para('הנה כמה טיפים <strong>לנצל כל קרדיט בצורה חכמה</strong>:') +
+        infoBox([
+          '📸 <strong>סריקת קבלות</strong> — רק 2 קרדיטים, חוסך שעות הקלדה',
+          '📋 <strong>כתב כמויות</strong> — 5 קרדיטים, מפרט מלא מתמונה',
+          '🔍 <strong>ניתוח הצעת מחיר</strong> — 3 קרדיטים, יכול לחסוך אלפי שקלים',
+        ]) +
+        para('הכלי הכי משתלם? <strong>סריקת קבלות</strong> — שני קרדיטים ומקבלים פירוט מלא.'),
+        'לסרוק קבלה',
+        `${BASE_URL}/receipt-scanner`,
+        user.email,
+      ),
+    };
+  }
+
+  // #3 +7 days: Feedback request
+  if (!sent.has(2) && daysSincePurchase >= 7) {
+    return {
+      flowName: 'post_purchase',
+      dayNumber: 2,
+      subject: 'מה דעתך? לוקח 15 שניות',
+      reason: 'post_purchase_feedback',
+      html: wrapEmail(
+        'מה דעתך?',
+        'לוקח 15 שניות',
+        greet(user.name || undefined) +
+        para('עבר שבוע מאז שרכשת קרדיטים. נשמח לשמוע <strong>מה אתה חושב</strong>!') +
+        para('הפידבק שלך עוזר לנו לבנות מוצר טוב יותר. פשוט <strong>שלח לנו מייל קצר</strong> עם מה שאהבת ומה אפשר לשפר.'),
+        'לשלוח פידבק',
+        'mailto:help@shipazti.com?subject=פידבק על ShiputzAI',
+        user.email,
+      ),
+    };
+  }
+
+  return null;
+}
+
+// Flow 9: Usage Summary (weekly, Sunday)
+function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, isSunday, weeklyActionCount } = ctx;
+  if (!isSunday) return null;
+
+  // Variant C: 0 actions — don't send, let Inactive flow handle
+  if (weeklyActionCount === 0) return null;
+
+  const sent = sentEmails.get('usage_summary') || new Set();
+  // Use week number as day_number for idempotency
+  const weekNum = getWeekNumber();
+  if (sent.has(weekNum)) return null;
+
+  // Variant A: 3+ actions
+  if (weeklyActionCount >= 3) {
+    return {
+      flowName: 'usage_summary',
+      dayNumber: weekNum,
+      subject: 'סיכום שבועי — שבוע פרודוקטיבי',
+      reason: 'weekly_summary_active',
+      html: wrapEmail(
+        'הסיכום השבועי שלך',
+        'שבוע מעולה',
+        greet(user.name || undefined) +
+        bigNumber(`${weeklyActionCount} שימושים`, 'השבוע') +
+        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> — כל שימוש בכלים מקרב אותך לשיפוץ מושלם.') +
+        para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
+        'לדשבורד',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  // Variant B: 1-2 actions
+  return {
+    flowName: 'usage_summary',
+    dayNumber: weekNum,
+    subject: 'סיכום שבועי — נסה עוד כלי',
+    reason: 'weekly_summary_light',
+    html: wrapEmail(
+      'הסיכום השבועי שלך',
+      '',
+      greet(user.name || undefined) +
+      bigNumber(`${weeklyActionCount}`, `שימוש${weeklyActionCount > 1 ? 'ים' : ''} השבוע`) +
+      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>ניתוח הצעת מחיר</strong> או <strong>כתב כמויות</strong> — שניהם חוסכים זמן וכסף.') +
+      para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
+      'לנסות כלי נוסף',
+      `${BASE_URL}/visualize`,
+      user.email,
+    ),
+  };
+}
+
+// Flow 10: Milestone (usage count milestones)
+function evaluateMilestone(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, totalUsageCount } = ctx;
+  const sent = sentEmails.get('milestone') || new Set();
+
+  // #1: 5 uses
+  if (!sent.has(0) && totalUsageCount >= 5) {
+    // Find an unused tool to suggest
+    const usedActions = new Set(ctx.creditTransactions.filter(t => t.amount < 0).map(t => t.action));
+    const suggestions = [
+      { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
+      { action: 'bill-of-quantities', name: 'כתב כמויות', url: '/bill-of-quantities' },
+      { action: 'shop-look', name: 'קנה את הסגנון', url: '/shop-the-look' },
+      { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
+    ];
+    const unused = suggestions.find(s => !usedActions.has(s.action));
+    const suggestUrl = unused ? `${BASE_URL}${unused.url}` : `${BASE_URL}/dashboard`;
+    const suggestText = unused ? `נסה גם את <strong>${unused.name}</strong> — כלי שרוב המשתמשים אוהבים.` : 'המשך לנצל את כל הכלים!';
+
+    return {
+      flowName: 'milestone',
+      dayNumber: 0,
+      subject: 'חמש פעם — אתה מקצוען',
+      reason: 'milestone_5_uses',
+      html: wrapEmail(
+        'חמש פעם',
+        'אתה מקצוען',
+        greet(user.name || undefined) +
+        bigNumber('5', 'שימושים בכלים') +
+        para('כבר השתמשת ב-5 כלים! <strong>אתה יודע מה אתה עושה.</strong>') +
+        para(suggestText),
+        'להמשיך',
+        suggestUrl,
+        user.email,
+      ),
+    };
+  }
+
+  // #2: 10 uses — upsell
+  if (!sent.has(1) && totalUsageCount >= 10) {
+    return {
+      flowName: 'milestone',
+      dayNumber: 1,
+      subject: 'אתה בין המשתמשים הפעילים ביותר',
+      reason: 'milestone_10_uses',
+      html: wrapEmail(
+        'אתה בין הפעילים ביותר',
+        '',
+        greet(user.name || undefined) +
+        bigNumber('10+', 'שימושים') +
+        para('עם יותר מ-10 שימושים, <strong>אתה בין המשתמשים הכי פעילים שלנו</strong>.') +
+        para('שווה לבדוק את התוכניות שלנו — <strong>חבילת קרדיטים גדולה יותר = מחיר טוב יותר לקרדיט</strong>.'),
+        'לצפות בתוכניות',
+        `${BASE_URL}/pricing`,
+        user.email,
+      ),
+    };
+  }
+
+  // #3: second purchase — suggest Pro
+  if (!sent.has(2) && user.purchased) {
+    // Check if user has more than one purchase transaction
+    const purchaseTransactions = ctx.creditTransactions.filter(
+      t => t.amount > 0 && !['trial', 'gift_inactive'].includes(t.action)
+    );
+    if (purchaseTransactions.length >= 2) {
+      return {
+        flowName: 'milestone',
+        dayNumber: 2,
+        subject: 'אולי תוכנית חודשית מתאימה?',
+        reason: 'milestone_second_purchase',
+        html: wrapEmail(
+          'אולי תוכנית חודשית?',
+          'חוסך לך כסף וזמן',
+          greet(user.name || undefined) +
+          para('שמנו לב שכבר רכשת קרדיטים פעמיים. <strong>תוכנית חודשית יכולה לחסוך לך</strong>:') +
+          infoBox([
+            '✅ <strong>מחיר טוב יותר</strong> לקרדיט',
+            '✅ <strong>קרדיטים אוטומטיים</strong> כל חודש',
+            '✅ <strong>בלי לדאוג</strong> שיגמרו',
+          ]),
+          'לצפות בתוכניות',
+          `${BASE_URL}/pricing`,
+          user.email,
+        ),
+      };
+    }
+  }
+
+  // #4: project 100% budget — TODO: needs project tracking system
+
+  return null;
+}
+
+// ============================================================
+// HELPER QUERIES
+// ============================================================
+
+async function getFlowSentDate(supabase: any, email: string, flowName: string, dayNumber: number): Promise<Date | null> {
+  const { data } = await supabase
+    .from('email_sequences')
+    .select('sent_at')
+    .eq('user_email', email)
+    .eq('sequence_type', flowName)
+    .eq('day_number', dayNumber)
+    .eq('status', 'sent')
+    .not('resend_id', 'is', null)
+    .limit(1)
+    .single();
+  return data?.sent_at ? new Date(data.sent_at) : null;
+}
+
+function getWeekNumber(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const diff = now.getTime() - start.getTime();
+  return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
+}
+
+// ============================================================
+// MAIN CRON HANDLER
+// ============================================================
+
 export async function GET(request: NextRequest) {
-  // Bug #24 fix: Always require CRON_SECRET in production
+  // Auth check
   const authHeader = request.headers.get('authorization');
   if (!process.env.CRON_SECRET) {
-    console.error('CRON_SECRET not configured - rejecting cron request');
+    console.error('CRON_SECRET not configured');
     return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
   }
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createServiceClient();
-  let sent = 0;
-  let errors = 0;
-  let skipped = 0;
+  if (!RESEND_KEY) {
+    return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 503 });
+  }
 
-  // Bug #10 fix: Generate a unique run ID for idempotency
+  const supabase = createServiceClient();
   const runId = `cron-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
   console.log(`Email cron started: ${runId}`);
 
-  try {
-    // Get all users
-    const { data: users, error } = await supabase.from('users').select('*');
-    if (error) throw error;
+  let sent = 0;
+  let errors = 0;
+  let skipped = 0;
+  const details: string[] = [];
+  const now = new Date();
+  const isSunday = now.getUTCDay() === 0;
 
-    // Get unsubscribed emails
+  try {
+    // Fetch all users
+    const { data: users, error: usersError } = await supabase.from('users').select('*');
+    if (usersError) throw usersError;
+
+    // Fetch unsubscribed newsletter emails
     const { data: unsubscribed } = await supabase
       .from('newsletter_subscribers')
       .select('email')
       .not('unsubscribed_at', 'is', null);
-    const unsubscribedEmails = new Set((unsubscribed || []).map(u => u.email.toLowerCase()));
+    const unsubscribedEmails = new Set((unsubscribed || []).map((u: any) => u.email.toLowerCase()));
 
-    // Admin/test emails that should never receive marketing emails
-    const EXCLUDED_EMAILS = new Set([
-      'test@test.com',
-      'test@shiputzai.com',
-      'test-ollie@shipazti.com',
-      'test-ollie-2028@test.com',
-    ]);
+    // Fetch ALL email_sequences (for sent tracking) — batch
+    const { data: allSequences } = await supabase
+      .from('email_sequences')
+      .select('user_email, sequence_type, day_number, status, resend_id, sent_at')
+      .eq('status', 'sent')
+      .not('resend_id', 'is', null);
 
-    for (const user of users || []) {
-      // Skip excluded test/admin accounts
-      if (EXCLUDED_EMAILS.has(user.email.toLowerCase())) {
-        continue;
-      }
-      
-      // Skip users who unsubscribed from marketing emails
-      if (user.marketing_unsubscribed_at) {
-        continue;
-      }
-      
-      // Skip newsletter unsubscribes (backward compatibility)
-      if (unsubscribedEmails.has(user.email.toLowerCase())) {
-        continue;
-      }
-      
-      const daysSinceRegistration = Math.floor(
-        (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)
-      );
+    // Build per-user sent map: email → flowName → Set<dayNumber>
+    const userSentMap = new Map<string, Map<string, Set<number>>>();
+    // Also track last email date per user
+    const userLastEmailMap = new Map<string, Date>();
+    for (const seq of allSequences || []) {
+      const email = seq.user_email.toLowerCase();
+      if (!userSentMap.has(email)) userSentMap.set(email, new Map());
+      const flows = userSentMap.get(email)!;
+      if (!flows.has(seq.sequence_type)) flows.set(seq.sequence_type, new Set());
+      flows.get(seq.sequence_type)!.add(seq.day_number);
 
-      const sequence = user.purchased ? PURCHASED_SEQUENCE : NON_PURCHASED_SEQUENCE;
-      const sequenceType = user.purchased ? 'purchased' : 'non_purchased';
-
-      // Check if user already received a SUCCESSFULLY SENT email TODAY - limit to 1 email per day
-      // Only check 'sent' status - 'pending' records may be stale from previous failed runs
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
-      const { data: sentToday } = await supabase
-        .from('email_sequences')
-        .select('id')
-        .eq('user_email', user.email)
-        .gte('sent_at', todayStart.toISOString())
-        .eq('status', 'sent')
-        .not('resend_id', 'is', null)
-        .limit(1);
-      
-      if (sentToday && sentToday.length > 0) {
-        // Already sent a real email today, skip this user
-        continue;
-      }
-
-      let emailSentThisRun = false; // Track if we sent an email in this run
-
-      for (const step of sequence) {
-        // Only send ONE email per cron run per user
-        if (emailSentThisRun) break;
-        
-        if (daysSinceRegistration >= step.day) {
-          // Check if already successfully sent (has resend_id = actually delivered)
-          const { data: existing } = await supabase
-            .from('email_sequences')
-            .select('id, status, resend_id')
-            .eq('user_email', user.email)
-            .eq('sequence_type', sequenceType)
-            .eq('day_number', step.day)
-            .single();
-
-          // Skip if already successfully sent (has resend_id)
-          if (existing && existing.status === 'sent' && existing.resend_id) {
-            continue;
-          }
-
-          // Skip purchased day 0 (welcome) if user already got ANY welcome email
-          // This prevents re-sending welcome when user transitions from non_purchased → purchased
-          if (sequenceType === 'purchased' && step.day === 0 && !existing) {
-            const { data: anyWelcome } = await supabase
-              .from('email_sequences')
-              .select('id')
-              .eq('user_email', user.email)
-              .eq('day_number', 0)
-              .eq('status', 'sent')
-              .not('resend_id', 'is', null)
-              .limit(1);
-            
-            if (anyWelcome && anyWelcome.length > 0) {
-              // Already got a welcome email (from non_purchased or webhook) — mark and skip
-              await supabase.from('email_sequences').insert({
-                user_email: user.email,
-                sequence_type: sequenceType,
-                day_number: 0,
-                run_id: runId,
-                status: 'skipped',
-                reason: 'already_welcomed',
-              });
-              skipped++;
-              continue;
-            }
-          }
-
-          if (!existing) {
-            // New record - insert as pending
-            const { error: lockError } = await supabase
-              .from('email_sequences')
-              .insert({
-                user_email: user.email,
-                sequence_type: sequenceType,
-                day_number: step.day,
-                run_id: runId,
-                status: 'pending',
-              });
-            
-            // If insert failed due to conflict, another instance already claimed this
-            if (lockError) {
-              if (lockError.code === '23505') { // Unique violation
-                skipped++;
-                continue;
-              }
-              console.error('Lock error:', lockError);
-              continue;
-            }
-          } else {
-            // Existing record is pending/failed/sent-without-resend-id — retry sending
-            // Update run_id to claim this retry
-            await supabase
-              .from('email_sequences')
-              .update({ run_id: runId, status: 'pending' })
-              .eq('id', existing.id);
-          }
-
-            // Skip vision_offer email if user already has Vision subscription
-            if (step.template === 'vision_offer' && user.vision_subscription === 'active') {
-              // Already marked as pending, update to skipped
-              await supabase
-                .from('email_sequences')
-                .update({ status: 'skipped', reason: 'user_has_vision' })
-                .eq('user_email', user.email)
-                .eq('sequence_type', sequenceType)
-                .eq('day_number', step.day);
-              skipped++;
-              continue;
-            }
-            
-            let html: string;
-            
-            if (step.template === 'discount_offer') {
-              // Create new discount code for Premium
-              const code = generateDiscountCode(user.email);
-              const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
-              
-              await supabase.from('discount_codes').insert({
-                code,
-                user_email: user.email,
-                discount_percent: 30,
-                expires_at: expiresAt.toISOString(),
-              });
-              
-              html = getEmailHTML(step.template, user, code);
-            } else if (step.template === 'vision_offer') {
-              // Vision is now included in Pro — no discount code needed
-              html = getEmailHTML(step.template, user);
-            } else if (step.template === 'urgency') {
-              // Fetch existing discount code for urgency reminder
-              const { data: discountData } = await supabase
-                .from('discount_codes')
-                .select('code')
-                .eq('user_email', user.email)
-                .is('used_at', null)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-              
-              html = getEmailHTML(step.template, user, discountData?.code);
-            } else {
-              html = getEmailHTML(step.template, user);
-            }
-
-            const result = await sendEmail(user.email, step.subject, html);
-
-            if (result.id) {
-              // Bug #10 fix: Update status to sent (record already exists from lock)
-              await supabase
-                .from('email_sequences')
-                .update({ status: 'sent', sent_at: new Date().toISOString(), resend_id: result.id })
-                .eq('user_email', user.email)
-                .eq('sequence_type', sequenceType)
-                .eq('day_number', step.day);
-              sent++;
-              emailSentThisRun = true; // Only one email per user per run
-            } else {
-              // Bug #37 partial fix: Mark as failed for potential retry
-              await supabase
-                .from('email_sequences')
-                .update({ status: 'failed', error: result.message || 'Unknown error' })
-                .eq('user_email', user.email)
-                .eq('sequence_type', sequenceType)
-                .eq('day_number', step.day);
-              errors++;
-            }
+      if (seq.sent_at) {
+        const sentDate = new Date(seq.sent_at);
+        const existing = userLastEmailMap.get(email);
+        if (!existing || sentDate > existing) {
+          userLastEmailMap.set(email, sentDate);
         }
       }
     }
 
-    console.log(`Email cron completed: ${runId} - sent: ${sent}, errors: ${errors}, skipped: ${skipped}`);
-    return NextResponse.json({ 
-      success: true, 
-      sent, 
+    // Fetch all credit_transactions — batch
+    const { data: allTransactions } = await supabase
+      .from('credit_transactions')
+      .select('user_email, action, amount, created_at')
+      .order('created_at', { ascending: true });
+
+    // Build per-user transaction map
+    const userTransactions = new Map<string, Array<{ action: string; amount: number; created_at: string }>>();
+    for (const tx of allTransactions || []) {
+      const email = tx.user_email.toLowerCase();
+      if (!userTransactions.has(email)) userTransactions.set(email, []);
+      userTransactions.get(email)!.push(tx);
+    }
+
+    // Process each user
+    for (const user of (users || []) as UserData[]) {
+      const email = user.email.toLowerCase();
+
+      // Skip excluded
+      if (EXCLUDED_EMAILS.has(email)) continue;
+
+      // Skip unsubscribed (both mechanisms)
+      if (user.marketing_unsubscribed_at) continue;
+      if (unsubscribedEmails.has(email)) continue;
+
+      // 48h minimum gap check
+      const lastEmailAt = userLastEmailMap.get(email) || null;
+      if (lastEmailAt && (now.getTime() - lastEmailAt.getTime()) < MIN_EMAIL_GAP_MS) {
+        // Exception: welcome email day 0 can be sent immediately for new users
+        const sentFlows = userSentMap.get(email);
+        const welcomeSent = sentFlows?.get('welcome')?.has(0);
+        if (welcomeSent) {
+          skipped++;
+          continue;
+        }
+      }
+
+      // Build context
+      const transactions = userTransactions.get(email) || [];
+      const deductions = transactions.filter(t => t.amount < 0);
+      const lastActivity = deductions.length > 0
+        ? new Date(deductions[deductions.length - 1].created_at)
+        : null;
+
+      // Weekly action count (last 7 days)
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const weeklyActionCount = deductions.filter(t => new Date(t.created_at) >= weekAgo).length;
+
+      const ctx: FlowContext = {
+        user,
+        sentEmails: userSentMap.get(email) || new Map(),
+        lastEmailAt,
+        creditTransactions: transactions,
+        totalUsageCount: deductions.length,
+        daysSinceSignup: Math.floor((now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+        daysSinceLastActivity: lastActivity
+          ? Math.floor((now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
+          : 999,
+        daysSincePurchase: user.purchased_at
+          ? Math.floor((now.getTime() - new Date(user.purchased_at).getTime()) / (1000 * 60 * 60 * 24))
+          : 999,
+        isSunday,
+        weeklyActionCount,
+      };
+
+      // Evaluate flows in priority order — first match wins
+      let action: EmailAction | null = null;
+
+      for (const flowName of FLOW_PRIORITY) {
+        switch (flowName) {
+          case 'zero_credits':
+            action = await evaluateZeroCredits(ctx, supabase);
+            break;
+          case 'low_credits':
+            action = evaluateLowCredits(ctx);
+            break;
+          case 'activation':
+            action = evaluateActivation(ctx);
+            break;
+          case 'welcome':
+            action = evaluateWelcome(ctx);
+            break;
+          case 'post_purchase':
+            action = evaluatePostPurchase(ctx);
+            break;
+          case 'inactive':
+            action = await evaluateInactive(ctx, supabase);
+            break;
+          case 'usage_summary':
+            action = evaluateUsageSummary(ctx);
+            break;
+          case 'milestone':
+            action = evaluateMilestone(ctx);
+            break;
+          default:
+            break;
+        }
+        if (action) break;
+      }
+
+      if (!action) {
+        skipped++;
+        continue;
+      }
+
+      // Idempotency: check if already sent this exact email
+      const { data: existing } = await supabase
+        .from('email_sequences')
+        .select('id, status, resend_id')
+        .eq('user_email', user.email)
+        .eq('sequence_type', action.flowName)
+        .eq('day_number', action.dayNumber)
+        .single();
+
+      if (existing?.status === 'sent' && existing?.resend_id) {
+        skipped++;
+        continue;
+      }
+
+      // Insert or update pending record
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from('email_sequences')
+          .insert({
+            user_email: user.email,
+            sequence_type: action.flowName,
+            day_number: action.dayNumber,
+            run_id: runId,
+            status: 'pending',
+            reason: action.reason,
+          });
+        if (insertError?.code === '23505') {
+          skipped++;
+          continue;
+        }
+      } else {
+        await supabase
+          .from('email_sequences')
+          .update({ run_id: runId, status: 'pending', reason: action.reason })
+          .eq('id', existing.id);
+      }
+
+      // Send!
+      try {
+        const result = await sendEmail(user.email, action.subject, action.html);
+        if (result.id) {
+          await supabase
+            .from('email_sequences')
+            .update({
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              resend_id: result.id,
+            })
+            .eq('user_email', user.email)
+            .eq('sequence_type', action.flowName)
+            .eq('day_number', action.dayNumber);
+          sent++;
+          details.push(`${user.email}: ${action.flowName}#${action.dayNumber} (${action.reason})`);
+        } else {
+          await supabase
+            .from('email_sequences')
+            .update({
+              status: 'failed',
+              error: result.message || 'Unknown error',
+            })
+            .eq('user_email', user.email)
+            .eq('sequence_type', action.flowName)
+            .eq('day_number', action.dayNumber);
+          errors++;
+          details.push(`FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`);
+        }
+      } catch (e: any) {
+        errors++;
+        details.push(`ERROR ${user.email}: ${e.message}`);
+      }
+    }
+
+    console.log(`Email cron completed: ${runId} — sent: ${sent}, errors: ${errors}, skipped: ${skipped}`);
+    if (details.length > 0) console.log('Details:', details.join(' | '));
+
+    return NextResponse.json({
+      success: true,
+      sent,
       errors,
       skipped,
       runId,
-      timestamp: new Date().toISOString()
+      details,
+      timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Cron error:', error);
-    return NextResponse.json({ error: 'Failed to process emails' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process emails', message: error.message }, { status: 500 });
   }
 }

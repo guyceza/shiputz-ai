@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error("GLTF proxy error:", error);
     return NextResponse.json(
       { error: "Failed to connect to render server" },
       { status: 503 }

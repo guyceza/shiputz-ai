@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!RESEND_KEY) {
-      console.error("RESEND_API_KEY not configured");
       return NextResponse.json(
         { error: "שירות האימייל לא מוגדר" },
         { status: 500 }
@@ -91,7 +90,6 @@ export async function POST(request: NextRequest) {
 
     if (!supportEmailRes.ok) {
       const err = await supportEmailRes.text();
-      console.error("Failed to send support email:", err);
       return NextResponse.json(
         { error: "שגיאה בשליחת הפנייה" },
         { status: 500 }
@@ -135,7 +133,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Contact form error:", error);
     return NextResponse.json(
       { error: "שגיאה בשליחת הפנייה" },
       { status: 500 }

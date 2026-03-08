@@ -59,7 +59,6 @@ Respond with ONLY the JSON, no other text.`;
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini detect-furniture error:", err);
       return NextResponse.json({ error: "Furniture detection failed" }, { status: 500 });
     }
 
@@ -74,7 +73,6 @@ Respond with ONLY the JSON, no other text.`;
     const info = JSON.parse(jsonMatch[0]);
     return NextResponse.json(info);
   } catch (error: any) {
-    console.error("Detect furniture error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

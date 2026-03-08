@@ -168,7 +168,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: result.message || 'Failed to send' }, { status: 500 });
     }
   } catch (error) {
-    console.error('Send test email error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

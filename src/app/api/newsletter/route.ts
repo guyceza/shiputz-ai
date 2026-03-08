@@ -31,11 +31,9 @@ async function addToResendAudience(email: string) {
       return result;
     } else {
       const error = await response.text();
-      console.error('Resend audience error:', error);
       return null;
     }
   } catch (err) {
-    console.error('Resend audience failed:', err);
     return null;
   }
 }
@@ -109,7 +107,6 @@ export async function POST(request: NextRequest) {
       resend: resendSuccess
     });
   } catch (error) {
-    console.error('Newsletter error:', error);
     return NextResponse.json({ error: 'Server error', details: String(error) }, { status: 500 });
   }
 }

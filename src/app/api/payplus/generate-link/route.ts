@@ -182,7 +182,6 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    console.log('PayPlus request:', JSON.stringify(payPlusBody, null, 2));
 
     const response = await fetch(`${PAYPLUS_BASE_URL}/PaymentPages/generateLink`, {
       method: 'POST',
@@ -197,7 +196,6 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (!response.ok || result.results?.status === 'error') {
-      console.error('PayPlus error:', result);
       return NextResponse.json({
         error: result.message || result.results?.description || 'Payment service error',
       }, { status: 400 });
@@ -225,7 +223,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('PayPlus generate-link error:', error);
     return NextResponse.json({ error: 'Failed to create payment link' }, { status: 500 });
   }
 }

@@ -118,7 +118,6 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", errorText);
       return NextResponse.json({ error: "Failed to analyze blueprint" }, { status: 500 });
     }
 
@@ -143,17 +142,14 @@ export async function POST(request: NextRequest) {
         analysis.rooms = validateRoomPositions(analysis.rooms);
       }
 
-      console.log("Blueprint analysis:", JSON.stringify(analysis, null, 2));
       return NextResponse.json(analysis);
     } catch (parseError) {
-      console.error("Failed to parse Gemini response:", text);
       return NextResponse.json(
         { error: "Failed to parse blueprint analysis", debug: text?.substring(0, 500) },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error("Blueprint analysis error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

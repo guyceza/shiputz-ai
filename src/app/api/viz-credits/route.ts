@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
       ]
     });
   } catch (err) {
-    console.error('viz-credits error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

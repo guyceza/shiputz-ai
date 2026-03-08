@@ -138,7 +138,6 @@ ${midragPricing}
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini API error:", error);
       return NextResponse.json({ error: "AI analysis failed" }, { status: 500 });
     }
 
@@ -147,7 +146,6 @@ ${midragPricing}
 
     return NextResponse.json({ analysis });
   } catch (error) {
-    console.error("Analysis error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

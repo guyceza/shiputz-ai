@@ -6,7 +6,6 @@ import crypto from 'crypto';
 function getUnsubscribeSecret(): string | null {
   const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET;
   if (!secret) {
-    console.error('SECURITY WARNING: UNSUBSCRIBE_SECRET or CRON_SECRET not configured!');
     return null;
   }
   return secret;
@@ -42,7 +41,6 @@ export function generateUnsubscribeToken(email: string): string {
   const secret = getUnsubscribeSecret();
   if (!secret) {
     // Return empty string if no secret - emails will still have unsubscribe link but without token
-    console.error('Cannot generate unsubscribe token: no secret configured');
     return '';
   }
   return crypto
@@ -208,7 +206,6 @@ export async function POST(request: NextRequest) {
       unsubscribed_from: unsubscribedFrom
     });
   } catch (error) {
-    console.error('Unsubscribe error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

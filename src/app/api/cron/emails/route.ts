@@ -49,7 +49,6 @@ const FLOW_PRIORITY: string[] = [
 function generateUnsubscribeToken(email: string): string {
   const secret = process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET;
   if (!secret) {
-    console.error('SECURITY WARNING: UNSUBSCRIBE_SECRET or CRON_SECRET not configured!');
     return '';
   }
   return crypto
@@ -1063,7 +1062,6 @@ export async function GET(request: NextRequest) {
   // Auth check
   const authHeader = request.headers.get('authorization');
   if (!process.env.CRON_SECRET) {
-    console.error('CRON_SECRET not configured');
     return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
   }
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -1076,7 +1074,6 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServiceClient();
   const runId = `cron-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-  console.log(`Email cron started: ${runId}`);
 
   let sent = 0;
   let errors = 0;
@@ -1339,9 +1336,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`Email cron completed: ${runId} — sent: ${sent}, errors: ${errors}, skipped: ${skipped}, evaluated: ${pendingActions.length}`);
-    if (details.length > 0) console.log('Details:', details.join(' | '));
-
     return NextResponse.json({
       success: true,
       sent,
@@ -1353,7 +1347,6 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('Cron error:', error);
     return NextResponse.json({ error: 'Failed to process emails', message: error.message }, { status: 500 });
   }
 }

@@ -79,7 +79,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Vision discount validation error:', error);
     return NextResponse.json(
       { valid: false, reason: 'שגיאה בבדיקת הקוד' },
       { status: 500 }

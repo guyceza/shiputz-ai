@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (beforeUploadError) {
-      console.error('Before image upload error:', beforeUploadError);
       return NextResponse.json({ error: "Failed to upload before image" }, { status: 500 });
     }
 
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (afterUploadError) {
-      console.error('After image upload error:', afterUploadError);
       return NextResponse.json({ error: "Failed to upload after image" }, { status: 500 });
     }
 
@@ -84,7 +82,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Database insert error:', insertError);
       return NextResponse.json({ error: "Failed to save visualization" }, { status: 500 });
     }
 
@@ -102,7 +99,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Save visualization error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

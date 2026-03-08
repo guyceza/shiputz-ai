@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
-      console.error('Get shop look history error:', error);
       return NextResponse.json({ error: "Failed to get history" }, { status: 500 });
     }
 
@@ -46,7 +45,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Get shop look history error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

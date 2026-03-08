@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Image upload error:', uploadError);
       return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
     }
 
@@ -73,7 +72,6 @@ export async function POST(request: NextRequest) {
         .single();
       
       if (projectError) {
-        console.error('Project creation error:', projectError);
         return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
       }
       projectId = newProject.id;
@@ -93,7 +91,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Database insert error:', insertError);
       return NextResponse.json({ error: "Failed to save image" }, { status: 500 });
     }
 
@@ -104,7 +101,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Save shop look image error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

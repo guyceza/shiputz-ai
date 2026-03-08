@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!PAYPLUS_API_KEY || !PAYPLUS_SECRET_KEY) {
-      console.error('PayPlus check: Missing API credentials');
       return NextResponse.json({ error: 'Payment service not configured' }, { status: 500 });
     }
 
@@ -41,7 +40,6 @@ export async function POST(request: NextRequest) {
     });
 
     const ipnData = await ipnResponse.json();
-    console.log('PayPlus IPN check response:', JSON.stringify(ipnData, null, 2));
 
     // Check if IPN call itself succeeded
     if (ipnData.results?.status === 'error') {
@@ -81,7 +79,6 @@ export async function POST(request: NextRequest) {
         if (custRes.ok) {
           const custData = await custRes.json();
           email = custData.data?.email || custData.email;
-          console.log('IPN check: customer lookup →', email);
         }
       } catch (e) {
         console.error('IPN check: customer lookup failed:', e);
@@ -91,11 +88,9 @@ export async function POST(request: NextRequest) {
     // Last fallback: use email/product from client request
     if (!email && clientEmail) {
       email = clientEmail;
-      console.log('IPN check: using client-provided email:', email);
     }
 
     if (!email) {
-      console.error('PayPlus IPN check: No email in transaction data');
       return NextResponse.json({ success: true, status: 'success', warning: 'No email found' });
     }
 
@@ -115,7 +110,6 @@ export async function POST(request: NextRequest) {
       if (error) {
         console.error('IPN check: Error upserting:', error);
       } else {
-        console.log(`IPN check: ${email} → ${productType} activated`);
       }
     }
 
@@ -127,7 +121,6 @@ export async function POST(request: NextRequest) {
       if (error) {
         console.error('IPN check: Error upserting vision:', error);
       } else {
-        console.log(`IPN check: ${email} → vision activated`);
       }
     }
 
@@ -147,10 +140,8 @@ export async function POST(request: NextRequest) {
         .update({ viz_credits: currentCredits + credits })
         .eq('email', email.toLowerCase());
       
-      console.log(`IPN check: Added ${credits} viz credits to ${email}`);
     }
 
-    console.log(`✅ PayPlus IPN check: ${email} → ${productType} (status: ${statusCode})`);
 
     // Mark pending payment as completed (so cron doesn't re-process)
     if (page_request_uid) {
@@ -168,7 +159,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('PayPlus check error:', error);
     return NextResponse.json({ error: 'Failed to check payment' }, { status: 500 });
   }
 }

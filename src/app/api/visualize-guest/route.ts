@@ -122,7 +122,6 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error("GEMINI_API_KEY not found in environment");
       return NextResponse.json({ error: "API key not configured." }, { status: 500 });
     }
 
@@ -170,7 +169,6 @@ export async function POST(request: NextRequest) {
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error("Guest Gemini API error:", geminiResponse.status, errorText);
 
       if (geminiResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
         return NextResponse.json({
@@ -260,7 +258,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         }
       } else {
         const errorText = await editResponse.text();
-        console.error("Guest image gen error:", editResponse.status, errorText);
 
         if (editResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
           return NextResponse.json({
@@ -281,7 +278,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         });
       }
     } catch (editError: any) {
-      console.error("Guest image edit failed:", editError);
       const isTimeout = editError?.name === 'AbortError' || editError?.message?.includes('abort');
       return NextResponse.json({
         success: false,
@@ -329,7 +325,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
   } catch (error) {
     trackRequest('/api/visualize-guest', true);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Guest visualize API error:", errorMessage, error);
     return NextResponse.json({
       error: "אירעה שגיאה בעיבוד התמונה. נסה שוב מאוחר יותר.",
       code: "SERVER_ERROR"

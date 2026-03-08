@@ -60,7 +60,6 @@ Replace or add the furniture from the second image into the room shown in the fi
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini furniture error:", err);
       return NextResponse.json({ error: "Furniture swap failed" }, { status: 500 });
     }
 
@@ -83,7 +82,6 @@ Replace or add the furniture from the second image into the room shown in the fi
 
     return NextResponse.json({ image: resultImage, text: resultText });
   } catch (error: any) {
-    console.error("Furniture API error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

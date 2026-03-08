@@ -101,7 +101,6 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini API error:", error);
       return NextResponse.json({ error: "שגיאה בניתוח. נסה שוב." }, { status: 500 });
     }
 
@@ -138,7 +137,6 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
 
     return NextResponse.json({ analysis, verdict });
   } catch (error) {
-    console.error("Analysis error:", error);
     return NextResponse.json({ error: "שגיאה פנימית. נסה שוב." }, { status: 500 });
   }
 }

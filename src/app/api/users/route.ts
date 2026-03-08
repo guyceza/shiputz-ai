@@ -54,10 +54,8 @@ async function sendWelcomeEmail(email: string, name: string) {
       }),
     });
     const result = await response.json();
-    console.log('Welcome email sent:', result);
     return result;
   } catch (err) {
-    console.error('Failed to send welcome email:', err);
     return null;
   }
 }
@@ -87,7 +85,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -144,7 +141,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating user:', error);
       return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 
@@ -165,7 +161,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: 'User created', id: data.id });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -198,13 +193,11 @@ export async function PATCH(request: NextRequest) {
       .eq('email', email.toLowerCase());
 
     if (error) {
-      console.error('Error updating user:', error);
       return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'User marked as purchased' });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

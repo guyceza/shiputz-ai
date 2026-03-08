@@ -131,7 +131,6 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Gemini API error:", response.status, error);
       return NextResponse.json({ 
         error: "AI scan failed", 
         details: error.substring(0, 200),
@@ -175,7 +174,6 @@ export async function POST(request: NextRequest) {
     }, { status: 422 });
   } catch (error) {
     trackRequest('/api/scan-receipt', true);
-    console.error("Scan error:", error);
     return NextResponse.json({ 
       error: "אירעה שגיאה בסריקת הקבלה. נסה שוב מאוחר יותר.",
       code: "SERVER_ERROR"

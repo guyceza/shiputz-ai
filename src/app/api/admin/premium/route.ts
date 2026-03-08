@@ -74,7 +74,6 @@ async function sendWelcomePremiumEmail(email: string, name?: string) {
     });
     return response.json();
   } catch (error) {
-    console.error('Failed to send welcome email:', error);
     return null;
   }
 }
@@ -167,7 +166,6 @@ export async function POST(request: NextRequest) {
       .eq('email', email.toLowerCase());
     
     if (error) {
-      console.error('Error updating user:', error);
       return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
     }
     
@@ -200,7 +198,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true, list });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Failed to add premium' }, { status: 500 });
   }
 }

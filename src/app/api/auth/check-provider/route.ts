@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       provider: data.auth_provider || 'email' 
     });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

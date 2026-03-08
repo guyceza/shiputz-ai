@@ -41,7 +41,6 @@ async function notifyAdminRateLimit(apiName: string, status: number, errorDetail
         `
       }),
     });
-    console.log('Admin notified about rate limit');
   } catch (e) {
     console.error('Failed to notify admin:', e);
   }
@@ -181,7 +180,6 @@ async function incrementUsage(userEmail: string): Promise<{ success: boolean; ne
     
     return { success: true, newCount: (data as any)?.vision_usage_count || 1 };
   } catch (e) {
-    console.error('Failed to increment usage:', e);
     return { success: false, newCount: 0 };
   }
 }
@@ -199,7 +197,6 @@ async function markTrialUsed(userEmail: string): Promise<boolean> {
     // If no error and row was updated, we successfully claimed the trial
     return !error;
   } catch (e) {
-    console.error('Failed to mark trial as used:', e);
     return false;
   }
 }
@@ -212,7 +209,6 @@ async function rollbackTrial(userEmail: string): Promise<void> {
       .from('users')
       .update({ vision_trial_used: false })
       .eq('email', userEmail.toLowerCase());
-    console.log(`Trial rolled back for ${userEmail} due to system error`);
   } catch (e) {
     console.error('Failed to rollback trial:', e);
   }
@@ -466,7 +462,6 @@ export async function POST(request: NextRequest) {
     // Read API key from environment
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.error("GEMINI_API_KEY not found in environment");
       return NextResponse.json(
         { error: "API key not configured. Please add GEMINI_API_KEY to Vercel environment variables." },
         { status: 500 }
@@ -525,7 +520,6 @@ export async function POST(request: NextRequest) {
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error("Gemini API error:", geminiResponse.status, errorText);
       
       // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
       if (isTrialRun && userEmail) {
@@ -654,7 +648,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         }
       } else {
         const errorText = await editResponse.text();
-        console.error("Nano Banana error:", editResponse.status, errorText);
         
         // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
         if (isTrialRun && userEmail) {
@@ -683,7 +676,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         });
       }
     } catch (editError: any) {
-      console.error("Image edit failed:", editError);
       
       // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
       if (isTrialRun && userEmail) {
@@ -741,7 +733,6 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     trackRequest('/api/visualize', true);
     
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Visualize API error:", errorMessage, error);
     
     // Bug fix: Try to rollback trial on unexpected errors
     // Note: isTrialRun and userEmail may not be defined if error happened early

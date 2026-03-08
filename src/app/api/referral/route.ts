@@ -183,7 +183,6 @@ export async function POST(request: NextRequest) {
       creditsGiven: REFERRAL_CREDITS,
     });
   } catch (error: any) {
-    console.error('Referral error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
     // Log all headers for debugging
     const headerObj: Record<string, string> = {};
     request.headers.forEach((value, key) => { headerObj[key] = key.toLowerCase().includes('key') ? '***' : value; });
-    console.log('PayPlus webhook headers:', JSON.stringify(headerObj));
     
     // Verify webhook authenticity — block unauthorized requests
     if (WEBHOOK_SECRET) {
@@ -64,21 +63,16 @@ export async function POST(request: NextRequest) {
         if (signature) {
           const isValid = verifyPayPlusSignature(rawBody, signature);
           if (!isValid) {
-            console.error('PayPlus webhook: INVALID signature — rejecting');
             return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
           }
-          console.log('PayPlus webhook: signature valid ✅');
         } else {
-          console.error('PayPlus webhook: No auth — rejecting');
           return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
       } else {
-        console.log('PayPlus webhook: secret token valid ✅');
       }
     } else if (signature) {
       // No webhook secret configured, try PayPlus signature
       const isValid = verifyPayPlusSignature(rawBody, signature);
-      console.log(`PayPlus webhook signature ${isValid ? 'valid' : 'INVALID'} (WEBHOOK_SECRET not set, allowing)`);
     } else {
       console.warn('PayPlus webhook: No auth configured (set PAYPLUS_WEBHOOK_SECRET to secure)');
     }
@@ -102,7 +96,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('PayPlus webhook received:', JSON.stringify(data, null, 2));
 
     // PayPlus wraps transaction data inside a "transaction" object
     // Support both flat (root-level) and nested (data.transaction) formats
@@ -138,7 +131,6 @@ export async function POST(request: NextRequest) {
     if (!email && (tx.customer_uid || data.customer_uid)) {
       try {
         const customerUid = tx.customer_uid || data.customer_uid;
-        console.log('PayPlus webhook: No email found, looking up customer_uid:', customerUid);
         const customerRes = await fetch(
           `${process.env.PAYPLUS_BASE_URL || 'https://restapi.payplus.co.il/api/v1.0'}/Customers/${customerUid}`,
           {
@@ -151,7 +143,6 @@ export async function POST(request: NextRequest) {
         if (customerRes.ok) {
           const customerData = await customerRes.json();
           email = customerData.data?.email || customerData.email;
-          console.log('PayPlus customer lookup result:', email);
         }
       } catch (e) {
         console.error('PayPlus customer lookup failed:', e);
@@ -160,7 +151,6 @@ export async function POST(request: NextRequest) {
 
     // Bug #39: Handle refund webhooks
     if (type === 'refund' || tx.action === 'refund' || tx.status === 'refunded' || data.action === 'refund' || data.status === 'refunded') {
-      console.log('PayPlus refund received for:', email);
       
       if (email) {
         // Revoke premium/vision access on refund
@@ -176,7 +166,6 @@ export async function POST(request: NextRequest) {
         if (updateError) {
           console.error('Error revoking access after refund:', updateError);
         } else {
-          console.log(`Access revoked for ${email} after refund`);
         }
       }
 
@@ -186,7 +175,6 @@ export async function POST(request: NextRequest) {
     // Handle recurring subscription cancellation
     // Bug #38: Added more specific field checks based on PayPlus documentation
     if (type === 'recurring_cancel' || tx.action === 'cancel' || tx.status === 'cancelled' || tx.subscription_status === 'cancelled' || data.action === 'cancel' || data.status === 'cancelled') {
-      console.log('PayPlus subscription cancelled for:', email);
       
       if (email) {
         // Deactivate Vision subscription
@@ -200,7 +188,6 @@ export async function POST(request: NextRequest) {
         if (updateError) {
           console.error('Error deactivating vision subscription:', updateError);
         } else {
-          console.log(`Vision subscription cancelled for ${email}`);
         }
       }
 
@@ -213,7 +200,6 @@ export async function POST(request: NextRequest) {
     const isSuccess = String(status_code) === '000' || String(status_code) === '0' || tx.status === 'approved' || data.status === 'approved';
 
     if (!isSuccess) {
-      console.log('PayPlus transaction failed:', status_description, { email, productType, amount });
       return NextResponse.json({ received: true, status: 'failed' });
     }
 
@@ -222,7 +208,6 @@ export async function POST(request: NextRequest) {
     const discountCode = more_info_3 || data.discount_code;
 
     if (!email) {
-      console.error('PayPlus webhook: No email in callback data');
       return NextResponse.json({ received: true, error: 'No email provided' });
     }
 
@@ -268,7 +253,6 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
       });
 
-      console.log(`✅ Plan ${planId} (${cycle}) activated for ${email}, +${credits} credits (total: ${newCredits})`);
 
       // Send plan welcome email
       await sendPlanEmail(email, planId, credits, supabase);
@@ -303,7 +287,6 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
       });
 
-      console.log(`✅ ${purchasedCredits} credits added to ${email} (total: ${newCredits})`);
 
       // Send credits purchase email
       await sendCreditsEmail(email, purchasedCredits, newCredits, supabase);
@@ -340,7 +323,6 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user Pro status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Pro (${productType}), credits: ${currentCredits + proCredits}`);
       }
     }
     
@@ -365,7 +347,6 @@ export async function POST(request: NextRequest) {
       if (creditError) {
         console.error('Error adding viz credits:', creditError);
       } else {
-        console.log(`Added ${credits} viz credits to ${email} (total: ${currentCredits + credits})`);
       }
     }
     
@@ -388,7 +369,6 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user premium status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Premium (legacy)`);
       }
     }
 
@@ -405,7 +385,6 @@ export async function POST(request: NextRequest) {
       if (upsertError) {
         console.error('Error upserting user vision status:', upsertError);
       } else {
-        console.log(`User ${email} marked as Vision active`);
       }
     }
 
@@ -425,7 +404,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the transaction (console only — transactions table doesn't exist yet)
-    console.log(`✅ PayPlus payment completed: ${email} → ${productType} (₪${amount}, tx: ${transaction_uid || page_request_uid})`);
 
     // Send welcome/purchase confirmation email via Resend (fire-and-forget)
     if (email && (productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual' || productType === 'premium' || productType === 'premium_plus')) {
@@ -472,7 +450,6 @@ export async function POST(request: NextRequest) {
               </div>`,
             }),
           });
-          console.log(`Welcome email sent to ${email}`);
 
           // Mark day 0 of purchased sequence as sent to avoid duplicate from cron
           try {
@@ -501,7 +478,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('PayPlus webhook error:', error);
     return NextResponse.json({ received: true, error: 'Internal error' }, { status: 200 });
   }
 }
@@ -539,7 +515,6 @@ async function sendPlanEmail(email: string, planId: string, credits: number, sup
         </div>`,
       }),
     });
-    console.log(`Plan welcome email sent to ${email}`);
   } catch (e) { console.error('Failed to send plan email:', e); }
 }
 
@@ -573,7 +548,6 @@ async function sendCreditsEmail(email: string, purchased: number, total: number,
         </div>`,
       }),
     });
-    console.log(`Credits email sent to ${email}`);
   } catch (e) { console.error('Failed to send credits email:', e); }
 }
 
@@ -585,13 +559,11 @@ export async function GET(request: NextRequest) {
   if (WEBHOOK_SECRET) {
     const urlSecret = searchParams.get('secret');
     if (urlSecret !== WEBHOOK_SECRET) {
-      console.error('PayPlus GET webhook: No valid secret — rejecting');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
   }
   
   const data = Object.fromEntries(searchParams);
-  console.log('PayPlus webhook GET received:', JSON.stringify(data));
   
   // Process directly instead of routing through POST (which reads request.text())
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -602,7 +574,6 @@ export async function GET(request: NextRequest) {
   const isSuccess = String(statusCode) === '0' || data.status === 'approved';
   
   if (!isSuccess || !email) {
-    console.log('PayPlus GET webhook: not success or no email', { statusCode, email });
     return NextResponse.json({ received: true, status: 'ignored' });
   }
 
@@ -616,7 +587,6 @@ export async function GET(request: NextRequest) {
       upsertData.vision_subscription = 'active';
     }
     await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
-    console.log(`GET webhook: ${email} → ${productType} activated`);
   }
 
   if (productType === 'vision') {
@@ -624,7 +594,6 @@ export async function GET(request: NextRequest) {
       email: email.toLowerCase(),
       vision_subscription: 'active',
     }, { onConflict: 'email' });
-    console.log(`GET webhook: ${email} → vision activated`);
   }
 
   return NextResponse.json({ received: true, status: 'success', product: productType });

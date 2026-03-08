@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ isAdmin });
   } catch (error) {
-    console.error('Admin check error:', error);
     return NextResponse.json({ isAdmin: false });
   }
 }
@@ -59,7 +58,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ isAdmin });
   } catch (error) {
-    console.error('Admin check error:', error);
     return NextResponse.json({ isAdmin: false });
   }
 }

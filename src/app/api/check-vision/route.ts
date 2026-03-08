@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
       visionSubscription: user.vision_subscription
     });
   } catch (error: any) {
-    console.error('Check vision error:', error);
     return NextResponse.json({ hasSubscription: false, error: 'Internal error' });
   }
 }

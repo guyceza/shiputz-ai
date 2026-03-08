@@ -131,7 +131,6 @@ export async function GET(request: NextRequest) {
     const html = generatePreview(template);
     return NextResponse.json({ html });
   } catch (error) {
-    console.error('Email preview error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

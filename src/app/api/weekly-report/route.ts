@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
       .eq("weekly_report_enabled", true);
 
     if (usersError || !users) {
-      console.error("Failed to fetch users:", usersError);
       return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
     }
 
@@ -114,14 +113,12 @@ export async function GET(req: NextRequest) {
           results.push({ email: user.email, status: "sent" });
         }
       } catch (err) {
-        console.error(`Failed to send report to ${user.email}:`, err);
         results.push({ email: user.email, status: "failed" });
       }
     }
 
     return NextResponse.json({ success: true, results });
   } catch (error) {
-    console.error("Weekly report error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

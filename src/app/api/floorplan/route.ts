@@ -94,7 +94,6 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini error:", err);
       return NextResponse.json({ error: `AI generation failed: ${err.substring(0, 200)}` }, { status: 500 });
     }
 
@@ -123,7 +122,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (!resultImage) {
-      console.error("No image in response:", JSON.stringify(data).substring(0, 500));
       return NextResponse.json({
         error: resultText || "No image generated — the AI returned text only. Try again.",
       }, { status: 500 });
@@ -135,7 +133,6 @@ export async function POST(req: NextRequest) {
       style: style?.name || styleKey,
     });
   } catch (error: any) {
-    console.error("Floorplan API error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

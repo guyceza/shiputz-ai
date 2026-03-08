@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
       .upload(filename, blob, { contentType: "image/jpeg", upsert: true });
 
     if (uploadError) {
-      console.error("Room image upload error:", uploadError);
       return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
     }
 
@@ -86,7 +85,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, imageUrl });
   } catch (err: any) {
-    console.error("Save room error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

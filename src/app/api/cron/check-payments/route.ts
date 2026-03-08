@@ -99,7 +99,6 @@ export async function GET(request: NextRequest) {
           }
 
           await supabase.from('users').upsert(upsertData, { onConflict: 'email' });
-          console.log(`✅ Cron: ${email} → ${productType} activated (was missed)`);
           updated++;
         }
 
@@ -128,7 +127,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  console.log(`Cron check-payments: checked=${checked}, updated=${updated}, expired=${expired}`);
 
   return NextResponse.json({ checked, updated, expired });
 }

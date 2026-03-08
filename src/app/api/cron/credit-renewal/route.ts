@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
       .not('plan_started_at', 'is', null);
 
     if (error || !users) {
-      console.error('Credit renewal: failed to fetch users', error);
       return NextResponse.json({ error: 'DB error' }, { status: 500 });
     }
 
@@ -86,7 +85,6 @@ export async function GET(request: NextRequest) {
         created_at: now.toISOString(),
       });
 
-      console.log(`✅ Renewed ${credits} credits for ${user.email} (${user.plan}), balance: ${newBalance}`);
       renewed++;
 
       // Send renewal email
@@ -138,7 +136,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (err) {
-    console.error('Credit renewal error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

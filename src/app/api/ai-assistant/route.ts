@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
     );
 
     if (!response.ok) {
-      console.error("Gemini API error:", await response.text());
       return NextResponse.json({ error: "AI failed" }, { status: 500 });
     }
 
@@ -106,7 +105,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ response: aiResponse });
   } catch (error) {
-    console.error("Assistant error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

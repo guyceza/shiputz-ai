@@ -163,7 +163,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Materials calculation error:', error);
     
     const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
     

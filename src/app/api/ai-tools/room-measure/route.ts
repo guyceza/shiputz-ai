@@ -75,7 +75,6 @@ export async function POST(request: NextRequest) {
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error("Room measure error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

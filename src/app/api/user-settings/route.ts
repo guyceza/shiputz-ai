@@ -32,21 +32,18 @@ export async function GET(request: NextRequest) {
         .single();
 
       if (insertError) {
-        console.error('Failed to create user settings:', insertError);
         return NextResponse.json({ error: "Failed to create settings" }, { status: 500 });
       }
       return NextResponse.json({ settings: newData });
     }
 
     if (error) {
-      console.error('Failed to get user settings:', error);
       return NextResponse.json({ error: "Failed to get settings" }, { status: 500 });
     }
 
     return NextResponse.json({ settings: data });
 
   } catch (error) {
-    console.error('User settings GET error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
@@ -72,14 +69,12 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error('Failed to update user settings:', error);
       return NextResponse.json({ error: "Failed to update settings" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('User settings POST error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

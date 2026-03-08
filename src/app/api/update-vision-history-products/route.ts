@@ -31,14 +31,12 @@ export async function POST(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Update products error:', error);
       return NextResponse.json({ error: "Failed to save products" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('Update vision history products error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

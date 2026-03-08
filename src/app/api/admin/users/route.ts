@@ -43,7 +43,6 @@ async function verifyAdmin(request: NextRequest): Promise<string | null> {
     
     return user.email;
   } catch (e) {
-    console.error('Auth verification error:', e);
     return null;
   }
 }
@@ -110,7 +109,6 @@ export async function GET(request: NextRequest) {
     const { data: users, error, count } = await query;
     
     if (error) {
-      console.error('Database error:', error);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
     
@@ -167,7 +165,6 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -231,14 +228,12 @@ export async function PATCH(request: NextRequest) {
       .eq('email', userEmail.toLowerCase());
     
     if (error) {
-      console.error('Update error:', error);
       return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
     }
     
     return NextResponse.json({ success: true });
     
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

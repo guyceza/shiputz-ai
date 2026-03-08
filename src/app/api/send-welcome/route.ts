@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!RESEND_KEY) {
-      console.error('RESEND_API_KEY not configured');
       return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
@@ -67,11 +66,9 @@ export async function POST(request: NextRequest) {
     });
 
     const result = await response.json();
-    console.log('Welcome email sent:', result);
 
     return NextResponse.json({ success: true, id: result.id });
   } catch (error) {
-    console.error('Error sending welcome email:', error);
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }

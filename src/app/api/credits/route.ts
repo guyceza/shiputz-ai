@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       creditAnchors: CREDIT_ANCHORS,
     });
   } catch (err) {
-    console.error('credits API error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

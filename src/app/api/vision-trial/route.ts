@@ -35,13 +35,11 @@ export async function POST(request: NextRequest) {
       .eq('email', normalizedEmail);
 
     if (error) {
-      console.error('Error marking trial as used:', error);
       return NextResponse.json({ error: 'Failed to mark trial' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -70,7 +68,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ trialUsed: data?.vision_trial_used || false });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

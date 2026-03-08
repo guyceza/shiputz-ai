@@ -66,7 +66,6 @@ IMPORTANT: Position values (top, left) MUST be percentages from 0 to 100, NOT pi
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
   } catch (error: any) {
-    console.error("Style matcher error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

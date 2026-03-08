@@ -61,7 +61,6 @@ export async function POST(request: NextRequest) {
       discount: data.discount_percent 
     });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -96,13 +95,11 @@ export async function PATCH(request: NextRequest) {
       .eq('user_email', email.toLowerCase()); // Double-check ownership
 
     if (error) {
-      console.error('Error marking code as used:', error);
       return NextResponse.json({ error: 'Failed to update code' }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Code marked as used' });
   } catch (error) {
-    console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

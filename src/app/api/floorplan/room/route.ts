@@ -82,7 +82,6 @@ Output a single photorealistic interior photograph.`;
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini room error:", err);
       return NextResponse.json({ error: "Room generation failed" }, { status: 500 });
     }
 
@@ -105,7 +104,6 @@ Output a single photorealistic interior photograph.`;
 
     return NextResponse.json({ image: resultImage, text: resultText, room: roomName });
   } catch (error: any) {
-    console.error("Room API error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

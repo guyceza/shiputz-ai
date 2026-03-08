@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Delete visualization error:', error);
       return NextResponse.json({ error: "Failed to delete visualization" }, { status: 500 });
     }
 
@@ -61,7 +60,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error('Delete visualization error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

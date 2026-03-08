@@ -57,7 +57,6 @@ If the click is on a wall, door, or unclear area, pick the nearest room. Respond
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini detect-room error:", err);
       return NextResponse.json({ error: "Room detection failed" }, { status: 500 });
     }
 
@@ -73,7 +72,6 @@ If the click is on a wall, door, or unclear area, pick the nearest room. Respond
     const roomInfo = JSON.parse(jsonMatch[0]);
     return NextResponse.json(roomInfo);
   } catch (error: any) {
-    console.error("Detect room error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       .limit(50);
 
     if (error) {
-      console.error('Load visualizations error:', error);
       return NextResponse.json({ error: "Failed to load visualizations" }, { status: 500 });
     }
 
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Get visualizations error:', error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

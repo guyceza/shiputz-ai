@@ -123,7 +123,6 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", errorText);
       
       // Handle rate limit / quota exceeded
       if (response.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
@@ -146,7 +145,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ response: aiResponse });
 
   } catch (error) {
-    console.error("Chat error:", error);
     return NextResponse.json(
       { error: "שגיאה בעיבוד ההודעה. נסו שוב." },
       { status: 500 }

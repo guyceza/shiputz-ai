@@ -271,12 +271,10 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
     const geminiData = await response.json();
 
     if (geminiData.error) {
-      console.error("Gemini API error:", JSON.stringify(geminiData.error, null, 2));
       return NextResponse.json({ error: "שגיאה בשירות AI", details: geminiData.error?.message || "Unknown error" }, { status: 500 });
     }
 
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
-      console.error("No candidates in response:", JSON.stringify(geminiData, null, 2));
       return NextResponse.json({ error: "לא התקבלה תשובה מה-AI" }, { status: 500 });
     }
 
@@ -293,8 +291,6 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
         throw new Error("No JSON found");
       }
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      console.log("Raw response:", rawText);
       
       // Return a generic error if we can't parse the response
       return NextResponse.json({
@@ -329,7 +325,6 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
     return NextResponse.json(result);
 
   } catch (error) {
-    console.error("Bill of quantities error:", error);
     return NextResponse.json({ error: "שגיאה בעיבוד הבקשה" }, { status: 500 });
   }
 }

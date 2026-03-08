@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ items: [] });
     }
   } catch (error) {
-    console.error("Error detecting items:", error);
     return NextResponse.json(
       { error: "Failed to detect items" },
       { status: 500 }

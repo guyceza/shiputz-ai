@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
 
     if (!createRes.ok) {
       const err = await createRes.text();
-      console.error("Replicate create error:", err);
       return NextResponse.json({ error: "Video generation failed to start" }, { status: 500 });
     }
 
@@ -73,7 +72,6 @@ export async function POST(req: NextRequest) {
     // Return immediately with prediction ID — client will poll
     return NextResponse.json({ predictionId: prediction.id, status: "starting" });
   } catch (err: any) {
-    console.error("Video route error:", err);
     return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
   }
 }
@@ -106,7 +104,6 @@ export async function GET(req: NextRequest) {
         .upload(filename, videoBuffer, { contentType: "video/mp4", upsert: true });
 
       if (uploadError) {
-        console.error("Video upload error:", uploadError);
         // Fallback: return Replicate URL directly instead of failing
         return NextResponse.json({
           status: "succeeded",

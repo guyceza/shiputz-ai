@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
 
+// Vercel: use Node.js runtime with 60s timeout (NOT Edge)
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
 // ============================================================
 // ShiputzAI Email Flow System — Behavioral Triggers
 // 10 Flows, 29 emails total
@@ -124,27 +128,75 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
 </html>`;
 }
 
-// Send email via Resend with List-Unsubscribe header
-async function sendEmail(to: string, subject: string, html: string): Promise<{ id?: string; message?: string }> {
+// Rate limiter: 200ms between sends to avoid Resend burst limits
+let lastSendTime = 0;
+async function rateLimitDelay(): Promise<void> {
+  const now = Date.now();
+  const elapsed = now - lastSendTime;
+  if (elapsed < 200) {
+    await new Promise(r => setTimeout(r, 200 - elapsed));
+  }
+  lastSendTime = Date.now();
+}
+
+// Send email via Resend with List-Unsubscribe header + retry
+async function sendEmail(to: string, subject: string, html: string, maxRetries = 3): Promise<{ id?: string; message?: string }> {
   const unsubUrl = getUnsubscribeUrl(to);
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
+  const payload = JSON.stringify({
+    from: FROM_EMAIL,
+    to,
+    subject,
+    html,
     headers: {
-      'Authorization': `Bearer ${RESEND_KEY}`,
-      'Content-Type': 'application/json',
+      'List-Unsubscribe': `<${unsubUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to,
-      subject,
-      html,
-      headers: {
-        'List-Unsubscribe': `<${unsubUrl}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      },
-    }),
   });
-  return response.json();
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    await rateLimitDelay();
+
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      });
+
+      // Rate limited — respect Retry-After
+      if (response.status === 429) {
+        const retryAfter = parseInt(response.headers.get('Retry-After') || '2', 10);
+        const waitMs = Math.min(retryAfter * 1000, 10000);
+        console.warn(`Resend rate limit hit for ${to}, waiting ${waitMs}ms (attempt ${attempt + 1})`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+
+      // Server error — retry with backoff
+      if (response.status >= 500) {
+        const waitMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+        console.warn(`Resend server error ${response.status} for ${to}, retrying in ${waitMs}ms`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+
+      return await response.json();
+    } catch (err: any) {
+      // Network error — retry with backoff
+      if (attempt < maxRetries - 1) {
+        const waitMs = Math.pow(2, attempt) * 1000;
+        console.warn(`Network error sending to ${to}: ${err.message}, retrying in ${waitMs}ms`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+      return { message: `Network error after ${maxRetries} retries: ${err.message}` };
+    }
+  }
+
+  return { message: `Failed after ${maxRetries} retries` };
 }
 
 // Helper: greeting
@@ -983,7 +1035,9 @@ export async function GET(request: NextRequest) {
       userTransactions.get(email)!.push(tx);
     }
 
-    // Process each user
+    // Process each user — collect actions first, then send in parallel batches
+    const pendingActions: Array<{ user: UserData; action: EmailAction }> = [];
+
     for (const user of (users || []) as UserData[]) {
       const email = user.email.toLowerCase();
 
@@ -1074,79 +1128,109 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Idempotency: check if already sent this exact email
-      const { data: existing } = await supabase
-        .from('email_sequences')
-        .select('id, status, resend_id')
-        .eq('user_email', user.email)
-        .eq('sequence_type', action.flowName)
-        .eq('day_number', action.dayNumber)
-        .single();
+      pendingActions.push({ user, action });
+    }
 
-      if (existing?.status === 'sent' && existing?.resend_id) {
-        skipped++;
-        continue;
-      }
+    // ================================================================
+    // BATCH SEND — process 5 users in parallel for speed + reliability
+    // Handles 500+ users within 60s timeout
+    // ================================================================
+    const BATCH_SIZE = 5;
 
-      // Insert or update pending record
-      if (!existing) {
-        const { error: insertError } = await supabase
-          .from('email_sequences')
-          .insert({
-            user_email: user.email,
-            sequence_type: action.flowName,
-            day_number: action.dayNumber,
-            run_id: runId,
-            status: 'pending',
-            reason: action.reason,
-          });
-        if (insertError?.code === '23505') {
-          skipped++;
-          continue;
-        }
-      } else {
-        await supabase
-          .from('email_sequences')
-          .update({ run_id: runId, status: 'pending', reason: action.reason })
-          .eq('id', existing.id);
-      }
+    for (let i = 0; i < pendingActions.length; i += BATCH_SIZE) {
+      const batch = pendingActions.slice(i, i + BATCH_SIZE);
 
-      // Send!
-      try {
-        const result = await sendEmail(user.email, action.subject, action.html);
-        if (result.id) {
-          await supabase
+      const results = await Promise.allSettled(
+        batch.map(async ({ user, action }) => {
+          // Idempotency: check if already sent this exact email
+          const { data: existing } = await supabase
             .from('email_sequences')
-            .update({
-              status: 'sent',
-              sent_at: new Date().toISOString(),
-              resend_id: result.id,
-            })
+            .select('id, status, resend_id')
             .eq('user_email', user.email)
             .eq('sequence_type', action.flowName)
-            .eq('day_number', action.dayNumber);
-          sent++;
-          details.push(`${user.email}: ${action.flowName}#${action.dayNumber} (${action.reason})`);
+            .eq('day_number', action.dayNumber)
+            .single();
+
+          if (existing?.status === 'sent' && existing?.resend_id) {
+            return { type: 'skipped' as const, email: user.email };
+          }
+
+          // Insert or update pending record
+          if (!existing) {
+            const { error: insertError } = await supabase
+              .from('email_sequences')
+              .insert({
+                user_email: user.email,
+                sequence_type: action.flowName,
+                day_number: action.dayNumber,
+                run_id: runId,
+                status: 'pending',
+                reason: action.reason,
+              });
+            if (insertError?.code === '23505') {
+              return { type: 'skipped' as const, email: user.email };
+            }
+          } else {
+            await supabase
+              .from('email_sequences')
+              .update({ run_id: runId, status: 'pending', reason: action.reason })
+              .eq('id', existing.id);
+          }
+
+          // Send!
+          const result = await sendEmail(user.email, action.subject, action.html);
+
+          if (result.id) {
+            await supabase
+              .from('email_sequences')
+              .update({
+                status: 'sent',
+                sent_at: new Date().toISOString(),
+                resend_id: result.id,
+              })
+              .eq('user_email', user.email)
+              .eq('sequence_type', action.flowName)
+              .eq('day_number', action.dayNumber);
+            return {
+              type: 'sent' as const,
+              email: user.email,
+              detail: `${user.email}: ${action.flowName}#${action.dayNumber} (${action.reason})`,
+            };
+          } else {
+            await supabase
+              .from('email_sequences')
+              .update({
+                status: 'failed',
+                error: result.message || 'Unknown error',
+              })
+              .eq('user_email', user.email)
+              .eq('sequence_type', action.flowName)
+              .eq('day_number', action.dayNumber);
+            return {
+              type: 'failed' as const,
+              email: user.email,
+              detail: `FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`,
+            };
+          }
+        })
+      );
+
+      // Tally batch results
+      for (const r of results) {
+        if (r.status === 'fulfilled') {
+          switch (r.value.type) {
+            case 'sent': sent++; details.push(r.value.detail!); break;
+            case 'failed': errors++; details.push(r.value.detail!); break;
+            case 'skipped': skipped++; break;
+          }
         } else {
-          await supabase
-            .from('email_sequences')
-            .update({
-              status: 'failed',
-              error: result.message || 'Unknown error',
-            })
-            .eq('user_email', user.email)
-            .eq('sequence_type', action.flowName)
-            .eq('day_number', action.dayNumber);
           errors++;
-          details.push(`FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`);
+          details.push(`ERROR batch: ${r.reason?.message || r.reason}`);
         }
-      } catch (e: any) {
-        errors++;
-        details.push(`ERROR ${user.email}: ${e.message}`);
       }
     }
 
-    console.log(`Email cron completed: ${runId} — sent: ${sent}, errors: ${errors}, skipped: ${skipped}`);
+    console.log(`Email cron completed: ${runId} — sent: ${sent}, errors: ${errors}, skipped: ${skipped}, evaluated: ${pendingActions.length}`);
     if (details.length > 0) console.log('Details:', details.join(' | '));
 
     return NextResponse.json({
@@ -1154,6 +1238,7 @@ export async function GET(request: NextRequest) {
       sent,
       errors,
       skipped,
+      evaluated: pendingActions.length,
       runId,
       details,
       timestamp: new Date().toISOString(),

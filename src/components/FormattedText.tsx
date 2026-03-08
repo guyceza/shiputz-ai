@@ -31,11 +31,11 @@ export function FormattedText({ text, className = '' }: FormattedTextProps) {
                 if (match) {
                   const [, num, content] = match;
                   return (
-                    <div key={iIdx} className="flex gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-semibold">
-                        {num}
+                    <div key={iIdx} className="flex gap-2">
+                      <span className="flex-shrink-0 text-sm font-medium text-gray-400 pt-0.5 min-w-[1.2em] text-left">
+                        {num}.
                       </span>
-                      <div className="flex-1 pt-0.5">
+                      <div className="flex-1">
                         {formatInlineText(content.trim())}
                       </div>
                     </div>

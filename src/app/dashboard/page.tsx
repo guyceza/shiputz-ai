@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminPanel from "./admin-panel";
+import ReferralWidget from "@/components/ReferralWidget";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
@@ -533,6 +534,9 @@ function DashboardContent() {
             פרויקט חדש
           </button>
         </div>
+
+        {/* Referral Widget */}
+        {user?.email && <ReferralWidget userEmail={user.email} />}
 
         {/* Mini Stats Overview - Enhanced */}
         {projects.length > 0 && (

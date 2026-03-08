@@ -5,6 +5,8 @@ import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import ChatWidget from "@/components/ChatWidget";
 import CookieConsent from "@/components/CookieConsent";
+import { Suspense } from "react";
+import ReferralCapture from "@/components/ReferralCapture";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
@@ -149,6 +151,7 @@ export default function RootLayout({
           showSpinner={false}
         />
         <ThemeProvider>
+          <Suspense fallback={null}><ReferralCapture /></Suspense>
           <main id="main-content">
             {children}
           </main>

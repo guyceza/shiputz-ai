@@ -32,12 +32,12 @@ const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
 const FLOW_PRIORITY: string[] = [
   'zero_credits',
   'low_credits',
-  // 'abandoned' — TODO: needs frontend tracking
+  'abandoned',
   'activation',
   'welcome',
   'post_purchase',
   'inactive',
-  // 'referral' — TODO: needs referral system
+  'referral',
   'usage_summary',
   'milestone',
 ];
@@ -265,6 +265,9 @@ interface UserData {
   viz_credits: number;
   plan: string | null;
   marketing_unsubscribed_at: string | null;
+  last_started_action: string | null;
+  last_started_action_at: string | null;
+  last_started_action_page: string | null;
 }
 
 interface EmailAction {
@@ -329,11 +332,11 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'welcome',
       dayNumber: 1,
-      subject: 'הטיפ שחוסך הכי הרבה כסף בשיפוץ',
+      subject: 'קיבלת הצעת מחיר? ככה בודקים אותה',
       reason: 'welcome_day1',
       html: wrapEmail(
-        'הטיפ שחוסך הכי הרבה כסף',
-        'בשיפוץ',
+        'קיבלת הצעת מחיר?',
+        'ככה בודקים אותה בשניות',
         greet(user.name || undefined) +
         para('לפני שמתחילים שיפוץ — <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלת הצעת מחיר מקבלן?') +
         para('ה-AI שלנו מנתח את ההצעה ובודק:') +
@@ -378,6 +381,51 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
 }
 
 // Flow 2: Activation (trigger: first tool use)
+// Flow: Abandoned Action — user started but didn't finish
+function evaluateAbandoned(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails } = ctx;
+  const sent = sentEmails.get('abandoned') || new Set();
+
+  // Only trigger if user started an action but didn't complete it (24h+ ago)
+  if (!user.last_started_action || !user.last_started_action_at) return null;
+
+  const hoursSinceAction = (Date.now() - new Date(user.last_started_action_at).getTime()) / (1000 * 60 * 60);
+  if (hoursSinceAction < 24) return null; // Wait at least 24h
+
+  if (!sent.has(0)) {
+    const actionNames: Record<string, string> = {
+      'visualize': 'הדמיית חדר',
+      'style-match': 'Style Match',
+      'detect-items': 'Shop the Look',
+      'floorplan': 'תוכנית קומה',
+      'quote-analysis': 'ניתוח הצעת מחיר',
+      'receipt-scanner': 'סריקת קבלה',
+    };
+    const actionName = actionNames[user.last_started_action] || user.last_started_action;
+    const actionPage = user.last_started_action_page || '/dashboard';
+
+    return {
+      flowName: 'abandoned',
+      dayNumber: 0,
+      subject: 'התמונה שלך עדיין מחכה',
+      reason: `abandoned_${user.last_started_action}`,
+      html: wrapEmail(
+        'לא סיימת!',
+        'התמונה שלך עדיין מחכה',
+        greet(user.name || undefined) +
+        para(`שמנו לב שהתחלת להשתמש ב-<strong>${actionName}</strong> אבל לא סיימת.`) +
+        para('אל דאגה — <strong>הכל שמור ומחכה לך</strong>. פשוט חזור ותסיים.') +
+        bigNumber(actionName, 'מחכה לך'),
+        'להמשיך מאיפה שעצרת',
+        `${BASE_URL}${actionPage}`,
+        user.email,
+      ),
+    };
+  }
+
+  return null;
+}
+
 function evaluateActivation(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails, creditTransactions } = ctx;
   const sent = sentEmails.get('activation') || new Set();
@@ -609,11 +657,11 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     return {
       flowName: 'inactive',
       dayNumber: 0,
-      subject: 'השיפוץ מתקדם?',
+      subject: 'יש לנו כלי עיצוב חדשים',
       reason: 'inactive_7d',
       html: wrapEmail(
-        'השיפוץ מתקדם?',
-        '',
+        'חזרת!',
+        'יש כלי עיצוב חדשים שחבל לפספס',
         greet(user.name || undefined) +
         para('לא ראינו אותך כבר שבוע. יש לנו <strong>כלי עיצוב חדשים</strong> שחבל לפספס!') +
         para('החשבון שלך מחכה — <strong>כל מה שעשית שמור</strong>.'),
@@ -849,6 +897,43 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
       user.email,
     ),
   };
+}
+
+// Flow 9: Referral — encourage sharing (sent once to active users)
+function evaluateReferral(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, totalUsageCount, daysSinceSignup } = ctx;
+  const sent = sentEmails.get('referral') || new Set();
+
+  // Only send to users who have used at least 3 tools and signed up 5+ days ago
+  if (totalUsageCount < 3 || daysSinceSignup < 5) return null;
+
+  if (!sent.has(0)) {
+    return {
+      flowName: 'referral',
+      dayNumber: 0,
+      subject: 'הזמן חבר — שניכם מקבלים 20 קרדיטים',
+      reason: 'referral_invite',
+      html: wrapEmail(
+        'הזמן חבר',
+        'שניכם מקבלים 20 קרדיטים',
+        greet(user.name || undefined) +
+        para('אהבת את ShiputzAI? <strong>שתף עם חבר ותרוויח!</strong>') +
+        bigNumber('20', 'קרדיטים לכל אחד — לך ולחבר שלך') +
+        para('איך זה עובד:') +
+        infoBox([
+          '1️⃣ שלח את הלינק האישי שלך לחבר',
+          '2️⃣ החבר נרשם דרך הלינק',
+          '3️⃣ <strong>שניכם מקבלים 20 קרדיטים אוטומטית!</strong>',
+        ]) +
+        para('הלינק האישי שלך מחכה בדשבורד.'),
+        'לקבל את הלינק שלי',
+        `${BASE_URL}/dashboard`,
+        user.email,
+      ),
+    };
+  }
+
+  return null;
 }
 
 // Flow 10: Milestone (usage count milestones)
@@ -1117,6 +1202,9 @@ export async function GET(request: NextRequest) {
           case 'low_credits':
             action = evaluateLowCredits(ctx);
             break;
+          case 'abandoned':
+            action = evaluateAbandoned(ctx);
+            break;
           case 'activation':
             action = evaluateActivation(ctx);
             break;
@@ -1128,6 +1216,9 @@ export async function GET(request: NextRequest) {
             break;
           case 'inactive':
             action = await evaluateInactive(ctx, supabase);
+            break;
+          case 'referral':
+            action = evaluateReferral(ctx);
             break;
           case 'usage_summary':
             action = evaluateUsageSummary(ctx);

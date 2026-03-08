@@ -54,6 +54,23 @@ export default function AuthCallbackPage() {
       console.error('User save failed:', e);
     }
     
+    // Complete referral if user signed up via referral link
+    if (isNewUser) {
+      try {
+        const referralCode = localStorage.getItem('referralCode');
+        if (referralCode) {
+          await fetch('/api/referral', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referralCode, newUserEmail: email }),
+          });
+          localStorage.removeItem('referralCode');
+        }
+      } catch (e) {
+        console.error('Referral completion failed:', e);
+      }
+    }
+    
     if (isNewUser && !hasCompletedOnboarding) {
       router.push('/visualize');
     } else {

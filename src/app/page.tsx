@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import HeroAnimation from "@/components/HeroAnimation";
 
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesShowcase from "@/components/FeaturesShowcase";
@@ -76,18 +78,27 @@ export default function Home() {
   
   const [showPromoPopup, setShowPromoPopup] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [popupLottie, setPopupLottie] = useState<any>(null);
+
+  // Load Lottie animation for popup
+  useEffect(() => {
+    fetch('/lottie-home-popup.json')
+      .then(r => r.json())
+      .then(setPopupLottie)
+      .catch(() => {});
+  }, []);
   
   // Exit intent popup (desktop: mouse leaves viewport, mobile: scroll up after 30s)
   useEffect(() => {
     const dismissed = localStorage.getItem('promo_dismissed');
     if (dismissed) return;
     
-    // Don't show to premium users
+    // Don't show to logged-in or premium users
     const userData = localStorage.getItem("user");
     if (userData) {
       try {
         const user = JSON.parse(userData);
-        if (user.purchased) return;
+        if (user.purchased || user.id) return;
       } catch {}
     }
     
@@ -354,7 +365,13 @@ export default function Home() {
             </button>
             
             <div className="text-center">
-              <div className="text-5xl mb-4">🎨</div>
+              <div className="w-20 h-20 mx-auto mb-4">
+                {popupLottie ? (
+                  <Lottie animationData={popupLottie} loop={true} />
+                ) : (
+                  <div className="text-5xl">🏠</div>
+                )}
+              </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">רוצים לראות איך הבית ייראה?</h2>
               <p className="text-gray-500 mb-5">העלו תמונה וקבלו הדמיית עיצוב תוך 30 שניות</p>
               

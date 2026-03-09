@@ -114,7 +114,36 @@ export default function PricingComparison() {
         </div>
       ))}
 
-      
+
+      {/* Enterprise Card */}
+      <div className="w-full lg:max-w-4xl order-3 mt-4 lg:mt-8" dir="rtl">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 md:p-10">
+          <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px'}} />
+          <div className="relative flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-1 text-center md:text-right">
+              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs text-emerald-300 font-medium">Enterprise</span>
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
+                מעצבי פנים? קבלנים? אדריכלים?
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                קרדיטים בכמויות גדולות במחיר מוזל · שימוש מסחרי מלא · תמיכה מועדפת · הדרכה והטמעה
+              </p>
+              <a
+                href="mailto:help@shipazti.com?subject=תוכנית לאנשי מקצוע"
+                className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                help@shipazti.com
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

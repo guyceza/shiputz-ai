@@ -56,94 +56,108 @@ const plans = [
     href: "/pricing",
     highlighted: true,
   },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    subtitle: "לאנשי מקצוע",
+    price: null,
+    period: "",
+    credits: "חבילה מותאמת אישית",
+    features: [
+      "קרדיטים בכמויות גדולות",
+      "מחיר מוזל לקרדיט",
+      "שימוש מסחרי מלא",
+      "תמיכה מועדפת",
+      "הדרכה והטמעה",
+    ],
+    cta: "help@shipazti.com",
+    href: "mailto:help@shipazti.com?subject=תוכנית לאנשי מקצוע",
+    highlighted: false,
+    isEnterprise: true,
+  },
 ];
 
 export default function PricingComparison() {
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full px-4 lg:px-8 justify-center items-center lg:items-stretch">
-      {plans.map((plan) => (
-        <div
-          key={plan.id}
-          className={`rounded-2xl p-6 lg:p-10 bg-white flex flex-col w-full lg:flex-1 lg:max-w-[340px] relative ${
-            plan.highlighted
-              ? "border-2 border-gray-900 order-1 lg:order-2"
-              : "border border-gray-200 order-2 lg:order-1"
-          }`}
-          dir="rtl"
-        >
-          {plan.badge && (
-            <div className="absolute -top-3 right-6 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
-              {plan.badge}
-            </div>
-          )}
-
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
-            <p className="text-gray-500 text-sm">{plan.subtitle}</p>
-          </div>
-
-          <div className="mb-4">
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-3xl font-bold text-gray-900">₪{plan.price}</span>
-              {plan.period && (
-                <span className="text-gray-500 text-sm">{plan.period}</span>
-              )}
-            </div>
-            <p className="text-gray-500 text-sm mt-1">{plan.credits}</p>
-          </div>
-
-          <ul className="space-y-3 mb-8 flex-grow">
-            {plan.features.map((feature, i) => (
-              <li key={i} className="flex items-start gap-0 text-gray-900">
-                <span className="flex-shrink-0 ml-0.5">✓</span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-
-          <Link
-            href={plan.href}
-            className={`block w-full py-3 rounded-lg text-center font-medium transition-colors mt-auto ${
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full px-4 lg:px-8">
+      {plans.map((plan) => {
+        const isEnterprise = (plan as any).isEnterprise;
+        return (
+          <div
+            key={plan.id}
+            className={`rounded-2xl p-6 lg:p-8 flex flex-col w-full relative ${
               plan.highlighted
-                ? "bg-gray-900 text-white hover:bg-gray-800"
-                : "border-2 border-gray-300 text-gray-600 hover:bg-gray-50"
+                ? "border-2 border-gray-900 bg-white"
+                : isEnterprise
+                ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-2 border-gray-700"
+                : "border border-gray-200 bg-white"
             }`}
+            dir="rtl"
           >
-            {plan.cta}
-          </Link>
-        </div>
-      ))}
-
-
-      {/* Enterprise Card */}
-      <div className="w-full lg:max-w-4xl order-3 mt-4 lg:mt-8" dir="rtl">
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 md:p-10">
-          <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px'}} />
-          <div className="relative flex flex-col md:flex-row items-center gap-6">
-            <div className="flex-1 text-center md:text-right">
-              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-3">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs text-emerald-300 font-medium">Enterprise</span>
+            {plan.badge && (
+              <div className="absolute -top-3 right-6 bg-gray-900 text-white text-xs font-bold px-4 py-1 rounded-full">
+                {plan.badge}
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
-                מעצבי פנים? קבלנים? אדריכלים?
+            )}
+
+            <div className="mb-4">
+              <h3 className={`text-xl font-bold mb-1 ${isEnterprise ? "text-white" : "text-gray-900"}`}>
+                {plan.name}
               </h3>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                קרדיטים בכמויות גדולות במחיר מוזל · שימוש מסחרי מלא · תמיכה מועדפת · הדרכה והטמעה
+              <p className={`text-sm ${isEnterprise ? "text-emerald-300" : "text-gray-500"}`}>
+                {plan.subtitle}
               </p>
-              <a
-                href="mailto:help@shipazti.com?subject=תוכנית לאנשי מקצוע"
-                className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                help@shipazti.com
-              </a>
             </div>
+
+            <div className="mb-4">
+              {plan.price !== null ? (
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-bold text-gray-900">₪{plan.price}</span>
+                  {plan.period && (
+                    <span className="text-gray-500 text-sm">{plan.period}</span>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className={`text-2xl font-bold ${isEnterprise ? "text-white" : "text-gray-900"}`}>בואו נדבר</span>
+                </div>
+              )}
+              <p className={`text-sm mt-1 ${isEnterprise ? "text-gray-400" : "text-gray-500"}`}>
+                {plan.credits}
+              </p>
+            </div>
+
+            <ul className="space-y-3 mb-8 flex-grow">
+              {plan.features.map((feature, i) => (
+                <li key={i} className={`flex items-start gap-0 ${isEnterprise ? "text-gray-300" : "text-gray-900"}`}>
+                  <span className={`flex-shrink-0 ml-0.5 ${isEnterprise ? "text-emerald-400" : ""}`}>✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            {isEnterprise ? (
+              <a
+                href={plan.href}
+                className="block w-full py-3 rounded-lg text-center font-medium transition-colors mt-auto bg-emerald-500 hover:bg-emerald-400 text-white"
+              >
+                {plan.cta}
+              </a>
+            ) : (
+              <Link
+                href={plan.href}
+                className={`block w-full py-3 rounded-lg text-center font-medium transition-colors mt-auto ${
+                  plan.highlighted
+                    ? "bg-gray-900 text-white hover:bg-gray-800"
+                    : "border-2 border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            )}
           </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

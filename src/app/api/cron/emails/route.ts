@@ -305,20 +305,20 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'welcome',
       dayNumber: 0,
-      subject: 'ברוכים הבאים — יש לך קרדיטים חינם',
+      subject: 'ברוכים הבאים — יש לכם קרדיטים חינם',
       reason: 'new_signup',
       html: wrapEmail(
         'ברוכים הבאים',
-        'יש לך 10 קרדיטים חינם לניסיון',
+        'יש לכם 10 קרדיטים חינם לניסיון',
         greet(user.name || undefined) +
-        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> — לפני שמוציאים שקל.') +
+        para('תודה שהצטרפתם! עם ShiputzAI תוכלו <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> — לפני שמוציאים שקל.') +
         infoBox([
           '✅ <strong>הדמיית חדר</strong> — צלם ותראה עיצוב חדש תוך שניות',
-          '✅ <strong>Style Match</strong> — מצא את הסגנון שמתאים לך',
+          '✅ <strong>Style Match</strong> — מצאו את הסגנון שמתאים לכם',
           '✅ <strong>Shop the Look</strong> — זיהוי מוצרים וקנייה ישירה',
           '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר',
         ]) +
-        para('התחל עם הדמיה ראשונה — מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה <strong>תוך 30 שניות</strong>.'),
+        para('התחילו עם הדמיה ראשונה — מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה <strong>תוך 30 שניות</strong>.'),
         'צור הדמיה ראשונה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -331,13 +331,13 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'welcome',
       dayNumber: 1,
-      subject: 'קיבלת הצעת מחיר? ככה בודקים אותה',
+      subject: 'קיבלתם הצעת מחיר? ככה בודקים אותה',
       reason: 'welcome_day1',
       html: wrapEmail(
-        'קיבלת הצעת מחיר?',
+        'קיבלתם הצעת מחיר?',
         'ככה בודקים אותה בשניות',
         greet(user.name || undefined) +
-        para('לפני שמתחילים שיפוץ — <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלת הצעת מחיר מקבלן?') +
+        para('לפני שמתחילים שיפוץ — <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלתם הצעת מחיר מקבלן?') +
         para('ה-AI שלנו מנתח את ההצעה ובודק:') +
         infoBox([
           '🔍 האם <strong>המחיר הוגן</strong> לעומת השוק?',
@@ -359,15 +359,15 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
       return {
         flowName: 'welcome',
         dayNumber: 2,
-        subject: 'עדיין לא ניסית את ההדמיה?',
+        subject: 'עדיין לא ניסיתם את ההדמיה?',
         reason: 'welcome_no_vision_use',
         html: wrapEmail(
-          'עדיין לא ניסית?',
+          'עדיין לא ניסיתם?',
           'ההדמיה לוקחת 30 שניות',
           greet(user.name || undefined) +
-          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong> — הכלי הכי פופולרי שלנו!') +
+          para('שמנו לב שעדיין לא ניסיתם את <strong>הדמיית החדר</strong> — הכלי הכי פופולרי שלנו!') +
           para('מצלמים את החדר, בוחרים סגנון עיצוב — ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
-          bigNumber('10 קרדיטים', 'מחכים לך בחשבון — מספיק להדמיה אחת'),
+          bigNumber('10 קרדיטים', 'מחכים לכם בחשבון — מספיק להדמיה אחת'),
           'לנסות עכשיו',
           `${BASE_URL}/visualize`,
           user.email,
@@ -406,15 +406,15 @@ function evaluateAbandoned(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'abandoned',
       dayNumber: 0,
-      subject: 'התמונה שלך עדיין מחכה',
+      subject: 'התמונה שלכם עדיין מחכה',
       reason: `abandoned_${user.last_started_action}`,
       html: wrapEmail(
         'לא סיימת!',
-        'התמונה שלך עדיין מחכה',
+        'התמונה שלכם עדיין מחכה',
         greet(user.name || undefined) +
-        para(`שמנו לב שהתחלת להשתמש ב-<strong>${actionName}</strong> אבל לא סיימת.`) +
-        para('אל דאגה — <strong>הכל שמור ומחכה לך</strong>. פשוט חזור ותסיים.') +
-        bigNumber(actionName, 'מחכה לך'),
+        para(`שמנו לב שהתחלתם להשתמש ב-<strong>${actionName}</strong> אבל לא סיימתם.`) +
+        para('אל דאגה — <strong>הכל שמור ומחכה לכם</strong>. פשוט חזרו ותסיימו.') +
+        bigNumber(actionName, 'מחכה לכם'),
         'להמשיך מאיפה שעצרת',
         `${BASE_URL}${actionPage}`,
         user.email,
@@ -441,14 +441,14 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'activation',
       dayNumber: 0,
-      subject: 'ההדמיה הראשונה שלך מוכנה',
+      subject: 'ההדמיה הראשונה שלכם מוכנה',
       reason: 'first_tool_use',
       html: wrapEmail(
         'כל הכבוד',
-        'השתמשת בכלי הראשון שלך',
+        'השתמשתם בכלי הראשון שלכם',
         greet(user.name || undefined) +
-        para('מעולה! עשית את הצעד הראשון. <strong>התוצאה שלך מוכנה</strong>.') +
-        para('רוצה לראות את החדר בסגנון אחר? <strong>כל סגנון נותן תוצאה שונה לגמרי</strong> — מודרני, כפרי, מינימליסטי, ועוד.'),
+        para('מעולה! עשיתם את הצעד הראשון. <strong>התוצאה שלכם מוכנה</strong>.') +
+        para('רוצים לראות את החדר בסגנון אחר? <strong>כל סגנון נותן תוצאה שונה לגמרי</strong> — מודרני, כפרי, מינימליסטי, ועוד.'),
         'לנסות סגנון אחר',
         `${BASE_URL}/visualize`,
         user.email,
@@ -461,7 +461,7 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
     const usedActions = new Set(deductions.map(t => t.action));
     const allTools = [
       { action: 'visualize', name: 'הדמיית חדר', url: '/visualize' },
-      { action: 'style-match', name: 'Style Match — מצא את הסגנון שלך', url: '/style-match' },
+      { action: 'style-match', name: 'Style Match — מצאו את הסגנון שלכם', url: '/style-match' },
       { action: 'shop-look', name: 'Shop the Look — קנה את הסגנון', url: '/shop-the-look' },
       { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
       { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
@@ -477,10 +477,10 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
         subject: 'כלים שכדאי לנסות',
         reason: 'suggest_unused_tools',
         html: wrapEmail(
-          'עוד כלים שיעזרו לך',
+          'עוד כלים שיעזרו לכם',
           'כדאי לנסות',
           greet(user.name || undefined) +
-          para('בנוסף לכלי שכבר ניסית, יש עוד כלי AI <strong>שיעזרו לך לעצב את הבית</strong>:') +
+          para('בנוסף לכלי שכבר ניסיתם, יש עוד כלי AI <strong>שיעזרו לכם לעצב את הבית</strong>:') +
           infoBox(toolLines) +
           para('כל כלי עולה רק <strong>כמה קרדיטים</strong> ונותן תוצאה מיידית.'),
           'לנסות עכשיו',
@@ -508,14 +508,14 @@ function evaluateLowCredits(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'low_credits',
       dayNumber: 0,
-      subject: `נשארו לך ${user.viz_credits} קרדיטים`,
+      subject: `נשארו לכם ${user.viz_credits} קרדיטים`,
       reason: 'credits_running_low',
       html: wrapEmail(
         `נשארו ${user.viz_credits} קרדיטים`,
         'כדאי להשלים לפני שנגמרים',
         greet(user.name || undefined) +
-        para(`נשארו לך <strong>${user.viz_credits} קרדיטים</strong> בחשבון. מספיק לעוד שימוש אחד או שניים.`) +
-        para('כדי להמשיך להשתמש בכל הכלים — <strong>השלם קרדיטים בכל רגע</strong>.') +
+        para(`נשארו לכם <strong>${user.viz_credits} קרדיטים</strong> בחשבון. מספיק לעוד שימוש אחד או שניים.`) +
+        para('כדי להמשיך להשתמש בכל הכלים — <strong>השלימו קרדיטים בכל רגע</strong>.') +
         bigNumber(`${user.viz_credits}`, 'קרדיטים נותרו'),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
@@ -552,7 +552,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
         'הקרדיטים נגמרו',
         '',
         greet(user.name || undefined) +
-        para(`השתמשת ב-<strong>${usageCount} כלים</strong> וצרכת <strong>${totalSpent} קרדיטים</strong>. עכשיו הגיע הזמן להשלים.`) +
+        para(`השתמשתם ב-<strong>${usageCount} כלים</strong> וצרכתם <strong>${totalSpent} קרדיטים</strong>. עכשיו הגיע הזמן להשלים.`) +
         infoBox([
           `📊 ${usageCount} שימושים בכלים`,
           `💰 ${totalSpent} קרדיטים נוצלו`,
@@ -587,10 +587,10 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
           subject: 'הנחה מיוחדת — 48 שעות בלבד',
           reason: 'zero_credits_discount_20',
           html: wrapEmail(
-            'הנחה מיוחדת בשבילך',
+            'הנחה מיוחדת בשבילכם',
             '48 שעות בלבד',
             greet(user.name || undefined) +
-            para('כי ראינו שאתה משתמש פעיל, יש לנו הצעה:') +
+            para('כי ראינו שאתם משתמשים פעילים, יש לנו הצעה:') +
             bigNumber('20% הנחה', `קוד: <strong>${code}</strong>`) +
             para('ההנחה תקפה ל-<strong>48 השעות הקרובות בלבד</strong>.'),
             'לרכוש עם הנחה',
@@ -626,7 +626,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
             'הצעה אחרונה',
             'הנחה הכי גבוהה שלנו',
             greet(user.name || undefined) +
-            para('לא רוצים לוותר עליך. הנה <strong>ההנחה הכי גבוהה שלנו</strong>:') +
+            para('לא רוצים לוותר עליכם. הנה <strong>ההנחה הכי גבוהה שלנו</strong>:') +
             bigNumber('25% הנחה', `קוד: <strong>${code}</strong>`) +
             para('חבילות קרדיטים מ-₪10 — <strong>עם ההנחה עוד פחות</strong>.'),
             'לנצל את ההנחה',
@@ -662,8 +662,8 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'חזרת!',
         'יש כלי עיצוב חדשים שחבל לפספס',
         greet(user.name || undefined) +
-        para('לא ראינו אותך כבר שבוע. יש לנו <strong>כלי עיצוב חדשים</strong> שחבל לפספס!') +
-        para('החשבון שלך מחכה — <strong>כל מה שעשית שמור</strong>.'),
+        para('לא ראינו אתכם כבר שבוע. יש לנו <strong>כלי עיצוב חדשים</strong> שחבל לפספס!') +
+        para('החשבון שלכם מחכה — <strong>כל מה שעשיתם שמור</strong>.'),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -684,9 +684,9 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         greet(user.name || undefined) +
         para('כלי עיצוב שכדאי לנסות:') +
         infoBox([
-          '✅ <strong>Style Match</strong> — מצא את סגנון העיצוב שמתאים לך',
+          '✅ <strong>Style Match</strong> — מצאו את סגנון העיצוב שמתאים לכם',
           '✅ <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה',
-          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר שלך',
+          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר שלכם',
         ]),
         'לנסות עכשיו',
         `${BASE_URL}/visualize`,
@@ -724,14 +724,14 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     return {
       flowName: 'inactive',
       dayNumber: 2,
-      subject: 'מתגעגעים — יש לך מתנה',
+      subject: 'מתגעגעים — יש לכם מתנה',
       reason: 'inactive_30d_gift',
       html: wrapEmail(
         'מתגעגעים',
-        'יש לך 5 קרדיטים מתנה',
+        'יש לכם 5 קרדיטים מתנה',
         greet(user.name || undefined) +
-        para('עבר חודש מהשימוש האחרון שלך. רצינו להגיד שלום ולתת לך <strong>מתנה קטנה</strong>.') +
-        bigNumber('5 קרדיטים', 'כבר בחשבון שלך — מוכנים לשימוש') +
+        para('עבר חודש מהשימוש האחרון שלכם. רצינו להגיד שלום ולתת לכם <strong>מתנה קטנה</strong>.') +
+        bigNumber('5 קרדיטים', 'כבר בחשבון שלכם — מוכנים לשימוש') +
         para('מספיק ל-Style Match, ניתוח הצעת מחיר, או סריקת קבלות.'),
         'להשתמש במתנה',
         `${BASE_URL}/visualize`,
@@ -752,9 +752,9 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'עדיין שם?',
         '',
         greet(user.name || undefined) +
-        para('עברו חודשיים מהביקור האחרון שלך. אם מצאת את הסגנון המושלם — מעולה!') +
-        para('אם רוצה להמשיך לקבל עדכונים על כלים חדשים, <strong>פשוט לחץ על הכפתור</strong>.') +
-        para(`לא רוצה לשמוע מאיתנו? <a href="${unsubUrl}" style="color: #0071e3; text-decoration: underline;">להסרה מרשימת התפוצה</a>`),
+        para('עברו חודשיים מהביקור האחרון שלכם. אם מצאתם את הסגנון המושלם — מעולה!') +
+        para('אם רוצים להמשיך לקבל עדכונים על כלים חדשים, <strong>פשוט לחצו על הכפתור</strong>.') +
+        para(`לא רוצים לשמוע מאיתנו? <a href="${unsubUrl}" style="color: #0071e3; text-decoration: underline;">להסרה מרשימת התפוצה</a>`),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -786,9 +786,9 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
         'הקרדיטים מוכנים',
         'אפשר להתחיל',
         greet(user.name || undefined) +
-        para('הקרדיטים החדשים שלך <strong>כבר בחשבון</strong> ומוכנים לשימוש.') +
-        bigNumber(`${user.viz_credits}`, 'קרדיטים בחשבון שלך') +
-        para('היכנס לדשבורד ותתחיל להשתמש.'),
+        para('הקרדיטים החדשים שלכם <strong>כבר בחשבון</strong> ומוכנים לשימוש.') +
+        bigNumber(`${user.viz_credits}`, 'קרדיטים בחשבון שלכם') +
+        para('היכנסו לדשבורד ותתחילו להשתמש.'),
         'לדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -805,15 +805,15 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
       reason: 'post_purchase_tips',
       html: wrapEmail(
         'ניצול מקסימלי',
-        'של הקרדיטים שלך',
+        'של הקרדיטים שלכם',
         greet(user.name || undefined) +
         para('הנה כמה טיפים <strong>לנצל כל קרדיט בצורה חכמה</strong>:') +
         infoBox([
-          '🎨 <strong>הדמיה בסגנונות שונים</strong> — נסה מודרני, כפרי, מינימליסטי (10 קרדיטים)',
-          '🛋️ <strong>Style Match</strong> — AI מזהה את הסגנון שלך ומציע מוצרים (3 קרדיטים)',
+          '🎨 <strong>הדמיה בסגנונות שונים</strong> — נסו מודרני, כפרי, מינימליסטי (10 קרדיטים)',
+          '🛋️ <strong>Style Match</strong> — AI מזהה את הסגנון שלכם ומציע מוצרים (3 קרדיטים)',
           '🛒 <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה (3 קרדיטים)',
         ]) +
-        para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> — 30 שניות ואתה רואה את העתיד.'),
+        para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> — 30 שניות ורואים את העתיד.'),
         'צור הדמיה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -832,8 +832,8 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
         'מה דעתך?',
         'לוקח 15 שניות',
         greet(user.name || undefined) +
-        para('עבר שבוע מאז שרכשת קרדיטים. נשמח לשמוע <strong>מה אתה חושב</strong>!') +
-        para('הפידבק שלך עוזר לנו לבנות מוצר טוב יותר. פשוט <strong>שלח לנו מייל קצר</strong> עם מה שאהבת ומה אפשר לשפר.'),
+        para('עבר שבוע מאז שרכשתם קרדיטים. נשמח לשמוע <strong>מה אתם חושבים</strong>!') +
+        para('הפידבק שלכם עוזר לנו לבנות מוצר טוב יותר. פשוט <strong>שלחו לנו מייל קצר</strong> עם מה שאהבתם ומה אפשר לשפר.'),
         'לשלוח פידבק',
         'mailto:help@shipazti.com?subject=פידבק על ShiputzAI',
         user.email,
@@ -865,12 +865,12 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
       subject: 'סיכום שבועי — שבוע פרודוקטיבי',
       reason: 'weekly_summary_active',
       html: wrapEmail(
-        'הסיכום השבועי שלך',
+        'הסיכום השבועי שלכם',
         'שבוע מעולה',
         greet(user.name || undefined) +
         bigNumber(`${weeklyActionCount} שימושים`, 'השבוע') +
-        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> — כל הדמיה מקרבת אותך לעיצוב המושלם.') +
-        para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
+        para('השבוע הייתם פעילים מאוד! <strong>המשיכו ככה</strong> — כל הדמיה מקרבת אתכם לעיצוב המושלם.') +
+        para(`נותרו לכם <strong>${user.viz_credits} קרדיטים</strong>.`),
         'לדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -882,15 +882,15 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
   return {
     flowName: 'usage_summary',
     dayNumber: weekNum,
-    subject: 'סיכום שבועי — נסה עוד כלי',
+    subject: 'סיכום שבועי — נסו עוד כלי',
     reason: 'weekly_summary_light',
     html: wrapEmail(
-      'הסיכום השבועי שלך',
+      'הסיכום השבועי שלכם',
       '',
       greet(user.name || undefined) +
       bigNumber(`${weeklyActionCount}`, `שימוש${weeklyActionCount > 1 ? 'ים' : ''} השבוע`) +
-      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>Style Match</strong> או <strong>Shop the Look</strong> — מצא וקנה את הסגנון שמתאים לך.') +
-      para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
+      para('יש לכם עוד כלים שיכולים לעזור. נסו <strong>Style Match</strong> או <strong>Shop the Look</strong> — מצאו וקנו את הסגנון שמתאים לכם.') +
+      para(`נותרו לכם <strong>${user.viz_credits} קרדיטים</strong>.`),
       'לנסות כלי נוסף',
       `${BASE_URL}/visualize`,
       user.email,
@@ -917,14 +917,14 @@ function evaluateReferral(ctx: FlowContext): EmailAction | null {
         'שניכם מקבלים 20 קרדיטים',
         greet(user.name || undefined) +
         para('אהבת את ShiputzAI? <strong>שתף עם חבר ותרוויח!</strong>') +
-        bigNumber('20', 'קרדיטים לכל אחד — לך ולחבר שלך') +
+        bigNumber('20', 'קרדיטים לכל אחד — לכם ולחבר שלכם') +
         para('איך זה עובד:') +
         infoBox([
-          '1️⃣ שלח את הלינק האישי שלך לחבר',
+          '1️⃣ שלחו את הלינק האישי שלכם לחבר',
           '2️⃣ החבר נרשם דרך הלינק',
           '3️⃣ <strong>שניכם מקבלים 20 קרדיטים אוטומטית!</strong>',
         ]) +
-        para('הלינק האישי שלך מחכה בדשבורד.'),
+        para('הלינק האישי שלכם מחכה בדשבורד.'),
         'לקבל את הלינק שלי',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -957,14 +957,14 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'milestone',
       dayNumber: 0,
-      subject: 'חמש פעם — אתה מקצוען',
+      subject: 'חמש פעמים — מקצוענים!',
       reason: 'milestone_5_uses',
       html: wrapEmail(
         'חמש פעם',
-        'אתה מקצוען',
+        'מקצוענים!',
         greet(user.name || undefined) +
         bigNumber('5', 'שימושים בכלים') +
-        para('כבר השתמשת ב-5 כלי עיצוב! <strong>אתה יודע מה אתה עושה.</strong>') +
+        para('כבר השתמשתם ב-5 כלי עיצוב! <strong>אתם יודעים מה אתם עושים.</strong>') +
         para(suggestText),
         'להמשיך',
         suggestUrl,
@@ -978,14 +978,14 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'milestone',
       dayNumber: 1,
-      subject: 'אתה בין המשתמשים הפעילים ביותר',
+      subject: 'אתם בין המשתמשים הפעילים ביותר',
       reason: 'milestone_10_uses',
       html: wrapEmail(
-        'אתה בין הפעילים ביותר',
+        'אתם בין הפעילים ביותר',
         '',
         greet(user.name || undefined) +
         bigNumber('10+', 'שימושים') +
-        para('עם יותר מ-10 שימושים, <strong>אתה בין המשתמשים הכי פעילים שלנו</strong>.') +
+        para('עם יותר מ-10 שימושים, <strong>אתם בין המשתמשים הכי פעילים שלנו</strong>.') +
         para('שווה לבדוק את התוכניות שלנו — <strong>חבילת קרדיטים גדולה יותר = מחיר טוב יותר לקרדיט</strong>.'),
         'לצפות בתוכניות',
         `${BASE_URL}/pricing`,
@@ -1008,9 +1008,9 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
         reason: 'milestone_second_purchase',
         html: wrapEmail(
           'אולי תוכנית חודשית?',
-          'חוסך לך כסף וזמן',
+          'חוסך לכם כסף וזמן',
           greet(user.name || undefined) +
-          para('שמנו לב שכבר רכשת קרדיטים פעמיים. <strong>תוכנית חודשית יכולה לחסוך לך</strong>:') +
+          para('שמנו לב שכבר רכשתם קרדיטים פעמיים. <strong>תוכנית חודשית יכולה לחסוך לכם</strong>:') +
           infoBox([
             '✅ <strong>מחיר טוב יותר</strong> לקרדיט',
             '✅ <strong>קרדיטים אוטומטיים</strong> כל חודש',

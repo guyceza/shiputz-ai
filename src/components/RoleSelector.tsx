@@ -19,51 +19,64 @@ const ROLES: Role[] = [
     key: "homeowner",
     label: "בעל/ת בית",
     description: "מתכנן/ת שיפוץ או עיצוב מחדש",
-    animationUrl: "https://lottie.host/embed/8ff98a55-037e-4489-9038-6fb7ea6f581f/house-animation.json",
+    animationUrl: "",
     color: "#3B82F6",
-    tools: ["visualize", "floorplan", "boq", "quotes", "receipts", "chat"],
+    tools: ["visualize", "floorplan", "video-tour", "boq", "quotes", "receipts", "chat"],
   },
   {
     key: "designer",
     label: "מעצב/ת פנים",
     description: "עיצוב ותכנון חללים ללקוחות",
-    animationUrl: "https://lottie.host/embed/designer-animation.json",
+    animationUrl: "",
     color: "#8B5CF6",
-    tools: ["visualize", "floorplan", "style-match", "shop-look", "boq"],
+    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "chat"],
   },
   {
     key: "architect",
     label: "אדריכל/ית",
     description: "תכנון אדריכלי ובנייה",
-    animationUrl: "https://lottie.host/embed/architect-animation.json",
+    animationUrl: "",
     color: "#EC4899",
-    tools: ["floorplan", "visualize", "boq", "quotes"],
+    tools: ["floorplan", "visualize", "video-tour", "boq", "quotes", "chat"],
   },
   {
     key: "contractor",
     label: "קבלן שיפוצים",
     description: "ביצוע עבודות שיפוץ ובנייה",
-    animationUrl: "https://lottie.host/embed/contractor-animation.json",
+    animationUrl: "",
     color: "#F59E0B",
-    tools: ["boq", "quotes", "receipts", "floorplan"],
+    tools: ["boq", "quotes", "receipts", "floorplan", "chat"],
   },
   {
     key: "realtor",
     label: "סוכן/ת נדל״ן",
     description: "הצגת פוטנציאל לנכסים",
-    animationUrl: "https://lottie.host/embed/realtor-animation.json",
+    animationUrl: "",
     color: "#10B981",
-    tools: ["visualize", "floorplan", "style-match"],
+    tools: ["visualize", "floorplan", "video-tour", "style-match", "chat"],
   },
   {
     key: "other",
     label: "אחר",
     description: "סתם מתעניין/ת",
-    animationUrl: "https://lottie.host/embed/other-animation.json",
+    animationUrl: "",
     color: "#6B7280",
-    tools: ["visualize", "floorplan", "boq", "quotes", "receipts", "chat"],
+    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "receipts", "chat"],
   },
 ];
+
+// Helper: get role by key
+export function getRoleByKey(key: string): Role | undefined {
+  return ROLES.find(r => r.key === key);
+}
+
+// Helper: check if a tool is available for a role
+export function isToolAvailable(roleKey: string | undefined | null, tool: string): boolean {
+  if (!roleKey) return true; // no role = show everything
+  const role = getRoleByKey(roleKey);
+  if (!role) return true;
+  return role.tools.includes(tool);
+}
 
 interface Props {
   onSelect: (role: Role) => void;

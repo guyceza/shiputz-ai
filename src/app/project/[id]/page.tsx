@@ -44,6 +44,7 @@ import { ExpenseListSkeleton } from "@/components/Skeleton";
 import { FormattedText } from "@/components/FormattedText";
 import { BarChart3, Calendar, Users, Camera } from "lucide-react";
 import ProjectWizardStepper, { WizardStep } from "@/components/ProjectWizardStepper";
+import { isToolAvailable } from "@/components/RoleSelector";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {

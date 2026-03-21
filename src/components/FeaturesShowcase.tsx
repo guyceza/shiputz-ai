@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import BeforeAfterSlider from "./BeforeAfterSlider";
+import { isToolAvailable } from "./RoleSelector";
 
 interface Feature {
   title: string;
@@ -16,6 +17,7 @@ interface Feature {
   video?: string;
   isGif?: boolean;
   beforeAfter?: { before: string; after: string };
+  toolKey?: string; // maps to role tool keys
 }
 
 const mainFeatures: Feature[] = [
@@ -26,6 +28,7 @@ const mainFeatures: Feature[] = [
     image: "/images/ai-vision/style-match-showcase.jpg",
     href: "/style-match",
     cta: "נסו עכשיו",
+    toolKey: "style-match",
   },
   {
     title: "תוכנית קומה חכמה",
@@ -34,6 +37,7 @@ const mainFeatures: Feature[] = [
     image: "/images/ai-vision/floorplan.jpg",
     href: "/floorplan",
     cta: "נסו עכשיו",
+    toolKey: "floorplan",
   },
   {
     title: "סיור וידאו AI",
@@ -43,6 +47,7 @@ const mainFeatures: Feature[] = [
     video: "/images/ai-vision/video-tour-showcase.mp4",
     href: "/floorplan?mode=video",
     cta: "צרו סרטון",
+    toolKey: "video-tour",
   },
 ];
 
@@ -61,6 +66,7 @@ const teaserFeatures: Feature[] = [
     href: "/dashboard",
     image: "/images/ai-vision/chat-support-thumb.jpg",
     video: "/images/ai-vision/chat-support-showcase.mp4",
+    toolKey: "chat",
   },
   {
     title: "עיצוב מחדש",
@@ -71,6 +77,7 @@ const teaserFeatures: Feature[] = [
       before: "/before-room.webp",
       after: "/after-room.webp",
     },
+    toolKey: "visualize",
   },
   {
     title: "כתב כמויות",
@@ -78,6 +85,7 @@ const teaserFeatures: Feature[] = [
     href: "/dashboard/bill-of-quantities",
     image: "/images/ai-vision/boq.gif",
     isGif: true,
+    toolKey: "boq",
   },
   {
     title: "ניתוח הצעת מחיר",
@@ -85,6 +93,7 @@ const teaserFeatures: Feature[] = [
     href: "/quote-analysis",
     image: "/images/ai-vision/quote-analysis.gif",
     isGif: true,
+    toolKey: "quotes",
   },
   {
     title: "סריקת קבלות",
@@ -92,6 +101,7 @@ const teaserFeatures: Feature[] = [
     href: "/receipt-scanner",
     image: "/images/ai-vision/receipt-scanner.gif",
     isGif: true,
+    toolKey: "receipts",
   },
 ];
 
@@ -187,11 +197,14 @@ function CardDeck({ features }: { features: Feature[] }) {
   );
 }
 
-export default function FeaturesShowcase() {
+export default function FeaturesShowcase({ userRole }: { userRole?: string | null }) {
+  const filteredMain = userRole ? mainFeatures.filter(f => !f.toolKey || isToolAvailable(userRole, f.toolKey)) : mainFeatures;
+  const filteredTeaser = userRole ? teaserFeatures.filter(f => !f.toolKey || isToolAvailable(userRole, f.toolKey)) : teaserFeatures;
+
   return (
     <div className="space-y-24 md:space-y-32">
       {/* Main Features - Alternating Layout */}
-      {mainFeatures.map((feature, index) => {
+      {filteredMain.map((feature, index) => {
         const imageOnRight = index % 2 === 0; // 0,2 = right, 1 = left
 
         return (
@@ -257,7 +270,7 @@ export default function FeaturesShowcase() {
       })}
 
       {/* Card Deck Section */}
-      <CardDeck features={teaserFeatures} />
+      <CardDeck features={filteredTeaser} />
     </div>
   );
 }

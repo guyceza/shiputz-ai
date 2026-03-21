@@ -23,6 +23,7 @@ export default function Home() {
   const [hasVisionSubscription, setHasVisionSubscription] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
   
   useEffect(() => {
     // Check for auth session
@@ -316,7 +317,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל הכלים. מקום אחד.</h2>
             <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך</p>
           </div>
-          <FeaturesShowcase />
+          <FeaturesShowcase userRole={viewMode === 'all' ? null : userRole} />
         </div>
       </section>
 

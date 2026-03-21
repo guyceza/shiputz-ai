@@ -507,44 +507,32 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Navigation */}
-      <nav className="h-11 border-b border-stone-200/60 bg-white overflow-x-auto">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center gap-4 md:gap-6 min-w-max">
+      <nav className="border-b border-stone-200/60 bg-white">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-11 flex items-center justify-between">
           <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600 whitespace-nowrap">
             ShiputzAI
           </Link>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap">דף הבית</Link>
-          <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap">
-            מאמרים וטיפים
-          </Link>
-          {isAdmin && (
-            <>
-              <Link
-                href="/admin"
-                className="text-xs font-medium text-purple-600 hover:text-purple-800 bg-purple-50 px-2 md:px-3 py-1 rounded-full whitespace-nowrap"
-              >
-                📊 CRM
-              </Link>
-              <button
-                onClick={() => setShowAdminPanel(!showAdminPanel)}
-                className={`text-xs font-medium whitespace-nowrap ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                🔧 Admin
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => setShowSettings(true)}
-            className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap"
-          >
-            ⚙️ הגדרות
-          </button>
-          <ThemeToggle />
-          <button
-            onClick={handleLogout}
-            className="text-xs text-gray-500 hover:text-gray-900 whitespace-nowrap"
-          >
-            התנתקות
-          </button>
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-5">
+            <Link href="/" className="text-xs text-gray-500 hover:text-gray-900">דף הבית</Link>
+            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">מאמרים וטיפים</Link>
+            {isAdmin && (
+              <>
+                <Link href="/admin" className="text-xs font-medium text-purple-600 hover:text-purple-800 bg-purple-50 px-3 py-1 rounded-full">📊 CRM</Link>
+                <button onClick={() => setShowAdminPanel(!showAdminPanel)} className={`text-xs font-medium ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>🔧 Admin</button>
+              </>
+            )}
+            <button onClick={() => setShowSettings(true)} className="text-xs text-gray-500 hover:text-gray-900">⚙️ הגדרות</button>
+            <ThemeToggle />
+            <button onClick={handleLogout} className="text-xs text-gray-500 hover:text-gray-900">התנתקות</button>
+          </div>
+          {/* Mobile nav */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link href="/" className="text-xs text-gray-500">דף הבית</Link>
+            <button onClick={() => setShowSettings(true)} className="text-xs text-gray-500">⚙️</button>
+            <ThemeToggle />
+            <button onClick={handleLogout} className="text-xs text-gray-500">יציאה</button>
+          </div>
         </div>
       </nav>
 
@@ -557,42 +545,40 @@ function DashboardContent() {
       )}
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-semibold text-stone-800">
+            <h1 className="text-2xl md:text-3xl font-semibold text-stone-800">
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
             </h1>
             {user.email && (
-              <div className="flex items-center gap-3 mt-1">
-                <p className="text-sm text-stone-500">{user.email}</p>
-                {user.role && (
-                  <>
-                    <button
-                      onClick={() => setShowRoleModal(true)}
-                      className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
-                    >
-                      🔄 {(() => {
-                        const labels: Record<string, string> = { homeowner: "בעל/ת בית", designer: "מעצב/ת פנים", architect: "אדריכל/ית", contractor: "קבלן", realtor: "נדל״ן", other: "אחר" };
-                        return labels[user.role] || user.role;
-                      })()}
-                    </button>
-                    <button
-                      onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
-                      className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
-                      title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
-                    >
-                      {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
-                    </button>
-                  </>
-                )}
+              <p className="text-sm text-stone-500 mt-0.5">{user.email}</p>
+            )}
+            {user.role && (
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => setShowRoleModal(true)}
+                  className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
+                >
+                  🔄 {(() => {
+                    const labels: Record<string, string> = { homeowner: "בעל/ת בית", designer: "מעצב/ת פנים", architect: "אדריכל/ית", contractor: "קבלן", realtor: "נדל״ן", other: "אחר" };
+                    return labels[user.role] || user.role;
+                  })()}
+                </button>
+                <button
+                  onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
+                  className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
+                  title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
+                >
+                  {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
+                </button>
               </div>
             )}
           </div>
           <button
             onClick={() => setShowNewProject(true)}
-            className="bg-stone-800 text-white px-6 py-2 rounded-full text-sm hover:bg-stone-700 transition-colors"
+            className="bg-stone-800 text-white px-5 py-2 rounded-full text-sm hover:bg-stone-700 transition-colors whitespace-nowrap"
           >
             פרויקט חדש
           </button>
@@ -601,30 +587,29 @@ function DashboardContent() {
         {/* Referral Widget */}
         {user?.email && <ReferralWidget userEmail={user.email} />}
 
-        {/* Mini Stats Overview - Enhanced */}
+        {/* Mini Stats Overview */}
         {projects.length > 0 && (
-          <div className="mb-8">
-            <div className="grid md:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
-                <p className="text-xs text-stone-500 mb-1">סה״כ תקציב</p>
-                <p className="text-2xl font-semibold text-stone-800">₪{totalBudget.toLocaleString()}</p>
+          <div className="mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-white p-3.5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-0.5">סה״כ תקציב</p>
+                <p className="text-lg md:text-2xl font-semibold text-stone-800">₪{totalBudget.toLocaleString()}</p>
               </div>
-              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
-                <p className="text-xs text-stone-500 mb-1">סה״כ הוצאות</p>
-                <p className="text-2xl font-semibold text-stone-800">₪{totalSpent.toLocaleString()}</p>
+              <div className="bg-white p-3.5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-0.5">סה״כ הוצאות</p>
+                <p className="text-lg md:text-2xl font-semibold text-stone-800">₪{totalSpent.toLocaleString()}</p>
               </div>
-              <div className={`p-5 rounded-xl border ${totalRemaining < 0 ? 'bg-rose-50/50 border-rose-200/60' : 'bg-white border-stone-200/80'}`}>
-                <p className={`text-xs mb-1 ${totalRemaining < 0 ? 'text-rose-500' : 'text-stone-500'}`}>נותר</p>
-                <p className={`text-2xl font-semibold ${totalRemaining < 0 ? 'text-rose-700' : 'text-stone-800'}`}>
+              <div className={`p-3.5 rounded-xl border ${totalRemaining < 0 ? 'bg-rose-50/50 border-rose-200/60' : 'bg-white border-stone-200/80'}`}>
+                <p className={`text-xs mb-0.5 ${totalRemaining < 0 ? 'text-rose-500' : 'text-stone-500'}`}>נותר</p>
+                <p className={`text-lg md:text-2xl font-semibold ${totalRemaining < 0 ? 'text-rose-700' : 'text-stone-800'}`}>
                   ₪{totalRemaining.toLocaleString()}
                 </p>
               </div>
-              <div className="bg-white p-5 rounded-xl border border-stone-200/80">
-                <p className="text-xs text-stone-500 mb-1">פרויקטים</p>
-                <p className="text-2xl font-semibold text-stone-800">{projects.length}</p>
+              <div className="bg-white p-3.5 rounded-xl border border-stone-200/80">
+                <p className="text-xs text-stone-500 mb-0.5">פרויקטים</p>
+                <p className="text-lg md:text-2xl font-semibold text-stone-800">{projects.length}</p>
               </div>
             </div>
-            
           </div>
         )}
 
@@ -677,7 +662,7 @@ function DashboardContent() {
               return (
                 <div
                   key={project.id}
-                  className="relative bg-white border border-stone-200/60 rounded-2xl p-8 hover:border-stone-300 hover:shadow-md shadow-sm transition-all duration-200"
+                  className="relative bg-white border border-stone-200/60 rounded-2xl p-5 md:p-8 hover:border-stone-300 hover:shadow-md shadow-sm transition-all duration-200"
                 >
                   {/* Project Menu Button */}
                   <div className="absolute top-4 left-4">

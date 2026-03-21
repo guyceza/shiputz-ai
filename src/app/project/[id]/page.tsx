@@ -1756,47 +1756,48 @@ export default function ProjectPage() {
             num: 2,
             label: "תוכנית ומיפוי חדרים",
             description: hasFloorplan ? "החדרים מופו" : "העלה תוכנית וזהה חדרים",
-            status: hasFloorplan ? "done" : hasOnboarding ? "current" : "locked",
-            href: hasOnboarding ? `/floorplan` : undefined,
+            status: hasFloorplan ? "done" : "current",
+            href: `/floorplan`,
           },
           {
             num: 3,
             label: "עיצוב והדמיות",
             description: hasVisualizations ? "יש הדמיות" : "צור הדמיות AI לכל חדר",
-            status: hasVisualizations ? "done" : hasFloorplan ? "current" : "locked",
-            href: hasFloorplan ? `/visualize` : undefined,
+            status: hasVisualizations ? "done" : "current",
+            href: `/visualize`,
           },
           {
             num: 4,
             label: "כתב כמויות",
             description: hasBOQ ? "כתב כמויות מוכן" : "הפק כתב כמויות מפורט",
-            status: hasBOQ ? "done" : (hasOnboarding || hasFloorplan) ? "current" : "locked",
+            status: hasBOQ ? "done" : "current",
             href: `/dashboard/bill-of-quantities`,
           },
           {
             num: 5,
             label: "הצעות מחיר",
             description: hasQuotes ? `${(project.savedQuotes || []).length} הצעות` : "נתח והשווה הצעות",
-            status: hasQuotes ? "done" : "locked",
+            status: hasQuotes ? "done" : "current",
             href: `/quote-analysis`,
           },
           {
             num: 6,
             label: "מעקב ביצוע",
-            description: hasExpenses ? `${(project.expenses || []).length} הוצאות` : "עקוב אחרי הוצאות וקבלות",
-            status: hasExpenses ? "done" : "locked",
+            description: hasExpenses ? `${(project.expenses || []).length} הוצאות` : "סרוק קבלות ועקוב אחרי הוצאות",
+            status: hasExpenses ? "done" : "current",
+            action: () => setShowAddExpense(true),
           },
         ];
 
-        // Find first non-done step and make it current
+        // Find first non-done step and make it the highlighted current
         let foundCurrent = false;
         for (let i = 0; i < wizardSteps.length; i++) {
           if (wizardSteps[i].status === "done") continue;
           if (!foundCurrent) {
-            wizardSteps[i] = { ...wizardSteps[i], status: "current" };
             foundCurrent = true;
+            // This one stays "current" (highlighted)
           } else {
-            wizardSteps[i] = { ...wizardSteps[i], status: "locked" };
+            // Others stay "current" too but won't be highlighted in UI
           }
         }
 
@@ -1828,30 +1829,42 @@ export default function ProjectPage() {
                   </a>
                 )}
               </div>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <a href="/visualize" className="text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 block">
+                  <p className="font-medium text-gray-900 mb-1">הדמיות AI</p>
+                  <p className="text-xs text-gray-500">צלם חדר וראה עיצוב חדש</p>
+                </a>
+                <a href="/floorplan" className="text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 block">
+                  <p className="font-medium text-gray-900 mb-1">תוכנית וחדרים</p>
+                  <p className="text-xs text-gray-500">מיפוי חדרים וסיור וירטואלי</p>
+                </a>
+                <a href="/dashboard/bill-of-quantities" className="text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 block">
+                  <p className="font-medium text-gray-900 mb-1">כתב כמויות</p>
+                  <p className="text-xs text-gray-500">הפקה אוטומטית מתיאור</p>
+                </a>
                 <button
                   onClick={() => isPremium ? (setShowQuoteAnalysis(true), setQuoteAnalysis(null), setQuoteText(""), setQuoteError(null)) : null}
                   disabled={!isPremium}
-                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">ניתוח הצעת מחיר</p>
-                  <p className="text-sm text-gray-500">בדוק אם המחיר סביר</p>
+                  <p className="text-xs text-gray-500">בדוק אם המחיר סביר</p>
                 </button>
                 <button
                   onClick={() => isPremium ? setShowAIChat(true) : null}
                   disabled={!isPremium}
-                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">עוזר AI</p>
-                  <p className="text-sm text-gray-500">שאל שאלות על השיפוץ</p>
+                  <p className="text-xs text-gray-500">שאל שאלות על השיפוץ</p>
                 </button>
                 <button
                   onClick={() => isPremium ? (fileInputRef.current?.click(), setShowAddExpense(true)) : null}
                   disabled={!isPremium}
-                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">סריקת קבלה</p>
-                  <p className="text-sm text-gray-500">צלם והוסף אוטומטית</p>
+                  <p className="text-xs text-gray-500">צלם והוסף אוטומטית</p>
                 </button>
               </div>
             </div>

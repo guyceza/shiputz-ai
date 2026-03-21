@@ -9,6 +9,8 @@ import ReferralWidget from "@/components/ReferralWidget";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import NewProjectWizard from "@/components/NewProjectWizard";
+import RoleSelector from "@/components/RoleSelector";
+import type { Role } from "@/components/RoleSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -47,6 +49,7 @@ function DashboardContent() {
   const [showNewProject, setShowNewProject] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -107,12 +110,17 @@ function DashboardContent() {
         if (session?.user) {
           // Real authenticated user
           userId = session.user.id;
+          const userRole = session.user.user_metadata?.role;
           setUser({ 
             id: session.user.id,
             email: session.user.email || "", 
             name: session.user.user_metadata?.name,
-            role: session.user.user_metadata?.role,
+            role: userRole,
           });
+          // Show role selector for existing users without a role
+          if (!userRole) {
+            setShowRoleModal(true);
+          }
           // Check if admin
           if (isAdminEmail(session.user.email || "")) {
             setIsAdmin(true);
@@ -753,6 +761,40 @@ function DashboardContent() {
           onComplete={handleWizardComplete}
           onCancel={() => setShowNewProject(false)}
         />
+      )}
+
+      {/* Role Selection Modal for existing users */}
+      {showRoleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <RoleSelector onSelect={async (role: Role) => {
+              try {
+                const { getSupabaseClient } = await import('@/lib/supabase');
+                const supabase = getSupabaseClient();
+                await supabase.auth.updateUser({ data: { role: role.key } });
+                
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                  const u = JSON.parse(userData);
+                  u.role = role.key;
+                  localStorage.setItem('user', JSON.stringify(u));
+                }
+                
+                setUser(prev => prev ? { ...prev, role: role.key } : prev);
+                setShowRoleModal(false);
+              } catch (err) {
+                console.error('Failed to save role:', err);
+                setShowRoleModal(false);
+              }
+            }} />
+            <button
+              onClick={() => setShowRoleModal(false)}
+              className="w-full mt-4 text-sm text-gray-400 hover:text-gray-600 py-2"
+            >
+              אולי אח״כ
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Edit Project Modal */}

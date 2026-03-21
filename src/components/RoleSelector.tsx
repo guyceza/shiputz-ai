@@ -86,6 +86,15 @@ export function isToolAvailable(roleKey: string | undefined | null, tool: string
   return role.tools.includes(tool);
 }
 
+const LOTTIE_PATHS: Record<string, string> = {
+  homeowner: "/lottie/homeowner.json",
+  designer: "/lottie/designer.json",
+  architect: "/lottie/architect.json",
+  contractor: "/lottie/contractor.json",
+  realtor: "/lottie/realtor.json",
+  other: "/lottie/other.json",
+};
+
 interface Props {
   onSelect: (role: Role) => void;
 }
@@ -94,6 +103,18 @@ export default function RoleSelector({ onSelect }: Props) {
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [animationData, setAnimationData] = useState<Record<string, any>>({});
+
+  // Load all Lottie animations on mount
+  useState(() => {
+    Object.entries(LOTTIE_PATHS).forEach(([key, path]) => {
+      fetch(path)
+        .then(res => res.json())
+        .then(data => {
+          setAnimationData(prev => ({ ...prev, [key]: data }));
+        })
+        .catch(() => {});
+    });
+  });
 
   const handleSelect = (role: Role) => {
     setSelectedRole(role.key);
@@ -128,15 +149,26 @@ export default function RoleSelector({ onSelect }: Props) {
                 : undefined,
             }}
           >
-            {/* Animated icon placeholder — will use Lottie when we have the URLs */}
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center text-3xl"
-              style={{ background: `${role.color}15` }}>
-              {role.key === "homeowner" && "🏠"}
-              {role.key === "designer" && "🎨"}
-              {role.key === "architect" && "📐"}
-              {role.key === "contractor" && "🔨"}
-              {role.key === "realtor" && "🏢"}
-              {role.key === "other" && "✨"}
+            {/* Lottie animation */}
+            <div className="w-20 h-20 mx-auto mb-3">
+              {animationData[role.key] ? (
+                <Lottie
+                  animationData={animationData[role.key]}
+                  loop={hoveredRole === role.key || selectedRole === role.key}
+                  autoplay={hoveredRole === role.key || selectedRole === role.key}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              ) : (
+                <div className="w-full h-full rounded-full flex items-center justify-center text-3xl"
+                  style={{ background: `${role.color}15` }}>
+                  {role.key === "homeowner" && "🏠"}
+                  {role.key === "designer" && "🎨"}
+                  {role.key === "architect" && "📐"}
+                  {role.key === "contractor" && "🔨"}
+                  {role.key === "realtor" && "🏢"}
+                  {role.key === "other" && "✨"}
+                </div>
+              )}
             </div>
 
             <div className="text-center">

@@ -13,13 +13,16 @@ import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
 import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
-// Promo popup for non-premium users
+import RoleSelector from "@/components/RoleSelector";
+import type { Role } from "@/components/RoleSelector";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [hasVisionSubscription, setHasVisionSubscription] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   useEffect(() => {
     // Check for auth session
@@ -36,6 +39,7 @@ export default function Home() {
             setIsAdmin(user.isAdmin === true);
             setIsPremium(user.purchased === true);
             userEmail = user.email;
+            if (user.role) setUserRole(user.role);
           }
         }
         
@@ -49,6 +53,8 @@ export default function Home() {
             userEmail = session.user.email || null;
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
             setIsPremium(storedUser.purchased === true);
+            const role = session.user.user_metadata?.role || storedUser.role;
+            if (role) setUserRole(role);
           }
         }
         
@@ -75,6 +81,15 @@ export default function Home() {
     };
     checkAuth();
   }, []);
+
+  // Show role modal for logged-in users without role (after auth loads)
+  useEffect(() => {
+    if (isLoggedIn && !userRole) {
+      // Small delay so the page renders first
+      const t = setTimeout(() => setShowRoleModal(true), 500);
+      return () => clearTimeout(t);
+    }
+  }, [isLoggedIn, userRole]);
   
   const [showPromoPopup, setShowPromoPopup] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -541,6 +556,40 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Role Selection Modal */}
+      {showRoleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <RoleSelector onSelect={async (role: Role) => {
+              try {
+                const { getSupabaseClient } = await import('@/lib/supabase');
+                const supabase = getSupabaseClient();
+                await supabase.auth.updateUser({ data: { role: role.key } });
+                
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                  const u = JSON.parse(userData);
+                  u.role = role.key;
+                  localStorage.setItem('user', JSON.stringify(u));
+                }
+                
+                setUserRole(role.key);
+                setShowRoleModal(false);
+              } catch (err) {
+                console.error('Failed to save role:', err);
+                setShowRoleModal(false);
+              }
+            }} />
+            <button
+              onClick={() => setShowRoleModal(false)}
+              className="w-full mt-4 text-sm text-gray-400 hover:text-gray-600 py-2"
+            >
+              אולי אח״כ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

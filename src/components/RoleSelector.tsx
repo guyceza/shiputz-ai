@@ -14,6 +14,8 @@ export interface Role {
   tools: string[]; // which tools to show for this role
 }
 
+const ALL_TOOLS = ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "receipts", "chat"];
+
 const ROLES: Role[] = [
   {
     key: "homeowner",
@@ -21,8 +23,8 @@ const ROLES: Role[] = [
     description: "מתכנן/ת שיפוץ או עיצוב מחדש",
     animationUrl: "",
     color: "#3B82F6",
-    // Sees everything EXCEPT BOQ (that's the contractor/designer's job)
-    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "quotes", "receipts", "chat"],
+    // Everything EXCEPT BOQ — contractor/designer prepares that
+    tools: ALL_TOOLS.filter(t => t !== "boq"),
   },
   {
     key: "designer",
@@ -30,8 +32,8 @@ const ROLES: Role[] = [
     description: "עיצוב ותכנון חללים ללקוחות",
     animationUrl: "",
     color: "#8B5CF6",
-    // Design-focused + BOQ for clients, no receipt tracking
-    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "chat"],
+    // Everything — designers do styling, BOQ, quotes, the works
+    tools: [...ALL_TOOLS],
   },
   {
     key: "architect",
@@ -39,8 +41,8 @@ const ROLES: Role[] = [
     description: "תכנון אדריכלי ובנייה",
     animationUrl: "",
     color: "#EC4899",
-    // Space planning + technical specs, no styling/receipts
-    tools: ["floorplan", "visualize", "video-tour", "boq", "quotes", "chat"],
+    // Everything — in Israel architects also do interior design & styling
+    tools: [...ALL_TOOLS],
   },
   {
     key: "contractor",
@@ -48,8 +50,8 @@ const ROLES: Role[] = [
     description: "ביצוע עבודות שיפוץ ובנייה",
     animationUrl: "",
     color: "#F59E0B",
-    // Execution-focused: BOQ + quotes + receipts + visualization for clients, no styling
-    tools: ["boq", "quotes", "receipts", "floorplan", "visualize", "video-tour", "chat"],
+    // Everything EXCEPT style-match & shop-look — contractors don't do styling
+    tools: ALL_TOOLS.filter(t => !["style-match", "shop-look"].includes(t)),
   },
   {
     key: "realtor",
@@ -57,7 +59,7 @@ const ROLES: Role[] = [
     description: "הצגת פוטנציאל לנכסים",
     animationUrl: "",
     color: "#10B981",
-    // Presentation-focused: show property potential, no construction/financial tools
+    // Presentation only — no project management / financial tools
     tools: ["visualize", "floorplan", "video-tour", "style-match", "chat"],
   },
   {
@@ -67,7 +69,7 @@ const ROLES: Role[] = [
     animationUrl: "",
     color: "#6B7280",
     // Everything
-    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "receipts", "chat"],
+    tools: [...ALL_TOOLS],
   },
 ];
 

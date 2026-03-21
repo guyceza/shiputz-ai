@@ -21,7 +21,8 @@ const ROLES: Role[] = [
     description: "מתכנן/ת שיפוץ או עיצוב מחדש",
     animationUrl: "",
     color: "#3B82F6",
-    tools: ["visualize", "floorplan", "video-tour", "boq", "quotes", "receipts", "chat"],
+    // Sees everything EXCEPT BOQ (that's the contractor/designer's job)
+    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "quotes", "receipts", "chat"],
   },
   {
     key: "designer",
@@ -29,7 +30,8 @@ const ROLES: Role[] = [
     description: "עיצוב ותכנון חללים ללקוחות",
     animationUrl: "",
     color: "#8B5CF6",
-    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "chat"],
+    // Design-focused + BOQ for clients, no receipt tracking
+    tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "chat"],
   },
   {
     key: "architect",
@@ -37,6 +39,7 @@ const ROLES: Role[] = [
     description: "תכנון אדריכלי ובנייה",
     animationUrl: "",
     color: "#EC4899",
+    // Space planning + technical specs, no styling/receipts
     tools: ["floorplan", "visualize", "video-tour", "boq", "quotes", "chat"],
   },
   {
@@ -45,7 +48,8 @@ const ROLES: Role[] = [
     description: "ביצוע עבודות שיפוץ ובנייה",
     animationUrl: "",
     color: "#F59E0B",
-    tools: ["boq", "quotes", "receipts", "floorplan", "chat"],
+    // Execution-focused: BOQ + quotes + receipts + visualization for clients, no styling
+    tools: ["boq", "quotes", "receipts", "floorplan", "visualize", "video-tour", "chat"],
   },
   {
     key: "realtor",
@@ -53,6 +57,7 @@ const ROLES: Role[] = [
     description: "הצגת פוטנציאל לנכסים",
     animationUrl: "",
     color: "#10B981",
+    // Presentation-focused: show property potential, no construction/financial tools
     tools: ["visualize", "floorplan", "video-tour", "style-match", "chat"],
   },
   {
@@ -61,6 +66,7 @@ const ROLES: Role[] = [
     description: "סתם מתעניין/ת",
     animationUrl: "",
     color: "#6B7280",
+    // Everything
     tools: ["visualize", "floorplan", "video-tour", "style-match", "shop-look", "boq", "quotes", "receipts", "chat"],
   },
 ];

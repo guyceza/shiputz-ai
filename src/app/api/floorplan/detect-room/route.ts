@@ -26,13 +26,15 @@ export async function POST(req: NextRequest) {
 
     const prompt = `This is a top-down floor plan rendering of an apartment. The user clicked at position ${clickX.toFixed(1)}% from the left and ${clickY.toFixed(1)}% from the top of the image.
 
-Identify which room or area the user clicked on. Respond in JSON format only:
+Identify which room or area the user clicked on. Also estimate the room's dimensions in meters based on the floor plan scale. Respond in JSON format only:
 {
   "room": "the room name in English (e.g. living room, kitchen, bedroom, bathroom, hallway, balcony, dining area, home office)",
   "roomHe": "the room name in Hebrew",
-  "description": "brief description of what you see in that area of the floor plan"
+  "description": "brief description of what you see in that area of the floor plan",
+  "dimensions": { "width": 3.5, "height": 4.0 }
 }
 
+For dimensions, estimate in meters based on typical Israeli apartment proportions. If you can see dimension labels on the plan, use those. Otherwise estimate based on room type and relative size.
 If the click is on a wall, door, or unclear area, pick the nearest room. Respond with ONLY the JSON, no other text.`;
 
     const response = await fetch(

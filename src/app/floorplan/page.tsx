@@ -33,7 +33,22 @@ const STEPS = [
 type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-upload" | "video-select" | "video-result";
 
 interface ClickMarker { x: number; y: number; }
-interface RoomInfo { room: string; roomHe: string; description: string; }
+interface RoomInfo { room: string; roomHe: string; description: string; dimensions?: { width: number; height: number }; }
+
+const ROOM_PURPOSES = [
+  { key: "bedroom", label: "חדר שינה", icon: "🛏️" },
+  { key: "living-room", label: "סלון", icon: "🛋️" },
+  { key: "kitchen", label: "מטבח", icon: "🍳" },
+  { key: "bathroom", label: "אמבטיה", icon: "🚿" },
+  { key: "office", label: "חדר עבודה", icon: "💻" },
+  { key: "kids-room", label: "חדר ילדים", icon: "🧸" },
+  { key: "dining", label: "פינת אוכל", icon: "🍽️" },
+  { key: "laundry", label: "מכבסה", icon: "🧺" },
+  { key: "storage", label: "מחסן", icon: "📦" },
+  { key: "balcony", label: "מרפסת", icon: "🌿" },
+  { key: "entrance", label: "כניסה", icon: "🚪" },
+  { key: "guest-room", label: "חדר אורחים", icon: "🛎️" },
+];
 interface FurnitureInfo { item: string; itemHe: string; description: string; suggestions: string[]; }
 interface RoomPhoto { roomName: string; roomNameHe: string; imageData: string; }
 
@@ -961,6 +976,69 @@ export default function FloorplanPage() {
               <h2 className="text-xl font-bold text-gray-900">{currentRoomPhoto.roomNameHe}</h2>
               <button onClick={() => setPhase("floorplan-ready")}
                 className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors">← חזרה לתפריט</button>
+            </div>
+
+            {/* Room Info Card */}
+            <div className="max-w-2xl mx-auto bg-gray-50 rounded-2xl p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{ROOM_PURPOSES.find(r => r.key === currentRoomPhoto.roomName || r.label === currentRoomPhoto.roomNameHe)?.icon || "🏠"}</span>
+                  <span className="font-medium text-gray-900">{currentRoomPhoto.roomNameHe}</span>
+                </div>
+                {detectedRoom?.dimensions && (
+                  <span className="text-sm text-gray-500 font-mono">
+                    {detectedRoom.dimensions.width}×{detectedRoom.dimensions.height} מ׳
+                  </span>
+                )}
+              </div>
+              {detectedRoom?.description && (
+                <p className="text-sm text-gray-500 mb-3">{detectedRoom.description}</p>
+              )}
+              {/* Change Purpose */}
+              <div className="flex flex-wrap gap-1.5">
+                <span className="text-xs text-gray-400 self-center ml-1">שנה ייעוד:</span>
+                {ROOM_PURPOSES.filter(r => r.label !== currentRoomPhoto.roomNameHe).slice(0, 6).map(r => (
+                  <button
+                    key={r.key}
+                    onClick={async () => {
+                      setCurrentRoomPhoto({ ...currentRoomPhoto, roomName: r.key, roomNameHe: r.label });
+                      setDetectedRoom(detectedRoom ? { ...detectedRoom, room: r.key, roomHe: r.label } : null);
+                      // Re-generate room with new purpose
+                      setLoadingRoom(true);
+                      setLoadingLabel(`מייצר ${r.label}...`);
+                      setPhase("floorplan");
+                      try {
+                        const blob = await (await fetch(floorplanResult!)).blob();
+                        const fd = new FormData();
+                        fd.append("floorplan", blob, "floorplan.png");
+                        fd.append("room", r.key);
+                        fd.append("style", customStyle || selectedStyle || "modern-cabin");
+                        fd.append("email", getEmail() || "");
+                        const res = await fetch("/api/floorplan/room", { method: "POST", body: fd });
+                        const data = await res.json();
+                        checkCredits(res, data); if (!res.ok) throw new Error(data.error);
+                        if (data.image) {
+                          const photo: RoomPhoto = {
+                            roomName: r.key, roomNameHe: r.label,
+                            imageData: `data:${data.image.mimeType};base64,${data.image.data}`,
+                          };
+                          setCurrentRoomPhoto(photo);
+                          setAllRoomPhotos(prev => {
+                            const filtered = prev.filter(p => p.roomName !== currentRoomPhoto.roomName);
+                            return [...filtered, photo];
+                          });
+                          saveRoomToDB(photo);
+                          setPhase("room-actions");
+                        }
+                      } catch (err: any) { setError(err.message); setPhase("room-actions"); }
+                      finally { setLoadingRoom(false); setLoadingLabel(""); }
+                    }}
+                    className="text-xs px-2.5 py-1 bg-white border border-gray-200 rounded-full hover:border-gray-900 hover:bg-gray-50 transition-all text-gray-600 hover:text-gray-900"
+                  >
+                    {r.icon} {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-2xl mx-auto">

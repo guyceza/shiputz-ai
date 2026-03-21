@@ -41,7 +41,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const actionParam = searchParams.get("action");
-  const [user, setUser] = useState<{ name?: string; email: string; id?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; email: string; id?: string; role?: string } | null>(null);
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
@@ -109,7 +109,8 @@ function DashboardContent() {
           setUser({ 
             id: session.user.id,
             email: session.user.email || "", 
-            name: session.user.user_metadata?.name 
+            name: session.user.user_metadata?.name,
+            role: session.user.user_metadata?.role,
           });
           // Check if admin
           if (isAdminEmail(session.user.email || "")) {

@@ -94,8 +94,14 @@ export default function RoleSelector({ onSelect }: Props) {
 
   const handleSelect = (role: Role) => {
     setSelectedRole(role.key);
-    setTimeout(() => onSelect(role), 400);
   };
+
+  const handleConfirm = () => {
+    const role = ROLES.find(r => r.key === selectedRole);
+    if (role) onSelect(role);
+  };
+
+  const selectedRoleObj = ROLES.find(r => r.key === selectedRole);
 
   return (
     <div className="space-y-6">
@@ -148,6 +154,17 @@ export default function RoleSelector({ onSelect }: Props) {
             )}
           </button>
         ))}
+      </div>
+
+      {/* Continue button — appears after selection */}
+      <div className={`transition-all duration-500 overflow-hidden ${selectedRole ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}>
+        <button
+          onClick={handleConfirm}
+          className="w-full max-w-md mx-auto block py-3.5 px-6 rounded-xl text-white font-semibold text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+          style={{ background: selectedRoleObj?.color || "#3B82F6" }}
+        >
+          המשך כ{selectedRoleObj?.label || ""}
+        </button>
       </div>
     </div>
   );

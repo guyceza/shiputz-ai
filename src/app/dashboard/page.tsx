@@ -568,13 +568,24 @@ function DashboardContent() {
               <div className="flex items-center gap-3 mt-1">
                 <p className="text-sm text-stone-500">{user.email}</p>
                 {user.role && (
-                  <button
-                    onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
-                    className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
-                    title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
-                  >
-                    {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setShowRoleModal(true)}
+                      className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
+                    >
+                      🔄 {(() => {
+                        const labels: Record<string, string> = { homeowner: "בעל/ת בית", designer: "מעצב/ת פנים", architect: "אדריכל/ית", contractor: "קבלן", realtor: "נדל״ן", other: "אחר" };
+                        return labels[user.role] || user.role;
+                      })()}
+                    </button>
+                    <button
+                      onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
+                      className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
+                      title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
+                    >
+                      {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
+                    </button>
+                  </>
                 )}
               </div>
             )}

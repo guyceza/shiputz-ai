@@ -8,6 +8,7 @@ import AdminPanel from "./admin-panel";
 import ReferralWidget from "@/components/ReferralWidget";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardSkeleton } from "@/components/Skeleton";
+import NewProjectWizard from "@/components/NewProjectWizard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsModal } from "@/components/SettingsModal";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -297,6 +298,31 @@ function DashboardContent() {
     setIsCanceling(false);
   };
 
+  const budgetRangeToNumber = (range: string): number => {
+    const map: Record<string, number> = {
+      "under-50k": 50000,
+      "50k-100k": 100000,
+      "100k-200k": 200000,
+      "200k-500k": 500000,
+      "over-500k": 750000,
+    };
+    return map[range] || 100000;
+  };
+
+  const handleWizardComplete = async (wizardData: { name: string; projectType: string; propertyType: string; budgetRange: string; timeline: string }) => {
+    const budgetNum = budgetRangeToNumber(wizardData.budgetRange);
+    const projectName = wizardData.name;
+    const onboardingData = {
+      projectType: wizardData.projectType,
+      propertyType: wizardData.propertyType,
+      budgetRange: wizardData.budgetRange,
+      timeline: wizardData.timeline,
+    };
+
+    // Reuse existing creation logic
+    await handleCreateProjectInternal(projectName, budgetNum, onboardingData);
+  };
+
   const handleCreateProject = async () => {
     if (!newProjectName || !newProjectBudget) return;
     
@@ -305,6 +331,10 @@ function DashboardContent() {
       alert("נא להזין תקציב תקין");
       return;
     }
+    await handleCreateProjectInternal(newProjectName, budgetNum);
+  };
+
+  const handleCreateProjectInternal = async (projectName: string, budgetNum: number, onboardingData?: { projectType: string; propertyType: string; budgetRange: string; timeline: string }) => {
 
     try {
       // Get user ID
@@ -326,7 +356,7 @@ function DashboardContent() {
       }
 
       // Create project in Supabase
-      const newProject = await createProject(userId, newProjectName, budgetNum);
+      const newProject = await createProject(userId, projectName, budgetNum, onboardingData);
       
       // Update local state
       const displayProject: DisplayProject = {
@@ -704,52 +734,12 @@ function DashboardContent() {
         )}
       </div>
 
-      {/* New Project Modal */}
+      {/* New Project Wizard */}
       {showNewProject && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-8">פרויקט חדש</h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">שם הפרויקט</label>
-                <input
-                  type="text"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  placeholder="לדוגמה: שיפוץ מטבח"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-2">תקציב (₪)</label>
-                <input
-                  type="number"
-                  value={newProjectBudget}
-                  onChange={(e) => setNewProjectBudget(e.target.value)}
-                  placeholder="100000"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-gray-900"
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-3 mt-8">
-              <button
-                onClick={handleCreateProject}
-                disabled={!newProjectName || !newProjectBudget}
-                className="flex-1 bg-gray-900 text-white py-3 rounded-full text-base hover:bg-gray-800 transition-colors disabled:opacity-30"
-              >
-                צור
-              </button>
-              <button
-                onClick={() => setShowNewProject(false)}
-                className="flex-1 border border-gray-200 text-gray-900 py-3 rounded-full text-base hover:bg-gray-50 transition-colors"
-              >
-                ביטול
-              </button>
-            </div>
-          </div>
-        </div>
+        <NewProjectWizard
+          onComplete={handleWizardComplete}
+          onCancel={() => setShowNewProject(false)}
+        />
       )}
 
       {/* Edit Project Modal */}

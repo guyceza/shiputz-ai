@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, name, budget = 0 } = body;
+    const { userId, name, budget = 0, onboardingData } = body;
 
     if (!userId || !name) {
       return NextResponse.json({ error: 'Missing required fields: userId, name' }, { status: 400 });
@@ -46,6 +46,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
     
+    // Include onboarding data in project data field
+    const projectData: Record<string, any> = {};
+    if (onboardingData) {
+      if (onboardingData.projectType) projectData.projectType = onboardingData.projectType;
+      if (onboardingData.propertyType) projectData.propertyType = onboardingData.propertyType;
+      if (onboardingData.budgetRange) projectData.budgetRange = onboardingData.budgetRange;
+      if (onboardingData.timeline) projectData.timeline = onboardingData.timeline;
+      projectData.wizardStep = 1; // Start at step 1 of project wizard
+    }
+
     const { data, error } = await supabase
       .from('projects')
       .insert({
@@ -53,7 +63,7 @@ export async function POST(request: NextRequest) {
         name,
         budget,
         spent: 0,
-        data: {}
+        data: projectData
       })
       .select()
       .single();

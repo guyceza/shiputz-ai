@@ -13,6 +13,16 @@ export interface Project {
 
 // All the nested data that syncs with Supabase
 export interface ProjectData {
+  // Onboarding wizard data
+  projectType?: string;    // full-renovation, room-renovation, design-furniture, new-build
+  propertyType?: string;   // apartment, house, penthouse, office, commercial
+  budgetRange?: string;    // under-50k, 50k-100k, 100k-200k, 200k-500k, over-500k
+  timeline?: string;       // 1month, 3months, 6months, 1year, unsure
+  wizardStep?: number;     // current step in project wizard (1-6)
+  rooms?: RoomData[];      // detected rooms from floorplan
+  floorplanUrl?: string;   // uploaded floorplan image URL
+
+  // Existing data
   expenses?: Expense[];
   categoryBudgets?: CategoryBudget[];
   phases?: Phase[];
@@ -20,6 +30,16 @@ export interface ProjectData {
   photos?: ProgressPhoto[];
   suppliers?: Supplier[];
   savedQuotes?: SavedQuote[];
+}
+
+export interface RoomData {
+  id: string;
+  name: string;
+  nameHe: string;
+  purpose: string;
+  dimensions?: { width: number; height: number };
+  furniture?: string[];
+  visualizations?: string[];  // URLs to visualization images
 }
 
 export interface Expense {
@@ -136,11 +156,16 @@ export async function getProject(projectId: string): Promise<Project | null> {
 }
 
 // Create a new project (via API to bypass RLS)
-export async function createProject(userId: string, name: string, budget: number = 0): Promise<Project> {
+export async function createProject(userId: string, name: string, budget: number = 0, onboardingData?: {
+  projectType?: string;
+  propertyType?: string;
+  budgetRange?: string;
+  timeline?: string;
+}): Promise<Project> {
   const response = await fetch('/api/projects', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, name, budget }),
+    body: JSON.stringify({ userId, name, budget, onboardingData }),
   });
   
   if (!response.ok) {

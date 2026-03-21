@@ -43,6 +43,7 @@ import { ExpenseCard } from "@/components/project/ExpenseCard";
 import { ExpenseListSkeleton } from "@/components/Skeleton";
 import { FormattedText } from "@/components/FormattedText";
 import { BarChart3, Calendar, Users, Camera } from "lucide-react";
+import ProjectWizardStepper, { WizardStep } from "@/components/ProjectWizardStepper";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -133,6 +134,14 @@ interface Project {
   photos?: ProgressPhoto[];
   suppliers?: Supplier[];
   savedQuotes?: SavedQuote[];
+  // Onboarding data
+  projectType?: string;
+  propertyType?: string;
+  budgetRange?: string;
+  timeline?: string;
+  wizardStep?: number;
+  rooms?: any[];
+  floorplanUrl?: string;
 }
 
 const CATEGORIES = ["חומרי בניין", "עבודה", "חשמל", "אינסטלציה", "ריצוף", "צבע", "מטבח", "אמבטיה", "אחר"];
@@ -219,6 +228,7 @@ export default function ProjectPage() {
   const [chatHistory, setChatHistory] = useState<{role: string, content: string}[]>([]);
   
   const [showScrollArrow, setShowScrollArrow] = useState(false);
+  const [showWizard, setShowWizard] = useState(true);
   const lastAiRef = useRef<HTMLDivElement>(null);
 
   // Scroll to start of last AI response (not bottom)
@@ -483,7 +493,14 @@ export default function ProjectPage() {
             tasks: supabaseProject.data?.tasks || [],
             photos: supabaseProject.data?.photos || [],
             suppliers: supabaseProject.data?.suppliers || [],
-            savedQuotes: supabaseProject.data?.savedQuotes || []
+            savedQuotes: supabaseProject.data?.savedQuotes || [],
+            projectType: supabaseProject.data?.projectType,
+            propertyType: supabaseProject.data?.propertyType,
+            budgetRange: supabaseProject.data?.budgetRange,
+            timeline: supabaseProject.data?.timeline,
+            wizardStep: supabaseProject.data?.wizardStep,
+            rooms: supabaseProject.data?.rooms,
+            floorplanUrl: supabaseProject.data?.floorplanUrl
           };
           
           // Initialize phases if not present
@@ -1718,6 +1735,79 @@ export default function ProjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Project Wizard Stepper */}
+      {showWizard && project && (() => {
+        const hasOnboarding = !!project.projectType;
+        const hasFloorplan = !!project.floorplanUrl || !!(project.rooms?.length);
+        const hasVisualizations = (project.photos || []).length > 0;
+        const hasBOQ = false; // TODO: detect BOQ
+        const hasQuotes = (project.savedQuotes || []).length > 0;
+        const hasExpenses = (project.expenses || []).length > 0;
+
+        const wizardSteps: WizardStep[] = [
+          {
+            num: 1,
+            label: "הגדרות פרויקט",
+            description: hasOnboarding ? "סוג, נכס, תקציב, לו״ז" : "הגדר סוג פרויקט ותקציב",
+            status: hasOnboarding ? "done" : "current",
+          },
+          {
+            num: 2,
+            label: "תוכנית ומיפוי חדרים",
+            description: hasFloorplan ? "החדרים מופו" : "העלה תוכנית וזהה חדרים",
+            status: hasFloorplan ? "done" : hasOnboarding ? "current" : "locked",
+            href: hasOnboarding ? `/floorplan` : undefined,
+          },
+          {
+            num: 3,
+            label: "עיצוב והדמיות",
+            description: hasVisualizations ? "יש הדמיות" : "צור הדמיות AI לכל חדר",
+            status: hasVisualizations ? "done" : hasFloorplan ? "current" : "locked",
+            href: hasFloorplan ? `/visualize` : undefined,
+          },
+          {
+            num: 4,
+            label: "כתב כמויות",
+            description: hasBOQ ? "כתב כמויות מוכן" : "הפק כתב כמויות מפורט",
+            status: hasBOQ ? "done" : (hasOnboarding || hasFloorplan) ? "current" : "locked",
+            href: `/dashboard/bill-of-quantities`,
+          },
+          {
+            num: 5,
+            label: "הצעות מחיר",
+            description: hasQuotes ? `${(project.savedQuotes || []).length} הצעות` : "נתח והשווה הצעות",
+            status: hasQuotes ? "done" : "locked",
+            href: `/quote-analysis`,
+          },
+          {
+            num: 6,
+            label: "מעקב ביצוע",
+            description: hasExpenses ? `${(project.expenses || []).length} הוצאות` : "עקוב אחרי הוצאות וקבלות",
+            status: hasExpenses ? "done" : "locked",
+          },
+        ];
+
+        // Find first non-done step and make it current
+        let foundCurrent = false;
+        for (let i = 0; i < wizardSteps.length; i++) {
+          if (wizardSteps[i].status === "done") continue;
+          if (!foundCurrent) {
+            wizardSteps[i] = { ...wizardSteps[i], status: "current" };
+            foundCurrent = true;
+          } else {
+            wizardSteps[i] = { ...wizardSteps[i], status: "locked" };
+          }
+        }
+
+        return (
+          <ProjectWizardStepper
+            steps={wizardSteps}
+            projectId={project.id}
+            onDismiss={() => setShowWizard(false)}
+          />
+        );
+      })()}
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Overview Tab */}

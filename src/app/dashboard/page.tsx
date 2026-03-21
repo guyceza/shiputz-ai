@@ -46,6 +46,7 @@ function DashboardContent() {
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -556,7 +557,18 @@ function DashboardContent() {
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
             </h1>
             {user.email && (
-              <p className="text-sm text-stone-500 mt-1">{user.email}</p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-sm text-stone-500">{user.email}</p>
+                {user.role && (
+                  <button
+                    onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
+                    className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
+                    title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
+                  >
+                    {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
+                  </button>
+                )}
+              </div>
             )}
           </div>
           <button

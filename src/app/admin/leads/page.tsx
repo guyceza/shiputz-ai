@@ -364,6 +364,67 @@ export default function AdminLeads() {
             </div>
           )}
         </div>
+        {/* Campaign Guide */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
+          <h3 className="text-lg font-semibold mb-4">📖 איך הקמפיין עובד</h3>
+          <div className="space-y-4 text-sm text-gray-300">
+            <div>
+              <h4 className="font-semibold text-white mb-2">🔄 תהליך השליחה</h4>
+              <ol className="list-decimal list-inside space-y-1 mr-2">
+                <li>הסקריפט רץ כל בוקר 09:00 (ראשון-חמישי)</li>
+                <li><strong>קודם follow-ups</strong>: לידים שקיבלו מייל #1 לפני 5+ ימים מקבלים מייל #2</li>
+                <li><strong>אח&quot;כ חדשים</strong>: לידים חדשים מקבלים מייל #1</li>
+                <li>אחרי 2 מיילים — הליד לא מקבל יותר</li>
+              </ol>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-2">📊 Warm-up (חימום דומיין)</h4>
+              <div className="flex gap-4">
+                <span className={`px-3 py-1 rounded ${stats.warmupWeek === 1 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 1: 30/יום</span>
+                <span className={`px-3 py-1 rounded ${stats.warmupWeek === 2 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 2: 40/יום</span>
+                <span className={`px-3 py-1 rounded ${stats.warmupWeek >= 3 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 3+: 50/יום</span>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-2">📈 מעקב (Funnel)</h4>
+              <div className="flex items-center gap-2 text-xs flex-wrap">
+                <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded">📧 נשלח</span>
+                <span className="text-gray-600">→</span>
+                <span className="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">✅ נמסר</span>
+                <span className="text-gray-600">→</span>
+                <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded">👀 נפתח</span>
+                <span className="text-gray-600">→</span>
+                <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">🔗 לחץ</span>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-2">👥 מקצועות ({stats.total} לידים)</h4>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(stats.statusBreakdown || {}).length > 0 && (
+                  <>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">מעצבי פנים</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">אדריכלים</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">קבלני שיפוצים</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">מטבחים ואמבטיות</span>
+                    <span className="bg-gray-800 px-2 py-1 rounded text-xs">נגרות אדריכלית</span>
+                  </>
+                )}
+              </div>
+              <p className="text-gray-500 mt-2">כל מקצוע מקבל מייל מותאם עם כותרת ותוכן רלוונטי</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-2">⚙️ ניהול ידני</h4>
+              <p className="text-gray-400">הסקריפט: <code className="bg-gray-800 px-1 rounded text-xs">email-campaign.js</code></p>
+              <div className="mt-1 space-y-1 text-gray-500 text-xs font-mono">
+                <p>node email-campaign.js run &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← שליחה ידנית</p>
+                <p>node email-campaign.js dry-run ← תצוגה מקדימה</p>
+                <p>node email-campaign.js stats &nbsp;&nbsp;← סטטיסטיקות</p>
+                <p>node email-campaign.js test X ← מייל טסט</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Email Preview Modal */}
         {(preview || previewLoading) && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setPreview(null)}>

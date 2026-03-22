@@ -21,22 +21,8 @@
     "dev": "tsc --build --watch",
     "prepublishOnly": "npm run build"
   },
-  "peerDependencies": {
-    "@pascal-app/core": "^0.1.4",
-    "@react-three/drei": "^10",
-    "@react-three/fiber": "^9",
-    "react": "^18 || ^19",
-    "three": "^0.183"
-  },
-  "dependencies": {
-    "polygon-clipping": "^0.15.7",
-    "zustand": "^5"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.2",
-    "typescript": "5.9.3",
-    "@types/three": "^0.183.0"
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "keywords": [
     "3d",
     "building",

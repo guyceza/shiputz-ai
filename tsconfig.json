@@ -19,7 +19,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@pascal-app/core": ["./packages/pascal-core/src/index.ts"],
+      "@pascal-app/core/*": ["./packages/pascal-core/src/*"],
+      "@pascal-app/viewer": ["./packages/pascal-viewer/src/index.ts"],
+      "@pascal-app/viewer/*": ["./packages/pascal-viewer/src/*"],
+      "@pascal-app/editor": ["./packages/pascal-editor/src/index.tsx"],
+      "@pascal-app/editor/*": ["./packages/pascal-editor/src/*"]
     }
   },
   "include": [

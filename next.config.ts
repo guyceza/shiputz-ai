@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   // Transpile Pascal Editor packages (source-only, no pre-built dist)
@@ -6,6 +7,24 @@ const nextConfig: NextConfig = {
   typescript: {
     // Pascal Editor has R3F JSX types that conflict — skip check for now
     ignoreBuildErrors: true,
+  },
+  // Turbopack resolveAlias for dev + Vercel
+  turbopack: {
+    resolveAlias: {
+      '@pascal-app/core': './packages/pascal-core/src/index.ts',
+      '@pascal-app/viewer': './packages/pascal-viewer/src/index.ts',
+      '@pascal-app/editor': './packages/pascal-editor/src/index.tsx',
+    },
+  },
+  // Webpack alias fallback
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@pascal-app/core': path.resolve(process.cwd(), 'packages/pascal-core/src/index.ts'),
+      '@pascal-app/viewer': path.resolve(process.cwd(), 'packages/pascal-viewer/src/index.ts'),
+      '@pascal-app/editor': path.resolve(process.cwd(), 'packages/pascal-editor/src/index.tsx'),
+    };
+    return config;
   },
   // Image optimization configuration
   images: {

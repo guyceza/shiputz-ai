@@ -259,8 +259,31 @@ function useApplyScene(scene: SceneGraph | null) {
           console.log(`Created wall: ${wall.name}`);
         }
         
-        // Doors/windows will be added in a future update
-        // For now, users can add them manually via the editor
+        // Create doors and windows (children of walls) after a short delay
+        await new Promise(r => setTimeout(r, 500));
+        
+        const doorNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'door');
+        const windowNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'window');
+        
+        for (const door of doorNodes as any[]) {
+          if (door.parentId && useScene.getState().nodes[door.parentId as any]) {
+            state.createNode({ ...door } as any, door.parentId);
+          }
+        }
+        
+        for (const win of windowNodes as any[]) {
+          if (win.parentId && useScene.getState().nodes[win.parentId as any]) {
+            state.createNode({ ...win } as any, win.parentId);
+          }
+        }
+        
+        // Re-mark walls dirty so WallSystem cuts openings for doors/windows
+        await new Promise(r => setTimeout(r, 300));
+        Object.values(useScene.getState().nodes).forEach((n: any) => {
+          if (n.type === 'wall') state.markDirty(n.id);
+        });
+        
+        console.log(`Created ${doorNodes.length} doors, ${windowNodes.length} windows`);
         
         applied.current = true;
         const totalNodes = Object.keys(useScene.getState().nodes).length;

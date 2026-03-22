@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 const PascalEditor = dynamic(
@@ -98,17 +98,56 @@ function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; o
   );
 }
 
+/**
+ * Applies a scene graph AFTER the editor has mounted by importing core directly
+ * and calling setScene + markDirty with a delay so renderers are registered.
+ */
+function useApplySceneDelayed(scene: SceneGraph | null) {
+  useEffect(() => {
+    if (!scene) return;
+
+    // Wait for editor to fully mount and register mesh refs in sceneRegistry
+    const timer = setTimeout(async () => {
+      try {
+        const { default: useScene } = await import("@pascal-app/core").then(m => ({ default: m.useScene }));
+        const { applySceneGraphToEditor } = await import("@pascal-app/editor").then(m => ({
+          applySceneGraphToEditor: m.applySceneGraphToEditor,
+        }));
+
+        // Apply scene
+        useScene.getState().setScene(
+          scene.nodes as any,
+          scene.rootNodeIds as any
+        );
+
+        // Re-mark all wall nodes as dirty after another delay 
+        // so WallRenderer meshes are in sceneRegistry
+        setTimeout(() => {
+          const nodes = useScene.getState().nodes;
+          Object.values(nodes).forEach((node: any) => {
+            if (node.type === 'wall') {
+              useScene.getState().markDirty(node.id);
+            }
+          });
+          console.log("Re-marked walls as dirty");
+        }, 500);
+      } catch (e) {
+        console.error("Failed to apply scene:", e);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [scene]);
+}
+
 function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
-  // Store scene in ref so onLoad always sees the latest value
-  const sceneRef = useRef(initialScene);
-  
-  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
-    return sceneRef.current;
-  }, []);
+  // Don't pass onLoad — let default empty scene load first
+  // Then apply our scene after mount
+  useApplySceneDelayed(initialScene);
 
   return (
     <div className="h-screen w-screen">
-      <PascalEditor onLoad={onLoad} />
+      <PascalEditor />
     </div>
   );
 }
@@ -126,6 +165,5 @@ export default function Editor3DPage() {
     );
   }
 
-  // Key forces full remount of editor when scene changes
   return <EditorWithScene key={scene ? "loaded" : "empty"} initialScene={scene} />;
 }

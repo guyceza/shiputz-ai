@@ -178,6 +178,12 @@ export default function AdminLeads() {
               {loading ? '⏳ טוען...' : '🔄 רענון'}
             </button>
             <Link
+              href="/admin/leads/list"
+              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-sm transition-colors font-medium"
+            >
+              📋 כל הלידים
+            </Link>
+            <Link
               href="/admin"
               className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors"
             >

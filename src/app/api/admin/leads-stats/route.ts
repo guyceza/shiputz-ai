@@ -38,10 +38,16 @@ export async function GET(request: NextRequest) {
 
     let bounced = 0;
     let errors = 0;
+    let opened = 0;
+    let delivered = 0;
+    let complained = 0;
     let totalEmailsSent = 0;
     emailStats?.forEach(e => {
       if (e.status === 'bounced') bounced++;
       if (e.status === 'error') errors++;
+      if (e.status === 'opened') opened++;
+      if (e.status === 'delivered') delivered++;
+      if (e.status === 'complained') complained++;
       if (e.status === 'sent' || e.status === 'delivered' || e.status === 'opened') totalEmailsSent++;
     });
 
@@ -99,6 +105,9 @@ export async function GET(request: NextRequest) {
       email2Sent,
       bounced,
       errors,
+      opened,
+      delivered,
+      complained,
       unsubscribed,
       remaining,
       sentToday,

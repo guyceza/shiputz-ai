@@ -20,6 +20,9 @@ interface LeadsStats {
   email2Sent: number;
   bounced: number;
   errors: number;
+  opened: number;
+  delivered: number;
+  complained: number;
   unsubscribed: number;
   remaining: number;
   sentToday: number;
@@ -146,9 +149,12 @@ export default function AdminLeads() {
           <StatCard label="נשלח מייל #1" value={stats.email1Sent} icon="📧" color="emerald" />
           <StatCard label="נשלח מייל #2" value={stats.email2Sent} icon="📨" color="blue" />
           <StatCard label="נשלח היום" value={stats.sentToday} icon="📤" color="yellow" />
+          <StatCard label="נמסרו" value={stats.delivered || 0} icon="✅" color="emerald" />
+          <StatCard label="פתחו" value={stats.opened || 0} icon="👀" color="blue" />
           <StatCard label="באונס" value={stats.bounced} icon="⚠️" color="red" />
-          <StatCard label="שגיאות" value={stats.errors} icon="❌" color="red" />
+          <StatCard label="התלוננו" value={stats.complained || 0} icon="🚨" color="red" />
           <StatCard label="הסירו עצמם" value={stats.unsubscribed} icon="🚫" color="orange" />
+          <StatCard label="שגיאות" value={stats.errors} icon="❌" color="red" />
           <StatCard label="נותרו לשלוח" value={stats.remaining} icon="📋" color="purple" />
         </div>
 

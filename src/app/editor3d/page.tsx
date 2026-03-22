@@ -160,32 +160,55 @@ function useApplyScene(scene: SceneGraph | null) {
   useEffect(() => {
     if (!scene || applied.current) return;
     
-    // Wait for editor to fully initialize, then inject scene via store
     const timer = setTimeout(async () => {
       try {
         const core = await import("@pascal-app/core");
         const useScene = core.useScene;
+        const state = useScene.getState();
         
-        console.log("Applying scene with", Object.keys(scene.nodes).length, "nodes");
+        // Get current default scene's level ID
+        const nodes = state.nodes as Record<string, any>;
+        const rootId = state.rootNodeIds[0];
+        const siteNode = nodes[rootId];
+        const buildingId = siteNode?.children?.[0];
+        const buildingNode = typeof buildingId === 'string' ? nodes[buildingId] : buildingId;
+        const levelId = buildingNode?.children?.[0];
+        const actualLevelId = typeof levelId === 'string' ? levelId : levelId?.id;
         
-        // Set scene directly in zustand store
-        useScene.getState().setScene(
-          scene.nodes as any,
-          scene.rootNodeIds as any
-        );
+        console.log("Found level:", actualLevelId);
+        
+        // Extract walls from our scene and create them in the existing scene
+        const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
+        console.log("Creating", wallNodes.length, "walls");
+        
+        for (const wall of wallNodes as any[]) {
+          const wallNode = {
+            object: 'node' as const,
+            id: wall.id,
+            type: 'wall' as const,
+            name: wall.name,
+            parentId: actualLevelId,
+            visible: true,
+            children: [],
+            start: wall.start,
+            end: wall.end,
+            thickness: wall.thickness || 0.15,
+            height: wall.height || 2.8,
+            frontSide: 'unknown',
+            backSide: 'unknown',
+            metadata: {},
+          };
+          
+          state.createNode(wallNode as any, actualLevelId);
+          console.log(`Created wall: ${wall.name} [${wall.start}] → [${wall.end}]`);
+        }
         
         applied.current = true;
-        console.log("Scene applied! Dirty nodes:", useScene.getState().dirtyNodes.size);
-        
-        // Log what's in the store
-        const nodes = useScene.getState().nodes;
-        Object.values(nodes).forEach((n: any) => {
-          console.log(`  ${n.type}: ${n.id} (parent: ${n.parentId})`);
-        });
+        console.log("Done! Total nodes:", Object.keys(useScene.getState().nodes).length);
       } catch (e) {
         console.error("Failed to apply scene:", e);
       }
-    }, 2000); // 2s delay for editor to fully mount
+    }, 2000);
     
     return () => clearTimeout(timer);
   }, [scene]);

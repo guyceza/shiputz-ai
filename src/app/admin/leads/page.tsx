@@ -45,12 +45,22 @@ interface LeadsStats {
   nextBatchLeads: NextBatchLead[];
 }
 
+interface EmailPreview {
+  subject: string;
+  body: string;
+  name: string;
+  profession: string;
+  firstName: string;
+}
+
 export default function AdminLeads() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<LeadsStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ email: string; seq: number; data: EmailPreview } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const fetchStats = useCallback(async (email: string) => {
     try {
@@ -67,6 +77,23 @@ export default function AdminLeads() {
       setLoading(false);
     }
   }, []);
+
+  const fetchPreview = async (email: string, seq: number) => {
+    if (!adminEmail) return;
+    setPreviewLoading(true);
+    try {
+      const resp = await fetch(`/api/admin/lead-preview?email=${encodeURIComponent(email)}&seq=${seq}`, {
+        headers: { "x-admin-email": adminEmail },
+      });
+      if (!resp.ok) throw new Error("Failed");
+      const data = await resp.json();
+      setPreview({ email, seq, data });
+    } catch {
+      setPreview(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -268,10 +295,11 @@ export default function AdminLeads() {
                   {stats.nextBatchLeads.map((lead, i) => (
                     <tr
                       key={lead.id}
-                      className="border-b border-gray-800/50 hover:bg-gray-800/30"
+                      className="border-b border-gray-800/50 hover:bg-gray-800/30 cursor-pointer"
+                      onClick={() => fetchPreview(lead.email, lead.nextEmail)}
                     >
                       <td className="py-2 px-3 text-gray-500">{i + 1}</td>
-                      <td className="py-2 px-3 font-mono text-xs">{lead.email}</td>
+                      <td className="py-2 px-3 font-mono text-xs text-emerald-400 underline">{lead.email}</td>
                       <td className="py-2 px-3">{lead.name || '—'}</td>
                       <td className="py-2 px-3 text-gray-400">{lead.profession || 'מעצבי פנים'}</td>
                       <td className="py-2 px-3">
@@ -309,9 +337,10 @@ export default function AdminLeads() {
                   {stats.recentEmails.map((email) => (
                     <tr
                       key={email.id}
-                      className="border-b border-gray-800/50 hover:bg-gray-800/30"
+                      className="border-b border-gray-800/50 hover:bg-gray-800/30 cursor-pointer"
+                      onClick={() => fetchPreview(email.email, email.sequence_number)}
                     >
-                      <td className="py-2 px-3 font-mono text-xs">
+                      <td className="py-2 px-3 font-mono text-xs text-emerald-400 underline">
                         {email.email}
                       </td>
                       <td className="py-2 px-3">#{email.sequence_number}</td>
@@ -333,6 +362,54 @@ export default function AdminLeads() {
             </div>
           )}
         </div>
+        {/* Email Preview Modal */}
+        {(preview || previewLoading) && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setPreview(null)}>
+            <div className="bg-gray-900 rounded-xl border border-gray-700 max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              {previewLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
+                </div>
+              ) : preview ? (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">תצוגה מקדימה</h3>
+                    <button onClick={() => setPreview(null)} className="text-gray-400 hover:text-white text-xl">✕</button>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex gap-2 text-sm">
+                      <span className="text-gray-400">אל:</span>
+                      <span className="font-mono">{preview.email}</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="text-gray-400">שם:</span>
+                      <span>{preview.data.name || '—'} ({preview.data.firstName})</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="text-gray-400">מקצוע:</span>
+                      <span>{preview.data.profession}</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="text-gray-400">מייל:</span>
+                      <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">#{preview.seq}</span>
+                    </div>
+                    <hr className="border-gray-700" />
+                    <div>
+                      <div className="text-sm text-gray-400 mb-1">נושא:</div>
+                      <div className="font-semibold text-white">{preview.data.subject}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400 mb-1">תוכן:</div>
+                      <div className="bg-gray-800 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                        {preview.data.body}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

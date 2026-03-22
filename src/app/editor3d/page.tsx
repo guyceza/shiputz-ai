@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import "./pascal-editor.css";
 
 const PascalEditor = dynamic(
   () => import("@pascal-app/editor").then((mod) => ({ default: mod.Editor })),
@@ -160,14 +161,18 @@ function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) 
     console.log("onLoad called, scene:", sceneRef.current ? "YES" : "null");
     if (sceneRef.current) {
       console.log("Returning scene with", Object.keys(sceneRef.current.nodes).length, "nodes");
-      console.log("Root IDs:", sceneRef.current.rootNodeIds);
       console.log("Node types:", Object.values(sceneRef.current.nodes).map((n: any) => `${n.id}:${n.type}`));
     }
     return sceneRef.current;
   }, []);
 
+  // Pascal Editor requires dark class on html
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.add('dark');
+  }
+
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-screen dark">
       <PascalEditor onLoad={onLoad} />
     </div>
   );

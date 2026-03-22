@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
     let opened = 0;
     let delivered = 0;
     let complained = 0;
+    let clicked = 0;
     let totalEmailsSent = 0;
     emailStats?.forEach(e => {
       if (e.status === 'bounced') bounced++;
@@ -48,7 +49,8 @@ export async function GET(request: NextRequest) {
       if (e.status === 'opened') opened++;
       if (e.status === 'delivered') delivered++;
       if (e.status === 'complained') complained++;
-      if (e.status === 'sent' || e.status === 'delivered' || e.status === 'opened') totalEmailsSent++;
+      if (e.status === 'clicked') { clicked++; opened++; } // clicked implies opened
+      if (['sent', 'delivered', 'opened', 'clicked'].includes(e.status)) totalEmailsSent++;
     });
 
     // Get today's sends
@@ -138,6 +140,7 @@ export async function GET(request: NextRequest) {
       opened,
       delivered,
       complained,
+      clicked,
       unsubscribed,
       remaining,
       sentToday,

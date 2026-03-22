@@ -31,6 +31,7 @@ interface LeadsStats {
   opened: number;
   delivered: number;
   complained: number;
+  clicked: number;
   unsubscribed: number;
   remaining: number;
   sentToday: number;
@@ -193,6 +194,7 @@ export default function AdminLeads() {
           <StatCard label="נשלח היום" value={stats.sentToday} icon="📤" color="yellow" />
           <StatCard label="נמסרו" value={stats.delivered || 0} icon="✅" color="emerald" />
           <StatCard label="פתחו" value={stats.opened || 0} icon="👀" color="blue" />
+          <StatCard label="לחצו על הלינק" value={stats.clicked || 0} icon="🔗" color="emerald" />
           <StatCard label="באונס" value={stats.bounced} icon="⚠️" color="red" />
           <StatCard label="התלוננו" value={stats.complained || 0} icon="🚨" color="red" />
           <StatCard label="הסירו עצמם" value={stats.unsubscribed} icon="🚫" color="orange" />
@@ -454,6 +456,7 @@ function StatusBadge({ status }: { status: string }) {
     sent: "bg-blue-500/20 text-blue-300",
     delivered: "bg-emerald-500/20 text-emerald-300",
     opened: "bg-green-500/20 text-green-300",
+    clicked: "bg-yellow-500/20 text-yellow-300",
     bounced: "bg-red-500/20 text-red-300",
     error: "bg-red-500/20 text-red-300",
   };

@@ -14,6 +14,14 @@ interface LeadEmail {
   error_message: string | null;
 }
 
+interface NextBatchLead {
+  id: string;
+  email: string;
+  name: string;
+  profession: string;
+  nextEmail: number;
+}
+
 interface LeadsStats {
   total: number;
   email1Sent: number;
@@ -34,6 +42,7 @@ interface LeadsStats {
   nextBatch: string;
   recentEmails: LeadEmail[];
   statusBreakdown: Record<string, number>;
+  nextBatchLeads: NextBatchLead[];
 }
 
 export default function AdminLeads() {
@@ -234,6 +243,48 @@ export default function AdminLeads() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Next Batch Preview */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
+          <h3 className="text-lg font-semibold mb-4">
+            📋 שליחה הבאה — {stats.nextBatchLeads?.length || 0} לידים
+          </h3>
+          {!stats.nextBatchLeads?.length ? (
+            <p className="text-gray-500 text-center py-4">אין לידים בתור</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-800">
+                    <th className="text-right py-2 px-3">#</th>
+                    <th className="text-right py-2 px-3">מייל</th>
+                    <th className="text-right py-2 px-3">שם</th>
+                    <th className="text-right py-2 px-3">מקצוע</th>
+                    <th className="text-right py-2 px-3">מייל הבא</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.nextBatchLeads.map((lead, i) => (
+                    <tr
+                      key={lead.id}
+                      className="border-b border-gray-800/50 hover:bg-gray-800/30"
+                    >
+                      <td className="py-2 px-3 text-gray-500">{i + 1}</td>
+                      <td className="py-2 px-3 font-mono text-xs">{lead.email}</td>
+                      <td className="py-2 px-3">{lead.name || '—'}</td>
+                      <td className="py-2 px-3 text-gray-400">{lead.profession || 'מעצבי פנים'}</td>
+                      <td className="py-2 px-3">
+                        <span className={`px-2 py-0.5 rounded text-xs ${lead.nextEmail === 1 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'}`}>
+                          מייל #{lead.nextEmail}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Recent Activity */}

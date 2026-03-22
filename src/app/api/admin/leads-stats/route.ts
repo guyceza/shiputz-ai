@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     if (campaignStart) {
       const daysSinceStart = Math.floor((Date.now() - campaignStart.getTime()) / (1000 * 60 * 60 * 24));
       warmupWeek = Math.min(Math.floor(daysSinceStart / 7) + 1, 3);
-      dailyLimit = warmupWeek === 1 ? 15 : warmupWeek === 2 ? 30 : 50;
+      dailyLimit = warmupWeek === 1 ? 30 : warmupWeek === 2 ? 40 : 50;
     }
 
     // Get recent activity (last 20 emails)
@@ -99,6 +99,36 @@ export async function GET(request: NextRequest) {
       nextBatch.setDate(nextBatch.getDate() + 1);
     }
 
+    // Get next batch preview: follow-ups first, then new leads
+    const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+    
+    // Follow-ups (email1_sent, 5+ days ago)
+    const { data: followupLeads } = await supabase
+      .from('leads')
+      .select('id, email, name, profession, status, last_email_sent_at')
+      .eq('status', 'email1_sent')
+      .is('unsubscribed_at', null)
+      .lte('last_email_sent_at', fiveDaysAgo)
+      .order('last_email_sent_at', { ascending: true })
+      .limit(dailyLimit);
+
+    const followupCount = followupLeads?.length || 0;
+    const newLeadsLimit = dailyLimit - followupCount;
+
+    // New leads
+    const { data: newLeads } = await supabase
+      .from('leads')
+      .select('id, email, name, profession, status')
+      .eq('status', 'new')
+      .is('unsubscribed_at', null)
+      .order('created_at', { ascending: true })
+      .limit(newLeadsLimit);
+
+    const nextBatchLeads = [
+      ...(followupLeads || []).map(l => ({ ...l, nextEmail: 2 })),
+      ...(newLeads || []).map(l => ({ ...l, nextEmail: 1 })),
+    ];
+
     return NextResponse.json({
       total,
       email1Sent,
@@ -119,6 +149,7 @@ export async function GET(request: NextRequest) {
       nextBatch: nextBatch.toISOString(),
       recentEmails: recentEmails || [],
       statusBreakdown: statusCounts,
+      nextBatchLeads,
     });
   } catch (error: unknown) {
     console.error('Leads stats error:', error);

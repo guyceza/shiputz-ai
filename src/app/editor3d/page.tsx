@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 
 const PascalEditor = dynamic(
@@ -19,6 +19,53 @@ const PascalEditor = dynamic(
 );
 
 type SceneGraph = { nodes: Record<string, unknown>; rootNodeIds: string[] };
+
+// Hard-coded test scene: a simple room (4 walls)
+function createTestScene(): SceneGraph {
+  const nodes: Record<string, any> = {
+    "site_test001": {
+      object: "node", id: "site_test001", type: "site", name: "Site",
+      parentId: null, visible: true, children: ["building_test001"],
+      boundary: [], metadata: {},
+    },
+    "building_test001": {
+      object: "node", id: "building_test001", type: "building", name: "Building",
+      parentId: "site_test001", visible: true, children: ["level_test001"],
+      metadata: {},
+    },
+    "level_test001": {
+      object: "node", id: "level_test001", type: "level", name: "Level 0",
+      parentId: "building_test001", visible: true,
+      children: ["wall_test001", "wall_test002", "wall_test003", "wall_test004"],
+      elevation: 0, height: 2.8, level: 0, metadata: {},
+    },
+    "wall_test001": {
+      object: "node", id: "wall_test001", type: "wall", name: "Wall 1",
+      parentId: "level_test001", visible: true, children: [],
+      start: [0, 0], end: [5, 0], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test002": {
+      object: "node", id: "wall_test002", type: "wall", name: "Wall 2",
+      parentId: "level_test001", visible: true, children: [],
+      start: [5, 0], end: [5, 4], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test003": {
+      object: "node", id: "wall_test003", type: "wall", name: "Wall 3",
+      parentId: "level_test001", visible: true, children: [],
+      start: [5, 4], end: [0, 4], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test004": {
+      object: "node", id: "wall_test004", type: "wall", name: "Wall 4",
+      parentId: "level_test001", visible: true, children: [],
+      start: [0, 4], end: [0, 0], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+  };
+  return { nodes, rootNodeIds: ["site_test001"] };
+}
 
 function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; onSkip: () => void }) {
   const [uploading, setUploading] = useState(false);
@@ -87,67 +134,41 @@ function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; o
           }}
         />
 
-        <button
-          className="w-full mt-4 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
-          onClick={onSkip}
-        >
-          או התחל מאפס בלי תוכנית →
-        </button>
+        <div className="flex gap-2 mt-4">
+          <button
+            className="flex-1 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
+            onClick={onSkip}
+          >
+            התחל מאפס →
+          </button>
+          <button
+            className="flex-1 py-3 rounded-xl bg-emerald-800 text-emerald-300 hover:bg-emerald-700 transition"
+            onClick={() => onScene(createTestScene())}
+          >
+            🧪 טען חדר בדיקה
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-/**
- * Applies a scene graph AFTER the editor has mounted by importing core directly
- * and calling setScene + markDirty with a delay so renderers are registered.
- */
-function useApplySceneDelayed(scene: SceneGraph | null) {
-  useEffect(() => {
-    if (!scene) return;
-
-    // Wait for editor to fully mount and register mesh refs in sceneRegistry
-    const timer = setTimeout(async () => {
-      try {
-        const { default: useScene } = await import("@pascal-app/core").then(m => ({ default: m.useScene }));
-        const { applySceneGraphToEditor } = await import("@pascal-app/editor").then(m => ({
-          applySceneGraphToEditor: m.applySceneGraphToEditor,
-        }));
-
-        // Apply scene
-        useScene.getState().setScene(
-          scene.nodes as any,
-          scene.rootNodeIds as any
-        );
-
-        // Re-mark all wall nodes as dirty after another delay 
-        // so WallRenderer meshes are in sceneRegistry
-        setTimeout(() => {
-          const nodes = useScene.getState().nodes;
-          Object.values(nodes).forEach((node: any) => {
-            if (node.type === 'wall') {
-              useScene.getState().markDirty(node.id);
-            }
-          });
-          console.log("Re-marked walls as dirty");
-        }, 500);
-      } catch (e) {
-        console.error("Failed to apply scene:", e);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [scene]);
-}
-
 function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
-  // Don't pass onLoad — let default empty scene load first
-  // Then apply our scene after mount
-  useApplySceneDelayed(initialScene);
+  const sceneRef = useRef(initialScene);
+
+  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
+    console.log("onLoad called, scene:", sceneRef.current ? "YES" : "null");
+    if (sceneRef.current) {
+      console.log("Returning scene with", Object.keys(sceneRef.current.nodes).length, "nodes");
+      console.log("Root IDs:", sceneRef.current.rootNodeIds);
+      console.log("Node types:", Object.values(sceneRef.current.nodes).map((n: any) => `${n.id}:${n.type}`));
+    }
+    return sceneRef.current;
+  }, []);
 
   return (
     <div className="h-screen w-screen">
-      <PascalEditor />
+      <PascalEditor onLoad={onLoad} />
     </div>
   );
 }
@@ -165,5 +186,6 @@ export default function Editor3DPage() {
     );
   }
 
-  return <EditorWithScene key={scene ? "loaded" : "empty"} initialScene={scene} />;
+  // Key forces remount when different scene
+  return <EditorWithScene key={JSON.stringify(scene?.rootNodeIds)} initialScene={scene} />;
 }

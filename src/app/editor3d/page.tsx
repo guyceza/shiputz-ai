@@ -286,11 +286,6 @@ function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGra
     return () => clearInterval(interval);
   }, [projectName]);
 
-  // Pascal Editor requires dark class on html
-  if (typeof document !== 'undefined') {
-    document.documentElement.classList.add('dark');
-  }
-
   const handleSave = async () => {
     try {
       const core = await import("@pascal-app/core");
@@ -303,7 +298,7 @@ function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGra
   };
 
   return (
-    <div className="h-screen w-screen dark relative">
+    <div className="h-screen w-screen relative">
       <PascalEditor />
       
       {/* Save button */}

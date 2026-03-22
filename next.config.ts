@@ -51,6 +51,15 @@ const nextConfig: NextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Proxy Pascal Editor assets from their CDN
+  async rewrites() {
+    return [
+      {
+        source: '/items/:path*',
+        destination: 'https://editor.pascal.app/items/:path*',
+      },
+    ];
+  },
   // Prevent caching of API routes
   async headers() {
     return [

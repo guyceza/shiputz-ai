@@ -9,8 +9,27 @@ function generateToken(email: string): string {
   return crypto.createHmac('sha256', HASH_SECRET).update(email).digest('hex').slice(0, 16);
 }
 
-function getFirstName(name: string): string {
-  if (!name) return 'שלום';
+function tryNameFromEmail(email: string): string {
+  if (!email) return 'שלום';
+  const local = email.split('@')[0].toLowerCase();
+  const generic = ['info','office','hello','hi','contact','mail','admin','support','studio','design','sales','team','service','help'];
+  if (generic.includes(local)) return 'שלום';
+  const namePart = local.replace(/[0-9]+/g, '').split('.')[0].split('-')[0].split('_')[0];
+  if (!namePart || namePart.length < 3) return 'שלום';
+  const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  if (/^[a-zA-Z]{3,20}$/.test(namePart)) {
+    const knownPrefixes = ['sharon','daniel','daniella','michael','david','eitan','shira','shiraz','noa','noam','tal','tali','gal','gali','ben','yael','chen','nir','guy','ori','orit','adi','mor','moran','lee','noy','tom','ron','roni','ronit','hagai','lucia','mika','bar','dafna','dana','sigal','anat','efrat','limor','sapir','merav','inbal','vered','keren','lior','liora','yuval','orna','ilana','dorit','rachel','sara','ruth','avital','ayelet','michal','galit','revital','einav','hila','maya','dina','ella','neta','yoav','amit','omer','itay','ido','shai','lavi','ariel','rotem'];
+    const found = knownPrefixes.sort((a,b) => b.length - a.length).find(n => namePart.toLowerCase().startsWith(n));
+    if (found) return found.charAt(0).toUpperCase() + found.slice(1);
+    if (namePart.length <= 8) return capitalized;
+    return 'שלום';
+  }
+  return 'שלום';
+}
+
+function getFirstName(name: string, email?: string): string {
+  if (!name && !email) return 'שלום';
+  if (!name) return tryNameFromEmail(email || '');
   let cleaned = name
     .replace(/\|.*/g, '')
     .replace(/[-–—].*(?:עיצוב|אדריכל|מעצב|סטודיו|לימודי|ביה"ס).*/g, '')
@@ -43,24 +62,23 @@ function getFirstName(name: string): string {
     .replace(/Materials.*$/i, '')
     .trim();
 
-  if (!cleaned || cleaned.length <= 1) return 'שלום';
+  if (!cleaned || cleaned.length <= 1) return tryNameFromEmail(email || '');
 
   const parts = cleaned.split(/\s+/).filter(p => p.length > 1);
   const skipWords = ['סטודיו', 'Studio', 'K.O.T', 'DYC', 'SAY', '6B', 'ETN', 'ביה"ס',
     'עמותת', 'חברת', 'חנות', 'מפעל', 'קבוצת', 'רשת', 'המרכז', 'המכון', 'בית', 'השירות', 'משרד'];
   
-  let firstName = parts[0] || 'שלום';
+  let firstName: string | null = parts[0] || null;
+  if (!firstName) return tryNameFromEmail(email || '');
   if (skipWords.some(w => firstName === w) || /^[A-Z.]{1,4}$/.test(firstName)) {
-    firstName = parts.length > 1 ? parts[1] : 'שלום';
-    if (skipWords.some(w => firstName === w)) return 'שלום';
+    firstName = parts.length > 1 ? parts[1] : null;
+    if (!firstName || skipWords.some(w => firstName === w)) return tryNameFromEmail(email || '');
   }
 
-  // All English = company name
-  if (/^[A-Za-z]+$/.test(firstName) && parts.every(p => /^[A-Za-z.,]+$/.test(p))) return 'שלום';
-  // Abbreviation like א.ב
-  if (/^.\./.test(firstName) || /\.$/.test(firstName)) return 'שלום';
-  if (/^[א-ת]\.[א-ת]/.test(firstName)) return 'שלום';
-  if (firstName.length <= 1 || firstName === 'ל') return 'שלום';
+  if (/^[A-Za-z]+$/.test(firstName) && parts.every(p => /^[A-Za-z.,]+$/.test(p))) return tryNameFromEmail(email || '');
+  if (/^.\./.test(firstName) || /\.$/.test(firstName)) return tryNameFromEmail(email || '');
+  if (/^[א-ת]\.[א-ת]/.test(firstName)) return tryNameFromEmail(email || '');
+  if (firstName.length <= 1 || firstName === 'ל') return tryNameFromEmail(email || '');
 
   return firstName;
 }
@@ -118,7 +136,7 @@ export async function GET(request: NextRequest) {
 
     const name = lead?.name || '';
     const profession = lead?.profession || 'מעצבי פנים';
-    const firstName = getFirstName(name);
+    const firstName = getFirstName(name, email);
     const token = generateToken(email);
     const content = PROFESSION_EMAILS[profession] || PROFESSION_EMAILS['מעצבי פנים'];
 

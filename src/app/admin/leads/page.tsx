@@ -204,7 +204,7 @@ export default function AdminLeads() {
                 <span className="text-2xl">⏰</span>
                 <div>
                   <div className="font-semibold">
-                    אצווה הבאה: {nextBatchLabel}
+                    שליחה הבאה: {nextBatchLabel}
                   </div>
                   <div className="text-sm text-gray-400">
                     {nextBatchDate.toLocaleDateString("he-IL", {

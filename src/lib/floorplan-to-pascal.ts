@@ -50,10 +50,7 @@ export function floorplanToPascalScene(data: FloorplanData) {
   const levelId = genId('level')
 
   const wallIds: string[] = []
-  const doorIds: string[] = []
-  const windowIds: string[] = []
-
-  // Create walls
+  // Create walls — doors/windows will be gaps (no physical door/window nodes for now)
   for (const wall of data.walls) {
     const wallId = genId('wall')
     wallIds.push(wallId)
@@ -65,62 +62,6 @@ export function floorplanToPascalScene(data: FloorplanData) {
       end: [wall.end[0], wall.end[1]],
       thickness: wall.thickness || 0.15, height: 2.8,
       frontSide: 'unknown', backSide: 'unknown', metadata: {},
-    }
-  }
-
-  // Create doors — attach to nearest wall
-  if (data.doors) {
-    for (const door of data.doors) {
-      const nearest = findNearestWall(door.position, data.walls, wallIds)
-      if (!nearest) continue
-      
-      const doorId = genId('door')
-      doorIds.push(doorId)
-      nodes[doorId] = {
-        object: 'node', id: doorId, type: 'door',
-        name: `Door ${doorIds.length}`,
-        parentId: nearest.wallId, visible: true,
-        position: [0, 0, 0], rotation: [0, 0, 0],
-        wallId: nearest.wallId, side: 'front',
-        width: door.width || 0.9, height: 2.1,
-        frameThickness: 0.05, frameDepth: 0.07,
-        threshold: true, thresholdHeight: 0.02,
-        hingesSide: 'left', swingDirection: 'inward',
-        segments: [
-          { type: 'panel', heightRatio: 0.4, columnRatios: [1], dividerThickness: 0.03, panelDepth: 0.01, panelInset: 0.04 },
-          { type: 'panel', heightRatio: 0.6, columnRatios: [1], dividerThickness: 0.03, panelDepth: 0.01, panelInset: 0.04 },
-        ],
-        handle: true, handleHeight: 1.05, handleSide: 'right',
-        contentPadding: [0.04, 0.04],
-        doorCloser: false, panicBar: false, panicBarHeight: 1.0,
-        metadata: {},
-      }
-      // Add door as child of wall
-      nodes[nearest.wallId].children.push(doorId)
-    }
-  }
-
-  // Create windows — attach to nearest wall
-  if (data.windows) {
-    for (const win of data.windows) {
-      const nearest = findNearestWall(win.position, data.walls, wallIds)
-      if (!nearest) continue
-      
-      const windowId = genId('window')
-      windowIds.push(windowId)
-      nodes[windowId] = {
-        object: 'node', id: windowId, type: 'window',
-        name: `Window ${windowIds.length}`,
-        parentId: nearest.wallId, visible: true,
-        position: [0, 0, 0], rotation: [0, 0, 0],
-        wallId: nearest.wallId, side: 'front',
-        width: win.width || 1.2, height: 1.2,
-        sillHeight: 0.9,
-        frameThickness: 0.05, frameDepth: 0.07,
-        panes: { rows: 1, columns: 1 },
-        metadata: {},
-      }
-      nodes[nearest.wallId].children.push(windowId)
     }
   }
 

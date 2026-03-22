@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import "./pascal-editor.css";
 
@@ -154,17 +154,45 @@ function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; o
   );
 }
 
-function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
-  const sceneRef = useRef(initialScene);
+function useApplyScene(scene: SceneGraph | null) {
+  const applied = useRef(false);
+  
+  useEffect(() => {
+    if (!scene || applied.current) return;
+    
+    // Wait for editor to fully initialize, then inject scene via store
+    const timer = setTimeout(async () => {
+      try {
+        const core = await import("@pascal-app/core");
+        const useScene = core.useScene;
+        
+        console.log("Applying scene with", Object.keys(scene.nodes).length, "nodes");
+        
+        // Set scene directly in zustand store
+        useScene.getState().setScene(
+          scene.nodes as any,
+          scene.rootNodeIds as any
+        );
+        
+        applied.current = true;
+        console.log("Scene applied! Dirty nodes:", useScene.getState().dirtyNodes.size);
+        
+        // Log what's in the store
+        const nodes = useScene.getState().nodes;
+        Object.values(nodes).forEach((n: any) => {
+          console.log(`  ${n.type}: ${n.id} (parent: ${n.parentId})`);
+        });
+      } catch (e) {
+        console.error("Failed to apply scene:", e);
+      }
+    }, 2000); // 2s delay for editor to fully mount
+    
+    return () => clearTimeout(timer);
+  }, [scene]);
+}
 
-  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
-    console.log("onLoad called, scene:", sceneRef.current ? "YES" : "null");
-    if (sceneRef.current) {
-      console.log("Returning scene with", Object.keys(sceneRef.current.nodes).length, "nodes");
-      console.log("Node types:", Object.values(sceneRef.current.nodes).map((n: any) => `${n.id}:${n.type}`));
-    }
-    return sceneRef.current;
-  }, []);
+function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
+  useApplyScene(initialScene);
 
   // Pascal Editor requires dark class on html
   if (typeof document !== 'undefined') {
@@ -173,7 +201,7 @@ function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) 
 
   return (
     <div className="h-screen w-screen dark">
-      <PascalEditor onLoad={onLoad} />
+      <PascalEditor />
     </div>
   );
 }

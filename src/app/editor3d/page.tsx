@@ -240,34 +240,48 @@ function useApplyScene(scene: SceneGraph | null) {
         }
         console.log("Cleared all existing elements");
         
-        // Extract walls from our scene and create them in the existing scene
+        // Create walls first
         const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
         console.log("Creating", wallNodes.length, "walls");
         
+        // Map old wall IDs to new ones (since createNode may change IDs)
+        const wallIdMap: Record<string, string> = {};
+        
         for (const wall of wallNodes as any[]) {
           const wallNode = {
-            object: 'node' as const,
-            id: wall.id,
-            type: 'wall' as const,
-            name: wall.name,
+            ...wall,
             parentId: actualLevelId,
-            visible: true,
-            children: [],
-            start: wall.start,
-            end: wall.end,
-            thickness: wall.thickness || 0.15,
-            height: wall.height || 2.8,
-            frontSide: 'unknown',
-            backSide: 'unknown',
-            metadata: {},
+            // Keep children references for doors/windows
+            children: wall.children || [],
           };
-          
           state.createNode(wallNode as any, actualLevelId);
-          console.log(`Created wall: ${wall.name} [${wall.start}] → [${wall.end}]`);
+          wallIdMap[wall.id] = wall.id;
+          console.log(`Created wall: ${wall.name}`);
+        }
+        
+        // Create doors (children of walls)
+        const doorNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'door');
+        for (const door of doorNodes as any[]) {
+          const parentWallId = door.parentId;
+          if (parentWallId && wallIdMap[parentWallId]) {
+            state.createNode({ ...door } as any, wallIdMap[parentWallId]);
+            console.log(`Created door: ${door.name} on ${parentWallId}`);
+          }
+        }
+        
+        // Create windows (children of walls)
+        const windowNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'window');
+        for (const win of windowNodes as any[]) {
+          const parentWallId = win.parentId;
+          if (parentWallId && wallIdMap[parentWallId]) {
+            state.createNode({ ...win } as any, wallIdMap[parentWallId]);
+            console.log(`Created window: ${win.name} on ${parentWallId}`);
+          }
         }
         
         applied.current = true;
-        console.log("Done! Total nodes:", Object.keys(useScene.getState().nodes).length);
+        const totalNodes = Object.keys(useScene.getState().nodes).length;
+        console.log(`Done! ${wallNodes.length} walls, ${doorNodes.length} doors, ${windowNodes.length} windows (${totalNodes} total)`);
       } catch (e) {
         console.error("Failed to apply scene:", e);
       }

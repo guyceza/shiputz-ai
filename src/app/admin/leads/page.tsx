@@ -124,15 +124,21 @@ export default function AdminLeads() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">📧 לידים — מעצבי פנים</h1>
+            <h1 className="text-2xl font-bold text-white">📧 לידים — קמפיין מיילים</h1>
             <p className="text-gray-400 mt-1">מעקב קמפיין מיילים</p>
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => adminEmail && fetchStats(adminEmail)}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors"
+              onClick={() => {
+                if (adminEmail) {
+                  setLoading(true);
+                  fetchStats(adminEmail);
+                }
+              }}
+              disabled={loading}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors disabled:opacity-50"
             >
-              🔄 רענון
+              {loading ? '⏳ טוען...' : '🔄 רענון'}
             </button>
             <Link
               href="/admin"

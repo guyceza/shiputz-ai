@@ -1,1549 +1,354 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import Link from "next/link";
-import CreditBadge from "@/components/CreditBadge";
-import { trackAction, clearAction } from "@/lib/track-action";
+import { useState, useCallback, useRef, Suspense } from "react";
+import dynamic from "next/dynamic";
+import type { FloorplanData } from "@/components/floorplan/FloorplanViewer";
 
-function checkCredits(res: Response, data: any) {
-  if (res.status === 402 || data?.creditError) {
-    const msg = `אין מספיק קרדיטים (נדרש: ${data?.required || '?'}, יתרה: ${data?.balance || 0})`;
-    window.open('/pricing', '_blank');
-    throw new Error(msg);
-  }
-}
-
-const STYLES = [
-  { key: "modern-cabin", nameHe: "בקתה מודרנית", desc: "עץ חם, קורות חשופות, חלונות גדולים" },
-  { key: "scandinavian", nameHe: "סקנדינבי", desc: "מינימליזם, לבן ואלון בהיר" },
-  { key: "industrial", nameHe: "אינדוסטריאלי", desc: "לבנים חשופות, מתכת, בטון" },
-  { key: "mediterranean", nameHe: "ים-תיכוני", desc: "טרקוטה, קשתות, קירות לבנים" },
-  { key: "japandi", nameHe: "ג׳פנדי", desc: "יפני-סקנדינבי, במבוק ועץ" },
-  { key: "luxury-modern", nameHe: "יוקרה מודרנית", desc: "שיש, זהב, ריהוט מעצבים" },
-  { key: "boho", nameHe: "בוהמייני", desc: "טקסטילים, שטיחים, ראטאן" },
-  { key: "classic", nameHe: "קלאסי אלגנטי", desc: "עיטורים, פרקט, נברשות" },
-];
-
-const STEPS = [
-  { num: 1, label: "תוכנית" },
-  { num: 2, label: "חדרים" },
-  { num: 3, label: "פעולה" },
-];
-
-type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-upload" | "video-select" | "video-result";
-
-interface ClickMarker { x: number; y: number; }
-interface RoomInfo { room: string; roomHe: string; description: string; dimensions?: { width: number; height: number }; }
-
-const ROOM_PURPOSES = [
-  { key: "bedroom", label: "חדר שינה", icon: "🛏️" },
-  { key: "living-room", label: "סלון", icon: "🛋️" },
-  { key: "kitchen", label: "מטבח", icon: "🍳" },
-  { key: "bathroom", label: "אמבטיה", icon: "🚿" },
-  { key: "office", label: "חדר עבודה", icon: "💻" },
-  { key: "kids-room", label: "חדר ילדים", icon: "🧸" },
-  { key: "dining", label: "פינת אוכל", icon: "🍽️" },
-  { key: "laundry", label: "מכבסה", icon: "🧺" },
-  { key: "storage", label: "מחסן", icon: "📦" },
-  { key: "balcony", label: "מרפסת", icon: "🌿" },
-  { key: "entrance", label: "כניסה", icon: "🚪" },
-  { key: "guest-room", label: "חדר אורחים", icon: "🛎️" },
-];
-interface FurnitureInfo { item: string; itemHe: string; description: string; suggestions: string[]; }
-interface RoomPhoto { roomName: string; roomNameHe: string; imageData: string; }
-
-// Spinner
-const Spinner = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg className={`animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-  </svg>
+// Dynamic import for Three.js (SSR not supported)
+const FloorplanViewer = dynamic(
+  () => import("@/components/floorplan/FloorplanViewer"),
+  { ssr: false, loading: () => <ViewerSkeleton /> }
 );
 
-// Progress bar
-const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
-  const [pct, setPct] = useState(0);
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (!active) return;
-    setDone(false);
-    setPct(3);
-    const t = setInterval(() => {
-      setPct((p) => {
-        if (p >= 95) return 95;
-        const jump = p < 20 ? 1.5 + Math.random() * 2
-          : p < 50 ? 0.8 + Math.random() * 1.5
-          : p < 75 ? 0.4 + Math.random() * 0.8
-          : 0.1 + Math.random() * 0.3;
-        return Math.min(p + jump, 95);
-      });
-    }, 600);
-    return () => clearInterval(t);
-  }, [active]);
-
-  useEffect(() => {
-    if (!active && pct > 0) {
-      setPct(100);
-      setDone(true);
-      const t = setTimeout(() => { setPct(0); setDone(false); }, 1500);
-      return () => clearTimeout(t);
-    }
-  }, [active]);
-
-  if (pct === 0 && !active) return null;
-
+function ViewerSkeleton() {
   return (
-    <div className="fixed top-11 left-0 right-0 z-[90]">
-      <div className="h-1 bg-gray-100 w-full">
-        <div
-          className={`h-full transition-all duration-700 ease-out ${done ? "bg-emerald-500" : "bg-gradient-to-r from-emerald-400 to-emerald-600"}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <div className="flex items-center justify-center gap-3 py-2.5 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
-        {done ? (
-          <span className="text-sm font-medium text-emerald-600">סיימנו ✓</span>
-        ) : (
-          <>
-            <Spinner className="h-4 w-4 text-emerald-600" />
-            <span className="text-sm font-medium text-gray-700">{label}</span>
-            <span className="text-sm font-mono font-bold text-emerald-600">{Math.round(pct)}%</span>
-          </>
-        )}
-      </div>
+    <div className="w-full h-full min-h-[400px] rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center">
+      <div className="text-gray-400 animate-pulse">טוען תצוגה תלת-ממדית...</div>
     </div>
   );
-};
+}
 
 export default function FloorplanPage() {
-  const [phase, setPhase] = useState<Phase>("upload");
-
-  // Check URL param on mount + load saved rooms
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("mode") === "video") setPhase("video-upload");
-
-    // Generate or restore session ID
-    let sessionId = sessionStorage.getItem("floorplan_session_id");
-    if (!sessionId) {
-      sessionId = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      sessionStorage.setItem("floorplan_session_id", sessionId);
-    }
-    setFloorplanSessionId(sessionId);
-
-    // Load saved rooms for this user
-    const loadRooms = async () => {
-      const email = getEmail();
-      if (!email) { setRoomsLoaded(true); return; }
-      try {
-        // Load rooms for current session
-        const res = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}&sessionId=${encodeURIComponent(sessionId!)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.rooms?.length > 0) {
-            const photos: RoomPhoto[] = data.rooms.map((r: any) => ({
-              roomName: r.room_name,
-              roomNameHe: r.room_name_he,
-              imageData: r.image_url,
-            }));
-            setAllRoomPhotos(photos);
-          }
-        }
-
-        // Load ALL rooms for video page (grouped by session)
-        const allRes = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}`);
-        if (allRes.ok) {
-          const allData = await allRes.json();
-          if (allData.rooms?.length > 0) {
-            const grouped: Record<string, RoomPhoto[]> = {};
-            for (const r of allData.rooms) {
-              if (!grouped[r.session_id]) grouped[r.session_id] = [];
-              grouped[r.session_id].push({ roomName: r.room_name, roomNameHe: r.room_name_he, imageData: r.image_url });
-            }
-            setAllUserRooms(Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms })));
-          }
-        }
-      } catch (e) { console.error("Failed to load rooms:", e); }
-      finally { setRoomsLoaded(true); }
-    };
-    loadRooms();
-  }, []);
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [customStyle, setCustomStyle] = useState("");
-
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [floorplanResult, setFloorplanResult] = useState<string | null>(null);
+  const [floorplan, setFloorplan] = useState<FloorplanData | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const [floorplanClick, setFloorplanClick] = useState<ClickMarker | null>(null);
-  const [detectedRoom, setDetectedRoom] = useState<RoomInfo | null>(null);
-  const [loadingRoom, setLoadingRoom] = useState(false);
-  const [currentRoomPhoto, setCurrentRoomPhoto] = useState<RoomPhoto | null>(null);
-  const [allRoomPhotos, setAllRoomPhotos] = useState<RoomPhoto[]>([]);
-  const [floorplanSessionId, setFloorplanSessionId] = useState<string>("");
-
-  const [roomClick, setRoomClick] = useState<ClickMarker | null>(null);
-  const [detectedFurniture, setDetectedFurniture] = useState<FurnitureInfo | null>(null);
-  const [loadingFurniture, setLoadingFurniture] = useState(false);
-  const [furnitureImage, setFurnitureImage] = useState<string | null>(null);
-  const [furnitureFile, setFurnitureFile] = useState<File | null>(null);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
-  const [customFurnitureText, setCustomFurnitureText] = useState<string | null>(null);
-  const [furnitureResult, setFurnitureResult] = useState<string | null>(null);
-  const [swapping, setSwapping] = useState(false);
-
-  const [videoFromRoom, setVideoFromRoom] = useState<string | null>(null);
-  const [videoToRoom, setVideoToRoom] = useState<string | null>(null);
-  const [videoClickMode, setVideoClickMode] = useState(false);
-  const [videoClickA, setVideoClickA] = useState<ClickMarker | null>(null);
-  const [videoClickB, setVideoClickB] = useState<ClickMarker | null>(null);
-  const [generatingBothRooms, setGeneratingBothRooms] = useState(false);
-  const [videoCustomPrompt, setVideoCustomPrompt] = useState("");
-  const [videoResult, setVideoResult] = useState<string | null>(null);
-  const [videoLoading, setVideoLoading] = useState(false);
-  const [videoProgress, setVideoProgress] = useState("");
-  const [videoFirstImage, setVideoFirstImage] = useState<string | null>(null);
-  const [videoLastImage, setVideoLastImage] = useState<string | null>(null);
-  const [allUserRooms, setAllUserRooms] = useState<{sessionId: string; rooms: RoomPhoto[]}[]>([]);
-  const [roomsLoaded, setRoomsLoaded] = useState(false);
-  const videoFirstInputRef = useRef<HTMLInputElement>(null);
-  const videoLastInputRef = useRef<HTMLInputElement>(null);
-
   const [error, setError] = useState<string | null>(null);
-  const [loadingLabel, setLoadingLabel] = useState("");
-
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [visualizing, setVisualizing] = useState(false);
+  const [vizResult, setVizResult] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const furnitureInputRef = useRef<HTMLInputElement>(null);
-  const floorplanImgRef = useRef<HTMLImageElement>(null);
-  const roomImgRef = useRef<HTMLImageElement>(null);
 
-  const getEmail = () => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}")?.email || null; }
-    catch { return null; }
-  };
-
-  const currentStep = () => {
-    if (phase === "upload") return 1;
-    if (phase === "floorplan-ready" || phase === "floorplan") return 2;
-    return 3;
-  };
-
-  const isAnyLoading = loading || loadingRoom || loadingFurniture || swapping || videoLoading;
-
-  // Shared: submit video + poll for result
-  // Resize image to 1280x720 JPEG — handles both data URLs and remote URLs
-  const resizeToJpeg = async (src: string): Promise<Blob> => {
-    // For remote URLs: fetch as blob, convert to data URL, THEN load in Image
-    // This avoids CORS canvas tainting issues
-    let dataUrl = src;
-    if (src.startsWith("http")) {
-      const resp = await fetch(src);
-      if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
-      const blob = await resp.blob();
-      if (blob.size === 0) throw new Error("Fetched image is empty");
-      dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
-    }
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = 1280; canvas.height = 720;
-          const ctx = canvas.getContext("2d")!;
-          const scale = Math.max(1280 / img.width, 720 / img.height);
-          const w = img.width * scale; const h = img.height * scale;
-          ctx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
-          canvas.toBlob((b) => {
-            if (b && b.size > 0) resolve(b);
-            else reject(new Error("Canvas toBlob returned empty"));
-          }, "image/jpeg", 0.85);
-        } catch (e) { reject(e); }
-      };
-      img.onerror = () => reject(new Error("Failed to load image for resize"));
-      img.src = dataUrl;
-    });
-  };
-
-  const submitAndPollVideo = async (fd: FormData) => {
-    setVideoProgress("שולח לייצור סרטון...");
-    const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
-    const data = await res.json();
-    checkCredits(res, data);
-    if (!res.ok) throw new Error(data.error || "Video generation failed");
-    
-    const predictionId = data.predictionId;
-    if (!predictionId) throw new Error("No prediction ID");
-
-    // Poll every 4 seconds from client
-    for (let i = 0; i < 75; i++) { // 75 * 4s = 5 min max
-      await new Promise((r) => setTimeout(r, 4000));
-      
-      const pollRes = await fetch(`/api/floorplan/video?id=${predictionId}`);
-      const pollData = await pollRes.json();
-
-      if (pollData.status === "succeeded") {
-        if (pollData.videoUrl) {
-          setVideoResult(pollData.videoUrl);
-          setPhase("video-result");
-          return;
-        }
-        throw new Error("No video URL in response");
-      }
-
-      if (pollData.status === "failed" || pollData.error) {
-        throw new Error(pollData.error || "Video generation failed");
-      }
-
-      // Update progress
-      const progress = pollData.progress;
-      if (progress) {
-        setVideoProgress(`מייצר סרטון... ${progress}%`);
-      } else {
-        const elapsed = Math.min(Math.round((i * 4) / 60 * 100), 95);
-        setVideoProgress(`מייצר סרטון... ${elapsed}%`);
-      }
-    }
-    throw new Error("Video generation timed out");
-  };
-
-  // Save room photo to DB (fire and forget)
-  const saveRoomToDB = useCallback((photo: RoomPhoto) => {
-    const email = getEmail();
-    if (!email || !floorplanSessionId) return;
-    fetch("/api/floorplan/rooms", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: email,
-        sessionId: floorplanSessionId,
-        roomName: photo.roomName,
-        roomNameHe: photo.roomNameHe,
-        imageData: photo.imageData,
-        style: customStyle || selectedStyle,
-      }),
-    }).catch((e) => console.error("Failed to save room:", e));
-  }, [floorplanSessionId, customStyle, selectedStyle]);
-
-  // === File handlers ===
-  const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadedFile(file);
-    setFloorplanResult(null);
-    setError(null);
-    setPhase("upload");
-    const reader = new FileReader();
-    reader.onload = (ev) => { setUploadedImage(ev.target?.result as string); trackAction('floorplan', '/floorplan'); };
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    setUploadedFile(file);
-    setFloorplanResult(null);
-    setError(null);
-    const reader = new FileReader();
-    reader.onload = (ev) => { setUploadedImage(ev.target?.result as string); trackAction('floorplan', '/floorplan'); };
-    reader.readAsDataURL(file);
-  }, []);
-
-  // === Step 1 ===
-  const generateFloorplan = async () => {
-    if (!uploadedFile || !selectedStyle) return;
+  const handleUpload = useCallback(async (file: File) => {
     setLoading(true);
-    setLoadingLabel("יוצר הדמיה מלמעלה...");
     setError(null);
+    setFloorplan(null);
+    setVizResult(null);
+    setSelectedRoom(null);
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
+    reader.readAsDataURL(file);
+
     try {
       const formData = new FormData();
-      formData.append("image", uploadedFile);
-      formData.append("style", customStyle || selectedStyle);
-      formData.append("email", getEmail() || "");
-      const res = await fetch("/api/floorplan", { method: "POST", body: formData });
-      const data = await res.json();
-      checkCredits(res, data); if (!res.ok) throw new Error(data.error || "AI generation failed");
-      if (data.image) {
-        setFloorplanResult(`data:${data.image.mimeType};base64,${data.image.data}`);
-        setPhase("floorplan-ready");
-        clearAction();
-      } else throw new Error(data.text || "No image returned");
-    } catch (err: any) { setError(err.message); }
-    finally { setLoading(false); setLoadingLabel(""); }
-  };
+      formData.append("image", file);
 
-  // === Step 2 ===
-  const handleFloorplanClick = async (e: React.MouseEvent<HTMLImageElement>) => {
-    if (loadingRoom) return;
-    const img = floorplanImgRef.current;
-    if (!img) return;
-    const rect = img.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setFloorplanClick({ x, y });
-    setDetectedRoom(null);
-    setLoadingRoom(true);
-    setLoadingLabel("מזהה חדר...");
-    setError(null);
-    try {
-      const blob = await (await fetch(floorplanResult!)).blob();
-      const fd1 = new FormData();
-      fd1.append("image", blob, "floorplan.png");
-      fd1.append("clickX", x.toFixed(1));
-      fd1.append("clickY", y.toFixed(1));
-      fd1.append("email", getEmail() || "");
-      const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
-      const roomInfo = await detectRes.json();
-      checkCredits(detectRes, roomInfo); if (!detectRes.ok) throw new Error(roomInfo.error);
-      setDetectedRoom(roomInfo);
-      setLoadingLabel(`יוצר צילום של ה${roomInfo.roomHe}...`);
-      const fd2 = new FormData();
-      fd2.append("floorplan", blob, "floorplan.png");
-      fd2.append("room", roomInfo.room);
-      fd2.append("style", customStyle || selectedStyle || "modern-cabin");
-      fd2.append("email", getEmail() || "");
-      const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
-      const roomData = await roomRes.json();
-      checkCredits(roomRes, roomData); if (!roomRes.ok) throw new Error(roomData.error);
-      if (roomData.image) {
-        const photo: RoomPhoto = {
-          roomName: roomInfo.room, roomNameHe: roomInfo.roomHe,
-          imageData: `data:${roomData.image.mimeType};base64,${roomData.image.data}`,
-        };
-        setCurrentRoomPhoto(photo);
-        setAllRoomPhotos((prev) => {
-          if (prev.some(p => p.roomName === photo.roomName)) return prev;
-          return [...prev, photo];
-        });
-        saveRoomToDB(photo);
-        setPhase("room-actions");
+      const resp = await fetch("/api/floorplan/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json();
+        throw new Error(data.error || "Analysis failed");
       }
-    } catch (err: any) { setError(err.message); }
-    finally { setLoadingRoom(false); setLoadingLabel(""); }
-  };
 
-  // === Video click mode: select 2 rooms from floorplan ===
-  const handleVideoFloorplanClick = async (e: React.MouseEvent<HTMLImageElement>) => {
-    if (loadingRoom || generatingBothRooms) return;
-    const img = floorplanImgRef.current;
-    if (!img) return;
-    const rect = img.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    const click = { x, y };
-
-    if (!videoClickA) {
-      setVideoClickA(click);
-    } else if (!videoClickB) {
-      setVideoClickB(click);
-      // Both clicks ready — generate both rooms in parallel
-      setGeneratingBothRooms(true);
-      setLoadingLabel("מזהה ויוצר 2 חדרים...");
-      setError(null);
-      try {
-        const blob = await (await fetch(floorplanResult!)).blob();
-        const email = getEmail() || "";
-
-        const generateRoom = async (clickPos: ClickMarker) => {
-          const fd1 = new FormData();
-          fd1.append("image", blob, "floorplan.png");
-          fd1.append("clickX", clickPos.x.toFixed(1));
-          fd1.append("clickY", clickPos.y.toFixed(1));
-          fd1.append("email", email);
-          const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
-          const roomInfo = await detectRes.json();
-          if (!detectRes.ok) throw new Error(roomInfo.error);
-
-          const fd2 = new FormData();
-          fd2.append("floorplan", blob, "floorplan.png");
-          fd2.append("room", roomInfo.room);
-          fd2.append("style", customStyle || selectedStyle || "modern-cabin");
-          fd2.append("email", email);
-          const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
-          const roomData = await roomRes.json();
-          if (!roomRes.ok) throw new Error(roomData.error);
-
-          return {
-            roomName: roomInfo.room,
-            roomNameHe: roomInfo.roomHe,
-            imageData: `data:${roomData.image.mimeType};base64,${roomData.image.data}`,
-          } as RoomPhoto;
-        };
-
-        const [roomA, roomB] = await Promise.all([
-          generateRoom(videoClickA),
-          generateRoom(click),
-        ]);
-
-        // Add to allRoomPhotos + save to DB
-        setAllRoomPhotos((prev) => {
-          const updated = [...prev];
-          if (!updated.some(p => p.roomName === roomA.roomName)) updated.push(roomA);
-          if (!updated.some(p => p.roomName === roomB.roomName)) updated.push(roomB);
-          return updated;
-        });
-        saveRoomToDB(roomA);
-        saveRoomToDB(roomB);
-
-        // Go directly to video select with these 2 rooms pre-selected
-        setVideoFromRoom(roomA.roomName);
-        setVideoToRoom(roomB.roomName);
-        setPhase("video-select");
-      } catch (err: any) { setError(err.message); }
-      finally { setGeneratingBothRooms(false); setLoadingLabel(""); setVideoClickA(null); setVideoClickB(null); }
+      const data = await resp.json();
+      setFloorplan(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "שגיאה בניתוח התוכנית");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // === Step 3: Furniture ===
-  const handleRoomClick = async (e: React.MouseEvent<HTMLImageElement>) => {
-    if (loadingFurniture) return;
-    const img = roomImgRef.current;
-    if (!img || !currentRoomPhoto) return;
-    const rect = img.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setRoomClick({ x, y });
-    setDetectedFurniture(null);
-    setSelectedSuggestion(null);
-    setFurnitureImage(null);
-    setFurnitureFile(null);
-    setFurnitureResult(null);
-    setLoadingFurniture(true);
-    setLoadingLabel("מזהה רהיט...");
-    setError(null);
-    try {
-      const blob = await (await fetch(currentRoomPhoto.imageData)).blob();
-      const fd = new FormData();
-      fd.append("image", blob, "room.png");
-      fd.append("clickX", x.toFixed(1));
-      fd.append("clickY", y.toFixed(1));
-      fd.append("email", getEmail() || "");
-      const res = await fetch("/api/floorplan/detect-furniture", { method: "POST", body: fd });
-      const info = await res.json();
-      checkCredits(res, info); if (!res.ok) throw new Error(info.error);
-      setDetectedFurniture(info);
-      setPhase("furniture-select");
-    } catch (err: any) { setError(err.message); }
-    finally { setLoadingFurniture(false); setLoadingLabel(""); }
-  };
-
-  const doSwap = async () => {
-    if (!currentRoomPhoto || (!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || !detectedFurniture) return;
-    setSwapping(true);
-    setLoadingLabel(`מחליף ${detectedFurniture.itemHe}...`);
-    setError(null);
-    try {
-      const roomBlob = await (await fetch(currentRoomPhoto.imageData)).blob();
-      const instruction = customFurnitureText?.trim()
-        ? `Replace the ${detectedFurniture.item} with: ${customFurnitureText.trim()}. Keep everything else exactly the same.`
-        : selectedSuggestion
-        ? `Replace the ${detectedFurniture.item} with: ${selectedSuggestion}. Keep everything else exactly the same.`
-        : `Replace the ${detectedFurniture.item} with the furniture shown in the second image. Keep everything else exactly the same.`;
-      const fd = new FormData();
-      fd.append("roomImage", roomBlob, "room.png");
-      if (furnitureFile) {
-        fd.append("furnitureImage", furnitureFile);
-      } else {
-        const canvas = document.createElement("canvas"); canvas.width = 1; canvas.height = 1;
-        const dummyBlob = await new Promise<Blob>((r) => canvas.toBlob((b) => r(b!), "image/png"));
-        fd.append("furnitureImage", dummyBlob, "placeholder.png");
-      }
-      fd.append("instruction", instruction);
-      fd.append("email", getEmail() || "");
-      const res = await fetch("/api/floorplan/furniture", { method: "POST", body: fd });
-      const data = await res.json();
-      checkCredits(res, data); if (!res.ok) throw new Error(data.error);
-      if (data.image) {
-        setFurnitureResult(`data:${data.image.mimeType};base64,${data.image.data}`);
-        setPhase("furniture-result");
-      }
-    } catch (err: any) { setError(err.message); }
-    finally { setSwapping(false); setLoadingLabel(""); }
-  };
-
-  // === Step 4: Video ===
-  const generateVideo = async () => {
-    if (!videoFromRoom || !videoToRoom) return;
-    const fromPhoto = allRoomPhotos.find(p => p.roomName === videoFromRoom);
-    const toPhoto = allRoomPhotos.find(p => p.roomName === videoToRoom);
-    if (!fromPhoto || !toPhoto) return;
-    setVideoLoading(true);
-    setVideoResult(null);
-    setVideoProgress("מכין תמונות...");
-    setLoadingLabel("מייצר סרטון סיור...");
-    setError(null);
-    try {
-      setVideoProgress("ממיר תמונות...");
-      const firstBlob = await resizeToJpeg(fromPhoto.imageData);
-      const lastBlob = await resizeToJpeg(toPhoto.imageData);
-      const fd = new FormData();
-      fd.append("firstFrame", firstBlob, "first.jpg");
-      fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts in the ${fromPhoto.roomName} and physically glides forward at eye level through a bright doorway or well-lit hallway, continuously moving into the ${toPhoto.roomName}. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition corridor is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.`;
-      const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
-      fd.append("prompt", fullPrompt);
-      fd.append("email", getEmail() || "");
-      await submitAndPollVideo(fd);
-    } catch (err: any) { setError(err.message); }
-    finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
-  };
-
-  // === Step 4b: Direct video from uploaded images ===
-  const generateDirectVideo = async () => {
-    if (!videoFirstImage || !videoLastImage) return;
-    setVideoLoading(true);
-    setVideoResult(null);
-    setVideoProgress("מכין תמונות...");
-    setLoadingLabel("מייצר סרטון סיור...");
-    setError(null);
-    try {
-      setVideoProgress("ממיר תמונות...");
-      const firstBlob = await resizeToJpeg(videoFirstImage);
-      const lastBlob = await resizeToJpeg(videoLastImage);
-      const fd = new FormData();
-      fd.append("firstFrame", firstBlob, "first.jpg");
-      fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level through a bright open doorway or well-lit hallway, continuously moving into the next room. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition area is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.";
-      const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
-      fd.append("prompt", fullPrompt);
-      fd.append("email", getEmail() || "");
-      await submitAndPollVideo(fd);
-    } catch (err: any) { setError(err.message); }
-    finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
-  };
-
-  // === Click pin ===
-  const ClickPin = ({ marker }: { marker: ClickMarker }) => (
-    <div className="absolute pointer-events-none z-10" style={{ left: `${marker.x}%`, top: `${marker.y}%`, transform: "translate(-50%, -100%)" }}>
-      <div className="flex flex-col items-center">
-        <div className="w-6 h-6 bg-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-          <div className="w-2 h-2 bg-white rounded-full" />
-        </div>
-        <div className="w-0.5 h-2 bg-emerald-500" />
-      </div>
-    </div>
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) handleUpload(file);
+    },
+    [handleUpload]
   );
 
-  // === Stepper ===
-  const StepBar = () => {
-    const step = currentStep();
-    return (
-      <div className="flex items-center justify-center gap-2 mb-8">
-        {STEPS.map((s, i) => (
-          <div key={s.num} className="flex items-center">
-            <button
-              onClick={() => {
-                if (s.num === 1) setPhase("upload");
-                if (s.num === 2 && floorplanResult) { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }
-                if (s.num === 3 && allRoomPhotos.length > 0) {
-                  if (!currentRoomPhoto) setCurrentRoomPhoto(allRoomPhotos[allRoomPhotos.length - 1]);
-                  setPhase("room-actions");
-                }
-              }}
-              disabled={(s.num === 2 && !floorplanResult) || (s.num === 3 && allRoomPhotos.length === 0)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                step === s.num
-                  ? "bg-gray-900 text-white"
-                  : step > s.num
-                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  : "bg-gray-100 text-gray-400"
-              }`}
-            >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                step === s.num ? "bg-white text-gray-900" : step > s.num ? "bg-emerald-200 text-emerald-800" : "bg-gray-200 text-gray-400"
-              }`}>{step > s.num ? "✓" : s.num}</span>
-              <span className="hidden sm:inline">{s.label}</span>
-            </button>
-            {i < STEPS.length - 1 && (
-              <div className={`w-6 sm:w-10 h-px mx-1 ${step > s.num ? "bg-emerald-300" : "bg-gray-200"}`} />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleUpload(file);
+    },
+    [handleUpload]
+  );
+
+  const handleVisualizeRoom = useCallback(async () => {
+    if (!selectedRoom || !floorplan) return;
+    setVisualizing(true);
+    setVizResult(null);
+
+    try {
+      // Take screenshot
+      const takeScreenshot = (window as unknown as Record<string, () => string>).__takeFloorplanScreenshot;
+      if (!takeScreenshot) throw new Error("Screenshot not available");
+      const dataUrl = takeScreenshot();
+
+      // Find room info
+      const room = floorplan.rooms.find((r) => r.name === selectedRoom);
+      const roomType = room?.type || "room";
+
+      // Send to visualize API
+      const resp = await fetch("/api/visualize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: dataUrl,
+          prompt: `עצב מחדש את ה${roomType === "bedroom" ? "חדר שינה" : roomType === "bathroom" ? "חדר אמבטיה" : roomType === "kitchen" ? "מטבח" : roomType === "living" ? "סלון" : "חדר"} "${selectedRoom}" בסגנון מודרני ומינימליסטי. הוסף ריהוט מתאים, תאורה, וחומרי גמר איכותיים.`,
+        }),
+      });
+
+      if (!resp.ok) throw new Error("Visualization failed");
+      const data = await resp.json();
+      if (data.image) setVizResult(data.image);
+    } catch (err) {
+      setError("שגיאה בהדמיית החדר");
+    } finally {
+      setVisualizing(false);
+    }
+  }, [selectedRoom, floorplan]);
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl">
-      {!videoLoading && <ProgressBar active={isAnyLoading} label={loadingLabel} />}
-
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
-          <div className="flex items-center gap-3">
-            <CreditBadge />
-            <span className="text-xs text-gray-900 bg-gray-100 px-3 py-1.5 rounded-full">Floor Plan Studio</span>
+    <div className="min-h-screen bg-[#0a0a0a] text-gray-100" dir="rtl">
+      {/* Header */}
+      <div className="border-b border-gray-800 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">📐 תוכנית לתלת-ממד</h1>
+            <p className="text-gray-400 text-sm mt-1">
+              העלה תוכנית דירה וקבל מודל תלת-ממדי אינטראקטיבי
+            </p>
           </div>
+          <a
+            href="/"
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition"
+          >
+            ← חזרה
+          </a>
         </div>
-      </nav>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12 space-y-8">
-        <StepBar />
-
-        {/* ======== STEP 1: Upload ======== */}
-        {phase === "upload" && (
-          <>
-            <div className="text-center space-y-3">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-                מתוכנית קומה ל<span className="text-emerald-600">דירה מעוצבת</span>
-              </h1>
-              <p className="text-gray-500 max-w-lg mx-auto">
-                העלו תוכנית קומה ובחרו סגנון עיצוב — ה-AI ייצור הדמיה מלמעלה של הדירה כולה
-              </p>
-            </div>
-
-            {/* Upload area */}
-            <div>
-              <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-gray-700">
-                <span className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">א</span>
-                העלאת תוכנית קומה
-              </label>
-              <div
-                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
-                  uploadedImage ? "border-emerald-300 bg-emerald-50/50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                }`}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-              >
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-                {uploadedImage ? (
-                  <div className="space-y-2">
-                    <img src={uploadedImage} alt="Floor plan" className="max-h-52 mx-auto rounded-xl shadow-sm" />
-                    <p className="text-xs text-gray-400">לחצו להחלפה</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2 py-4">
-                    <div className="w-12 h-12 mx-auto rounded-full bg-gray-200 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                    </div>
-                    <p className="text-gray-600 font-medium">גררו תוכנית קומה או לחצו לבחירה</p>
-                    <p className="text-xs text-gray-400">PNG, JPG, WEBP</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Style selection */}
-            <div>
-              <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-700">
-                <span className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">ב</span>
-                בחירת סגנון עיצוב
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {STYLES.map((s) => (
-                  <button key={s.key} onClick={() => { setSelectedStyle(s.key); setCustomStyle(""); }}
-                    className={`rounded-xl p-3.5 text-right transition-all border-2 bg-white ${
-                      selectedStyle === s.key && !customStyle
-                        ? "border-gray-900 shadow-md"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}>
-                    <div className="font-bold text-sm text-gray-900">{s.nameHe}</div>
-                    <div className="text-xs text-gray-400 mt-0.5">{s.desc}</div>
-                  </button>
-                ))}
-              </div>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  value={customStyle}
-                  onChange={(e) => { setCustomStyle(e.target.value); if (e.target.value) setSelectedStyle("custom"); }}
-                  placeholder="או כתבו סגנון משלכם... למשל: לופט ניו יורקי עם בטון ועץ כהה"
-                  className={`w-full px-4 py-3 rounded-xl border-2 bg-white text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none transition-all ${
-                    customStyle ? "border-gray-900 shadow-md" : "border-gray-200 focus:border-gray-400"
-                  }`}
-                  dir="rtl"
-                />
-              </div>
-            </div>
-
-            <button onClick={generateFloorplan} disabled={!uploadedFile || (!selectedStyle && !customStyle) || loading}
-              className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
-                !uploadedFile || (!selectedStyle && !customStyle) || loading
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-900 text-white hover:bg-gray-800 shadow-xl hover:shadow-2xl"
-              }`}>
-              {loading ? <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> יוצר הדמיה...</span> : "צור הדמיה →"}
-            </button>
-            <p className="text-xs text-gray-400 text-center mt-2">10 קרדיטים להדמיה · 5 לצילום חדר · 25 לסרטון</p>
-
-            {/* How it works */}
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-              <h3 className="text-base font-bold text-gray-900 mb-3">איך זה עובד?</h3>
-              <div className="text-gray-500 text-sm space-y-2">
-                <p><strong className="text-gray-700">1.</strong> העלו תוכנית קומה, בחרו סגנון — קבלו הדמיה מלמעלה</p>
-                <p><strong className="text-gray-700">2.</strong> לחצו על חדר בהדמיה — ה-AI יוצר צילום פנים ריאליסטי</p>
-                <p><strong className="text-gray-700">3.</strong> החליפו רהיטים או צרו סרטון סיור בדירה</p>
-              </div>
-            </div>
-          </>
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Upload Area - Show when no floorplan */}
+        {!floorplan && !loading && (
+          <div
+            className="border-2 border-dashed border-gray-700 rounded-2xl p-12 text-center hover:border-emerald-500/50 transition cursor-pointer"
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <div className="text-6xl mb-4">🏠</div>
+            <h2 className="text-xl font-semibold mb-2">העלה תוכנית דירה</h2>
+            <p className="text-gray-400 mb-4">
+              גרור תמונה לכאן או לחץ לבחירה
+            </p>
+            <p className="text-gray-500 text-sm">
+              תומך ב-JPG, PNG, PDF • תוכניות מקצועיות, סקיצות, או צילומים
+            </p>
+          </div>
         )}
 
-        {/* ======== STEP 2: Floorplan ready — choose action ======== */}
-        {phase === "floorplan-ready" && floorplanResult && (
-          <>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">ההדמיה מוכנה</h2>
-              <p className="text-gray-500">מה תרצו לעשות עם התוכנית?</p>
-              <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד</p>
-            </div>
-
-            {/* Before / After side by side */}
-            <div className="grid grid-cols-2 gap-3 max-w-3xl mx-auto">
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                <img src={uploadedImage!} alt="Original" className="w-full" />
-                <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">תוכנית מקורית</div>
-              </div>
-              <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-sm">
-                <img src={floorplanResult} alt="Rendering" className="w-full" />
-                <div className="text-center text-xs text-emerald-600 py-1.5 bg-emerald-50">
-                  {STYLES.find((s) => s.key === selectedStyle)?.nameHe}
-                </div>
-              </div>
-            </div>
-
-            {/* Action cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
-              {/* Room photo */}
-              <button onClick={() => setPhase("floorplan")}
-                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
-                </div>
-                <div className="font-bold text-gray-900 text-sm">הדמיית חדר</div>
-                <div className="text-xs text-gray-400 mt-1">לחצו על חדר וראו אותו מבפנים</div>
-              </button>
-
-              {/* Video */}
-              <button onClick={() => {
-                if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
-                else { setVideoClickMode(true); setVideoClickA(null); setVideoClickB(null); setPhase("floorplan"); }
-              }}
-                className="bg-white border-2 border-gray-200 hover:border-emerald-500 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-emerald-50 group-hover:bg-emerald-500 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-emerald-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" /></svg>
-                </div>
-                <div className="font-bold text-gray-900 text-sm">סרטון סיור</div>
-                <div className="text-xs text-gray-400 mt-1">לחצו על 2 חדרים בתוכנית</div>
-              </button>
-
-              {/* Furniture */}
-              <button onClick={() => {
-                if (allRoomPhotos.length > 0) {
-                  if (!currentRoomPhoto) setCurrentRoomPhoto(allRoomPhotos[allRoomPhotos.length - 1]);
-                  setPhase("furniture-click");
-                  setRoomClick(null);
-                  setDetectedFurniture(null);
-                } else {
-                  setPhase("floorplan");
-                }
-              }}
-                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
-                </div>
-                <div className="font-bold text-gray-900 text-sm">החלפת רהיט</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {allRoomPhotos.length > 0
-                    ? "בחרו רהיט והחליפו אותו"
-                    : "צרו חדר קודם"}
-                </div>
-              </button>
-            </div>
-
-            {/* Room thumbnails if any */}
-            {allRoomPhotos.length > 0 && (
-              <div className="space-y-3 max-w-3xl mx-auto">
-                <h3 className="text-sm font-semibold text-gray-500">חדרים שנוצרו ({allRoomPhotos.length})</h3>
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {allRoomPhotos.map((photo, i) => (
-                    <button key={i} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
-                      className="rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all">
-                      <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{photo.roomNameHe}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Start fresh */}
-            <div className="text-center">
-              <button onClick={() => { 
-                setPhase("upload"); setFloorplanResult(null); setUploadedImage(null); setUploadedFile(null); setAllRoomPhotos([]); 
-                const newSession = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-                sessionStorage.setItem("floorplan_session_id", newSession);
-                setFloorplanSessionId(newSession);
-              }}
-                className="text-sm text-gray-400 hover:text-gray-600 transition-colors">תוכנית חדשה</button>
-            </div>
-          </>
-        )}
-
-        {/* ======== STEP 2b: Floorplan — click rooms ======== */}
-        {phase === "floorplan" && floorplanResult && (
-          <>
-            <div className="flex items-center justify-between mb-2">
-              {videoClickMode ? (
-                <button onClick={() => { setVideoClickMode(false); setVideoClickA(null); setVideoClickB(null); }}
-                  className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">ביטול מצב סרטון</button>
-              ) : <div />}
-              <button onClick={() => { setPhase("floorplan-ready"); setVideoClickMode(false); }}
-                className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">← חזרה</button>
-            </div>
-
-            {videoClickMode ? (
-              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center">
-                <p className="text-purple-800 font-medium text-sm">
-                  {!videoClickA ? "🎬 לחצו על החדר הראשון (A) — תחילת הסרטון" :
-                   generatingBothRooms ? "מזהה ויוצר 2 חדרים במקביל..." :
-                   "עכשיו לחצו על החדר השני (B) — סוף הסרטון"}
-                </p>
-                <p className="text-purple-600/60 text-xs mt-1">שני החדרים ייוצרו במקביל ותעברו ישר ליצירת הסרטון</p>
-              </div>
-            ) : (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-                <p className="text-emerald-800 font-medium text-sm">לחצו על חדר בהדמיה כדי לראות אותו מבפנים</p>
-                <p className="text-emerald-600/60 text-xs mt-1">ה-AI יזהה את החדר וייצור צילום פנים ריאליסטי</p>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                <img src={uploadedImage!} alt="Original" className="w-full" />
-                <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">תוכנית מקורית</div>
-              </div>
-              <div className={`rounded-2xl overflow-hidden border-2 shadow-sm relative ${videoClickMode ? "border-purple-200" : "border-emerald-200"}`}>
-                <img ref={floorplanImgRef} src={floorplanResult} alt="Rendering"
-                  className={`w-full ${(loadingRoom || generatingBothRooms) ? "opacity-50" : "cursor-crosshair"}`}
-                  onClick={videoClickMode ? handleVideoFloorplanClick : handleFloorplanClick} />
-                {!videoClickMode && floorplanClick && <ClickPin marker={floorplanClick} />}
-                {videoClickA && <ClickPin marker={videoClickA} />}
-                {videoClickB && <ClickPin marker={videoClickB} />}
-                {(loadingRoom || generatingBothRooms) && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/60">
-                    <div className="bg-white rounded-2xl px-6 py-4 text-center shadow-xl border border-gray-100">
-                      <Spinner className="h-8 w-8 text-emerald-600 mx-auto" />
-                      <p className="text-sm text-gray-600 mt-2">
-                        {generatingBothRooms ? "יוצר 2 חדרים במקביל..." :
-                         detectedRoom ? `יוצר צילום של ה${detectedRoom.roomHe}...` : "מזהה חדר..."}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <div className={`text-center text-xs py-1.5 ${videoClickMode ? "text-purple-600 bg-purple-50" : "text-emerald-600 bg-emerald-50"}`}>
-                  {videoClickMode
-                    ? `🎬 מצב סרטון — ${videoClickA ? "1/2 נבחרו" : "בחרו חדר A"}`
-                    : `${customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || ""} — לחצו על חדר`}
-                </div>
-              </div>
-            </div>
-
-            {allRoomPhotos.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-500">חדרים שנוצרו ({allRoomPhotos.length})</h3>
-                {allRoomPhotos.length >= 2 && (
-                  <button onClick={() => { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }}
-                    className="w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-full shadow-lg transition-all text-sm">
-                    צור סרטון סיור בין {allRoomPhotos.length} חדרים →
-                  </button>
-                )}
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {allRoomPhotos.map((photo, i) => (
-                    <button key={i} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
-                      className="rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all">
-                      <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{photo.roomNameHe}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* ======== STEP 3a: Room Actions Hub ======== */}
-        {phase === "room-actions" && currentRoomPhoto && (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">{currentRoomPhoto.roomNameHe}</h2>
-              <button onClick={() => setPhase("floorplan-ready")}
-                className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors">← חזרה לתפריט</button>
-            </div>
-
-            {/* Room Info Card */}
-            <div className="max-w-2xl mx-auto bg-gray-50 rounded-2xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{ROOM_PURPOSES.find(r => r.key === currentRoomPhoto.roomName || r.label === currentRoomPhoto.roomNameHe)?.icon || "🏠"}</span>
-                  <span className="font-medium text-gray-900">{currentRoomPhoto.roomNameHe}</span>
-                </div>
-                {detectedRoom?.dimensions && (
-                  <span className="text-sm text-gray-500 font-mono">
-                    {detectedRoom.dimensions.width}×{detectedRoom.dimensions.height} מ׳
-                  </span>
-                )}
-              </div>
-              {detectedRoom?.description && (
-                <p className="text-sm text-gray-500 mb-3">{detectedRoom.description}</p>
-              )}
-              {/* Change Purpose */}
-              <div className="flex flex-wrap gap-1.5">
-                <span className="text-xs text-gray-400 self-center ml-1">שנה ייעוד:</span>
-                {ROOM_PURPOSES.filter(r => r.label !== currentRoomPhoto.roomNameHe).slice(0, 6).map(r => (
-                  <button
-                    key={r.key}
-                    onClick={async () => {
-                      setCurrentRoomPhoto({ ...currentRoomPhoto, roomName: r.key, roomNameHe: r.label });
-                      setDetectedRoom(detectedRoom ? { ...detectedRoom, room: r.key, roomHe: r.label } : null);
-                      // Re-generate room with new purpose
-                      setLoadingRoom(true);
-                      setLoadingLabel(`מייצר ${r.label}...`);
-                      setPhase("floorplan");
-                      try {
-                        const blob = await (await fetch(floorplanResult!)).blob();
-                        const fd = new FormData();
-                        fd.append("floorplan", blob, "floorplan.png");
-                        fd.append("room", r.key);
-                        fd.append("style", customStyle || selectedStyle || "modern-cabin");
-                        fd.append("email", getEmail() || "");
-                        const res = await fetch("/api/floorplan/room", { method: "POST", body: fd });
-                        const data = await res.json();
-                        checkCredits(res, data); if (!res.ok) throw new Error(data.error);
-                        if (data.image) {
-                          const photo: RoomPhoto = {
-                            roomName: r.key, roomNameHe: r.label,
-                            imageData: `data:${data.image.mimeType};base64,${data.image.data}`,
-                          };
-                          setCurrentRoomPhoto(photo);
-                          setAllRoomPhotos(prev => {
-                            const filtered = prev.filter(p => p.roomName !== currentRoomPhoto.roomName);
-                            return [...filtered, photo];
-                          });
-                          saveRoomToDB(photo);
-                          setPhase("room-actions");
-                        }
-                      } catch (err: any) { setError(err.message); setPhase("room-actions"); }
-                      finally { setLoadingRoom(false); setLoadingLabel(""); }
-                    }}
-                    className="text-xs px-2.5 py-1 bg-white border border-gray-200 rounded-full hover:border-gray-900 hover:bg-gray-50 transition-all text-gray-600 hover:text-gray-900"
-                  >
-                    {r.icon} {r.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-2xl mx-auto">
-              <img src={currentRoomPhoto.imageData} alt={currentRoomPhoto.roomNameHe} className="w-full" />
-            </div>
-
-            <p className="text-center text-gray-500 text-sm">מה תרצו לעשות עם החדר?</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
-              <button
-                onClick={() => { setPhase("furniture-click"); setRoomClick(null); setDetectedFurniture(null); }}
-                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-6 text-center transition-all group"
-              >
-                <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
-                </div>
-                <div className="font-bold text-gray-900">החלפת רהיט</div>
-                <div className="text-xs text-gray-400 mt-1">לחצו על רהיט בתמונה והחליפו אותו</div>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
-                  else { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }
-                }}
-                className="bg-white border-2 border-gray-200 hover:border-emerald-500 rounded-2xl p-6 text-center transition-all group"
-              >
-                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 group-hover:bg-emerald-500 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-6 h-6 text-emerald-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" /></svg>
-                </div>
-                <div className="font-bold text-gray-900">סרטון סיור</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {allRoomPhotos.length >= 2
-                    ? `סיור וירטואלי בין ${allRoomPhotos.length} חדרים`
-                    : `צרו עוד ${2 - allRoomPhotos.length} חדר/ים — לחצו לחזור`}
-                </div>
-              </button>
-            </div>
-
-            <div className="text-center">
-              <button onClick={() => { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }}
-                className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← הוספת חדרים נוספים</button>
-            </div>
-          </>
-        )}
-
-        {/* ======== STEP 3b: Furniture click ======== */}
-        {phase === "furniture-click" && currentRoomPhoto && (
-          <>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-              <p className="text-emerald-800 font-medium text-sm">לחצו על רהיט בתמונה להחלפה</p>
-              <p className="text-emerald-600/60 text-xs mt-1">ה-AI יזהה את הרהיט ויציע חלופות</p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">{currentRoomPhoto.roomNameHe}</h2>
-              <button onClick={() => setPhase("room-actions")}
-                className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">← חזרה</button>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 relative max-w-2xl mx-auto shadow-sm">
-              <img ref={roomImgRef} src={currentRoomPhoto.imageData} alt={currentRoomPhoto.roomNameHe}
-                className={`w-full ${loadingFurniture ? "opacity-50" : "cursor-crosshair"}`}
-                onClick={handleRoomClick} />
-              {roomClick && <ClickPin marker={roomClick} />}
-              {loadingFurniture && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/60">
-                  <div className="bg-white rounded-2xl px-6 py-4 text-center shadow-xl border border-gray-100">
-                    <Spinner className="h-8 w-8 text-emerald-600 mx-auto" />
-                    <p className="text-sm text-gray-600 mt-2">מזהה רהיט...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* ======== STEP 3c: Furniture select + result ======== */}
-        {(phase === "furniture-select" || phase === "furniture-result") && currentRoomPhoto && (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">{currentRoomPhoto.roomNameHe}</h2>
-              <button onClick={() => setPhase("room-actions")}
-                className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">← חזרה</button>
-            </div>
-
-            {phase === "furniture-select" && detectedFurniture && (
-              <div className="space-y-5">
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
-                  </div>
-                  <div>
-                    <div className="font-bold text-gray-900">{detectedFurniture.itemHe}</div>
-                    <div className="text-xs text-gray-500">{detectedFurniture.description}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">בחרו חלופה</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {detectedFurniture.suggestions.map((sug, i) => (
-                      <button key={i} onClick={() => { setSelectedSuggestion(sug); setFurnitureImage(null); setFurnitureFile(null); setCustomFurnitureText(null); }}
-                        className={`text-right rounded-xl p-3 border-2 transition-all text-sm ${
-                          selectedSuggestion === sug ? "bg-emerald-50 border-emerald-400 text-emerald-800" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                        }`}>{sug}</button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או — תארו מה אתם רוצים</h3>
-                  <input
-                    type="text"
-                    placeholder={`למשל: מיטה לבנה מעץ אלון בסגנון כפרי`}
-                    value={customFurnitureText || ""}
-                    onChange={(e) => { setCustomFurnitureText(e.target.value); if (e.target.value) { setSelectedSuggestion(null); setFurnitureImage(null); setFurnitureFile(null); } }}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-right focus:outline-none focus:border-emerald-400 transition-colors"
-                    dir="rtl"
-                  />
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או — העלו רהיט ספציפי</h3>
-                  <div className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all ${
-                    furnitureImage ? "border-emerald-300 bg-emerald-50/50" : "border-gray-300 hover:border-gray-400"
-                  }`} onClick={() => furnitureInputRef.current?.click()}>
-                    <input ref={furnitureInputRef} type="file" accept="image/*" className="hidden"
-                      onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; setFurnitureFile(f); setSelectedSuggestion(null); setCustomFurnitureText(null);
-                        const reader = new FileReader(); reader.onload = (ev) => setFurnitureImage(ev.target?.result as string); reader.readAsDataURL(f); }} />
-                    {furnitureImage ? <img src={furnitureImage} alt="Furniture" className="max-h-28 mx-auto rounded-xl" />
-                      : <p className="text-gray-400 text-sm py-2">העלו תמונת רהיט</p>}
-                  </div>
-                </div>
-
-                <button onClick={doSwap} disabled={(!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || swapping}
-                  className={`w-full py-3.5 rounded-full font-bold transition-all ${
-                    (!selectedSuggestion && !furnitureFile) || swapping ? "bg-gray-200 text-gray-400"
-                      : "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"
-                  }`}>
-                  {swapping ? <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> מחליף...</span>
-                    : `החלף ${detectedFurniture.itemHe} →`}
-                </button>
-
-                <div className="flex justify-center gap-4 pt-1">
-                  <button onClick={() => { setPhase("furniture-click"); setDetectedFurniture(null); setRoomClick(null); }}
-                    className="text-sm text-gray-400 hover:text-gray-600">← חזרה לחדר</button>
-                  <button onClick={() => setPhase("room-actions")}
-                    className="text-sm text-emerald-600 hover:text-emerald-700">פעולות נוספות →</button>
-                </div>
-              </div>
-            )}
-
-            {phase === "furniture-result" && furnitureResult && (
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl overflow-hidden border border-gray-200">
-                    <img src={currentRoomPhoto.imageData} alt="Before" className="w-full" />
-                    <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">לפני</div>
-                  </div>
-                  <div className="rounded-2xl overflow-hidden border-2 border-emerald-200">
-                    <img src={furnitureResult} alt="After" className="w-full" />
-                    <div className="text-center text-xs text-emerald-600 py-1.5 bg-emerald-50">אחרי</div>
-                  </div>
-                </div>
-                <div className="flex justify-center gap-3 flex-wrap">
-                  <a href={furnitureResult} download="furniture-swap.png"
-                    className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800">הורד תמונה</a>
-                  <button onClick={() => { setPhase("furniture-click"); setFurnitureResult(null); setDetectedFurniture(null); setRoomClick(null); }}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">רהיט נוסף</button>
-                  <button onClick={() => setPhase("room-actions")}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">פעולות נוספות</button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* ======== STEP 4: Video select ======== */}
-        {phase === "video-upload" && (
-          <>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">סרטון סיור AI</h2>
-              <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
-            </div>
-
-            {/* Loading rooms */}
-            {!roomsLoaded && (
-              <div className="flex items-center justify-center py-12 gap-3">
-                <Spinner className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-400 text-sm">טוען הדמיות...</span>
-              </div>
-            )}
-
-            {/* No images yet — friendly redirect */}
-            {roomsLoaded && allUserRooms.length === 0 && (
-              <div className="max-w-md mx-auto text-center bg-amber-50 border border-amber-200 rounded-2xl p-8 space-y-4">
-                <div className="text-4xl">🎬</div>
-                <h3 className="text-lg font-semibold text-gray-900">אין עדיין הדמיות לסרטון</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  כדי ליצור סרטון סיור, צריך קודם להעלות תוכנית קומה וליצור הדמיות של החדרים. אחרי שיהיו לכם לפחות 2 חדרים — תוכלו ליצור סרטון מדהים!
-                </p>
-                <a
-                  href="/floorplan"
-                  className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-                >
-                  עברו לתוכנית קומה חכמה ←
-                </a>
-              </div>
-            )}
-
-            {/* Previously generated rooms — grouped by session (house) */}
-            {allUserRooms.length > 0 && (
-              <div className="max-w-2xl mx-auto space-y-4">
-                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים שנוצרו — בחרו 2 מאותו בית</h3>
-                {allUserRooms.filter(g => g.rooms.length >= 1).map((group, gi) => (
-                  <div key={group.sessionId} className="space-y-2">
-                    {allUserRooms.length > 1 && (
-                      <p className="text-xs text-gray-400 font-medium">הדמיה {gi + 1}</p>
-                    )}
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                      {group.rooms.map((photo) => {
-                        const isFirst = videoFirstImage === photo.imageData;
-                        const isLast = videoLastImage === photo.imageData;
-                        return (
-                          <button key={photo.roomName + group.sessionId} onClick={() => {
-                            if (isFirst) { setVideoFirstImage(null); return; }
-                            if (isLast) { setVideoLastImage(null); return; }
-                            if (!videoFirstImage) setVideoFirstImage(photo.imageData);
-                            else if (!videoLastImage) setVideoLastImage(photo.imageData);
-                          }}
-                            className={`rounded-xl overflow-hidden border-2 transition-all relative ${
-                              isFirst || isLast ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                            }`}>
-                            <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                            {(isFirst || isLast) && (
-                              <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                                {isFirst ? "A" : "B"}
-                              </div>
-                            )}
-                            <div className={`text-center text-[10px] py-1 ${
-                              isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
-                            }`}>
-                              {photo.roomNameHe}
-                              {isFirst && " — התחלה"}
-                              {isLast && " — סיום"}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Or upload custom images */}
-            <div className="max-w-2xl mx-auto">
-              {allRoomPhotos.length > 0 && (
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs text-gray-400">או העלו תמונות</span>
-                  <div className="flex-1 h-px bg-gray-200" />
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                {/* First frame */}
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה ראשונה (התחלה)</label>
-                  <input ref={videoFirstInputRef} type="file" accept="image/*" className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => setVideoFirstImage(ev.target?.result as string);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  <button onClick={() => videoFirstInputRef.current?.click()}
-                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                      videoFirstImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                    }`}>
-                    {videoFirstImage ? (
-                      <img src={videoFirstImage} alt="First frame" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center p-4">
-                        <div className="text-3xl mb-2 opacity-40">A</div>
-                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                      </div>
-                    )}
-                  </button>
-                </div>
-
-                {/* Last frame */}
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה שנייה (סיום)</label>
-                  <input ref={videoLastInputRef} type="file" accept="image/*" className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => setVideoLastImage(ev.target?.result as string);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  <button onClick={() => videoLastInputRef.current?.click()}
-                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                      videoLastImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                    }`}>
-                    {videoLastImage ? (
-                      <img src={videoLastImage} alt="Last frame" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center p-4">
-                        <div className="text-3xl mb-2 opacity-40">B</div>
-                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {videoFirstImage && videoLastImage && (
-              <div className="flex items-center justify-center gap-3 text-sm">
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר A</span>
-                <span className="text-gray-300">→</span>
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר B</span>
-              </div>
-            )}
-
-            {/* Optional custom prompt */}
-            <div className="max-w-2xl mx-auto space-y-4">
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
-                <input
-                  type="text"
-                  value={videoCustomPrompt}
-                  onChange={(e) => setVideoCustomPrompt(e.target.value)}
-                  placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
-                  dir="rtl"
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-
-              <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
-                className={`w-full py-4 rounded-full font-bold text-lg transition-all relative overflow-hidden ${
-                  videoLoading
-                    ? "bg-emerald-800 text-white"
-                    : videoFirstImage && videoLastImage
-                    ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }`}>
-                {videoLoading && (
-                  <div
-                    className="absolute inset-0 bg-emerald-600 transition-all duration-1000 ease-out"
-                    style={{ width: `${parseInt(videoProgress.match?.(/\d+/)?.[0] || "5")}%` }}
-                  />
-                )}
-                <span className="relative z-10">
-                {videoLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Spinner className="h-5 w-5" />
-                    {videoProgress || "מייצר סרטון..."}
-                  </span>
-                ) : "🎬 צור סרטון סיור"}
-                </span>
-              </button>
-
-
-              <div className="text-center">
-                <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}
-                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה לתוכנית קומה</button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {phase === "video-select" && (
-          <>
-            {(() => {
-              const selected = (videoFromRoom ? 1 : 0) + (videoToRoom ? 1 : 0);
-              return (
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold text-gray-900">{selected}/2</span>
-                    <span className="text-gray-500 text-sm">חדרים נבחרו</span>
-                  </div>
-                  <p className="text-gray-700 font-medium text-sm">
-                    {selected === 0 && "בחרו את החדר הראשון — תחילת הסרטון"}
-                    {selected === 1 && "עכשיו בחרו את החדר השני — סוף הסרטון"}
-                    {selected === 2 && "מעולה — לחצו ליצירת הסרטון"}
-                  </p>
-                  <p className="text-gray-400 text-xs">המצלמה תזוז מחדר אחד לשני — מעבר חלק, בלי חתכים</p>
-                </div>
-              );
-            })()}
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
-              {allRoomPhotos.map((photo) => {
-                const isFrom = videoFromRoom === photo.roomName;
-                const isTo = videoToRoom === photo.roomName;
-                const isSelected = isFrom || isTo;
-                return (
-                  <button key={photo.roomName} onClick={() => {
-                    if (isFrom) { setVideoFromRoom(null); return; }
-                    if (isTo) { setVideoToRoom(null); return; }
-                    if (!videoFromRoom) { setVideoFromRoom(photo.roomName); }
-                    else if (!videoToRoom) { setVideoToRoom(photo.roomName); }
-                  }}
-                    className={`rounded-2xl overflow-hidden border-2 transition-all relative ${
-                      isSelected ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                    }`}>
-                    <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                    {isSelected && (
-                      <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                        {isFrom ? "A" : "B"}
-                      </div>
-                    )}
-                    <div className={`text-center text-xs py-1.5 ${
-                      isSelected ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
-                    }`}>
-                      {photo.roomNameHe}
-                      {isFrom && " — התחלה"}
-                      {isTo && " — סיום"}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {videoFromRoom && videoToRoom && (
-              <div className="flex items-center justify-center gap-3 text-sm">
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">
-                  {allRoomPhotos.find(p => p.roomName === videoFromRoom)?.roomNameHe}
-                </span>
-                <span className="text-gray-300">→</span>
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">
-                  {allRoomPhotos.find(p => p.roomName === videoToRoom)?.roomNameHe}
-                </span>
-              </div>
-            )}
-
-            {/* Optional custom prompt */}
-            <div className="max-w-2xl mx-auto">
-              <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
-              <input
-                type="text"
-                value={videoCustomPrompt}
-                onChange={(e) => setVideoCustomPrompt(e.target.value)}
-                placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
-                dir="rtl"
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500 mx-auto mb-6" />
+            <h2 className="text-xl font-semibold mb-2">מנתח את התוכנית...</h2>
+            <p className="text-gray-400">
+              ה-AI מזהה קירות, חדרים, דלתות וחלונות
+            </p>
+            {previewUrl && (
+              <img
+                src={previewUrl}
+                alt="תוכנית"
+                className="max-w-sm mx-auto mt-6 rounded-lg opacity-50"
               />
-            </div>
-
-            <button onClick={generateVideo} disabled={!videoFromRoom || !videoToRoom || videoLoading}
-              className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
-                !videoFromRoom || !videoToRoom || videoLoading
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-900 text-white hover:bg-gray-800 shadow-xl"
-              }`}>
-              {videoLoading ? (
-                <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> {videoProgress || "מייצר סרטון..."}</span>
-              ) : "צור סרטון סיור →"}
-            </button>
-
-            <button onClick={() => setPhase("room-actions")}
-              className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה</button>
-          </>
-        )}
-
-        {/* ======== Video result ======== */}
-        {phase === "video-result" && videoResult && (
-          <>
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold text-gray-900">הסרטון מוכן</h2>
-              <p className="text-gray-500 text-sm">
-                {allRoomPhotos.find(p => p.roomName === videoFromRoom)?.roomNameHe} → {allRoomPhotos.find(p => p.roomName === videoToRoom)?.roomNameHe}
-              </p>
-            </div>
-
-            <div className="max-w-2xl mx-auto rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
-              <video src={videoResult} controls autoPlay loop className="w-full" />
-            </div>
-
-            <div className="flex justify-center gap-3 flex-wrap">
-              <a href={videoResult} download="walkthrough.mp4"
-                className="px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800">הורד סרטון</a>
-              <button onClick={() => { setVideoResult(null); setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }}
-                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">סרטון נוסף</button>
-              <button onClick={() => { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }}
-                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">חזרה להדמיה</button>
-            </div>
-          </>
+            )}
+          </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-600 text-center text-sm">{error}</div>
+          <div className="bg-red-900/30 border border-red-700 rounded-xl p-4 mb-6 text-center">
+            <p className="text-red-400">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setFloorplan(null);
+                setPreviewUrl(null);
+              }}
+              className="mt-3 px-4 py-2 bg-red-800 hover:bg-red-700 rounded-lg text-sm transition"
+            >
+              נסה שוב
+            </button>
+          </div>
+        )}
+
+        {/* Main Content - Show when floorplan loaded */}
+        {floorplan && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Upload new */}
+              <button
+                onClick={() => {
+                  setFloorplan(null);
+                  setPreviewUrl(null);
+                  setVizResult(null);
+                  setSelectedRoom(null);
+                }}
+                className="w-full px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition"
+              >
+                📤 העלה תוכנית חדשה
+              </button>
+
+              {/* Stats */}
+              <div className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+                <h3 className="font-semibold mb-3 text-gray-300">📊 סיכום</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="bg-gray-800 rounded-lg p-2 text-center">
+                    <div className="text-lg font-bold">{floorplan.walls.length}</div>
+                    <div className="text-gray-400 text-xs">קירות</div>
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-2 text-center">
+                    <div className="text-lg font-bold">{floorplan.rooms.length}</div>
+                    <div className="text-gray-400 text-xs">חדרים</div>
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-2 text-center">
+                    <div className="text-lg font-bold">{floorplan.doors?.length || 0}</div>
+                    <div className="text-gray-400 text-xs">דלתות</div>
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-2 text-center">
+                    <div className="text-lg font-bold">{floorplan.windows?.length || 0}</div>
+                    <div className="text-gray-400 text-xs">חלונות</div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-gray-500 text-center">
+                  {floorplan.dimensions.width}m × {floorplan.dimensions.height}m
+                </div>
+              </div>
+
+              {/* Rooms list */}
+              <div className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+                <h3 className="font-semibold mb-3 text-gray-300">🏠 חדרים</h3>
+                <div className="space-y-2">
+                  {floorplan.rooms.map((room, i) => (
+                    <button
+                      key={i}
+                      onClick={() =>
+                        setSelectedRoom(
+                          selectedRoom === room.name ? null : room.name
+                        )
+                      }
+                      className={`w-full text-right px-3 py-2 rounded-lg text-sm transition flex items-center gap-2 ${
+                        selectedRoom === room.name
+                          ? "bg-emerald-700 text-white"
+                          : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                      }`}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full inline-block flex-shrink-0"
+                        style={{
+                          backgroundColor:
+                            selectedRoom === room.name
+                              ? "#ffd700"
+                              : (
+                                  {
+                                    bedroom: "#8b9dc3",
+                                    bathroom: "#7ec8e3",
+                                    kitchen: "#f4a460",
+                                    living: "#98d98e",
+                                    hallway: "#d3d3d3",
+                                    balcony: "#c5e1a5",
+                                    storage: "#bcaaa4",
+                                    laundry: "#b0bec5",
+                                    entrance: "#ffe082",
+                                  } as Record<string, string>
+                                )[room.type] || "#e0e0e0",
+                        }}
+                      />
+                      <span className="truncate">{room.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Visualize button */}
+              {selectedRoom && (
+                <button
+                  onClick={handleVisualizeRoom}
+                  disabled={visualizing}
+                  className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 rounded-xl font-semibold transition text-sm"
+                >
+                  {visualizing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="animate-spin">⏳</span> מדמיין...
+                    </span>
+                  ) : (
+                    `🎨 הדמה את "${selectedRoom}"`
+                  )}
+                </button>
+              )}
+
+              {/* Original image */}
+              {previewUrl && (
+                <div className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+                  <h3 className="font-semibold mb-2 text-gray-300 text-sm">
+                    📋 תוכנית מקורית
+                  </h3>
+                  <img
+                    src={previewUrl}
+                    alt="תוכנית"
+                    className="w-full rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* 3D Viewer */}
+            <div className="lg:col-span-3 space-y-4">
+              <div className="h-[500px] lg:h-[600px]">
+                <FloorplanViewer
+                  data={floorplan}
+                  selectedRoom={selectedRoom}
+                  onSelectRoom={setSelectedRoom}
+                  onScreenshot={(url) => console.log("Screenshot taken")}
+                />
+              </div>
+
+              {/* Visualization result */}
+              {vizResult && (
+                <div className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+                  <h3 className="font-semibold mb-3 text-gray-300">
+                    🎨 הדמיית &quot;{selectedRoom}&quot;
+                  </h3>
+                  <img
+                    src={vizResult}
+                    alt="הדמיה"
+                    className="w-full rounded-xl"
+                  />
+                </div>
+              )}
+
+              {/* Instructions */}
+              <div className="text-center text-gray-500 text-xs">
+                💡 גלגל עכבר לזום • גרור לסיבוב • לחץ על חדר לבחירה • Shift+גרור להזזה
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

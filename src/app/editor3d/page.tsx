@@ -68,7 +68,12 @@ function createTestScene(): SceneGraph {
   return { nodes, rootNodeIds: ["site_test001"] };
 }
 
-function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; onSkip: () => void }) {
+function UploadScreen({ onScene, onSkip, onLoadProject }: { 
+  onScene: (s: SceneGraph, name?: string) => void; 
+  onSkip: () => void;
+  onLoadProject: (name: string, scene: SceneGraph) => void;
+}) {
+  const [projects] = useState(() => getSavedProjects());
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -135,20 +140,32 @@ function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; o
           }}
         />
 
-        <div className="flex gap-2 mt-4">
-          <button
-            className="flex-1 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
-            onClick={onSkip}
-          >
-            התחל מאפס →
-          </button>
-          <button
-            className="flex-1 py-3 rounded-xl bg-emerald-800 text-emerald-300 hover:bg-emerald-700 transition"
-            onClick={() => onScene(createTestScene())}
-          >
-            🧪 טען חדר בדיקה
-          </button>
-        </div>
+        <button
+          className="w-full mt-4 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
+          onClick={onSkip}
+        >
+          התחל מאפס →
+        </button>
+
+        {projects.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-gray-400 text-sm mb-2 text-right">פרויקטים שמורים:</h3>
+            <div className="space-y-2">
+              {projects.map((p) => (
+                <button
+                  key={p.name}
+                  className="w-full flex items-center justify-between bg-gray-800 hover:bg-gray-700 rounded-xl px-4 py-3 transition"
+                  onClick={() => onLoadProject(p.name, p.scene)}
+                >
+                  <span className="text-gray-500 text-xs">
+                    {new Date(p.date).toLocaleDateString('he-IL')}
+                  </span>
+                  <span className="text-white font-medium">{p.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -177,12 +194,24 @@ function useApplyScene(scene: SceneGraph | null) {
         
         console.log("Found level:", actualLevelId);
         
-        // Delete existing walls first
-        const existingWalls = Object.values(nodes).filter((n: any) => n.type === 'wall');
-        for (const wall of existingWalls as any[]) {
-          state.deleteNode(wall.id);
+        // Delete ALL existing children of the level (walls, doors, windows, items, zones)
+        const levelNode = nodes[actualLevelId];
+        const childIds = levelNode?.children || [];
+        for (const childId of childIds) {
+          const cId = typeof childId === 'string' ? childId : (childId as any)?.id;
+          if (cId && nodes[cId]) {
+            // Also delete grandchildren (doors/windows inside walls)
+            const childNode = nodes[cId] as any;
+            if (childNode.children) {
+              for (const gcId of childNode.children) {
+                const gcIdStr = typeof gcId === 'string' ? gcId : gcId?.id;
+                if (gcIdStr) state.deleteNode(gcIdStr as any);
+              }
+            }
+            state.deleteNode(cId as any);
+          }
         }
-        console.log("Cleared", existingWalls.length, "old walls");
+        console.log("Cleared all existing elements");
         
         // Extract walls from our scene and create them in the existing scene
         const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
@@ -221,17 +250,87 @@ function useApplyScene(scene: SceneGraph | null) {
   }, [scene]);
 }
 
-function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
+// Project save/load
+function getSavedProjects(): { name: string; date: string; scene: SceneGraph }[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('pascal-projects') || '[]');
+  } catch { return []; }
+}
+
+function saveProject(name: string, scene: SceneGraph) {
+  const projects = getSavedProjects();
+  const existing = projects.findIndex(p => p.name === name);
+  const entry = { name, date: new Date().toISOString(), scene };
+  if (existing >= 0) projects[existing] = entry;
+  else projects.push(entry);
+  localStorage.setItem('pascal-projects', JSON.stringify(projects));
+}
+
+function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGraph | null; projectName: string }) {
   useApplyScene(initialScene);
+  const [showSave, setShowSave] = useState(false);
+  const [saveName, setSaveName] = useState(projectName);
+
+  // Auto-save current scene periodically
+  useEffect(() => {
+    if (!projectName) return;
+    const interval = setInterval(async () => {
+      try {
+        const core = await import("@pascal-app/core");
+        const state = core.useScene.getState();
+        const scene = { nodes: state.nodes as any, rootNodeIds: state.rootNodeIds as any };
+        saveProject(projectName, scene);
+      } catch {}
+    }, 30000); // auto-save every 30s
+    return () => clearInterval(interval);
+  }, [projectName]);
 
   // Pascal Editor requires dark class on html
   if (typeof document !== 'undefined') {
     document.documentElement.classList.add('dark');
   }
 
+  const handleSave = async () => {
+    try {
+      const core = await import("@pascal-app/core");
+      const state = core.useScene.getState();
+      const scene = { nodes: state.nodes as any, rootNodeIds: state.rootNodeIds as any };
+      saveProject(saveName || 'ללא שם', scene);
+      setShowSave(false);
+      alert(`פרויקט "${saveName}" נשמר!`);
+    } catch {}
+  };
+
   return (
-    <div className="h-screen w-screen dark">
+    <div className="h-screen w-screen dark relative">
       <PascalEditor />
+      
+      {/* Save button */}
+      <button
+        className="absolute top-4 left-4 z-50 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition"
+        onClick={() => setShowSave(!showSave)}
+      >
+        💾 שמור
+      </button>
+      
+      {showSave && (
+        <div className="absolute top-14 left-4 z-50 bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-xl w-64">
+          <input
+            className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-600 mb-2"
+            placeholder="שם הפרויקט..."
+            value={saveName}
+            onChange={e => setSaveName(e.target.value)}
+            dir="rtl"
+          />
+          <button
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg py-2 text-sm font-medium"
+            onClick={handleSave}
+          >
+            שמור פרויקט
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -239,16 +338,25 @@ function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) 
 export default function Editor3DPage() {
   const [mode, setMode] = useState<"upload" | "editor">("upload");
   const [scene, setScene] = useState<SceneGraph | null>(null);
+  const [projectName, setProjectName] = useState("פרויקט חדש");
 
   if (mode === "upload") {
     return (
       <UploadScreen
-        onScene={(s) => { setScene(s); setMode("editor"); }}
+        onScene={(s) => { 
+          setScene(s); 
+          setProjectName("פרויקט " + new Date().toLocaleDateString('he-IL'));
+          setMode("editor"); 
+        }}
         onSkip={() => { setScene(null); setMode("editor"); }}
+        onLoadProject={(name, s) => {
+          setScene(s);
+          setProjectName(name);
+          setMode("editor");
+        }}
       />
     );
   }
 
-  // Key forces remount when different scene
-  return <EditorWithScene key={JSON.stringify(scene?.rootNodeIds)} initialScene={scene} />;
+  return <EditorWithScene key={projectName} initialScene={scene} projectName={projectName} />;
 }

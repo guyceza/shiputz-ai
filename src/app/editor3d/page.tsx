@@ -20,10 +20,8 @@ const PascalEditor = dynamic(
 
 type SceneGraph = { nodes: Record<string, unknown>; rootNodeIds: string[] };
 
-export default function Editor3DPage() {
-  const [scene, setScene] = useState<SceneGraph | null>(null);
+function UploadScreen({ onScene, onSkip }: { onScene: (s: SceneGraph) => void; onSkip: () => void }) {
   const [uploading, setUploading] = useState(false);
-  const [showUpload, setShowUpload] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = useCallback(async (file: File) => {
@@ -37,86 +35,97 @@ export default function Editor3DPage() {
       });
       if (!res.ok) throw new Error("Analysis failed");
       const data = await res.json();
-      setScene(data.sceneGraph);
-      setShowUpload(false);
+      console.log("Pascal SceneGraph:", JSON.stringify(data.sceneGraph, null, 2));
+      onScene(data.sceneGraph);
     } catch (err) {
       alert("שגיאה בניתוח התוכנית. נסה שוב.");
-    } finally {
       setUploading(false);
     }
+  }, [onScene]);
+
+  return (
+    <div className="h-screen w-screen flex items-center justify-center bg-[#0a0a0a]">
+      <div className="max-w-lg w-full mx-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">🏗️ עורך תלת-ממדי</h1>
+          <p className="text-gray-400">העלה תוכנית דירה ← AI ינתח ← מודל 3D מוכן לעריכה</p>
+        </div>
+
+        <div
+          className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all
+            ${uploading ? "border-emerald-500 bg-emerald-500/10" : "border-gray-600 hover:border-emerald-500 hover:bg-gray-900"}`}
+          onClick={() => !uploading && fileRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) handleUpload(file);
+          }}
+        >
+          {uploading ? (
+            <>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4" />
+              <p className="text-emerald-400 font-medium">מנתח תוכנית... (10-20 שניות)</p>
+            </>
+          ) : (
+            <>
+              <div className="text-5xl mb-4">📐</div>
+              <p className="text-white font-medium text-lg mb-2">גרור תוכנית לכאן</p>
+              <p className="text-gray-500 text-sm">או לחץ לבחירת קובץ</p>
+            </>
+          )}
+        </div>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleUpload(file);
+          }}
+        />
+
+        <button
+          className="w-full mt-4 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
+          onClick={onSkip}
+        >
+          או התחל מאפס בלי תוכנית →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EditorWithScene({ initialScene }: { initialScene: SceneGraph | null }) {
+  // Store scene in ref so onLoad always sees the latest value
+  const sceneRef = useRef(initialScene);
+  
+  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
+    return sceneRef.current;
   }, []);
 
-  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
-    return scene;
-  }, [scene]);
+  return (
+    <div className="h-screen w-screen">
+      <PascalEditor onLoad={onLoad} />
+    </div>
+  );
+}
 
-  if (showUpload) {
+export default function Editor3DPage() {
+  const [mode, setMode] = useState<"upload" | "editor">("upload");
+  const [scene, setScene] = useState<SceneGraph | null>(null);
+
+  if (mode === "upload") {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#0a0a0a]">
-        <div className="max-w-lg w-full mx-4">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">🏗️ עורך תלת-ממדי</h1>
-            <p className="text-gray-400">העלה תוכנית דירה ← AI ינתח ← מודל 3D מוכן לעריכה</p>
-          </div>
-
-          <div
-            className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all
-              ${uploading ? "border-emerald-500 bg-emerald-500/10" : "border-gray-600 hover:border-emerald-500 hover:bg-gray-900"}`}
-            onClick={() => !uploading && fileRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={(e) => {
-              e.preventDefault();
-              const file = e.dataTransfer.files[0];
-              if (file) handleUpload(file);
-            }}
-          >
-            {uploading ? (
-              <>
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4" />
-                <p className="text-emerald-400 font-medium">מנתח תוכנית... (10-20 שניות)</p>
-              </>
-            ) : (
-              <>
-                <div className="text-5xl mb-4">📐</div>
-                <p className="text-white font-medium text-lg mb-2">גרור תוכנית לכאן</p>
-                <p className="text-gray-500 text-sm">או לחץ לבחירת קובץ</p>
-              </>
-            )}
-          </div>
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleUpload(file);
-            }}
-          />
-
-          <button
-            className="w-full mt-4 py-3 rounded-xl bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition"
-            onClick={() => { setScene(null); setShowUpload(false); }}
-          >
-            או התחל מאפס בלי תוכנית →
-          </button>
-        </div>
-      </div>
+      <UploadScreen
+        onScene={(s) => { setScene(s); setMode("editor"); }}
+        onSkip={() => { setScene(null); setMode("editor"); }}
+      />
     );
   }
 
-  return (
-    <div className="h-screen w-screen relative">
-      <PascalEditor onLoad={onLoad} />
-      
-      {/* Floating upload button */}
-      <button
-        className="absolute top-4 left-4 z-50 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition flex items-center gap-2"
-        onClick={() => { setShowUpload(true); }}
-      >
-        📐 העלה תוכנית
-      </button>
-    </div>
-  );
+  // Key forces full remount of editor when scene changes
+  return <EditorWithScene key={scene ? "loaded" : "empty"} initialScene={scene} />;
 }

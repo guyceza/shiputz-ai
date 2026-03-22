@@ -224,8 +224,16 @@ export default function AdminDashboard() {
             </Link>
             <h1 className="text-xl font-semibold text-gray-900">ניהול משתמשים</h1>
           </div>
-          <div className="text-sm text-gray-500">
-            מחובר כ: {adminEmail}
+          <div className="flex items-center gap-4">
+            <Link href="/admin/leads" className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg hover:bg-emerald-200 transition-colors">
+              📧 לידים
+            </Link>
+            <Link href="/admin/emails" className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-lg hover:bg-blue-200 transition-colors">
+              ✉️ מיילים
+            </Link>
+            <div className="text-sm text-gray-500">
+              מחובר כ: {adminEmail}
+            </div>
           </div>
         </div>
       </header>

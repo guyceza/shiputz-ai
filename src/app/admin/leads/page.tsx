@@ -1,0 +1,328 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ADMIN_EMAILS, isAdmin as isAdminCheck } from "@/lib/admin";
+
+interface LeadEmail {
+  id: string;
+  email: string;
+  sequence_number: number;
+  sent_at: string;
+  status: string;
+  error_message: string | null;
+}
+
+interface LeadsStats {
+  total: number;
+  email1Sent: number;
+  email2Sent: number;
+  bounced: number;
+  errors: number;
+  unsubscribed: number;
+  remaining: number;
+  sentToday: number;
+  totalEmailsSent: number;
+  warmupWeek: number;
+  dailyLimit: number;
+  campaignStarted: boolean;
+  campaignStartDate: string | null;
+  nextBatch: string;
+  recentEmails: LeadEmail[];
+  statusBreakdown: Record<string, number>;
+}
+
+export default function AdminLeads() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<LeadsStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+
+  const fetchStats = useCallback(async (email: string) => {
+    try {
+      const resp = await fetch("/api/admin/leads-stats", {
+        headers: { "x-admin-email": email },
+      });
+      if (!resp.ok) throw new Error("Failed to fetch stats");
+      const data = await resp.json();
+      setStats(data);
+      setError(null);
+    } catch (err) {
+      setError("שגיאה בטעינת הנתונים");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.email && isAdminCheck(user.email)) {
+          setAdminEmail(user.email);
+          fetchStats(user.email);
+          return;
+        }
+      } catch {}
+    }
+    router.push("/");
+  }, [router, fetchStats]);
+
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "#0a0a0a" }}
+      >
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center text-red-400"
+        style={{ background: "#0a0a0a" }}
+      >
+        {error || "שגיאה"}
+      </div>
+    );
+  }
+
+  const progress =
+    stats.total > 0
+      ? Math.round(((stats.email1Sent + stats.email2Sent) / (stats.total * 2)) * 100)
+      : 0;
+
+  const nextBatchDate = new Date(stats.nextBatch);
+  const now = new Date();
+  const hoursUntilNext = Math.max(
+    0,
+    Math.round((nextBatchDate.getTime() - now.getTime()) / (1000 * 60 * 60))
+  );
+  const nextBatchLabel =
+    hoursUntilNext <= 0
+      ? "עכשיו"
+      : hoursUntilNext <= 24
+      ? `בעוד ${hoursUntilNext} שעות`
+      : `מחר 09:00`;
+
+  return (
+    <div
+      dir="rtl"
+      className="min-h-screen text-gray-100 p-4 md:p-8"
+      style={{ background: "#0a0a0a" }}
+    >
+      {/* Header */}
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-white">📧 לידים — מעצבי פנים</h1>
+            <p className="text-gray-400 mt-1">מעקב קמפיין מיילים</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => adminEmail && fetchStats(adminEmail)}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors"
+            >
+              🔄 רענון
+            </button>
+            <Link
+              href="/admin"
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors"
+            >
+              ← חזרה
+            </Link>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatCard label="סה״כ לידים" value={stats.total} icon="👥" />
+          <StatCard label="נשלח מייל #1" value={stats.email1Sent} icon="📧" color="emerald" />
+          <StatCard label="נשלח מייל #2" value={stats.email2Sent} icon="📨" color="blue" />
+          <StatCard label="נשלח היום" value={stats.sentToday} icon="📤" color="yellow" />
+          <StatCard label="באונס" value={stats.bounced} icon="⚠️" color="red" />
+          <StatCard label="שגיאות" value={stats.errors} icon="❌" color="red" />
+          <StatCard label="הסירו עצמם" value={stats.unsubscribed} icon="🚫" color="orange" />
+          <StatCard label="נותרו לשלוח" value={stats.remaining} icon="📋" color="purple" />
+        </div>
+
+        {/* Progress + Warm-up */}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          {/* Progress Bar */}
+          <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h3 className="text-lg font-semibold mb-4">התקדמות קמפיין</h3>
+            <div className="w-full bg-gray-800 rounded-full h-4 mb-3">
+              <div
+                className="bg-emerald-500 rounded-full h-4 transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>{progress}% הושלם</span>
+              <span>
+                {stats.totalEmailsSent} / {stats.total * 2} מיילים
+              </span>
+            </div>
+          </div>
+
+          {/* Warm-up Phase */}
+          <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h3 className="text-lg font-semibold mb-4">שלב חימום</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔥</span>
+                <div>
+                  <div className="font-semibold text-emerald-400">
+                    שבוע {stats.warmupWeek} — {stats.dailyLimit}/יום
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {stats.campaignStarted
+                      ? `התחיל ב-${new Date(stats.campaignStartDate!).toLocaleDateString("he-IL")}`
+                      : "טרם התחיל"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⏰</span>
+                <div>
+                  <div className="font-semibold">
+                    אצווה הבאה: {nextBatchLabel}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {nextBatchDate.toLocaleDateString("he-IL", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    })}{" "}
+                    09:00
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Breakdown */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
+          <h3 className="text-lg font-semibold mb-4">פילוח סטטוסים</h3>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(stats.statusBreakdown).map(([status, count]) => (
+              <div
+                key={status}
+                className="bg-gray-800 rounded-lg px-4 py-2 flex items-center gap-2"
+              >
+                <span className="text-sm font-mono text-gray-400">{status}</span>
+                <span className="font-bold text-white">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <h3 className="text-lg font-semibold mb-4">פעילות אחרונה</h3>
+          {stats.recentEmails.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">
+              עדיין לא נשלחו מיילים
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-800">
+                    <th className="text-right py-2 px-3">מייל</th>
+                    <th className="text-right py-2 px-3">מייל #</th>
+                    <th className="text-right py-2 px-3">נשלח</th>
+                    <th className="text-right py-2 px-3">סטטוס</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.recentEmails.map((email) => (
+                    <tr
+                      key={email.id}
+                      className="border-b border-gray-800/50 hover:bg-gray-800/30"
+                    >
+                      <td className="py-2 px-3 font-mono text-xs">
+                        {email.email}
+                      </td>
+                      <td className="py-2 px-3">#{email.sequence_number}</td>
+                      <td className="py-2 px-3 text-gray-400">
+                        {new Date(email.sent_at).toLocaleString("he-IL", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="py-2 px-3">
+                        <StatusBadge status={email.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+  color = "gray",
+}: {
+  label: string;
+  value: number;
+  icon: string;
+  color?: string;
+}) {
+  const colorMap: Record<string, string> = {
+    emerald: "text-emerald-400",
+    blue: "text-blue-400",
+    yellow: "text-yellow-400",
+    red: "text-red-400",
+    orange: "text-orange-400",
+    purple: "text-purple-400",
+    gray: "text-gray-300",
+  };
+
+  return (
+    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+      <div className="flex items-center gap-2 mb-2">
+        <span>{icon}</span>
+        <span className="text-sm text-gray-400">{label}</span>
+      </div>
+      <div className={`text-2xl font-bold ${colorMap[color] || colorMap.gray}`}>
+        {value.toLocaleString()}
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    sent: "bg-blue-500/20 text-blue-300",
+    delivered: "bg-emerald-500/20 text-emerald-300",
+    opened: "bg-green-500/20 text-green-300",
+    bounced: "bg-red-500/20 text-red-300",
+    error: "bg-red-500/20 text-red-300",
+  };
+
+  return (
+    <span
+      className={`px-2 py-0.5 rounded text-xs ${styles[status] || "bg-gray-700 text-gray-300"}`}
+    >
+      {status}
+    </span>
+  );
+}

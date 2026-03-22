@@ -177,6 +177,13 @@ function useApplyScene(scene: SceneGraph | null) {
         
         console.log("Found level:", actualLevelId);
         
+        // Delete existing walls first
+        const existingWalls = Object.values(nodes).filter((n: any) => n.type === 'wall');
+        for (const wall of existingWalls as any[]) {
+          state.deleteNode(wall.id);
+        }
+        console.log("Cleared", existingWalls.length, "old walls");
+        
         // Extract walls from our scene and create them in the existing scene
         const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
         console.log("Creating", wallNodes.length, "walls");

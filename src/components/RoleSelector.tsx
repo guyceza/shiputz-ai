@@ -106,7 +106,7 @@ export default function RoleSelector({ onSelect }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">מי אתה?</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">מי אתה?</h2>
         <p className="text-gray-500">בחר את התפקיד שלך — נתאים את החוויה עבורך</p>
       </div>
 
@@ -117,7 +117,7 @@ export default function RoleSelector({ onSelect }: Props) {
             onClick={() => handleSelect(role)}
             onMouseEnter={() => setHoveredRole(role.key)}
             onMouseLeave={() => setHoveredRole(null)}
-            className={`relative p-5 rounded-2xl border-2 transition-all duration-300 ${
+            className={`relative p-5 rounded-2xl border-2 transition-all duration-300 bg-white ${
               selectedRole === role.key
                 ? "scale-105 shadow-xl"
                 : hoveredRole === role.key
@@ -125,10 +125,10 @@ export default function RoleSelector({ onSelect }: Props) {
                 : "shadow-sm hover:shadow-md"
             }`}
             style={{
-              borderColor: selectedRole === role.key || hoveredRole === role.key ? role.color : "transparent",
+              borderColor: selectedRole === role.key || hoveredRole === role.key ? role.color : "#E5E7EB",
               background: selectedRole === role.key
-                ? `linear-gradient(135deg, ${role.color}15, ${role.color}05)`
-                : undefined,
+                ? `linear-gradient(135deg, ${role.color}15, white)`
+                : "white",
             }}
           >
             {/* Animated SVG icon */}
@@ -141,7 +141,7 @@ export default function RoleSelector({ onSelect }: Props) {
             </div>
 
             <div className="text-center">
-              <div className="font-semibold text-gray-900 dark:text-white text-sm">{role.label}</div>
+              <div className="font-semibold text-gray-900 text-sm">{role.label}</div>
               <div className="text-xs text-gray-500 mt-1">{role.description}</div>
             </div>
 

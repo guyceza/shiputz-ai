@@ -561,7 +561,7 @@ export default function Home() {
       {/* Role Selection Modal */}
       {showRoleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <RoleSelector onSelect={async (role: Role) => {
               try {
                 const { getSupabaseClient } = await import('@/lib/supabase');

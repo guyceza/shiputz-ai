@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@pascal-app/core": "file:../pascal-editor/packages/core",
+    "@pascal-app/editor": "file:../pascal-editor/packages/editor",
+    "@pascal-app/viewer": "file:../pascal-editor/packages/viewer",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@supabase/auth-helpers-nextjs": "^0.15.0",

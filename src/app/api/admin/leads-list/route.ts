@@ -32,17 +32,40 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    const { data: leads, error: leadsError } = await supabase
-      .from('leads')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Fetch ALL leads (Supabase default limit is 1000)
+    let allLeads: any[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    while (true) {
+      const { data: batch, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, from + batchSize - 1);
+      if (error) throw error;
+      if (!batch || batch.length === 0) break;
+      allLeads = allLeads.concat(batch);
+      if (batch.length < batchSize) break;
+      from += batchSize;
+    }
+    const leads = allLeads;
 
-    if (leadsError) throw leadsError;
-
-    const { data: emails, error: emailsError } = await supabase
-      .from('lead_emails')
-      .select('*')
-      .order('sent_at', { ascending: false });
+    // Fetch ALL emails
+    let allEmails: any[] = [];
+    from = 0;
+    while (true) {
+      const { data: batch, error } = await supabase
+        .from('lead_emails')
+        .select('*')
+        .order('sent_at', { ascending: false })
+        .range(from, from + batchSize - 1);
+      if (error) throw error;
+      if (!batch || batch.length === 0) break;
+      allEmails = allEmails.concat(batch);
+      if (batch.length < batchSize) break;
+      from += batchSize;
+    }
+    const emails = allEmails;
 
     if (emailsError) throw emailsError;
 

@@ -4,6 +4,25 @@ import { isAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
+const PROFESSION_PRIORITY: Record<string, number> = {
+  'מעצבי פנים': 1,
+  'אדריכלים': 2,
+  'קבלני שיפוצים': 3,
+  'מטבחים ואמבטיות': 4,
+  'נגרות אדריכלית': 5,
+};
+
+function scoreLead(lead: any): number {
+  let score = 0;
+  const profRank = PROFESSION_PRIORITY[lead.profession] || 6;
+  score += (6 - profRank) * 100;
+  if (lead.email && !/\@(gmail|yahoo|hotmail|outlook|walla|bezeqint)\./i.test(lead.email)) {
+    score += 50;
+  }
+  score += (lead.rating || 0) * 10;
+  return score;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authEmail = request.headers.get('x-admin-email') || '';
@@ -13,7 +32,6 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Get all leads
     const { data: leads, error: leadsError } = await supabase
       .from('leads')
       .select('*')
@@ -21,7 +39,6 @@ export async function GET(request: NextRequest) {
 
     if (leadsError) throw leadsError;
 
-    // Get all emails sent
     const { data: emails, error: emailsError } = await supabase
       .from('lead_emails')
       .select('*')
@@ -29,18 +46,23 @@ export async function GET(request: NextRequest) {
 
     if (emailsError) throw emailsError;
 
-    // Map emails to leads
     const emailsByLead: Record<string, typeof emails> = {};
     emails?.forEach(e => {
       if (!emailsByLead[e.email]) emailsByLead[e.email] = [];
       emailsByLead[e.email].push(e);
     });
 
-    // Enrich leads with email data
+    // Determine next batch (unsent leads sorted by quality)
+    const unsent = leads?.filter(l => 
+      ['new', 'pending'].includes(l.status) && !l.unsubscribed_at
+    ) || [];
+    const sortedUnsent = unsent.sort((a, b) => scoreLead(b) - scoreLead(a));
+    const nextBatchEmails = new Set(sortedUnsent.slice(0, 30).map(l => l.email));
+
     const enrichedLeads = leads?.map(lead => {
       const leadEmails = emailsByLead[lead.email] || [];
-      const email1 = leadEmails.find((e: { sequence_number: number }) => e.sequence_number === 1);
-      const email2 = leadEmails.find((e: { sequence_number: number }) => e.sequence_number === 2);
+      const email1 = leadEmails.find((e: any) => e.sequence_number === 1);
+      const email2 = leadEmails.find((e: any) => e.sequence_number === 2);
       
       return {
         id: lead.id,
@@ -51,6 +73,7 @@ export async function GET(request: NextRequest) {
         website: lead.website || '',
         profession: lead.profession || '',
         source: lead.source || '',
+        rating: lead.rating || null,
         status: lead.status,
         created_at: lead.created_at,
         unsubscribed: !!lead.unsubscribed_at,
@@ -60,6 +83,8 @@ export async function GET(request: NextRequest) {
         email2_sent_at: email2?.sent_at || null,
         last_event: leadEmails[0]?.status || null,
         last_event_at: leadEmails[0]?.sent_at || null,
+        quality_score: scoreLead(lead),
+        in_next_batch: nextBatchEmails.has(lead.email),
       };
     });
 

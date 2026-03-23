@@ -14,6 +14,7 @@ interface Lead {
   website: string;
   profession: string;
   source: string;
+  rating: number | null;
   status: string;
   created_at: string;
   unsubscribed: boolean;
@@ -23,6 +24,8 @@ interface Lead {
   email2_sent_at: string | null;
   last_event: string | null;
   last_event_at: string | null;
+  quality_score: number;
+  in_next_batch: boolean;
 }
 
 type SortKey = keyof Lead;
@@ -86,7 +89,7 @@ export default function LeadsListPage() {
   const [filterUnsubscribed, setFilterUnsubscribed] = useState<string>("all");
 
   // Sort
-  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortKey, setSortKey] = useState<SortKey>("quality_score");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   // Pagination
@@ -261,6 +264,16 @@ export default function LeadsListPage() {
           ))}
         </div>
 
+        {/* Color Legend */}
+        <div className="bg-white rounded-lg border p-3 mb-4 flex flex-wrap gap-4 items-center text-xs text-gray-600">
+          <span className="font-medium text-gray-800">מקרא צבעים:</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-100 border border-amber-300" /> בתור לשליחה הבאה</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-300" /> נשלח מייל #1</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-indigo-100 border border-indigo-300" /> נשלח מייל #2</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-100 border border-gray-300" /> לא נשלח עדיין</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> נקודה = בתור</span>
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-lg border p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-center">
@@ -383,6 +396,9 @@ export default function LeadsListPage() {
                   </th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600">מייל 1</th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600">מייל 2</th>
+                  <th className="px-3 py-3 text-center font-medium text-gray-600 cursor-pointer hover:bg-gray-100" onClick={() => handleSort("quality_score" as SortKey)}>
+                    דירוג <SortArrow col={"quality_score" as any} />
+                  </th>
                   <th className="px-3 py-3 text-right font-medium text-gray-600 cursor-pointer hover:bg-gray-100" onClick={() => handleSort("created_at")}>
                     נוצר <SortArrow col="created_at" />
                   </th>
@@ -391,8 +407,15 @@ export default function LeadsListPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {paginated.map((lead) => (
-                  <tr key={lead.id} className={`hover:bg-blue-50/50 transition ${lead.unsubscribed ? "opacity-50" : ""}`}>
+                  <tr key={lead.id} className={`transition ${
+                    lead.unsubscribed ? "opacity-50 bg-gray-50" : 
+                    lead.in_next_batch ? "bg-amber-50 hover:bg-amber-100" :
+                    lead.email1_status ? "bg-blue-50/30 hover:bg-blue-50" :
+                    lead.email2_status ? "bg-indigo-50/30 hover:bg-indigo-50" :
+                    "hover:bg-gray-50"
+                  }`}>
                     <td className="px-3 py-2.5 font-medium text-gray-900 max-w-[200px] truncate" title={lead.name}>
+                      {lead.in_next_batch && <span className="inline-block w-2 h-2 rounded-full bg-amber-400 mr-1.5" title="בתור לשליחה הבאה" />}
                       {lead.name || "—"}
                       {lead.unsubscribed && <span className="text-red-500 text-xs mr-1">🚫</span>}
                     </td>
@@ -430,6 +453,14 @@ export default function LeadsListPage() {
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                        lead.quality_score >= 500 ? "bg-green-100 text-green-700" :
+                        lead.quality_score >= 300 ? "bg-blue-100 text-blue-700" :
+                        lead.quality_score >= 100 ? "bg-gray-100 text-gray-600" :
+                        "bg-gray-50 text-gray-400"
+                      }`}>{lead.quality_score}</span>
                     </td>
                     <td className="px-3 py-2.5 text-gray-500 text-xs">{formatDate(lead.created_at)}</td>
                     <td className="px-3 py-2.5">

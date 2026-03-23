@@ -67,8 +67,6 @@ export async function GET(request: NextRequest) {
     }
     const emails = allEmails;
 
-    if (emailsError) throw emailsError;
-
     const emailsByLead: Record<string, typeof emails> = {};
     emails?.forEach(e => {
       if (!emailsByLead[e.email]) emailsByLead[e.email] = [];

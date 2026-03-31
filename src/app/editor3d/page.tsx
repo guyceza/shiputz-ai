@@ -175,6 +175,20 @@ function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGra
   const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
     if (initialScene) {
       console.log("[editor3d] onLoad: returning analyzed scene with", Object.keys(initialScene.nodes).length, "nodes");
+      // Force re-dirty all wall nodes after a delay to ensure WallSystem processes them
+      // (race condition: WallSystem may check dirtyNodes before WallRenderer meshes are registered)
+      setTimeout(async () => {
+        try {
+          const core = await import("@pascal-app/core");
+          const state = core.useScene.getState();
+          Object.values(state.nodes).forEach((node: any) => {
+            if (node.type === 'wall') {
+              state.markDirty(node.id);
+            }
+          });
+          console.log("[editor3d] Re-marked walls as dirty for WallSystem");
+        } catch (e) { console.warn("[editor3d] Could not re-dirty walls:", e); }
+      }, 1500);
       return initialScene;
     }
     console.log("[editor3d] onLoad: no initial scene, using default");

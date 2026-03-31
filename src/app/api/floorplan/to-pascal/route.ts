@@ -5,9 +5,9 @@ import { floorplanToPascalScene } from '@/lib/floorplan-to-pascal';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const PROMPT = `You are an expert architectural floor plan analyzer. Given an image of a floor plan (hand-drawn, professional, or photographed), extract all structural elements precisely.
+const PROMPT = `You are an expert architectural floor plan analyzer. Analyze this floor plan image and extract ALL structural elements.
 
-Return ONLY valid JSON with this exact structure:
+Return ONLY valid JSON with this structure:
 {
   "walls": [
     {"start": [x, y], "end": [x, y], "thickness": 0.15}
@@ -24,15 +24,26 @@ Return ONLY valid JSON with this exact structure:
   "dimensions": {"width": 10.0, "height": 8.0}
 }
 
-RULES:
-- All coordinates in METERS, origin at (0,0) top-left
-- Walls: line segments. Thickness 0.12-0.20m interior, 0.20-0.30m exterior
-- Rooms: clockwise polygon points. Name in plan language
-- Doors: center position on wall. Standard 0.8-0.9m
-- Windows: center on wall. Standard 1.0-1.5m
-- Use dimensions shown on plan if available, else estimate
-- Include ALL walls including partitions
-- Connect walls at corners (shared endpoints)`;
+CRITICAL RULES:
+1. COORDINATE SYSTEM: All values in METERS. Origin (0,0) at top-left of the plan. X increases rightward, Y increases downward.
+2. DIMENSIONS: If dimensions/measurements are shown on the plan, use those exact values. Otherwise estimate from typical room sizes (bedroom ~12-15sqm, bathroom ~4-6sqm, kitchen ~8-12sqm, living room ~20-30sqm).
+3. WALLS - MOST IMPORTANT:
+   - Every wall is a line segment from start [x,y] to end [x,y]
+   - Include ALL walls: exterior perimeter AND interior partition walls
+   - Walls MUST connect at corners: if wall A ends at [5,0] and wall B starts at [5,0], they share that exact point
+   - Trace the FULL exterior perimeter as connected wall segments
+   - Then add all interior dividing walls
+   - Exterior wall thickness: 0.20-0.30m. Interior walls: 0.10-0.15m
+   - Each wall should be a straight segment. For L-shaped walls, use two segments meeting at the corner
+4. ROOMS: Polygon points define room boundary clockwise. Use room names as shown on the plan (Hebrew if Hebrew plan)
+5. DOORS: Position is the center point [x,y] on the wall where the door is. Width typically 0.8-0.9m
+6. WINDOWS: Position is center point [x,y] on the wall. Width typically 1.0-1.5m
+
+VERIFICATION: After generating, verify that:
+- All exterior walls form a closed loop (last wall end = first wall start)
+- All interior walls connect to exterior walls or other interior walls at their endpoints
+- Every room is fully enclosed by walls
+- Door/window positions lie on or very near a wall`;
 
 export async function POST(request: NextRequest) {
   try {

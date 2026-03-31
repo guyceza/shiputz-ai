@@ -1,669 +1,433 @@
-import type { Metadata } from 'next';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'ShiputzAI — עוזר השיפוץ החכם שלך',
-  description: 'ShiputzAI הופך כל תמונה להדמיית שיפוץ מדהימה, מייצר כתב כמויות אוטומטי, סורק קבלות ומנתח הצעות מחיר — הכל עם AI.',
-};
+import { useRef } from "react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+
+// Reusable animated section
+function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.25, 0.1, 0, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Spotlight glow effect
+function SpotlightGlow() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -top-[40%] left-1/2 -translate-x-1/2 w-[140%] aspect-square rounded-full"
+        style={{ background: "radial-gradient(ellipse at center, rgba(69,128,247,0.08) 0%, rgba(124,58,237,0.04) 30%, transparent 70%)" }}
+      />
+    </div>
+  );
+}
+
+// Feature images with parallax
+function FeatureImage({ src, alt }: { src: string; alt: string }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  return (
+    <motion.div ref={ref} style={{ y }} className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0d1117]">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050917]/60 to-transparent z-10 pointer-events-none" />
+      <Image src={src} alt={alt} width={600} height={400} className="w-full h-auto" />
+    </motion.div>
+  );
+}
 
 export default function LandingPage() {
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroScroll } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(heroScroll, [0, 1], [0, 150]);
+  const heroOpacity = useTransform(heroScroll, [0, 0.5], [1, 0]);
+
   return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
-        
-        :root {
-          --blue: #4580f7;
-          --blue-dark: #3570e0;
-          --dark: #050917;
-          --dark-card: #0d1117;
-          --gray-50: #f8f9fa;
-          --gray-100: #f1f3f5;
-          --gray-200: #e9ecef;
-          --gray-400: #ced4da;
-          --gray-600: #868e96;
-          --gray-800: #343a40;
-          --radius: 16px;
-          --amber: #f59e0b;
-        }
+    <div className="bg-[#050917] text-white min-h-screen" dir="rtl" style={{ fontFamily: "'Heebo', -apple-system, sans-serif" }}>
 
-        .lp * { margin: 0; padding: 0; box-sizing: border-box; }
-        .lp {
-          font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
-          color: #fff; line-height: 1.6; direction: rtl;
-          background: var(--dark);
-          overflow-x: hidden;
-        }
-        .lp a { text-decoration: none; color: inherit; }
-
-        /* ===== NAV ===== */
-        .lp-nav {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-          background: rgba(5,9,23,0.85); backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          height: 72px; display: flex; align-items: center;
-        }
-        .lp-nav-inner {
-          max-width: 1200px; margin: 0 auto; padding: 0 32px;
-          width: 100%; display: flex; align-items: center; justify-content: space-between;
-        }
-        .lp-nav-logo {
-          display: flex; align-items: center; gap: 10px;
-          font-size: 22px; font-weight: 800;
-        }
-        .lp-nav-logo img { height: 32px; width: 32px; border-radius: 8px; }
-        .lp-nav-logo span { color: var(--blue); }
-        .lp-nav-links { display: flex; gap: 32px; align-items: center; }
-        .lp-nav-links a {
-          font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.6);
-          transition: color 0.2s;
-        }
-        .lp-nav-links a:hover { color: #fff; }
-
-        /* ===== BUTTONS ===== */
-        .lp-btn {
-          display: inline-flex; align-items: center; justify-content: center;
-          padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px;
-          transition: all 0.25s; cursor: pointer; border: none; font-family: inherit;
-          gap: 8px;
-        }
-        .lp-btn-primary {
-          background: var(--blue); color: #fff;
-          box-shadow: 0 0 0 0 rgba(69,128,247,0), 0 2px 8px rgba(69,128,247,0.3);
-        }
-        .lp-btn-primary:hover {
-          background: var(--blue-dark); transform: translateY(-2px);
-          box-shadow: 0 0 30px rgba(69,128,247,0.15), 0 8px 24px rgba(69,128,247,0.3);
-        }
-        .lp-btn-outline {
-          background: transparent; color: #fff;
-          border: 1.5px solid rgba(255,255,255,0.2);
-        }
-        .lp-btn-outline:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
-        .lp-btn-sm { padding: 10px 20px; font-size: 14px; }
-
-        /* ===== HERO ===== */
-        .lp-hero {
-          padding: 160px 32px 100px; text-align: center;
-          position: relative; overflow: hidden;
-          background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(69,128,247,0.12) 0%, transparent 60%);
-        }
-        .lp-hero-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-          background: rgba(69,128,247,0.1); border: 1px solid rgba(69,128,247,0.2);
-          border-radius: 100px; padding: 8px 20px; font-size: 14px; font-weight: 600;
-          color: var(--blue); margin-bottom: 32px;
-        }
-        .lp-hero-badge .pulse {
-          width: 8px; height: 8px; border-radius: 50%; background: var(--blue);
-          animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.5); }
-        }
-        .lp-hero h1 {
-          font-size: clamp(40px, 5.5vw, 72px); font-weight: 900; line-height: 1.08;
-          margin-bottom: 24px; max-width: 900px; margin-left: auto; margin-right: auto;
-          letter-spacing: -0.02em;
-        }
-        .lp-hero h1 .gradient {
-          background: linear-gradient(135deg, var(--blue) 0%, #a78bfa 50%, #f472b6 100%);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .lp-hero p {
-          font-size: 20px; color: rgba(255,255,255,0.55); max-width: 600px;
-          margin: 0 auto 40px; line-height: 1.7; font-weight: 400;
-        }
-        .lp-hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-
-        /* Hero screenshot */
-        .lp-hero-image {
-          max-width: 1000px; margin: 60px auto 0; position: relative;
-        }
-        .lp-hero-image img {
-          width: 100%; border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.08);
-          box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(69,128,247,0.08);
-        }
-        .lp-hero-image::after {
-          content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
-          background: linear-gradient(transparent, var(--dark));
-          pointer-events: none;
-        }
-
-        /* ===== STATS ===== */
-        .lp-stats {
-          padding: 80px 32px;
-          background: var(--dark-card);
-          border-top: 1px solid rgba(255,255,255,0.04);
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-stats-inner {
-          max-width: 1000px; margin: 0 auto;
-          display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
-          text-align: center;
-        }
-        .lp-stat-number {
-          font-size: 44px; font-weight: 900;
-          background: linear-gradient(135deg, var(--blue), #a78bfa);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .lp-stat-label { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; font-weight: 500; }
-
-        /* ===== FEATURES ===== */
-        .lp-features { padding: 120px 32px; }
-        .lp-features .lp-section-header { margin-bottom: 80px; }
-
-        .lp-feature {
-          max-width: 1100px; margin: 0 auto 120px;
-          display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
-        }
-        .lp-feature.reverse { direction: ltr; }
-        .lp-feature.reverse .lp-feature-text { direction: rtl; }
-        
-        .lp-feature-tag {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 13px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 1.5px; color: var(--blue); margin-bottom: 16px;
-        }
-        .lp-feature-text h3 {
-          font-size: 36px; font-weight: 800; margin-bottom: 16px; line-height: 1.2;
-          letter-spacing: -0.01em;
-        }
-        .lp-feature-text p {
-          font-size: 17px; color: rgba(255,255,255,0.55); line-height: 1.8;
-        }
-        .lp-feature-text .lp-btn { margin-top: 24px; }
-
-        .lp-feature-visual {
-          border-radius: var(--radius); overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.06);
-          background: var(--dark-card);
-          position: relative;
-        }
-        .lp-feature-visual img {
-          width: 100%; height: auto; display: block;
-          transition: transform 0.4s;
-        }
-        .lp-feature-visual:hover img { transform: scale(1.02); }
-
-        /* Before/After wrapper */
-        .lp-before-after {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
-          background: rgba(255,255,255,0.1);
-          border-radius: var(--radius); overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.06);
-        }
-        .lp-before-after img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .lp-before-after-label {
-          position: absolute; bottom: 8px; font-size: 11px; font-weight: 700;
-          background: rgba(0,0,0,0.7); color: #fff; padding: 4px 10px; border-radius: 6px;
-          text-transform: uppercase; letter-spacing: 1px;
-        }
-        .lp-ba-item { position: relative; }
-        .lp-ba-item .lp-before-after-label.before { right: 8px; }
-        .lp-ba-item .lp-before-after-label.after { left: 8px; }
-
-        /* ===== HOW ===== */
-        .lp-how {
-          padding: 120px 32px;
-          background: var(--dark-card);
-          border-top: 1px solid rgba(255,255,255,0.04);
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-section-header { text-align: center; margin-bottom: 60px; }
-        .lp-section-header h2 {
-          font-size: clamp(32px, 4vw, 48px); font-weight: 900; margin-bottom: 16px;
-          letter-spacing: -0.02em;
-        }
-        .lp-section-header p { font-size: 18px; color: rgba(255,255,255,0.5); }
-
-        .lp-steps {
-          max-width: 1000px; margin: 0 auto;
-          display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-        }
-        .lp-step {
-          background: rgba(255,255,255,0.03); border-radius: var(--radius); padding: 40px 32px;
-          border: 1px solid rgba(255,255,255,0.06); text-align: center;
-          transition: transform 0.3s, border-color 0.3s;
-        }
-        .lp-step:hover { transform: translateY(-6px); border-color: rgba(69,128,247,0.2); }
-        .lp-step-number {
-          width: 56px; height: 56px; border-radius: 14px;
-          background: linear-gradient(135deg, var(--blue), #7c3aed);
-          color: #fff; font-size: 22px; font-weight: 900;
-          display: flex; align-items: center; justify-content: center;
-          margin: 0 auto 24px;
-        }
-        .lp-step h4 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-        .lp-step p { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.7; }
-
-        /* ===== TESTIMONIALS ===== */
-        .lp-testimonials { padding: 120px 32px; }
-        .lp-testimonials-grid {
-          max-width: 1100px; margin: 0 auto;
-          display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-        }
-        .lp-testimonial {
-          background: var(--dark-card); border-radius: var(--radius);
-          padding: 36px; border: 1px solid rgba(255,255,255,0.06);
-          transition: border-color 0.3s;
-        }
-        .lp-testimonial:hover { border-color: rgba(69,128,247,0.15); }
-        .lp-testimonial-stars { color: var(--amber); font-size: 18px; margin-bottom: 20px; letter-spacing: 2px; }
-        .lp-testimonial-text {
-          font-size: 15px; line-height: 1.8; margin-bottom: 24px;
-          color: rgba(255,255,255,0.7); font-style: italic;
-        }
-        .lp-testimonial-author { display: flex; align-items: center; gap: 12px; }
-        .lp-testimonial-avatar {
-          width: 44px; height: 44px; border-radius: 50%;
-          background: linear-gradient(135deg, var(--blue), #7c3aed);
-          color: #fff; display: flex; align-items: center; justify-content: center;
-          font-weight: 700; font-size: 17px;
-        }
-        .lp-testimonial-name { font-size: 15px; font-weight: 700; }
-        .lp-testimonial-role { font-size: 13px; color: rgba(255,255,255,0.4); }
-
-        /* ===== PRICING ===== */
-        .lp-pricing {
-          padding: 120px 32px;
-          background: var(--dark-card);
-          border-top: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-pricing-grid {
-          max-width: 800px; margin: 0 auto;
-          display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
-        }
-        .lp-price-card {
-          background: rgba(255,255,255,0.03); border-radius: var(--radius); padding: 40px;
-          border: 1px solid rgba(255,255,255,0.06);
-          transition: border-color 0.3s;
-        }
-        .lp-price-card:hover { border-color: rgba(255,255,255,0.1); }
-        .lp-price-card.popular {
-          border: 2px solid var(--blue); position: relative;
-          background: rgba(69,128,247,0.04);
-        }
-        .lp-price-card.popular::before {
-          content: 'הכי פופולרי'; position: absolute; top: -13px; right: 24px;
-          background: linear-gradient(135deg, var(--blue), #7c3aed);
-          color: #fff; font-size: 12px; font-weight: 700;
-          padding: 5px 16px; border-radius: 100px;
-        }
-        .lp-price-card h4 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-        .lp-price { font-size: 52px; font-weight: 900; margin-bottom: 4px; }
-        .lp-price span { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.5); }
-        .lp-period { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
-        .lp-price-card ul { list-style: none; margin-bottom: 32px; }
-        .lp-price-card li {
-          padding: 10px 0; font-size: 15px; color: rgba(255,255,255,0.7);
-          display: flex; align-items: center; gap: 10px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-price-card li:last-child { border-bottom: none; }
-        .lp-price-card li::before {
-          content: '✓'; color: var(--blue); font-weight: 700; font-size: 16px;
-        }
-
-        /* ===== CTA ===== */
-        .lp-cta {
-          padding: 120px 32px; text-align: center;
-          background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(69,128,247,0.1) 0%, transparent 60%);
-          border-top: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-cta h2 {
-          font-size: clamp(36px, 4.5vw, 52px); font-weight: 900; margin-bottom: 20px;
-          letter-spacing: -0.02em;
-        }
-        .lp-cta p {
-          font-size: 18px; color: rgba(255,255,255,0.5); margin-bottom: 40px;
-          max-width: 500px; margin-left: auto; margin-right: auto;
-        }
-
-        /* ===== FOOTER ===== */
-        .lp-footer {
-          padding: 48px 32px;
-          border-top: 1px solid rgba(255,255,255,0.04);
-          text-align: center; font-size: 14px; color: rgba(255,255,255,0.3);
-        }
-
-        /* ===== LOGOS ===== */
-        .lp-logos {
-          padding: 60px 32px;
-          border-top: 1px solid rgba(255,255,255,0.04);
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .lp-logos p {
-          text-align: center; font-size: 13px; text-transform: uppercase;
-          letter-spacing: 2px; color: rgba(255,255,255,0.3); font-weight: 600;
-          margin-bottom: 32px;
-        }
-        .lp-logos-row {
-          display: flex; align-items: center; justify-content: center;
-          gap: 40px; flex-wrap: wrap; opacity: 0.4;
-        }
-        .lp-logos-row img { height: 28px; filter: brightness(0) invert(1); }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-          .lp-feature { grid-template-columns: 1fr; gap: 40px; }
-          .lp-feature.reverse { direction: rtl; }
-          .lp-steps { grid-template-columns: 1fr; }
-          .lp-testimonials-grid { grid-template-columns: 1fr; }
-          .lp-pricing-grid { grid-template-columns: 1fr; }
-          .lp-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-          .lp-nav-links a:not(.lp-btn) { display: none; }
-          .lp-hero { padding: 130px 20px 60px; }
-          .lp-hero h1 { font-size: 36px; }
-          .lp-features, .lp-how, .lp-testimonials, .lp-pricing, .lp-cta { padding: 80px 20px; }
-        }
-      `}} />
-
-      <div className="lp">
-        {/* NAV */}
-        <nav className="lp-nav">
-          <div className="lp-nav-inner">
-            <div className="lp-nav-logo">
-              <img src="/logo-no-bg.png" alt="ShiputzAI" />
-              Shiputz<span>AI</span>
-            </div>
-            <div className="lp-nav-links">
-              <a href="#features">יכולות</a>
-              <a href="#how">איך זה עובד</a>
-              <a href="#pricing">מחירים</a>
-              <a href="/" className="lp-btn lp-btn-primary lp-btn-sm">התחל בחינם</a>
-            </div>
+      {/* ===== NAV ===== */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06]"
+        style={{ background: "rgba(5,9,23,0.8)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)" }}>
+        <div className="max-w-[1200px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image src="/logo-no-bg.png" alt="ShiputzAI" width={32} height={32} className="rounded-lg" />
+            <span className="text-[22px] font-extrabold tracking-tight">Shiputz<span className="text-[#4580f7]">AI</span></span>
+          </Link>
+          <div className="flex items-center gap-8">
+            <a href="#features" className="hidden md:block text-[15px] font-medium text-white/50 hover:text-white transition-colors">יכולות</a>
+            <a href="#how" className="hidden md:block text-[15px] font-medium text-white/50 hover:text-white transition-colors">איך זה עובד</a>
+            <a href="#pricing" className="hidden md:block text-[15px] font-medium text-white/50 hover:text-white transition-colors">מחירים</a>
+            <Link href="/" className="bg-[#4580f7] hover:bg-[#3570e0] text-white text-[14px] font-bold px-5 py-2.5 rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(69,128,247,0.3)]">
+              התחל בחינם
+            </Link>
           </div>
-        </nav>
+        </div>
+      </nav>
 
-        {/* HERO */}
-        <section className="lp-hero">
-          <div className="lp-hero-badge"><span className="pulse"></span> מופעל בינה מלאכותית</div>
-          <h1>הדמיית שיפוץ.<br /><span className="gradient">תוך שניות.</span></h1>
-          <p>העלו תמונה של החדר, קבלו הדמיה ריאליסטית של השיפוץ, כתב כמויות מפורט, וניתוח הצעות מחיר — הכל אוטומטי עם AI.</p>
-          <div className="lp-hero-buttons">
-            <a href="/" className="lp-btn lp-btn-primary">התחל בחינם — בלי כרטיס אשראי ←</a>
-            <a href="#how" className="lp-btn lp-btn-outline">איך זה עובד?</a>
-          </div>
-          <div className="lp-hero-image">
-            <img src="/images/ai-vision/style-match-showcase.jpg" alt="ShiputzAI בפעולה" />
-          </div>
-        </section>
+      {/* ===== HERO ===== */}
+      <section ref={heroRef} className="relative pt-[160px] pb-[100px] overflow-hidden">
+        <SpotlightGlow />
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 text-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 bg-[#4580f7]/10 border border-[#4580f7]/20 rounded-full px-5 py-2 text-[14px] font-semibold text-[#4580f7] mb-8"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#4580f7] animate-pulse" />
+            מופעל בינה מלאכותית
+          </motion.div>
 
-        {/* STATS */}
-        <section className="lp-stats">
-          <div className="lp-stats-inner">
-            <div>
-              <div className="lp-stat-number">63%</div>
-              <div className="lp-stat-label">מהיר מעיצוב ידני</div>
-            </div>
-            <div>
-              <div className="lp-stat-number">127+</div>
-              <div className="lp-stat-label">בעלי מקצוע משתמשים</div>
-            </div>
-            <div>
-              <div className="lp-stat-number">8</div>
-              <div className="lp-stat-label">כלי AI במקום אחד</div>
-            </div>
-            <div>
-              <div className="lp-stat-number">₪99</div>
-              <div className="lp-stat-label">חד פעמי — בלי מנוי</div>
-            </div>
-          </div>
-        </section>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-[clamp(42px,5.5vw,76px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[900px] mx-auto mb-6"
+          >
+            הדמיית שיפוץ.{" "}
+            <span className="bg-gradient-to-l from-[#4580f7] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+              תוך שניות.
+            </span>
+          </motion.h1>
 
-        {/* FEATURES */}
-        <section className="lp-features" id="features">
-          <div className="lp-section-header">
-            <h2>הכלים שישנו לך את השיפוץ</h2>
-            <p>כל מה שצריך כדי לתכנן, לדמיין ולחסוך — במקום אחד</p>
-          </div>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-[20px] text-white/50 max-w-[600px] mx-auto mb-10 leading-relaxed"
+          >
+            העלו תמונה של החדר, קבלו הדמיה ריאליסטית של השיפוץ, כתב כמויות מפורט, וניתוח הצעות מחיר — הכל אוטומטי עם AI.
+          </motion.p>
 
-          {/* Feature 1: Visualize - Before/After */}
-          <div className="lp-feature">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">הדמיות AI</div>
-              <h3>העלה תמונה. קבל הדמיית שיפוץ תוך שניות.</h3>
-              <p>ה-AI מנתח את החדר שלך ומייצר הדמיה ריאליסטית של איך הוא ייראה אחרי השיפוץ. בחר סגנון, שנה צבעים, הוסף רהיטים — בלחיצה.</p>
-              <a href="/visualize" className="lp-btn lp-btn-primary lp-btn-sm">נסו עכשיו ←</a>
-            </div>
-            <div className="lp-before-after">
-              <div className="lp-ba-item">
-                <img src="/examples/kitchen-before.jpg" alt="לפני השיפוץ" />
-                <span className="lp-before-after-label before">לפני</span>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="flex gap-4 justify-center flex-wrap"
+          >
+            <Link href="/" className="bg-[#4580f7] hover:bg-[#3570e0] text-white text-[16px] font-bold px-8 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(69,128,247,0.35)]">
+              התחל בחינם — בלי כרטיס אשראי ←
+            </Link>
+            <a href="#how" className="border border-white/15 hover:border-white/30 text-white text-[16px] font-bold px-8 py-3.5 rounded-xl transition-all hover:bg-white/[0.03]">
+              איך זה עובד?
+            </a>
+          </motion.div>
+        </motion.div>
+
+        {/* Hero Screenshot */}
+        <motion.div
+          initial={{ opacity: 0, y: 60, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1, delay: 0.5, ease: [0.25, 0.1, 0, 1] }}
+          className="relative max-w-[1000px] mx-auto mt-16 px-6"
+        >
+          <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_40px_80px_rgba(0,0,0,0.5),0_0_60px_rgba(69,128,247,0.06)]">
+            <Image src="/ads/screenshot-home-landscape.png" alt="ShiputzAI" width={1200} height={700} className="w-full h-auto" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050917] via-transparent to-transparent" />
+          </div>
+          {/* Glow behind screenshot */}
+          <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[80%] h-[200px] rounded-full blur-[80px]"
+            style={{ background: "radial-gradient(ellipse, rgba(69,128,247,0.15) 0%, transparent 70%)" }} />
+        </motion.div>
+      </section>
+
+      {/* ===== STATS ===== */}
+      <section className="relative border-y border-white/[0.04] bg-[#0d1117]">
+        <div className="max-w-[1100px] mx-auto px-6 py-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { num: "63%", label: "מהיר מעיצוב ידני" },
+            { num: "127+", label: "בעלי מקצוע משתמשים" },
+            { num: "8", label: "כלי AI במקום אחד" },
+            { num: "₪99", label: "חד פעמי — בלי מנוי" },
+          ].map((stat, i) => (
+            <AnimatedSection key={i} delay={i * 0.1}>
+              <div className="text-[44px] font-black bg-gradient-to-l from-[#4580f7] to-[#a78bfa] bg-clip-text text-transparent">
+                {stat.num}
               </div>
-              <div className="lp-ba-item">
-                <img src="/examples/kitchen-after.jpg" alt="אחרי השיפוץ" />
-                <span className="lp-before-after-label after">אחרי</span>
-              </div>
-            </div>
-          </div>
+              <div className="text-[14px] text-white/40 mt-1 font-medium">{stat.label}</div>
+            </AnimatedSection>
+          ))}
+        </div>
+      </section>
 
-          {/* Feature 2: Style Matcher */}
-          <div className="lp-feature reverse">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">STYLE MATCHER</div>
-              <h3>זיהוי סגנון + רשימת קניות מוכנה</h3>
-              <p>העלו תמונה של חדר שאהבתם — ה-AI מזהה את סגנון העיצוב, מפרט את כל המוצרים ומציע לינקים ישירים לקנייה בישראל. כולל מפת חומרים וטקסטורות.</p>
-              <a href="/style-match" className="lp-btn lp-btn-primary lp-btn-sm">נסו עכשיו ←</a>
-            </div>
-            <div className="lp-feature-visual">
-              <img src="/images/ai-vision/style-match-showcase.jpg" alt="Style Matcher" />
-            </div>
-          </div>
+      {/* ===== FEATURES ===== */}
+      <section id="features" className="py-[120px] px-6">
+        <AnimatedSection className="text-center mb-20">
+          <h2 className="text-[clamp(32px,4vw,48px)] font-black tracking-[-0.02em] mb-4">הכלים שישנו לך את השיפוץ</h2>
+          <p className="text-[18px] text-white/40">כל מה שצריך כדי לתכנן, לדמיין ולחסוך — במקום אחד</p>
+        </AnimatedSection>
 
-          {/* Feature 3: Floorplan */}
-          <div className="lp-feature">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">תוכנית קומה חכמה</div>
-              <h3>מתוכנית אדריכלית להדמיה תלת-ממדית</h3>
-              <p>העלו תוכנית קומה — ה-AI ממיר אותה להדמיה ריאליסטית של הדירה. תראו איך הסלון, המטבח וחדרי השינה ייראו במציאות, עוד לפני שהתחלתם.</p>
-              <a href="/floorplan" className="lp-btn lp-btn-primary lp-btn-sm">נסו עכשיו ←</a>
-            </div>
-            <div className="lp-feature-visual">
-              <img src="/images/ai-vision/floorplan.jpg" alt="תוכנית קומה חכמה" />
-            </div>
-          </div>
-
-          {/* Feature 4: Video Tour */}
-          <div className="lp-feature reverse">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">סיור וידאו AI</div>
-              <h3>הליכה וירטואלית בדירה החדשה</h3>
-              <p>סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן — כולם רואים את אותה חזון.</p>
-              <a href="/floorplan?mode=video" className="lp-btn lp-btn-primary lp-btn-sm">צרו סרטון ←</a>
-            </div>
-            <div className="lp-feature-visual">
-              <img src="/images/ai-vision/video-tour-thumb.jpg" alt="סיור וידאו AI" />
-            </div>
-          </div>
-
-          {/* Feature 5: Shop the Look */}
-          <div className="lp-feature">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">SHOP THE LOOK</div>
-              <h3>ראית עיצוב שאהבת? קנה אותו.</h3>
-              <p>העלו תמונת השראה וה-AI יזהה כל מוצר — רהיטים, תאורה, אביזרים — עם קישורים ישירים לרכישה בחנויות ישראליות.</p>
-              <a href="/shop-the-look" className="lp-btn lp-btn-primary lp-btn-sm">נסו עכשיו ←</a>
-            </div>
-            <div className="lp-feature-visual">
-              <img src="/images/ai-vision/shop-look.jpg" alt="Shop the Look" />
-            </div>
-          </div>
-
-          {/* Feature 6: BOQ */}
-          <div className="lp-feature reverse">
-            <div className="lp-feature-text">
-              <div className="lp-feature-tag">כתב כמויות</div>
-              <h3>כתב כמויות אוטומטי מתמונה אחת</h3>
-              <p>צלמו את החדר, וה-AI ימפה כל פריט: ריצוף, צבע, חשמל, אינסטלציה. תקבלו כתב כמויות מפורט עם מחירי שוק מעודכנים.</p>
-              <a href="/dashboard/bill-of-quantities" className="lp-btn lp-btn-primary lp-btn-sm">נסו עכשיו ←</a>
-            </div>
-            <div className="lp-feature-visual">
-              <img src="/features/feature-budget.png" alt="כתב כמויות" />
-            </div>
-          </div>
-        </section>
-
-        {/* LOGOS */}
-        <section className="lp-logos">
-          <p>קישורים ישירים לחנויות המובילות</p>
-          <div className="lp-logos-row">
-            <img src="/logos/ikea.png" alt="IKEA" />
-            <img src="/logos/homecenter.png" alt="Home Center" />
-            <img src="/logos/ace.png" alt="ACE" />
-            <img src="/logos/foxhome.png" alt="Fox Home" />
-            <img src="/logos/aminach.png" alt="עמינח" />
-            <img src="/logos/tambur.png" alt="טמבור" />
-          </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section className="lp-how" id="how">
-          <div className="lp-section-header">
-            <h2>איך זה עובד?</h2>
-            <p>שלושה צעדים פשוטים — מתמונה לתוכנית שיפוץ מלאה</p>
-          </div>
-          <div className="lp-steps">
-            <div className="lp-step">
-              <div className="lp-step-number">1</div>
-              <h4>העלו תמונה</h4>
-              <p>צלמו את החדר או העלו תמונה קיימת. ה-AI מזהה אוטומטית את המרחב.</p>
-            </div>
-            <div className="lp-step">
-              <div className="lp-step-number">2</div>
-              <h4>בחרו מה לעשות</h4>
-              <p>הדמיית שיפוץ? כתב כמויות? ניתוח מחיר? בחרו את הכלי שמתאים לכם.</p>
-            </div>
-            <div className="lp-step">
-              <div className="lp-step-number">3</div>
-              <h4>קבלו תוצאה מיידית</h4>
-              <p>תוך שניות תקבלו תוצאה מקצועית לשיתוף עם הקבלן, המעצב או בן/בת הזוג.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* MORE FEATURES GRID */}
-        <section style={{ padding: '120px 32px' }}>
-          <div className="lp-section-header">
-            <h2>ועוד כלים בארגז</h2>
-          </div>
-          <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
-            {[
-              { title: 'ניתוח הצעות מחיר', desc: 'העלו הצעת מחיר מקבלן — ה-AI ישווה מול מחירי שוק ויגיד אם המחיר הוגן.', img: '/features/feature-receipt.png' },
-              { title: 'סריקת קבלות', desc: 'צלמו קבלה וקבלו סכום, תאריך וקטגוריה אוטומטית.', img: '/features/feature-receipt.png' },
-              { title: 'עוזר AI לשיפוץ', desc: 'שאלו כל שאלה על השיפוץ וקבלו תשובה מיידית מעוזר מומחה.', img: '/images/ai-vision/chat-support-thumb.jpg' },
-            ].map((f, i) => (
-              <div key={i} style={{
-                background: 'var(--dark-card)', borderRadius: 'var(--radius)',
-                border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden',
-                transition: 'border-color 0.3s',
-              }}>
-                <img src={f.img} alt={f.title} style={{ width: '100%', height: 200, objectFit: 'cover' }} />
-                <div style={{ padding: '24px' }}>
-                  <h4 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{f.title}</h4>
-                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>{f.desc}</p>
+        {/* Feature 1: Before/After */}
+        <div className="max-w-[1100px] mx-auto mb-32">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <AnimatedSection>
+              <div className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#4580f7] mb-4">הדמיות AI</div>
+              <h3 className="text-[36px] font-extrabold leading-[1.15] tracking-[-0.01em] mb-4">העלה תמונה. קבל הדמיית שיפוץ תוך שניות.</h3>
+              <p className="text-[17px] text-white/50 leading-relaxed mb-6">ה-AI מנתח את החדר שלך ומייצר הדמיה ריאליסטית של איך הוא ייראה אחרי השיפוץ. בחר סגנון, שנה צבעים, הוסף רהיטים — בלחיצה.</p>
+              <Link href="/visualize" className="inline-flex items-center gap-2 bg-[#4580f7] hover:bg-[#3570e0] text-white text-[14px] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5">
+                נסו עכשיו ←
+              </Link>
+            </AnimatedSection>
+            <AnimatedSection delay={0.2}>
+              <div className="grid grid-cols-2 gap-[2px] rounded-2xl overflow-hidden border border-white/[0.06]">
+                <div className="relative">
+                  <Image src="/examples/kitchen-before.jpg" alt="לפני" width={400} height={300} className="w-full h-full object-cover" />
+                  <span className="absolute bottom-2 right-2 text-[11px] font-bold bg-black/70 text-white px-2.5 py-1 rounded-md uppercase tracking-wider">לפני</span>
+                </div>
+                <div className="relative">
+                  <Image src="/examples/kitchen-after.jpg" alt="אחרי" width={400} height={300} className="w-full h-full object-cover" />
+                  <span className="absolute bottom-2 left-2 text-[11px] font-bold bg-[#4580f7]/90 text-white px-2.5 py-1 rounded-md uppercase tracking-wider">אחרי</span>
                 </div>
               </div>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 2: Style Matcher */}
+        <div className="max-w-[1100px] mx-auto mb-32">
+          <div className="grid md:grid-cols-2 gap-16 items-center" dir="ltr">
+            <AnimatedSection delay={0.2}>
+              <FeatureImage src="/images/ai-vision/style-match-showcase.jpg" alt="Style Matcher" />
+            </AnimatedSection>
+            <AnimatedSection className="text-right" dir="rtl">
+              <div className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#a78bfa] mb-4">STYLE MATCHER</div>
+              <h3 className="text-[36px] font-extrabold leading-[1.15] tracking-[-0.01em] mb-4">זיהוי סגנון + רשימת קניות מוכנה</h3>
+              <p className="text-[17px] text-white/50 leading-relaxed mb-6">העלו תמונה של חדר שאהבתם — ה-AI מזהה את סגנון העיצוב, מפרט את כל המוצרים ומציע לינקים ישירים לקנייה בישראל.</p>
+              <Link href="/style-match" className="inline-flex items-center gap-2 bg-[#a78bfa] hover:bg-[#9775e8] text-white text-[14px] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5">
+                נסו עכשיו ←
+              </Link>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 3: Floorplan */}
+        <div className="max-w-[1100px] mx-auto mb-32">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <AnimatedSection>
+              <div className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#34d399] mb-4">תוכנית קומה חכמה</div>
+              <h3 className="text-[36px] font-extrabold leading-[1.15] tracking-[-0.01em] mb-4">מתוכנית אדריכלית להדמיה תלת-ממדית</h3>
+              <p className="text-[17px] text-white/50 leading-relaxed mb-6">העלו תוכנית קומה — ה-AI ממיר אותה להדמיה ריאליסטית של הדירה. תראו איך הסלון, המטבח וחדרי השינה ייראו במציאות.</p>
+              <Link href="/floorplan" className="inline-flex items-center gap-2 bg-[#34d399] hover:bg-[#2bc48d] text-[#050917] text-[14px] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5">
+                נסו עכשיו ←
+              </Link>
+            </AnimatedSection>
+            <AnimatedSection delay={0.2}>
+              <FeatureImage src="/images/ai-vision/floorplan.jpg" alt="תוכנית קומה" />
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 4: Video Tour */}
+        <div className="max-w-[1100px] mx-auto mb-32">
+          <div className="grid md:grid-cols-2 gap-16 items-center" dir="ltr">
+            <AnimatedSection delay={0.2}>
+              <FeatureImage src="/images/ai-vision/video-tour-thumb.jpg" alt="סיור וידאו" />
+            </AnimatedSection>
+            <AnimatedSection className="text-right" dir="rtl">
+              <div className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#f472b6] mb-4">סיור וידאו AI</div>
+              <h3 className="text-[36px] font-extrabold leading-[1.15] tracking-[-0.01em] mb-4">הליכה וירטואלית בדירה החדשה</h3>
+              <p className="text-[17px] text-white/50 leading-relaxed mb-6">סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן.</p>
+              <Link href="/floorplan?mode=video" className="inline-flex items-center gap-2 bg-[#f472b6] hover:bg-[#e860a8] text-[#050917] text-[14px] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5">
+                צרו סרטון ←
+              </Link>
+            </AnimatedSection>
+          </div>
+        </div>
+
+        {/* Feature 5: Shop the Look */}
+        <div className="max-w-[1100px] mx-auto mb-20">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <AnimatedSection>
+              <div className="text-[13px] font-bold uppercase tracking-[1.5px] text-[#fbbf24] mb-4">SHOP THE LOOK</div>
+              <h3 className="text-[36px] font-extrabold leading-[1.15] tracking-[-0.01em] mb-4">ראית עיצוב שאהבת? קנה אותו.</h3>
+              <p className="text-[17px] text-white/50 leading-relaxed mb-6">העלו תמונת השראה וה-AI יזהה כל מוצר — רהיטים, תאורה, אביזרים — עם קישורים ישירים לרכישה.</p>
+              <Link href="/shop-the-look" className="inline-flex items-center gap-2 bg-[#fbbf24] hover:bg-[#f0b420] text-[#050917] text-[14px] font-bold px-6 py-3 rounded-xl transition-all hover:-translate-y-0.5">
+                נסו עכשיו ←
+              </Link>
+            </AnimatedSection>
+            <AnimatedSection delay={0.2}>
+              <FeatureImage src="/images/ai-vision/shop-look.jpg" alt="Shop the Look" />
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== MORE TOOLS GRID ===== */}
+      <section className="py-[100px] px-6 border-t border-white/[0.04] bg-[#0d1117]">
+        <AnimatedSection className="text-center mb-16">
+          <h2 className="text-[36px] font-black tracking-[-0.02em] mb-4">ועוד כלים בארגז</h2>
+        </AnimatedSection>
+        <div className="max-w-[1100px] mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { title: "כתב כמויות", desc: "צלמו את החדר וקבלו פירוט מלא — ריצוף, צבע, חשמל, אינסטלציה. עם מחירי שוק.", img: "/features/feature-budget.png", color: "#4580f7" },
+            { title: "ניתוח הצעות מחיר", desc: "העלו הצעת מחיר מקבלן — ה-AI ישווה מול מחירי שוק ויגיד אם המחיר הוגן.", img: "/features/feature-receipt.png", color: "#a78bfa" },
+            { title: "עוזר AI לשיפוץ", desc: "שאלו כל שאלה על השיפוץ וקבלו תשובה מיידית מעוזר מומחה.", img: "/images/ai-vision/chat-support-thumb.jpg", color: "#34d399" },
+          ].map((f, i) => (
+            <AnimatedSection key={i} delay={i * 0.15}>
+              <div className="group rounded-2xl overflow-hidden border border-white/[0.06] bg-[#050917] transition-all hover:border-white/[0.12] hover:-translate-y-1">
+                <div className="h-[200px] overflow-hidden">
+                  <Image src={f.img} alt={f.title} width={400} height={200} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+                <div className="p-6">
+                  <h4 className="text-[18px] font-bold mb-2">{f.title}</h4>
+                  <p className="text-[14px] text-white/45 leading-relaxed">{f.desc}</p>
+                </div>
+                <div className="h-[2px] w-full" style={{ background: `linear-gradient(to left, ${f.color}, transparent)` }} />
+              </div>
+            </AnimatedSection>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== LOGOS ===== */}
+      <section className="py-16 px-6 border-t border-white/[0.04]">
+        <AnimatedSection>
+          <p className="text-center text-[12px] uppercase tracking-[3px] text-white/25 font-semibold mb-8">
+            קישורים ישירים לחנויות המובילות
+          </p>
+          <div className="flex items-center justify-center gap-10 flex-wrap opacity-30">
+            {["ikea", "homecenter", "ace", "foxhome", "aminach", "tambur"].map(logo => (
+              <Image key={logo} src={`/logos/${logo}.png`} alt={logo} width={80} height={28} className="h-7 w-auto brightness-0 invert" />
             ))}
           </div>
-        </section>
+        </AnimatedSection>
+      </section>
 
-        {/* TESTIMONIALS */}
-        <section className="lp-testimonials" id="testimonials">
-          <div className="lp-section-header">
-            <h2>מה אומרים עלינו</h2>
-            <p>בעלי מקצוע ולקוחות שכבר משתמשים</p>
-          </div>
-          <div className="lp-testimonials-grid">
-            <div className="lp-testimonial">
-              <div className="lp-testimonial-stars">★★★★★</div>
-              <div className="lp-testimonial-text">&ldquo;חסך לי שעות של עבודה. במקום לשבת עם אקסל ולחשב כמויות, פשוט צילמתי את הדירה וקיבלתי כתב כמויות מפורט תוך דקה.&rdquo;</div>
-              <div className="lp-testimonial-author">
-                <div className="lp-testimonial-avatar">ד</div>
-                <div>
-                  <div className="lp-testimonial-name">דניאל כ.</div>
-                  <div className="lp-testimonial-role">קבלן שיפוצים, תל אביב</div>
+      {/* ===== HOW IT WORKS ===== */}
+      <section id="how" className="py-[120px] px-6 bg-[#0d1117] border-t border-white/[0.04]">
+        <AnimatedSection className="text-center mb-16">
+          <h2 className="text-[clamp(32px,4vw,48px)] font-black tracking-[-0.02em] mb-4">איך זה עובד?</h2>
+          <p className="text-[18px] text-white/40">שלושה צעדים — מתמונה לתוכנית שיפוץ מלאה</p>
+        </AnimatedSection>
+        <div className="max-w-[1000px] mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { num: "1", title: "העלו תמונה", desc: "צלמו את החדר או העלו תמונה קיימת. ה-AI מזהה אוטומטית את המרחב." },
+            { num: "2", title: "בחרו כלי", desc: "הדמיית שיפוץ? כתב כמויות? ניתוח מחיר? בחרו את הכלי שמתאים." },
+            { num: "3", title: "קבלו תוצאה", desc: "תוך שניות תקבלו תוצאה מקצועית לשיתוף עם הקבלן, המעצב או בן/בת הזוג." },
+          ].map((step, i) => (
+            <AnimatedSection key={i} delay={i * 0.15}>
+              <div className="relative rounded-2xl p-8 border border-white/[0.06] bg-white/[0.02] text-center transition-all hover:-translate-y-1 hover:border-[#4580f7]/20 group">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4580f7] to-[#7c3aed] text-white text-[22px] font-black flex items-center justify-center mx-auto mb-6 shadow-[0_8px_24px_rgba(69,128,247,0.25)] transition-transform group-hover:scale-110">
+                  {step.num}
                 </div>
+                <h4 className="text-[20px] font-bold mb-3">{step.title}</h4>
+                <p className="text-[15px] text-white/45 leading-relaxed">{step.desc}</p>
               </div>
-            </div>
-            <div className="lp-testimonial">
-              <div className="lp-testimonial-stars">★★★★★</div>
-              <div className="lp-testimonial-text">&ldquo;הלקוחות שלי מתים על ההדמיות. במקום להסביר במילים איך החדר ייראה, אני מראה להם תמונה ריאליסטית. סוגר עסקאות יותר מהר.&rdquo;</div>
-              <div className="lp-testimonial-author">
-                <div className="lp-testimonial-avatar">ש</div>
-                <div>
-                  <div className="lp-testimonial-name">שירה ד.</div>
-                  <div className="lp-testimonial-role">מעצבת פנים</div>
-                </div>
-              </div>
-            </div>
-            <div className="lp-testimonial">
-              <div className="lp-testimonial-stars">★★★★★</div>
-              <div className="lp-testimonial-text">&ldquo;קיבלתי הצעת מחיר מקבלן והרגשתי שמשהו לא בסדר. העליתי ל-ShiputzAI וזה הראה לי שהמחיר מנופח ב-40%. חסך לי אלפי שקלים.&rdquo;</div>
-              <div className="lp-testimonial-author">
-                <div className="lp-testimonial-avatar">א</div>
-                <div>
-                  <div className="lp-testimonial-name">אורן מ.</div>
-                  <div className="lp-testimonial-role">בעל דירה, חיפה</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </AnimatedSection>
+          ))}
+        </div>
+      </section>
 
-        {/* PRICING */}
-        <section className="lp-pricing" id="pricing">
-          <div className="lp-section-header">
-            <h2>מחירים פשוטים</h2>
-            <p>בלי מנויים. בלי הפתעות. שלם על מה שאתה צריך.</p>
-          </div>
-          <div className="lp-pricing-grid">
-            <div className="lp-price-card">
-              <h4>חינם</h4>
-              <div className="lp-price">₪0</div>
-              <div className="lp-period">לנצח</div>
-              <ul>
-                <li>הדמיית שיפוץ אחת</li>
-                <li>כתב כמויות אחד</li>
-                <li>ניתוח הצעת מחיר אחד</li>
-                <li>תמיכה בצ׳אט</li>
+      {/* ===== TESTIMONIALS ===== */}
+      <section className="py-[120px] px-6">
+        <AnimatedSection className="text-center mb-16">
+          <h2 className="text-[clamp(32px,4vw,48px)] font-black tracking-[-0.02em] mb-4">מה אומרים עלינו</h2>
+          <p className="text-[18px] text-white/40">בעלי מקצוע ולקוחות שכבר משתמשים</p>
+        </AnimatedSection>
+        <div className="max-w-[1100px] mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { text: "חסך לי שעות של עבודה. במקום לשבת עם אקסל ולחשב כמויות, פשוט צילמתי את הדירה וקיבלתי כתב כמויות מפורט תוך דקה.", name: "דניאל כ.", role: "קבלן שיפוצים, תל אביב", initial: "ד" },
+            { text: "הלקוחות שלי מתים על ההדמיות. במקום להסביר במילים איך החדר ייראה, אני מראה להם תמונה ריאליסטית. סוגר עסקאות יותר מהר.", name: "שירה ד.", role: "מעצבת פנים", initial: "ש" },
+            { text: "קיבלתי הצעת מחיר מקבלן והרגשתי שמשהו לא בסדר. העליתי ל-ShiputzAI וזה הראה לי שהמחיר מנופח ב-40%. חסך לי אלפי שקלים.", name: "אורן מ.", role: "בעל דירה, חיפה", initial: "א" },
+          ].map((t, i) => (
+            <AnimatedSection key={i} delay={i * 0.15}>
+              <div className="rounded-2xl p-8 border border-white/[0.06] bg-[#0d1117] transition-all hover:border-[#4580f7]/15">
+                <div className="text-[#fbbf24] text-[18px] mb-5 tracking-wider">★★★★★</div>
+                <p className="text-[15px] text-white/65 leading-[1.8] mb-6 italic">&ldquo;{t.text}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#4580f7] to-[#7c3aed] flex items-center justify-center font-bold text-[17px]">
+                    {t.initial}
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-bold">{t.name}</div>
+                    <div className="text-[13px] text-white/35">{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            </AnimatedSection>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== PRICING ===== */}
+      <section id="pricing" className="py-[120px] px-6 bg-[#0d1117] border-t border-white/[0.04]">
+        <AnimatedSection className="text-center mb-16">
+          <h2 className="text-[clamp(32px,4vw,48px)] font-black tracking-[-0.02em] mb-4">מחירים פשוטים</h2>
+          <p className="text-[18px] text-white/40">בלי מנויים. בלי הפתעות. שלם על מה שאתה צריך.</p>
+        </AnimatedSection>
+        <div className="max-w-[800px] mx-auto grid md:grid-cols-2 gap-6">
+          {/* Free */}
+          <AnimatedSection>
+            <div className="rounded-2xl p-10 border border-white/[0.06] bg-white/[0.02] h-full flex flex-col">
+              <h4 className="text-[22px] font-bold mb-2">חינם</h4>
+              <div className="text-[52px] font-black mb-1">₪0</div>
+              <div className="text-[14px] text-white/35 mb-8">לנצח</div>
+              <ul className="flex-1 mb-8">
+                {["הדמיית שיפוץ אחת", "כתב כמויות אחד", "ניתוח הצעת מחיר אחד", "תמיכה בצ׳אט"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 py-3 text-[15px] text-white/60 border-b border-white/[0.04] last:border-none">
+                    <span className="text-[#4580f7] font-bold">✓</span> {item}
+                  </li>
+                ))}
               </ul>
-              <a href="/" className="lp-btn lp-btn-outline" style={{width:'100%'}}>התחל בחינם</a>
+              <Link href="/" className="w-full text-center border border-white/15 hover:border-white/30 text-white text-[15px] font-bold px-6 py-3.5 rounded-xl transition-all hover:bg-white/[0.03]">
+                התחל בחינם
+              </Link>
             </div>
-            <div className="lp-price-card popular">
-              <h4>Pro</h4>
-              <div className="lp-price">₪99 <span>חד פעמי</span></div>
-              <div className="lp-period">4 קרדיטים לכל הכלים</div>
-              <ul>
-                <li>4 הדמיות שיפוץ</li>
-                <li>כתב כמויות ללא הגבלה</li>
-                <li>ניתוח הצעות מחיר</li>
-                <li>Shop the Look</li>
-                <li>סריקת קבלות</li>
-                <li>סיור וידאו AI</li>
-                <li>תמיכה בעדיפות</li>
+          </AnimatedSection>
+
+          {/* Pro */}
+          <AnimatedSection delay={0.15}>
+            <div className="relative rounded-2xl p-10 border-2 border-[#4580f7] bg-[#4580f7]/[0.04] h-full flex flex-col">
+              <div className="absolute -top-3.5 right-6 bg-gradient-to-l from-[#4580f7] to-[#7c3aed] text-white text-[12px] font-bold px-4 py-1.5 rounded-full">
+                הכי פופולרי
+              </div>
+              <h4 className="text-[22px] font-bold mb-2">Pro</h4>
+              <div className="text-[52px] font-black mb-1">₪99 <span className="text-[16px] font-medium text-white/40">חד פעמי</span></div>
+              <div className="text-[14px] text-white/35 mb-8">4 קרדיטים לכל הכלים</div>
+              <ul className="flex-1 mb-8">
+                {["4 הדמיות שיפוץ", "כתב כמויות ללא הגבלה", "ניתוח הצעות מחיר", "Shop the Look", "סריקת קבלות", "סיור וידאו AI", "תמיכה בעדיפות"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 py-3 text-[15px] text-white/60 border-b border-white/[0.04] last:border-none">
+                    <span className="text-[#4580f7] font-bold">✓</span> {item}
+                  </li>
+                ))}
               </ul>
-              <a href="/" className="lp-btn lp-btn-primary" style={{width:'100%'}}>שדרג ל-Pro ←</a>
+              <Link href="/" className="w-full text-center bg-[#4580f7] hover:bg-[#3570e0] text-white text-[15px] font-bold px-6 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(69,128,247,0.3)]">
+                שדרג ל-Pro ←
+              </Link>
             </div>
-          </div>
-        </section>
+          </AnimatedSection>
+        </div>
+      </section>
 
-        {/* CTA */}
-        <section className="lp-cta">
-          <h2>מוכנים לשפץ חכם?</h2>
-          <p>הצטרפו למאות בעלי מקצוע ובעלי דירות שכבר משתמשים ב-ShiputzAI</p>
-          <a href="/" className="lp-btn lp-btn-primary" style={{fontSize:18,padding:'16px 44px'}}>התחל בחינם — בלי כרטיס אשראי ←</a>
-        </section>
+      {/* ===== CTA ===== */}
+      <section className="relative py-[120px] px-6 text-center overflow-hidden">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] rounded-full blur-[100px]"
+          style={{ background: "radial-gradient(ellipse, rgba(69,128,247,0.1) 0%, transparent 70%)" }} />
+        <AnimatedSection className="relative z-10">
+          <h2 className="text-[clamp(36px,4.5vw,52px)] font-black tracking-[-0.02em] mb-5">מוכנים לשפץ חכם?</h2>
+          <p className="text-[18px] text-white/40 mb-10 max-w-[500px] mx-auto">
+            הצטרפו למאות בעלי מקצוע ובעלי דירות שכבר משתמשים ב-ShiputzAI
+          </p>
+          <Link href="/" className="bg-[#4580f7] hover:bg-[#3570e0] text-white text-[18px] font-bold px-12 py-4 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(69,128,247,0.35)]">
+            התחל בחינם — בלי כרטיס אשראי ←
+          </Link>
+        </AnimatedSection>
+      </section>
 
-        {/* FOOTER */}
-        <footer className="lp-footer">
-          <p>© 2026 ShiputzAI. כל הזכויות שמורות.</p>
-        </footer>
-      </div>
-    </>
+      {/* ===== FOOTER ===== */}
+      <footer className="py-12 px-6 border-t border-white/[0.04] text-center text-[14px] text-white/25">
+        © 2026 ShiputzAI. כל הזכויות שמורות.
+      </footer>
+    </div>
   );
 }

@@ -89,6 +89,22 @@ export async function POST(request: NextRequest) {
     }
 
     const floorplan = JSON.parse(text);
+    
+    // Normalize: ensure walls is always an array
+    if (!Array.isArray(floorplan.walls)) {
+      console.error('Gemini returned non-array walls:', typeof floorplan.walls, JSON.stringify(floorplan).slice(0, 500));
+      floorplan.walls = [];
+    }
+    if (!Array.isArray(floorplan.rooms)) floorplan.rooms = [];
+    if (!Array.isArray(floorplan.doors)) floorplan.doors = [];
+    if (!Array.isArray(floorplan.windows)) floorplan.windows = [];
+    
+    // Validate wall format - each wall needs start/end as [x,y]
+    floorplan.walls = floorplan.walls.filter((w: any) => {
+      return Array.isArray(w?.start) && w.start.length >= 2 && 
+             Array.isArray(w?.end) && w.end.length >= 2;
+    });
+    
     const sceneGraph = floorplanToPascalScene(floorplan);
 
     return NextResponse.json({ 

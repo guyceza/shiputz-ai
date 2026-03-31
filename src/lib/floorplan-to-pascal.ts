@@ -131,9 +131,10 @@ export function floorplanToPascalScene(data: FloorplanData) {
   const levelId = genId('level')
 
   const wallIds: string[] = []
+  const walls = Array.isArray(data.walls) ? data.walls : []
 
   // Create walls
-  for (const wall of data.walls) {
+  for (const wall of walls) {
     const wallId = genId('wall')
     wallIds.push(wallId)
     nodes[wallId] = {
@@ -150,11 +151,11 @@ export function floorplanToPascalScene(data: FloorplanData) {
   // Create doors — position is [localX, height/2, 0] in wall-local space
   if (data.doors) {
     for (const door of data.doors) {
-      const nearest = findNearestWall(door.position, data.walls)
+      const nearest = findNearestWall(door.position, walls)
       if (!nearest) continue
 
       const wallId = wallIds[nearest.wallIdx]
-      const w = data.walls[nearest.wallIdx]
+      const w = walls[nearest.wallIdx]
       const wallAngle = Math.atan2(w.end[1] - w.start[1], w.end[0] - w.start[0])
       const doorWidth = door.width || 0.9
       const doorHeight = 2.1
@@ -191,11 +192,11 @@ export function floorplanToPascalScene(data: FloorplanData) {
   // Create windows — position is [localX, sillHeight + height/2, 0]
   if (data.windows) {
     for (const win of data.windows) {
-      const nearest = findNearestWall(win.position, data.walls)
+      const nearest = findNearestWall(win.position, walls)
       if (!nearest) continue
 
       const wallId = wallIds[nearest.wallIdx]
-      const w = data.walls[nearest.wallIdx]
+      const w = walls[nearest.wallIdx]
       const winWidth = win.width || 1.2
       const winHeight = 1.2
       const sillHeight = 0.9

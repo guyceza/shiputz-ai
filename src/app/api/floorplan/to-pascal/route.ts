@@ -88,22 +88,86 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No analysis result' }, { status: 500 });
     }
 
-    const floorplan = JSON.parse(text);
+    let floorplan = JSON.parse(text);
     
-    // Normalize: ensure walls is always an array
-    if (!Array.isArray(floorplan.walls)) {
-      console.error('Gemini returned non-array walls:', typeof floorplan.walls, JSON.stringify(floorplan).slice(0, 500));
-      floorplan.walls = [];
+    // Gemini sometimes returns [{...}] instead of {...}
+    if (Array.isArray(floorplan)) {
+      floorplan = floorplan[0] || {};
     }
+    
+    // Normalize: ensure arrays
+    if (!Array.isArray(floorplan.walls)) floorplan.walls = [];
     if (!Array.isArray(floorplan.rooms)) floorplan.rooms = [];
     if (!Array.isArray(floorplan.doors)) floorplan.doors = [];
     if (!Array.isArray(floorplan.windows)) floorplan.windows = [];
     
-    // Validate wall format - each wall needs start/end as [x,y]
+    // Validate wall format
     floorplan.walls = floorplan.walls.filter((w: any) => {
       return Array.isArray(w?.start) && w.start.length >= 2 && 
              Array.isArray(w?.end) && w.end.length >= 2;
     });
+    
+    // Auto-detect if coordinates are in cm/pixels (values > 50 suggest non-meter units)
+    // and convert to meters
+    const allCoords = floorplan.walls.flatMap((w: any) => [...w.start, ...w.end]);
+    const maxCoord = Math.max(...allCoords, 0);
+    
+    if (maxCoord > 50) {
+      // Likely centimeters or pixels — determine scale
+      // Use dimensions hint if available, otherwise assume cm
+      const dims = floorplan.dimensions;
+      let scale: number;
+      if (dims?.width && dims.width < 50) {
+        // dimensions are in meters, coords are in something else
+        scale = dims.width / maxCoord;
+      } else {
+        // Assume centimeters → meters
+        scale = 0.01;
+      }
+      
+      console.log(`Auto-scaling coordinates: maxCoord=${maxCoord}, scale=${scale}`);
+      
+      // Scale walls
+      for (const w of floorplan.walls) {
+        w.start = [w.start[0] * scale, w.start[1] * scale];
+        w.end = [w.end[0] * scale, w.end[1] * scale];
+        if (w.thickness) w.thickness = w.thickness * scale;
+      }
+      
+      // Scale rooms
+      for (const r of floorplan.rooms) {
+        if (Array.isArray(r.polygon)) {
+          r.polygon = r.polygon.map((p: number[]) => [p[0] * scale, p[1] * scale]);
+        }
+      }
+      
+      // Scale doors
+      for (const d of floorplan.doors) {
+        if (Array.isArray(d.position)) {
+          d.position = [d.position[0] * scale, d.position[1] * scale];
+        }
+        if (d.width) d.width = d.width * scale;
+      }
+      
+      // Scale windows
+      for (const w of floorplan.windows) {
+        if (Array.isArray(w.position)) {
+          w.position = [w.position[0] * scale, w.position[1] * scale];
+        }
+        if (w.width) w.width = w.width * scale;
+      }
+      
+      // Update dimensions
+      if (dims) {
+        if (dims.width > 50) dims.width = dims.width * scale;
+        if (dims.height > 50) dims.height = dims.height * scale;
+      }
+    }
+    
+    // Ensure minimum wall thickness
+    for (const w of floorplan.walls) {
+      if (!w.thickness || w.thickness < 0.05) w.thickness = 0.15;
+    }
     
     const sceneGraph = floorplanToPascalScene(floorplan);
 

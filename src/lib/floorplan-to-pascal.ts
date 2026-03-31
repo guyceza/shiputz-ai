@@ -60,7 +60,7 @@ interface FurnitureItem {
 }
 
 function getFurnitureForRoom(roomType: string): FurnitureItem[] {
-  const t = roomType.replace(/[^a-zא-ת\s]/gi, '').trim()
+  const t = roomType.replace(/[_-]/g, ' ').trim()
 
   // Bedroom / חדר שינה
   if (/bedroom|חדר שינה|חד"ש|master/i.test(t)) return [
@@ -91,7 +91,7 @@ function getFurnitureForRoom(roomType: string): FurnitureItem[] {
   ]
 
   // Living room / סלון
-  if (/living|salon|סלון|מגורים|אורח/i.test(t)) return [
+  if (/living|salon|lounge|סלון|מגורים|אורח/i.test(t)) return [
     { id: 'sofa', name: 'Sofa', category: 'furniture', dimensions: [2.0, 0.8, 0.9] },
     { id: 'coffee-table', name: 'Coffee Table', category: 'furniture', dimensions: [1.0, 0.45, 0.6] },
     { id: 'television', name: 'Television', category: 'appliance', dimensions: [1.2, 0.7, 0.1] },

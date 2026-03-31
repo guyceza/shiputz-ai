@@ -54,22 +54,26 @@ export default function LandingPage() {
       </nav>
 
       {/* ===== HERO ===== */}
-      <section ref={heroRef} className="relative overflow-hidden pt-[140px] pb-[60px]"
+      <section ref={heroRef} className="relative overflow-hidden pt-[140px] pb-[80px]"
         style={{
-          background: "linear-gradient(180deg, #f0f4ff 0%, #e8eeff 30%, #fff 80%)"
+          background: "linear-gradient(160deg, #1a3a8a 0%, #4580f7 35%, #6ba3ff 60%, #a5c8ff 80%, #e8eeff 100%)"
         }}>
-        {/* Decorative gradient orb */}
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(69,128,247,0.12) 0%, rgba(167,139,250,0.06) 40%, transparent 70%)" }} />
+        {/* Decorative shapes */}
+        <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[-300px] right-[-200px] w-[800px] h-[800px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%)" }} />
+          <div className="absolute bottom-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 60%)" }} />
+        </div>
         
         <div className="relative z-10 text-center px-8 max-w-[860px] mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2.5 bg-white/70 border border-[#4580f7]/15 rounded-full px-5 py-2 text-[13px] font-semibold text-[#4580f7] mb-8 shadow-[0_2px_8px_rgba(69,128,247,0.08)]"
+            className="inline-flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full px-5 py-2 text-[13px] font-semibold text-white mb-8 backdrop-blur-sm"
           >
-            <span className="w-2 h-2 rounded-full bg-[#4580f7] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             מופעל בינה מלאכותית
           </motion.div>
 
@@ -77,17 +81,16 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-[clamp(40px,5vw,68px)] font-black text-[#14171f] leading-[1.08] tracking-[-0.03em] mb-6"
+            className="text-[clamp(40px,5vw,68px)] font-black text-white leading-[1.08] tracking-[-0.03em] mb-6"
           >
-            השיפוץ שלך.{" "}
-            <span className="bg-gradient-to-l from-[#4580f7] to-[#7c3aed] bg-clip-text text-transparent">חכם יותר.</span>
+            השיפוץ שלך. חכם יותר.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-[19px] text-[#6d727e] leading-[1.7] max-w-[560px] mx-auto mb-10"
+            className="text-[19px] text-white/80 leading-[1.7] max-w-[560px] mx-auto mb-10"
           >
             העלו תמונה של החדר — קבלו הדמיית שיפוץ, כתב כמויות מפורט, וניתוח הצעות מחיר. הכל אוטומטי עם AI.
           </motion.p>
@@ -99,11 +102,11 @@ export default function LandingPage() {
             className="flex gap-4 justify-center flex-wrap mb-16"
           >
             <Link href="/"
-              className="bg-[#14171f] hover:bg-[#2a2d35] text-white text-[16px] font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+              className="bg-white hover:bg-gray-50 text-[#14171f] text-[16px] font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-0.5 shadow-[0_4px_16px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
               התחל בחינם ←
             </Link>
             <a href="#how"
-              className="bg-white hover:bg-gray-50 text-[#14171f] text-[16px] font-semibold px-8 py-4 rounded-xl border border-[#e0e3e8] transition-all hover:shadow-md">
+              className="bg-white/10 hover:bg-white/20 text-white text-[16px] font-semibold px-8 py-4 rounded-xl border border-white/20 transition-all backdrop-blur-sm">
               איך זה עובד?
             </a>
           </motion.div>
@@ -115,12 +118,12 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mb-16"
           >
-            <p className="text-[12px] uppercase tracking-[2.5px] text-[#6d727e]/60 font-semibold mb-5">
+            <p className="text-[12px] uppercase tracking-[2.5px] text-white/50 font-semibold mb-5">
               קישורים לחנויות המובילות
             </p>
-            <div className="flex items-center justify-center gap-8 flex-wrap opacity-40">
+            <div className="flex items-center justify-center gap-8 flex-wrap">
               {["ikea", "homecenter", "ace", "foxhome", "aminach", "tambur"].map(logo => (
-                <Image key={logo} src={`/logos/${logo}.png`} alt={logo} width={80} height={24} className="h-5 w-auto grayscale" />
+                <Image key={logo} src={`/logos/${logo}.png`} alt={logo} width={80} height={24} className="h-5 w-auto brightness-0 invert opacity-50" />
               ))}
             </div>
           </motion.div>
@@ -136,13 +139,10 @@ export default function LandingPage() {
         >
           <div className="relative rounded-2xl overflow-hidden"
             style={{
-              boxShadow: "0 25px 50px rgba(0,0,0,0.08), 0 8px 20px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04)",
+              boxShadow: "0 30px 60px rgba(0,0,0,0.2), 0 15px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1)",
             }}>
             <Image src="/ads/screenshot-home-landscape.png" alt="ShiputzAI" width={1200} height={700} className="w-full h-auto" priority />
           </div>
-          {/* Soft glow behind */}
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-[70%] h-[100px] rounded-full blur-[60px]"
-            style={{ background: "rgba(69,128,247,0.08)" }} />
         </motion.div>
       </section>
 
@@ -208,7 +208,7 @@ export default function LandingPage() {
         <div className="max-w-[1100px] mx-auto mb-[140px]">
           <div className="grid md:grid-cols-2 gap-20 items-center" dir="ltr">
             <Reveal delay={0.15}>
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+              <div className="rounded-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.12)] border border-black/[0.04] rotate-[-1deg] hover:rotate-0 transition-transform duration-500">
                 <Image src="/images/ai-vision/style-match-showcase.jpg" alt="Style Matcher" width={600} height={400} className="w-full h-auto" />
               </div>
             </Reveal>
@@ -243,7 +243,7 @@ export default function LandingPage() {
               </Link>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+              <div className="rounded-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.12)] border border-black/[0.04] rotate-[1deg] hover:rotate-0 transition-transform duration-500">
                 <Image src="/images/ai-vision/floorplan.jpg" alt="תוכנית קומה" width={600} height={400} className="w-full h-auto" />
               </div>
             </Reveal>
@@ -254,7 +254,7 @@ export default function LandingPage() {
         <div className="max-w-[1100px] mx-auto mb-[140px]">
           <div className="grid md:grid-cols-2 gap-20 items-center" dir="ltr">
             <Reveal delay={0.15}>
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+              <div className="rounded-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.12)] border border-black/[0.04] rotate-[-1deg] hover:rotate-0 transition-transform duration-500">
                 <Image src="/images/ai-vision/video-tour-thumb.jpg" alt="סיור וידאו" width={600} height={400} className="w-full h-auto" />
               </div>
             </Reveal>
@@ -289,7 +289,7 @@ export default function LandingPage() {
               </Link>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-black/[0.04]">
+              <div className="rounded-2xl overflow-hidden shadow-[0_25px_50px_rgba(0,0,0,0.12)] border border-black/[0.04] rotate-[1deg] hover:rotate-0 transition-transform duration-500">
                 <Image src="/images/ai-vision/shop-look.jpg" alt="Shop the Look" width={600} height={400} className="w-full h-auto" />
               </div>
             </Reveal>
@@ -298,9 +298,9 @@ export default function LandingPage() {
       </section>
 
       {/* ===== MORE TOOLS BENTO ===== */}
-      <section className="py-[120px] px-8 bg-[#f6f8fb]">
+      <section className="py-[120px] px-8" style={{ background: "linear-gradient(160deg, #0d9488 0%, #14b8a6 40%, #5eead4 100%)" }}>
         <Reveal className="text-center mb-14">
-          <h2 className="text-[36px] font-black text-[#14171f] tracking-[-0.02em] mb-3">ועוד כלים בארגז</h2>
+          <h2 className="text-[36px] font-black text-white tracking-[-0.02em] mb-3">ועוד כלים בארגז</h2>
         </Reveal>
         <div className="max-w-[1100px] mx-auto grid md:grid-cols-3 gap-5">
           {[
@@ -309,14 +309,14 @@ export default function LandingPage() {
             { title: "עוזר AI לשיפוץ", desc: "שאלו כל שאלה על השיפוץ וקבלו תשובה מיידית.", img: "/images/ai-vision/chat-support-thumb.jpg" },
           ].map((f, i) => (
             <Reveal key={i} delay={i * 0.1}>
-              <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] group">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-all hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] group">
                 <div className="h-[200px] overflow-hidden">
                   <Image src={f.img} alt={f.title} width={400} height={200}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <div className="p-6">
                   <h4 className="text-[17px] font-bold text-[#14171f] mb-2">{f.title}</h4>
-                  <p className="text-[14px] text-[#6d727e] leading-[1.7]">{f.desc}</p>
+                  <p className="text-[14px] text-[#4a4f5a] leading-[1.7]">{f.desc}</p>
                 </div>
               </div>
             </Reveal>

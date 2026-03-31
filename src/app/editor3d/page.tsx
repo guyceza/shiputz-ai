@@ -167,33 +167,100 @@ function saveProject(name: string, scene: SceneGraph) {
   localStorage.setItem('pascal-projects', JSON.stringify(projects));
 }
 
+function useApplyScene(scene: SceneGraph | null) {
+  const applied = useRef(false);
+  
+  useEffect(() => {
+    if (!scene || applied.current) return;
+    
+    const timer = setTimeout(async () => {
+      try {
+        const core = await import("@pascal-app/core");
+        const useScene = core.useScene;
+        const state = useScene.getState();
+        
+        // Get current default scene's level ID
+        const nodes = state.nodes as Record<string, any>;
+        const rootId = state.rootNodeIds[0];
+        const siteNode = nodes[rootId];
+        const buildingId = siteNode?.children?.[0];
+        const buildingNode = typeof buildingId === 'string' ? nodes[buildingId] : buildingId;
+        const levelId = buildingNode?.children?.[0];
+        const actualLevelId = typeof levelId === 'string' ? levelId : levelId?.id;
+        
+        console.log("Found level:", actualLevelId);
+        
+        // Delete ALL existing children of the level
+        const levelNode = nodes[actualLevelId];
+        const childIds = levelNode?.children || [];
+        for (const childId of childIds) {
+          const cId = typeof childId === 'string' ? childId : (childId as any)?.id;
+          if (cId && nodes[cId]) {
+            const childNode = nodes[cId] as any;
+            if (childNode.children) {
+              for (const gcId of childNode.children) {
+                const gcIdStr = typeof gcId === 'string' ? gcId : gcId?.id;
+                if (gcIdStr) state.deleteNode(gcIdStr as any);
+              }
+            }
+            state.deleteNode(cId as any);
+          }
+        }
+        console.log("Cleared all existing elements");
+        
+        // Create walls first
+        const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
+        console.log("Creating", wallNodes.length, "walls");
+        
+        for (const wall of wallNodes as any[]) {
+          const wallNode = {
+            ...wall,
+            parentId: actualLevelId,
+            children: wall.children || [],
+          };
+          state.createNode(wallNode as any, actualLevelId);
+          console.log(`Created wall: ${wall.name}`);
+        }
+        
+        // Create doors and windows after a short delay
+        await new Promise(r => setTimeout(r, 500));
+        
+        const doorNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'door');
+        const windowNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'window');
+        
+        for (const door of doorNodes as any[]) {
+          if (door.parentId && useScene.getState().nodes[door.parentId as any]) {
+            state.createNode({ ...door } as any, door.parentId);
+          }
+        }
+        
+        for (const win of windowNodes as any[]) {
+          if (win.parentId && useScene.getState().nodes[win.parentId as any]) {
+            state.createNode({ ...win } as any, win.parentId);
+          }
+        }
+        
+        // Re-mark walls dirty so WallSystem cuts openings
+        await new Promise(r => setTimeout(r, 300));
+        Object.values(useScene.getState().nodes).forEach((n: any) => {
+          if (n.type === 'wall') state.markDirty(n.id);
+        });
+        
+        console.log(`Done! ${wallNodes.length} walls, ${doorNodes.length} doors, ${windowNodes.length} windows`);
+        applied.current = true;
+      } catch (e) {
+        console.error("Failed to apply scene:", e);
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [scene]);
+}
+
 function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGraph | null; projectName: string }) {
+  useApplyScene(initialScene);
   const [showSave, setShowSave] = useState(false);
   const [saveName, setSaveName] = useState(projectName);
-
-  // Use Pascal Editor's official onLoad mechanism to pass our scene
-  const onLoad = useCallback(async (): Promise<SceneGraph | null> => {
-    if (initialScene) {
-      console.log("[editor3d] onLoad: returning analyzed scene with", Object.keys(initialScene.nodes).length, "nodes");
-      // Force re-dirty all wall nodes after a delay to ensure WallSystem processes them
-      // (race condition: WallSystem may check dirtyNodes before WallRenderer meshes are registered)
-      setTimeout(async () => {
-        try {
-          const core = await import("@pascal-app/core");
-          const state = core.useScene.getState();
-          Object.values(state.nodes).forEach((node: any) => {
-            if (node.type === 'wall') {
-              state.markDirty(node.id);
-            }
-          });
-          console.log("[editor3d] Re-marked walls as dirty for WallSystem");
-        } catch (e) { console.warn("[editor3d] Could not re-dirty walls:", e); }
-      }, 1500);
-      return initialScene;
-    }
-    console.log("[editor3d] onLoad: no initial scene, using default");
-    return null;
-  }, [initialScene]);
 
   // Auto-save current scene periodically
   useEffect(() => {
@@ -222,7 +289,7 @@ function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGra
 
   return (
     <div className="h-screen w-screen relative">
-      <PascalEditor onLoad={onLoad} />
+      <PascalEditor />
       
       {/* Save button */}
       <button

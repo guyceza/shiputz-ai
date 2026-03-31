@@ -21,6 +21,53 @@ const PascalEditor = dynamic(
 
 type SceneGraph = { nodes: Record<string, unknown>; rootNodeIds: string[] };
 
+// Hard-coded test scene: a simple room (4 walls)
+function createTestScene(): SceneGraph {
+  const nodes: Record<string, any> = {
+    "site_test001": {
+      object: "node", id: "site_test001", type: "site", name: "Site",
+      parentId: null, visible: true, children: ["building_test001"],
+      boundary: [], metadata: {},
+    },
+    "building_test001": {
+      object: "node", id: "building_test001", type: "building", name: "Building",
+      parentId: "site_test001", visible: true, children: ["level_test001"],
+      metadata: {},
+    },
+    "level_test001": {
+      object: "node", id: "level_test001", type: "level", name: "Level 0",
+      parentId: "building_test001", visible: true,
+      children: ["wall_test001", "wall_test002", "wall_test003", "wall_test004"],
+      elevation: 0, height: 2.8, level: 0, metadata: {},
+    },
+    "wall_test001": {
+      object: "node", id: "wall_test001", type: "wall", name: "Wall 1",
+      parentId: "level_test001", visible: true, children: [],
+      start: [0, 0], end: [5, 0], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test002": {
+      object: "node", id: "wall_test002", type: "wall", name: "Wall 2",
+      parentId: "level_test001", visible: true, children: [],
+      start: [5, 0], end: [5, 4], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test003": {
+      object: "node", id: "wall_test003", type: "wall", name: "Wall 3",
+      parentId: "level_test001", visible: true, children: [],
+      start: [5, 4], end: [0, 4], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+    "wall_test004": {
+      object: "node", id: "wall_test004", type: "wall", name: "Wall 4",
+      parentId: "level_test001", visible: true, children: [],
+      start: [0, 4], end: [0, 0], thickness: 0.15, height: 2.8,
+      frontSide: "unknown", backSide: "unknown", metadata: {},
+    },
+  };
+  return { nodes, rootNodeIds: ["site_test001"] };
+}
+
 function UploadScreen({ onScene, onSkip, onLoadProject }: { 
   onScene: (s: SceneGraph, name?: string) => void; 
   onSkip: () => void;
@@ -37,6 +84,7 @@ function UploadScreen({ onScene, onSkip, onLoadProject }: {
     setProgress(0);
     setStatusText("מעלה תמונה...");
     
+    // Simulate progress
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev < 30) { setStatusText("מעלה תמונה..."); return prev + 3; }
@@ -150,23 +198,6 @@ function UploadScreen({ onScene, onSkip, onLoadProject }: {
   );
 }
 
-// Project save/load
-function getSavedProjects(): { name: string; date: string; scene: SceneGraph }[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(localStorage.getItem('pascal-projects') || '[]');
-  } catch { return []; }
-}
-
-function saveProject(name: string, scene: SceneGraph) {
-  const projects = getSavedProjects();
-  const existing = projects.findIndex(p => p.name === name);
-  const entry = { name, date: new Date().toISOString(), scene };
-  if (existing >= 0) projects[existing] = entry;
-  else projects.push(entry);
-  localStorage.setItem('pascal-projects', JSON.stringify(projects));
-}
-
 function useApplyScene(scene: SceneGraph | null) {
   const applied = useRef(false);
   
@@ -190,12 +221,13 @@ function useApplyScene(scene: SceneGraph | null) {
         
         console.log("Found level:", actualLevelId);
         
-        // Delete ALL existing children of the level
+        // Delete ALL existing children of the level (walls, doors, windows, items, zones)
         const levelNode = nodes[actualLevelId];
         const childIds = levelNode?.children || [];
         for (const childId of childIds) {
           const cId = typeof childId === 'string' ? childId : (childId as any)?.id;
           if (cId && nodes[cId]) {
+            // Also delete grandchildren (doors/windows inside walls)
             const childNode = nodes[cId] as any;
             if (childNode.children) {
               for (const gcId of childNode.children) {
@@ -212,17 +244,22 @@ function useApplyScene(scene: SceneGraph | null) {
         const wallNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'wall');
         console.log("Creating", wallNodes.length, "walls");
         
+        // Map old wall IDs to new ones (since createNode may change IDs)
+        const wallIdMap: Record<string, string> = {};
+        
         for (const wall of wallNodes as any[]) {
           const wallNode = {
             ...wall,
             parentId: actualLevelId,
+            // Keep children references for doors/windows
             children: wall.children || [],
           };
           state.createNode(wallNode as any, actualLevelId);
+          wallIdMap[wall.id] = wall.id;
           console.log(`Created wall: ${wall.name}`);
         }
         
-        // Create doors and windows after a short delay
+        // Create doors and windows (children of walls) after a short delay
         await new Promise(r => setTimeout(r, 500));
         
         const doorNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'door');
@@ -240,14 +277,17 @@ function useApplyScene(scene: SceneGraph | null) {
           }
         }
         
-        // Re-mark walls dirty so WallSystem cuts openings
+        // Re-mark walls dirty so WallSystem cuts openings for doors/windows
         await new Promise(r => setTimeout(r, 300));
         Object.values(useScene.getState().nodes).forEach((n: any) => {
           if (n.type === 'wall') state.markDirty(n.id);
         });
         
-        console.log(`Done! ${wallNodes.length} walls, ${doorNodes.length} doors, ${windowNodes.length} windows`);
+        console.log(`Created ${doorNodes.length} doors, ${windowNodes.length} windows`);
+        
         applied.current = true;
+        const totalNodes = Object.keys(useScene.getState().nodes).length;
+        console.log(`Done! ${wallNodes.length} walls, ${doorNodes.length} doors, ${windowNodes.length} windows (${totalNodes} total)`);
       } catch (e) {
         console.error("Failed to apply scene:", e);
       }
@@ -255,6 +295,23 @@ function useApplyScene(scene: SceneGraph | null) {
     
     return () => clearTimeout(timer);
   }, [scene]);
+}
+
+// Project save/load
+function getSavedProjects(): { name: string; date: string; scene: SceneGraph }[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('pascal-projects') || '[]');
+  } catch { return []; }
+}
+
+function saveProject(name: string, scene: SceneGraph) {
+  const projects = getSavedProjects();
+  const existing = projects.findIndex(p => p.name === name);
+  const entry = { name, date: new Date().toISOString(), scene };
+  if (existing >= 0) projects[existing] = entry;
+  else projects.push(entry);
+  localStorage.setItem('pascal-projects', JSON.stringify(projects));
 }
 
 function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGraph | null; projectName: string }) {
@@ -272,7 +329,7 @@ function EditorWithScene({ initialScene, projectName }: { initialScene: SceneGra
         const scene = { nodes: state.nodes as any, rootNodeIds: state.rootNodeIds as any };
         saveProject(projectName, scene);
       } catch {}
-    }, 30000);
+    }, 30000); // auto-save every 30s
     return () => clearInterval(interval);
   }, [projectName]);
 

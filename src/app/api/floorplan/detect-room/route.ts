@@ -65,13 +65,15 @@ If the click is on a wall, door, or unclear area, pick the nearest room. Respond
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
-    // Parse JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*?\}/);
+    // Parse JSON from response (greedy match for nested objects like dimensions)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       return NextResponse.json({ error: "Could not identify room", raw: text }, { status: 500 });
     }
 
-    const roomInfo = JSON.parse(jsonMatch[0]);
+    // Clean markdown code fences if present
+    let jsonStr = jsonMatch[0].replace(/```json\s*|\s*```/g, '').trim();
+    const roomInfo = JSON.parse(jsonStr);
     return NextResponse.json(roomInfo);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

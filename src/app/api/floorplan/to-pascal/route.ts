@@ -35,7 +35,7 @@ CRITICAL RULES:
    - Then add all interior dividing walls
    - Exterior wall thickness: 0.20-0.30m. Interior walls: 0.10-0.15m
    - Each wall should be a straight segment. For L-shaped walls, use two segments meeting at the corner
-4. ROOMS: Polygon points define room boundary clockwise. Use room names as shown on the plan (Hebrew if Hebrew plan)
+4. ROOMS: Polygon points define room boundary clockwise. Use room names as shown on the plan (Hebrew if Hebrew plan). MUST include "type" field: bedroom, bathroom, kitchen, living, hallway, balcony, storage, laundry, entrance, office, dining, kids
 5. DOORS: Position is the center point [x,y] on the wall where the door is. Width typically 0.8-0.9m
 6. WINDOWS: Position is center point [x,y] on the wall. Width typically 1.0-1.5m
 

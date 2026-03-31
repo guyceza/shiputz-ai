@@ -277,13 +277,20 @@ function useApplyScene(scene: SceneGraph | null) {
           }
         }
         
+        // Create furniture items (children of level, not walls)
+        const itemNodes = Object.values(scene.nodes).filter((n: any) => n.type === 'item');
+        for (const item of itemNodes as any[]) {
+          state.createNode({ ...item, parentId: actualLevelId } as any, actualLevelId);
+          console.log(`Created item: ${item.name}`);
+        }
+        
         // Re-mark walls dirty so WallSystem cuts openings for doors/windows
         await new Promise(r => setTimeout(r, 300));
         Object.values(useScene.getState().nodes).forEach((n: any) => {
           if (n.type === 'wall') state.markDirty(n.id);
         });
         
-        console.log(`Created ${doorNodes.length} doors, ${windowNodes.length} windows`);
+        console.log(`Created ${doorNodes.length} doors, ${windowNodes.length} windows, ${itemNodes.length} items`);
         
         applied.current = true;
         const totalNodes = Object.keys(useScene.getState().nodes).length;

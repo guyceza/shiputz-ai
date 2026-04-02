@@ -3,212 +3,372 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import {
   motion,
+  useInView,
   useScroll,
   useTransform,
-  useInView,
-  useMotionValue,
-  useSpring,
   AnimatePresence,
+  useMotionValue,
 } from "framer-motion";
 import Link from "next/link";
+import Head from "next/head";
 
-/* ─────────────────────────── helpers ─────────────────────────── */
+/* ───────────────────────── helpers ───────────────────────── */
 
-function useScrollDirection() {
-  const [dir, setDir] = useState<"up" | "down">("up");
-  const [y, setY] = useState(0);
+function useScrolled(threshold = 10) {
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handle = () => {
-      const cur = window.scrollY;
-      setDir(cur > y && cur > 80 ? "down" : "up");
-      setY(cur);
-    };
-    window.addEventListener("scroll", handle, { passive: true });
-    return () => window.removeEventListener("scroll", handle);
-  }, [y]);
-  return dir;
+    const fn = () => setScrolled(window.scrollY > threshold);
+    window.addEventListener("scroll", fn, { passive: true });
+    fn();
+    return () => window.removeEventListener("scroll", fn);
+  }, [threshold]);
+  return scrolled;
 }
 
-/* ─── fade-in wrapper ─── */
-function Section({
+function FadeIn({
   children,
+  delay = 0,
   className = "",
-  id,
 }: {
   children: React.ReactNode;
+  delay?: number;
   className?: string;
-  id?: string;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
-    <motion.section
+    <motion.div
       ref={ref}
-      id={id}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, ease: [0.25, 0.4, 0.25, 1] }}
+      transition={{ duration: 0.6, delay, ease: [0.25, 0.4, 0.25, 1] }}
       className={className}
     >
       {children}
-    </motion.section>
+    </motion.div>
   );
 }
 
-/* ─── animated counter ─── */
-function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
+function Counter({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
-  const mv = useMotionValue(0);
-  const spring = useSpring(mv, { stiffness: 50, damping: 20 });
-  const [display, setDisplay] = useState("0");
+  const [display, setDisplay] = useState(0);
   useEffect(() => {
-    if (inView) mv.set(to);
-  }, [inView, mv, to]);
-  useEffect(() => {
-    const unsub = spring.on("change", (v) =>
-      setDisplay(Math.round(v).toLocaleString("he-IL"))
-    );
-    return unsub;
-  }, [spring]);
+    if (!inView) return;
+    let start = 0;
+    const end = value;
+    const duration = 1600;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * end));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [inView, value]);
   return (
     <span ref={ref}>
-      {display}
+      {display.toLocaleString()}
       {suffix}
     </span>
   );
 }
 
-/* ─── before/after slider ─── */
-function BeforeAfterSlider({
-  beforeGradient,
-  afterGradient,
-  label,
-}: {
-  beforeGradient: string;
-  afterGradient: string;
-  label: string;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState(50);
-  const dragging = useRef(false);
+/* ───────────────────────── SVG Icons (thin line) ─────────── */
 
-  const updatePos = useCallback((clientX: number) => {
+const Icons = {
+  upload: (
+    <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  palette: (
+    <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4c3 0 5.6-2.5 5.6-5.6C22 5.8 17.5 2 12 2z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="7.5" cy="11.5" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="10.5" cy="7.5" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="15.5" cy="7.5" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  sparkles: (
+    <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3zM19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  eye: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  layout: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18M9 21V9" />
+    </svg>
+  ),
+  video: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <polygon points="23 7 16 12 23 17 23 7" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="1" y="5" width="15" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  shoppingBag: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  sliders: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <line x1="4" y1="21" x2="4" y2="14" strokeLinecap="round" />
+      <line x1="4" y1="10" x2="4" y2="3" strokeLinecap="round" />
+      <line x1="12" y1="21" x2="12" y2="12" strokeLinecap="round" />
+      <line x1="12" y1="8" x2="12" y2="3" strokeLinecap="round" />
+      <line x1="20" y1="21" x2="20" y2="16" strokeLinecap="round" />
+      <line x1="20" y1="12" x2="20" y2="3" strokeLinecap="round" />
+      <line x1="1" y1="14" x2="7" y2="14" strokeLinecap="round" />
+      <line x1="9" y1="8" x2="15" y2="8" strokeLinecap="round" />
+      <line x1="17" y1="16" x2="23" y2="16" strokeLinecap="round" />
+    </svg>
+  ),
+  fileText: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="14 2 14 8 20 8" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="13" x2="8" y2="13" strokeLinecap="round" />
+      <line x1="16" y1="17" x2="8" y2="17" strokeLinecap="round" />
+    </svg>
+  ),
+  star: (
+    <svg width="16" height="16" fill="#F59E0B" stroke="none" viewBox="0 0 24 24">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  ),
+  check: (
+    <svg width="18" height="18" fill="none" stroke="#F59E0B" strokeWidth="2" viewBox="0 0 24 24">
+      <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  chevronDown: (
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  arrowLeft: (
+    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <line x1="19" y1="12" x2="5" y2="12" strokeLinecap="round" />
+      <polyline points="12 19 5 12 12 5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  arrowRight: (
+    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <line x1="5" y1="12" x2="19" y2="12" strokeLinecap="round" />
+      <polyline points="12 5 19 12 12 19" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+};
+
+/* ───────────────────────── data ──────────────────────────── */
+
+const steps = [
+  { num: "01", title: "העלו תמונה", desc: "צלמו את החדר שלכם — מהנייד או מהמחשב", icon: Icons.upload },
+  { num: "02", title: "בחרו סגנון", desc: "מודרני, סקנדינבי, קלאסי — או תנו ל-AI להפתיע", icon: Icons.palette },
+  { num: "03", title: "קבלו הדמיה", desc: "תוך שניות תראו את החדר המעוצב — עם רהיטים אמיתיים", icon: Icons.sparkles },
+];
+
+const features = [
+  { icon: Icons.eye, title: "הדמיית AI", desc: "ראו את החדר המעוצב בלחיצה אחת" },
+  { icon: Icons.layout, title: "תוכניות קומה", desc: "תכנון מרחבי חכם ומדויק" },
+  { icon: Icons.video, title: "סיור וידאו", desc: "סיור וירטואלי בעיצוב החדש" },
+  { icon: Icons.shoppingBag, title: "Shop the Look", desc: "קנו את המוצרים מתוך ההדמיה" },
+  { icon: Icons.sliders, title: "התאמת סגנון", desc: "AI שלומד את הטעם שלכם" },
+  { icon: Icons.fileText, title: "כתב כמויות", desc: "הערכת עלויות אוטומטית ומדויקת" },
+];
+
+const testimonials = [
+  {
+    name: "רונית כ.",
+    role: "שיפצה דירת 4 חדרים",
+    text: "חסכתי אלפי שקלים כי ראיתי מראש מה עובד ומה לא. המעצבת שלי השתמשה בהדמיות כבסיס לתכנון.",
+    stars: 5,
+  },
+  {
+    name: "אורי מ.",
+    role: "קבלן שיפוצים",
+    text: "הלקוחות שלי מקבלים את ההדמיה ומיד מבינים מה הם רוצים. חוסך לי שעות של דיונים ואי-הבנות.",
+    stars: 5,
+  },
+  {
+    name: "דנה ל.",
+    role: "מעצבת פנים",
+    text: "כלי עבודה מדהים. אני מציגה ללקוחות 3-4 אופציות תוך דקות במקום ימים של עבודה על רנדרים.",
+    stars: 5,
+  },
+];
+
+const pricingPlans = [
+  {
+    name: "בייסיק",
+    price: "חינם",
+    period: "",
+    desc: "לטעימה ראשונה",
+    features: ["2 הדמיות חינם", "סגנונות בסיסיים", "רזולוציה סטנדרטית", "תמיכה במייל"],
+    cta: "התחילו בחינם",
+    highlight: false,
+  },
+  {
+    name: "פרו",
+    price: "₪99",
+    period: "",
+    desc: "לפרויקט שיפוץ אחד",
+    features: ["4 הדמיות", "כל הסגנונות", "רזולוציה גבוהה", "Shop the Look", "כתב כמויות", "תמיכה בצ׳אט"],
+    cta: "שדרגו עכשיו",
+    highlight: true,
+  },
+  {
+    name: "חבילת 30",
+    price: "₪69",
+    period: "",
+    desc: "לקבלנים ומעצבים",
+    features: ["30 הדמיות", "כל הסגנונות", "רזולוציה גבוהה", "Shop the Look", "כתב כמויות", "סיור וידאו", "תמיכה VIP"],
+    cta: "בחרו חבילה",
+    highlight: false,
+  },
+];
+
+const faqs = [
+  { q: "כמה זמן לוקח ליצור הדמיה?", a: "בדרך כלל 10-30 שניות. ה-AI שלנו עובד מהר כדי שתקבלו תוצאה כמעט מיידית." },
+  { q: "האם ההדמיות מדויקות?", a: "ההדמיות נותנות תמונה מאוד קרובה למציאות. הן מבוססות על AI מתקדם שמבין פרופורציות, תאורה וחומרים." },
+  { q: "אפשר להשתמש בתמונות מהנייד?", a: "בהחלט! צלמו עם הנייד, העלו ישירות מהגלריה. עובד מעולה גם עם תמונות בזווית רחבה." },
+  { q: "מה זה כתב כמויות?", a: "זו הערכת עלויות אוטומטית שמחושבת על בסיס ההדמיה — כולל חומרים, ריהוט ועבודה. חוסך לכם הפתעות." },
+  { q: "יש אפשרות לקבלנים ומעצבים?", a: "כן, החבילות הגדולות שלנו מיועדות בדיוק לאנשי מקצוע שרוצים להציג ללקוחות הדמיות מרשימות." },
+];
+
+/* ───────────────────────── Before/After Slider ───────────── */
+
+function BeforeAfterSlider() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [sliderPos, setSliderPos] = useState(50);
+  const isDragging = useRef(false);
+
+  const updatePosition = useCallback((clientX: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     // RTL: flip the calculation
-    const pct = ((rect.right - clientX) / rect.width) * 100;
-    setPos(Math.max(2, Math.min(98, pct)));
+    const x = rect.right - clientX;
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPos(pct);
   }, []);
 
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      dragging.current = true;
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-      updatePos(e.clientX);
-    },
-    [updatePos]
-  );
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (dragging.current) updatePos(e.clientX);
-    },
-    [updatePos]
-  );
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    isDragging.current = true;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    updatePosition(e.clientX);
+  }, [updatePosition]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    updatePosition(e.clientX);
+  }, [updatePosition]);
+
   const onPointerUp = useCallback(() => {
-    dragging.current = false;
+    isDragging.current = false;
   }, []);
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-white/50 text-center">{label}</p>
+    <div
+      ref={containerRef}
+      className="relative w-full aspect-[16/10] rounded-3xl overflow-hidden shadow-lg cursor-col-resize select-none"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      style={{ touchAction: "none" }}
+    >
+      {/* After (full background) */}
       <div
-        ref={containerRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden cursor-col-resize select-none touch-none border border-white/[0.06]"
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(135deg, #FEF3C7 0%, #FDE68A 25%, #A7F3D0 50%, #BAE6FD 75%, #DDD6FE 100%)",
+        }}
       >
-        {/* after (full bg) */}
-        <div
-          className="absolute inset-0"
-          style={{ background: afterGradient }}
-        />
-        {/* before (clipped) */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: beforeGradient,
-            clipPath: `inset(0 0 0 ${100 - pos}%)`,
-          }}
-        />
-        {/* divider */}
-        <div
-          className="absolute top-0 bottom-0 w-[2px] bg-white/80 z-10"
-          style={{ right: `${pos}%` }}
-        >
-          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              className="text-[#050917]"
-            >
-              <path
-                d="M7 4L3 10L7 16M13 4L17 10L13 16"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-32 h-20 mx-auto mb-4 rounded-xl bg-white/40 backdrop-blur-sm" />
+            <div className="w-48 h-3 mx-auto mb-2 rounded-full bg-white/50" />
+            <div className="w-36 h-3 mx-auto rounded-full bg-white/40" />
           </div>
         </div>
-        {/* labels */}
-        <span className="absolute top-3 right-3 text-xs font-bold bg-black/50 backdrop-blur px-2 py-1 rounded-full text-white/80 z-20">
+        <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-sm text-gray-700 text-sm font-medium px-4 py-2 rounded-full">
+          אחרי ✨
+        </div>
+      </div>
+
+      {/* Before (clipped) — RTL: clip from right */}
+      <div
+        className="absolute inset-0"
+        style={{
+          clipPath: `inset(0 0 0 ${100 - sliderPos}%)`,
+          background: "linear-gradient(135deg, #F5F0E8 0%, #E8E0D4 30%, #D4C8B8 60%, #C4B8A8 100%)",
+        }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-32 h-20 mx-auto mb-4 rounded-xl bg-white/30" />
+            <div className="w-48 h-3 mx-auto mb-2 rounded-full bg-white/30" />
+            <div className="w-36 h-3 mx-auto rounded-full bg-white/20" />
+          </div>
+        </div>
+        <div className="absolute bottom-6 right-6 bg-white/80 backdrop-blur-sm text-gray-700 text-sm font-medium px-4 py-2 rounded-full">
           לפני
-        </span>
-        <span className="absolute top-3 left-3 text-xs font-bold bg-black/50 backdrop-blur px-2 py-1 rounded-full text-white/80 z-20">
-          אחרי
-        </span>
+        </div>
+      </div>
+
+      {/* Slider handle — RTL: position from right */}
+      <div
+        className="absolute top-0 bottom-0 z-10"
+        style={{ right: `${sliderPos}%`, transform: "translateX(50%)" }}
+      >
+        <div className="w-0.5 h-full bg-white/90 mx-auto" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center gap-1">
+          {Icons.arrowRight}
+          {Icons.arrowLeft}
+        </div>
       </div>
     </div>
   );
 }
 
-/* ─── FAQ accordion ─── */
+/* ───────────────────────── FAQ Item ──────────────────────── */
+
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-white/[0.06]">
+    <div className="border-b border-gray-100 last:border-b-0">
       <button
+        className="w-full flex items-center justify-between py-6 text-right gap-4 group"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-right gap-4 group"
       >
-        <span className="text-base md:text-lg font-medium text-white/90 group-hover:text-white transition-colors">
-          {q}
-        </span>
+        <span className="text-lg font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">{q}</span>
         <motion.span
-          animate={{ rotate: open ? 45 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-xl text-white/40 shrink-0"
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-gray-400 shrink-0"
         >
-          +
+          {Icons.chevronDown}
         </motion.span>
       </button>
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-5 text-white/50 leading-relaxed text-sm md:text-base">
-              {a}
-            </p>
+            <p className="pb-6 text-gray-500 leading-relaxed">{a}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -216,746 +376,369 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-/* ─────────────────────────── icons (inline SVG) ─────────────────────────── */
-
-const Icons = {
-  visualize: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <path d="M21 15l-5-5L5 21" />
-    </svg>
-  ),
-  floorplan: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="1" />
-      <path d="M3 12h8v9M12 3v8h9" />
-    </svg>
-  ),
-  video: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  ),
-  shop: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <path d="M16 10a4 4 0 01-8 0" />
-    </svg>
-  ),
-  bill: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </svg>
-  ),
-  quote: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <polyline points="9 12 11 14 15 10" />
-    </svg>
-  ),
-  upload: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  ),
-  palette: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />
-      <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor" />
-      <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" />
-      <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor" />
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.8-1.7 1.7-1.7H16c3.3 0 6-2.7 6-6 0-5.5-4.5-9.6-10-9.4z" />
-    </svg>
-  ),
-  sparkle: (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z" />
-    </svg>
-  ),
-  star: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-  ),
-  check: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  ),
-};
-
-/* ─────────────────────────── data ─────────────────────────── */
-
-const features = [
-  {
-    icon: Icons.visualize,
-    title: "הדמיות AI",
-    desc: "העלו תמונה של החדר וקבלו הדמיית שיפוץ תוך 30 שניות",
-    color: "#F59E0B",
-    span: "md:col-span-2",
-  },
-  {
-    icon: Icons.floorplan,
-    title: "תוכניות קומה",
-    desc: "הפקת תוכנית קומה אוטומטית מתמונה אחת",
-    color: "#3B82F6",
-    span: "",
-  },
-  {
-    icon: Icons.video,
-    title: "סיורים וירטואליים",
-    desc: "סרטון תלת-ממדי של החדר המשופץ בלחיצת כפתור",
-    color: "#8B5CF6",
-    span: "",
-  },
-  {
-    icon: Icons.shop,
-    title: "Shop the Look",
-    desc: "זיהוי אוטומטי של רהיטים ופריטים עם קישורי רכישה",
-    color: "#10B981",
-    span: "md:col-span-2",
-  },
-  {
-    icon: Icons.bill,
-    title: "כתב כמויות",
-    desc: "הפקת כתב כמויות מפורט עם אומדן עלויות לכל פריט",
-    color: "#EC4899",
-    span: "",
-  },
-  {
-    icon: Icons.quote,
-    title: "ניתוח הצעות מחיר",
-    desc: "השוואה חכמה של הצעות מחיר מקבלנים שונים",
-    color: "#F97316",
-    span: "",
-  },
-];
-
-const testimonials = [
-  {
-    name: "שירה לוי",
-    role: "מעצבת פנים",
-    quote:
-      "חסכתי שעות של עבודה על הדמיות. הלקוחות שלי מתלהבים כשהם רואים את התוצאה תוך שניות במקום ימים.",
-    stars: 5,
-  },
-  {
-    name: "אורן כהן",
-    role: "קבלן שיפוצים",
-    quote:
-      "כתב הכמויות האוטומטי חסך לי טעויות יקרות. עכשיו אני נותן הצעות מחיר מדויקות יותר ומרוויח יותר.",
-    stars: 5,
-  },
-  {
-    name: "מיכל אברהם",
-    role: "בעלת דירה",
-    quote:
-      "לפני ShiputzAI הייתי לגמרי אבודה עם השיפוץ. עכשיו אני רואה בדיוק מה אני רוצה לפני שמוציאה שקל.",
-    stars: 5,
-  },
-];
-
-const pricing = [
-  {
-    name: "Pack 10",
-    price: "29",
-    credits: "10",
-    desc: "לניסיון ראשון",
-    features: ["10 הדמיות AI", "כל הסגנונות", "תמיכה במייל"],
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "99",
-    credits: "4",
-    desc: "הכי פופולרי למקצוענים",
-    features: [
-      "4 הדמיות AI",
-      "כתב כמויות",
-      "ניתוח הצעות מחיר",
-      "סיורים וירטואליים",
-      "תמיכה בעדיפות",
-    ],
-    highlighted: true,
-  },
-  {
-    name: "Pack 100",
-    price: "149",
-    credits: "100",
-    desc: "למשרדים ומעצבים",
-    features: [
-      "100 הדמיות AI",
-      "כל הכלים",
-      "תמיכה בעדיפות",
-      "המחיר הכי משתלם",
-    ],
-    highlighted: false,
-  },
-];
-
-const faqs = [
-  {
-    q: "כמה מדויקות ההדמיות?",
-    a: "ההדמיות שלנו מבוססות על מודלי AI מתקדמים שמנתחים את החדר שלכם ויוצרים תוצאה ריאליסטית. הדיוק הוא כ-90% מהתוצאה הסופית — מספיק כדי לקבל החלטות חכמות על שיפוץ.",
-  },
-  {
-    q: "אילו סוגי חדרים נתמכים?",
-    a: "כל סוג חדר — סלון, מטבח, חדר שינה, חדר אמבטיה, מרפסת, משרד ועוד. המערכת מזהה אוטומטית את סוג החדר ומתאימה את העיצוב.",
-  },
-  {
-    q: "איך עובד מערכת הקרדיטים?",
-    a: "כל הדמיה צורכת קרדיט אחד. קרדיטים לא פגים ותקפים לנצח. תוכלו לרכוש חבילות נוספות בכל עת.",
-  },
-  {
-    q: "האם קבלנים יכולים להשתמש בשירות?",
-    a: "בהחלט! קבלנים רבים משתמשים ב-ShiputzAI כדי להציג ללקוחות הדמיות של העבודה לפני תחילת הביצוע, מה שמגביר את שיעור הסגירה משמעותית.",
-  },
-  {
-    q: "מה קורה עם הפרטיות שלי?",
-    a: "התמונות שלכם מוגנות ומאובטחות. אנחנו לא משתפים תמונות עם צדדים שלישיים ולא משתמשים בהן לאימון מודלים. תוכלו למחוק את כל התמונות בכל עת.",
-  },
-];
-
-/* ─────────────────────────── page ─────────────────────────── */
+/* ═══════════════════════ MAIN PAGE ═══════════════════════ */
 
 export default function LandingPage() {
-  const scrollDir = useScrollDirection();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroImageY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const scrolled = useScrolled();
 
   return (
-    <div dir="rtl" className="relative bg-[#050917] text-white overflow-x-hidden">
-      {/* ── Nav ── */}
-      <motion.nav
-        initial={{ y: 0 }}
-        animate={{ y: scrollDir === "down" ? -100 : 0 }}
-        transition={{ duration: 0.3 }}
-        className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.04]"
-        style={{ backdropFilter: "blur(20px)", background: "rgba(5,9,23,0.7)" }}
-      >
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link
-            href="/landing"
-            className="text-xl font-extrabold tracking-tight"
-          >
-            <span className="text-[#F59E0B]">Shiputz</span>
-            <span className="text-white/90">AI</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/50">
-            <a href="#how" className="hover:text-white transition-colors">
-              איך זה עובד
-            </a>
-            <a href="#features" className="hover:text-white transition-colors">
-              יכולות
-            </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
-              מחירים
-            </a>
-            <a href="#faq" className="hover:text-white transition-colors">
-              שאלות נפוצות
-            </a>
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+        .landing-root,
+        .landing-root * {
+          font-family: 'Heebo', sans-serif;
+        }
+      `}</style>
+
+      <div dir="rtl" className="landing-root bg-white text-gray-900 antialiased">
+
+        {/* ══════════ NAV ══════════ */}
+        <motion.nav
+          className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
+          style={{
+            backgroundColor: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0)",
+            backdropFilter: scrolled ? "blur(20px)" : "none",
+            boxShadow: scrolled ? "0 1px 3px rgba(0,0,0,0.05)" : "none",
+          }}
+        >
+          <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+            <Link href="/" className="text-2xl font-bold text-gray-900 tracking-tight">
+              ShiputzAI
+            </Link>
+            <div className="hidden md:flex items-center gap-10 text-[15px] text-gray-500">
+              <a href="#how" className="hover:text-gray-900 transition-colors">איך זה עובד</a>
+              <a href="#features" className="hover:text-gray-900 transition-colors">יתרונות</a>
+              <a href="#pricing" className="hover:text-gray-900 transition-colors">מחירים</a>
+              <a href="#faq" className="hover:text-gray-900 transition-colors">שאלות</a>
+            </div>
+            <Link
+              href="/login"
+              className="bg-amber-400 hover:bg-amber-500 text-white font-semibold text-[15px] px-7 py-2.5 rounded-full transition-all hover:shadow-lg hover:shadow-amber-200/50"
+            >
+              התחילו בחינם
+            </Link>
           </div>
+        </motion.nav>
+
+        {/* ══════════ HERO ══════════ */}
+        <section className="pt-40 pb-20 md:pt-52 md:pb-32 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <FadeIn>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
+                תראו את השיפוץ
+                <br />
+                <span className="text-amber-500">לפני שמתחילים</span>
+              </h1>
+            </FadeIn>
+
+            <FadeIn delay={0.15}>
+              <p className="mt-8 text-lg md:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
+                העלו תמונה של החדר, בחרו סגנון עיצוב, וקבלו הדמיה מלאה תוך שניות.
+                <br className="hidden md:block" />
+                בלי מעצבים יקרים, בלי הפתעות — פשוט AI שעובד.
+              </p>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/login"
+                  className="bg-amber-400 hover:bg-amber-500 text-white font-semibold text-lg px-10 py-4 rounded-full transition-all hover:shadow-xl hover:shadow-amber-200/50 w-full sm:w-auto"
+                >
+                  התחילו בחינם — ללא כרטיס אשראי
+                </Link>
+                <a
+                  href="#how"
+                  className="border border-gray-200 hover:border-gray-300 text-gray-600 font-medium text-lg px-10 py-4 rounded-full transition-all hover:shadow-md w-full sm:w-auto"
+                >
+                  איך זה עובד?
+                </a>
+              </div>
+            </FadeIn>
+
+            {/* Product mockup */}
+            <FadeIn delay={0.45}>
+              <div className="mt-20 md:mt-28 relative">
+                <div className="rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/80 border border-gray-100 bg-gradient-to-br from-gray-50 to-white aspect-[16/10]">
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    {/* Mockup UI */}
+                    <div className="absolute top-0 inset-x-0 h-12 bg-gray-50 border-b border-gray-100 flex items-center px-6 gap-2">
+                      <div className="w-3 h-3 rounded-full bg-gray-200" />
+                      <div className="w-3 h-3 rounded-full bg-gray-200" />
+                      <div className="w-3 h-3 rounded-full bg-gray-200" />
+                      <div className="mx-auto w-64 h-6 rounded-full bg-gray-100" />
+                    </div>
+                    <div className="flex items-center gap-8 mt-6">
+                      {/* Before */}
+                      <div className="w-36 sm:w-48 md:w-64 aspect-[4/3] rounded-2xl bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center">
+                        <span className="text-stone-400 text-sm font-medium">לפני</span>
+                      </div>
+                      {/* Arrow */}
+                      <div className="text-amber-400">
+                        <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <line x1="19" y1="12" x2="5" y2="12" strokeLinecap="round" />
+                          <polyline points="12 5 5 12 12 19" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      {/* After */}
+                      <div className="w-36 sm:w-48 md:w-64 aspect-[4/3] rounded-2xl bg-gradient-to-br from-amber-100 via-emerald-100 to-sky-100 flex items-center justify-center">
+                        <span className="text-emerald-500 text-sm font-medium">אחרי ✨</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* ══════════ TRUST BAR ══════════ */}
+        <section className="bg-[#F9FAFB] py-16 md:py-20 px-6">
+          <div className="max-w-4xl mx-auto">
+            <FadeIn>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+                {[
+                  { value: 12400, suffix: "+", label: "הדמיות נוצרו" },
+                  { value: 3200, suffix: "+", label: "משתמשים פעילים" },
+                  { value: 98, suffix: "%", label: "שביעות רצון" },
+                ].map((stat, i) => (
+                  <div key={i}>
+                    <div className="text-3xl md:text-4xl font-bold text-gray-900">
+                      <Counter value={stat.value} suffix={stat.suffix} />
+                    </div>
+                    <div className="mt-2 text-gray-500 text-[15px]">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* ══════════ HOW IT WORKS ══════════ */}
+        <section id="how" className="py-28 md:py-36 px-6">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-20">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">איך זה עובד?</h2>
+                <p className="mt-5 text-gray-500 text-lg">שלושה צעדים פשוטים לעיצוב החלומות</p>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+              {steps.map((step, i) => (
+                <FadeIn key={i} delay={i * 0.1}>
+                  <div className="text-center group">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-6 group-hover:bg-amber-100 transition-colors">
+                      {step.icon}
+                    </div>
+                    <div className="text-xs font-bold text-amber-400 tracking-widest mb-3">{step.num}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
+                    <p className="text-gray-500 leading-relaxed">{step.desc}</p>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ BEFORE/AFTER ══════════ */}
+        <section className="bg-[#F9FAFB] py-28 md:py-36 px-6">
+          <div className="max-w-4xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">תראו את ההבדל</h2>
+                <p className="mt-5 text-gray-500 text-lg">גררו את הסליידר כדי לראות את השינוי</p>
+              </div>
+            </FadeIn>
+            <FadeIn delay={0.15}>
+              <BeforeAfterSlider />
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* ══════════ FEATURES ══════════ */}
+        <section id="features" className="py-28 md:py-36 px-6">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-20">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">הכל במקום אחד</h2>
+                <p className="mt-5 text-gray-500 text-lg">כלי AI מתקדמים שהופכים שיפוץ לפשוט</p>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((f, i) => (
+                <FadeIn key={i} delay={i * 0.08}>
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-white border border-gray-100 rounded-2xl p-8 hover:shadow-lg hover:shadow-gray-100/80 transition-shadow cursor-default"
+                  >
+                    <div className="text-gray-400 mb-5">{f.icon}</div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h3>
+                    <p className="text-gray-500 text-[15px] leading-relaxed">{f.desc}</p>
+                  </motion.div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ TESTIMONIALS ══════════ */}
+        <section className="bg-[#F9FAFB] py-28 md:py-36 px-6">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">מה אומרים עלינו</h2>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((t, i) => (
+                <FadeIn key={i} delay={i * 0.1}>
+                  <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                    <div className="flex gap-1 mb-4">
+                      {Array.from({ length: t.stars }).map((_, j) => (
+                        <span key={j}>{Icons.star}</span>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
+                    <div>
+                      <div className="font-semibold text-gray-900">{t.name}</div>
+                      <div className="text-sm text-gray-400">{t.role}</div>
+                    </div>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ PRICING ══════════ */}
+        <section id="pricing" className="py-28 md:py-36 px-6">
+          <div className="max-w-5xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">תוכניות ומחירים</h2>
+                <p className="mt-5 text-gray-500 text-lg">בחרו את החבילה שמתאימה לכם</p>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              {pricingPlans.map((plan, i) => (
+                <FadeIn key={i} delay={i * 0.1}>
+                  <div
+                    className={`relative bg-white rounded-3xl p-8 md:p-10 border transition-shadow ${
+                      plan.highlight
+                        ? "border-amber-300 shadow-lg shadow-amber-100/50 md:scale-105"
+                        : "border-gray-100 shadow-sm hover:shadow-md"
+                    }`}
+                  >
+                    {plan.highlight && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-400 text-white text-sm font-bold px-5 py-1.5 rounded-full">
+                        הכי פופולרי
+                      </div>
+                    )}
+                    <div className="text-center mb-8">
+                      <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                      <div className="mt-4">
+                        <span className="text-4xl font-extrabold text-gray-900">{plan.price}</span>
+                        {plan.period && <span className="text-gray-400 mr-1">{plan.period}</span>}
+                      </div>
+                      <p className="mt-2 text-sm text-gray-400">{plan.desc}</p>
+                    </div>
+
+                    <ul className="space-y-4 mb-10">
+                      {plan.features.map((feat, j) => (
+                        <li key={j} className="flex items-center gap-3 text-gray-600 text-[15px]">
+                          {Icons.check}
+                          {feat}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      href="/login"
+                      className={`block w-full text-center font-semibold py-3.5 rounded-full transition-all ${
+                        plan.highlight
+                          ? "bg-amber-400 hover:bg-amber-500 text-white hover:shadow-lg hover:shadow-amber-200/50"
+                          : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {plan.cta}
+                    </Link>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════ FAQ ══════════ */}
+        <section id="faq" className="bg-[#F9FAFB] py-28 md:py-36 px-6">
+          <div className="max-w-3xl mx-auto">
+            <FadeIn>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900">שאלות נפוצות</h2>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.1}>
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10">
+                {faqs.map((faq, i) => (
+                  <FAQItem key={i} q={faq.q} a={faq.a} />
+                ))}
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+
+        {/* ══════════ FINAL CTA ══════════ */}
+        <section className="py-28 md:py-36 px-6">
+          <FadeIn>
+            <div className="max-w-4xl mx-auto bg-amber-50 rounded-3xl p-12 md:p-20 text-center">
+              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                מוכנים לראות את הבית החדש?
+              </h2>
+              <p className="text-gray-500 text-lg mb-10 max-w-xl mx-auto">
+                הצטרפו לאלפי משתמשים שכבר משפצים חכם — עם הדמיות AI שחוסכות זמן, כסף ועצבים.
+              </p>
+              <Link
+                href="/login"
+                className="inline-block bg-amber-400 hover:bg-amber-500 text-white font-semibold text-lg px-12 py-4 rounded-full transition-all hover:shadow-xl hover:shadow-amber-200/50"
+              >
+                התחילו עכשיו — בחינם
+              </Link>
+            </div>
+          </FadeIn>
+        </section>
+
+        {/* ══════════ FOOTER ══════════ */}
+        <footer className="border-t border-gray-100 py-16 px-6">
+          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} ShiputzAI. כל הזכויות שמורות.
+            </div>
+            <div className="flex items-center gap-8 text-sm text-gray-400">
+              <Link href="/terms" className="hover:text-gray-600 transition-colors">תנאי שימוש</Link>
+              <Link href="/privacy" className="hover:text-gray-600 transition-colors">מדיניות פרטיות</Link>
+              <a href="mailto:support@shiputz.ai" className="hover:text-gray-600 transition-colors">צרו קשר</a>
+            </div>
+          </div>
+        </footer>
+
+        {/* ══════════ MOBILE STICKY CTA ══════════ */}
+        <div className="fixed bottom-0 inset-x-0 md:hidden bg-white/95 backdrop-blur-lg border-t border-gray-100 p-4 z-50">
           <Link
             href="/login"
-            className="text-sm font-semibold px-5 py-2 rounded-full bg-[#F59E0B] text-[#050917] hover:bg-[#FBBF24] transition-colors"
+            className="block w-full text-center bg-amber-400 hover:bg-amber-500 text-white font-semibold py-3.5 rounded-full transition-all"
           >
             התחילו בחינם
           </Link>
         </div>
-      </motion.nav>
 
-      {/* ── Hero ── */}
-      <div ref={heroRef} className="relative pt-32 md:pt-44 pb-12 px-4">
-        {/* glow */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#F59E0B]/[0.07] rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-40 left-1/3 w-[300px] h-[300px] bg-[#3B82F6]/[0.05] rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="relative max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#F59E0B]/20 bg-[#F59E0B]/[0.06] text-[#F59E0B] text-sm font-medium mb-6"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-            AI לעיצוב הבית
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-extrabold leading-[1.1] tracking-tight"
-            style={{
-              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
-            }}
-          >
-            תראו את{" "}
-            <span className="bg-gradient-to-l from-[#F59E0B] to-[#FBBF24] bg-clip-text text-transparent">
-              השיפוץ
-            </span>
-            <br />
-            לפני שמתחילים
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-5 text-base md:text-lg text-white/50 max-w-xl mx-auto leading-relaxed"
-          >
-            העלו תמונה של החדר, בחרו סגנון עיצוב, וקבלו הדמיית שיפוץ
-            מקצועית תוך 30 שניות. בינה מלאכותית שחוסכת לכם זמן, כסף וטעויות.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
-          >
-            <Link
-              href="/login"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F59E0B] text-[#050917] font-bold text-base hover:bg-[#FBBF24] transition-all hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]"
-            >
-              התחילו בחינם
-            </Link>
-            <a
-              href="#gallery"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/10 text-white/70 font-medium text-base hover:border-white/20 hover:text-white transition-colors"
-            >
-              צפו בדוגמאות
-            </a>
-          </motion.div>
-
-          {/* Hero mockup */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            style={{ y: heroImageY }}
-            className="relative mt-16 mx-auto max-w-3xl"
-          >
-            {/* glow behind */}
-            <div className="absolute -inset-4 bg-gradient-to-b from-[#F59E0B]/10 via-[#3B82F6]/5 to-transparent rounded-3xl blur-2xl" />
-            <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0d1117]">
-              {/* simulated app UI */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                <span className="mr-auto text-xs text-white/30">
-                  shipazti.com
-                </span>
-              </div>
-              <div className="aspect-[16/9] bg-gradient-to-br from-[#0d1117] via-[#131a27] to-[#0d1117] relative flex items-center justify-center">
-                {/* Split view mockup */}
-                <div className="absolute inset-0 flex">
-                  <div className="w-1/2 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-end justify-center p-6">
-                    <div className="w-32 h-24 md:w-48 md:h-36 rounded-lg bg-gradient-to-t from-[#2a2a3e] to-[#3a3a5e] opacity-40" />
-                  </div>
-                  <div className="w-1/2 bg-gradient-to-br from-[#1a1a2e] via-[#1e3a5f] to-[#0f3460] flex items-end justify-center p-6 relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#F59E0B]/5 to-[#3B82F6]/5" />
-                    <div className="w-32 h-24 md:w-48 md:h-36 rounded-lg bg-gradient-to-t from-[#F59E0B]/20 to-[#3B82F6]/10 relative z-10" />
-                  </div>
-                </div>
-                {/* Center divider */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/20" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="text-white/60">
-                    <path d="M7 4L3 10L7 16M13 4L17 10L13 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                {/* Labels */}
-                <span className="absolute bottom-4 right-6 text-xs text-white/40 font-medium">לפני</span>
-                <span className="absolute bottom-4 left-6 text-xs text-white/40 font-medium">אחרי</span>
-              </div>
-            </div>
-            {/* bottom gradient fade */}
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#050917] to-transparent" />
-          </motion.div>
-        </div>
       </div>
-
-      {/* ── Trust bar ── */}
-      <Section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-white/40 text-sm mb-8">
-            בשימוש מעצבי פנים, אדריכלים וקבלנים בכל הארץ
-          </p>
-          <div className="flex flex-wrap justify-center gap-10 md:gap-16">
-            {[
-              { label: "הדמיות נוצרו", value: 12400, suffix: "+" },
-              { label: "משתמשים פעילים", value: 2800, suffix: "+" },
-              { label: "שביעות רצון", value: 98, suffix: "%" },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-extrabold text-white">
-                  <Counter to={stat.value} suffix={stat.suffix} />
-                </div>
-                <p className="text-white/40 text-sm mt-1">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── How it works ── */}
-      <Section id="how" className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-center font-bold mb-4"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            איך זה עובד
-          </h2>
-          <p className="text-center text-white/40 mb-14 max-w-lg mx-auto">
-            שלושה צעדים פשוטים לשיפוץ חכם
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Icons.upload,
-                step: "01",
-                title: "העלו תמונה",
-                desc: "צלמו את החדר או העלו תמונה קיימת מהגלריה",
-              },
-              {
-                icon: Icons.palette,
-                step: "02",
-                title: "בחרו סגנון",
-                desc: "מודרני, סקנדינבי, תעשייתי, ים-תיכוני ועוד",
-              },
-              {
-                icon: Icons.sparkle,
-                step: "03",
-                title: "קבלו הדמיה",
-                desc: "תוך 30 שניות תקבלו הדמיה מקצועית של השיפוץ",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.6 }}
-                className="relative group"
-              >
-                <div className="p-8 rounded-2xl bg-[#0d1117] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-300 group-hover:-translate-y-1">
-                  <span className="text-xs font-mono text-[#F59E0B]/60 tracking-widest">
-                    {item.step}
-                  </span>
-                  <div className="mt-4 text-white/60 group-hover:text-[#F59E0B] transition-colors duration-300">
-                    {item.icon}
-                  </div>
-                  <h3 className="mt-4 text-lg font-bold">{item.title}</h3>
-                  <p className="mt-2 text-white/40 text-sm leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-                {/* connector line */}
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -left-4 w-8 border-t border-dashed border-white/[0.08]" />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Before/After Gallery ── */}
-      <Section id="gallery" className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-center font-bold mb-4"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            לפני ואחרי
-          </h2>
-          <p className="text-center text-white/40 mb-14 max-w-lg mx-auto">
-            גררו את הפס כדי לראות את ההבדל
-          </p>
-          <div className="grid md:grid-cols-2 gap-8">
-            <BeforeAfterSlider
-              beforeGradient="linear-gradient(135deg, #2a2a3e 0%, #1a1a2a 50%, #252535 100%)"
-              afterGradient="linear-gradient(135deg, #1e3a5f 0%, #F59E0B22 50%, #3B82F622 100%)"
-              label="מטבח"
-            />
-            <BeforeAfterSlider
-              beforeGradient="linear-gradient(135deg, #2e2e3a 0%, #1e1e28 50%, #2a2a36 100%)"
-              afterGradient="linear-gradient(135deg, #2d1f4e 0%, #8B5CF622 50%, #EC489922 100%)"
-              label="סלון"
-            />
-            <BeforeAfterSlider
-              beforeGradient="linear-gradient(135deg, #282838 0%, #1c1c2c 50%, #222232 100%)"
-              afterGradient="linear-gradient(135deg, #1a3a2f 0%, #10B98122 50%, #F59E0B11 100%)"
-              label="חדר אמבטיה"
-            />
-            <BeforeAfterSlider
-              beforeGradient="linear-gradient(135deg, #2c2c3a 0%, #202030 50%, #262636 100%)"
-              afterGradient="linear-gradient(135deg, #1e2a4f 0%, #3B82F622 50%, #F59E0B11 100%)"
-              label="חדר שינה"
-            />
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Features bento grid ── */}
-      <Section id="features" className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-center font-bold mb-4"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            כל מה שצריך לשיפוץ חכם
-          </h2>
-          <p className="text-center text-white/40 mb-14 max-w-lg mx-auto">
-            חבילת כלים מלאה מבוססת בינה מלאכותית
-          </p>
-          <div className="grid md:grid-cols-4 gap-4">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
-                whileHover={{ y: -4 }}
-                className={`group p-6 rounded-2xl bg-[#0d1117] border border-white/[0.04] hover:border-opacity-100 transition-all duration-300 ${f.span}`}
-                style={
-                  {
-                    "--card-color": f.color,
-                  } as React.CSSProperties
-                }
-              >
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors duration-300"
-                  style={{
-                    background: `${f.color}10`,
-                    color: f.color,
-                  }}
-                >
-                  {f.icon}
-                </div>
-                <h3 className="text-base font-bold mb-1.5">{f.title}</h3>
-                <p className="text-white/40 text-sm leading-relaxed">
-                  {f.desc}
-                </p>
-                {/* hover glow */}
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    boxShadow: `inset 0 0 0 1px ${f.color}30`,
-                  }}
-                />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Testimonials ── */}
-      <Section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-center font-bold mb-14"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            מה אומרים עלינו
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                whileHover={{ y: -4 }}
-                className="p-6 rounded-2xl bg-[#0d1117] border border-white/[0.04] hover:border-white/[0.08] transition-all duration-300"
-              >
-                <div className="flex gap-0.5 text-[#F59E0B] mb-4">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <span key={j}>{Icons.star}</span>
-                  ))}
-                </div>
-                <p className="text-white/60 text-sm leading-relaxed mb-5">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="font-bold text-sm">{t.name}</p>
-                  <p className="text-white/40 text-xs mt-0.5">{t.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Pricing ── */}
-      <Section id="pricing" className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-center font-bold mb-4"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            תוכניות ומחירים
-          </h2>
-          <p className="text-center text-white/40 mb-14 max-w-md mx-auto">
-            קרדיטים לא פגים. שלמו פעם אחת, השתמשו מתי שרוצים.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6 items-start">
-            {pricing.map((p, i) => (
-              <motion.div
-                key={p.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className={`relative p-6 rounded-2xl border transition-all duration-300 ${
-                  p.highlighted
-                    ? "bg-[#0d1117] border-[#F59E0B]/30 shadow-[0_0_40px_rgba(245,158,11,0.08)]"
-                    : "bg-[#0d1117] border-white/[0.04] hover:border-white/[0.08]"
-                }`}
-              >
-                {p.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#F59E0B] text-[#050917] text-xs font-bold">
-                    הכי פופולרי
-                  </div>
-                )}
-                <h3 className="text-lg font-bold">{p.name}</h3>
-                <p className="text-white/40 text-sm mt-1">{p.desc}</p>
-                <div className="mt-5 mb-6">
-                  <span className="text-4xl font-extrabold">₪{p.price}</span>
-                  <span className="text-white/40 text-sm mr-1">
-                    / {p.credits} קרדיטים
-                  </span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {p.features.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-center gap-2 text-sm text-white/60"
-                    >
-                      <span
-                        className={
-                          p.highlighted ? "text-[#F59E0B]" : "text-white/30"
-                        }
-                      >
-                        {Icons.check}
-                      </span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/login"
-                  className={`block w-full text-center py-3 rounded-full font-semibold text-sm transition-all duration-200 ${
-                    p.highlighted
-                      ? "bg-[#F59E0B] text-[#050917] hover:bg-[#FBBF24] hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                      : "border border-white/10 text-white/70 hover:border-white/20 hover:text-white"
-                  }`}
-                >
-                  התחילו עכשיו
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── FAQ ── */}
-      <Section id="faq" className="py-20 px-4">
-        <div className="max-w-2xl mx-auto">
-          <h2
-            className="text-center font-bold mb-14"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.5rem)" }}
-          >
-            שאלות נפוצות
-          </h2>
-          <div>
-            {faqs.map((f) => (
-              <FAQItem key={f.q} q={f.q} a={f.a} />
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Final CTA ── */}
-      <Section className="py-24 px-4">
-        <div className="relative max-w-3xl mx-auto text-center">
-          {/* glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#F59E0B]/[0.08] rounded-full blur-[80px] pointer-events-none" />
-          <h2
-            className="relative font-extrabold mb-5"
-            style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
-          >
-            מוכנים לראות את{" "}
-            <span className="bg-gradient-to-l from-[#F59E0B] to-[#FBBF24] bg-clip-text text-transparent">
-              השיפוץ
-            </span>
-            ?
-          </h2>
-          <p className="relative text-white/40 mb-8 max-w-md mx-auto">
-            הצטרפו לאלפי ישראלים שכבר משפצים חכם עם בינה מלאכותית
-          </p>
-          <Link
-            href="/login"
-            className="relative inline-block px-10 py-4 rounded-full bg-[#F59E0B] text-[#050917] font-bold text-lg hover:bg-[#FBBF24] transition-all hover:shadow-[0_0_40px_rgba(245,158,11,0.35)]"
-          >
-            התחילו בחינם — ללא כרטיס אשראי
-          </Link>
-        </div>
-      </Section>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.04] py-10 px-4">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-white/30">
-            © {new Date().getFullYear()} ShiputzAI. כל הזכויות שמורות.
-          </div>
-          <div className="flex gap-6 text-sm text-white/30">
-            <Link href="/terms" className="hover:text-white/50 transition-colors">
-              תנאי שימוש
-            </Link>
-            <Link href="/privacy" className="hover:text-white/50 transition-colors">
-              פרטיות
-            </Link>
-            <a href="mailto:support@shipazti.com" className="hover:text-white/50 transition-colors">
-              צור קשר
-            </a>
-          </div>
-        </div>
-      </footer>
-
-      {/* ── Mobile sticky CTA ── */}
-      <div className="fixed bottom-0 inset-x-0 md:hidden z-40 p-3 bg-[#050917]/90 backdrop-blur border-t border-white/[0.04]">
-        <Link
-          href="/login"
-          className="block w-full text-center py-3 rounded-full bg-[#F59E0B] text-[#050917] font-bold text-sm"
-        >
-          התחילו בחינם
-        </Link>
-      </div>
-    </div>
+    </>
   );
 }

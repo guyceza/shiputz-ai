@@ -41,6 +41,7 @@
     "html2canvas": "^1.4.1",
     "idb-keyval": "^6.2.2",
     "jspdf": "^4.2.0",
+    "locomotive-scroll": "^5.0.1",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.575.0",
     "mitt": "^3.0.1",

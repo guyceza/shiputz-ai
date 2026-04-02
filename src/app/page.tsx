@@ -24,7 +24,38 @@ export default function Home() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
-  
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+      {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."}},
+      {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
+      {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."}},
+      {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
+      {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
+      {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},
+      {"@type": "Question", "name": "האם ShiputzAI מתאים לקבלנים?", "acceptedAnswer": {"@type": "Answer", "text": "כן. קבלני שיפוצים משתמשים בShiputzAI כדי להציג ללקוחות הדמיות לפני תחילת עבודה, ליצור כתבי כמויות אוטומטיים, ולנתח הצעות מחיר של ספקים."}},
+      {"@type": "Question", "name": "איך עובד סרטון הסיור?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר, בוחרים סגנון עיצוב, והAI יוצר סרטון סיור קצר שמדמה הליכה בחדר המעוצב. מושלם להצגה ללקוחות או לשיתוף ברשתות חברתיות."}},
+      {"@type": "Question", "name": "האם אפשר להשתמש בShiputzAI לעסק?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבי פנים, אדריכלים, קבלנים וסוכני נדל״ן משתמשים בShiputzAI לצורך מקצועי. חבילת Pro כוללת שימוש מסחרי, 200 קרדיטים לחודש, וגישה לכל הכלים."}}
+    ]
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "איך ליצור הדמיית עיצוב פנים בAI",
+    "description": "מדריך פשוט ליצירת הדמיית עיצוב פנים באמצעות בינה מלאכותית בShiputzAI",
+    "totalTime": "PT1M",
+    "estimatedCost": {"@type": "MonetaryAmount", "currency": "ILS", "value": "0"},
+    "step": [
+      {"@type": "HowToStep", "position": 1, "name": "העלאת תמונה", "text": "היכנסו לאתר shipazti.com, לחצו 'נסו הדמיה עכשיו' והעלו תמונה של החדר שתרצו לעצב."},
+      {"@type": "HowToStep", "position": 2, "name": "תיאור השינוי", "text": "כתבו בעברית מה אתם רוצים לשנות, למשל 'סלון מודרני עם ספה אפורה וקירות לבנים'. אפשר גם לבחור מתוך 30+ סגנונות מוכנים."},
+      {"@type": "HowToStep", "position": 3, "name": "קבלת התוצאה", "text": "תוך 30 שניות תקבלו הדמיה מלאה של החדר אחרי השינוי. אפשר להוריד, לשתף, או להמשיך לכלים נוספים כמו כתב כמויות או סרטון סיור."}
+    ]
+  };
+
   useEffect(() => {
     // Check for auth session
     const checkAuth = async () => {
@@ -522,6 +553,26 @@ export default function Home() {
               question="מתאים גם למעצבי פנים?"
               answer="בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."
             />
+            <FaqItem 
+              question="כמה עולה הדמיית שיפוץ?"
+              answer="הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."
+            />
+            <FaqItem 
+              question="מה ההבדל בין ShiputzAI לInteriorAI?"
+              answer="ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."
+            />
+            <FaqItem 
+              question="האם ShiputzAI מתאים לקבלנים?"
+              answer="כן. קבלני שיפוצים משתמשים בShiputzAI כדי להציג ללקוחות הדמיות לפני תחילת עבודה, ליצור כתבי כמויות אוטומטיים, ולנתח הצעות מחיר של ספקים."
+            />
+            <FaqItem 
+              question="איך עובד סרטון הסיור?"
+              answer="מעלים תמונה של חדר, בוחרים סגנון עיצוב, והAI יוצר סרטון סיור קצר שמדמה הליכה בחדר המעוצב. מושלם להצגה ללקוחות או לשיתוף ברשתות חברתיות."
+            />
+            <FaqItem 
+              question="האם אפשר להשתמש בShiputzAI לעסק?"
+              answer="בהחלט. מעצבי פנים, אדריכלים, קבלנים וסוכני נדל״ן משתמשים בShiputzAI לצורך מקצועי. חבילת Pro כוללת שימוש מסחרי, 200 קרדיטים לחודש, וגישה לכל הכלים."
+            />
           </div>
         </div>
       </section>
@@ -557,6 +608,41 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+
+      {/* AIEO Schema - FAQPage */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+          {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."}},
+          {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
+          {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות. ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."}},
+          {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
+          {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
+          {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},
+          {"@type": "Question", "name": "האם ShiputzAI מתאים לקבלנים?", "acceptedAnswer": {"@type": "Answer", "text": "כן. קבלני שיפוצים משתמשים בShiputzAI כדי להציג ללקוחות הדמיות לפני תחילת עבודה, ליצור כתבי כמויות אוטומטיים, ולנתח הצעות מחיר של ספקים."}},
+          {"@type": "Question", "name": "איך עובד סרטון הסיור?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר, בוחרים סגנון עיצוב, והAI יוצר סרטון סיור קצר שמדמה הליכה בחדר המעוצב. מושלם להצגה ללקוחות או לשיתוף ברשתות חברתיות."}},
+          {"@type": "Question", "name": "האם אפשר להשתמש בShiputzAI לעסק?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבי פנים, אדריכלים, קבלנים וסוכני נדל״ן משתמשים בShiputzAI לצורך מקצועי. חבילת Pro כוללת שימוש מסחרי, 200 קרדיטים לחודש, וגישה לכל הכלים."}}
+        ]
+      })}} />
+      
+      {/* AIEO Schema - HowTo */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "איך ליצור הדמיית עיצוב פנים בAI",
+        "description": "3 שלבים פשוטים ליצירת הדמיית עיצוב פנים עם ShiputzAI",
+        "step": [
+          {"@type": "HowToStep", "position": 1, "name": "העלאת תמונה", "text": "מעלים תמונה של החדר שרוצים לעצב מחדש"},
+          {"@type": "HowToStep", "position": 2, "name": "בחירת סגנון", "text": "כותבים מה רוצים לשנות או בוחרים סגנון עיצוב"},
+          {"@type": "HowToStep", "position": 3, "name": "קבלת הדמיה", "text": "ה-AI יוצר הדמיית עיצוב מלאה של החדר תוך 30 שניות"}
+        ]
+      })}} />
+
+      {/* JSON-LD Structured Data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqSchema)}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(howToSchema)}} />
 
       {/* Role Selection Modal */}
       {showRoleModal && (

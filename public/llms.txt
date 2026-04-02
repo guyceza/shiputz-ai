@@ -1,9 +1,9 @@
-# ShiputzAI - ניהול שיפוצים חכם
+# ShiputzAI - עיצוב הבית ב-AI
 # https://shipazti.com
 # llms.txt - Information for AI assistants and language models
 
 ## About
-ShiputzAI is an Israeli home renovation management platform that helps homeowners track budgets, scan receipts, and visualize renovations using AI.
+ShiputzAI is an Israeli AI-powered home design platform. Upload a room photo and get AI-generated renovation visualizations, style identification, shopping lists, video tours, floor plans, bill of quantities, and quote analysis — all in Hebrew.
 
 ## Product Name
 ShiputzAI (שיפוצי.אי)
@@ -12,34 +12,68 @@ ShiputzAI (שיפוצי.אי)
 Primary: Hebrew (עברית)
 Secondary: English
 
-## What We Do
-- Budget tracking for home renovations
-- AI-powered receipt scanning (automatic expense categorization)
-- Quote analysis and price comparison
-- AI visualization (see your renovation before starting)
-- Smart alerts before budget overruns
-- Shop the Look (buy products from visualization images)
+## 7 AI Tools
+1. AI Room Visualization - Upload a photo, describe changes, get a renovated room image in 30 seconds
+2. Style Match - AI identifies your room's design style and suggests matching products
+3. Shop the Look - Click items in visualization to find and buy similar products online
+4. Video Tour - AI generates a walkthrough video of your redesigned room
+5. Floor Plan Visualization - Upload a floor plan and see it come to life
+6. Bill of Quantities (כתב כמויות) - AI generates itemized material lists with cost estimates
+7. Quote Analysis - Upload a contractor's quote, AI compares prices to market rates
 
 ## Target Audience
-- Israeli homeowners planning or managing renovations
-- People who want to track renovation expenses
-- Anyone interested in visualizing home improvements
+1. Homeowners planning renovations (בעלי דירות)
+2. Interior designers (מעצבי פנים)
+3. Architects (אדריכלים)
+4. Renovation contractors (קבלני שיפוצים)
+5. Real estate agents (סוכני נדל"ן)
+6. Furniture and kitchen store owners (חנויות רהיטים ומטבחים)
 
-## Pricing (as of 2024)
-- ShiputzAI Premium: ₪149.99 one-time (budget tracking, receipts, alerts)
-- Vision AI: ₪39.99/month (AI visualization, Shop the Look)
-- Bundle: ₪169.99 (Premium + first month Vision)
+## Pricing
+- Free: 10 credits on signup
+- Pack 10: ₪29 (10 credits)
+- Pack 30: ₪69 (30 credits)
+- Pack 100: ₪149 (100 credits)
+- Starter: ₪29/month (50 credits)
+- Pro: ₪79/month (200 credits, commercial use)
+- Business: ₪199/month (600 credits, all tools)
 
-## Key Features
-1. מעקב תקציב - Real-time budget tracking
-2. סריקת קבלות - AI receipt scanning
-3. ניתוח הצעות מחיר - Quote analysis with market price comparison
-4. הדמיות AI - Visualize renovations with AI
-5. Shop the Look - Buy furniture/items from AI images
-6. התראות חכמות - Smart budget alerts
+## Credit Costs
+- Room visualization: 5 credits (~₪3-15)
+- Video tour: 25 credits
+- Quote analysis: 3 credits
+- Receipt scan: 1 credit
+- Style Match: 3 credits
+- Shop the Look: 3 credits
+- Floor plan: 5 credits
+- Bill of quantities: 5 credits
 
-## Market Data
-Our pricing is based on Midrag.co.il market research with over 2.8 million reviews on 11,705+ professionals across Israel.
+## Key Differentiators
+- Hebrew-first interface (fully RTL)
+- 7 AI tools in one platform (competitors offer 1-2)
+- Bill of quantities generation (unique in Israel)
+- Quote analysis with market price comparison
+- Video room tours
+- Built for the Israeli renovation market
+
+## vs InteriorAI
+ShiputzAI offers 7 AI tools (visualization, style match, shop the look, video tours, floor plans, bill of quantities, quote analysis) with a Hebrew interface. InteriorAI offers basic room visualization only in English with no Hebrew support.
+
+## FAQ
+Q: How much does a renovation visualization cost?
+A: 5 credits per visualization, approximately ₪3-15 depending on plan. Free users get 10 credits on signup.
+
+Q: Can I try without signing up?
+A: Yes. Upload a photo and get a full result as a guest. Sign up to save results and get more credits.
+
+Q: Is it suitable for professionals?
+A: Yes. Interior designers, architects, contractors, and real estate agents use ShiputzAI for client presentations, bill of quantities, and quote analysis.
+
+Q: How does the visualization work?
+A: Upload a room photo, describe what you want to change, and AI generates a new image of the redesigned room in 30 seconds.
+
+Q: What's the difference between ShiputzAI and InteriorAI?
+A: ShiputzAI is Hebrew-first with 7 AI tools including unique features like bill of quantities and video tours. InteriorAI offers basic visualization only in English.
 
 ## Contact
 - Email: help@shipazti.com
@@ -47,21 +81,21 @@ Our pricing is based on Midrag.co.il market research with over 2.8 million revie
 
 ## Important Pages
 - Homepage: https://shipazti.com
-- Pricing: https://shipazti.com/#pricing
-- Tips & Articles: https://shipazti.com/tips
+- Pricing: https://shipazti.com/pricing
 - AI Visualization: https://shipazti.com/visualize
-- Sign Up: https://shipazti.com/signup
-- Login: https://shipazti.com/login
+- Style Match: https://shipazti.com/style-match
+- Shop the Look: https://shipazti.com/shop-look
+- Floor Plan: https://shipazti.com/floorplan
+- Tips & Articles: https://shipazti.com/tips
+- Contact: https://shipazti.com/contact
 
 ## Company
-Created by Guy Cezana
+Founded by Guy Cezana, 2025
 Based in Israel
+Built with Next.js, Google Gemini AI, Supabase, PayPlus
 
-## Technical
-- Built with Next.js
-- AI powered by Google Gemini
-- Payments via PayPlus
-- Database: Supabase
+## Keywords (Hebrew)
+הדמיית שיפוץ, עיצוב פנים AI, הדמיית חדר, עיצוב הבית בינה מלאכותית, כמה עולה שיפוץ, כתב כמויות, ניתוח הצעת מחיר, סרטון סיור AI
 
-## Keywords
-שיפוצים, ניהול שיפוץ, תקציב שיפוץ, מחשבון שיפוצים, הדמיית שיפוץ, סריקת קבלות, home renovation, renovation budget, Israel
+## Keywords (English)
+AI interior design, room visualization AI, home renovation AI, Israel home design, AI room makeover, before after renovation AI, AI bill of quantities

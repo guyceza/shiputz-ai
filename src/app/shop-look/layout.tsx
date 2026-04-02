@@ -1,22 +1,16 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shop the Look",
-  description: "לחץ על המוצרים בתמונה ומצא איפה לקנות אותם. השוואת מחירים בין רשתות הריהוט המובילות בישראל.",
-  alternates: {
-    canonical: "https://shipazti.com/shop-look",
-  },
+  title: "Shop the Look — מצאו ורכשו כל פריט מתמונה | ShiputzAI",
+  description: "Shop the Look של ShiputzAI מזהה כל פריט בתמונת עיצוב ועוזר למצוא אותו לרכישה. לחצו על ספה, שולחן או מנורה בתמונה וקבלו קישורי קנייה — AI שעובד בשבילכם.",
+  keywords: ["Shop the Look", "מציאת מוצרים מתמונה", "AI product detection", "רהיטים", "קניות עיצוב", "ShiputzAI"],
   openGraph: {
-    title: "Shop the Look | ShiputzAI",
-    description: "מצא ורכוש את המוצרים מהדמיית השיפוץ שלך",
-    images: ["/og-image.jpg"],
+    title: "Shop the Look — קנו מה שאתם רואים | ShiputzAI",
+    description: "AI מזהה פריטי עיצוב בתמונה ועוזר למצוא אותם לרכישה.",
+    url: "https://shipazti.com/shop-look",
   },
 };
 
-export default function ShopLookLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }

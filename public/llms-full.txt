@@ -282,6 +282,16 @@ AI interior design Israel, room visualization AI, renovation visualization, Ship
 - Room Visualization: https://shipazti.com/dashboard (main tool)
 - Profile/Settings: https://shipazti.com/dashboard#settings
 
+### Content & Guide Pages
+- Best AI Interior Design Tools 2026: https://shipazti.com/tips/best-ai-interior-design-tools
+- ShiputzAI vs InteriorAI: https://shipazti.com/tips/shiputzai-vs-interiorai
+- AI Renovation Visualization Pricing: https://shipazti.com/tips/how-much-renovation-visualization
+- AI Kitchen Visualization: https://shipazti.com/tips/ai-kitchen-visualization
+- AI Living Room Design Styles: https://shipazti.com/tips/ai-living-room-design
+- AI Interior Design Israel Guide: https://shipazti.com/tips/ai-interior-design-israel
+- AI Bill of Quantities: https://shipazti.com/tips/bill-of-quantities-ai
+- Renovation Cost Calculator Israel: https://shipazti.com/tips/renovation-cost-calculator
+
 ### Machine-Readable
 - llms.txt: https://shipazti.com/llms.txt
 - llms-full.txt: https://shipazti.com/llms-full.txt

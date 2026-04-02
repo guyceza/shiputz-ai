@@ -14,7 +14,36 @@ export interface Article {
   faq?: FaqItem[];
 }
 
+// New standalone pages (have their own page.tsx, not using [slug] route)
+// Listed here so they appear in the tips index
+const standalonePages: {slug: string; title: string; excerpt: string; category: string; readingTime: number}[] = [
+  { slug: "best-ai-interior-design-tools", title: "5 כלי AI לעיצוב פנים — השוואה מלאה 2026", excerpt: "השוואה מלאה בין 5 כלי AI לעיצוב פנים: ShiputzAI, InteriorAI, RoomGPT, Spacely AI ו-ReRoom", category: "AI", readingTime: 8 },
+  { slug: "shiputzai-vs-interiorai", title: "ShiputzAI לעומת InteriorAI — השוואה מפורטת", excerpt: "השוואה מפורטת: מחירים, תכונות, עברית, ומי מתאים יותר לשוק הישראלי", category: "AI", readingTime: 7 },
+  { slug: "how-much-renovation-visualization", title: "כמה עולה הדמיית עיצוב פנים? מחירון 2026", excerpt: "מחירון מלא: מעצב 3D לעומת AI, מחירים, יתרונות וחסרונות", category: "תקציב", readingTime: 6 },
+  { slug: "ai-kitchen-visualization", title: "הדמיית שיפוץ מטבח — 4 סגנונות פופולריים עם AI", excerpt: "מדריך להדמיית שיפוץ מטבח: 4 סגנונות, עלויות, וטיפים לתוצאה מושלמת", category: "חדרים", readingTime: 6 },
+  { slug: "ai-living-room-design", title: "עיצוב סלון — 7 סגנונות להדמיה בבינה מלאכותית", excerpt: "7 סגנונות סלון: מודרני, סקנדינבי, בוהו, תעשייתי ועוד. פלטות צבעים וטיפים", category: "חדרים", readingTime: 7 },
+  { slug: "ai-interior-design-israel", title: "עיצוב פנים AI בישראל — המדריך המלא 2026", excerpt: "7 כלים, השוואות, מחירים, ואיך להתחיל עם עיצוב פנים AI בישראל", category: "AI", readingTime: 10 },
+  { slug: "bill-of-quantities-ai", title: "כתב כמויות AI — איך לחסוך אלפי שקלים", excerpt: "כתב כמויות אוטומטי עם AI: איך זה עובד והשוואה למסורתי", category: "תקציב", readingTime: 6 },
+  { slug: "renovation-cost-calculator", title: "מחשבון עלות שיפוץ — כמה באמת עולה?", excerpt: "מחירים מעודכנים לפי חדר: מטבח, אמבטיה, סלון. 10 טיפים לחיסכון", category: "תקציב", readingTime: 7 },
+  { slug: "small-kitchen-design-ai", title: "עיצוב מטבח קטן — 8 רעיונות חכמים עם AI", excerpt: "ארונות גבוהים, צבעים בהירים, אי מתקפל ועוד. הדמיה תוך 30 שניות", category: "חדרים", readingTime: 6 },
+  { slug: "bathroom-renovation-cost", title: "כמה עולה שיפוץ חדר אמבטיה 2026 — מחירון מלא", excerpt: "פירוט מלא: הריסה, אינסטלציה, ריצוף, כלים סניטריים. ₪20,000-₪70,000", category: "תקציב", readingTime: 7 },
+  { slug: "scandinavian-design-israel", title: "עיצוב סקנדינבי בישראל — המדריך המלא", excerpt: "פשטות, פונקציונליות וחומרים טבעיים — התאמות לאקלים הישראלי", category: "טיפים", readingTime: 6 },
+  { slug: "modern-living-room-ideas", title: "15 רעיונות לסלון מודרני — השראה עם AI", excerpt: "צבעים, ריהוט, תאורה ואביזרים — כל מה שצריך לסלון מודרני 2026", category: "חדרים", readingTime: 7 },
+  { slug: "apartment-renovation-guide", title: "מדריך שיפוץ דירה — 10 צעדים מההתחלה ועד המפתח", excerpt: "תקציב, הדמיה, הצעות מחיר, חוזה, הריסה ועד גימורים — הכל בסדר", category: "תכנון", readingTime: 8 },
+  { slug: "minimalist-design-guide", title: "עיצוב מינימליסטי — פחות זה יותר", excerpt: "5 עקרונות, צבעים, רהיטים, וטיפים לכל חדר. לא ריק — מדויק", category: "טיפים", readingTime: 6 },
+  { slug: "bedroom-design-ai", title: "עיצוב חדר שינה — 6 סגנונות להדמיה בAI", excerpt: "Japandi, בוהו, מודרני, קוסטל, תעשייתי, קלאסי — הדמיה תוך 30 שניות", category: "חדרים", readingTime: 7 },
+  { slug: "contractor-quote-tips", title: "7 טיפים לקריאת הצעת מחיר מקבלן", excerpt: "דגלים אדומים, סעיפים חסרים, ותנאי תשלום — איך לא להיות פראייר", category: "קבלנים", readingTime: 6 },
+  { slug: "balcony-design-ideas", title: "עיצוב מרפסת — 10 רעיונות לחדר נוסף", excerpt: "פינת ישיבה, משרד, גינה, ברביקיו ועוד. מה מותר ומה דורש היתר", category: "חדרים", readingTime: 7 },
+  { slug: "industrial-design-style", title: "עיצוב תעשייתי — לופט, בטון חשוף וברזל", excerpt: "5 חומרים מפתח, סלון תעשייתי, מטבח, ומחירים. הדמיה עם AI", category: "טיפים", readingTime: 6 },
+];
+
 export const articles: Article[] = [
+  // Standalone pages as article entries (link to their own routes)
+  ...standalonePages.map(p => ({
+    ...p,
+    content: "",
+    relatedSlugs: [] as string[],
+  })),
   {
     slug: "renovation-costs-2026",
     title: "כמה באמת עולה שיפוץ דירה ב-2026?",

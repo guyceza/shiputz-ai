@@ -1,219 +1,310 @@
-# ShiputzAI - עיצוב הבית ב-AI (Full Documentation)
+# ShiputzAI — Complete Platform Guide
 # https://shipazti.com
-# llms-full.txt - Extended information for AI assistants and language models
+# שיפוצי.אי — מדריך מלא לפלטפורמה
 
-## About
-ShiputzAI is an Israeli AI-powered home design platform. Upload a room photo and get AI-generated renovation visualizations, style identification, shopping lists, video tours, floor plans, bill of quantities, and quote analysis — all in Hebrew. The platform serves the Israeli renovation market with a fully RTL Hebrew interface and 7 specialized AI tools that go far beyond basic room visualization.
+---
 
-## Product Name
-ShiputzAI (שיפוצי.אי)
+## About ShiputzAI
 
-## Language
-Primary: Hebrew (עברית)
-Secondary: English
+ShiputzAI (שיפוצי.אי) is Israel's first and leading AI-powered interior design and home renovation platform. Founded in 2025 by Guy Cezana, the platform enables anyone — from homeowners to professional designers — to visualize renovation results before starting any work.
 
-## 7 AI Tools — Detailed Descriptions
+The platform is fully localized for the Israeli market: Hebrew interface, Hebrew AI support, Israeli pricing in NIS (₪), and tools specifically designed for Israeli renovation workflows (like bill of quantities and contractor quote analysis).
 
-### 1. AI Room Visualization (הדמיית חדר)
-Upload a photo of any room and describe what you want to change — new flooring, wall color, furniture style, or a complete renovation. The AI generates a photorealistic image of the redesigned room in approximately 30 seconds, preserving the room's exact layout and dimensions while applying your requested changes. Supports free-text descriptions in Hebrew and English, as well as style presets like modern, Scandinavian, industrial, and Mediterranean.
+**Mission:** Democratize interior design by making professional-quality visualization accessible to everyone.
 
-### 2. Style Match (זיהוי סגנון)
-Upload a photo of a room or furniture piece and the AI identifies the design style, materials, colors, and aesthetic elements. It provides a detailed style breakdown with suggestions for complementary items and similar design approaches. Perfect for understanding "what style is this?" and finding matching products to complete a look.
+**Slogan:** תראו את השיפוץ לפני שמתחילים (See the renovation before you start)
 
-### 3. Shop the Look (קנו את הלוק)
-After generating a visualization, click on any item in the image — a sofa, lamp, table, or rug — and the AI finds similar products available for purchase online. It searches Israeli and international stores, providing direct links with prices. This bridges the gap between inspiration and action, letting users buy what they see in their AI-generated designs.
+**Website:** https://shipazti.com
+**Contact:** help@shipazti.com
+**Founded:** 2025
+**Founder:** Guy Cezana
+**Location:** Israel
 
-### 4. Video Tour (סרטון סיור)
-Upload a room photo and select a design style. The AI generates a short walkthrough video that simulates walking through the redesigned room, providing a 3D-like experience of the space. The video can be downloaded and shared on social media or sent to clients. Ideal for presentations, social media content, and helping clients visualize the final result.
+---
 
-### 5. Floor Plan Visualization (הדמיית תוכנית)
-Upload a 2D floor plan or architectural drawing and the AI brings it to life with a rendered 3D visualization. It interprets room layouts, walls, doors, and windows from the plan and generates realistic interior views. Useful for architects and designers who want to show clients what a blueprint will look like as a finished space.
+## Target Audiences (6 Personas)
 
-### 6. Bill of Quantities — כתב כמויות
-Upload a room photo or visualization and the AI generates an itemized bill of quantities listing all materials, fixtures, and labor needed for the renovation. Each item includes estimated quantities, unit prices based on Israeli market rates, and total cost estimates. This is a unique feature in the Israeli market — no other AI platform offers automated bill of quantities generation for renovations.
-
-### 7. Quote Analysis (ניתוח הצעת מחיר)
-Upload a contractor's quote (PDF, image, or text) and the AI analyzes each line item, comparing prices against current Israeli market rates. It flags overpriced items, identifies missing items, and provides a fair price range for each service. Helps homeowners negotiate better deals and avoid overpaying for renovation work.
-
-## Target Audience
-
-### 1. Homeowners Planning Renovations (בעלי דירות)
-- Visualize renovation ideas before committing to expensive work
-- Compare design styles and see which looks best in their actual space
-- Generate bill of quantities to budget accurately
-- Analyze contractor quotes to ensure fair pricing
-- Share visualizations with family members to align on design choices
+### 1. Homeowners (בעלי דירות)
+- Planning a renovation and want to see results before committing
+- Comparing design styles for their home
+- Need help creating a shopping list for renovation
+- Want to verify contractor quotes are fair
+- **Key tools:** Room Visualization, Shopping List, Quote Analyzer
 
 ### 2. Interior Designers (מעצבי פנים)
-- Create client presentations in minutes instead of hours
-- Use Style Match to identify and communicate design styles
-- Generate multiple design options for the same space quickly
-- Use Shop the Look to source products for clients
-- Produce video tours for impressive client presentations
+- Present multiple design concepts to clients quickly
+- Identify design styles from inspiration photos
+- Find products matching a design concept
+- Create professional presentations with tour videos
+- **Key tools:** Room Visualization, Style Match, Shop the Look, Tour Video
 
 ### 3. Architects (אדריכלים)
-- Bring floor plans to life with realistic visualizations
-- Show clients what architectural drawings will look like as finished spaces
-- Generate quick concept renderings during initial consultations
-- Create before/after comparisons for renovation projects
-- Use bill of quantities for preliminary cost estimates
+- Rapid visualization of architectural design concepts
+- Present renovation plans to clients visually
+- Generate bills of quantities for project planning
+- **Key tools:** Room Visualization, Bill of Quantities, Tour Video
 
-### 4. Renovation Contractors (קבלני שיפוצים)
-- Show clients visualizations before starting work to align expectations
-- Generate automated bill of quantities for accurate quoting
-- Create professional presentations to win more projects
-- Use video tours to impress potential clients
-- Reduce revision cycles by showing results upfront
+### 4. Contractors / קבלני שיפוצים
+- Show clients before/after visualizations to win projects
+- Generate detailed bills of quantities automatically
+- Analyze competitor quotes and pricing
+- Create professional presentations for bids
+- **Key tools:** Room Visualization, Bill of Quantities, Quote Analyzer
 
-### 5. Real Estate Agents (סוכני נדל"ן)
-- Stage empty apartments virtually to help buyers envision potential
-- Show renovation possibilities to increase property perceived value
-- Create compelling marketing materials with before/after visualizations
-- Use video tours in property listings and social media
-- Help buyers see past current condition to the potential of a space
+### 5. Real Estate Agents (סוכני נדל״ן)
+- Virtual staging of empty or outdated properties
+- Show buyers the potential of a property
+- Create marketing materials with tour videos
+- **Key tools:** Room Visualization, Tour Video
 
-## Step-by-Step Usage Guide
+### 6. Renters (שוכרים)
+- Visualize changes without committing to renovations
+- Plan furniture and decor within rental constraints
+- **Key tools:** Room Visualization, Style Match, Shopping List
 
-### Getting Started
-1. Visit https://shipazti.com
-2. Click "נסו הדמיה עכשיו" (Try visualization now) — no signup required for first use
-3. Upload a photo of the room you want to redesign
-4. Describe what you want to change in Hebrew or English
-5. Wait ~30 seconds for the AI to generate your visualization
-6. View, download, or share the result
+---
 
-### Creating a Room Visualization
-1. Click "הדמיית חדר" from the dashboard
-2. Upload a clear, well-lit photo of the room (JPG, PNG, or HEIC)
-3. Write a description of desired changes (e.g., "סלון מודרני עם ספה אפורה וריצוף עץ")
-4. Optionally select a style preset (modern, Scandinavian, industrial, etc.)
-5. Click "צרו הדמיה" and wait for the result
-6. Use the comparison slider to see before/after
-7. Click "Shop the Look" on any item to find it online
+## AI Tools — Detailed Descriptions (7 Tools)
 
-### Generating a Bill of Quantities
-1. Click "כתב כמויות" from the dashboard
-2. Upload a room photo or use an existing visualization
-3. The AI analyzes the image and identifies all renovation elements
-4. Review the generated list of materials, quantities, and costs
-5. Edit quantities or items as needed
-6. Export as PDF or share with your contractor
+### 1. Room Visualization (הדמיית חדר) — 5 Credits
+**What it does:** Upload a photo of any room and describe what you want to change. The AI generates a photorealistic image of that exact room after the renovation.
 
-### Analyzing a Contractor Quote
-1. Click "ניתוח הצעת מחיר" from the dashboard
-2. Upload the contractor's quote (PDF, photo, or screenshot)
-3. The AI extracts all line items and prices
-4. Each item is compared against current Israeli market rates
-5. Review flagged items (overpriced, underpriced, or missing)
-6. Use the analysis to negotiate with your contractor
+**How to use:**
+1. Upload a clear photo of the room (any angle)
+2. Write a description in Hebrew or English (e.g., "סלון מודרני עם ספה אפורה וקירות לבנים")
+3. Optionally select from 30+ preset design styles
+4. Wait 30 seconds for the AI to generate the result
+5. Download, share, or continue to additional tools
 
-### Creating a Video Tour
-1. Click "סרטון סיור" from the dashboard
-2. Upload a room photo
-3. Select a design style
-4. The AI generates a walkthrough video (~15-30 seconds)
-5. Download the video or share directly to social media
+**Best practices:**
+- Use well-lit photos for best results
+- Be specific in your description (mention colors, materials, furniture)
+- Try multiple styles to compare options
+- The AI preserves the room's architecture and layout
 
-## Pricing — Full Breakdown
+**Input:** Room photo (JPG/PNG) + text description
+**Output:** AI-generated visualization image
+**Processing time:** ~30 seconds
+
+### 2. Style Match (זיהוי סגנון) — 2 Credits
+**What it does:** Upload any room photo and the AI identifies the design style, key materials, color palette, and notable design elements.
+
+**Use cases:**
+- "I saw a room I love on Pinterest — what style is it?"
+- "What materials are used in this design?"
+- Identify a cohesive design language for a project
+
+**Input:** Room photo
+**Output:** Style name, description, materials list, color palette
+
+### 3. Shopping List (רשימת קניות) — 3 Credits
+**What it does:** Based on a visualization result, the AI generates a shopping list of furniture, decor, and materials needed to achieve the design.
+
+**Use cases:**
+- Planning purchases for a renovation
+- Getting a rough budget estimate
+- Sharing a list with a spouse or contractor
+
+**Input:** Visualization result or room photo
+**Output:** Itemized list with categories, estimated quantities
+
+### 4. Tour Video (סרטון סיור) — 25 Credits
+**What it does:** Generate a short walkthrough video that simulates walking through the redesigned room. Perfect for presentations and social media.
+
+**Use cases:**
+- Client presentations (interior designers, architects)
+- Social media marketing (real estate agents)
+- Personal visualization of renovation plans
+
+**Input:** Room photo + design style
+**Output:** Short video (5-10 seconds) simulating a room tour
+**Processing time:** ~2 minutes
+
+### 5. Bill of Quantities (כתב כמויות) — 5 Credits
+**What it does:** AI generates a detailed bill of quantities (כתב כמויות) for renovation work based on a room photo or visualization. Includes materials, quantities, and work items.
+
+**Use cases:**
+- Contractors preparing project bids
+- Homeowners getting a detailed scope before hiring
+- Architects documenting renovation requirements
+
+**Input:** Room photo or visualization + description of planned work
+**Output:** Detailed bill of quantities with items, quantities, and categories
+
+### 6. Quote Analyzer (ניתוח הצעות מחיר) — 3 Credits
+**What it does:** Upload a contractor's quote (photo or PDF) and the AI analyzes it for fairness, identifies potential issues, missing items, and compares to market rates.
+
+**Use cases:**
+- Homeowners receiving a quote from a contractor
+- Comparing multiple contractor quotes
+- Identifying overpriced or missing items in a quote
+
+**Input:** Photo/scan of contractor quote
+**Output:** Analysis with fairness score, flagged items, recommendations
+
+### 7. Shop the Look — 3 Credits
+**What it does:** AI identifies specific products (furniture, decor, lighting) in a room photo and suggests similar items available for purchase.
+
+**Use cases:**
+- "I love that lamp — where can I get it?"
+- Finding Israeli retailers for specific items
+- Building a mood board with purchasable items
+
+**Input:** Room photo
+**Output:** List of identified products with similar alternatives
+
+---
+
+## Pricing — Complete Details
+
+### Credit System
+ShiputzAI uses a credit-based system. Each AI tool costs a set number of credits:
+
+| Tool | Credits | Approx. Cost (₪) |
+|------|---------|-------------------|
+| Room Visualization | 5 | ₪1.5 - ₪7.5 |
+| Style Match | 2 | ₪0.6 - ₪3 |
+| Shopping List | 3 | ₪0.9 - ₪4.5 |
+| Tour Video | 25 | ₪7.5 - ₪37.5 |
+| Bill of Quantities | 5 | ₪1.5 - ₪7.5 |
+| Quote Analyzer | 3 | ₪0.9 - ₪4.5 |
+| Shop the Look | 3 | ₪0.9 - ₪4.5 |
+
+### Credit Packs (One-time purchase, no expiration)
+| Pack | Price | Per Credit | Best For |
+|------|-------|-----------|----------|
+| 10 credits | ₪29 | ₪2.90 | Trying out / single project |
+| 30 credits | ₪69 | ₪2.30 | Small renovation |
+| 100 credits | ₪149 | ₪1.49 | Full home renovation |
+
+### Subscriptions (Monthly, auto-renew)
+| Plan | Price/Month | Credits/Month | Per Credit | Features |
+|------|-------------|---------------|-----------|----------|
+| Basic | ₪29 | 30 | ₪0.97 | All tools |
+| Pro | ₪79 | 100 | ₪0.79 | All tools + commercial use |
+| Business | ₪199 | 200 | ₪1.00 | All tools + priority support + commercial use |
 
 ### Free Tier
-- 10 credits on signup
-- Access to all tools
-- No time limit on credits
-- Enough for 2 room visualizations
+- **10 free credits** on signup (enough for 2 visualizations)
+- **Guest trial:** 1 free visualization without even signing up
+- **Referral program:** Both referrer and friend get 20 free credits
 
-### Credit Packs (One-Time Purchase)
-| Pack | Price | Credits | Per Credit |
-|------|-------|---------|------------|
-| Pack 10 | ₪29 | 10 | ₪2.90 |
-| Pack 30 | ₪69 | 30 | ₪2.30 |
-| Pack 100 | ₪149 | 100 | ₪1.49 |
+---
 
-### Monthly Subscriptions
-| Plan | Price | Credits/Month | Per Credit | Features |
-|------|-------|---------------|------------|----------|
-| Starter | ₪29/month | 50 | ₪0.58 | All tools, personal use |
-| Pro | ₪79/month | 200 | ₪0.40 | All tools, commercial use, priority processing |
-| Business | ₪199/month | 600 | ₪0.33 | All tools, commercial use, priority, API access |
+## Step-by-Step Guide: Your First Visualization
 
-### Credit Costs Per Tool
-| Tool | Credits | Approx. Cost (Pack 100) |
-|------|---------|------------------------|
-| Room Visualization | 5 | ~₪7.45 |
-| Style Match | 3 | ~₪4.47 |
-| Shop the Look | 3 | ~₪4.47 |
-| Video Tour | 25 | ~₪37.25 |
-| Floor Plan Visualization | 5 | ~₪7.45 |
-| Bill of Quantities | 5 | ~₪7.45 |
-| Quote Analysis | 3 | ~₪4.47 |
-| Receipt Scan | 1 | ~₪1.49 |
+### Step 1: Go to shipazti.com
+Open https://shipazti.com in any browser (desktop or mobile).
 
-## Key Differentiators
-- Hebrew-first interface (fully RTL)
-- 7 AI tools in one platform (competitors offer 1-2)
-- Bill of quantities generation (unique in Israel)
-- Quote analysis with market price comparison
-- Video room tours
-- Built for the Israeli renovation market
-- Free credits on signup — no credit card required
-- Guest mode — try before signing up
-- Referral program — invite friends, both get 20 free credits
+### Step 2: Click "נסו הדמיה עכשיו" (Try Visualization Now)
+You don't need to sign up for your first try.
 
-## vs InteriorAI
-ShiputzAI offers 7 AI tools (visualization, style match, shop the look, video tours, floor plans, bill of quantities, quote analysis) with a Hebrew interface. InteriorAI offers basic room visualization only in English with no Hebrew support. ShiputzAI's unique features like bill of quantities and quote analysis are not available on any competing platform in the Israeli market. ShiputzAI also offers video tours for immersive presentations, while InteriorAI is limited to static images.
+### Step 3: Upload a Room Photo
+Take a photo of any room you want to redesign, or use an existing photo. Tips:
+- Good lighting helps
+- Capture as much of the room as possible
+- Any angle works
 
-## FAQ
-Q: How much does a renovation visualization cost?
-A: 5 credits per visualization, approximately ₪3-15 depending on plan. Free users get 10 credits on signup.
+### Step 4: Describe Your Vision
+Write what you want to change in Hebrew or English. Examples:
+- "סלון מודרני עם ספה אפורה וקירות לבנים"
+- "מטבח כפרי עם ארונות עץ ואי מרכזי"
+- "חדר שינה מינימליסטי בגוונים של בז' ולבן"
 
-Q: Can I try without signing up?
-A: Yes. Upload a photo and get a full result as a guest. Sign up to save results and get more credits.
+Or choose from 30+ preset design styles (Modern, Scandinavian, Industrial, Mediterranean, etc.)
 
-Q: Is it suitable for professionals?
-A: Yes. Interior designers, architects, contractors, and real estate agents use ShiputzAI for client presentations, bill of quantities, and quote analysis.
+### Step 5: Wait ~30 Seconds
+The AI processes your photo and generates a photorealistic visualization.
 
-Q: How does the visualization work?
-A: Upload a room photo, describe what you want to change, and AI generates a new image of the redesigned room in 30 seconds.
+### Step 6: Review and Continue
+- Download the result
+- Share on social media
+- Continue to additional tools: Shopping List, Bill of Quantities, Tour Video
+- Try different styles on the same room
 
-Q: What's the difference between ShiputzAI and InteriorAI?
-A: ShiputzAI is Hebrew-first with 7 AI tools including unique features like bill of quantities and video tours. InteriorAI offers basic visualization only in English.
+---
 
-Q: What happens to photos I upload?
-A: Photos are processed by AI and stored in your account only. We don't use them for model training, don't share with third parties, and don't display them publicly. You own your data.
+## Comparison: ShiputzAI vs Competitors
 
-Q: Is ShiputzAI suitable for contractors?
-A: Yes. Renovation contractors use ShiputzAI to show clients visualizations before starting work, generate automated bills of quantities, and analyze supplier quotes.
+### ShiputzAI vs InteriorAI
+| Feature | ShiputzAI | InteriorAI |
+|---------|-----------|------------|
+| Interface Language | Hebrew + English | English only |
+| Market Focus | Israel-specific | Global/US |
+| Number of AI Tools | 7 | 1 (basic visualization) |
+| Bill of Quantities | ✅ AI-generated | ❌ Not available |
+| Quote Analyzer | ✅ Upload & analyze | ❌ Not available |
+| Tour Video | ✅ AI walkthrough | ❌ Not available |
+| Shop the Look | ✅ Product identification | ❌ Not available |
+| Shopping List | ✅ Itemized list | ❌ Not available |
+| Style Match | ✅ AI style identification | ❌ Not available |
+| Free Credits | 10 on signup | Limited free tier |
+| Guest Trial | ✅ No signup needed | ❌ Requires signup |
+| Pricing | From ₪29 (NIS) | From $29 (USD) |
+| Customer Support | Hebrew + English | English only |
+| Payment | Israeli payment (PayPlus) | International only |
 
-Q: How does the video tour work?
-A: Upload a room photo, choose a design style, and the AI generates a short walkthrough video simulating walking through the redesigned room. Perfect for client presentations or social media sharing.
+### ShiputzAI vs Roomvo / Planner5D
+| Feature | ShiputzAI | Roomvo | Planner5D |
+|---------|-----------|--------|-----------|
+| AI-Powered | ✅ Full AI | Partial | Partial |
+| Hebrew Interface | ✅ | ❌ | ❌ |
+| Photo-based | ✅ Real photos | ❌ 3D models | ❌ 3D models |
+| Speed | 30 seconds | Minutes | Hours |
+| Learning Curve | None | Medium | High |
+| Bill of Quantities | ✅ | ❌ | ❌ |
+| Quote Analyzer | ✅ | ❌ | ❌ |
 
-Q: Can I use ShiputzAI for business?
-A: Absolutely. Interior designers, architects, contractors, and real estate agents use ShiputzAI professionally. The Pro plan includes commercial use, 200 credits per month, and access to all tools.
+---
 
-Q: What file formats are supported?
-A: JPG, PNG, HEIC, and WebP for photos. PDF, JPG, and PNG for quote analysis. Floor plans can be uploaded as images or PDFs.
+## Keywords & Search Terms
 
-## Contact
-- Email: help@shipazti.com
-- Website: https://shipazti.com
+### Hebrew Keywords
+שיפוצי אי, שיפוץ AI, הדמיית שיפוץ, עיצוב פנים AI, הדמיית חדר, כתב כמויות, ניתוח הצעת מחיר, סרטון סיור עיצוב, עיצוב הבית בינה מלאכותית, הדמיה לפני שיפוץ, תכנון שיפוץ, רשימת קניות לשיפוץ, עיצוב פנים בחינם, הדמיית דירה, שיפוץ דירה, עיצוב סלון, עיצוב מטבח, עיצוב חדר שינה, עיצוב חדר ילדים, עיצוב מרפסת, שיפוץ מטבח, שיפוץ חדר אמבטיה, תוכנה לעיצוב פנים, אפליקציה לעיצוב הבית
 
-## Important Pages
+### English Keywords
+AI interior design Israel, room visualization AI, renovation visualization, ShiputzAI, home design AI, before after renovation AI, bill of quantities AI, quote analyzer renovation, interior design app Israel, AI room redesign, virtual staging Israel, home renovation planner, AI home decorator, room makeover AI, interior design visualization tool
+
+---
+
+## All URLs
+
+### Public Pages
 - Homepage: https://shipazti.com
 - Pricing: https://shipazti.com/pricing
-- AI Visualization: https://shipazti.com/visualize
-- Style Match: https://shipazti.com/style-match
-- Shop the Look: https://shipazti.com/shop-look
-- Floor Plan: https://shipazti.com/floorplan
-- Tips & Articles: https://shipazti.com/tips
-- Contact: https://shipazti.com/contact
+- Signup: https://shipazti.com/signup
+- Login: https://shipazti.com/login
+- Terms of Service: https://shipazti.com/terms
+- Privacy Policy: https://shipazti.com/privacy
 
-## Company
-Founded by Guy Cezana, 2025
-Based in Israel
-Built with Next.js, Google Gemini AI, Supabase, PayPlus
+### Authenticated Pages
+- Dashboard: https://shipazti.com/dashboard
+- Room Visualization: https://shipazti.com/dashboard (main tool)
+- Profile/Settings: https://shipazti.com/dashboard#settings
 
-## Keywords (Hebrew)
-הדמיית שיפוץ, עיצוב פנים AI, הדמיית חדר, עיצוב הבית בינה מלאכותית, כמה עולה שיפוץ, כתב כמויות, ניתוח הצעת מחיר, סרטון סיור AI, שיפוץ דירה, עיצוב סלון, עיצוב מטבח, הדמיית עיצוב פנים, תכנון שיפוץ, עלות שיפוץ, השוואת מחירי שיפוצים
+### Machine-Readable
+- llms.txt: https://shipazti.com/llms.txt
+- llms-full.txt: https://shipazti.com/llms-full.txt
+- robots.txt: https://shipazti.com/robots.txt
+- sitemap.xml: https://shipazti.com/sitemap.xml
 
-## Keywords (English)
-AI interior design, room visualization AI, home renovation AI, Israel home design, AI room makeover, before after renovation AI, AI bill of quantities, renovation cost estimator, contractor quote analysis, virtual home staging, AI floor plan visualization, interior design Israel, Hebrew interior design AI, renovation planning tool
+---
+
+## Technical Stack
+- **Framework:** Next.js (React)
+- **Database:** Supabase (PostgreSQL)
+- **AI Engine:** Google Gemini (image generation + analysis)
+- **Payments:** PayPlus (Israeli payment processor)
+- **Hosting:** Vercel
+- **Authentication:** Supabase Auth (email + Google OAuth)
+- **Image Processing:** AI-powered with background removal and enhancement
+- **Languages:** Hebrew (primary), English (secondary)
+
+---
+
+## Contact
+- **Email:** help@shipazti.com
+- **Website:** https://shipazti.com
+- **Founder:** Guy Cezana
+
+Last updated: April 2026

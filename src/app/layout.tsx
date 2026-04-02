@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     default: "ShiputzAI - עיצוב הבית ב-AI",
     template: "%s | ShiputzAI",
   },
-  description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים — הדמיות, זיהוי סגנון, רשימת קניות, סרטון סיור וניתוח הצעות מחיר.",
-  keywords: ["עיצוב פנים", "הדמיות AI", "עיצוב הבית", "הדמיית חדר", "Style Match", "Shop the Look", "AI", "בינה מלאכותית", "עיצוב דירה", "שיפוץ"],
+  description: "ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים ושיפוצים באמצעות AI. 7 כלים בפלטפורמה אחת: הדמיות חדרים, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון, רשימת קניות ותוכנית קומה. ממשק בעברית, תוצאות תוך שניות.",
+  keywords: ["עיצוב פנים AI", "הדמיית שיפוץ", "הדמיות AI", "עיצוב הבית", "הדמיית חדר", "כתב כמויות", "ניתוח הצעת מחיר", "סרטון סיור", "ShiputzAI", "שיפוצי AI", "עיצוב פנים בינה מלאכותית", "Style Match", "Shop the Look", "AI interior design Israel", "best AI interior design tool", "renovation visualization"],
   authors: [{ name: "ShiputzAI" }],
   creator: "ShiputzAI",
   metadataBase: new URL("https://shipazti.com"),
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     url: "https://shipazti.com",
     siteName: "ShiputzAI",
     title: "ShiputzAI - עיצוב הבית ב-AI",
-    description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים — הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור.",
+    description: "ShiputzAI — הכלי המוביל בישראל להדמיית עיצוב פנים ב-AI. 7 כלים: הדמיות, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
     images: [
       {
         url: "/og-image.jpg",
@@ -141,6 +141,28 @@ export default function RootLayout({
             gtag('js', new Date());
             gtag('config', 'G-R50X5M6ZDL');
             gtag('config', 'AW-17986657494');
+            
+            // Track AI search referrals
+            var ref = document.referrer || '';
+            var aiPattern = /chatgpt|perplexity|gemini|claude|copilot|you\.com|phind|bing\.com\/chat/i;
+            if (aiPattern.test(ref)) {
+              gtag('event', 'ai_referral', {
+                'event_category': 'acquisition',
+                'event_label': ref.match(aiPattern)[0],
+                'referrer': ref
+              });
+            }
+            // Also track UTM from AI sources
+            var params = new URLSearchParams(window.location.search);
+            var utmSource = params.get('utm_source') || '';
+            if (aiPattern.test(utmSource)) {
+              gtag('event', 'ai_utm_referral', {
+                'event_category': 'acquisition',
+                'event_label': utmSource,
+                'utm_medium': params.get('utm_medium') || '',
+                'utm_campaign': params.get('utm_campaign') || ''
+              });
+            }
           `}
         </Script>
         {/* Microsoft Clarity */}

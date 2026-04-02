@@ -11,8 +11,31 @@ Disallow: /checkout/
 Disallow: /checkout-vision/
 Disallow: /lp/
 
+# Explicitly allow AI crawlers
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
 # Sitemap
 Sitemap: https://shipazti.com/sitemap.xml
 
-# LLMs
-# Information for AI assistants: https://shipazti.com/llms.txt
+# LLMs — structured info for AI assistants
+# https://shipazti.com/llms.txt
+# https://shipazti.com/llms-full.txt

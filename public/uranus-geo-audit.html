@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דוח GEO — Uranus Invest</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0,200,150,0.08) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+
+  .cover h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00c896, #00a0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .cover .subtitle {
+    font-size: 1.5rem;
+    color: #888;
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+
+  .cover .meta {
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  .cover .score-big {
+    font-size: 8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ff4444, #ff8800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 30px 0 10px;
+    line-height: 1;
+  }
+
+  .cover .score-label {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 40px;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 60px 0 30px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #222;
+    color: #fff;
+  }
+
+  h2 .emoji { margin-left: 10px; }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #00c896;
+    margin: 30px 0 15px;
+  }
+
+  p { margin-bottom: 16px; color: #bbb; }
+
+  .section-intro {
+    font-size: 1.1rem;
+    color: #999;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #111;
+    border-radius: 12px;
+    border-right: 4px solid #00c896;
+  }
+
+  /* Status cards */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .status-card {
+    background: #111;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #222;
+  }
+
+  .status-card.good { border-right: 4px solid #00c896; }
+  .status-card.bad { border-right: 4px solid #ff4444; }
+  .status-card.warn { border-right: 4px solid #ffaa00; }
+
+  .status-card .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .status-card .value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #e0e0e0;
+  }
+
+  .status-card.good .icon { color: #00c896; }
+  .status-card.bad .icon { color: #ff4444; }
+  .status-card.warn .icon { color: #ffaa00; }
+
+  /* Checklist */
+  .checklist {
+    list-style: none;
+    margin: 20px 0;
+  }
+
+  .checklist li {
+    padding: 16px 20px;
+    background: #111;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid #1a1a1a;
+  }
+
+  .checklist li .check {
+    font-size: 1.2rem;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .checklist li .text { flex: 1; }
+  .checklist li .text strong { color: #fff; }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #111;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  th {
+    background: #1a1a1a;
+    padding: 14px 16px;
+    text-align: right;
+    font-weight: 600;
+    color: #00c896;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-top: 1px solid #1a1a1a;
+    color: #bbb;
+  }
+
+  tr:hover td { background: #151515; }
+
+  .severity-critical {
+    display: inline-block;
+    background: #ff4444;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .severity-high {
+    display: inline-block;
+    background: #ff8800;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .severity-medium {
+    display: inline-block;
+    background: #ffaa00;
+    color: #000;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .severity-low {
+    display: inline-block;
+    background: #00c896;
+    color: #000;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Data highlight */
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #111;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+  }
+
+  .data-row .engine { font-weight: 600; color: #fff; }
+  .data-row .citations { color: #00c896; font-weight: 700; font-size: 1.2rem; }
+  .data-row .conversion { color: #ffaa00; font-weight: 500; }
+  .data-row .detail { color: #888; font-size: 0.9rem; }
+
+  /* CTA box */
+  .cta-box {
+    background: linear-gradient(135deg, #0d2818, #0a1a2e);
+    border: 1px solid #00c896;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    margin: 60px 0;
+  }
+
+  .cta-box h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+
+  .cta-box p { color: #aaa; }
+
+  .priority-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .priority-1 { background: #ff4444; color: #fff; }
+  .priority-2 { background: #ff8800; color: #fff; }
+  .priority-3 { background: #ffaa00; color: #000; }
+
+  .timeline {
+    position: relative;
+    margin: 30px 0;
+    padding-right: 30px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #222;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #111;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    right: -26px;
+    top: 24px;
+    width: 12px;
+    height: 12px;
+    background: #00c896;
+    border-radius: 50%;
+    border: 2px solid #0a0a0a;
+  }
+
+  .timeline-item .week {
+    font-size: 0.8rem;
+    color: #00c896;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-item h4 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  .timeline-item ul {
+    list-style: none;
+    color: #999;
+  }
+
+  .timeline-item ul li {
+    padding: 4px 0;
+    padding-right: 20px;
+    position: relative;
+  }
+
+  .timeline-item ul li::before {
+    content: '→';
+    position: absolute;
+    right: 0;
+    color: #444;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 40px;
+    color: #444;
+    font-size: 0.85rem;
+    border-top: 1px solid #1a1a1a;
+    margin-top: 60px;
+  }
+
+  @media (max-width: 768px) {
+    .status-grid { grid-template-columns: 1fr; }
+    .cover h1 { font-size: 2.2rem; }
+    .cover .score-big { font-size: 5rem; }
+    .container { padding: 30px 20px; }
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .cover { min-height: auto; padding: 60px 40px; background: #fff; }
+    .cover h1 { -webkit-text-fill-color: #00c896; }
+    .cover .score-big { -webkit-text-fill-color: #ff4444; }
+    .status-card, .checklist li, table, .data-row, .timeline-item, .cta-box, .section-intro {
+      background: #f8f8f8; border-color: #ddd;
+    }
+    th { background: #eee; }
+    td, p, .status-card .value, .checklist li .text { color: #333; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <h1>דוח ביקורת GEO</h1>
+  <div class="subtitle">Generative Engine Optimization — uranus-invest.co.il</div>
+  <div class="score-big">5/10</div>
+  <div class="score-label">ציון נוכחות AI Search</div>
+  <div class="meta">
+    תאריך: 3 באפריל 2026 &nbsp;|&nbsp; מבוסס על מחקר 118,000 תשובות AI &nbsp;|&nbsp; 8 מקורות מקצועיים
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- EXECUTIVE SUMMARY -->
+  <h2><span class="emoji">📋</span> תקציר מנהלים</h2>
+  
+  <div class="section-intro">
+    <strong>GEO (Generative Engine Optimization)</strong> — האופטימיזציה לתשובות AI. כש-40% מקוני B2B כבר חוקרים ב-ChatGPT/Gemini/Perplexity, מי שלא מופיע בתשובות AI — פשוט לא קיים.<br><br>
+    <strong>Uranus Invest</strong> עשתה עבודה טובה בהקמת תשתית (schemas, llms.txt, תוכן מקצועי), אבל <strong>בעיה קריטית אחת</strong> מונעת מכל זה לעבוד: <strong>robots.txt חוסם את כל ה-AI crawlers</strong>. זה כמו לשים שלט מקצועי על חנות נעולה.
+  </div>
+
+  <!-- WHAT EXISTS -->
+  <h2><span class="emoji">✅</span> מה כבר קיים ועובד</h2>
+
+  <ul class="checklist">
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>llms.txt</strong> — קובץ מפורט ומותאם אישית (Yoast). כולל עמודים, פוסטים, דפי נחיתה, סקירות שוק, קטגוריות. <em>מצוין.</em></span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>Organization Schema</strong> (Yoast) — שם, לוגו, alternateName בעברית, sameAs (Facebook, YouTube, Google Maps)</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>FAQPage Schema</strong> — שאלות ותשובות מובנות על דף הבית (6 שאלות)</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>Product Schema + AggregateRating</strong> — דירוג 4.9/5 מ-357 ביקורות. אות סמכות חזק.</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>BreadcrumbList + WebSite + SearchAction</strong> — מבנה אתר נגיש למנועים</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>Meta Description + OG Tags</strong> — מלאים, בעברית, עם תמונה</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>Sitemap</strong> — 7 sitemaps (דפים, פוסטים, דפי נחיתה, מאמרים, משרות, סקירות שוק, קטגוריות)</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>תוכן HTML server-side</strong> — 30+ מופעי תוכן עברי ב-HTML source (לא רק JavaScript). AI crawlers יכולים לקרוא.</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>~17 פוסטים מקצועיים</strong> — מידע מקצועי, השקעות קריפטו, סקירות שוק</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>דף אודות</strong> — תום בוקאי, רקע צבאי (דובדבן), תואר הנדסת תוכנה, 10 שנות ניסיון</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>דף VSL מקיף</strong> — FAQs, עדויות לקוחות, השוואות, CTA</span>
+    </li>
+    <li>
+      <span class="check">✅</span>
+      <span class="text"><strong>JSON-LD מותאם אישית</strong> — Organization schema מורחב עם Code Snippets (founder, כתובת, כתבות)</span>
+    </li>
+  </ul>
+
+  <!-- PROBLEMS -->
+  <h2><span class="emoji">🔴</span> מה צריך לתקן</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>בעיה</th>
+        <th>חומרה</th>
+        <th>פעולה נדרשת</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><strong>robots.txt חוסם כל AI crawlers</strong><br>GPTBot, ClaudeBot, Google-Extended, CCBot, Bytespider, meta-externalagent — כולם Disallow</td>
+        <td><span class="severity-critical">קריטי</span></td>
+        <td>Cloudflare Dashboard → AI → בטל חסימת בוטים. או ערוך robots.txt ידנית.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Content-Signal חסר ai-input=yes</strong><br>יש ai-train=no (טוב) אבל אין הרשאה ל-RAG/grounding</td>
+        <td><span class="severity-critical">קריטי</span></td>
+        <td>הוסף: <code>Content-Signal: search=yes,ai-input=yes,ai-train=no</code></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong>OAI-SearchBot bug ב-robots.txt</strong><br>יש Allow: / אבל גם Disallow: / בסוף — סותר</td>
+        <td><span class="severity-high">גבוה</span></td>
+        <td>הסר את שורת Disallow: / האחרונה תחת OAI-SearchBot</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>RSS feed חסום</strong><br>Disallow: /feed ב-robots.txt</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>הסר Disallow: /feed. RSS חשוב ל-AI freshness signals.</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><strong>אין IndexNow</strong><br>תוכן חדש לוקח 48-72 שעות להתגלות ע"י Bing (ולכן ChatGPT)</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>התקן פלאגין IndexNow לWordPress. מקצר ל-24 שעות.</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><strong>אין Bing Webmaster Tools</strong><br>ChatGPT + Copilot מבוססים על Bing index</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>הירשם ב-bing.com/webmasters, אמת ownership, submit sitemap</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><strong>תוכן לא עדכני</strong><br>רוב הפוסטים מ-2024. Perplexity נותן 82% ציטוט לתוכן מ-30 יום אחרונים, 37% בלבד מעל 6 חודשים</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>עדכן dateModified על כל הפוסטים. פרסם 2-3 חדשים בחודש.</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><strong>אין Article/BlogPosting schema</strong><br>הפוסטים חסרים author markup ו-dateModified מובנה</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>הפעל ב-Yoast או הוסף ידנית JSON-LD עם author Person schema</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td><strong>אין Brand Knowledge Base page</strong><br>דף ריכוזי עם כל העובדות על Uranus — מחירים, ביצועים, הבדלים, עדויות</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>צור דף /knowledge-base או /facts עם כל המידע במקום אחד</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td><strong>אין "Best-of" Listicles</strong><br>רשימות דירוג (3-5x יותר ציטוטים מאשר מאמרים רגילים!)</td>
+        <td><span class="severity-medium">בינוני</span></td>
+        <td>"5 אסטרטגיות מסחר בביטקוין 2026" — Uranus #1</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td><strong>אין Press Releases</strong><br>Press releases מתחילים לקבל ציטוטי AI תוך 14-21 ימים</td>
+        <td><span class="severity-low">נמוך</span></td>
+        <td>AB Newswire — $80/release. 2 releases = התחלה.</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td><strong>YouTube ריק</strong><br>YouTube = האתר הכי מצוטט ב-AI search</td>
+        <td><span class="severity-low">נמוך</span></td>
+        <td>3-5 סרטונים על נושאים מהבלוג + כותרות GEO-optimized</td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td><strong>משפט ראשון לא הגדרתי</strong><br>AI שולף את המשפט הראשון. צריך: "Uranus הוא שירות ליווי השקעות בביטקוין ש..."</td>
+        <td><span class="severity-low">נמוך</span></td>
+        <td>שנה את המשפט הפותח בכל דף מפתח</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ENGINE DATA -->
+  <h2><span class="emoji">📊</span> איך כל מנוע AI מתנהג — נתונים</h2>
+  
+  <div class="section-intro">
+    מבוסס על מחקר של 118,000 תשובות AI (Qwairy, ינואר-מרץ 2026). <strong>רק 11% מהדומיינים</strong> מופיעים ביותר ממנוע אחד — צריך אסטרטגיה נפרדת לכל מנוע.
+  </div>
+
+  <div class="data-row">
+    <div>
+      <div class="engine">🤖 ChatGPT</div>
+      <div class="detail">Bing index &nbsp;|&nbsp; צפיפות מידע &nbsp;|&nbsp; Top 10 בגוגל</div>
+    </div>
+    <div style="text-align: left;">
+      <div class="citations">7.92 ציטוטים/תשובה</div>
+      <div class="conversion">קונברז'ן: 15.9% (9x גוגל!)</div>
+    </div>
+  </div>
+
+  <div class="data-row">
+    <div>
+      <div class="engine">🔍 Perplexity</div>
+      <div class="detail">עדכניות קריטית &nbsp;|&nbsp; YouTube &nbsp;|&nbsp; תמיד מראה מקורות</div>
+    </div>
+    <div style="text-align: left;">
+      <div class="citations">21.87 ציטוטים/תשובה</div>
+      <div class="conversion">קונברז'ן: 10.5% (6x גוגל)</div>
+    </div>
+  </div>
+
+  <div class="data-row">
+    <div>
+      <div class="engine">🌐 Google AI Mode</div>
+      <div class="detail">E-E-A-T &nbsp;|&nbsp; Knowledge Graph &nbsp;|&nbsp; דירוג אורגני</div>
+    </div>
+    <div style="text-align: left;">
+      <div class="citations">8.34 ציטוטים/תשובה</div>
+      <div class="conversion">הכי סלקטיבי</div>
+    </div>
+  </div>
+
+  <div class="data-row">
+    <div>
+      <div class="engine">💼 Microsoft Copilot</div>
+      <div class="detail">Bing index &nbsp;|&nbsp; טבלאות ורשימות &nbsp;|&nbsp; Schema</div>
+    </div>
+    <div style="text-align: left;">
+      <div class="citations">6.89 ציטוטים/תשובה</div>
+      <div class="conversion">קונברז'ן: 5% (3x גוגל)</div>
+    </div>
+  </div>
+
+  <div class="data-row">
+    <div>
+      <div class="engine">🧠 Claude</div>
+      <div class="detail">Brave Search &nbsp;|&nbsp; חדשות ומוסדות &nbsp;|&nbsp; פחות ציטוטים</div>
+    </div>
+    <div style="text-align: left;">
+      <div class="citations">5.67 ציטוטים/תשובה</div>
+      <div class="conversion">—</div>
+    </div>
+  </div>
+
+  <!-- FRESHNESS -->
+  <h2><span class="emoji">⏰</span> עדכניות = הפקטור הכי חשוב</h2>
+
+  <div class="status-grid">
+    <div class="status-card good">
+      <div class="label">Perplexity — תוכן מ-30 יום</div>
+      <div class="value" style="font-size: 2rem; color: #00c896;">82% ציטוט</div>
+    </div>
+    <div class="status-card bad">
+      <div class="label">Perplexity — תוכן מעל 6 חודשים</div>
+      <div class="value" style="font-size: 2rem; color: #ff4444;">37% ציטוט</div>
+    </div>
+    <div class="status-card warn">
+      <div class="label">ChatGPT — תוכן מ-60 יום</div>
+      <div class="value" style="font-size: 2rem; color: #ffaa00;">76.4% ציטוט</div>
+    </div>
+    <div class="status-card warn">
+      <div class="label">Google AI — תוכן מ-90 יום</div>
+      <div class="value" style="font-size: 2rem; color: #ffaa00;">61% ציטוט</div>
+    </div>
+  </div>
+
+  <p style="text-align: center; color: #888; margin-top: 20px;">
+    <strong>תוכן מעודכן ב-30 ימים = 3.2x יותר ציטוטים</strong> מתוכן ישן (Goodie AI/Adweek)
+  </p>
+
+  <!-- ACTION PLAN -->
+  <h2><span class="emoji">🗓️</span> תוכנית פעולה</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="week">שבוע 1 — דחוף</div>
+      <h4>פתיחת הדלת ל-AI</h4>
+      <ul>
+        <li>תיקון robots.txt — ביטול חסימת AI crawlers ב-Cloudflare</li>
+        <li>הוספת Content-Signal: ai-input=yes</li>
+        <li>תיקון bug של OAI-SearchBot</li>
+        <li>ביטול חסימת RSS feed</li>
+        <li>Bing Webmaster Tools — הרשמה + submit sitemap</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="week">שבוע 2 — תשתית</div>
+      <h4>חיזוק Schema + עדכניות</h4>
+      <ul>
+        <li>Organization schema מורחב — founder, telephone, email, address, description</li>
+        <li>Article/BlogPosting schema על כל הפוסטים</li>
+        <li>עדכון dateModified על כל הפוסטים הקיימים</li>
+        <li>התקנת IndexNow plugin</li>
+        <li>משפט ראשון הגדרתי בדפים מרכזיים</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="week">שבוע 3-4 — תוכן</div>
+      <h4>תוכן חדש + Brand KB</h4>
+      <ul>
+        <li>דף Brand Knowledge Base — עובדות, מחירים, הבדלים, ביצועים</li>
+        <li>"5 אסטרטגיות מסחר בביטקוין 2026" — Best-of listicle</li>
+        <li>2-3 פוסטים חדשים עם סטטיסטיקות ייחודיות</li>
+        <li>2 Press Releases דרך AB Newswire (~$80 כל אחד)</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="week">חודש 2+ — צמיחה</div>
+      <h4>YouTube + מדידה</h4>
+      <ul>
+        <li>3-5 סרטוני YouTube על נושאים מהבלוג</li>
+        <li>בדיקה שבועית — לשאול ChatGPT/Perplexity/Gemini שאלות ולעקוב</li>
+        <li>עדכון תוכן חודשי (minimum רבעוני)</li>
+        <li>מעקב תנועת referral מ-AI בGoogle Analytics</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- KEY INSIGHTS -->
+  <h2><span class="emoji">💡</span> תובנות מפתח מהמחקר</h2>
+
+  <ul class="checklist">
+    <li>
+      <span class="check">📊</span>
+      <span class="text"><strong>רשימות "Best-of" = 3-5x יותר ציטוטים</strong> ממאמרים רגילים. חברות שמות את עצמן #1 ברשימה שלהן — AI קולט את זה.</span>
+    </li>
+    <li>
+      <span class="check">📰</span>
+      <span class="text"><strong>Press Releases = הדרך הכי זולה</strong> להיכנס לציטוטי AI. $6-80 per release. ציטוטים מתחילים תוך 14-21 ימים.</span>
+    </li>
+    <li>
+      <span class="check">🎥</span>
+      <span class="text"><strong>YouTube = האתר הכי מצוטט ב-AI search.</strong> Perplexity ממוצע 6.61 ציטוטים לתשובה, מעדיף YouTube. עוקף Reddit.</span>
+    </li>
+    <li>
+      <span class="check">🔢</span>
+      <span class="text"><strong>2-3 סטטיסטיקות לכל 300 מילים</strong> = 2.1x יותר ציטוטים. מספרים מדויקים (58.5% ולא ~60%) עובדים טוב יותר.</span>
+    </li>
+    <li>
+      <span class="check">✍️</span>
+      <span class="text"><strong>המשפט הראשון = הכי חשוב.</strong> AI שולף את 150-200 ה-tokens הראשונים. פורמט: "[Entity] הוא [קטגוריה] ש-[מבדל]."</span>
+    </li>
+    <li>
+      <span class="check">🌐</span>
+      <span class="text"><strong>11% חפיפה בין מנועים.</strong> מה שעובד ב-ChatGPT לא בהכרח עובד ב-Perplexity. צריך אסטרטגיה multi-engine.</span>
+    </li>
+    <li>
+      <span class="check">💰</span>
+      <span class="text"><strong>ChatGPT converts 9x טוב יותר מגוגל</strong> (15.9% לעומת 1.76%). מבקרים מ-AI search יודעים בדיוק מה הם מחפשים.</span>
+    </li>
+  </ul>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h3>הצעד הראשון: לפתוח את הדלת</h3>
+    <p>
+      תיקון robots.txt ב-Cloudflare לוקח 5 דקות.<br>
+      בלי זה, כל ה-schemas, llms.txt, והתוכן המצוין שכבר קיים — פשוט לא נגישים ל-AI.
+    </p>
+  </div>
+
+  <div class="footer">
+    דוח GEO — uranus-invest.co.il — אפריל 2026<br>
+    מבוסס על: GenOptima, CitedRank, LLMrefs, WhiteHat SEO (118K responses), Edward Sturm, Search Engine Land, Firebrand, Reddit r/DigitalMarketing
+  </div>
+
+</div>
+
+</body>
+</html>

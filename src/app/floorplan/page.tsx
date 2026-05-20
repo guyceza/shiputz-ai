@@ -153,6 +153,19 @@ export default function FloorplanPage() {
     const loadRooms = async () => {
       const email = getEmail();
       if (!email) { setRoomsLoaded(true); return; }
+      const roomGroupsCacheKey = `floorplan_room_groups_${email}`;
+      try {
+        const cachedRaw = localStorage.getItem(roomGroupsCacheKey);
+        if (cachedRaw !== null) {
+          const cachedGroups = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedGroups)) {
+            setAllUserRooms(cachedGroups);
+            setRoomsLoaded(true);
+          }
+        }
+      } catch {
+        localStorage.removeItem(roomGroupsCacheKey);
+      }
       try {
         // Load rooms for current session
         const res = await fetch(`/api/floorplan/rooms?userId=${encodeURIComponent(email)}&sessionId=${encodeURIComponent(sessionId!)}`);
@@ -178,7 +191,12 @@ export default function FloorplanPage() {
               if (!grouped[r.session_id]) grouped[r.session_id] = [];
               grouped[r.session_id].push({ roomName: r.room_name, roomNameHe: r.room_name_he, imageData: r.image_url });
             }
-            setAllUserRooms(Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms })));
+            const groups = Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms }));
+            setAllUserRooms(groups);
+            localStorage.setItem(roomGroupsCacheKey, JSON.stringify(groups));
+          } else {
+            setAllUserRooms([]);
+            localStorage.setItem(roomGroupsCacheKey, "[]");
           }
         }
 
@@ -396,7 +414,25 @@ export default function FloorplanPage() {
         imageData: photo.imageData,
         style: customStyle || selectedStyle,
       }),
-    }).catch((e) => console.error("Failed to save room:", e));
+    })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        const cachedPhoto = data.imageUrl ? { ...photo, imageData: data.imageUrl } : photo;
+        setAllUserRooms((prev) => {
+          const next = [...prev];
+          const groupIndex = next.findIndex((group) => group.sessionId === floorplanSessionId);
+          if (groupIndex >= 0) {
+            const rooms = next[groupIndex].rooms.filter((room) => room.roomName !== cachedPhoto.roomName);
+            next[groupIndex] = { ...next[groupIndex], rooms: [...rooms, cachedPhoto] };
+          } else {
+            next.unshift({ sessionId: floorplanSessionId, rooms: [cachedPhoto] });
+          }
+          localStorage.setItem(`floorplan_room_groups_${email}`, JSON.stringify(next));
+          return next;
+        });
+      })
+      .catch((e) => console.error("Failed to save room:", e));
   }, [floorplanSessionId, customStyle, selectedStyle]);
 
   // === File handlers ===

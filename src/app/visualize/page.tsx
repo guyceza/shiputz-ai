@@ -15,6 +15,13 @@ const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 // Popcorn waiting animation URL
 const POPCORN_ANIMATION_URL = '/popcorn-waiting.json';
 
+type ShopLookProduct = {
+  id: string;
+  name: string;
+  position: { top: number; left: number; width?: number; height?: number };
+  searchQuery: string;
+};
+
 // Add keyframes for animations
 const animationStyles = `
 @keyframes bounce-in {
@@ -443,7 +450,7 @@ export default function VisualizePage() {
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
   // Products cache: keyed by visualization ID — single source of truth
-  const [productsCache, setProductsCache] = useState<Record<string, {id: string, name: string, position: {top: number, left: number}, searchQuery: string}[]>>({});
+  const [productsCache, setProductsCache] = useState<Record<string, ShopLookProduct[]>>({});
   const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null);
   const [detectingProducts, setDetectingProducts] = useState(false);
   
@@ -451,7 +458,7 @@ export default function VisualizePage() {
   const detectedProducts = currentVisualizationId ? (productsCache[currentVisualizationId] || []) : [];
   
   // Helper to set products for a specific visualization
-  const setCachedProducts = (vizId: string, products: any[]) => {
+  const setCachedProducts = (vizId: string, products: ShopLookProduct[]) => {
     setProductsCache(prev => ({ ...prev, [vizId]: products }));
   };
   
@@ -898,6 +905,38 @@ export default function VisualizePage() {
     setGenerating(false);
   };
 
+  const detectProductsForVisualization = async (vizId: string, imageUrl: string) => {
+    setDetectingProducts(true);
+    
+    try {
+      const userData = localStorage.getItem("user");
+      const userEmailForProducts = userData ? JSON.parse(userData).email : null;
+      
+      const res = await fetch('/api/detect-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageUrl, userEmail: userEmailForProducts })
+      });
+      
+      const data = await res.json();
+      if (data.items && data.items.length > 0) {
+        // Single write to cache — this is the only place products live
+        setCachedProducts(vizId, data.items);
+        
+        // Persist to DB (fire and forget)
+        fetch('/api/update-visualization-products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visualizationId: vizId, products: data.items, userId })
+        }).catch(e => console.error('Failed to save products to DB:', e));
+      }
+    } catch (err) {
+      console.error("Failed to detect products:", err);
+    } finally {
+      setDetectingProducts(false);
+    }
+  };
+
   const handleShopTheLook = async () => {
     if (!generatedResult?.image) return;
     
@@ -910,35 +949,7 @@ export default function VisualizePage() {
     
     // No products in cache — scan and save
     if (!currentVisualizationId) return;
-    setDetectingProducts(true);
-    
-    try {
-      const userData = localStorage.getItem("user");
-      const userEmailForProducts = userData ? JSON.parse(userData).email : null;
-      
-      const res = await fetch('/api/detect-products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: generatedResult.image, userEmail: userEmailForProducts })
-      });
-      
-      const data = await res.json();
-      if (data.items && data.items.length > 0) {
-        // Single write to cache — this is the only place products live
-        setCachedProducts(currentVisualizationId, data.items);
-        
-        // Persist to DB (fire and forget)
-        fetch('/api/update-visualization-products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ visualizationId: currentVisualizationId, products: data.items, userId })
-        }).catch(e => console.error('Failed to save products to DB:', e));
-      }
-    } catch (err) {
-      console.error("Failed to detect products:", err);
-    }
-    
-    setDetectingProducts(false);
+    await detectProductsForVisualization(currentVisualizationId, generatedResult.image);
   };
 
   return (
@@ -1900,7 +1911,19 @@ export default function VisualizePage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center flex items-center justify-center gap-2">
                 🛒 Shop the Look
               </h3>
-              <p className="text-sm text-gray-500 text-center mb-4">לחץ על המוצרים בתמונה לחיפוש בגוגל שופינג</p>
+              <div className="mb-4 flex flex-col items-center gap-2">
+                <p className="text-sm text-gray-500 text-center">לחץ על המוצרים בתמונה לחיפוש בגוגל שופינג</p>
+                {currentVisualizationId && generatedResult?.image && detectedProducts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => detectProductsForVisualization(currentVisualizationId, generatedResult.image)}
+                    disabled={detectingProducts}
+                    className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {detectingProducts ? "סורק מחדש..." : "סרוק מחדש לחיפוש מדויק יותר"}
+                  </button>
+                )}
+              </div>
               
               <div className="relative">
                 <img src={generatedResult.image} alt="אחרי" className="w-full rounded-xl" />
@@ -1985,26 +2008,7 @@ export default function VisualizePage() {
                   // If not in cache, scan and save
                   const vizId = selectedHistoryItem.id;
                   if (!productsCache[vizId] || productsCache[vizId].length === 0) {
-                    setDetectingProducts(true);
-                    const ud = localStorage.getItem("user");
-                    const ue = ud ? JSON.parse(ud).email : null;
-                    fetch('/api/detect-products', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ image: selectedHistoryItem.afterImage, userEmail: ue })
-                    }).then(res => res.json()).then(data => {
-                      if (data.items?.length > 0) {
-                        // Single write to cache
-                        setCachedProducts(vizId, data.items);
-                        // Persist to DB (fire and forget)
-                        fetch('/api/update-visualization-products', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ visualizationId: vizId, products: data.items, userId })
-                        }).catch(e => console.error('Failed to save products:', e));
-                      }
-                      setDetectingProducts(false);
-                    }).catch(() => setDetectingProducts(false));
+                    detectProductsForVisualization(vizId, selectedHistoryItem.afterImage);
                   }
                 }}
               >

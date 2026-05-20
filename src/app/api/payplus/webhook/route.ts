@@ -4,6 +4,16 @@ import crypto from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplus.co.il/api/v1.0';
+const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY || '';
+const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY || '';
+const PAYPLUS_TERMINAL_UID = process.env.PAYPLUS_TERMINAL_UID || '';
+
+const PLAN_DETAILS: Record<string, { label: string; monthly: number; credits: number }> = {
+  starter: { label: 'Starter', monthly: 29, credits: 50 },
+  pro: { label: 'Pro', monthly: 79, credits: 200 },
+  business: { label: 'Business', monthly: 199, credits: 600 },
+};
 
 // HTML escape to prevent XSS in email templates
 function escapeHtml(str: string): string {
@@ -16,11 +26,108 @@ type CreditBucketRow = {
   purchased_credits?: number | null;
 };
 
+type PayPlusRecurringItem = {
+  name?: string;
+  quantity?: number;
+  currency_code?: string;
+  quantity_price?: number;
+  amount_pay?: number;
+  quantity_price_including_vat?: number;
+  discount_type?: string | null;
+  discount_amount?: number;
+  discount_value?: number | null;
+  [key: string]: unknown;
+};
+
 function getCreditBuckets(user: CreditBucketRow | null | undefined) {
   const total = user?.viz_credits || 0;
   const subscriptionCredits = user?.subscription_credits || 0;
   const purchasedCredits = user?.purchased_credits ?? Math.max(total - subscriptionCredits, 0);
   return { total, subscriptionCredits, purchasedCredits };
+}
+
+function getNextMonthlyChargeDate(): string {
+  const now = new Date();
+  const next = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth() + 1,
+    Math.min(now.getUTCDate(), 28)
+  ));
+
+  return next.toISOString().slice(0, 10);
+}
+
+function buildRecurringItem(currentItem: PayPlusRecurringItem | null | undefined, planId: string) {
+  const plan = PLAN_DETAILS[planId];
+  return {
+    ...(currentItem || {}),
+    name: `ShiputzAI ${plan.label} monthly`,
+    quantity: 1,
+    currency_code: 'ILS',
+    quantity_price: plan.monthly,
+    amount_pay: plan.monthly,
+    quantity_price_including_vat: plan.monthly,
+    discount_type: null,
+    discount_amount: 0,
+    discount_value: null,
+  };
+}
+
+async function updatePayPlusRecurringPlan(recurringUid: string, planId: string) {
+  if (!PAYPLUS_API_KEY || !PAYPLUS_SECRET_KEY || !PAYPLUS_TERMINAL_UID) {
+    throw new Error('PayPlus recurring update is not configured');
+  }
+
+  const viewRes = await fetch(
+    `${PAYPLUS_BASE_URL}/RecurringPayments/${recurringUid}/ViewRecurring?terminal_uid=${encodeURIComponent(PAYPLUS_TERMINAL_UID)}`,
+    {
+      headers: {
+        'api-key': PAYPLUS_API_KEY,
+        'secret-key': PAYPLUS_SECRET_KEY,
+      },
+    }
+  );
+  const recurring = await viewRes.json();
+  if (!viewRes.ok || recurring.status === 'error') {
+    throw new Error(`PayPlus recurring view failed: ${JSON.stringify(recurring).slice(0, 500)}`);
+  }
+
+  const plan = PLAN_DETAILS[planId];
+  const updateBody = {
+    terminal_uid: PAYPLUS_TERMINAL_UID,
+    customer_uid: recurring.customer_uid,
+    card_token: recurring.card_token,
+    cashier_uid: recurring.cashier_uid,
+    currency_code: recurring.currency_code || 'ILS',
+    instant_first_payment: false,
+    recurring_type: 2,
+    recurring_range: 1,
+    number_of_charges: 0,
+    start_date: getNextMonthlyChargeDate(),
+    items: [buildRecurringItem(recurring.items?.[0], planId)],
+    successful_invoice: recurring.successful_invoice ?? true,
+    send_customer_success_email: recurring.send_customer_success_email ?? true,
+    customer_failure_email: recurring.customer_failure_email ?? true,
+    send_failure_callback: true,
+    ref_url_callback: `https://shipazti.com/api/payplus/webhook?secret=${WEBHOOK_SECRET || ''}`,
+    extra_info: `plan_${planId}_monthly`,
+  };
+
+  const updateRes = await fetch(`${PAYPLUS_BASE_URL}/RecurringPayments/Update/${recurringUid}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': PAYPLUS_API_KEY,
+      'secret-key': PAYPLUS_SECRET_KEY,
+    },
+    body: JSON.stringify(updateBody),
+  });
+  const result = await updateRes.json();
+  if (!updateRes.ok || result.status === 'error' || result.results?.status === 'error') {
+    throw new Error(`PayPlus recurring update failed: ${JSON.stringify(result).slice(0, 500)}`);
+  }
+
+  return { result, nextChargeDate: updateBody.start_date, amount: plan.monthly };
 }
 
 // Shared secret for webhook authentication
@@ -236,6 +343,70 @@ export async function POST(request: NextRequest) {
     //       viz_credits, plan, plan_started_at + credit_transactions table
 
     // ====== NEW CREDIT SYSTEM ======
+
+    // Plan upgrades: charge only the monthly price difference now, then update the PayPlus recurring order for next month.
+    const upgradeMatch = productType?.match?.(/^upgrade_(starter|pro|business)_to_(starter|pro|business)_monthly$/);
+    if (upgradeMatch) {
+      const fromPlan = upgradeMatch[1];
+      const planId = upgradeMatch[2];
+      const credits = PLAN_DETAILS[planId]?.credits || 0;
+
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('viz_credits, subscription_credits, purchased_credits, payplus_recurring_uid, payplus_customer_uid')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (!currentUser?.payplus_recurring_uid) {
+        console.error('PayPlus upgrade missing existing recurring UID', { email, fromPlan, planId });
+        return NextResponse.json({ received: false, error: 'Missing existing recurring subscription' }, { status: 500 });
+      }
+
+      let recurringUpdate;
+      try {
+        recurringUpdate = await updatePayPlusRecurringPlan(currentUser.payplus_recurring_uid, planId);
+      } catch (error) {
+        console.error('PayPlus recurring update failed after upgrade payment:', error);
+        return NextResponse.json({ received: false, error: 'Recurring update failed' }, { status: 500 });
+      }
+
+      const { purchasedCredits } = getCreditBuckets(currentUser);
+      const newCredits = purchasedCredits + credits;
+
+      await supabase.from('users').upsert({
+        email: email.toLowerCase(),
+        purchased: true,
+        purchased_at: new Date().toISOString(),
+        plan: planId,
+        plan_started_at: new Date().toISOString(),
+        vision_subscription: 'active',
+        viz_credits: newCredits,
+        subscription_credits: credits,
+        purchased_credits: purchasedCredits,
+        payplus_recurring_uid: currentUser.payplus_recurring_uid,
+        payplus_customer_uid: currentUser.payplus_customer_uid || customerUid,
+        payplus_subscription_status: 'active',
+        payplus_last_checked_at: new Date().toISOString(),
+      }, { onConflict: 'email' });
+
+      await supabase.from('credit_transactions').insert({
+        user_email: email.toLowerCase(),
+        action: `upgrade_${fromPlan}_to_${planId}_monthly`,
+        amount: credits,
+        balance_after: newCredits,
+        created_at: new Date().toISOString(),
+      });
+
+      await sendPlanEmail(email, planId, credits, supabase);
+
+      return NextResponse.json({
+        received: true,
+        status: 'success',
+        product: productType,
+        recurring_next_amount: recurringUpdate.amount,
+        recurring_next_charge_date: recurringUpdate.nextChargeDate,
+      });
+    }
 
     // Plan subscriptions: plan_starter_monthly, plan_pro_annual, etc.
     const planMatch = productType?.match?.(/^plan_(starter|pro|business)_(monthly|annual)$/);

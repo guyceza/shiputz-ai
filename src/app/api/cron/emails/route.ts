@@ -28,7 +28,7 @@ const EXCLUDED_EMAILS = new Set([
 const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
 
 // Flow priority (lower = higher priority, checked first)
-// credits flows > activation > welcome > post_purchase > inactive > summary > milestone
+// credits flows > activation > welcome > post_purchase > inactive > referral > milestone
 const FLOW_PRIORITY: string[] = [
   'zero_credits',
   'low_credits',
@@ -38,7 +38,6 @@ const FLOW_PRIORITY: string[] = [
   'post_purchase',
   'inactive',
   'referral',
-  'usage_summary',
   'milestone',
 ];
 
@@ -286,8 +285,6 @@ interface FlowContext {
   daysSinceSignup: number;
   daysSinceLastActivity: number;
   daysSincePurchase: number;
-  isSunday: boolean;
-  weeklyActionCount: number;
 }
 
 // ============================================================
@@ -848,60 +845,6 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
   return null;
 }
 
-// Flow 9: Usage Summary (weekly, Sunday)
-function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
-  const { user, sentEmails, isSunday, weeklyActionCount } = ctx;
-  if (!isSunday) return null;
-
-  // Variant C: 0 actions - don't send, let Inactive flow handle
-  if (weeklyActionCount === 0) return null;
-
-  const sent = sentEmails.get('usage_summary') || new Set();
-  // Use week number as day_number for idempotency
-  const weekNum = getWeekNumber();
-  if (sent.has(weekNum)) return null;
-
-  // Variant A: 3+ actions
-  if (weeklyActionCount >= 3) {
-    return {
-      flowName: 'usage_summary',
-      dayNumber: weekNum,
-      subject: 'סיכום שבועי - שבוע פרודוקטיבי',
-      reason: 'weekly_summary_active',
-      html: wrapEmail(
-        'הסיכום השבועי שלכם',
-        'שבוע מעולה',
-        greet(user.name || undefined) +
-        bigNumber(`${weeklyActionCount} שימושים`, 'השבוע') +
-        para('השבוע הייתם פעילים מאוד! <strong>המשיכו ככה</strong> - כל הדמיה מקרבת אתכם לעיצוב המושלם.') +
-        para(`נותרו לכם <strong>${user.viz_credits} קרדיטים</strong>.`),
-        'לדשבורד',
-        `${BASE_URL}/dashboard`,
-        user.email,
-      ),
-    };
-  }
-
-  // Variant B: 1-2 actions
-  return {
-    flowName: 'usage_summary',
-    dayNumber: weekNum,
-    subject: 'סיכום שבועי - נסו עוד כלי',
-    reason: 'weekly_summary_light',
-    html: wrapEmail(
-      'הסיכום השבועי שלכם',
-      '',
-      greet(user.name || undefined) +
-      bigNumber(`${weeklyActionCount}`, `שימוש${weeklyActionCount > 1 ? 'ים' : ''} השבוע`) +
-      para('יש לכם עוד כלים שיכולים לעזור. נסו <strong>Style Match</strong> או <strong>Shop the Look</strong> - מצאו וקנו את הסגנון שמתאים לכם.') +
-      para(`נותרו לכם <strong>${user.viz_credits} קרדיטים</strong>.`),
-      'לנסות כלי נוסף',
-      `${BASE_URL}/visualize`,
-      user.email,
-    ),
-  };
-}
-
 // Flow 9: Referral - encourage sharing (sent once to active users)
 function evaluateReferral(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails, totalUsageCount, daysSinceSignup } = ctx;
@@ -977,27 +920,6 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     };
   }
 
-  // #2: 10 uses - upsell
-  if (!sent.has(1) && totalUsageCount >= 10) {
-    return {
-      flowName: 'milestone',
-      dayNumber: 1,
-      subject: 'אתם בין המשתמשים הפעילים ביותר',
-      reason: 'milestone_10_uses',
-      html: wrapEmail(
-        'אתם בין הפעילים ביותר',
-        '',
-        greet(user.name || undefined) +
-        bigNumber('10+', 'שימושים') +
-        para('עם יותר מ-10 שימושים, <strong>אתם בין המשתמשים הכי פעילים שלנו</strong>.') +
-        para('שווה לבדוק את התוכניות שלנו - <strong>חבילת קרדיטים גדולה יותר = מחיר טוב יותר לקרדיט</strong>.'),
-        'לצפות בתוכניות',
-        `${BASE_URL}/pricing`,
-        user.email,
-      ),
-    };
-  }
-
   // #3: second purchase - suggest Pro
   if (!sent.has(2) && user.purchased) {
     // Check if user has more than one purchase transaction
@@ -1051,13 +973,6 @@ async function getFlowSentDate(supabase: any, email: string, flowName: string, d
   return data?.sent_at ? new Date(data.sent_at) : null;
 }
 
-function getWeekNumber(): number {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const diff = now.getTime() - start.getTime();
-  return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
-}
-
 // ============================================================
 // MAIN CRON HANDLER
 // ============================================================
@@ -1084,7 +999,6 @@ export async function GET(request: NextRequest) {
   let skipped = 0;
   const details: string[] = [];
   const now = new Date();
-  const isSunday = now.getUTCDay() === 0;
 
   try {
     // Fetch all users
@@ -1171,10 +1085,6 @@ export async function GET(request: NextRequest) {
         ? new Date(deductions[deductions.length - 1].created_at)
         : null;
 
-      // Weekly action count (last 7 days)
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const weeklyActionCount = deductions.filter(t => new Date(t.created_at) >= weekAgo).length;
-
       const ctx: FlowContext = {
         user,
         sentEmails: userSentMap.get(email) || new Map(),
@@ -1188,8 +1098,6 @@ export async function GET(request: NextRequest) {
         daysSincePurchase: user.purchased_at
           ? Math.floor((now.getTime() - new Date(user.purchased_at).getTime()) / (1000 * 60 * 60 * 24))
           : 999,
-        isSunday,
-        weeklyActionCount,
       };
 
       // Evaluate flows in priority order - first match wins
@@ -1220,9 +1128,6 @@ export async function GET(request: NextRequest) {
             break;
           case 'referral':
             action = evaluateReferral(ctx);
-            break;
-          case 'usage_summary':
-            action = evaluateUsageSummary(ctx);
             break;
           case 'milestone':
             action = evaluateMilestone(ctx);

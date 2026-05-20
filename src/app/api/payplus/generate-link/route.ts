@@ -40,6 +40,8 @@ const PLAN_PRICING: Record<string, { monthly: number; annual: number; credits: n
   business: { monthly: 199, annual: 99, credits: 600 },
 };
 
+const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
+
 function getNextMonthlyChargeDate(): string {
   const now = new Date();
   const next = new Date(Date.UTC(
@@ -113,6 +115,7 @@ export async function POST(request: NextRequest) {
     let chargeMethod = 1; // 1 = one-time
     let isRecurring = false;
     let description = '';
+    let payPlusProductType = productType;
 
     // NEW: Plan subscriptions (plan_starter_monthly, plan_pro_annual, etc.)
     const planMatch = productType.match(/^plan_(starter|pro|business)_(monthly|annual)$/);
@@ -131,8 +134,22 @@ export async function POST(request: NextRequest) {
       if (currentUser?.plan === planId && currentUser?.vision_subscription === 'active') {
         return NextResponse.json({ error: 'You are already on this plan' }, { status: 409 });
       }
-      
-      if (cycle === 'annual') {
+
+      if (currentUser?.plan && currentUser.plan !== 'free' && currentUser?.vision_subscription === 'active') {
+        const currentPlan = PLAN_PRICING[currentUser.plan];
+        const currentRank = PLAN_RANK[currentUser.plan] || 0;
+        const targetRank = PLAN_RANK[planId] || 0;
+
+        if (cycle !== 'monthly' || !currentPlan || targetRank <= currentRank) {
+          return NextResponse.json({
+            error: 'This plan change is not available through checkout',
+          }, { status: 409 });
+        }
+
+        amount = Math.max(1, plan.monthly - currentPlan.monthly);
+        payPlusProductType = `upgrade_${currentUser.plan}_to_${planId}_monthly`;
+        description = `שדרוג מ-${currentUser.plan} ל-${planId} - הפרש לחודש הנוכחי`;
+      } else if (cycle === 'annual') {
         amount = plan.annual * 12; // Charge full year
         description = `תוכנית ${planId} - שנתית (${plan.credits} קרדיטים/חודש)`;
       } else {
@@ -195,10 +212,10 @@ export async function POST(request: NextRequest) {
         customer_name: email.split('@')[0],
         email,
       },
-      refURL_success: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-success?product=${productType}`,
+      refURL_success: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-success?product=${payPlusProductType}`,
       refURL_failure: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shipazti.com'}/payment-failed`,
       refURL_callback: `https://shipazti.com/api/payplus/webhook?secret=${process.env.PAYPLUS_WEBHOOK_SECRET || ''}`,
-      more_info: productType,
+      more_info: payPlusProductType,
       more_info_1: email,
       more_info_2: billing || '',
       more_info_3: discountCode || '',
@@ -264,7 +281,7 @@ export async function POST(request: NextRequest) {
       await supabase.from('pending_payments').upsert({
         page_request_uid: pageRequestUid,
         email: email.toLowerCase(),
-        product_type: productType,
+        product_type: payPlusProductType,
         amount,
         status: 'pending',
       }, { onConflict: 'page_request_uid' });
@@ -274,7 +291,7 @@ export async function POST(request: NextRequest) {
         await supabase.from('payment_attribution').upsert({
           page_request_uid: pageRequestUid,
           email: email.toLowerCase(),
-          product_type: productType,
+          product_type: payPlusProductType,
           amount,
           ...cleanAttribution,
           ip_address: getRequestIp(request.headers),

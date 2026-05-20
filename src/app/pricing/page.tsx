@@ -70,6 +70,12 @@ function getPlanCta(planId: string, planName: string, userPlan: string, defaultC
   return `עבור ל-${planName}`;
 }
 
+function getPlanHref(planId: string, billingCycle: "monthly" | "annual", isLoggedIn: boolean) {
+  return isLoggedIn
+    ? `/checkout?plan=${planId}&billing=${billingCycle}`
+    : `/signup?redirect=/checkout?plan=${planId}&billing=${billingCycle}`;
+}
+
 const CREDIT_COSTS = [
   { action: "הדמיית חדר", credits: 10, icon: "🎨" },
   { action: "הדמיית תוכנית קומה", credits: 10, icon: "📐" },
@@ -126,7 +132,7 @@ const FAQ = [
   },
   {
     q: "איך משדרגים או מבטלים?",
-    a: "אפשר לבטל בכל רגע. שדרוג תוכנית עדיין לא מחושב אוטומטית לפי יתרת החודש, ולכן כרגע עדיף לפנות אלינו לשדרוג יחסי מסודר.",
+    a: "אפשר לבטל בכל רגע. בשדרוג חודשי משלמים רק את ההפרש בין המסלול הקיים למסלול החדש עבור החודש הנוכחי, ומהחודש הבא החיוב מתעדכן למסלול החדש.",
   },
 ];
 
@@ -303,7 +309,7 @@ export default function PricingPage() {
                   </button>
                 ) : (
                   <Link
-                    href={isLoggedIn ? `/checkout?plan=${plan.id}&billing=${billingCycle}` : `/signup?redirect=/checkout?plan=${plan.id}&billing=${billingCycle}`}
+                    href={getPlanHref(plan.id, billingCycle, isLoggedIn)}
                     className={`block w-full py-3 rounded-full text-center font-bold text-sm transition-all ${
                       plan.highlighted
                         ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"

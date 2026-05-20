@@ -38,6 +38,8 @@ const PLAN_CONFIG: Record<string, { name: string; monthlyPrice: number; annualPr
   business: { name: "Business", monthlyPrice: 199, annualPrice: 99, credits: 600 },
 };
 
+const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -59,6 +61,17 @@ function CheckoutContent() {
   const isPlan = planId && PLAN_CONFIG[planId];
   const isCredits = creditsParam && !isNaN(Number(creditsParam));
 
+  const currentPlan = PLAN_CONFIG[userPlan];
+  const targetPlan = isPlan ? PLAN_CONFIG[planId] : null;
+  const isMonthlyUpgrade = Boolean(
+    targetPlan &&
+    currentPlan &&
+    billing === "monthly" &&
+    userPlan !== "free" &&
+    userPlan !== planId &&
+    (PLAN_RANK[planId || ""] || 0) > (PLAN_RANK[userPlan] || 0)
+  );
+
   // Calculate pricing
   let productLabel = "";
   let price = 0;
@@ -67,10 +80,14 @@ function CheckoutContent() {
 
   if (isPlan) {
     const plan = PLAN_CONFIG[planId];
-    price = billing === "annual" ? plan.annualPrice : plan.monthlyPrice;
-    productLabel = `תוכנית ${plan.name}`;
+    price = isMonthlyUpgrade && currentPlan
+      ? Math.max(1, plan.monthlyPrice - currentPlan.monthlyPrice)
+      : billing === "annual" ? plan.annualPrice : plan.monthlyPrice;
+    productLabel = isMonthlyUpgrade ? `שדרוג ל-${plan.name}` : `תוכנית ${plan.name}`;
     productType = `plan_${planId}_${billing}`;
-    subtitle = billing === "annual"
+    subtitle = isMonthlyUpgrade && currentPlan
+      ? `הפרש מהמסלול הנוכחי לחודש הזה בלבד · מהחודש הבא ₪${plan.monthlyPrice}/חודש`
+      : billing === "annual"
       ? `₪${price * 12} לשנה · ${plan.credits} קרדיטים/חודש`
       : `${plan.credits} קרדיטים לחודש`;
   } else if (isCredits) {
@@ -161,7 +178,9 @@ function CheckoutContent() {
         window.location.href = data.payment_url;
       } else {
         if (response.status === 409) {
-          alert("זו כבר התוכנית הנוכחית שלך.");
+          alert(data.error === "You are already on this plan"
+            ? "זו כבר התוכנית הנוכחית שלך."
+            : "השינוי הזה לא זמין כרגע דרך הסליקה האוטומטית.");
           setLoading(false);
           return;
         }
@@ -249,7 +268,11 @@ function CheckoutContent() {
             disabled={loading || (Boolean(isPlan) && userPlan === planId)}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-full text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
-            {userPlan === planId && isPlan ? "התוכנית הנוכחית שלך" : loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
+            {userPlan === planId && isPlan
+              ? "התוכנית הנוכחית שלך"
+              : isMonthlyUpgrade
+                ? `לתשלום הפרש - ₪${price}`
+                : loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
           </button>
 
           <p className="text-center text-gray-400 text-xs mt-3">

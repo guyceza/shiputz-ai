@@ -22,6 +22,110 @@ async function verifyUserExists(userEmail: string): Promise<boolean> {
   }
 }
 
+type DetectedProduct = {
+  id: string;
+  name: string;
+  position: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+  searchQuery: string;
+};
+
+type RawDetectedProduct = {
+  id?: unknown;
+  name?: unknown;
+  searchQuery?: unknown;
+  query?: unknown;
+  position?: {
+    top?: unknown;
+    left?: unknown;
+    width?: unknown;
+    height?: unknown;
+  };
+};
+
+const PRODUCT_DETECTION_PROMPT = `You are a visual product matching expert for interior design shopping in Israel.
+
+Your job is NOT to label objects generically. Your job is to create precise Google Shopping searches for products that visually match the room image.
+
+CRITICAL: Position values MUST be percentages (0-100), NOT pixels.
+- top: percentage from top of image to the CENTER of the item
+- left: percentage from left of image to the CENTER of the item
+- width: approximate item width as percentage of image width
+- height: approximate item height as percentage of image height
+
+Find 5-8 purchasable furniture/decor items only. Prefer visible items a user would reasonably buy:
+- sofas, armchairs, chairs, tables, rugs, lamps, chandeliers, curtains, art, pillows, plants, sideboards, kitchen stools, shelves
+- Skip walls, ceiling, windows, doors, generic floor unless it is a clearly purchasable finish
+
+For EVERY item:
+1. name: a specific Hebrew commercial product name, not a category.
+2. searchQuery: a Hebrew Google Shopping query that is specific enough to find a visually similar product.
+
+Search query rules:
+- NEVER use one-word or generic searches like "שטיח", "ספה", "כיסא", "מנורה".
+- Include as many visible attributes as possible: product subtype, material, color, shape, texture/pattern, style, size/usage.
+- If the item is a rug, identify the rug type when visible: שאגי / פרסי / קילים / ברבר / גאומטרי / צמר / יוטה / עגול / מלבני / אפור / בז / עבה / דק.
+- If the item is a sofa/chair, include upholstery/material, color, seat count or silhouette, style, legs/frame if visible.
+- If the item is lighting, include fixture type, finish/material, number of arms/shades, style.
+- If you cannot know a brand/model from the image, do not invent one.
+- Do not add "לקנות בישראל"; the app adds that automatically.
+- Good examples:
+  - "שטיח שאגי אפור מלבני עבה לסלון"
+  - "כורסאת ראטן ועץ עם כרית חרדל וינטג"
+  - "נברשת פליז קלאסית 5 קנים אהילי זכוכית"
+  - "ספת עור שחורה דו מושבית מודרנית"
+
+Return ONLY a JSON array, no markdown and no explanation:
+[{"id":"item-1","name":"שטיח שאגי אפור מלבני","position":{"top":72,"left":52,"width":28,"height":18},"searchQuery":"שטיח שאגי אפור מלבני עבה לסלון"}]`;
+
+function extractJsonArray(text: string): unknown[] | null {
+  const cleanText = text.replace(/```json\n?/g, "").replace(/```/g, "").trim();
+  const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
+  if (!arrayMatch) return null;
+  const parsed = JSON.parse(arrayMatch[0]);
+  return Array.isArray(parsed) ? parsed : null;
+}
+
+function cleanProductText(value: unknown): string {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeDetectedProducts(items: unknown[]): DetectedProduct[] {
+  return items
+    .map((raw, index) => {
+      const item = raw as RawDetectedProduct;
+      const pos = item?.position || {};
+      const top = Number(pos.top);
+      const left = Number(pos.left);
+      const width = Number(pos.width ?? 8);
+      const height = Number(pos.height ?? 8);
+      const name = cleanProductText(item?.name);
+      const searchQuery = cleanProductText(item?.searchQuery || item?.query || name);
+
+      return {
+        id: cleanProductText(item?.id) || `item-${index + 1}`,
+        name,
+        position: { top, left, width, height },
+        searchQuery,
+      };
+    })
+    .filter((item) => {
+      const pos = item.position;
+      return item.name.length > 0 &&
+        item.searchQuery.length > 0 &&
+        Number.isFinite(pos.top) && pos.top >= 0 && pos.top <= 100 &&
+        Number.isFinite(pos.left) && pos.left >= 0 && pos.left <= 100 &&
+        Number.isFinite(pos.width) && pos.width > 0 && pos.width <= 100 &&
+        Number.isFinite(pos.height) && pos.height > 0 && pos.height <= 100;
+    });
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limit: 30 requests per minute
@@ -81,7 +185,7 @@ export async function POST(request: NextRequest) {
         mimeType = contentType.split(";")[0];
         const arrayBuffer = await imageResponse.arrayBuffer();
         imageBase64 = Buffer.from(arrayBuffer).toString("base64");
-      } catch (fetchError) {
+      } catch {
         return NextResponse.json({ items: [], error: "Failed to fetch image" });
       }
     }
@@ -99,21 +203,7 @@ export async function POST(request: NextRequest) {
             }
           },
           {
-            text: `You are analyzing a room image to identify purchasable furniture and decor items.
-
-CRITICAL: Position values MUST be percentages (0-100), NOT pixels!
-- top: percentage from top of image (0 = top edge, 50 = middle, 100 = bottom)
-- left: percentage from left of image (0 = left edge, 50 = middle, 100 = right)
-
-For each item found, provide:
-1. Hebrew name
-2. Position as percentage values
-3. Hebrew search query
-
-Return ONLY a JSON array like this (no markdown, no explanation):
-[{"id":"1","name":"מיטה","position":{"top":60,"left":40},"searchQuery":"מיטה זוגית"}]
-
-Find 5-8 main furniture/decor items. Position should be the CENTER of each item.`
+            text: PRODUCT_DETECTION_PROMPT
           }
         ]
       }]
@@ -134,24 +224,10 @@ Find 5-8 main furniture/decor items. Position should be the CENTER of each item.
     
     // Parse JSON from response
     try {
-      // Clean up response - remove markdown code blocks
-      let cleanText = responseText.replace(/```json\n?/g, '').replace(/```/g, '').trim();
-      
-      // Find the first complete JSON array (handle duplicates)
-      const firstArrayEnd = cleanText.indexOf(']') + 1;
-      if (firstArrayEnd > 0) {
-        const jsonStr = cleanText.substring(0, firstArrayEnd);
-        const items = JSON.parse(jsonStr);
-        
-        // Validate positions are percentages (0-100)
-        const validItems = items.filter((item: any) => {
-          const pos = item.position;
-          return pos && 
-                 typeof pos.top === 'number' && pos.top >= 0 && pos.top <= 100 &&
-                 typeof pos.left === 'number' && pos.left >= 0 && pos.left <= 100;
-        });
-        
-        return NextResponse.json({ items: validItems });
+      const items = extractJsonArray(responseText);
+      if (items) {
+        const validItems = normalizeDetectedProducts(items);
+        return NextResponse.json({ items: validItems, products: validItems });
       }
     } catch (parseError) {
       console.error("[detect-products] Failed to parse product detection response:", parseError);
@@ -159,7 +235,7 @@ Find 5-8 main furniture/decor items. Position should be the CENTER of each item.
 
     return NextResponse.json({ items: [] });
 
-  } catch (error) {
+  } catch {
     return NextResponse.json({ items: [] });
   }
 }

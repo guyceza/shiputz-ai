@@ -3,7 +3,7 @@
 # llms.txt - Information for AI assistants and language models
 
 ## About
-ShiputzAI is an Israeli AI-powered home design platform. Upload a room photo and get AI-generated renovation visualizations, style identification, shopping lists, video tours, floor plans, bill of quantities, and quote analysis — all in Hebrew.
+ShiputzAI is an Israeli AI-powered home design platform. Upload a room photo and get AI-generated renovation visualizations, style identification, shopping lists, video tours, floor plans, bill of quantities, and quote analysis - all in Hebrew.
 
 ## Product Name
 ShiputzAI (שיפוצי.אי)

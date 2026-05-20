@@ -21,7 +21,7 @@ export default function AIKitchenVisualizationPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות | ShiputzAI";
+    document.title = "הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות | ShiputzAI";
     try {
       const userData = localStorage.getItem("user");
       if (userData) {
@@ -34,7 +34,7 @@ export default function AIKitchenVisualizationPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות",
+    "headline": "הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות",
     "description": "הדמיית שיפוץ מטבח בAI עולה ₪3-15 ותוצאה מוכנה תוך 30 שניות. מדריך מלא עם שלבים, סגנונות מטבח פופולריים ועלויות.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
@@ -60,12 +60,12 @@ export default function AIKitchenVisualizationPage() {
       {
         "@type": "Question",
         "name": "האם הדמיית AI מחליפה מעצב פנים?",
-        "acceptedAnswer": { "@type": "Answer", "text": "הדמיית AI היא כלי מצוין לשלב התכנון — לראות כיוון לפני שמשקיעים אלפי שקלים. לפרויקטים מורכבים, מומלץ לשלב עם מעצב פנים מקצועי." }
+        "acceptedAnswer": { "@type": "Answer", "text": "הדמיית AI היא כלי מצוין לשלב התכנון - לראות כיוון לפני שמשקיעים אלפי שקלים. לפרויקטים מורכבים, מומלץ לשלב עם מעצב פנים מקצועי." }
       },
       {
         "@type": "Question",
         "name": "אילו סגנונות מטבח אפשר להדמות?",
-        "acceptedAnswer": { "@type": "Answer", "text": "בShiputzAI אפשר להדמות כל סגנון — מודרני, כפרי, סקנדינבי, תעשייתי, מינימליסטי, קלאסי ועוד. פשוט כותבים את הסגנון הרצוי בתיאור." }
+        "acceptedAnswer": { "@type": "Answer", "text": "בShiputzAI אפשר להדמות כל סגנון - מודרני, כפרי, סקנדינבי, תעשייתי, מינימליסטי, קלאסי ועוד. פשוט כותבים את הסגנון הרצוי בתיאור." }
       },
       {
         "@type": "Question",
@@ -110,7 +110,7 @@ export default function AIKitchenVisualizationPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 6 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות
+          הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות
         </h1>
       </header>
 
@@ -124,7 +124,7 @@ export default function AIKitchenVisualizationPage() {
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
-            שיפוץ מטבח הוא אחד הפרויקטים היקרים ביותר בבית — בין ₪40,000 ל-₪80,000 בממוצע. לפני שמשקיעים סכום כזה, הדמיית AI מאפשרת לראות בדיוק איך המטבח ייראה אחרי השיפוץ. במקום לשלם ₪3,000-₪8,000 למעצב פנים רק על הדמיות, מקבלים תוצאה דומה תוך חצי דקה.
+            שיפוץ מטבח הוא אחד הפרויקטים היקרים ביותר בבית - בין ₪40,000 ל-₪80,000 בממוצע. לפני שמשקיעים סכום כזה, הדמיית AI מאפשרת לראות בדיוק איך המטבח ייראה אחרי השיפוץ. במקום לשלם ₪3,000-₪8,000 למעצב פנים רק על הדמיות, מקבלים תוצאה דומה תוך חצי דקה.
           </p>
 
           {/* Step by step */}
@@ -169,7 +169,7 @@ export default function AIKitchenVisualizationPage() {
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">🌿 כפרי (Farmhouse)</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">ארונות עץ טבעי, משטח עץ או שיש, ברז נחושת או ברונזה. צבעים חמים — שמנת, ירוק מרווה, כחול עמום. תחושה חמה וביתית.</p>
+              <p className="text-gray-600 text-sm leading-relaxed">ארונות עץ טבעי, משטח עץ או שיש, ברז נחושת או ברונזה. צבעים חמים - שמנת, ירוק מרווה, כחול עמום. תחושה חמה וביתית.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">❄️ סקנדינבי</h3>
@@ -238,9 +238,9 @@ export default function AIKitchenVisualizationPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">טיפים לתוצאה מושלמת</h2>
           <ul className="space-y-3 text-gray-700 mb-8">
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>צלמו מזווית רחבה שמראה כמה שיותר מהמטבח</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>ודאו שיש תאורה טובה בתמונה — אור טבעי עדיף</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>ודאו שיש תאורה טובה בתמונה - אור טבעי עדיף</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>כתבו תיאור מפורט: &quot;ארונות לבנים, משטח עץ אלון, ברז שחור מט&quot;</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>נסו כמה סגנונות שונים — ההשוואה תעזור להחליט</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>נסו כמה סגנונות שונים - ההשוואה תעזור להחליט</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span>אחרי ההדמיה, השתמשו בכלי כתב הכמויות לקבלת הערכת עלות</span></li>
           </ul>
         </div>
@@ -251,7 +251,7 @@ export default function AIKitchenVisualizationPage() {
             href="/visualize"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            נסו הדמיית מטבח עכשיו — 10 קרדיטים חינם →
+            נסו הדמיית מטבח עכשיו - 10 קרדיטים חינם →
           </Link>
           <p className="text-sm text-gray-400 mt-3">לא צריך כרטיס אשראי להרשמה</p>
         </div>
@@ -270,11 +270,11 @@ export default function AIKitchenVisualizationPage() {
             />
             <FaqItem
               question="האם הדמיית AI מחליפה מעצב פנים?"
-              answer="הדמיית AI היא כלי מצוין לשלב התכנון — לראות כיוון לפני שמשקיעים אלפי שקלים. לפרויקטים מורכבים, מומלץ לשלב עם מעצב פנים מקצועי."
+              answer="הדמיית AI היא כלי מצוין לשלב התכנון - לראות כיוון לפני שמשקיעים אלפי שקלים. לפרויקטים מורכבים, מומלץ לשלב עם מעצב פנים מקצועי."
             />
             <FaqItem
               question="אילו סגנונות מטבח אפשר להדמות?"
-              answer="בShiputzAI אפשר להדמות כל סגנון — מודרני, כפרי, סקנדינבי, תעשייתי, מינימליסטי, קלאסי ועוד. פשוט כותבים את הסגנון הרצוי בתיאור."
+              answer="בShiputzAI אפשר להדמות כל סגנון - מודרני, כפרי, סקנדינבי, תעשייתי, מינימליסטי, קלאסי ועוד. פשוט כותבים את הסגנון הרצוי בתיאור."
             />
             <FaqItem
               question="האם אפשר להדמות שינויים ספציפיים במטבח?"
@@ -287,10 +287,10 @@ export default function AIKitchenVisualizationPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/ai-living-room-design" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב סלון בAI — 7 סגנונות עיצוב פופולריים להדמיה</Link></li>
-            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל — המדריך המלא 2026</Link></li>
-            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
-            <li><Link href="/tips/bill-of-quantities-ai" className="text-gray-700 hover:text-gray-900 hover:underline">כתב כמויות אוטומטי בAI — חסכו אלפי שקלים</Link></li>
+            <li><Link href="/tips/ai-living-room-design" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב סלון בAI - 7 סגנונות עיצוב פופולריים להדמיה</Link></li>
+            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל - המדריך המלא 2026</Link></li>
+            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
+            <li><Link href="/tips/bill-of-quantities-ai" className="text-gray-700 hover:text-gray-900 hover:underline">כתב כמויות אוטומטי בAI - חסכו אלפי שקלים</Link></li>
           </ul>
         </div>
       </article>

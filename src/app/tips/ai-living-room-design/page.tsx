@@ -21,7 +21,7 @@ export default function AILivingRoomDesignPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "עיצוב סלון בAI — 7 סגנונות עיצוב פופולריים להדמיה | ShiputzAI";
+    document.title = "עיצוב סלון בAI - 7 סגנונות עיצוב פופולריים להדמיה | ShiputzAI";
     try {
       const userData = localStorage.getItem("user");
       if (userData) {
@@ -34,7 +34,7 @@ export default function AILivingRoomDesignPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "עיצוב סלון בAI — 7 סגנונות עיצוב פופולריים להדמיה",
+    "headline": "עיצוב סלון בAI - 7 סגנונות עיצוב פופולריים להדמיה",
     "description": "עיצוב סלון בAI מאפשר לראות את הסלון שלכם ב-7 סגנונות שונים תוך דקות. מדריך מלא עם סגנונות, פלטות צבעים וטיפים.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
@@ -70,7 +70,7 @@ export default function AILivingRoomDesignPage() {
       {
         "@type": "Question",
         "name": "אפשר לעצב סלון קטן עם AI?",
-        "acceptedAnswer": { "@type": "Answer", "text": "בהחלט! AI מצוין לסלונות קטנים — אפשר לנסות פריסות רהיטים שונות, צבעים בהירים שמרחיבים את החלל, ופתרונות אחסון חכמים." }
+        "acceptedAnswer": { "@type": "Answer", "text": "בהחלט! AI מצוין לסלונות קטנים - אפשר לנסות פריסות רהיטים שונות, צבעים בהירים שמרחיבים את החלל, ופתרונות אחסון חכמים." }
       }
     ]
   };
@@ -110,7 +110,7 @@ export default function AILivingRoomDesignPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 8 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          עיצוב סלון בAI — 7 סגנונות עיצוב פופולריים להדמיה
+          עיצוב סלון בAI - 7 סגנונות עיצוב פופולריים להדמיה
         </h1>
       </header>
 
@@ -119,11 +119,11 @@ export default function AILivingRoomDesignPage() {
       <article className="max-w-3xl mx-auto px-6 py-8">
         <div className="prose prose-gray max-w-none">
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong>עיצוב סלון בAI מאפשר לראות את הסלון שלכם ב-7 סגנונות שונים תוך דקות.</strong> בShiputzAI, העלו תמונה של הסלון וקבלו הדמיות מקצועיות — מסלון מודרני מינימליסטי ועד בוהו-שיק צבעוני.
+            <strong>עיצוב סלון בAI מאפשר לראות את הסלון שלכם ב-7 סגנונות שונים תוך דקות.</strong> בShiputzAI, העלו תמונה של הסלון וקבלו הדמיות מקצועיות - מסלון מודרני מינימליסטי ועד בוהו-שיק צבעוני.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
-            הסלון הוא הלב של הבית — המקום שבו מבלים הכי הרבה זמן, מארחים אורחים ונרגעים. עיצוב סלון חדש יכול לשנות לחלוטין את האווירה בבית. עם AI, אפשר לנסות עשרות סגנונות שונים לפני שקונים רהיט אחד.
+            הסלון הוא הלב של הבית - המקום שבו מבלים הכי הרבה זמן, מארחים אורחים ונרגעים. עיצוב סלון חדש יכול לשנות לחלוטין את האווירה בבית. עם AI, אפשר לנסות עשרות סגנונות שונים לפני שקונים רהיט אחד.
           </p>
 
           {/* 7 Styles */}
@@ -138,7 +138,7 @@ export default function AILivingRoomDesignPage() {
 
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">2. 🌊 ים-תיכוני (Mediterranean)</h3>
-              <p className="text-gray-600 leading-relaxed mb-2">השראה מהריביירה — גוונים של כחול ולבן, אריחים מעוטרים, עץ כהה. בדים טבעיים (פשתן, כותנה), צמחים ירוקים, ותחושת חופש.</p>
+              <p className="text-gray-600 leading-relaxed mb-2">השראה מהריביירה - גוונים של כחול ולבן, אריחים מעוטרים, עץ כהה. בדים טבעיים (פשתן, כותנה), צמחים ירוקים, ותחושת חופש.</p>
               <p className="text-sm text-gray-500"><strong>פלטת צבעים:</strong> כחול ים, לבן, טרקוטה, עץ זית</p>
             </div>
 
@@ -156,13 +156,13 @@ export default function AILivingRoomDesignPage() {
 
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">5. ⚙️ תעשייתי (Industrial)</h3>
-              <p className="text-gray-600 leading-relaxed mb-2">בטון חשוף, מתכת, לבנים. ספת עור כהה, מדפי ברזל, תאורת אדיסון. גלוי ומינימלי — מתאים לדירות לופט ולמי שאוהב אופי.</p>
+              <p className="text-gray-600 leading-relaxed mb-2">בטון חשוף, מתכת, לבנים. ספת עור כהה, מדפי ברזל, תאורת אדיסון. גלוי ומינימלי - מתאים לדירות לופט ולמי שאוהב אופי.</p>
               <p className="text-sm text-gray-500"><strong>פלטת צבעים:</strong> אפור בטון, שחור, חלודה, עץ גולמי</p>
             </div>
 
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">6. 🏛️ קלאסי מודרני (Transitional)</h3>
-              <p className="text-gray-600 leading-relaxed mb-2">שילוב של קלאסי ומודרני — רהיטים אלגנטיים עם קווים פשוטים. צבעים ניטרליים עשירים, בדים איכותיים (קטיפה, משי), ופרטי עיצוב מעודנים.</p>
+              <p className="text-gray-600 leading-relaxed mb-2">שילוב של קלאסי ומודרני - רהיטים אלגנטיים עם קווים פשוטים. צבעים ניטרליים עשירים, בדים איכותיים (קטיפה, משי), ופרטי עיצוב מעודנים.</p>
               <p className="text-sm text-gray-500"><strong>פלטת צבעים:</strong> שמנת, בז&apos;, זהב, כחול כהה, ירוק אזמרגד</p>
             </div>
 
@@ -209,9 +209,9 @@ export default function AILivingRoomDesignPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">טיפים לפריסת רהיטים בסלון</h2>
           <ul className="space-y-3 text-gray-700 mb-8">
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>כלל 60-30-10:</strong> 60% צבע דומיננטי (קירות), 30% צבע משני (רהיטים), 10% צבע הדגשה (כריות, אקססוריז)</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>שטיח:</strong> שטיח גדול מספיק שרגלי הספה הקדמיות עומדות עליו — מאחד את החלל</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>שטיח:</strong> שטיח גדול מספיק שרגלי הספה הקדמיות עומדות עליו - מאחד את החלל</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>מרחק:</strong> השאירו לפחות 90 ס&quot;מ למעבר בין רהיטים</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>מוקד:</strong> כל סלון צריך מוקד — טלוויזיה, אח, חלון גדול, או קיר אמנות</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>מוקד:</strong> כל סלון צריך מוקד - טלוויזיה, אח, חלון גדול, או קיר אמנות</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>תאורה בשכבות:</strong> שילוב של תאורה עליונה, עמידה ושולחנית ליצירת אווירה</span></li>
           </ul>
 
@@ -220,11 +220,11 @@ export default function AILivingRoomDesignPage() {
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">צבעים מרחיבים חלל</h3>
-              <p className="text-gray-600 text-sm">לבן, בז&apos; בהיר, תכלת, אפור בהיר. מושלמים לסלונות קטנים — יוצרים תחושת מרחב ואור.</p>
+              <p className="text-gray-600 text-sm">לבן, בז&apos; בהיר, תכלת, אפור בהיר. מושלמים לסלונות קטנים - יוצרים תחושת מרחב ואור.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">צבעים יוצרים אינטימיות</h3>
-              <p className="text-gray-600 text-sm">כחול כהה, ירוק יער, חום שוקולד, בורדו. מתאימים לסלונות גדולים — יוצרים חמימות ואווירה.</p>
+              <p className="text-gray-600 text-sm">כחול כהה, ירוק יער, חום שוקולד, בורדו. מתאימים לסלונות גדולים - יוצרים חמימות ואווירה.</p>
             </div>
           </div>
         </div>
@@ -235,7 +235,7 @@ export default function AILivingRoomDesignPage() {
             href="/visualize"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            עצבו את הסלון שלכם עכשיו — חינם →
+            עצבו את הסלון שלכם עכשיו - חינם →
           </Link>
           <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם בהרשמה</p>
         </div>
@@ -262,7 +262,7 @@ export default function AILivingRoomDesignPage() {
             />
             <FaqItem
               question="אפשר לעצב סלון קטן עם AI?"
-              answer="בהחלט! AI מצוין לסלונות קטנים — אפשר לנסות פריסות רהיטים שונות, צבעים בהירים שמרחיבים את החלל, ופתרונות אחסון חכמים."
+              answer="בהחלט! AI מצוין לסלונות קטנים - אפשר לנסות פריסות רהיטים שונות, צבעים בהירים שמרחיבים את החלל, ופתרונות אחסון חכמים."
             />
           </div>
         </div>
@@ -271,10 +271,10 @@ export default function AILivingRoomDesignPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות</Link></li>
-            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל — המדריך המלא 2026</Link></li>
-            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
-            <li><Link href="/tips/best-ai-interior-design-tools" className="text-gray-700 hover:text-gray-900 hover:underline">5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI — 2026</Link></li>
+            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות</Link></li>
+            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל - המדריך המלא 2026</Link></li>
+            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
+            <li><Link href="/tips/best-ai-interior-design-tools" className="text-gray-700 hover:text-gray-900 hover:underline">5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI - 2026</Link></li>
           </ul>
         </div>
       </article>

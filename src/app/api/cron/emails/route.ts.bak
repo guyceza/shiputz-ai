@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 // ============================================================
-// ShiputzAI Email Flow System — Behavioral Triggers
+// ShiputzAI Email Flow System - Behavioral Triggers
 // 10 Flows, 29 emails total
 // Replaces old day-based sequence system
 // ============================================================
@@ -16,7 +16,7 @@ const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
 const BASE_URL = 'https://shipazti.com';
 
-// Admin/test emails — never send marketing
+// Admin/test emails - never send marketing
 const EXCLUDED_EMAILS = new Set([
   'test@test.com',
   'test@shiputzai.com',
@@ -63,7 +63,7 @@ function getUnsubscribeUrl(email: string): string {
   return `${BASE_URL}/unsubscribe?email=${encodeURIComponent(email.toLowerCase())}${token ? `&token=${token}` : ''}`;
 }
 
-// Apple-style email wrapper — clean, RTL, Hebrew
+// Apple-style email wrapper - clean, RTL, Hebrew
 function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail: string): string {
   const unsubscribeUrl = getUnsubscribeUrl(userEmail);
   return `
@@ -150,7 +150,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ i
   return response.json();
 }
 
-// Batch send via Resend Batch API — up to 100 emails per request
+// Batch send via Resend Batch API - up to 100 emails per request
 // Returns array of { id } or { message } per email (same order as input)
 interface BatchEmailInput { to: string; subject: string; html: string; }
 async function sendBatchEmails(emails: BatchEmailInput[], maxRetries = 3): Promise<Array<{ id?: string; message?: string }>> {
@@ -178,7 +178,7 @@ async function sendBatchEmails(emails: BatchEmailInput[], maxRetries = 3): Promi
         body: JSON.stringify(payload),
       });
 
-      // Rate limited — respect Retry-After
+      // Rate limited - respect Retry-After
       if (response.status === 429) {
         const retryAfter = parseInt(response.headers.get('Retry-After') || '2', 10);
         const waitMs = Math.min(retryAfter * 1000, 10000);
@@ -187,7 +187,7 @@ async function sendBatchEmails(emails: BatchEmailInput[], maxRetries = 3): Promi
         continue;
       }
 
-      // Server error — retry with backoff
+      // Server error - retry with backoff
       if (response.status >= 500) {
         const waitMs = Math.pow(2, attempt) * 1000;
         console.warn(`Resend batch server error ${response.status}, retrying in ${waitMs}ms`);
@@ -305,20 +305,20 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'welcome',
       dayNumber: 0,
-      subject: 'ברוכים הבאים — יש לך קרדיטים חינם',
+      subject: 'ברוכים הבאים - יש לך קרדיטים חינם',
       reason: 'new_signup',
       html: wrapEmail(
         'ברוכים הבאים',
         'יש לך 10 קרדיטים חינם לניסיון',
         greet(user.name || undefined) +
-        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> — לפני שמוציאים שקל.') +
+        para('תודה שהצטרפת! עם ShiputzAI תוכל <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> - לפני שמוציאים שקל.') +
         infoBox([
-          '✅ <strong>הדמיית חדר</strong> — צלם ותראה עיצוב חדש תוך שניות',
-          '✅ <strong>Style Match</strong> — מצא את הסגנון שמתאים לך',
-          '✅ <strong>Shop the Look</strong> — זיהוי מוצרים וקנייה ישירה',
-          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר',
+          '✅ <strong>הדמיית חדר</strong> - צלם ותראה עיצוב חדש תוך שניות',
+          '✅ <strong>Style Match</strong> - מצא את הסגנון שמתאים לך',
+          '✅ <strong>Shop the Look</strong> - זיהוי מוצרים וקנייה ישירה',
+          '✅ <strong>סרטון סיור</strong> - וידאו תלת-מימדי של החדר',
         ]) +
-        para('התחל עם הדמיה ראשונה — מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה <strong>תוך 30 שניות</strong>.'),
+        para('התחל עם הדמיה ראשונה - מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה <strong>תוך 30 שניות</strong>.'),
         'צור הדמיה ראשונה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -337,14 +337,14 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
         'קיבלת הצעת מחיר?',
         'ככה בודקים אותה בשניות',
         greet(user.name || undefined) +
-        para('לפני שמתחילים שיפוץ — <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלת הצעת מחיר מקבלן?') +
+        para('לפני שמתחילים שיפוץ - <strong>כדאי לדעת כמה זה באמת עולה</strong>. קיבלת הצעת מחיר מקבלן?') +
         para('ה-AI שלנו מנתח את ההצעה ובודק:') +
         infoBox([
           '🔍 האם <strong>המחיר הוגן</strong> לעומת השוק?',
           '📋 מה <strong>חסר</strong> בהצעה?',
           '⚠️ סעיפים <strong>לשים לב</strong> אליהם לפני שחותמים',
         ]) +
-        para('מצלמים או מעלים את ההצעה — ו<strong>תוך שניות מקבלים ניתוח מלא</strong>.'),
+        para('מצלמים או מעלים את ההצעה - ו<strong>תוך שניות מקבלים ניתוח מלא</strong>.'),
         'לנתח הצעת מחיר',
         `${BASE_URL}/quote-analysis`,
         user.email,
@@ -365,9 +365,9 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
           'עדיין לא ניסית?',
           'ההדמיה לוקחת 30 שניות',
           greet(user.name || undefined) +
-          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong> — הכלי הכי פופולרי שלנו!') +
-          para('מצלמים את החדר, בוחרים סגנון עיצוב — ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
-          bigNumber('10 קרדיטים', 'מחכים לך בחשבון — מספיק להדמיה אחת'),
+          para('שמנו לב שעדיין לא ניסית את <strong>הדמיית החדר</strong> - הכלי הכי פופולרי שלנו!') +
+          para('מצלמים את החדר, בוחרים סגנון עיצוב - ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
+          bigNumber('10 קרדיטים', 'מחכים לך בחשבון - מספיק להדמיה אחת'),
           'לנסות עכשיו',
           `${BASE_URL}/visualize`,
           user.email,
@@ -380,7 +380,7 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
 }
 
 // Flow 2: Activation (trigger: first tool use)
-// Flow: Abandoned Action — user started but didn't finish
+// Flow: Abandoned Action - user started but didn't finish
 function evaluateAbandoned(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails } = ctx;
   const sent = sentEmails.get('abandoned') || new Set();
@@ -413,7 +413,7 @@ function evaluateAbandoned(ctx: FlowContext): EmailAction | null {
         'התמונה שלך עדיין מחכה',
         greet(user.name || undefined) +
         para(`שמנו לב שהתחלת להשתמש ב-<strong>${actionName}</strong> אבל לא סיימת.`) +
-        para('אל דאגה — <strong>הכל שמור ומחכה לך</strong>. פשוט חזור ותסיים.') +
+        para('אל דאגה - <strong>הכל שמור ומחכה לך</strong>. פשוט חזור ותסיים.') +
         bigNumber(actionName, 'מחכה לך'),
         'להמשיך מאיפה שעצרת',
         `${BASE_URL}${actionPage}`,
@@ -448,7 +448,7 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
         'השתמשת בכלי הראשון שלך',
         greet(user.name || undefined) +
         para('מעולה! עשית את הצעד הראשון. <strong>התוצאה שלך מוכנה</strong>.') +
-        para('רוצה לראות את החדר בסגנון אחר? <strong>כל סגנון נותן תוצאה שונה לגמרי</strong> — מודרני, כפרי, מינימליסטי, ועוד.'),
+        para('רוצה לראות את החדר בסגנון אחר? <strong>כל סגנון נותן תוצאה שונה לגמרי</strong> - מודרני, כפרי, מינימליסטי, ועוד.'),
         'לנסות סגנון אחר',
         `${BASE_URL}/visualize`,
         user.email,
@@ -461,8 +461,8 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
     const usedActions = new Set(deductions.map(t => t.action));
     const allTools = [
       { action: 'visualize', name: 'הדמיית חדר', url: '/visualize' },
-      { action: 'style-match', name: 'Style Match — מצא את הסגנון שלך', url: '/style-match' },
-      { action: 'shop-look', name: 'Shop the Look — קנה את הסגנון', url: '/shop-the-look' },
+      { action: 'style-match', name: 'Style Match - מצא את הסגנון שלך', url: '/style-match' },
+      { action: 'shop-look', name: 'Shop the Look - קנה את הסגנון', url: '/shop-the-look' },
       { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
       { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
       { action: 'bill-of-quantities', name: 'כתב כמויות', url: '/bill-of-quantities' },
@@ -494,7 +494,7 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
   return null;
 }
 
-// Flow 3: Abandoned Action — TODO: needs frontend tracking
+// Flow 3: Abandoned Action - TODO: needs frontend tracking
 // function evaluateAbandoned(ctx: FlowContext): EmailAction | null { return null; }
 
 // Flow 4: Low Credits (viz_credits <= 3 AND > 0)
@@ -515,7 +515,7 @@ function evaluateLowCredits(ctx: FlowContext): EmailAction | null {
         'כדאי להשלים לפני שנגמרים',
         greet(user.name || undefined) +
         para(`נשארו לך <strong>${user.viz_credits} קרדיטים</strong> בחשבון. מספיק לעוד שימוש אחד או שניים.`) +
-        para('כדי להמשיך להשתמש בכל הכלים — <strong>השלם קרדיטים בכל רגע</strong>.') +
+        para('כדי להמשיך להשתמש בכל הכלים - <strong>השלם קרדיטים בכל רגע</strong>.') +
         bigNumber(`${user.viz_credits}`, 'קרדיטים נותרו'),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
@@ -584,7 +584,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
         return {
           flowName: 'zero_credits',
           dayNumber: 1,
-          subject: 'הנחה מיוחדת — 48 שעות בלבד',
+          subject: 'הנחה מיוחדת - 48 שעות בלבד',
           reason: 'zero_credits_discount_20',
           html: wrapEmail(
             'הנחה מיוחדת בשבילך',
@@ -620,7 +620,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
         return {
           flowName: 'zero_credits',
           dayNumber: 2,
-          subject: 'הצעה אחרונה — 25 אחוז הנחה',
+          subject: 'הצעה אחרונה - 25 אחוז הנחה',
           reason: 'zero_credits_discount_25',
           html: wrapEmail(
             'הצעה אחרונה',
@@ -628,7 +628,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
             greet(user.name || undefined) +
             para('לא רוצים לוותר עליך. הנה <strong>ההנחה הכי גבוהה שלנו</strong>:') +
             bigNumber('25% הנחה', `קוד: <strong>${code}</strong>`) +
-            para('חבילות קרדיטים מ-₪10 — <strong>עם ההנחה עוד פחות</strong>.'),
+            para('חבילות קרדיטים מ-₪10 - <strong>עם ההנחה עוד פחות</strong>.'),
             'לנצל את ההנחה',
             `${BASE_URL}/pricing?code=${code}`,
             user.email,
@@ -663,7 +663,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'יש כלי עיצוב חדשים שחבל לפספס',
         greet(user.name || undefined) +
         para('לא ראינו אותך כבר שבוע. יש לנו <strong>כלי עיצוב חדשים</strong> שחבל לפספס!') +
-        para('החשבון שלך מחכה — <strong>כל מה שעשית שמור</strong>.'),
+        para('החשבון שלך מחכה - <strong>כל מה שעשית שמור</strong>.'),
         'לצפות בדשבורד',
         `${BASE_URL}/dashboard`,
         user.email,
@@ -684,9 +684,9 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         greet(user.name || undefined) +
         para('כלי עיצוב שכדאי לנסות:') +
         infoBox([
-          '✅ <strong>Style Match</strong> — מצא את סגנון העיצוב שמתאים לך',
-          '✅ <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה',
-          '✅ <strong>סרטון סיור</strong> — וידאו תלת-מימדי של החדר שלך',
+          '✅ <strong>Style Match</strong> - מצא את סגנון העיצוב שמתאים לך',
+          '✅ <strong>Shop the Look</strong> - זיהוי מוצרים בתמונה + קישורי קנייה',
+          '✅ <strong>סרטון סיור</strong> - וידאו תלת-מימדי של החדר שלך',
         ]),
         'לנסות עכשיו',
         `${BASE_URL}/visualize`,
@@ -695,7 +695,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     };
   }
 
-  // #3: 30 days — gift 5 credits
+  // #3: 30 days - gift 5 credits
   if (!sent.has(2) && daysSinceLastActivity >= 30) {
     // Actually add 5 credits
     try {
@@ -724,14 +724,14 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     return {
       flowName: 'inactive',
       dayNumber: 2,
-      subject: 'מתגעגעים — יש לך מתנה',
+      subject: 'מתגעגעים - יש לך מתנה',
       reason: 'inactive_30d_gift',
       html: wrapEmail(
         'מתגעגעים',
         'יש לך 5 קרדיטים מתנה',
         greet(user.name || undefined) +
         para('עבר חודש מהשימוש האחרון שלך. רצינו להגיד שלום ולתת לך <strong>מתנה קטנה</strong>.') +
-        bigNumber('5 קרדיטים', 'כבר בחשבון שלך — מוכנים לשימוש') +
+        bigNumber('5 קרדיטים', 'כבר בחשבון שלך - מוכנים לשימוש') +
         para('מספיק ל-Style Match, ניתוח הצעת מחיר, או סריקת קבלות.'),
         'להשתמש במתנה',
         `${BASE_URL}/visualize`,
@@ -740,7 +740,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     };
   }
 
-  // #4: 60 days — last email with prominent unsubscribe
+  // #4: 60 days - last email with prominent unsubscribe
   if (!sent.has(3) && daysSinceLastActivity >= 60) {
     const unsubUrl = getUnsubscribeUrl(user.email);
     return {
@@ -752,7 +752,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         'עדיין שם?',
         '',
         greet(user.name || undefined) +
-        para('עברו חודשיים מהביקור האחרון שלך. אם מצאת את הסגנון המושלם — מעולה!') +
+        para('עברו חודשיים מהביקור האחרון שלך. אם מצאת את הסגנון המושלם - מעולה!') +
         para('אם רוצה להמשיך לקבל עדכונים על כלים חדשים, <strong>פשוט לחץ על הכפתור</strong>.') +
         para(`לא רוצה לשמוע מאיתנו? <a href="${unsubUrl}" style="color: #0071e3; text-decoration: underline;">להסרה מרשימת התפוצה</a>`),
         'לצפות בדשבורד',
@@ -765,7 +765,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
   return null;
 }
 
-// Flow 7: Referral — TODO: needs referral system
+// Flow 7: Referral - TODO: needs referral system
 // function evaluateReferral(ctx: FlowContext): EmailAction | null { return null; }
 
 // Flow 8: Post-Purchase (trigger: purchased=true)
@@ -809,11 +809,11 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
         greet(user.name || undefined) +
         para('הנה כמה טיפים <strong>לנצל כל קרדיט בצורה חכמה</strong>:') +
         infoBox([
-          '🎨 <strong>הדמיה בסגנונות שונים</strong> — נסה מודרני, כפרי, מינימליסטי (10 קרדיטים)',
-          '🛋️ <strong>Style Match</strong> — AI מזהה את הסגנון שלך ומציע מוצרים (3 קרדיטים)',
-          '🛒 <strong>Shop the Look</strong> — זיהוי מוצרים בתמונה + קישורי קנייה (3 קרדיטים)',
+          '🎨 <strong>הדמיה בסגנונות שונים</strong> - נסה מודרני, כפרי, מינימליסטי (10 קרדיטים)',
+          '🛋️ <strong>Style Match</strong> - AI מזהה את הסגנון שלך ומציע מוצרים (3 קרדיטים)',
+          '🛒 <strong>Shop the Look</strong> - זיהוי מוצרים בתמונה + קישורי קנייה (3 קרדיטים)',
         ]) +
-        para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> — 30 שניות ואתה רואה את העתיד.'),
+        para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> - 30 שניות ואתה רואה את העתיד.'),
         'צור הדמיה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -849,7 +849,7 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails, isSunday, weeklyActionCount } = ctx;
   if (!isSunday) return null;
 
-  // Variant C: 0 actions — don't send, let Inactive flow handle
+  // Variant C: 0 actions - don't send, let Inactive flow handle
   if (weeklyActionCount === 0) return null;
 
   const sent = sentEmails.get('usage_summary') || new Set();
@@ -862,14 +862,14 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'usage_summary',
       dayNumber: weekNum,
-      subject: 'סיכום שבועי — שבוע פרודוקטיבי',
+      subject: 'סיכום שבועי - שבוע פרודוקטיבי',
       reason: 'weekly_summary_active',
       html: wrapEmail(
         'הסיכום השבועי שלך',
         'שבוע מעולה',
         greet(user.name || undefined) +
         bigNumber(`${weeklyActionCount} שימושים`, 'השבוע') +
-        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> — כל הדמיה מקרבת אותך לעיצוב המושלם.') +
+        para('השבוע היית פעיל מאוד! <strong>המשך ככה</strong> - כל הדמיה מקרבת אותך לעיצוב המושלם.') +
         para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
         'לדשבורד',
         `${BASE_URL}/dashboard`,
@@ -882,14 +882,14 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
   return {
     flowName: 'usage_summary',
     dayNumber: weekNum,
-    subject: 'סיכום שבועי — נסה עוד כלי',
+    subject: 'סיכום שבועי - נסה עוד כלי',
     reason: 'weekly_summary_light',
     html: wrapEmail(
       'הסיכום השבועי שלך',
       '',
       greet(user.name || undefined) +
       bigNumber(`${weeklyActionCount}`, `שימוש${weeklyActionCount > 1 ? 'ים' : ''} השבוע`) +
-      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>Style Match</strong> או <strong>Shop the Look</strong> — מצא וקנה את הסגנון שמתאים לך.') +
+      para('יש לך עוד כלים שיכולים לעזור. נסה <strong>Style Match</strong> או <strong>Shop the Look</strong> - מצא וקנה את הסגנון שמתאים לך.') +
       para(`נותרו לך <strong>${user.viz_credits} קרדיטים</strong>.`),
       'לנסות כלי נוסף',
       `${BASE_URL}/visualize`,
@@ -898,7 +898,7 @@ function evaluateUsageSummary(ctx: FlowContext): EmailAction | null {
   };
 }
 
-// Flow 9: Referral — encourage sharing (sent once to active users)
+// Flow 9: Referral - encourage sharing (sent once to active users)
 function evaluateReferral(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails, totalUsageCount, daysSinceSignup } = ctx;
   const sent = sentEmails.get('referral') || new Set();
@@ -910,14 +910,14 @@ function evaluateReferral(ctx: FlowContext): EmailAction | null {
     return {
       flowName: 'referral',
       dayNumber: 0,
-      subject: 'הזמן חבר — שניכם מקבלים 20 קרדיטים',
+      subject: 'הזמן חבר - שניכם מקבלים 20 קרדיטים',
       reason: 'referral_invite',
       html: wrapEmail(
         'הזמן חבר',
         'שניכם מקבלים 20 קרדיטים',
         greet(user.name || undefined) +
         para('אהבת את ShiputzAI? <strong>שתף עם חבר ותרוויח!</strong>') +
-        bigNumber('20', 'קרדיטים לכל אחד — לך ולחבר שלך') +
+        bigNumber('20', 'קרדיטים לכל אחד - לך ולחבר שלך') +
         para('איך זה עובד:') +
         infoBox([
           '1️⃣ שלח את הלינק האישי שלך לחבר',
@@ -952,12 +952,12 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     ];
     const unused = suggestions.find(s => !usedActions.has(s.action));
     const suggestUrl = unused ? `${BASE_URL}${unused.url}` : `${BASE_URL}/dashboard`;
-    const suggestText = unused ? `נסה גם את <strong>${unused.name}</strong> — כלי שרוב המשתמשים אוהבים.` : 'המשך לנצל את כל הכלים!';
+    const suggestText = unused ? `נסה גם את <strong>${unused.name}</strong> - כלי שרוב המשתמשים אוהבים.` : 'המשך לנצל את כל הכלים!';
 
     return {
       flowName: 'milestone',
       dayNumber: 0,
-      subject: 'חמש פעם — אתה מקצוען',
+      subject: 'חמש פעם - אתה מקצוען',
       reason: 'milestone_5_uses',
       html: wrapEmail(
         'חמש פעם',
@@ -973,7 +973,7 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     };
   }
 
-  // #2: 10 uses — upsell
+  // #2: 10 uses - upsell
   if (!sent.has(1) && totalUsageCount >= 10) {
     return {
       flowName: 'milestone',
@@ -986,7 +986,7 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
         greet(user.name || undefined) +
         bigNumber('10+', 'שימושים') +
         para('עם יותר מ-10 שימושים, <strong>אתה בין המשתמשים הכי פעילים שלנו</strong>.') +
-        para('שווה לבדוק את התוכניות שלנו — <strong>חבילת קרדיטים גדולה יותר = מחיר טוב יותר לקרדיט</strong>.'),
+        para('שווה לבדוק את התוכניות שלנו - <strong>חבילת קרדיטים גדולה יותר = מחיר טוב יותר לקרדיט</strong>.'),
         'לצפות בתוכניות',
         `${BASE_URL}/pricing`,
         user.email,
@@ -994,7 +994,7 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     };
   }
 
-  // #3: second purchase — suggest Pro
+  // #3: second purchase - suggest Pro
   if (!sent.has(2) && user.purchased) {
     // Check if user has more than one purchase transaction
     const purchaseTransactions = ctx.creditTransactions.filter(
@@ -1024,7 +1024,7 @@ function evaluateMilestone(ctx: FlowContext): EmailAction | null {
     }
   }
 
-  // #4: project 100% budget — TODO: needs project tracking system
+  // #4: project 100% budget - TODO: needs project tracking system
 
   return null;
 }
@@ -1094,7 +1094,7 @@ export async function GET(request: NextRequest) {
       .not('unsubscribed_at', 'is', null);
     const unsubscribedEmails = new Set((unsubscribed || []).map((u: any) => u.email.toLowerCase()));
 
-    // Fetch ALL email_sequences (for sent tracking) — batch
+    // Fetch ALL email_sequences (for sent tracking) - batch
     const { data: allSequences } = await supabase
       .from('email_sequences')
       .select('user_email, sequence_type, day_number, status, resend_id, sent_at')
@@ -1121,7 +1121,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fetch all credit_transactions — batch
+    // Fetch all credit_transactions - batch
     const { data: allTransactions } = await supabase
       .from('credit_transactions')
       .select('user_email, action, amount, created_at')
@@ -1135,7 +1135,7 @@ export async function GET(request: NextRequest) {
       userTransactions.get(email)!.push(tx);
     }
 
-    // Process each user — collect actions first, then send in parallel batches
+    // Process each user - collect actions first, then send in parallel batches
     const pendingActions: Array<{ user: UserData; action: EmailAction }> = [];
 
     for (const user of (users || []) as UserData[]) {
@@ -1188,7 +1188,7 @@ export async function GET(request: NextRequest) {
         weeklyActionCount,
       };
 
-      // Evaluate flows in priority order — first match wins
+      // Evaluate flows in priority order - first match wins
       let action: EmailAction | null = null;
 
       for (const flowName of FLOW_PRIORITY) {
@@ -1243,7 +1243,7 @@ export async function GET(request: NextRequest) {
     // ================================================================
     const BATCH_SIZE = 100; // Resend max per batch request
 
-    // Step 1: Idempotency check — filter out already-sent emails
+    // Step 1: Idempotency check - filter out already-sent emails
     const toSend: Array<{ user: UserData; action: EmailAction }> = [];
     for (const { user, action } of pendingActions) {
       const { data: existing } = await supabase
@@ -1326,7 +1326,7 @@ export async function GET(request: NextRequest) {
             .eq('sequence_type', action.flowName)
             .eq('day_number', action.dayNumber);
           errors++;
-          details.push(`FAIL ${user.email}: ${action.flowName}#${action.dayNumber} — ${result.message}`);
+          details.push(`FAIL ${user.email}: ${action.flowName}#${action.dayNumber} - ${result.message}`);
         }
       }
 

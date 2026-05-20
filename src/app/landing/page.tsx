@@ -399,7 +399,7 @@ const STEPS = [
   {
     num: "02",
     title: "בוחרים סגנון",
-    desc: "מודרני, כפרי, מינימליסטי, סקנדינבי — בחרו את הסגנון שמדבר אליכם.",
+    desc: "מודרני, כפרי, מינימליסטי, סקנדינבי - בחרו את הסגנון שמדבר אליכם.",
   },
   {
     num: "03",
@@ -1213,7 +1213,7 @@ function FinalCTA() {
           style={{ marginTop: "2rem" }}
         >
           <MagneticButton className="btn-primary btn-large">
-            התחילו בחינם — זה לוקח 10 שניות ←
+            התחילו בחינם - זה לוקח 10 שניות ←
           </MagneticButton>
         </motion.div>
       </div>
@@ -1232,7 +1232,7 @@ function Footer() {
       }}
     >
       <p style={{ color: "#94A3B8", fontSize: "0.9rem" }}>
-        © 2026 ShiputzAI — הדמיות שיפוץ בינה מלאכותית 🏠
+        © 2026 ShiputzAI - הדמיות שיפוץ בינה מלאכותית 🏠
       </p>
     </footer>
   );

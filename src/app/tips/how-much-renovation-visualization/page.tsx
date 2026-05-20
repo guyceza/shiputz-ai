@@ -21,7 +21,7 @@ export default function HowMuchRenovationVisualizationPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026 | ShiputzAI";
+    document.title = "כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026 | ShiputzAI";
     const checkAuth = async () => {
       try {
         const userData = localStorage.getItem("user");
@@ -37,8 +37,8 @@ export default function HowMuchRenovationVisualizationPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026",
-    "description": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים — בערך ₪3-15.",
+    "headline": "כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026",
+    "description": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://shipazti.com/tips/how-much-renovation-visualization" },
@@ -55,7 +55,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "כמה עולה הדמיית שיפוץ בAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים — בערך ₪3-15 תלוי בגודל החבילה."
+          "text": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15 תלוי בגודל החבילה."
         }
       },
       {
@@ -63,7 +63,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "האם אפשר לקבל הדמיית שיפוץ בחינם?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה — מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
+          "text": "כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
         }
       },
       {
@@ -122,7 +122,7 @@ export default function HowMuchRenovationVisualizationPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 5 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026
+          כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026
         </h1>
       </header>
 
@@ -133,11 +133,11 @@ export default function HowMuchRenovationVisualizationPage() {
         <div className="prose prose-gray max-w-none">
           {/* ANSWER-FIRST */}
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים — בערך ₪3-15. בהרשמה מקבלים 10 קרדיטים חינם.
+            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15. בהרשמה מקבלים 10 קרדיטים חינם.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
-            לפני עידן ה-AI, הדמיית עיצוב פנים דרשה שעות עבודה של מעצב או אדריכל — ועלתה אלפי שקלים. היום, אפשר לקבל הדמיה מקצועית תוך 30 שניות ובעלות של כמה שקלים. בואו נפרק את המחירים.
+            לפני עידן ה-AI, הדמיית עיצוב פנים דרשה שעות עבודה של מעצב או אדריכל - ועלתה אלפי שקלים. היום, אפשר לקבל הדמיה מקצועית תוך 30 שניות ובעלות של כמה שקלים. בואו נפרק את המחירים.
           </p>
 
           {/* Price Comparison Table */}
@@ -241,10 +241,10 @@ export default function HowMuchRenovationVisualizationPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">מה משפיע על המחיר?</h2>
           <p className="text-gray-700 leading-relaxed mb-4">מספר גורמים משפיעים על העלות הסופית:</p>
           <ul className="space-y-3 text-gray-700 mb-6">
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">1.</span><span><strong>גודל החבילה</strong> — ככל שקונים יותר קרדיטים, המחיר לקרדיט נמוך יותר. בחבילת 100 קרדיטים (₪149), קרדיט עולה ₪1.49 לעומת ₪2.9 בחבילת 10.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">2.</span><span><strong>הפלטפורמה</strong> — כלים שונים גובים מחירים שונים. מנויים חודשיים (כמו InteriorAI) יכולים להיות יקרים אם לא משתמשים מספיק.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">3.</span><span><strong>מספר ההדמיות</strong> — תכנון שיפוץ דירה שלמה דורש 5-10 הדמיות (חדר אחד × כמה סגנונות). תכנון חדר בודד — 2-3 הדמיות מספיקות.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">4.</span><span><strong>כלים נוספים</strong> — אם משתמשים גם בכתב כמויות, ניתוח הצעת מחיר ותוכנית קומה, צריך יותר קרדיטים — אבל זה חוסך אלפי שקלים בייעוץ מקצועי.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">1.</span><span><strong>גודל החבילה</strong> - ככל שקונים יותר קרדיטים, המחיר לקרדיט נמוך יותר. בחבילת 100 קרדיטים (₪149), קרדיט עולה ₪1.49 לעומת ₪2.9 בחבילת 10.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">2.</span><span><strong>הפלטפורמה</strong> - כלים שונים גובים מחירים שונים. מנויים חודשיים (כמו InteriorAI) יכולים להיות יקרים אם לא משתמשים מספיק.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">3.</span><span><strong>מספר ההדמיות</strong> - תכנון שיפוץ דירה שלמה דורש 5-10 הדמיות (חדר אחד × כמה סגנונות). תכנון חדר בודד - 2-3 הדמיות מספיקות.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">4.</span><span><strong>כלים נוספים</strong> - אם משתמשים גם בכתב כמויות, ניתוח הצעת מחיר ותוכנית קומה, צריך יותר קרדיטים - אבל זה חוסך אלפי שקלים בייעוץ מקצועי.</span></li>
           </ul>
 
           {/* ROI Analysis */}
@@ -277,18 +277,18 @@ export default function HowMuchRenovationVisualizationPage() {
 
           <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-3">מתי ShiputzAI חוסך הכי הרבה?</h3>
           <ul className="space-y-2 text-gray-700 mb-6">
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>תכנון ראשוני</strong> — לראות איך החדר ייראה לפני שמתחילים</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>השוואת סגנונות</strong> — לנסות 5-10 סגנונות שונים תוך דקות</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>כתב כמויות</strong> — חוסך ₪1,000-3,000 של ייעוץ מקצועי</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>ניתוח הצעת מחיר</strong> — מונע שתשלמו יותר מדי לקבלן</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>תקשורת עם הקבלן</strong> — להראות בדיוק מה אתם רוצים</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>תכנון ראשוני</strong> - לראות איך החדר ייראה לפני שמתחילים</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>השוואת סגנונות</strong> - לנסות 5-10 סגנונות שונים תוך דקות</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>כתב כמויות</strong> - חוסך ₪1,000-3,000 של ייעוץ מקצועי</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>ניתוח הצעת מחיר</strong> - מונע שתשלמו יותר מדי לקבלן</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span><span><strong>תקשורת עם הקבלן</strong> - להראות בדיוק מה אתם רוצים</span></li>
           </ul>
 
           {/* Practical Tip */}
           <div className="bg-gray-900 text-white rounded-2xl p-8 mb-8">
             <h2 className="text-xl font-semibold mb-4">💡 הטיפ שיחסוך לכם הכי הרבה</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-              התחילו עם 10 הקרדיטים החינמיים. עשו 2 הדמיות — אחת לסלון ואחת למטבח. אם אהבתם את התוצאות, קנו את חבילת ה-100 קרדיטים ב-₪149 וכך:
+              התחילו עם 10 הקרדיטים החינמיים. עשו 2 הדמיות - אחת לסלון ואחת למטבח. אם אהבתם את התוצאות, קנו את חבילת ה-100 קרדיטים ב-₪149 וכך:
             </p>
             <ul className="space-y-2 text-gray-300">
               <li>• תוכלו לנסות 10+ סגנונות שונים לכל חדר</li>
@@ -297,7 +297,7 @@ export default function HowMuchRenovationVisualizationPage() {
               <li>• ליצור סרטון סיור להציג למשפחה</li>
             </ul>
             <p className="text-gray-300 leading-relaxed mt-4">
-              <strong className="text-white">₪149 על כל הכלים האלה — במקום ₪5,000+ למעצב פנים.</strong>
+              <strong className="text-white">₪149 על כל הכלים האלה - במקום ₪5,000+ למעצב פנים.</strong>
             </p>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function HowMuchRenovationVisualizationPage() {
             href="/signup"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            התחילו חינם — 10 קרדיטים במתנה →
+            התחילו חינם - 10 קרדיטים במתנה →
           </Link>
         </div>
 
@@ -318,11 +318,11 @@ export default function HowMuchRenovationVisualizationPage() {
           <div className="space-y-4">
             <FaqItem
               question="כמה עולה הדמיית שיפוץ בAI?"
-              answer="הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים — בערך ₪3-15 תלוי בגודל החבילה."
+              answer="הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15 תלוי בגודל החבילה."
             />
             <FaqItem
               question="האם אפשר לקבל הדמיית שיפוץ בחינם?"
-              answer="כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה — מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
+              answer="כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
             />
             <FaqItem
               question="כמה עולות חבילות הקרדיטים בShiputzAI?"
@@ -339,8 +339,8 @@ export default function HowMuchRenovationVisualizationPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/best-ai-interior-design-tools" className="text-gray-700 hover:text-gray-900 hover:underline">5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI — 2026</Link></li>
-            <li><Link href="/tips/shiputzai-vs-interiorai" className="text-gray-700 hover:text-gray-900 hover:underline">ShiputzAI vs InteriorAI — השוואה מקיפה 2026</Link></li>
+            <li><Link href="/tips/best-ai-interior-design-tools" className="text-gray-700 hover:text-gray-900 hover:underline">5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI - 2026</Link></li>
+            <li><Link href="/tips/shiputzai-vs-interiorai" className="text-gray-700 hover:text-gray-900 hover:underline">ShiputzAI vs InteriorAI - השוואה מקיפה 2026</Link></li>
             <li><Link href="/tips/renovation-costs-2026" className="text-gray-700 hover:text-gray-900 hover:underline">כמה באמת עולה שיפוץ דירה ב-2026?</Link></li>
           </ul>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-// Animated SVG icons for each role — lightweight, no external dependencies
+// Animated SVG icons for each role - lightweight, no external dependencies
 
 export function HomeownerIcon({ animate }: { animate?: boolean }) {
   return (

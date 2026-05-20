@@ -23,7 +23,7 @@ async function main() {
   const url = env.NEXT_PUBLIC_SUPABASE_URL;
   const key = env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // Create table via REST insert approach — we'll create via the app's API
+  // Create table via REST insert approach - we'll create via the app's API
   // Instead, let's use the Supabase Management API
   
   const projectRef = 'vghfcdtzywbmlacltnjp';

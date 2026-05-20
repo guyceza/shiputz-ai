@@ -126,7 +126,7 @@ export default function ReceiptScannerPage() {
                       </svg>
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">סריקת קבלות חכמה</h2>
-                    <p className="text-sm text-gray-500">צלמו קבלה — ה-AI מזהה הכל תוך שניות</p>
+                    <p className="text-sm text-gray-500">צלמו קבלה - ה-AI מזהה הכל תוך שניות</p>
                   </div>
 
                   <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
@@ -263,7 +263,7 @@ export default function ReceiptScannerPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">תיאור</span>
-                    <span className="font-medium text-gray-900">{result.description || "—"}</span>
+                    <span className="font-medium text-gray-900">{result.description || "-"}</span>
                   </div>
                 </div>
 

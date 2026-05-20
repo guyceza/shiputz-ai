@@ -22,7 +22,7 @@ export function FormattedText({ text, className = '' }: FormattedTextProps) {
         const isNumberedList = /(?:^|\n)\d+\.\s/.test(paragraph.trim());
         
         if (isNumberedList) {
-          // Parse numbered list items — split on newline followed by digit
+          // Parse numbered list items - split on newline followed by digit
           const items = paragraph.split(/\n(?=\d+\.\s)/g).filter(Boolean);
           return (
             <div key={pIdx} className="space-y-3">

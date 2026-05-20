@@ -110,11 +110,11 @@ const FAQ = [
   },
   {
     q: "אפשר לנסות בחינם?",
-    a: "בהחלט! כל משתמש חדש מקבל 10 קרדיטים בחינם — מספיק להדמיה אחת מלאה. אחרי הרשמה מקבלים עוד 10.",
+    a: "בהחלט! כל משתמש חדש מקבל 10 קרדיטים בחינם - מספיק להדמיה אחת מלאה. אחרי הרשמה מקבלים עוד 10.",
   },
   {
     q: "איך משדרגים או מבטלים?",
-    a: "אפשר לשדרג בכל רגע — הקרדיטים החדשים נוספים מיד. ביטול נכנס לתוקף בסוף תקופת החיוב.",
+    a: "אפשר לשדרג בכל רגע - הקרדיטים החדשים נוספים מיד. ביטול נכנס לתוקף בסוף תקופת החיוב.",
   },
 ];
 
@@ -180,7 +180,7 @@ export default function PricingPage() {
             שלמו רק על מה שאתם <span className="text-emerald-600">משתמשים</span>
           </h1>
           <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8">
-            קנו קרדיטים או בחרו מנוי חודשי — בלי התחייבות, בלי הפתעות
+            קנו קרדיטים או בחרו מנוי חודשי - בלי התחייבות, בלי הפתעות
           </p>
 
           {/* Trial badge */}
@@ -297,7 +297,7 @@ export default function PricingPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">צריכים עוד קרדיטים?</h2>
-            <p className="text-gray-500">גררו ובחרו כמה קרדיטים — ככל שקונים יותר, המחיר יורד</p>
+            <p className="text-gray-500">גררו ובחרו כמה קרדיטים - ככל שקונים יותר, המחיר יורד</p>
           </div>
           <div className="rounded-2xl border-2 border-gray-200 p-8 bg-white">
             {/* Credits display */}

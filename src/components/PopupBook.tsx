@@ -338,7 +338,7 @@ export default function PopupBook() {
           </span>
         </h2>
         <p className="text-lg text-gray-500">
-          גלול למטה וצפה בספר נפתח — עם מחירים לכל מוצר
+          גלול למטה וצפה בספר נפתח - עם מחירים לכל מוצר
         </p>
       </div>
 

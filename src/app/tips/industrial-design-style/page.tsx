@@ -4,8 +4,8 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 function FaqItem({ q, a }: { q: string; a: string }) { return (<details className="border border-gray-200 rounded-xl p-4 group"><summary className="font-semibold text-gray-900 cursor-pointer group-open:mb-2">{q}</summary><p className="text-gray-600 leading-relaxed">{a}</p></details>); }
 export default function IndustrialDesignStyle() {
-  useEffect(() => { document.title = "עיצוב תעשייתי — לופט, בטון חשוף וברזל בבית הישראלי | ShiputzAI"; }, []);
-  const s1 = {"@context":"https://schema.org","@type":"Article","headline":"עיצוב תעשייתי — לופט, בטון חשוף וברזל בבית הישראלי","author":{"@type":"Organization","name":"ShiputzAI"},"datePublished":"2026-04-02"};
+  useEffect(() => { document.title = "עיצוב תעשייתי - לופט, בטון חשוף וברזל בבית הישראלי | ShiputzAI"; }, []);
+  const s1 = {"@context":"https://schema.org","@type":"Article","headline":"עיצוב תעשייתי - לופט, בטון חשוף וברזל בבית הישראלי","author":{"@type":"Organization","name":"ShiputzAI"},"datePublished":"2026-04-02"};
   const s2 = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"מה זה עיצוב תעשייתי?","acceptedAnswer":{"@type":"Answer","text":"סגנון שמבוסס על אסתטיקה של מפעלים ומחסנים: בטון חשוף, מתכת, צנרת גלויה, בריקים ועץ ממוחזר. תחושת לופט ניו-יורקי."}},{"@type":"Question","name":"כמה עולה עיצוב תעשייתי?","acceptedAnswer":{"@type":"Answer","text":"בטון חשוף: ₪80-150 למ\"ר. קיר בריקים: ₪200-500 למ\"ר. מנורות תעשייתיות: ₪300-2,000 ליח'. סלון מלא: ₪15,000-40,000."}}]};
   return (
     <div dir="rtl" className="min-h-screen bg-white">
@@ -14,8 +14,8 @@ export default function IndustrialDesignStyle() {
       <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50"><div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between"><Link href="/" className="text-xl font-bold text-gray-900">ShiputzAI</Link><div className="flex items-center gap-4"><Link href="/tips" className="text-gray-600 hover:text-gray-900 text-sm">טיפים</Link><Link href="/signup" className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600">התחילו בחינם</Link></div></div></nav>
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-4 text-sm text-gray-500"><Link href="/tips" className="hover:text-amber-600">טיפים</Link> / עיצוב תעשייתי</div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">עיצוב תעשייתי — לופט, בטון חשוף וברזל בבית הישראלי</h1>
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10"><p className="text-lg text-gray-800"><strong>עיצוב תעשייתי הפך מטרנד ללקוחות נישה למיינסטרים ישראלי.</strong> בטון חשוף, צנרת גלויה, מנורות מתכת ועץ ממוחזר — הסגנון שאומר &quot;אני לא מתאמץ&quot; (אבל דורש תכנון מדויק). ShiputzAI מאפשר להדמות לופט תעשייתי על הדירה שלכם.</p></div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">עיצוב תעשייתי - לופט, בטון חשוף וברזל בבית הישראלי</h1>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10"><p className="text-lg text-gray-800"><strong>עיצוב תעשייתי הפך מטרנד ללקוחות נישה למיינסטרים ישראלי.</strong> בטון חשוף, צנרת גלויה, מנורות מתכת ועץ ממוחזר - הסגנון שאומר &quot;אני לא מתאמץ&quot; (אבל דורש תכנון מדויק). ShiputzAI מאפשר להדמות לופט תעשייתי על הדירה שלכם.</p></div>
         <article className="prose prose-lg max-w-none">
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">5 חומרים מפתח</h2>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -37,7 +37,7 @@ export default function IndustrialDesignStyle() {
           <p className="text-gray-700 leading-relaxed mb-4">ארונות בשחור/אפור כהה + משטח בטון או נירוסטה + מדפים פתוחים ממתכת + ברזים בסגנון תעשייתי. ספלשבק: מתכת או אריחי מטרו שחורים. אי מטבח עם בסיס מתכת.</p>
 
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">הטעות הנפוצה: &quot;תעשייתי = קר ומרוחק&quot;</h2>
-          <p className="text-gray-700 leading-relaxed mb-4">תעשייתי טוב הוא חם. האיזון: <strong>60% גולמי</strong> (בטון, מתכת) + <strong>40% חם</strong> (עץ, עור, שטיחים, צמחים). בלי העץ והטקסטיל — זה מחסן, לא בית.</p>
+          <p className="text-gray-700 leading-relaxed mb-4">תעשייתי טוב הוא חם. האיזון: <strong>60% גולמי</strong> (בטון, מתכת) + <strong>40% חם</strong> (עץ, עור, שטיחים, צמחים). בלי העץ והטקסטיל - זה מחסן, לא בית.</p>
 
           <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">מחירים</h2>
           <div className="bg-gray-50 rounded-xl p-6 space-y-3">
@@ -54,7 +54,7 @@ export default function IndustrialDesignStyle() {
           <FaqItem q="מה זה עיצוב תעשייתי?" a="בטון חשוף, מתכת, צנרת גלויה, בריקים ועץ ממוחזר. תחושת לופט." />
           <FaqItem q="כמה עולה?" a='קיר בריקים: ₪2,000-5,000. רצפת בטון: ₪5,000-15,000. סלון מלא: ₪15,000-40,000.' />
         </div></section>
-        <div className="mt-12 text-center"><Link href="/visualize" className="bg-amber-500 text-white px-8 py-3 rounded-xl font-medium text-lg hover:bg-amber-600 inline-block">הדמיה תעשייתית — חינם</Link></div>
+        <div className="mt-12 text-center"><Link href="/visualize" className="bg-amber-500 text-white px-8 py-3 rounded-xl font-medium text-lg hover:bg-amber-600 inline-block">הדמיה תעשייתית - חינם</Link></div>
         <div className="mt-8 flex flex-wrap gap-3 text-sm"><Link href="/tips/modern-living-room-ideas" className="text-amber-600">סלון מודרני →</Link><Link href="/tips/minimalist-design-guide" className="text-amber-600">מינימליסטי →</Link><Link href="/tips/bedroom-design-ai" className="text-amber-600">חדר שינה →</Link></div>
       </main>
       <Footer />

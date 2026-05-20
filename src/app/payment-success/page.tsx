@@ -61,7 +61,7 @@ function PaymentSuccessContent() {
           setVerificationStatus('failed');
         }
       } else {
-        // No UID available — assume success (webhook should handle it)
+        // No UID available - assume success (webhook should handle it)
         console.log('No page_request_uid in URL, relying on webhook');
         setVerificationStatus('verified');
       }
@@ -150,7 +150,7 @@ function PaymentSuccessContent() {
         <div className="mt-6 bg-gradient-to-l from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-5 text-right">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">🎁</span>
-            <h3 className="font-bold text-gray-900 text-sm">הזמינו חבר — שניכם מרוויחים!</h3>
+            <h3 className="font-bold text-gray-900 text-sm">הזמינו חבר - שניכם מרוויחים!</h3>
           </div>
           <p className="text-xs text-gray-600 mb-3">שתפו את הלינק שלכם וקבלו <strong>20 קרדיטים חינם</strong> על כל חבר שנרשם</p>
           <Link

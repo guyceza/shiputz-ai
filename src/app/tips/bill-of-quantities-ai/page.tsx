@@ -21,7 +21,7 @@ export default function BillOfQuantitiesAIPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "כתב כמויות אוטומטי בAI — חסכו אלפי שקלים | ShiputzAI";
+    document.title = "כתב כמויות אוטומטי בAI - חסכו אלפי שקלים | ShiputzAI";
     try {
       const userData = localStorage.getItem("user");
       if (userData) {
@@ -34,7 +34,7 @@ export default function BillOfQuantitiesAIPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "כתב כמויות אוטומטי בAI — חסכו אלפי שקלים",
+    "headline": "כתב כמויות אוטומטי בAI - חסכו אלפי שקלים",
     "description": "כתב כמויות מקצועי עולה ₪3,000-₪8,000 ולוקח 1-2 שבועות. בShiputzAI, כתב כמויות AI נוצר תוך 30 שניות מתמונה של החדר.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
@@ -110,7 +110,7 @@ export default function BillOfQuantitiesAIPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 7 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          כתב כמויות אוטומטי בAI — חסכו אלפי שקלים
+          כתב כמויות אוטומטי בAI - חסכו אלפי שקלים
         </h1>
       </header>
 
@@ -119,11 +119,11 @@ export default function BillOfQuantitiesAIPage() {
       <article className="max-w-3xl mx-auto px-6 py-8">
         <div className="prose prose-gray max-w-none">
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong>כתב כמויות מקצועי עולה ₪3,000-₪8,000 ולוקח 1-2 שבועות.</strong> בShiputzAI, כתב כמויות AI נוצר תוך 30 שניות מתמונה של החדר — עם פירוט חומרים, עבודה, ועלויות משוערות.
+            <strong>כתב כמויות מקצועי עולה ₪3,000-₪8,000 ולוקח 1-2 שבועות.</strong> בShiputzAI, כתב כמויות AI נוצר תוך 30 שניות מתמונה של החדר - עם פירוט חומרים, עבודה, ועלויות משוערות.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
-            כתב כמויות הוא אחד המסמכים החשובים ביותר בפרויקט שיפוץ. בלעדיו, אתם טסים בלי מכשירים — לא יודעים כמה חומרים צריך, כמה העבודה תעלה, ואם הצעת המחיר של הקבלן הגיונית. עד היום, רק איש מקצוע יכול היה להכין כתב כמויות. היום, AI עושה את זה תוך חצי דקה.
+            כתב כמויות הוא אחד המסמכים החשובים ביותר בפרויקט שיפוץ. בלעדיו, אתם טסים בלי מכשירים - לא יודעים כמה חומרים צריך, כמה העבודה תעלה, ואם הצעת המחיר של הקבלן הגיונית. עד היום, רק איש מקצוע יכול היה להכין כתב כמויות. היום, AI עושה את זה תוך חצי דקה.
           </p>
 
           {/* What is BOQ */}
@@ -132,8 +132,8 @@ export default function BillOfQuantitiesAIPage() {
             כתב כמויות (Bill of Quantities) הוא מסמך מפורט שמפרט:
           </p>
           <ul className="space-y-2 text-gray-700 mb-8">
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">📋</span> <span><strong>חומרים:</strong> סוג וכמות של כל חומר — ריצוף, צבע, גבס, חשמל, אינסטלציה</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">👷</span> <span><strong>עבודה:</strong> פירוט שעות עבודה לכל מקצוע — חשמלאי, אינסטלטור, צבעי, רצף</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">📋</span> <span><strong>חומרים:</strong> סוג וכמות של כל חומר - ריצוף, צבע, גבס, חשמל, אינסטלציה</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">👷</span> <span><strong>עבודה:</strong> פירוט שעות עבודה לכל מקצוע - חשמלאי, אינסטלטור, צבעי, רצף</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">💰</span> <span><strong>עלויות:</strong> מחיר משוער לכל פריט ועלות כוללת של הפרויקט</span></li>
             <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">📊</span> <span><strong>השוואה:</strong> בסיס להשוואת הצעות מחיר מקבלנים שונים</span></li>
           </ul>
@@ -192,7 +192,7 @@ export default function BillOfQuantitiesAIPage() {
                 <span className="flex-shrink-0 w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-semibold">1</span>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">מעלים תמונה</h3>
-                  <p className="text-gray-600">תמונה של החדר הקיים, או הדמיית AI שיצרתם בShiputzAI. ה-AI מנתח את החדר — גודל משוער, חומרים קיימים, ומצב כללי.</p>
+                  <p className="text-gray-600">תמונה של החדר הקיים, או הדמיית AI שיצרתם בShiputzAI. ה-AI מנתח את החדר - גודל משוער, חומרים קיימים, ומצב כללי.</p>
                 </div>
               </div>
             </div>
@@ -219,18 +219,18 @@ export default function BillOfQuantitiesAIPage() {
           {/* Sample BOQ */}
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">דוגמה: כתב כמויות למטבח</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 mb-4">כתב כמויות — שיפוץ מטבח 12 מ&quot;ר</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">כתב כמויות - שיפוץ מטבח 12 מ&quot;ר</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
                 <span className="text-gray-700">פירוק מטבח ישן + פינוי</span>
                 <span className="text-gray-900 font-medium">₪3,500</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-700">אינסטלציה — העברת נקודות מים וביוב</span>
+                <span className="text-gray-700">אינסטלציה - העברת נקודות מים וביוב</span>
                 <span className="text-gray-900 font-medium">₪4,500</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-700">חשמל — הוספת נקודות + לוח חשמל</span>
+                <span className="text-gray-700">חשמל - הוספת נקודות + לוח חשמל</span>
                 <span className="text-gray-900 font-medium">₪5,000</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
@@ -238,7 +238,7 @@ export default function BillOfQuantitiesAIPage() {
                 <span className="text-gray-900 font-medium">₪6,000</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-700">חיפוי קירות — Backsplash</span>
+                <span className="text-gray-700">חיפוי קירות - Backsplash</span>
                 <span className="text-gray-900 font-medium">₪3,200</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
@@ -254,7 +254,7 @@ export default function BillOfQuantitiesAIPage() {
                 <span className="text-gray-900 font-medium">₪2,500</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-700">צביעה — 40 מ&quot;ר (קירות + תקרה)</span>
+                <span className="text-gray-700">צביעה - 40 מ&quot;ר (קירות + תקרה)</span>
                 <span className="text-gray-900 font-medium">₪2,800</span>
               </div>
               <div className="flex justify-between items-center py-3 bg-gray-100 rounded-xl px-4 mt-4">
@@ -287,7 +287,7 @@ export default function BillOfQuantitiesAIPage() {
           <ol className="space-y-2 text-gray-700 mb-8 list-decimal list-inside">
             <li>יוצרים כתב כמויות AI מתמונה של החדר</li>
             <li>שולחים לקבלנים ומקבלים הצעות מחיר</li>
-            <li>מעלים את הצעת המחיר לShiputzAI — ה-AI בודק אם המחירים סבירים</li>
+            <li>מעלים את הצעת המחיר לShiputzAI - ה-AI בודק אם המחירים סבירים</li>
             <li>משתמשים בניתוח כדי לנהל משא ומתן מושכל</li>
           </ol>
         </div>
@@ -298,7 +298,7 @@ export default function BillOfQuantitiesAIPage() {
             href="/signup"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            צרו כתב כמויות AI עכשיו — חינם →
+            צרו כתב כמויות AI עכשיו - חינם →
           </Link>
           <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם בהרשמה</p>
         </div>
@@ -319,10 +319,10 @@ export default function BillOfQuantitiesAIPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
-            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות</Link></li>
-            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל — המדריך המלא 2026</Link></li>
-            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026</Link></li>
+            <li><Link href="/tips/renovation-cost-calculator" className="text-gray-700 hover:text-gray-900 hover:underline">מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026</Link></li>
+            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות</Link></li>
+            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל - המדריך המלא 2026</Link></li>
+            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026</Link></li>
           </ul>
         </div>
       </article>

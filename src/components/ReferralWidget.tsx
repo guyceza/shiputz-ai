@@ -34,7 +34,7 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
 
   const shareWhatsApp = () => {
     if (!data) return;
-    const text = `הכירו את ShiputzAI — כלי AI לעיצוב הבית 🏠\nהירשמו דרך הלינק שלי ושנינו מקבלים 20 קרדיטים חינם!\n${data.link}`;
+    const text = `הכירו את ShiputzAI - כלי AI לעיצוב הבית 🏠\nהירשמו דרך הלינק שלי ושנינו מקבלים 20 קרדיטים חינם!\n${data.link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -46,7 +46,7 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
       <div className="flex items-center gap-3 mb-3">
         <span className="text-2xl">🎁</span>
         <div>
-          <h3 className="font-bold text-gray-900 text-sm">הזמן חבר — שניכם מרוויחים!</h3>
+          <h3 className="font-bold text-gray-900 text-sm">הזמן חבר - שניכם מרוויחים!</h3>
           <p className="text-xs text-gray-600">כל חבר שנרשם = <strong>20 קרדיטים לך + 20 לחבר</strong></p>
         </div>
       </div>

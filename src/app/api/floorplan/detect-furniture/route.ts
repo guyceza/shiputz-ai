@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image or click position" }, { status: 400 });
     }
 
-    // Auth only — detect is free (credit charged on furniture swap)
+    // Auth only - detect is free (credit charged on furniture swap)
     if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
 
     const bytes = await image.arrayBuffer();

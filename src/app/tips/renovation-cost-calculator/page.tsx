@@ -21,7 +21,7 @@ export default function RenovationCostCalculatorPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026 | ShiputzAI";
+    document.title = "מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026 | ShiputzAI";
     try {
       const userData = localStorage.getItem("user");
       if (userData) {
@@ -34,7 +34,7 @@ export default function RenovationCostCalculatorPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026",
+    "headline": "מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026",
     "description": "שיפוץ דירה 4 חדרים בישראל עולה בממוצע ₪120,000-₪250,000 ב-2026. מדריך מחירים מפורט לפי חדר, עם טיפים לחיסכון.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
@@ -115,7 +115,7 @@ export default function RenovationCostCalculatorPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 9 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          מחשבון עלות שיפוץ — כמה באמת עולה שיפוץ דירה בישראל 2026
+          מחשבון עלות שיפוץ - כמה באמת עולה שיפוץ דירה בישראל 2026
         </h1>
       </header>
 
@@ -218,7 +218,7 @@ export default function RenovationCostCalculatorPage() {
           <div className="space-y-4 mb-8">
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">📐 גודל הדירה</h3>
-              <p className="text-gray-600 text-sm">ככל שהדירה גדולה יותר, העלות עולה — אך המחיר למ&quot;ר בדרך כלל יורד. דירה גדולה = יותר חומרים, אבל פחות עלות יחסית למ&quot;ר.</p>
+              <p className="text-gray-600 text-sm">ככל שהדירה גדולה יותר, העלות עולה - אך המחיר למ&quot;ר בדרך כלל יורד. דירה גדולה = יותר חומרים, אבל פחות עלות יחסית למ&quot;ר.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">🧱 רמת החומרים</h3>
@@ -226,7 +226,7 @@ export default function RenovationCostCalculatorPage() {
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">📍 מיקום</h3>
-              <p className="text-gray-600 text-sm">מחירי עבודה בתל אביב גבוהים ב-20-30% מהפריפריה. בירושלים המחירים גבוהים ב-10-20%. בדרום ובצפון — המחירים נמוכים יותר.</p>
+              <p className="text-gray-600 text-sm">מחירי עבודה בתל אביב גבוהים ב-20-30% מהפריפריה. בירושלים המחירים גבוהים ב-10-20%. בדרום ובצפון - המחירים נמוכים יותר.</p>
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">🔧 היקף העבודה</h3>
@@ -234,7 +234,7 @@ export default function RenovationCostCalculatorPage() {
             </div>
             <div className="bg-gray-50 rounded-2xl p-6">
               <h3 className="font-semibold text-gray-900 mb-2">📅 עונה</h3>
-              <p className="text-gray-600 text-sm">קיץ ואביב — עונת שיא. קבלנים עמוסים ומחירים גבוהים ב-10-15%. חורף — עונה שקטה, אפשר לקבל מחירים טובים יותר.</p>
+              <p className="text-gray-600 text-sm">קיץ ואביב - עונת שיא. קבלנים עמוסים ומחירים גבוהים ב-10-15%. חורף - עונה שקטה, אפשר לקבל מחירים טובים יותר.</p>
             </div>
           </div>
 
@@ -245,16 +245,16 @@ export default function RenovationCostCalculatorPage() {
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">2.</span> <span><strong>כתב כמויות:</strong> השתמשו בכתב כמויות AI של ShiputzAI כדי לדעת מה הגיוני ומה מנופח.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">3.</span> <span><strong>שפצו בחורף:</strong> קבלנים פנויים יותר ונותנים הנחות של 10-15%.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">4.</span> <span><strong>חומרים ישראליים:</strong> אריחים ישראליים (כמו של חלמיש) זולים ב-30-50% מיובא.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">5.</span> <span><strong>אל תשנו באמצע:</strong> שינויים תוך כדי עבודה עולים כסף — תכננו הכל מראש.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">5.</span> <span><strong>אל תשנו באמצע:</strong> שינויים תוך כדי עבודה עולים כסף - תכננו הכל מראש.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">6.</span> <span><strong>הדמיה לפני שיפוץ:</strong> השתמשו בShiputzAI לראות את התוצאה לפני שמשקיעים. חוסך טעויות יקרות.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">7.</span> <span><strong>קנו חומרים בעצמכם:</strong> ברזים, כלים סניטריים, ותאורה — קנו ישירות ולא דרך הקבלן. חיסכון של 20-40%.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">8.</span> <span><strong>שמרו על גמישות:</strong> אם הקבלן מציע חומר חלופי זול יותר באותה איכות — שקלו.</span></li>
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">9.</span> <span><strong>רזרבה של 15%:</strong> תמיד שמרו 15% מהתקציב כרזרבה — תמיד יש הפתעות.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">7.</span> <span><strong>קנו חומרים בעצמכם:</strong> ברזים, כלים סניטריים, ותאורה - קנו ישירות ולא דרך הקבלן. חיסכון של 20-40%.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">8.</span> <span><strong>שמרו על גמישות:</strong> אם הקבלן מציע חומר חלופי זול יותר באותה איכות - שקלו.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">9.</span> <span><strong>רזרבה של 15%:</strong> תמיד שמרו 15% מהתקציב כרזרבה - תמיד יש הפתעות.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900">10.</span> <span><strong>ניתוח הצעת מחיר:</strong> העלו את ההצעה לShiputzAI וה-AI יגיד לכם אם המחירים סבירים.</span></li>
           </ul>
 
           {/* AI cost estimation */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">הערכת עלות AI — איך ShiputzAI עוזר?</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">הערכת עלות AI - איך ShiputzAI עוזר?</h2>
           <p className="text-gray-700 leading-relaxed mb-4">ShiputzAI מציע שני כלים שעוזרים לתכנן תקציב שיפוץ:</p>
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
@@ -329,7 +329,7 @@ export default function RenovationCostCalculatorPage() {
           >
             קבלו הערכת עלות AI לשיפוץ שלכם →
           </Link>
-          <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם — כולל כתב כמויות וניתוח הצעת מחיר</p>
+          <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם - כולל כתב כמויות וניתוח הצעת מחיר</p>
         </div>
 
         {/* FAQ */}
@@ -349,11 +349,11 @@ export default function RenovationCostCalculatorPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/bill-of-quantities-ai" className="text-gray-700 hover:text-gray-900 hover:underline">כתב כמויות אוטומטי בAI — חסכו אלפי שקלים</Link></li>
-            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI — ראו את המטבח החדש תוך 30 שניות</Link></li>
-            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל — המדריך המלא 2026</Link></li>
-            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026</Link></li>
-            <li><Link href="/tips/ai-living-room-design" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב סלון בAI — 7 סגנונות עיצוב פופולריים להדמיה</Link></li>
+            <li><Link href="/tips/bill-of-quantities-ai" className="text-gray-700 hover:text-gray-900 hover:underline">כתב כמויות אוטומטי בAI - חסכו אלפי שקלים</Link></li>
+            <li><Link href="/tips/ai-kitchen-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">הדמיית שיפוץ מטבח בAI - ראו את המטבח החדש תוך 30 שניות</Link></li>
+            <li><Link href="/tips/ai-interior-design-israel" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב פנים בAI בישראל - המדריך המלא 2026</Link></li>
+            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026</Link></li>
+            <li><Link href="/tips/ai-living-room-design" className="text-gray-700 hover:text-gray-900 hover:underline">עיצוב סלון בAI - 7 סגנונות עיצוב פופולריים להדמיה</Link></li>
           </ul>
         </div>
       </article>

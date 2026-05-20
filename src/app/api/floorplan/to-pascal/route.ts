@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     const maxCoord = Math.max(...allCoords, 0);
     
     if (maxCoord > 50) {
-      // Likely centimeters or pixels — determine scale
+      // Likely centimeters or pixels - determine scale
       // Use dimensions hint if available, otherwise assume cm
       const dims = floorplan.dimensions;
       let scale: number;

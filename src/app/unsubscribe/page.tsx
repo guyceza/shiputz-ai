@@ -35,7 +35,7 @@ function UnsubscribeContent() {
       if (data.success) {
         setStatus("success");
       } else if (data.needs_confirm) {
-        // Token invalid — show confirmation screen instead of error
+        // Token invalid - show confirmation screen instead of error
         setStatus("confirm");
       } else if (response.ok) {
         setStatus("success");
@@ -44,7 +44,7 @@ function UnsubscribeContent() {
         setStatus("error");
       }
     } catch (err) {
-      setErrorMessage("שגיאת תקשורת — נסו שוב מאוחר יותר");
+      setErrorMessage("שגיאת תקשורת - נסו שוב מאוחר יותר");
       setStatus("error");
     }
     
@@ -53,7 +53,7 @@ function UnsubscribeContent() {
 
   useEffect(() => {
     if (!emailFromUrl) {
-      // No email in URL — show manual input form
+      // No email in URL - show manual input form
       setStatus("manual");
       return;
     }
@@ -62,7 +62,7 @@ function UnsubscribeContent() {
     if (token) {
       doUnsubscribe();
     } else {
-      // No token — show confirm screen (manual or old links)
+      // No token - show confirm screen (manual or old links)
       setStatus("confirm");
     }
   }, [emailFromUrl, token, doUnsubscribe]);
@@ -197,7 +197,7 @@ function UnsubscribeContent() {
           onClick={async () => {
             setProcessing(true);
             try {
-              // Send WITHOUT token — confirmed by user clicking button
+              // Send WITHOUT token - confirmed by user clicking button
               const response = await fetch("/api/unsubscribe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -210,7 +210,7 @@ function UnsubscribeContent() {
                 setStatus("error");
               }
             } catch {
-              setErrorMessage("שגיאת תקשורת — נסו שוב מאוחר יותר");
+              setErrorMessage("שגיאת תקשורת - נסו שוב מאוחר יותר");
               setStatus("error");
             }
             setProcessing(false);

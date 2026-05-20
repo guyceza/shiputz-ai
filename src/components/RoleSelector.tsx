@@ -21,7 +21,7 @@ const ROLES: Role[] = [
     description: "מתכנן/ת שיפוץ או עיצוב מחדש",
     animationUrl: "",
     color: "#3B82F6",
-    // Everything EXCEPT BOQ — contractor/designer prepares that
+    // Everything EXCEPT BOQ - contractor/designer prepares that
     tools: ALL_TOOLS.filter(t => t !== "boq"),
   },
   {
@@ -30,7 +30,7 @@ const ROLES: Role[] = [
     description: "עיצוב ותכנון חללים ללקוחות",
     animationUrl: "",
     color: "#8B5CF6",
-    // Everything — designers do styling, BOQ, quotes, the works
+    // Everything - designers do styling, BOQ, quotes, the works
     tools: [...ALL_TOOLS],
   },
   {
@@ -39,7 +39,7 @@ const ROLES: Role[] = [
     description: "תכנון אדריכלי ובנייה",
     animationUrl: "",
     color: "#EC4899",
-    // Everything — in Israel architects also do interior design & styling
+    // Everything - in Israel architects also do interior design & styling
     tools: [...ALL_TOOLS],
   },
   {
@@ -48,7 +48,7 @@ const ROLES: Role[] = [
     description: "ביצוע עבודות שיפוץ ובנייה",
     animationUrl: "",
     color: "#F59E0B",
-    // Everything EXCEPT style-match & shop-look — contractors don't do styling
+    // Everything EXCEPT style-match & shop-look - contractors don't do styling
     tools: ALL_TOOLS.filter(t => !["style-match", "shop-look"].includes(t)),
   },
   {
@@ -57,7 +57,7 @@ const ROLES: Role[] = [
     description: "הצגת פוטנציאל לנכסים",
     animationUrl: "",
     color: "#10B981",
-    // Presentation only — no project management / financial tools
+    // Presentation only - no project management / financial tools
     tools: ["visualize", "floorplan", "video-tour", "style-match", "chat"],
   },
   {
@@ -107,7 +107,7 @@ export default function RoleSelector({ onSelect }: Props) {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">מי אתה?</h2>
-        <p className="text-gray-500">בחר את התפקיד שלך — נתאים את החוויה עבורך</p>
+        <p className="text-gray-500">בחר את התפקיד שלך - נתאים את החוויה עבורך</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
@@ -156,7 +156,7 @@ export default function RoleSelector({ onSelect }: Props) {
         ))}
       </div>
 
-      {/* Continue button — appears after selection */}
+      {/* Continue button - appears after selection */}
       <div className={`transition-all duration-500 overflow-hidden ${selectedRole ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}>
         <button
           onClick={handleConfirm}

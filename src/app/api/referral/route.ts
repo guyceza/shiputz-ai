@@ -11,7 +11,7 @@ function generateReferralCode(): string {
 
 const REFERRAL_CREDITS = 20; // Both referrer and referred get 20 credits
 
-// GET /api/referral?email=xxx — Get or create referral code for user
+// GET /api/referral?email=xxx - Get or create referral code for user
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
   if (!email) {
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       .eq('email', email);
 
     if (!error) break;
-    // Collision — regenerate
+    // Collision - regenerate
     code = generateReferralCode();
     attempts++;
   }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// POST /api/referral — Complete a referral (called when new user signs up with ref code)
+// POST /api/referral - Complete a referral (called when new user signs up with ref code)
 // Body: { referralCode: string, newUserEmail: string }
 export async function POST(request: NextRequest) {
   try {
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!newUser) {
-      // Store pending referral — will complete when user signs up
+      // Store pending referral - will complete when user signs up
       await supabase.from('referrals').insert({
         referrer_email: referrer.email,
         referral_code: referralCode.toUpperCase(),
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: 'pending', message: 'Waiting for user to sign up' });
     }
 
-    // User exists — complete the referral!
+    // User exists - complete the referral!
     // 1. Create referral record
     await supabase.from('referrals').insert({
       referrer_email: referrer.email,

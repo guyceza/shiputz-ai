@@ -8,9 +8,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function BathroomRenovationCost() {
-  useEffect(() => { document.title = "כמה עולה שיפוץ חדר אמבטיה בישראל 2026 — מחירון מלא | ShiputzAI"; }, []);
+  useEffect(() => { document.title = "כמה עולה שיפוץ חדר אמבטיה בישראל 2026 - מחירון מלא | ShiputzAI"; }, []);
 
-  const articleSchema = {"@context":"https://schema.org","@type":"Article","headline":"כמה עולה שיפוץ חדר אמבטיה בישראל 2026 — מחירון מלא","author":{"@type":"Organization","name":"ShiputzAI"},"publisher":{"@type":"Organization","name":"ShiputzAI","url":"https://shipazti.com"},"datePublished":"2026-04-02","description":"מחירון מלא לשיפוץ חדר אמבטיה בישראל 2026: פירוט עלויות, חומרים, עבודה, וטיפים לחיסכון."};
+  const articleSchema = {"@context":"https://schema.org","@type":"Article","headline":"כמה עולה שיפוץ חדר אמבטיה בישראל 2026 - מחירון מלא","author":{"@type":"Organization","name":"ShiputzAI"},"publisher":{"@type":"Organization","name":"ShiputzAI","url":"https://shipazti.com"},"datePublished":"2026-04-02","description":"מחירון מלא לשיפוץ חדר אמבטיה בישראל 2026: פירוט עלויות, חומרים, עבודה, וטיפים לחיסכון."};
   const faqSchema = {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"כמה עולה שיפוץ אמבטיה קומפלט?","acceptedAnswer":{"@type":"Answer","text":"שיפוץ אמבטיה קומפלט בישראל עולה בין ₪20,000 ל-₪70,000 תלוי בגודל, חומרים ורמת גימור."}},{"@type":"Question","name":"כמה זמן לוקח שיפוץ אמבטיה?","acceptedAnswer":{"@type":"Answer","text":"שיפוץ אמבטיה סטנדרטי לוקח 2-4 שבועות. שיפוץ קוסמטי: שבוע. שיפוץ עם שינוי אינסטלציה: 3-5 שבועות."}},{"@type":"Question","name":"אפשר להדמות שיפוץ אמבטיה עם AI?","acceptedAnswer":{"@type":"Answer","text":"כן. ShiputzAI מאפשר להעלות תמונה של האמבטיה הקיימת ולקבל הדמיה של השיפוץ תוך 30 שניות."}}]};
 
   return (
@@ -21,13 +21,13 @@ export default function BathroomRenovationCost() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-4 text-sm text-gray-500"><Link href="/tips" className="hover:text-amber-600">טיפים</Link> / שיפוץ חדר אמבטיה</div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">כמה עולה שיפוץ חדר אמבטיה בישראל 2026 — מחירון מלא</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">כמה עולה שיפוץ חדר אמבטיה בישראל 2026 - מחירון מלא</h1>
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-10">
-          <p className="text-lg text-gray-800 leading-relaxed"><strong>שיפוץ חדר אמבטיה קומפלט בישראל עולה בין ₪20,000 ל-₪70,000.</strong> המחיר תלוי בגודל החדר, רמת הגימור, והאם משנים אינסטלציה. הנה פירוט מלא — מהריסה ועד מגבות חדשות.</p>
+          <p className="text-lg text-gray-800 leading-relaxed"><strong>שיפוץ חדר אמבטיה קומפלט בישראל עולה בין ₪20,000 ל-₪70,000.</strong> המחיר תלוי בגודל החדר, רמת הגימור, והאם משנים אינסטלציה. הנה פירוט מלא - מהריסה ועד מגבות חדשות.</p>
         </div>
 
         <article className="prose prose-lg max-w-none">
-          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">פירוט עלויות — כל סעיף בנפרד</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">פירוט עלויות - כל סעיף בנפרד</h2>
           <div className="bg-gray-50 rounded-xl p-6 mb-6 space-y-3">
             <div className="flex justify-between border-b border-gray-200 pb-2"><span className="text-gray-700 font-medium">הריסה + פינוי</span><span className="font-bold">₪2,000-4,000</span></div>
             <div className="flex justify-between border-b border-gray-200 pb-2"><span className="text-gray-700 font-medium">אינסטלציה (צנרת מים + ביוב)</span><span className="font-bold">₪3,000-8,000</span></div>
@@ -40,7 +40,7 @@ export default function BathroomRenovationCost() {
             <div className="flex justify-between font-bold text-lg"><span className="text-gray-900">סה&quot;כ טווח</span><span className="text-amber-600">₪18,500-61,000</span></div>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">3 רמות שיפוץ — מה מקבלים?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">3 רמות שיפוץ - מה מקבלים?</h2>
 
           <h3 className="text-xl font-bold text-gray-900 mt-6 mb-3">🟢 שיפוץ בסיסי (₪18,000-30,000)</h3>
           <p className="text-gray-700 leading-relaxed mb-4">החלפת ריצוף וחיפוי, כלים סניטריים סטנדרטיים (ויטרה, אמריקן סטנדרט), ברזים רגילים. מתאים לדירה להשכרה או לתקציב מוגבל. זמן עבודה: 2-3 שבועות.</p>
@@ -55,10 +55,10 @@ export default function BathroomRenovationCost() {
           <div className="space-y-3">
             {[
               { n: "1", title: "לא לבדוק איטום", text: "איטום לקוי = נזילות שיעלו פי 3 לתקן אחרי שנה. תמיד תדרשו אחריות בכתב." },
-              { n: "2", title: "לקנות חומרים לפני תכנון", text: "קונים אריחים ואז מגלים שהצבע לא מתאים. קודם תכנון/הדמיה — אחר כך קנייה." },
-              { n: "3", title: "לא לתכנן תאורה מראש", text: "נקודות חשמל חייבות להיקבע לפני הריצוף. אם תרצו ספוט מעל המראה אחרי — הקיר כבר סגור." },
+              { n: "2", title: "לקנות חומרים לפני תכנון", text: "קונים אריחים ואז מגלים שהצבע לא מתאים. קודם תכנון/הדמיה - אחר כך קנייה." },
+              { n: "3", title: "לא לתכנן תאורה מראש", text: "נקודות חשמל חייבות להיקבע לפני הריצוף. אם תרצו ספוט מעל המראה אחרי - הקיר כבר סגור." },
               { n: "4", title: "לחסוך על אינסטלטור", text: "אינסטלציה זולה = נזילות סמויות. זה המקום האחרון לחסוך בו." },
-              { n: "5", title: "לא להשוות הצעות מחיר", text: "תמיד קחו לפחות 3 הצעות. השתמשו בShiputzAI לניתוח ההצעות — ה-AI מזהה סעיפים חריגים." },
+              { n: "5", title: "לא להשוות הצעות מחיר", text: "תמיד קחו לפחות 3 הצעות. השתמשו בShiputzAI לניתוח ההצעות - ה-AI מזהה סעיפים חריגים." },
             ].map((err) => (
               <div key={err.n} className="bg-gray-50 rounded-xl p-4">
                 <h3 className="font-bold text-gray-900 mb-1">{err.n}. {err.title}</h3>
@@ -67,7 +67,7 @@ export default function BathroomRenovationCost() {
             ))}
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">הדמיית אמבטיה עם AI — לפני שמתחילים</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">הדמיית אמבטיה עם AI - לפני שמתחילים</h2>
           <p className="text-gray-700 leading-relaxed mb-4">לפני שמשקיעים עשרות אלפי שקלים, שווה להשקיע ₪10-25 בהדמיית AI. העלו תמונה של האמבטיה הקיימת ל-<Link href="/visualize" className="text-amber-600 hover:text-amber-700 font-medium">ShiputzAI</Link>, תארו את הסגנון הרצוי, ותוך 30 שניות תראו איך זה ייראה. נסו כמה סגנונות לפני שמתחייבים.</p>
         </article>
 
@@ -81,7 +81,7 @@ export default function BathroomRenovationCost() {
         </section>
 
         <div className="mt-12 text-center">
-          <Link href="/visualize" className="bg-amber-500 text-white px-8 py-3 rounded-xl font-medium text-lg hover:bg-amber-600 transition-colors inline-block">נסו הדמיית אמבטיה — חינם</Link>
+          <Link href="/visualize" className="bg-amber-500 text-white px-8 py-3 rounded-xl font-medium text-lg hover:bg-amber-600 transition-colors inline-block">נסו הדמיית אמבטיה - חינם</Link>
         </div>
         <div className="mt-8 flex flex-wrap gap-3 text-sm">
           <Link href="/tips/renovation-cost-calculator" className="text-amber-600 hover:text-amber-700">מחשבון עלות שיפוץ →</Link>

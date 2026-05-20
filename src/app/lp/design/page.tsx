@@ -9,7 +9,7 @@ export default function DesignLandingPage() {
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
-      {/* Hero — straight to the point */}
+      {/* Hero - straight to the point */}
       <section className="pt-12 pb-16 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
@@ -18,7 +18,7 @@ export default function DesignLandingPage() {
               רוצים לראות איך הבית ייראה<br />לפני שמתחילים?
             </h1>
             <p className="text-xl text-gray-500 max-w-xl mx-auto">
-              העלו תמונה של חדר — קבלו הדמיית עיצוב תוך 30 שניות. בחינם.
+              העלו תמונה של חדר - קבלו הדמיית עיצוב תוך 30 שניות. בחינם.
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export default function DesignLandingPage() {
           <div className="relative max-w-2xl mx-auto mb-10 rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
             <Image
               src="/images/ai-vision/before-after-preview.jpg"
-              alt="לפני ואחרי — הדמיית עיצוב AI"
+              alt="לפני ואחרי - הדמיית עיצוב AI"
               width={800}
               height={450}
               className="w-full"
@@ -44,7 +44,7 @@ export default function DesignLandingPage() {
               href="/visualize"
               className="inline-block bg-[#101010] text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-800 transition-all"
             >
-              נסו הדמיה עכשיו — בחינם
+              נסו הדמיה עכשיו - בחינם
             </Link>
             <p className="text-sm text-gray-400 mt-3">ללא הרשמה · ללא כרטיס אשראי · תוצאה תוך 30 שניות</p>
           </div>

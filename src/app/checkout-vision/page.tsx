@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Legacy page — redirect to new unified checkout
+// Legacy page - redirect to new unified checkout
 export default function CheckoutVisionRedirect() {
   const router = useRouter();
   

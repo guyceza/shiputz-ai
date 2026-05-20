@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   },
   "confidence": 70,
   "cluesUsed": ["דלת סטנדרטית 2m", "מיטה זוגית ~1.6m"],
-  "disclaimer": "הערכה בלבד — למדידה מדויקת יש להשתמש במטר"
+  "disclaimer": "הערכה בלבד - למדידה מדויקת יש להשתמש במטר"
 }` }
             ]
           }],

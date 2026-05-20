@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     url: "https://shipazti.com",
     siteName: "ShiputzAI",
     title: "ShiputzAI - עיצוב הבית ב-AI",
-    description: "ShiputzAI — הכלי המוביל בישראל להדמיית עיצוב פנים ב-AI. 7 כלים: הדמיות, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
+    description: "ShiputzAI - הכלי המוביל בישראל להדמיית עיצוב פנים ב-AI. 7 כלים: הדמיות, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
     images: [
       {
         url: "/og-image.jpg",
@@ -80,7 +80,7 @@ const jsonLd = {
       "@id": "https://shipazti.com/#website",
       "url": "https://shipazti.com",
       "name": "ShiputzAI",
-      "description": "AI לעיצוב הבית — הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור",
+      "description": "AI לעיצוב הבית - הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור",
       "inLanguage": "he-IL",
     },
     {
@@ -107,7 +107,7 @@ const jsonLd = {
       "alternateName": "שיפוצי.אי",
       "url": "https://shipazti.com",
       "logo": {"@type": "ImageObject", "url": "https://shipazti.com/icon-512.png", "width": 512, "height": 512},
-      "description": "ShiputzAI היא פלטפורמת AI ישראלית לעיצוב הבית — הדמיות חדרים, זיהוי סגנון, רשימת קניות, סרטון סיור, כתב כמויות וניתוח הצעות מחיר. הכל באמצעות בינה מלאכותית.",
+      "description": "ShiputzAI היא פלטפורמת AI ישראלית לעיצוב הבית - הדמיות חדרים, זיהוי סגנון, רשימת קניות, סרטון סיור, כתב כמויות וניתוח הצעות מחיר. הכל באמצעות בינה מלאכותית.",
       "founder": {"@type": "Person", "name": "Guy Cezana"},
       "foundingDate": "2025",
       "email": "help@shipazti.com",

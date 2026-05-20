@@ -161,7 +161,7 @@ export default function AdminLeads() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">📧 לידים — קמפיין מיילים</h1>
+            <h1 className="text-2xl font-bold text-white">📧 לידים - קמפיין מיילים</h1>
             <p className="text-gray-400 mt-1">מעקב קמפיין מיילים</p>
           </div>
           <div className="flex gap-3">
@@ -235,7 +235,7 @@ export default function AdminLeads() {
                 <span className="text-2xl">🔥</span>
                 <div>
                   <div className="font-semibold text-emerald-400">
-                    שבוע {stats.warmupWeek} — {stats.dailyLimit}/יום
+                    שבוע {stats.warmupWeek} - {stats.dailyLimit}/יום
                   </div>
                   <div className="text-sm text-gray-400">
                     {stats.campaignStarted
@@ -283,7 +283,7 @@ export default function AdminLeads() {
         {/* Next Batch Preview */}
         <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
           <h3 className="text-lg font-semibold mb-4">
-            📋 שליחה הבאה — {stats.nextBatchLeads?.length || 0} לידים
+            📋 שליחה הבאה - {stats.nextBatchLeads?.length || 0} לידים
           </h3>
           {!stats.nextBatchLeads?.length ? (
             <p className="text-gray-500 text-center py-4">אין לידים בתור</p>
@@ -308,7 +308,7 @@ export default function AdminLeads() {
                     >
                       <td className="py-2 px-3 text-gray-500">{i + 1}</td>
                       <td className="py-2 px-3 font-mono text-xs text-emerald-400 underline">{lead.email}</td>
-                      <td className="py-2 px-3">{lead.name || '—'}</td>
+                      <td className="py-2 px-3">{lead.name || '-'}</td>
                       <td className="py-2 px-3 text-gray-400">{lead.profession || 'מעצבי פנים'}</td>
                       <td className="py-2 px-3">
                         <span className={`px-2 py-0.5 rounded text-xs ${lead.nextEmail === 1 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'}`}>
@@ -380,7 +380,7 @@ export default function AdminLeads() {
                 <li>הסקריפט רץ כל בוקר 09:00 (ראשון-חמישי)</li>
                 <li><strong>קודם follow-ups</strong>: לידים שקיבלו מייל #1 לפני 5+ ימים מקבלים מייל #2</li>
                 <li><strong>אח&quot;כ חדשים</strong>: לידים חדשים מקבלים מייל #1</li>
-                <li>אחרי 2 מיילים — הליד לא מקבל יותר</li>
+                <li>אחרי 2 מיילים - הליד לא מקבל יותר</li>
               </ol>
             </div>
             <div>
@@ -452,7 +452,7 @@ export default function AdminLeads() {
                     </div>
                     <div className="flex gap-2 text-sm">
                       <span className="text-gray-400">שם:</span>
-                      <span>{preview.data.name || '—'} ({preview.data.firstName})</span>
+                      <span>{preview.data.name || '-'} ({preview.data.firstName})</span>
                     </div>
                     <div className="flex gap-2 text-sm">
                       <span className="text-gray-400">מקצוע:</span>

@@ -59,7 +59,7 @@ const features = [
   {
     title: "ניתוח הצעת מחיר",
     subtitle: "Quote Analysis",
-    description: "העלו הצעת מחיר מקבלן וקבלו ניתוח AI — מה סביר ומה חסר",
+    description: "העלו הצעת מחיר מקבלן וקבלו ניתוח AI - מה סביר ומה חסר",
     credits: 3,
     href: "/dashboard",
     image: "/images/ai-vision/quote-analysis.gif",
@@ -69,7 +69,7 @@ const features = [
   {
     title: "סריקת קבלות",
     subtitle: "Receipt Scanner",
-    description: "צלמו קבלה — ה-AI קורא סכום, תאריך וקטגוריה אוטומטית",
+    description: "צלמו קבלה - ה-AI קורא סכום, תאריך וקטגוריה אוטומטית",
     credits: 2,
     href: "/dashboard",
     image: "/images/ai-vision/receipt-scanner.gif",
@@ -101,7 +101,7 @@ export default function AIVisionPage() {
               AI Vision
             </h1>
             <p className="text-gray-500 text-base">
-              בחרו את הכלי שמתאים לכם — כל הקסם במקום אחד
+              בחרו את הכלי שמתאים לכם - כל הקסם במקום אחד
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export default function AIVisionPage() {
             <p className="text-gray-500 max-w-lg mx-auto leading-relaxed">
               אנחנו כבר לא יכולים לחכות להוציא לכם את מה שאנחנו בונים עכשיו. כלים חדשים, יכולות מטורפות, ודברים שעוד לא ראיתם באף מקום.
             </p>
-            <p className="text-sm text-gray-400 mt-4">הישארו בקשר — זה הולך להיות שווה.</p>
+            <p className="text-sm text-gray-400 mt-4">הישארו בקשר - זה הולך להיות שווה.</p>
           </div>
 
           {/* Footer note */}

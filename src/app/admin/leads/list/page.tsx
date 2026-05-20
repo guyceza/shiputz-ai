@@ -62,13 +62,13 @@ const PROFESSIONS: Record<string, string> = {
 };
 
 function formatDate(dateStr: string | null) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   const d = new Date(dateStr);
   return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit" });
 }
 
 function formatDateTime(dateStr: string | null) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   const d = new Date(dateStr);
   return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
@@ -416,15 +416,15 @@ export default function LeadsListPage() {
                   }`}>
                     <td className="px-3 py-2.5 font-medium text-gray-900 max-w-[200px] truncate" title={lead.name}>
                       {lead.in_next_batch && <span className="inline-block w-2 h-2 rounded-full bg-amber-400 mr-1.5" title="בתור לשליחה הבאה" />}
-                      {lead.name || "—"}
+                      {lead.name || "-"}
                       {lead.unsubscribed && <span className="text-red-500 text-xs mr-1">🚫</span>}
                     </td>
                     <td className="px-3 py-2.5 text-gray-600 max-w-[220px] truncate" title={lead.email}>
                       <a href={`mailto:${lead.email}`} className="hover:text-blue-600">{lead.email}</a>
                     </td>
-                    <td className="px-3 py-2.5 text-gray-600">{lead.profession || "—"}</td>
-                    <td className="px-3 py-2.5 text-gray-600">{lead.city || "—"}</td>
-                    <td className="px-3 py-2.5 text-gray-600 font-mono text-xs" dir="ltr">{lead.phone || "—"}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{lead.profession || "-"}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{lead.city || "-"}</td>
+                    <td className="px-3 py-2.5 text-gray-600 font-mono text-xs" dir="ltr">{lead.phone || "-"}</td>
                     <td className="px-3 py-2.5">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-600"}`}>
                         {lead.status}
@@ -439,7 +439,7 @@ export default function LeadsListPage() {
                           {EMAIL_STATUS_BADGE[lead.email1_status]?.label || lead.email1_status}
                         </span>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-gray-300">-</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5 text-center">
@@ -451,7 +451,7 @@ export default function LeadsListPage() {
                           {EMAIL_STATUS_BADGE[lead.email2_status]?.label || lead.email2_status}
                         </span>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-gray-300">-</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5 text-center">
@@ -469,7 +469,7 @@ export default function LeadsListPage() {
                           🔗
                         </a>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-gray-300">-</span>
                       )}
                     </td>
                   </tr>

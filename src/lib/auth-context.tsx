@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Centralized admin emails — single source of truth
+// Centralized admin emails - single source of truth
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
 
 interface AuthUser {
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch {
-      // Silent fail — user stays null
+      // Silent fail - user stays null
     } finally {
       setIsLoading(false);
     }

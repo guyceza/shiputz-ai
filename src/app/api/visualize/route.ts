@@ -214,7 +214,7 @@ async function rollbackTrial(userEmail: string): Promise<void> {
   }
 }
 
-// Credits-only model — no monthly limit
+// Credits-only model - no monthly limit
 
 // Cost estimation logic
 interface CostItem {
@@ -447,7 +447,7 @@ export async function POST(request: NextRequest) {
       
       if (!isAdmin) {
         if (subscription.vizCredits <= 0) {
-          // No credits left — need to buy Pro or a pack
+          // No credits left - need to buy Pro or a pack
           return NextResponse.json({ 
             error: subscription.isPro 
               ? "נגמרו ההדמיות שלך. רכוש חבילת הדמיות נוספות."

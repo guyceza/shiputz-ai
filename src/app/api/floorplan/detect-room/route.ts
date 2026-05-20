@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image or click position" }, { status: 400 });
     }
 
-    // Auth only — detect-room is free (credit charged on room photo generation)
+    // Auth only - detect-room is free (credit charged on room photo generation)
     if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
 
     const bytes = await image.arrayBuffer();

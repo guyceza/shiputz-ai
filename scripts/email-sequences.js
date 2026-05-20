@@ -28,9 +28,9 @@ const PURCHASED_SEQUENCE = [
 
 const NON_PURCHASED_SEQUENCE = [
   { day: 1, subject: '👋 שכחת משהו?', template: 'reminder' },
-  { day: 3, subject: '🎁 מתנה בשבילך — 20% הנחה', template: 'discount_offer' },
+  { day: 3, subject: '🎁 מתנה בשבילך - 20% הנחה', template: 'discount_offer' },
   { day: 5, subject: '😱 70% מהשיפוצים חורגים מהתקציב', template: 'problem_highlight' },
-  { day: 7, subject: '💬 "חסכתי ₪15,000" — סיפור אמיתי', template: 'testimonials' },
+  { day: 7, subject: '💬 "חסכתי ₪15,000" - סיפור אמיתי', template: 'testimonials' },
   { day: 9, subject: '⏰ נשארו 24 שעות להנחה!', template: 'urgency' },
   { day: 11, subject: '📊 ראה איך זה עובד (1 דקה)', template: 'demo' },
   { day: 14, subject: '🤝 נפרדים כחברים?', template: 'last_chance' },
@@ -349,7 +349,7 @@ const TEMPLATES = {
       <p style="margin: 0 0 8px 0; font-size: 14px; color: #166534; font-style: italic; text-align: right;">
         "הקבלן ביקש ₪18,000 על ריצוף. המערכת הראתה לי שזה 30% מעל השוק. ניהלתי מו״מ וחסכתי ₪4,000."
       </p>
-      <p style="margin: 0; font-size: 13px; color: #15803d; text-align: right;">— דני, תל אביב</p>
+      <p style="margin: 0; font-size: 13px; color: #15803d; text-align: right;">- דני, תל אביב</p>
     </div>
     
     <p style="font-size: 16px; color: #1e293b; line-height: 1.8; margin: 0 0 16px 0; text-align: right;">
@@ -536,21 +536,21 @@ const TEMPLATES = {
       <p style="margin: 0 0 12px 0; font-size: 16px; color: #166534; text-align: right; line-height: 1.7;">
         "חסכתי ₪15,000 רק בזכות ניתוח הצעות המחיר. הקבלן רצה ₪45,000 על המטבח - המערכת הראתה שזה 30% מעל השוק. ניהלתי מו״מ וירדנו ל-₪30,000."
       </p>
-      <p style="margin: 0; font-size: 14px; color: #15803d; text-align: right;"><strong>— יעל מ.</strong>, תל אביב</p>
+      <p style="margin: 0; font-size: 14px; color: #15803d; text-align: right;"><strong>- יעל מ.</strong>, תל אביב</p>
     </div>
     
     <div style="background: #eff6ff; border-radius: 16px; padding: 24px; margin-bottom: 16px; border-right: 4px solid #3b82f6;">
       <p style="margin: 0 0 12px 0; font-size: 16px; color: #1e40af; text-align: right; line-height: 1.7;">
         "סוף סוף אני יודע בדיוק לאן הולך הכסף. סריקת הקבלות עובדת מעולה - מצלם ומסיים."
       </p>
-      <p style="margin: 0; font-size: 14px; color: #2563eb; text-align: right;"><strong>— אורי כ.</strong>, הרצליה</p>
+      <p style="margin: 0; font-size: 14px; color: #2563eb; text-align: right;"><strong>- אורי כ.</strong>, הרצליה</p>
     </div>
     
     <div style="background: #fdf4ff; border-radius: 16px; padding: 24px; margin-bottom: 24px; border-right: 4px solid #a855f7;">
       <p style="margin: 0 0 12px 0; font-size: 16px; color: #6b21a8; text-align: right; line-height: 1.7;">
         "ההתראות על חריגה מהתקציב הצילו אותי. גיליתי שאני עומד לחרוג עוד לפני שזה קרה."
       </p>
-      <p style="margin: 0; font-size: 14px; color: #7c3aed; text-align: right;"><strong>— דני ר.</strong>, רמת גן</p>
+      <p style="margin: 0; font-size: 14px; color: #7c3aed; text-align: right;"><strong>- דני ר.</strong>, רמת גן</p>
     </div>
     
     ${ctaButton('להצטרף אליהם ←', 'https://shipazti.com/signup', '#16a34a')}

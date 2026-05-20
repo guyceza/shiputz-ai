@@ -148,7 +148,7 @@ export function floorplanToPascalScene(data: FloorplanData) {
     }
   }
 
-  // Create doors — position is [localX, height/2, 0] in wall-local space
+  // Create doors - position is [localX, height/2, 0] in wall-local space
   if (data.doors) {
     for (const door of data.doors) {
       const nearest = findNearestWall(door.position, walls)
@@ -189,7 +189,7 @@ export function floorplanToPascalScene(data: FloorplanData) {
     }
   }
 
-  // Create windows — position is [localX, sillHeight + height/2, 0]
+  // Create windows - position is [localX, sillHeight + height/2, 0]
   if (data.windows) {
     for (const win of data.windows) {
       const nearest = findNearestWall(win.position, walls)
@@ -256,7 +256,7 @@ export function floorplanToPascalScene(data: FloorplanData) {
           object: 'node', id: itemId, type: 'item',
           name: f.name,
           parentId: levelId, visible: true,
-          position: [px, 0, py], // [x, y(height), z] — y=0 is floor
+          position: [px, 0, py], // [x, y(height), z] - y=0 is floor
           rotation: [0, 0, 0],
           scale: [1, 1, 1],
           children: [],
@@ -277,7 +277,7 @@ export function floorplanToPascalScene(data: FloorplanData) {
     }
   }
 
-  // Level — walls and items are direct children
+  // Level - walls and items are direct children
   nodes[levelId] = {
     object: 'node', id: levelId, type: 'level',
     name: 'Level 0', parentId: buildingId, visible: true,

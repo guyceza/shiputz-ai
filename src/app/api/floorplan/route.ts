@@ -9,35 +9,35 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 const STYLES: Record<string, { name: string; prompt: string }> = {
   "modern-cabin": {
     name: "Modern Cabin",
-    prompt: `Style: Luxury Modern Cabin — high ceilings, exposed timber beams, warm natural wood throughout, wide plank flooring, large floor-to-ceiling glass windows and sliding glass doors, expansive glazing facing exterior areas, cozy yet contemporary cabin aesthetic. Use light and warm wood tones, natural stone accents, soft warm lighting, and comfortable furnishings and natural romantic decorations.`,
+    prompt: `Style: Luxury Modern Cabin - high ceilings, exposed timber beams, warm natural wood throughout, wide plank flooring, large floor-to-ceiling glass windows and sliding glass doors, expansive glazing facing exterior areas, cozy yet contemporary cabin aesthetic. Use light and warm wood tones, natural stone accents, soft warm lighting, and comfortable furnishings and natural romantic decorations.`,
   },
   "scandinavian": {
     name: "Scandinavian",
-    prompt: `Style: Scandinavian Minimalist — clean lines, white and light gray walls, pale oak flooring, abundant natural light, minimalist furniture with organic shapes, hygge atmosphere. Use muted pastel accents, natural textiles (wool, linen), indoor plants, and simple elegant decor. Bright, airy, and serene.`,
+    prompt: `Style: Scandinavian Minimalist - clean lines, white and light gray walls, pale oak flooring, abundant natural light, minimalist furniture with organic shapes, hygge atmosphere. Use muted pastel accents, natural textiles (wool, linen), indoor plants, and simple elegant decor. Bright, airy, and serene.`,
   },
   "industrial": {
     name: "Industrial Loft",
-    prompt: `Style: Industrial Loft — exposed brick walls, concrete floors with area rugs, black metal framework, edison bulb lighting, large factory-style windows, raw materials mixed with refined furniture. Use dark metals, reclaimed wood, leather seating, and urban art pieces. Edgy yet sophisticated.`,
+    prompt: `Style: Industrial Loft - exposed brick walls, concrete floors with area rugs, black metal framework, edison bulb lighting, large factory-style windows, raw materials mixed with refined furniture. Use dark metals, reclaimed wood, leather seating, and urban art pieces. Edgy yet sophisticated.`,
   },
   "mediterranean": {
     name: "Mediterranean",
-    prompt: `Style: Mediterranean Villa — terracotta tile flooring, arched doorways and windows, whitewashed walls, wrought iron details, lush indoor greenery. Use warm earth tones, mosaic tile accents, natural stone, rustic wooden beams, and colorful ceramic pottery. Warm, inviting, and sun-drenched.`,
+    prompt: `Style: Mediterranean Villa - terracotta tile flooring, arched doorways and windows, whitewashed walls, wrought iron details, lush indoor greenery. Use warm earth tones, mosaic tile accents, natural stone, rustic wooden beams, and colorful ceramic pottery. Warm, inviting, and sun-drenched.`,
   },
   "japandi": {
     name: "Japandi",
-    prompt: `Style: Japandi (Japanese-Scandinavian fusion) — clean minimalist lines with wabi-sabi imperfection, low-profile furniture, tatami-inspired flooring areas, shoji screen dividers, natural materials. Use muted earth tones, bamboo, light wood, ceramics, and careful negative space. Calm, balanced, and intentional.`,
+    prompt: `Style: Japandi (Japanese-Scandinavian fusion) - clean minimalist lines with wabi-sabi imperfection, low-profile furniture, tatami-inspired flooring areas, shoji screen dividers, natural materials. Use muted earth tones, bamboo, light wood, ceramics, and careful negative space. Calm, balanced, and intentional.`,
   },
   "luxury-modern": {
     name: "Luxury Modern",
-    prompt: `Style: Ultra Luxury Modern — high-end contemporary design, marble flooring with brass inlays, designer furniture, statement lighting fixtures, floor-to-ceiling windows with sheer curtains. Use monochromatic palette with gold accents, Italian marble, velvet upholstery, and curated art pieces. Opulent yet tasteful.`,
+    prompt: `Style: Ultra Luxury Modern - high-end contemporary design, marble flooring with brass inlays, designer furniture, statement lighting fixtures, floor-to-ceiling windows with sheer curtains. Use monochromatic palette with gold accents, Italian marble, velvet upholstery, and curated art pieces. Opulent yet tasteful.`,
   },
   "boho": {
     name: "Bohemian",
-    prompt: `Style: Bohemian Eclectic — layered textiles, patterned rugs and throws, rattan and wicker furniture, macramé wall hangings, abundant plants. Use warm jewel tones mixed with neutrals, global-inspired patterns, vintage finds, and handcrafted accessories. Free-spirited, colorful, and collected.`,
+    prompt: `Style: Bohemian Eclectic - layered textiles, patterned rugs and throws, rattan and wicker furniture, macramé wall hangings, abundant plants. Use warm jewel tones mixed with neutrals, global-inspired patterns, vintage finds, and handcrafted accessories. Free-spirited, colorful, and collected.`,
   },
   "classic": {
     name: "Classic Elegant",
-    prompt: `Style: Classic Elegant — traditional design with crown moldings, wainscoting, hardwood herringbone flooring, crystal chandeliers, symmetrical arrangements. Use rich fabrics (silk, damask), antique-inspired furniture, deep colors (navy, burgundy, emerald), and gilded frames. Timeless, refined, and sophisticated.`,
+    prompt: `Style: Classic Elegant - traditional design with crown moldings, wainscoting, hardwood herringbone flooring, crystal chandeliers, symmetrical arrangements. Use rich fabrics (silk, damask), antique-inspired furniture, deep colors (navy, burgundy, emerald), and gilded frames. Timeless, refined, and sophisticated.`,
   },
 };
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     // Allow custom style text (not in STYLES dict)
     const stylePrompt = style
       ? style.prompt
-      : `Style: ${styleKey} — apply this design style throughout the apartment with appropriate materials, colors, furniture, and atmosphere that match this aesthetic.`;
+      : `Style: ${styleKey} - apply this design style throughout the apartment with appropriate materials, colors, furniture, and atmosphere that match this aesthetic.`;
 
     // Convert image to base64
     const bytes = await image.arrayBuffer();
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
 
     if (!resultImage) {
       return NextResponse.json({
-        error: resultText || "No image generated — the AI returned text only. Try again.",
+        error: resultText || "No image generated - the AI returned text only. Try again.",
       }, { status: 500 });
     }
 

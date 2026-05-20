@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
           .eq('id', payment.id);
 
       } else if (ipnData.results?.status === 'error' || tx.status === 'rejected') {
-        // Transaction failed or not found — check if it's old enough to expire
+        // Transaction failed or not found - check if it's old enough to expire
         const ageMinutes = (Date.now() - new Date(payment.created_at).getTime()) / 60000;
         if (ageMinutes > 60) {
           // Expire after 1 hour

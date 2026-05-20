@@ -32,8 +32,8 @@ function getFirstName(name: string, email?: string): string {
   if (!name) return tryNameFromEmail(email || '');
   let cleaned = name
     .replace(/\|.*/g, '')
-    .replace(/[-–—].*(?:עיצוב|אדריכל|מעצב|סטודיו|לימודי|ביה"ס).*/g, '')
-    .replace(/\s*[-–—]\s*/g, ' ')
+    .replace(/[---].*(?:עיצוב|אדריכל|מעצב|סטודיו|לימודי|ביה"ס).*/g, '')
+    .replace(/\s*[---]\s*/g, ' ')
     .replace(/עיצוב פנים.*/i, '')
     .replace(/מעצב[ת]?\s+פנים.*/i, '')
     .replace(/אדריכל[ית]?.*$/i, '')

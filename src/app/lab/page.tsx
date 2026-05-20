@@ -53,7 +53,7 @@ export default function LabPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded">LAB</span>
-            <h1 className="text-3xl font-bold text-gray-900">כלים חדשים — בדיקה פנימית</h1>
+            <h1 className="text-3xl font-bold text-gray-900">כלים חדשים - בדיקה פנימית</h1>
           </div>
           <p className="text-gray-500">דף זה לא נגיש למשתמשים. לבדיקה בלבד.</p>
         </div>
@@ -92,7 +92,7 @@ export default function LabPage() {
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-gray-400 transition-colors">
                 <div className="text-4xl mb-3">📸</div>
                 <p className="text-gray-600 font-medium mb-1">העלו תמונה של חדר</p>
-                <p className="text-gray-400 text-sm">JPG, PNG, WebP — עד 10MB</p>
+                <p className="text-gray-400 text-sm">JPG, PNG, WebP - עד 10MB</p>
               </div>
               <input type="file" accept="image/*" onChange={handleImage} className="hidden" ref={fileRef} />
             </label>
@@ -185,7 +185,7 @@ function ColorPaletteResult({ data }: { data: any }) {
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
           <h3 className="font-semibold text-gray-900 mb-2">המלצת צבע</h3>
           <p className="text-gray-700">
-            <span className="font-medium">{data.paintRecommendation.brand}</span> — {data.paintRecommendation.shade}
+            <span className="font-medium">{data.paintRecommendation.brand}</span> - {data.paintRecommendation.shade}
             {data.paintRecommendation.code && <span className="text-gray-400 mr-2">({data.paintRecommendation.code})</span>}
           </p>
         </div>

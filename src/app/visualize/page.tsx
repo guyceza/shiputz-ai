@@ -449,7 +449,7 @@ export default function VisualizePage() {
   const [countdown, setCountdown] = useState(60);
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
-  // Products cache: keyed by visualization ID — single source of truth
+  // Products cache: keyed by visualization ID - single source of truth
   const [productsCache, setProductsCache] = useState<Record<string, ShopLookProduct[]>>({});
   const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null);
   const [detectingProducts, setDetectingProducts] = useState(false);
@@ -481,7 +481,7 @@ export default function VisualizePage() {
       .then(data => setWaitingAnimationData(data))
       .catch(err => console.error('Failed to load waiting animation:', err));
     
-    // Load packs modal animation (local file — reliable)
+    // Load packs modal animation (local file - reliable)
     fetch('/lottie-image-pack.json')
       .then(res => res.json())
       .then(data => setPacksAnimationData(data))
@@ -740,7 +740,7 @@ export default function VisualizePage() {
     // Guest (not logged in): allow one free trial
     if (!isLoggedIn) {
       if (guestUsed) {
-        // Already used guest trial — prompt signup
+        // Already used guest trial - prompt signup
         setShowPaywall(true);
         return;
       }
@@ -753,7 +753,7 @@ export default function VisualizePage() {
       return;
     }
     
-    // Pro user with 0 credits — show packs modal
+    // Pro user with 0 credits - show packs modal
     if (hasSubscription && vizCredits === 0) {
       setShowPacksModal(true);
       return;
@@ -872,7 +872,7 @@ export default function VisualizePage() {
           analysis: analysis,
           costs: costs
         });
-        clearAction(); // User completed — clear abandoned tracking
+        clearAction(); // User completed - clear abandoned tracking
         // Update credits after successful generation
         if (data.usedCredit && vizCredits !== null) {
           setVizCredits(Math.max(0, vizCredits - 1));
@@ -920,7 +920,7 @@ export default function VisualizePage() {
       
       const data = await res.json();
       if (data.items && data.items.length > 0) {
-        // Single write to cache — this is the only place products live
+        // Single write to cache - this is the only place products live
         setCachedProducts(vizId, data.items);
         
         // Persist to DB (fire and forget)
@@ -942,12 +942,12 @@ export default function VisualizePage() {
     
     setShowShopModal(true);
     
-    // Products are derived from cache — if already there, nothing to do
+    // Products are derived from cache - if already there, nothing to do
     if (detectedProducts.length > 0) {
       return;
     }
     
-    // No products in cache — scan and save
+    // No products in cache - scan and save
     if (!currentVisualizationId) return;
     await detectProductsForVisualization(currentVisualizationId, generatedResult.image);
   };
@@ -989,7 +989,7 @@ export default function VisualizePage() {
           </h1>
           
           <p className="text-lg text-gray-500 max-w-xl mx-auto mb-6 leading-relaxed">
-            AI שמראה לך איך השיפוץ יראה — עם הערכת עלויות מדויקת
+            AI שמראה לך איך השיפוץ יראה - עם הערכת עלויות מדויקת
           </p>
 
           {/* CTA FIRST on mobile - before the image */}
@@ -1009,7 +1009,7 @@ export default function VisualizePage() {
                     ? (hasSubscription 
                         ? (vizCredits === 0 ? '📦 רכוש חבילת הדמיות' : `🎨 צור הדמיה (${vizCredits} נותרו)`)
                         : trialUsed ? 'שדרגו לתוכנית מנוי' : 'נסו עכשיו בחינם →')
-                    : (guestUsed ? 'הירשם בחינם — צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
+                    : (guestUsed ? 'הירשם בחינם - צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
                   }
                 </button>
                 {!isLoggedIn && !guestUsed && (
@@ -1419,7 +1419,7 @@ export default function VisualizePage() {
             </button>
             
             {!isLoggedIn ? (
-              // Guest who used trial — prompt signup
+              // Guest who used trial - prompt signup
               <>
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -1556,7 +1556,7 @@ export default function VisualizePage() {
         </div>
       )}
 
-      {/* Packs Modal — Pro user with 0 credits */}
+      {/* Packs Modal - Pro user with 0 credits */}
       {showPacksModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6" onClick={() => setShowPacksModal(false)}>
           <div className="bg-white rounded-3xl p-8 max-w-lg w-full relative" dir="rtl" onClick={e => e.stopPropagation()}>
@@ -1609,7 +1609,7 @@ export default function VisualizePage() {
                 <div className="flex items-center justify-between">
                   <div className="text-right">
                     <div className="font-medium text-gray-900">200 קרדיטים</div>
-                    <div className="text-xs text-green-600 font-medium">35% הנחה — ₪0.65 לקרדיט</div>
+                    <div className="text-xs text-green-600 font-medium">35% הנחה - ₪0.65 לקרדיט</div>
                   </div>
                   <div className="text-xl font-bold text-gray-900">₪129</div>
                 </div>
@@ -1635,7 +1635,7 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {!isLoggedIn ? '✨ נסו בחינם — הדמיה אחת עלינו!' : hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
+                {!isLoggedIn ? '✨ נסו בחינם - הדמיה אחת עלינו!' : hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
               </h3>
               <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
               <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
@@ -1759,7 +1759,7 @@ export default function VisualizePage() {
             
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">🎉 ההדמיה שלך מוכנה!</h3>
-              <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד — התוצאה בפועל עשויה להשתנות</p>
+              <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד - התוצאה בפועל עשויה להשתנות</p>
             </div>
             
             {/* Before/After Comparison */}
@@ -1846,7 +1846,7 @@ export default function VisualizePage() {
                   href="/signup?redirect=/visualize"
                   className="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white py-3 rounded-full text-center font-medium hover:from-emerald-600 hover:to-green-600 transition-all"
                 >
-                  🎉 הירשם בחינם — צור עוד הדמיות
+                  🎉 הירשם בחינם - צור עוד הדמיות
                 </Link>
               ) : hasSubscription ? (
                 <button
@@ -1876,7 +1876,7 @@ export default function VisualizePage() {
               <div className="mt-4 bg-gradient-to-l from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-xl shrink-0">🎁</span>
-                  <p className="text-sm text-gray-700">הזמינו חבר — <strong>שניכם מקבלים 20 קרדיטים</strong></p>
+                  <p className="text-sm text-gray-700">הזמינו חבר - <strong>שניכם מקבלים 20 קרדיטים</strong></p>
                 </div>
                 <Link
                   href="/dashboard#referral"

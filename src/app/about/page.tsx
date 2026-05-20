@@ -8,7 +8,7 @@ export default function AboutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "אודות ShiputzAI — שיפוצי.אי | הכלי המוביל בישראל להדמיית עיצוב פנים";
+    document.title = "אודות ShiputzAI - שיפוצי.אי | הכלי המוביל בישראל להדמיית עיצוב פנים";
     try {
       const userData = localStorage.getItem("user");
       if (userData) {
@@ -69,9 +69,9 @@ export default function AboutPage() {
 
   const values = [
     { icon: "💡", title: "חדשנות", desc: "שימוש בטכנולוגיות AI מתקדמות ליצירת חוויה פשוטה וחכמה" },
-    { icon: "🌍", title: "נגישות", desc: "כלי מקצועי שזמין לכל אחד — בעלי דירות, מעצבים וקבלנים" },
+    { icon: "🌍", title: "נגישות", desc: "כלי מקצועי שזמין לכל אחד - בעלי דירות, מעצבים וקבלנים" },
     { icon: "✨", title: "פשטות", desc: "ממשק אינטואיטיבי שלא דורש ידע טכני או ניסיון בעיצוב" },
-    { icon: "🇮🇱", title: "עברית-first", desc: "נבנה מהיסוד בעברית — לא תרגום, אלא חוויה מקומית מלאה" },
+    { icon: "🇮🇱", title: "עברית-first", desc: "נבנה מהיסוד בעברית - לא תרגום, אלא חוויה מקומית מלאה" },
   ];
 
   return (
@@ -116,7 +116,7 @@ export default function AboutPage() {
       <section className="py-16 px-6 border-b border-gray-100">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            אודות ShiputzAI — שיפוצי.אי
+            אודות ShiputzAI - שיפוצי.אי
           </h1>
           <p className="text-lg text-gray-600 leading-relaxed">
             ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים ושיפוצים באמצעות בינה מלאכותית. הפלטפורמה פותחה בישראל ב-2025 כדי לפתור בעיה פשוטה: איך רואים את תוצאת השיפוץ לפני שמתחילים?
@@ -130,13 +130,13 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">הסיפור שלנו</h2>
           <div className="space-y-4 text-gray-600 leading-relaxed">
             <p>
-              ShiputzAI נולד מתוך תסכול אמיתי. כל מי ששיפץ פעם יודע את הרגע הזה — עומדים מול הקבלן, מנסים לדמיין איך הסלון ייראה אחרי השיפוץ, ומקווים לטוב. המציאות? ברוב המקרים התוצאה לא תואמת את הדמיון.
+              ShiputzAI נולד מתוך תסכול אמיתי. כל מי ששיפץ פעם יודע את הרגע הזה - עומדים מול הקבלן, מנסים לדמיין איך הסלון ייראה אחרי השיפוץ, ומקווים לטוב. המציאות? ברוב המקרים התוצאה לא תואמת את הדמיון.
             </p>
             <p>
               <strong>גיא צזנה</strong>, יזם טכנולוגי ישראלי, החליט שהגיע הזמן לשנות את זה. ב-2025 הוא הקים את ShiputzAI עם חזון ברור: לאפשר לכל אחד לראות את תוצאת השיפוץ לפני שמשקיעים שקל אחד.
             </p>
             <p>
-              במקום להסתמך על דמיון או על הדמיות יקרות שלוקחות ימים, ShiputzAI מאפשר ליצור הדמיה פוטוריאליסטית תוך 30 שניות בלבד — פשוט מעלים תמונה, מתארים את השינוי, ומקבלים תוצאה.
+              במקום להסתמך על דמיון או על הדמיות יקרות שלוקחות ימים, ShiputzAI מאפשר ליצור הדמיה פוטוריאליסטית תוך 30 שניות בלבד - פשוט מעלים תמונה, מתארים את השינוי, ומקבלים תוצאה.
             </p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">המשימה שלנו</h2>
           <p className="text-xl text-gray-700 leading-relaxed">
-            &ldquo;לאפשר לכל אחד — בעל דירה, מעצב, קבלן — לראות את התוצאה לפני שמשקיעים.&rdquo;
+            &ldquo;לאפשר לכל אחד - בעל דירה, מעצב, קבלן - לראות את התוצאה לפני שמשקיעים.&rdquo;
           </p>
         </div>
       </section>

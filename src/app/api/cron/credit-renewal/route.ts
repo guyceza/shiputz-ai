@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       await sendRenewalEmail(user.email, user.name, credits, newBalance);
     }
 
-    // Low credit alerts — users with < 10 credits who had activity this month
+    // Low credit alerts - users with < 10 credits who had activity this month
     const { data: lowCreditUsers } = await supabase
       .from('users')
       .select('email, name, viz_credits, plan')

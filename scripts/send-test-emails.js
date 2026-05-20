@@ -128,7 +128,7 @@ const templates = {
                 </td>
                 <td valign="top" style="text-align: right; padding-right: 15px;">
                   <p style="font-size: 17px; font-weight: 700; color: #1d1d1f; margin: 0 0 4px; text-align: right;">סרוק קבלה ראשונה</p>
-                  <p style="font-size: 15px; color: #86868b; margin: 0; text-align: right;">צלם קבלה — ה-AI יקרא הכל</p>
+                  <p style="font-size: 15px; color: #86868b; margin: 0; text-align: right;">צלם קבלה - ה-AI יקרא הכל</p>
                 </td>
               </tr>
             </table>
@@ -158,20 +158,20 @@ const templates = {
   vision_offer: {
     subject: '🎨 רוצה לראות איך השיפוץ יראה?',
     title: '🎨 רוצה לראות איך השיפוץ יראה?',
-    subtitle: 'הצצה לעתיד — לפני שמתחילים',
+    subtitle: 'הצצה לעתיד - לפני שמתחילים',
     content: `
       ${greeting}
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
         מתלבט איך לשפץ את הסלון? לא בטוח איזה סגנון מתאים למטבח?
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-        עכשיו אפשר <strong>לראות את השיפוץ לפני שמתחילים</strong> — פשוט מעלים תמונה של החדר, וה-AI שלנו מדמיין איך זה יראה אחרי.
+        עכשיו אפשר <strong>לראות את השיפוץ לפני שמתחילים</strong> - פשוט מעלים תמונה של החדר, וה-AI שלנו מדמיין איך זה יראה אחרי.
       </p>
       <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
         <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
           ✨ <strong>הדמיות ויזואליות</strong> של איך השיפוץ יראה<br>
           💰 <strong>הערכת עלויות</strong> מדויקת לפי התמונה<br>
-          🛒 <strong>Shop the Look</strong> — קנה את הסגנון בקליק
+          🛒 <strong>Shop the Look</strong> - קנה את הסגנון בקליק
         </p>
       </div>
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px;">
@@ -188,16 +188,16 @@ const templates = {
   receipt_scanning: {
     subject: '📸 הטריק שיחסוך לך שעות',
     title: '📸 הטריק שיחסוך לך שעות',
-    subtitle: 'סריקת קבלות — מהיר ומדויק',
+    subtitle: 'סריקת קבלות - מהיר ומדויק',
     content: `
       ${greeting}
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-        במקום לרשום הכל ידנית, פשוט <strong>מצלמים את הקבלה</strong> — וזהו.
+        במקום לרשום הכל ידנית, פשוט <strong>מצלמים את הקבלה</strong> - וזהו.
       </p>
       <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
         <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
           📷 <strong>צלם</strong> או בחר מהגלריה<br>
-          🤖 ה-AI <strong>קורא הכל</strong> — סכום, ספק, תאריך<br>
+          🤖 ה-AI <strong>קורא הכל</strong> - סכום, ספק, תאריך<br>
           ✅ הוצאה <strong>נוספת אוטומטית</strong> לפרויקט
         </p>
       </div>
@@ -217,13 +217,13 @@ const templates = {
       ${greeting}
       <div style="margin-bottom: 25px;">
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; margin-bottom: 12px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>1.</strong> השאר <strong>15% רזרבה</strong> — תמיד יש הפתעות</p>
+          <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>1.</strong> השאר <strong>15% רזרבה</strong> - תמיד יש הפתעות</p>
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; margin-bottom: 12px; text-align: right;">
           <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>2.</strong> קח <strong>3 הצעות מחיר</strong> לפחות</p>
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; margin-bottom: 12px; text-align: right;">
-          <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>3.</strong> תעד <strong>כל הוצאה</strong> — קטנה כגדולה</p>
+          <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>3.</strong> תעד <strong>כל הוצאה</strong> - קטנה כגדולה</p>
         </div>
         <div style="background: #f5f5f7; border-radius: 12px; padding: 20px; margin-bottom: 12px; text-align: right;">
           <p style="font-size: 16px; color: #1d1d1f; margin: 0;"><strong>4.</strong> בדוק שהצעת מחיר כוללת <strong>מע"מ</strong></p>
@@ -247,7 +247,7 @@ const templates = {
         רצינו לבדוק שהכל בסדר עם השיפוץ.
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-        <strong>יש שאלות?</strong> פשוט תענה על המייל הזה — אנחנו כאן.
+        <strong>יש שאלות?</strong> פשוט תענה על המייל הזה - אנחנו כאן.
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
         בהצלחה! 🏠
@@ -264,13 +264,13 @@ const templates = {
     content: `
       ${greeting}
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-        אנחנו רוצים להשתפר — וה<strong>פידבק שלך</strong> יעזור לנו.
+        אנחנו רוצים להשתפר - וה<strong>פידבק שלך</strong> יעזור לנו.
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
         <strong>מה עובד טוב?</strong> מה אפשר לשפר?
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-        פשוט תענה על המייל הזה — נקרא כל מילה 🙏
+        פשוט תענה על המייל הזה - נקרא כל מילה 🙏
       </p>
     `,
     cta: 'לשתף פידבק',
@@ -301,7 +301,7 @@ const templates = {
   },
   
   discount_offer: {
-    subject: '🎁 מתנה בשבילך — 20% הנחה',
+    subject: '🎁 מתנה בשבילך - 20% הנחה',
     title: '🎁 מתנה בשבילך',
     subtitle: '',
     content: `
@@ -343,7 +343,7 @@ const templates = {
   },
   
   testimonials: {
-    subject: '💬 "חסכתי ₪15,000" — יעל מת"א',
+    subject: '💬 "חסכתי ₪15,000" - יעל מת"א',
     title: '💬 מה אומרים המשפצים',
     subtitle: '',
     content: `
@@ -394,10 +394,10 @@ const templates = {
       </p>
       <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
         <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
-          📊 <strong>דשבורד חכם</strong> — כל ההוצאות במקום אחד<br>
-          📸 <strong>סריקת קבלות</strong> — צלם ותשכח<br>
-          🔔 <strong>התראות</strong> — לפני שחורגים מהתקציב<br>
-          🎨 <strong>הדמיות AI</strong> — ראה איך זה יראה
+          📊 <strong>דשבורד חכם</strong> - כל ההוצאות במקום אחד<br>
+          📸 <strong>סריקת קבלות</strong> - צלם ותשכח<br>
+          🔔 <strong>התראות</strong> - לפני שחורגים מהתקציב<br>
+          🎨 <strong>הדמיות AI</strong> - ראה איך זה יראה
         </p>
       </div>
     `,
@@ -415,10 +415,10 @@ const templates = {
         שמנו לב שלא הצטרפת עדיין. <strong>זה בסדר גמור.</strong>
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">
-        אם יש משהו שהפריע לך, נשמח לשמוע — פשוט תענה על המייל הזה.
+        אם יש משהו שהפריע לך, נשמח לשמוע - פשוט תענה על המייל הזה.
       </p>
       <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0; text-align: right;">
-        ואם תשנה את דעתך — <strong>אנחנו כאן</strong> 🏠
+        ואם תשנה את דעתך - <strong>אנחנו כאן</strong> 🏠
       </p>
     `,
     cta: 'אולי בכל זאת?',

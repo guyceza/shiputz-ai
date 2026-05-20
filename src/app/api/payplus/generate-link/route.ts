@@ -10,7 +10,7 @@ const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplu
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Credit slider pricing — same anchors as frontend
+// Credit slider pricing - same anchors as frontend
 const CREDIT_ANCHORS = [
   { credits: 10, price: 10 },
   { credits: 20, price: 19 },
@@ -78,12 +78,12 @@ export async function POST(request: NextRequest) {
       
       if (cycle === 'annual') {
         amount = plan.annual * 12; // Charge full year
-        description = `תוכנית ${planId} — שנתית (${plan.credits} קרדיטים/חודש)`;
+        description = `תוכנית ${planId} - שנתית (${plan.credits} קרדיטים/חודש)`;
       } else {
         amount = plan.monthly;
         isRecurring = true;
         chargeMethod = 3; // recurring
-        description = `תוכנית ${planId} — חודשית (${plan.credits} קרדיטים/חודש)`;
+        description = `תוכנית ${planId} - חודשית (${plan.credits} קרדיטים/חודש)`;
       }
     }
 

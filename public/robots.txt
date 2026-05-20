@@ -36,6 +36,6 @@ Allow: /
 # Sitemap
 Sitemap: https://shipazti.com/sitemap.xml
 
-# LLMs — structured info for AI assistants
+# LLMs - structured info for AI assistants
 # https://shipazti.com/llms.txt
 # https://shipazti.com/llms-full.txt

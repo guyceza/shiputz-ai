@@ -24,7 +24,7 @@ const mainFeatures: Feature[] = [
   {
     title: "Style Matcher",
     subtitle: "זיהוי סגנון + רשימת קניות",
-    description: "העלו תמונה של חדר שאהבתם — ה-AI מזהה את סגנון העיצוב, מפרט את כל המוצרים ומציע לינקים ישירים לקנייה בישראל. כולל מפת חומרים וטקסטורות.",
+    description: "העלו תמונה של חדר שאהבתם - ה-AI מזהה את סגנון העיצוב, מפרט את כל המוצרים ומציע לינקים ישירים לקנייה בישראל. כולל מפת חומרים וטקסטורות.",
     image: "/images/ai-vision/style-match-showcase.jpg",
     href: "/style-match",
     cta: "נסו עכשיו",
@@ -33,7 +33,7 @@ const mainFeatures: Feature[] = [
   {
     title: "תוכנית קומה חכמה",
     subtitle: "מתוכנית אדריכלית להדמיה תלת-ממדית",
-    description: "העלו תוכנית קומה — ה-AI ממיר אותה להדמיה ריאליסטית של הדירה. תראו איך הסלון, המטבח וחדרי השינה ייראו במציאות, עוד לפני שהתחלתם.",
+    description: "העלו תוכנית קומה - ה-AI ממיר אותה להדמיה ריאליסטית של הדירה. תראו איך הסלון, המטבח וחדרי השינה ייראו במציאות, עוד לפני שהתחלתם.",
     image: "/images/ai-vision/floorplan.jpg",
     href: "/floorplan",
     cta: "נסו עכשיו",
@@ -42,7 +42,7 @@ const mainFeatures: Feature[] = [
   {
     title: "סיור וידאו AI",
     subtitle: "הליכה וירטואלית בדירה החדשה",
-    description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן — כולם רואים את אותה חזון.",
+    description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן - כולם רואים את אותה חזון.",
     image: "/images/ai-vision/video-tour-thumb.jpg",
     video: "/images/ai-vision/video-tour-showcase.mp4",
     href: "/floorplan?mode=video",

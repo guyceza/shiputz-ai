@@ -14,9 +14,9 @@ const TEMPLATE_SUBJECTS: Record<string, string> = {
   quote_analysis: '🔥 הכלי שרוב המשפצים לא מכירים',
   feedback_request: '⭐ 30 שניות מזמנך?',
   reminder: '👋 שכחת משהו?',
-  discount_offer: '🎁 מתנה בשבילך — 20% הנחה',
+  discount_offer: '🎁 מתנה בשבילך - 20% הנחה',
   problem_highlight: '😱 70% מהשיפוצים חורגים מהתקציב',
-  testimonials: '💬 "חסכתי ₪15,000" — סיפור אמיתי',
+  testimonials: '💬 "חסכתי ₪15,000" - סיפור אמיתי',
   urgency: '⏰ נשארו 24 שעות להנחה!',
   demo: '📊 ראה איך זה עובד (1 דקה)',
   last_chance: '🤝 נפרדים כחברים?',
@@ -91,7 +91,7 @@ const generateHtml = (templateId: string, userEmail?: string): string => {
        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 20px; padding: 32px; margin: 24px 0; text-align: center;">
          <p style="font-size: 14px; color: #92400e;">🎁 הנחה מיוחדת לחברי Premium:</p>
          <p style="font-size: 40px; font-weight: 700; color: #1e293b; letter-spacing: 3px;">VIS-TEST-123</p>
-         <p style="font-size: 16px; color: #92400e;"><strong>10 קרדיטים חינם</strong> — התחילו עכשיו!<br>תוכניות מ-₪29/חודש</p>
+         <p style="font-size: 16px; color: #92400e;"><strong>10 קרדיטים חינם</strong> - התחילו עכשיו!<br>תוכניות מ-₪29/חודש</p>
        </div>
        ${ctaButton('לנסות Pro ←', 'https://shipazti.com/checkout', '#a855f7')}`,
       'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%)',

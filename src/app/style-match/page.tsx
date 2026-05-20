@@ -29,9 +29,9 @@ const DEMO_RESULT = {
     { item: "שמיכת טלוויזיה", description: "שמיכה ארוגה בגוון שמנת", material: "כותנה", priceRange: "₪150-400", searchQuery: "שמיכה ארוגה כותנה שמנת סלון", position: { top: 60, left: 35 } },
   ],
   tips: [
-    "הוסיפו צמחייה ירוקה — פיקוס או מונסטרה משלימים מושלם",
+    "הוסיפו צמחייה ירוקה - פיקוס או מונסטרה משלימים מושלם",
     "שמרו על פלטה מצומצמת: לבן, בז׳, עץ בהיר ונגיעות שחור",
-    "תעדיפו רהיטים עם רגליים — יוצר תחושת מרחב",
+    "תעדיפו רהיטים עם רגליים - יוצר תחושת מרחב",
     "השתמשו בתאורה בשכבות: תקרה + רצפה + שולחן",
   ],
 };
@@ -48,7 +48,7 @@ export default function StyleMatchPage() {
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setError("קובץ גדול מדי — עד 10MB"); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("קובץ גדול מדי - עד 10MB"); return; }
     const reader = new FileReader();
     reader.onload = () => { setImageSrc(reader.result as string); setResult(null); setError(""); setShowDemo(false); trackAction('style-match', '/style-match'); };
     reader.readAsDataURL(file);
@@ -84,7 +84,7 @@ export default function StyleMatchPage() {
           <div>
             <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה</Link>
             <h1 className="text-2xl font-bold text-gray-900 mt-1">Style Matcher</h1>
-            <p className="text-gray-500 text-sm mt-1">העלו תמונה של חדר שאהבתם — נזהה את הסגנון ונעזור לכם לשחזר אותו</p>
+            <p className="text-gray-500 text-sm mt-1">העלו תמונה של חדר שאהבתם - נזהה את הסגנון ונעזור לכם לשחזר אותו</p>
           </div>
           <span className="bg-gray-100 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-full">3 קרדיטים</span>
         </div>
@@ -109,7 +109,7 @@ export default function StyleMatchPage() {
           ) : (
             <div>
               <div className="relative rounded-2xl overflow-hidden bg-gray-100 inline-block w-full text-center">
-                {/* Image wrapper — markers are positioned relative to this */}
+                {/* Image wrapper - markers are positioned relative to this */}
                 <div className="relative inline-block max-w-full">
                   <img src={imageSrc} alt="uploaded" className="block max-w-full max-h-[500px] rounded-2xl" />
                   {/* Numbered markers on image */}
@@ -179,7 +179,7 @@ export default function StyleMatchPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 text-sm">{error}</div>
         )}
 
-        {/* How it works — shown only when no image and no results */}
+        {/* How it works - shown only when no image and no results */}
         {!imageSrc && !activeResult && (
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">איך זה עובד?</h3>
@@ -244,11 +244,11 @@ function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: an
     <div className="space-y-6">
       {isDemo && (
         <div className="bg-gradient-to-r from-gray-100 to-gray-50 border border-gray-200 rounded-2xl p-4 text-center">
-          <p className="text-gray-500 text-sm">תצוגה לדוגמה — העלו תמונה כדי לקבל ניתוח אמיתי</p>
+          <p className="text-gray-500 text-sm">תצוגה לדוגמה - העלו תמונה כדי לקבל ניתוח אמיתי</p>
         </div>
       )}
 
-      {/* Shopping List — Visual Cards (first, right below image) */}
+      {/* Shopping List - Visual Cards (first, right below image) */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-semibold text-gray-900">רשימת קניות לשחזור הסגנון</h3>

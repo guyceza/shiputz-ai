@@ -229,7 +229,7 @@ function CheckoutContent() {
             disabled={loading}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-full text-sm font-bold transition-all disabled:opacity-50 shadow-lg"
           >
-            {loading ? "מעבד..." : `לתשלום — ₪${isPlan && billing === "annual" ? price * 12 : price}`}
+            {loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
           </button>
 
           <p className="text-center text-gray-400 text-xs mt-3">

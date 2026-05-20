@@ -146,7 +146,7 @@ export default function EpicHomePage() {
               }`}
               style={{ transitionDelay: "1s" }}
             >
-              בינה מלאכותית לניהול שיפוצים — מעקב תקציב, סריקת קבלות,
+              בינה מלאכותית לניהול שיפוצים - מעקב תקציב, סריקת קבלות,
               ניתוח הצעות מחיר והדמיות AI. לפני שמתחילים לשבור קירות.
             </p>
 
@@ -203,7 +203,7 @@ export default function EpicHomePage() {
 
           <div className="grid md:grid-cols-3 gap-4 md:gap-5">
             <FeatureCard icon="📊" title="מעקב תקציב" description="ראו בדיוק כמה הוצאתם, על מה, ומתי. התראות אוטומטיות כשמתקרבים לגבול." />
-            <FeatureCard icon="📸" title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה — אוטומטי." />
+            <FeatureCard icon="📸" title="סריקת קבלות" description="צלמו קבלה, ה-AI קורא ומוסיף לרשימה. סכום, תאריך, קטגוריה - אוטומטי." />
             <FeatureCard icon="📋" title="ניתוח הצעות מחיר" description="העלו הצעת מחיר ותקבלו ניתוח מיידי. האם המחיר הוגן? מה חסר?" />
             <FeatureCard icon="🎨" title="הדמיות AI" description="העלו תמונה של החדר ותראו איך הוא ייראה אחרי שיפוץ. בלי לשבור קיר אחד." />
             <FeatureCard icon="🛋️" title="Shop the Look" description="ראיתם חדר שאהבתם? ה-AI יזהה את הפריטים ויראה לכם איפה לקנות." />
@@ -222,7 +222,7 @@ export default function EpicHomePage() {
 
           <div className="space-y-20 md:space-y-24">
             <StepCard number="01" title="נרשמים ומגדירים פרויקט" description="הרשמה חינמית, הגדרת תקציב ובחירת חדרים לשיפוץ. תוך דקה אתם בפנים." />
-            <StepCard number="02" title="מעלים קבלות והצעות מחיר" description="פשוט מצלמים — ה-AI סורק, מנתח ומסדר הכל אוטומטית בפרויקט שלכם." />
+            <StepCard number="02" title="מעלים קבלות והצעות מחיר" description="פשוט מצלמים - ה-AI סורק, מנתח ומסדר הכל אוטומטית בפרויקט שלכם." />
             <StepCard number="03" title="שליטה מלאה" description="תקציב מעודכן, התראות חכמות, הדמיות AI וכל הכלים לשיפוץ מושלם." />
           </div>
         </div>

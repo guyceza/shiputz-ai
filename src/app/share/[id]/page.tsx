@@ -25,10 +25,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const desc = viz.description || "הדמיית שיפוץ ב-AI";
   return {
-    title: `הדמיית שיפוץ — ${desc} | ShiputzAI`,
+    title: `הדמיית שיפוץ - ${desc} | ShiputzAI`,
     description: `תראו את ההדמיה הזו! ${desc}. צרו הדמיית שיפוץ בחינם ב-ShiputzAI.`,
     openGraph: {
-      title: `הדמיית שיפוץ — ${desc}`,
+      title: `הדמיית שיפוץ - ${desc}`,
       description: `תראו מה ShiputzAI עשה 😍 הדמיית שיפוץ ב-AI!`,
       images: viz.after_image_url ? [{ url: viz.after_image_url, width: 1024, height: 1024 }] : [],
       url: `https://shipazti.com/share/${id}`,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     },
     twitter: {
       card: "summary_large_image",
-      title: `הדמיית שיפוץ — ${desc}`,
+      title: `הדמיית שיפוץ - ${desc}`,
       images: viz.after_image_url ? [viz.after_image_url] : [],
     },
   };
@@ -113,13 +113,13 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
             רוצה לראות איך החדר שלך ייראה?
           </h2>
           <p className="text-gray-500 mb-6">
-            העלה תמונה וקבל הדמיית שיפוץ + הערכת עלויות — בחינם
+            העלה תמונה וקבל הדמיית שיפוץ + הערכת עלויות - בחינם
           </p>
           <Link
             href="/visualize"
             className="inline-block bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors"
           >
-            נסה בחינם — 30 שניות ⚡
+            נסה בחינם - 30 שניות ⚡
           </Link>
         </div>
       </div>

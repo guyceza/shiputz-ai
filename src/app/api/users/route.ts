@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Sanitize name — strip HTML tags to prevent XSS
+    // Sanitize name - strip HTML tags to prevent XSS
     const name = rawName ? String(rawName).replace(/<[^>]*>/g, '').trim().slice(0, 100) : undefined;
 
     const supabase = createServiceClient();

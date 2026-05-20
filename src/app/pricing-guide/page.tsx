@@ -3,11 +3,11 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
-  title: "מחירון שיפוצים 2026 — כמה עולה שיפוץ דירה? | ShiputzAI",
+  title: "מחירון שיפוצים 2026 - כמה עולה שיפוץ דירה? | ShiputzAI",
   description: "מחירון שיפוצים מעודכן 2026: מטבח, אמבטיה, ריצוף, חשמל, אינסטלציה, צביעה ועוד. מחירים ממוצעים בישראל לפי קטגוריה.",
   keywords: "מחירון שיפוצים, כמה עולה שיפוץ, מחירי שיפוץ 2026, שיפוץ דירה מחיר, שיפוץ מטבח מחיר, שיפוץ אמבטיה מחיר",
   openGraph: {
-    title: "מחירון שיפוצים 2026 — כמה עולה שיפוץ דירה?",
+    title: "מחירון שיפוצים 2026 - כמה עולה שיפוץ דירה?",
     description: "מחירון שיפוצים מעודכן עם טווחי מחירים לכל קטגוריה. חינם.",
     url: "https://shipazti.com/pricing-guide",
   },
@@ -23,16 +23,16 @@ const unitLabels: Record<string, string> = {
 };
 
 const categoryDescriptions: Record<string, string> = {
-  general: "מחירי שיפוץ כללי למ״ר — מקוסמטי ועד יוקרתי. כולל עבודה וחומרים.",
+  general: "מחירי שיפוץ כללי למ״ר - מקוסמטי ועד יוקרתי. כולל עבודה וחומרים.",
   bathroom: "שיפוץ חדר אמבטיה כולל פירוק, איטום, צנרת, ריצוף וחיפוי. מחירים לחדר ממוצע.",
-  kitchen: "חידוש או החלפת מטבח — מפורמייקה ועד מטבח יוקרתי. כולל דלתות, משטחים ופרזול.",
-  flooring: "ריצוף ופרקט למ״ר — קרמיקה, למינציה, עץ גושני ואבן טבעית.",
-  electrical: "עבודות חשמל — מנקודה בודדת ועד שדרוג ללוח תלת-פאזי.",
-  plumbing: "אינסטלציה — סתימות, ברזים, נקודות מים, אסלות תלויות.",
-  drywall: "עבודות גבס — קירות, הנמכת תקרה, תקרה אקוסטית, מזנונים.",
-  aluminum: "אלומיניום — חלונות, סגירת מרפסת, תריסים חשמליים.",
-  painting: "צביעה — מקיר בודד ועד דירה שלמה.",
-  waterproofing: "איטום — גג, מרפסת, קיר חיצוני. ביריעות או זפת.",
+  kitchen: "חידוש או החלפת מטבח - מפורמייקה ועד מטבח יוקרתי. כולל דלתות, משטחים ופרזול.",
+  flooring: "ריצוף ופרקט למ״ר - קרמיקה, למינציה, עץ גושני ואבן טבעית.",
+  electrical: "עבודות חשמל - מנקודה בודדת ועד שדרוג ללוח תלת-פאזי.",
+  plumbing: "אינסטלציה - סתימות, ברזים, נקודות מים, אסלות תלויות.",
+  drywall: "עבודות גבס - קירות, הנמכת תקרה, תקרה אקוסטית, מזנונים.",
+  aluminum: "אלומיניום - חלונות, סגירת מרפסת, תריסים חשמליים.",
+  painting: "צביעה - מקיר בודד ועד דירה שלמה.",
+  waterproofing: "איטום - גג, מרפסת, קיר חיצוני. ביריעות או זפת.",
 };
 
 const categoryIcons: Record<string, string> = {
@@ -183,7 +183,7 @@ export default async function PricingGuidePage() {
                       </span>
                     </div>
                     <div className="text-left font-semibold text-gray-900 whitespace-nowrap">
-                      ₪{item.min_price?.toLocaleString()} — ₪{item.max_price?.toLocaleString()}
+                      ₪{item.min_price?.toLocaleString()} - ₪{item.max_price?.toLocaleString()}
                     </div>
                   </div>
                 ))}
@@ -202,7 +202,7 @@ export default async function PricingGuidePage() {
             href="/visualize"
             className="inline-block bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors"
           >
-            נסה בחינם — הדמיה ראשונה מתנה 🎁
+            נסה בחינם - הדמיה ראשונה מתנה 🎁
           </Link>
         </div>
 

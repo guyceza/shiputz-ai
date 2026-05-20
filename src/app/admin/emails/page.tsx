@@ -18,9 +18,9 @@ const EMAIL_TEMPLATES = [
   { id: 'feedback_request', name: 'בקשת משוב', day: 14, flow: 'purchased', subject: '⭐ 30 שניות מזמנך?' },
   // Non-purchased flow
   { id: 'reminder', name: 'תזכורת', day: 1, flow: 'non_purchased', subject: '👋 שכחת משהו?' },
-  { id: 'discount_offer', name: 'הנחה 20% Premium', day: 3, flow: 'non_purchased', subject: '🎁 מתנה בשבילך — 20% הנחה' },
+  { id: 'discount_offer', name: 'הנחה 20% Premium', day: 3, flow: 'non_purchased', subject: '🎁 מתנה בשבילך - 20% הנחה' },
   { id: 'problem_highlight', name: '70% חורגים', day: 5, flow: 'non_purchased', subject: '😱 70% מהשיפוצים חורגים מהתקציב' },
-  { id: 'testimonials', name: 'סיפורי הצלחה', day: 7, flow: 'non_purchased', subject: '💬 "חסכתי ₪15,000" — סיפור אמיתי' },
+  { id: 'testimonials', name: 'סיפורי הצלחה', day: 7, flow: 'non_purchased', subject: '💬 "חסכתי ₪15,000" - סיפור אמיתי' },
   { id: 'urgency', name: 'דחיפות 24 שעות', day: 9, flow: 'non_purchased', subject: '⏰ נשארו 24 שעות להנחה!' },
   { id: 'demo', name: 'דמו', day: 11, flow: 'non_purchased', subject: '📊 ראה איך זה עובד (1 דקה)' },
   { id: 'last_chance', name: 'הזדמנות אחרונה', day: 14, flow: 'non_purchased', subject: '🤝 נפרדים כחברים?' },

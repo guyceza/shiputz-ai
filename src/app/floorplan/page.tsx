@@ -233,7 +233,7 @@ export default function FloorplanPage() {
   const isAnyLoading = loading || loadingRoom || loadingFurniture || swapping || videoLoading;
 
   // Shared: submit video + poll for result
-  // Resize image to 1280x720 JPEG — handles both data URLs and remote URLs
+  // Resize image to 1280x720 JPEG - handles both data URLs and remote URLs
   const resizeToJpeg = async (src: string): Promise<Blob> => {
     // For remote URLs: fetch as blob, convert to data URL, THEN load in Image
     // This avoids CORS canvas tainting issues
@@ -442,7 +442,7 @@ export default function FloorplanPage() {
       setVideoClickA(click);
     } else if (!videoClickB) {
       setVideoClickB(click);
-      // Both clicks ready — generate both rooms in parallel
+      // Both clicks ready - generate both rooms in parallel
       setGeneratingBothRooms(true);
       setLoadingLabel("מזהה ויוצר 2 חדרים...");
       setError(null);
@@ -585,7 +585,7 @@ export default function FloorplanPage() {
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts in the ${fromPhoto.roomName} and physically glides forward at eye level through a bright doorway or well-lit hallway, continuously moving into the ${toPhoto.roomName}. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition corridor is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.`;
+      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts in the ${fromPhoto.roomName} and physically glides forward at eye level through a bright doorway or well-lit hallway, continuously moving into the ${toPhoto.roomName}. The rooms are connected - the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition corridor is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.`;
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
@@ -609,7 +609,7 @@ export default function FloorplanPage() {
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level through a bright open doorway or well-lit hallway, continuously moving into the next room. The rooms are connected — the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition area is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.";
+      const basePrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level through a bright open doorway or well-lit hallway, continuously moving into the next room. The rooms are connected - the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition area is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.";
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
@@ -695,7 +695,7 @@ export default function FloorplanPage() {
                 מתוכנית קומה ל<span className="text-emerald-600">דירה מעוצבת</span>
               </h1>
               <p className="text-gray-500 max-w-lg mx-auto">
-                העלו תוכנית קומה ובחרו סגנון עיצוב — ה-AI ייצור הדמיה מלמעלה של הדירה כולה
+                העלו תוכנית קומה ובחרו סגנון עיצוב - ה-AI ייצור הדמיה מלמעלה של הדירה כולה
               </p>
             </div>
 
@@ -778,15 +778,15 @@ export default function FloorplanPage() {
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
               <h3 className="text-base font-bold text-gray-900 mb-3">איך זה עובד?</h3>
               <div className="text-gray-500 text-sm space-y-2">
-                <p><strong className="text-gray-700">1.</strong> העלו תוכנית קומה, בחרו סגנון — קבלו הדמיה מלמעלה</p>
-                <p><strong className="text-gray-700">2.</strong> לחצו על חדר בהדמיה — ה-AI יוצר צילום פנים ריאליסטי</p>
+                <p><strong className="text-gray-700">1.</strong> העלו תוכנית קומה, בחרו סגנון - קבלו הדמיה מלמעלה</p>
+                <p><strong className="text-gray-700">2.</strong> לחצו על חדר בהדמיה - ה-AI יוצר צילום פנים ריאליסטי</p>
                 <p><strong className="text-gray-700">3.</strong> החליפו רהיטים או צרו סרטון סיור בדירה</p>
               </div>
             </div>
           </>
         )}
 
-        {/* ======== STEP 2: Floorplan ready — choose action ======== */}
+        {/* ======== STEP 2: Floorplan ready - choose action ======== */}
         {phase === "floorplan-ready" && floorplanResult && (
           <>
             <div className="text-center space-y-2">
@@ -887,7 +887,7 @@ export default function FloorplanPage() {
           </>
         )}
 
-        {/* ======== STEP 2b: Floorplan — click rooms ======== */}
+        {/* ======== STEP 2b: Floorplan - click rooms ======== */}
         {phase === "floorplan" && floorplanResult && (
           <>
             <div className="flex items-center justify-between mb-2">
@@ -902,9 +902,9 @@ export default function FloorplanPage() {
             {videoClickMode ? (
               <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center">
                 <p className="text-purple-800 font-medium text-sm">
-                  {!videoClickA ? "🎬 לחצו על החדר הראשון (A) — תחילת הסרטון" :
+                  {!videoClickA ? "🎬 לחצו על החדר הראשון (A) - תחילת הסרטון" :
                    generatingBothRooms ? "מזהה ויוצר 2 חדרים במקביל..." :
-                   "עכשיו לחצו על החדר השני (B) — סוף הסרטון"}
+                   "עכשיו לחצו על החדר השני (B) - סוף הסרטון"}
                 </p>
                 <p className="text-purple-600/60 text-xs mt-1">שני החדרים ייוצרו במקביל ותעברו ישר ליצירת הסרטון</p>
               </div>
@@ -940,8 +940,8 @@ export default function FloorplanPage() {
                 )}
                 <div className={`text-center text-xs py-1.5 ${videoClickMode ? "text-purple-600 bg-purple-50" : "text-emerald-600 bg-emerald-50"}`}>
                   {videoClickMode
-                    ? `🎬 מצב סרטון — ${videoClickA ? "1/2 נבחרו" : "בחרו חדר A"}`
-                    : `${customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || ""} — לחצו על חדר`}
+                    ? `🎬 מצב סרטון - ${videoClickA ? "1/2 נבחרו" : "בחרו חדר A"}`
+                    : `${customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || ""} - לחצו על חדר`}
                 </div>
               </div>
             </div>
@@ -1073,7 +1073,7 @@ export default function FloorplanPage() {
                 <div className="text-xs text-gray-400 mt-1">
                   {allRoomPhotos.length >= 2
                     ? `סיור וירטואלי בין ${allRoomPhotos.length} חדרים`
-                    : `צרו עוד ${2 - allRoomPhotos.length} חדר/ים — לחצו לחזור`}
+                    : `צרו עוד ${2 - allRoomPhotos.length} חדר/ים - לחצו לחזור`}
                 </div>
               </button>
             </div>
@@ -1150,7 +1150,7 @@ export default function FloorplanPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או — תארו מה אתם רוצים</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או - תארו מה אתם רוצים</h3>
                   <input
                     type="text"
                     placeholder={`למשל: מיטה לבנה מעץ אלון בסגנון כפרי`}
@@ -1162,7 +1162,7 @@ export default function FloorplanPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או — העלו רהיט ספציפי</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">או - העלו רהיט ספציפי</h3>
                   <div className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all ${
                     furnitureImage ? "border-emerald-300 bg-emerald-50/50" : "border-gray-300 hover:border-gray-400"
                   }`} onClick={() => furnitureInputRef.current?.click()}>
@@ -1222,7 +1222,7 @@ export default function FloorplanPage() {
           <>
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-gray-900">סרטון סיור AI</h2>
-              <p className="text-gray-500 text-sm">העלו שתי תמונות — חדר התחלה וחדר סיום — והסרטון ייוצר אוטומטית</p>
+              <p className="text-gray-500 text-sm">העלו שתי תמונות - חדר התחלה וחדר סיום - והסרטון ייוצר אוטומטית</p>
             </div>
 
             {/* Loading rooms */}
@@ -1233,13 +1233,13 @@ export default function FloorplanPage() {
               </div>
             )}
 
-            {/* No images yet — friendly redirect */}
+            {/* No images yet - friendly redirect */}
             {roomsLoaded && allUserRooms.length === 0 && (
               <div className="max-w-md mx-auto text-center bg-amber-50 border border-amber-200 rounded-2xl p-8 space-y-4">
                 <div className="text-4xl">🎬</div>
                 <h3 className="text-lg font-semibold text-gray-900">אין עדיין הדמיות לסרטון</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  כדי ליצור סרטון סיור, צריך קודם להעלות תוכנית קומה וליצור הדמיות של החדרים. אחרי שיהיו לכם לפחות 2 חדרים — תוכלו ליצור סרטון מדהים!
+                  כדי ליצור סרטון סיור, צריך קודם להעלות תוכנית קומה וליצור הדמיות של החדרים. אחרי שיהיו לכם לפחות 2 חדרים - תוכלו ליצור סרטון מדהים!
                 </p>
                 <a
                   href="/floorplan"
@@ -1250,10 +1250,10 @@ export default function FloorplanPage() {
               </div>
             )}
 
-            {/* Previously generated rooms — grouped by session (house) */}
+            {/* Previously generated rooms - grouped by session (house) */}
             {allUserRooms.length > 0 && (
               <div className="max-w-2xl mx-auto space-y-4">
-                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים שנוצרו — בחרו 2 מאותו בית</h3>
+                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים שנוצרו - בחרו 2 מאותו בית</h3>
                 {allUserRooms.filter(g => g.rooms.length >= 1).map((group, gi) => (
                   <div key={group.sessionId} className="space-y-2">
                     {allUserRooms.length > 1 && (
@@ -1283,8 +1283,8 @@ export default function FloorplanPage() {
                               isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
                             }`}>
                               {photo.roomNameHe}
-                              {isFirst && " — התחלה"}
-                              {isLast && " — סיום"}
+                              {isFirst && " - התחלה"}
+                              {isLast && " - סיום"}
                             </div>
                           </button>
                         );
@@ -1433,11 +1433,11 @@ export default function FloorplanPage() {
                     <span className="text-gray-500 text-sm">חדרים נבחרו</span>
                   </div>
                   <p className="text-gray-700 font-medium text-sm">
-                    {selected === 0 && "בחרו את החדר הראשון — תחילת הסרטון"}
-                    {selected === 1 && "עכשיו בחרו את החדר השני — סוף הסרטון"}
-                    {selected === 2 && "מעולה — לחצו ליצירת הסרטון"}
+                    {selected === 0 && "בחרו את החדר הראשון - תחילת הסרטון"}
+                    {selected === 1 && "עכשיו בחרו את החדר השני - סוף הסרטון"}
+                    {selected === 2 && "מעולה - לחצו ליצירת הסרטון"}
                   </p>
-                  <p className="text-gray-400 text-xs">המצלמה תזוז מחדר אחד לשני — מעבר חלק, בלי חתכים</p>
+                  <p className="text-gray-400 text-xs">המצלמה תזוז מחדר אחד לשני - מעבר חלק, בלי חתכים</p>
                 </div>
               );
             })()}
@@ -1467,8 +1467,8 @@ export default function FloorplanPage() {
                       isSelected ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
                     }`}>
                       {photo.roomNameHe}
-                      {isFrom && " — התחלה"}
-                      {isTo && " — סיום"}
+                      {isFrom && " - התחלה"}
+                      {isTo && " - סיום"}
                     </div>
                   </button>
                 );

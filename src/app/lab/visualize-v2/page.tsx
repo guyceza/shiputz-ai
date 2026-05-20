@@ -165,7 +165,7 @@ export default function VisualizeV2Preview() {
               <div className="text-center mb-3">
                 <span className="text-sm font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">❌ גרסה ישנה</span>
               </div>
-              <p className="text-sm text-gray-500 text-center mb-4">Laptop mockup — קטן וקשה לקריאה על מובייל</p>
+              <p className="text-sm text-gray-500 text-center mb-4">Laptop mockup - קטן וקשה לקריאה על מובייל</p>
               <div className="rounded-xl overflow-hidden shadow border border-gray-200">
                 <video 
                   autoPlay 
@@ -185,7 +185,7 @@ export default function VisualizeV2Preview() {
               <div className="text-center mb-3">
                 <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">✅ גרסה חדשה</span>
               </div>
-              <p className="text-sm text-gray-500 text-center mb-4">Phone mockup + אנימציית before/after — ברור מיד</p>
+              <p className="text-sm text-gray-500 text-center mb-4">Phone mockup + אנימציית before/after - ברור מיד</p>
               <div className="flex justify-center">
                 <div className="relative" style={{ maxWidth: '200px' }}>
                   <div className="relative rounded-[1.8rem] border-[4px] border-gray-900 bg-gray-900 shadow-xl overflow-hidden">
@@ -216,7 +216,7 @@ export default function VisualizeV2Preview() {
       <section className="py-12 px-4 border-t border-gray-100">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-bold mb-3 text-gray-900">אופציה 2: בלי מסגרת טלפון</h2>
-          <p className="text-sm text-gray-500 mb-6">Full-width before/after — אולי אפילו יותר ברור</p>
+          <p className="text-sm text-gray-500 mb-6">Full-width before/after - אולי אפילו יותר ברור</p>
           
           {/* Before → After Label */}
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -272,7 +272,7 @@ export default function VisualizeV2Preview() {
       {/* Footer note */}
       <div className="py-8 px-4 text-center border-t border-gray-100">
         <p className="text-sm text-gray-400">
-          🔬 דף תצוגה מקדימה — לא מופיע בניווט הראשי
+          🔬 דף תצוגה מקדימה - לא מופיע בניווט הראשי
         </p>
       </div>
     </div>

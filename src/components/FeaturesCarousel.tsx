@@ -8,7 +8,7 @@ const features = [
   {
     id: "visualize",
     title: "עיצוב מחדש",
-    description: "העלו תמונה של החדר — קבלו הדמיית AI של התוצאה",
+    description: "העלו תמונה של החדר - קבלו הדמיית AI של התוצאה",
     href: "/visualize",
     type: "before-after" as const,
     before: "/before-room.webp",
@@ -46,7 +46,7 @@ const features = [
   {
     id: "boq",
     title: "כתב כמויות",
-    description: "פירוט חומרים, כמויות ועלויות — אוטומטי",
+    description: "פירוט חומרים, כמויות ועלויות - אוטומטי",
     href: "/dashboard/boq",
     type: "gif" as const,
     gif: "/images/ai-vision/boq.gif",
@@ -56,7 +56,7 @@ const features = [
   {
     id: "quote",
     title: "ניתוח הצעת מחיר",
-    description: "העלו הצעה מקבלן — מה סביר ומה חסר",
+    description: "העלו הצעה מקבלן - מה סביר ומה חסר",
     href: "/dashboard",
     type: "gif" as const,
     gif: "/images/ai-vision/quote-analysis.gif",
@@ -66,7 +66,7 @@ const features = [
   {
     id: "receipt",
     title: "סריקת קבלות",
-    description: "צלמו קבלה — סכום, תאריך וקטגוריה אוטומטית",
+    description: "צלמו קבלה - סכום, תאריך וקטגוריה אוטומטית",
     href: "/dashboard",
     type: "gif" as const,
     gif: "/images/ai-vision/receipt-scanner.gif",

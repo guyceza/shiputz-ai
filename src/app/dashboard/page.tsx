@@ -85,7 +85,7 @@ function DashboardContent() {
     }
   }, [projectMenuOpen]);
 
-  // Google Ads conversion tracking — fire once per session on dashboard load
+  // Google Ads conversion tracking - fire once per session on dashboard load
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
       const key = 'gads_signup_fired';

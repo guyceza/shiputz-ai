@@ -29,10 +29,10 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
-      {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."}},
+      {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+      {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים - תירשמו בחינם."}},
       {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
-      {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."}},
+      {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק - אחרי השינוי. תוך 30 שניות."}},
       {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
       {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
       {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},
@@ -241,7 +241,7 @@ export default function Home() {
         <div className="fixed top-11 left-0 right-0 bg-white border-b border-gray-200 z-40 md:hidden shadow-lg" dir="rtl">
           <div className="px-6 py-4 space-y-3">
             <Link href="/ai-vision" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              🎨 AI Vision — כלי העיצוב
+              🎨 AI Vision - כלי העיצוב
             </Link>
             <Link href="/visualize" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
               הדמיית עיצוב
@@ -273,7 +273,7 @@ export default function Home() {
                 עצבו את הבית. בלחיצה.
               </h1>
               <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                העלו תמונה של חדר — קבלו הדמיית עיצוב, רשימת קניות, וסרטון סיור. הכל ב-AI.
+                העלו תמונה של חדר - קבלו הדמיית עיצוב, רשימת קניות, וסרטון סיור. הכל ב-AI.
               </p>
               <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
                 {isLoggedIn ? (
@@ -340,7 +340,7 @@ export default function Home() {
         <BrandsMarquee />
       </section>
 
-      {/* AI Vision — Features Showcase */}
+      {/* AI Vision - Features Showcase */}
       <section id="features" className="py-24 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
@@ -426,7 +426,7 @@ export default function Home() {
                 <div className="flex items-center justify-center gap-3 mb-1">
                   <span className="text-3xl font-bold text-gray-900">10 קרדיטים חינם</span>
                 </div>
-                <p className="text-sm text-gray-500">בהרשמה — בלי כרטיס אשראי</p>
+                <p className="text-sm text-gray-500">בהרשמה - בלי כרטיס אשראי</p>
               </div>
               
               <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
@@ -453,7 +453,7 @@ export default function Home() {
       <section className="py-24 px-6 border-t border-gray-100">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">תוכניות ומחירים</h2>
-          <p className="text-gray-500 mb-12">התחילו בחינם — שדרגו כשתרצו</p>
+          <p className="text-gray-500 mb-12">התחילו בחינם - שדרגו כשתרצו</p>
           
           <PricingComparison />
         </div>
@@ -488,7 +488,7 @@ export default function Home() {
             <div className="relative bg-black/60 backdrop-blur-sm rounded-2xl p-10 md:p-14 border border-white/10">
               <div className="space-y-8 text-right">
                 <p className="text-xl md:text-2xl text-white font-light leading-relaxed">
-                  בנינו את <span className="font-semibold">ShiputzAI</span> כי רצינו לראות את הבית החדש — לפני שמתחילים.
+                  בנינו את <span className="font-semibold">ShiputzAI</span> כי רצינו לראות את הבית החדש - לפני שמתחילים.
                 </p>
                 
                 <p className="text-gray-400 text-lg leading-relaxed">
@@ -510,7 +510,7 @@ export default function Home() {
                 </p>
                 
                 <p className="text-gray-500 text-lg leading-relaxed">
-                  נבנה בישראל, בעברית, עם מחירי שוק ישראליים. אם יש לכם רעיון לשיפור — נשמח לשמוע.
+                  נבנה בישראל, בעברית, עם מחירי שוק ישראליים. אם יש לכם רעיון לשיפור - נשמח לשמוע.
                 </p>
                 
                 <div className="pt-8 border-t border-white/10">
@@ -535,11 +535,11 @@ export default function Home() {
           <div className="space-y-6">
             <FaqItem 
               question="מה זה קרדיט ולמה צריך אותו?"
-              answer="קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."
+              answer="קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."
             />
             <FaqItem 
               question="אפשר לנסות בלי להירשם?"
-              answer="כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."
+              answer="כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים - תירשמו בחינם."
             />
             <FaqItem 
               question="מה קורה עם התמונות שאני מעלה?"
@@ -547,7 +547,7 @@ export default function Home() {
             />
             <FaqItem 
               question="איך ההדמיה עובדת?"
-              answer="מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."
+              answer="מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק - אחרי השינוי. תוך 30 שניות."
             />
             <FaqItem 
               question="מתאים גם למעצבי פנים?"
@@ -581,8 +581,8 @@ export default function Home() {
       <section className="py-16 px-6 bg-gradient-to-l from-emerald-50 to-teal-50">
         <div className="max-w-3xl mx-auto text-center">
           <span className="text-4xl mb-4 block">🎁</span>
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">הזמינו חבר — שניכם מרוויחים</h2>
-          <p className="text-gray-600 mb-6">שתפו את הלינק שלכם עם חברים ועמיתים. על כל חבר שנרשם — <strong>שניכם מקבלים 20 קרדיטים חינם</strong>.</p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">הזמינו חבר - שניכם מרוויחים</h2>
+          <p className="text-gray-600 mb-6">שתפו את הלינק שלכם עם חברים ועמיתים. על כל חבר שנרשם - <strong>שניכם מקבלים 20 קרדיטים חינם</strong>.</p>
           <Link
             href={isLoggedIn ? "/dashboard#referral" : "/signup"}
             className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-base hover:bg-gray-800 transition-all"
@@ -614,10 +614,10 @@ export default function Home() {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם — מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
-          {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים — תירשמו בחינם."}},
+          {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+          {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים - תירשמו בחינם."}},
           {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
-          {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות. ה-AI יוצר תמונה חדשה של אותו חדר בדיוק — אחרי השינוי. תוך 30 שניות."}},
+          {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות. ה-AI יוצר תמונה חדשה של אותו חדר בדיוק - אחרי השינוי. תוך 30 שניות."}},
           {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
           {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
           {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},

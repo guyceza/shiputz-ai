@@ -138,7 +138,7 @@ export default function QuoteAnalysisPage() {
         {/* Title */}
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">ניתוח הצעת מחיר</h1>
-          <p className="text-gray-500 text-lg">העלו הצעה מקבלן או כתבו את הפרטים — נבדוק אם המחיר סביר</p>
+          <p className="text-gray-500 text-lg">העלו הצעה מקבלן או כתבו את הפרטים - נבדוק אם המחיר סביר</p>
         </div>
 
         {/* Login Required */}

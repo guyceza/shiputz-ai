@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
-// POST /api/track-action — Track when a user starts an action (upload image, etc.)
+// POST /api/track-action - Track when a user starts an action (upload image, etc.)
 // Body: { email: string, action: string, page: string }
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/track-action — Clear tracked action (user completed it)
+// DELETE /api/track-action - Clear tracked action (user completed it)
 export async function DELETE(request: NextRequest) {
   try {
     const { email } = await request.json();

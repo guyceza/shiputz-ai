@@ -198,7 +198,7 @@ function testimonial(quote, name, city) {
             <tr>
                 <td style="background: ${BRAND.light}; border-radius: 16px; padding: 24px; text-align: right;" dir="rtl">
                     <p style="font-size: 16px; line-height: 1.6; color: ${BRAND.text}; margin: 0 0 12px; font-style: italic; text-align: right;">"${quote}"</p>
-                    <p style="font-size: 14px; color: ${BRAND.muted}; margin: 0; text-align: right;">— ${name}, ${city}</p>
+                    <p style="font-size: 14px; color: ${BRAND.muted}; margin: 0; text-align: right;">- ${name}, ${city}</p>
                 </td>
             </tr>
         </table>`;
@@ -237,7 +237,7 @@ const FLOW1 = {
         ${header('👋', 'ברוך הבא ל-ShiputzAI!')}
         ${p(`היי${userName ? ' ' + userName : ''},`)}
         ${p('תודה שנרשמת ל-ShiputzAI!')}
-        ${p('אנחנו יודעים שניהול שיפוץ יכול להיות מטורף — עשרות קבלנים, הצעות מחיר, קבלות, ותקציב שכל הזמן משתנה.')}
+        ${p('אנחנו יודעים שניהול שיפוץ יכול להיות מטורף - עשרות קבלנים, הצעות מחיר, קבלות, ותקציב שכל הזמן משתנה.')}
         ${p('ShiputzAI עוזר לך:', true)}
         ${featureList([
             { emoji: '📊', text: 'לעקוב אחרי כל הוצאה בזמן אמת' },
@@ -270,7 +270,7 @@ const FLOW1 = {
         ${priceBox('₪' + PRICING.premium.regular.ils, '₪' + PRICING.premium.discounted.ils)}
         <p style="font-size: 15px; line-height: 1.6; color: ${BRAND.muted}; margin: 0 0 32px; text-align: center;">תשלום חד פעמי. גישה לכל הפיצ׳רים.</p>
         ${button('לממש את ההנחה ←', 'https://shipazti.com/signup?code=' + PRICING.premium.code, '#0071e3')}
-    `, '🎁 20% הנחה מחכה לך — תקף 48 שעות'),
+    `, '🎁 20% הנחה מחכה לך - תקף 48 שעות'),
 
     day5_problem: (userName = '') => emailWrapper(`
         ${header('😱', '70% מהשיפוצים חורגים מהתקציב')}
@@ -292,7 +292,7 @@ const FLOW1 = {
         ])}
         ${p('<strong>אל תהיה חלק מה-70%.</strong>')}
         ${button('להתחיל היום ←', 'https://shipazti.com/signup')}
-    `, '70% מהשיפוצים חורגים מהתקציב — אל תהיה אחד מהם'),
+    `, '70% מהשיפוצים חורגים מהתקציב - אל תהיה אחד מהם'),
 
     day7_testimonials: (userName = '') => emailWrapper(`
         ${header('💬', 'מה הלקוחות שלנו אומרים')}
@@ -308,7 +308,7 @@ const FLOW1 = {
         ${p(`היי${userName ? ' ' + userName : ''},`)}
         ${p(`קוד ההנחה שלך <strong>${PRICING.premium.code}</strong> פג בעוד 24 שעות!`)}
         ${grayBox(`
-            <p style="font-size: 14px; color: ${BRAND.muted}; margin: 0 0 8px;">20% הנחה — לא תחזור</p>
+            <p style="font-size: 14px; color: ${BRAND.muted}; margin: 0 0 8px;">20% הנחה - לא תחזור</p>
             <span style="font-size: 20px; color: ${BRAND.muted}; text-decoration: line-through;">₪${PRICING.premium.regular.ils}</span>
             <span style="font-size: 20px; color: ${BRAND.muted}; margin: 0 8px;">←</span>
             <span style="font-size: 36px; font-weight: 700; color: ${BRAND.text};">₪${PRICING.premium.discounted.ils}</span>
@@ -321,7 +321,7 @@ const FLOW1 = {
         ${header('🤝', 'אולי לא בשבילך?')}
         ${p(`היי${userName ? ' ' + userName : ''},`)}
         ${p('זה המייל האחרון שלנו.')}
-        ${p('אם ShiputzAI לא מתאים לך — זה בסדר גמור. לא כולם צריכים כלי לניהול שיפוץ.')}
+        ${p('אם ShiputzAI לא מתאים לך - זה בסדר גמור. לא כולם צריכים כלי לניהול שיפוץ.')}
         ${p('אבל אם אתה עדיין מתלבט:', true)}
         ${bulletList([
             'יש לנו ניסיון חינם של 7 ימים',
@@ -329,7 +329,7 @@ const FLOW1 = {
             'אין התחייבות'
         ])}
         ${button('לנסות בחינם 7 ימים ←', 'https://shipazti.com/signup?trial=7')}
-    `, 'זה המייל האחרון שלנו — יש לנו הצעה בשבילך')
+    `, 'זה המייל האחרון שלנו - יש לנו הצעה בשבילך')
 };
 
 // ============================================
@@ -414,7 +414,7 @@ const FLOW2 = {
             'סרקת קבלות?',
             'יש משהו שלא ברור?'
         ])}
-        ${p('אם יש לך שאלות — פשוט תענה על המייל הזה.')}
+        ${p('אם יש לך שאלות - פשוט תענה על המייל הזה.')}
         ${p('<strong>אנחנו קוראים הכל!</strong>')}
         ${button('לדשבורד ←', 'https://shipazti.com/dashboard')}
     `, 'איך הולך? יש לנו כמה שאלות'),
@@ -453,7 +453,7 @@ const SUBJECTS = {
     flow1: {
         day0: '👋 ברוך הבא ל-ShiputzAI!',
         day1: '👋 שכחת משהו?',
-        day3: '🎁 מתנה בשבילך — 20% הנחה',
+        day3: '🎁 מתנה בשבילך - 20% הנחה',
         day5: '😱 70% מהשיפוצים חורגים מהתקציב',
         day7: '💬 "חסכתי ₪15,000 בזכותכם"',
         day9: '⏰ נשארו 24 שעות להנחה!',
@@ -502,7 +502,7 @@ function subscriptionCancelled(email, periodEnd) {
     `;
     
     return {
-        subject: '👋 המנוי בוטל בהצלחה — ShiputzAI',
+        subject: '👋 המנוי בוטל בהצלחה - ShiputzAI',
         html: emailWrapper(content, 'קיבלנו את בקשת הביטול שלך')
     };
 }

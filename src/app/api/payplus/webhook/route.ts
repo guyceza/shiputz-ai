@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const headerObj: Record<string, string> = {};
     request.headers.forEach((value, key) => { headerObj[key] = key.toLowerCase().includes('key') ? '***' : value; });
     
-    // Verify webhook authenticity — block unauthorized requests
+    // Verify webhook authenticity - block unauthorized requests
     if (WEBHOOK_SECRET) {
       // Method 1: Check our custom webhook secret (added as query param or header)
       const urlSecret = new URL(request.url).searchParams.get('secret');
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     // Extract email from various possible fields (check both tx and root data)
     // For recurring callbacks, PayPlus uses "extra_info" instead of "more_info"
-    // and may not include email — try customer_uid lookup as fallback
+    // and may not include email - try customer_uid lookup as fallback
     let email = more_info_1 || tx.email || tx.customer_email || data.email || data.customer_email || data.more_info_1;
     const productType = more_info || tx.extra_info || data.extra_info || tx.product_type || data.product_type;
 
@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Visualization pack purchases — add credits
+    // Visualization pack purchases - add credits
     const PACK_CREDITS: Record<string, number> = { pack_10: 10, pack_30: 30, pack_100: 100 };
     if (PACK_CREDITS[productType]) {
       const credits = PACK_CREDITS[productType];
@@ -403,7 +403,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log the transaction (console only — transactions table doesn't exist yet)
+    // Log the transaction (console only - transactions table doesn't exist yet)
 
     // Send welcome/purchase confirmation email via Resend (fire-and-forget)
     if (email && (productType === 'pro' || productType === 'pro_monthly' || productType === 'pro_annual' || productType === 'premium' || productType === 'premium_plus')) {

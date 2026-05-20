@@ -5,7 +5,7 @@ import { createServiceClient } from "@/lib/supabase";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-// GET — load rooms for a user (optionally filtered by session)
+// GET - load rooms for a user (optionally filtered by session)
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId");
   const sessionId = req.nextUrl.searchParams.get("sessionId");
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ rooms: data || [] });
 }
 
-// POST — save a room photo
+// POST - save a room photo
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

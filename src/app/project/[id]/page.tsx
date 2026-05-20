@@ -1818,7 +1818,7 @@ export default function ProjectPage() {
             {/* Budget Overview - includes grid, progress, alerts, and category chart */}
             <BudgetOverview project={project} onOpenBudgetModal={openBudgetModal} />
 
-            {/* Vision section removed — users access via /visualize directly */}
+            {/* Vision section removed - users access via /visualize directly */}
 
             {/* AI Tools - Requires Premium subscription */}
             <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden">

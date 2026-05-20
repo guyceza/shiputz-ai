@@ -1,12 +1,12 @@
-# ShiputzAI — Complete Platform Guide
+# ShiputzAI - Complete Platform Guide
 # https://shipazti.com
-# שיפוצי.אי — מדריך מלא לפלטפורמה
+# שיפוצי.אי - מדריך מלא לפלטפורמה
 
 ---
 
 ## About ShiputzAI
 
-ShiputzAI (שיפוצי.אי) is Israel's first and leading AI-powered interior design and home renovation platform. Founded in 2025 by Guy Cezana, the platform enables anyone — from homeowners to professional designers — to visualize renovation results before starting any work.
+ShiputzAI (שיפוצי.אי) is Israel's first and leading AI-powered interior design and home renovation platform. Founded in 2025 by Guy Cezana, the platform enables anyone - from homeowners to professional designers - to visualize renovation results before starting any work.
 
 The platform is fully localized for the Israeli market: Hebrew interface, Hebrew AI support, Israeli pricing in NIS (₪), and tools specifically designed for Israeli renovation workflows (like bill of quantities and contractor quote analysis).
 
@@ -64,9 +64,9 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 
 ---
 
-## AI Tools — Detailed Descriptions (7 Tools)
+## AI Tools - Detailed Descriptions (7 Tools)
 
-### 1. Room Visualization (הדמיית חדר) — 5 Credits
+### 1. Room Visualization (הדמיית חדר) - 5 Credits
 **What it does:** Upload a photo of any room and describe what you want to change. The AI generates a photorealistic image of that exact room after the renovation.
 
 **How to use:**
@@ -86,18 +86,18 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Output:** AI-generated visualization image
 **Processing time:** ~30 seconds
 
-### 2. Style Match (זיהוי סגנון) — 2 Credits
+### 2. Style Match (זיהוי סגנון) - 2 Credits
 **What it does:** Upload any room photo and the AI identifies the design style, key materials, color palette, and notable design elements.
 
 **Use cases:**
-- "I saw a room I love on Pinterest — what style is it?"
+- "I saw a room I love on Pinterest - what style is it?"
 - "What materials are used in this design?"
 - Identify a cohesive design language for a project
 
 **Input:** Room photo
 **Output:** Style name, description, materials list, color palette
 
-### 3. Shopping List (רשימת קניות) — 3 Credits
+### 3. Shopping List (רשימת קניות) - 3 Credits
 **What it does:** Based on a visualization result, the AI generates a shopping list of furniture, decor, and materials needed to achieve the design.
 
 **Use cases:**
@@ -108,7 +108,7 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Input:** Visualization result or room photo
 **Output:** Itemized list with categories, estimated quantities
 
-### 4. Tour Video (סרטון סיור) — 25 Credits
+### 4. Tour Video (סרטון סיור) - 25 Credits
 **What it does:** Generate a short walkthrough video that simulates walking through the redesigned room. Perfect for presentations and social media.
 
 **Use cases:**
@@ -120,7 +120,7 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Output:** Short video (5-10 seconds) simulating a room tour
 **Processing time:** ~2 minutes
 
-### 5. Bill of Quantities (כתב כמויות) — 5 Credits
+### 5. Bill of Quantities (כתב כמויות) - 5 Credits
 **What it does:** AI generates a detailed bill of quantities (כתב כמויות) for renovation work based on a room photo or visualization. Includes materials, quantities, and work items.
 
 **Use cases:**
@@ -131,7 +131,7 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Input:** Room photo or visualization + description of planned work
 **Output:** Detailed bill of quantities with items, quantities, and categories
 
-### 6. Quote Analyzer (ניתוח הצעות מחיר) — 3 Credits
+### 6. Quote Analyzer (ניתוח הצעות מחיר) - 3 Credits
 **What it does:** Upload a contractor's quote (photo or PDF) and the AI analyzes it for fairness, identifies potential issues, missing items, and compares to market rates.
 
 **Use cases:**
@@ -142,11 +142,11 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Input:** Photo/scan of contractor quote
 **Output:** Analysis with fairness score, flagged items, recommendations
 
-### 7. Shop the Look — 3 Credits
+### 7. Shop the Look - 3 Credits
 **What it does:** AI identifies specific products (furniture, decor, lighting) in a room photo and suggests similar items available for purchase.
 
 **Use cases:**
-- "I love that lamp — where can I get it?"
+- "I love that lamp - where can I get it?"
 - Finding Israeli retailers for specific items
 - Building a mood board with purchasable items
 
@@ -155,7 +155,7 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 
 ---
 
-## Pricing — Complete Details
+## Pricing - Complete Details
 
 ### Credit System
 ShiputzAI uses a credit-based system. Each AI tool costs a set number of credits:

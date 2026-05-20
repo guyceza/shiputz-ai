@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     // Unsubscribe must ALWAYS be possible (CAN-SPAM/GDPR compliance)
     const tokenValid = verifyUnsubscribeToken(email, token);
     if (!tokenValid && token) {
-      // Bad token provided — don't block, ask for confirmation instead
+      // Bad token provided - don't block, ask for confirmation instead
       return NextResponse.json({ needs_confirm: true }, { status: 200 });
     }
 

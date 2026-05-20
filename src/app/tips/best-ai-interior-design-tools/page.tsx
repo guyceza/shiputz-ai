@@ -21,7 +21,7 @@ export default function BestAIInteriorDesignToolsPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    document.title = "5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI — 2026 | ShiputzAI";
+    document.title = "5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI - 2026 | ShiputzAI";
     const checkAuth = async () => {
       try {
         const userData = localStorage.getItem("user");
@@ -37,7 +37,7 @@ export default function BestAIInteriorDesignToolsPage() {
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI — 2026",
+    "headline": "5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI - 2026",
     "description": "ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים באמצעות AI, עם 7 כלים ייחודיים כולל סרטון סיור, כתב כמויות וניתוח הצעות מחיר.",
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
@@ -55,7 +55,7 @@ export default function BestAIInteriorDesignToolsPage() {
         "name": "מה הכלי הטוב ביותר להדמיית עיצוב פנים בAI בישראל?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ShiputzAI הוא הכלי המוביל בישראל עם 7 כלי AI כולל הדמיה, כתב כמויות, סרטון סיור, ניתוח הצעות מחיר ועוד — הכל בעברית מלאה ובמחירים החל מ-₪29."
+          "text": "ShiputzAI הוא הכלי המוביל בישראל עם 7 כלי AI כולל הדמיה, כתב כמויות, סרטון סיור, ניתוח הצעות מחיר ועוד - הכל בעברית מלאה ובמחירים החל מ-₪29."
         }
       },
       {
@@ -114,7 +114,7 @@ export default function BestAIInteriorDesignToolsPage() {
           <span className="text-xs text-gray-400">זמן קריאה: 7 דקות</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-          5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI — 2026
+          5 הכלים הטובים ביותר להדמיית עיצוב פנים בAI - 2026
         </h1>
       </header>
 
@@ -129,11 +129,11 @@ export default function BestAIInteriorDesignToolsPage() {
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
-            הדמיית עיצוב פנים באמצעות בינה מלאכותית הפכה לכלי חיוני לכל מי שמתכנן שיפוץ. במקום לשלם אלפי שקלים למעצב פנים רק כדי לראות איך החדר ייראה — אפשר לקבל הדמיה תוך 30 שניות. אבל עם כל כך הרבה כלים בשוק, איזה באמת שווה? בדקנו את כולם.
+            הדמיית עיצוב פנים באמצעות בינה מלאכותית הפכה לכלי חיוני לכל מי שמתכנן שיפוץ. במקום לשלם אלפי שקלים למעצב פנים רק כדי לראות איך החדר ייראה - אפשר לקבל הדמיה תוך 30 שניות. אבל עם כל כך הרבה כלים בשוק, איזה באמת שווה? בדקנו את כולם.
           </p>
 
           {/* Tool 1: ShiputzAI */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">1. ShiputzAI — הכלי המוביל בישראל 🏆</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">1. ShiputzAI - הכלי המוביל בישראל 🏆</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
               <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">מחיר: ₪29-149 לחבילה</span>
@@ -144,13 +144,13 @@ export default function BestAIInteriorDesignToolsPage() {
               <strong>שיפוצי.אי הוא הכלי היחיד שמשלב 7 כלי AI בפלטפורמה אחת, עם ממשק בעברית מלא.</strong> בניגוד לכל הכלים האחרים שמציעים הדמיה בסיסית בלבד, ShiputzAI מציע חבילה שלמה למי שמתכנן שיפוץ:
             </p>
             <ul className="space-y-2 text-gray-700 mb-4">
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>הדמיית עיצוב AI</strong> — העלו תמונה וקבלו הדמיה תוך 30 שניות</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>Style Match</strong> — מצאו סגנון עיצוב שמתאים לכם</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>Shop the Look</strong> — זיהוי מוצרים בתמונה עם קישורי רכישה</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>סרטון סיור</strong> — סיור וירטואלי בחדר המעוצב</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>תוכנית קומה</strong> — יצירת Floorplan מתמונה</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>כתב כמויות</strong> — הפקת כתב כמויות מפורט מתמונת ההדמיה</span></li>
-              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>ניתוח הצעת מחיר</strong> — AI שבודק אם המחיר הגיוני</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>הדמיית עיצוב AI</strong> - העלו תמונה וקבלו הדמיה תוך 30 שניות</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>Style Match</strong> - מצאו סגנון עיצוב שמתאים לכם</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>Shop the Look</strong> - זיהוי מוצרים בתמונה עם קישורי רכישה</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>סרטון סיור</strong> - סיור וירטואלי בחדר המעוצב</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>תוכנית קומה</strong> - יצירת Floorplan מתמונה</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>כתב כמויות</strong> - הפקת כתב כמויות מפורט מתמונת ההדמיה</span></li>
+              <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>ניתוח הצעת מחיר</strong> - AI שבודק אם המחיר הגיוני</span></li>
             </ul>
             <p className="text-gray-700 leading-relaxed mb-2">
               <strong>יתרונות:</strong> ממשק עברי מלא, מותאם לשוק הישראלי, 10 קרדיטים חינם בהרשמה, 7 כלים בפלטפורמה אחת, מחירים בשקלים.
@@ -161,7 +161,7 @@ export default function BestAIInteriorDesignToolsPage() {
           </div>
 
           {/* Tool 2: InteriorAI */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">2. InteriorAI — הדמיות בסיסיות באנגלית</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">2. InteriorAI - הדמיות בסיסיות באנגלית</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
               <span className="text-sm bg-amber-100 text-amber-700 px-3 py-1 rounded-full">מחיר: $29/חודש</span>
@@ -183,7 +183,7 @@ export default function BestAIInteriorDesignToolsPage() {
           </div>
 
           {/* Tool 3: RoomGPT */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">3. RoomGPT — קוד פתוח וחינמי</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">3. RoomGPT - קוד פתוח וחינמי</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
               <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">מחיר: חינם</span>
@@ -205,7 +205,7 @@ export default function BestAIInteriorDesignToolsPage() {
           </div>
 
           {/* Tool 4: ReRoom AI */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">4. ReRoom AI — מגוון סגנונות</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">4. ReRoom AI - מגוון סגנונות</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
               <span className="text-sm bg-amber-100 text-amber-700 px-3 py-1 rounded-full">מחיר: $9.99/חודש</span>
@@ -227,7 +227,7 @@ export default function BestAIInteriorDesignToolsPage() {
           </div>
 
           {/* Tool 5: Spacely AI */}
-          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">5. Spacely AI — לשוק הארגוני</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">5. Spacely AI - לשוק הארגוני</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
               <span className="text-sm bg-amber-100 text-amber-700 px-3 py-1 rounded-full">מחיר: לפי בקשה (Enterprise)</span>
@@ -235,7 +235,7 @@ export default function BestAIInteriorDesignToolsPage() {
               <span className="text-sm bg-gray-200 text-gray-700 px-3 py-1 rounded-full">Virtual Staging</span>
             </div>
             <p className="text-gray-700 leading-relaxed mb-4">
-              Spacely AI מתמקד בשוק הארגוני — חברות נדל&quot;ן, אדריכלים ומעצבים. מציע Virtual Staging ליצירת הדמיות לדירות ריקות למכירה.
+              Spacely AI מתמקד בשוק הארגוני - חברות נדל&quot;ן, אדריכלים ומעצבים. מציע Virtual Staging ליצירת הדמיות לדירות ריקות למכירה.
             </p>
             <p className="text-gray-700 leading-relaxed mb-2">
               <strong>יתרונות:</strong> איכות גבוהה, מותאם לנדל&quot;ן, API זמין.
@@ -244,7 +244,7 @@ export default function BestAIInteriorDesignToolsPage() {
               <strong>חסרונות:</strong> אין עברית, מחיר גבוה, מתאים לעסקים ולא לפרטיים, אין כלים נוספים לתכנון שיפוץ.
             </p>
             <p className="text-gray-600 text-sm italic">
-              למה ShiputzAI עדיף למשתמש הפרטי? ShiputzAI נבנה בדיוק לצרכי מי שמתכנן שיפוץ בישראל — עם כלים מעשיים ומחירים נגישים.
+              למה ShiputzAI עדיף למשתמש הפרטי? ShiputzAI נבנה בדיוק לצרכי מי שמתכנן שיפוץ בישראל - עם כלים מעשיים ומחירים נגישים.
             </p>
           </div>
 
@@ -334,7 +334,7 @@ export default function BestAIInteriorDesignToolsPage() {
           {/* Summary */}
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">סיכום</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            אם אתם מתכננים שיפוץ בישראל, <strong>ShiputzAI הוא הבחירה הברורה</strong>. זה הכלי היחיד שמציע ממשק עברי מלא, 7 כלי AI בפלטפורמה אחת, ומחירים נגישים בשקלים. בעוד שכלים אחרים מציעים רק הדמיות בסיסיות, ShiputzAI נותן לכם את כל מה שצריך — מהדמיה ועד כתב כמויות וניתוח הצעות מחיר.
+            אם אתם מתכננים שיפוץ בישראל, <strong>ShiputzAI הוא הבחירה הברורה</strong>. זה הכלי היחיד שמציע ממשק עברי מלא, 7 כלי AI בפלטפורמה אחת, ומחירים נגישים בשקלים. בעוד שכלים אחרים מציעים רק הדמיות בסיסיות, ShiputzAI נותן לכם את כל מה שצריך - מהדמיה ועד כתב כמויות וניתוח הצעות מחיר.
           </p>
           <p className="text-gray-700 leading-relaxed mb-8">
             התחילו עם 10 קרדיטים חינם ותראו בעצמכם למה אלפי ישראלים כבר בחרו בShiputzAI.
@@ -357,7 +357,7 @@ export default function BestAIInteriorDesignToolsPage() {
           <div className="space-y-4">
             <FaqItem
               question="מה הכלי הטוב ביותר להדמיית עיצוב פנים בAI בישראל?"
-              answer="ShiputzAI הוא הכלי המוביל בישראל עם 7 כלי AI כולל הדמיה, כתב כמויות, סרטון סיור, ניתוח הצעות מחיר ועוד — הכל בעברית מלאה ובמחירים החל מ-₪29."
+              answer="ShiputzAI הוא הכלי המוביל בישראל עם 7 כלי AI כולל הדמיה, כתב כמויות, סרטון סיור, ניתוח הצעות מחיר ועוד - הכל בעברית מלאה ובמחירים החל מ-₪29."
             />
             <FaqItem
               question="כמה עולה הדמיית עיצוב פנים בAI?"
@@ -374,8 +374,8 @@ export default function BestAIInteriorDesignToolsPage() {
         <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">קרא גם</h3>
           <ul className="space-y-3">
-            <li><Link href="/tips/shiputzai-vs-interiorai" className="text-gray-700 hover:text-gray-900 hover:underline">ShiputzAI vs InteriorAI — השוואה מקיפה 2026</Link></li>
-            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? — מדריך מחירים 2026</Link></li>
+            <li><Link href="/tips/shiputzai-vs-interiorai" className="text-gray-700 hover:text-gray-900 hover:underline">ShiputzAI vs InteriorAI - השוואה מקיפה 2026</Link></li>
+            <li><Link href="/tips/how-much-renovation-visualization" className="text-gray-700 hover:text-gray-900 hover:underline">כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026</Link></li>
             <li><Link href="/tips/renovation-costs-2026" className="text-gray-700 hover:text-gray-900 hover:underline">כמה באמת עולה שיפוץ דירה ב-2026?</Link></li>
           </ul>
         </div>

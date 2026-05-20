@@ -5,10 +5,6 @@
       "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/weekly-report",
-      "schedule": "0 8 1 * *"
-    },
-    {
       "path": "/api/cron/check-payments",
       "schedule": "*/5 * * * *"
     },
@@ -43,9 +39,6 @@
       "maxDuration": 30
     },
     "src/app/api/cron/emails/route.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/weekly-report/route.ts": {
       "maxDuration": 60
     },
     "src/app/api/bill-of-quantities/route.ts": {

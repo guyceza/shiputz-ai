@@ -8,7 +8,6 @@ export const maxDuration = 60;
 
 // ============================================================
 // ShiputzAI Email Flow System - Behavioral Triggers
-// 10 Flows, 29 emails total
 // Replaces old day-based sequence system
 // ============================================================
 
@@ -28,7 +27,7 @@ const EXCLUDED_EMAILS = new Set([
 const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
 
 // Flow priority (lower = higher priority, checked first)
-// credits flows > activation > welcome > post_purchase > inactive > referral > milestone
+// credits flows > activation > welcome > post_purchase > inactive > referral
 const FLOW_PRIORITY: string[] = [
   'zero_credits',
   'low_credits',
@@ -38,7 +37,6 @@ const FLOW_PRIORITY: string[] = [
   'post_purchase',
   'inactive',
   'referral',
-  'milestone',
 ];
 
 // ============================================================
@@ -882,79 +880,6 @@ function evaluateReferral(ctx: FlowContext): EmailAction | null {
   return null;
 }
 
-// Flow 10: Milestone (usage count milestones)
-function evaluateMilestone(ctx: FlowContext): EmailAction | null {
-  const { user, sentEmails, totalUsageCount } = ctx;
-  const sent = sentEmails.get('milestone') || new Set();
-
-  // #1: 5 uses
-  if (!sent.has(0) && totalUsageCount >= 5) {
-    // Find an unused tool to suggest
-    const usedActions = new Set(ctx.creditTransactions.filter(t => t.amount < 0).map(t => t.action));
-    const suggestions = [
-      { action: 'analyze-quote', name: 'ניתוח הצעת מחיר', url: '/quote-analysis' },
-      { action: 'bill-of-quantities', name: 'כתב כמויות', url: '/bill-of-quantities' },
-      { action: 'shop-look', name: 'קנה את הסגנון', url: '/shop-the-look' },
-      { action: 'scan-receipt', name: 'סריקת קבלות', url: '/receipt-scanner' },
-    ];
-    const unused = suggestions.find(s => !usedActions.has(s.action));
-    const suggestUrl = unused ? `${BASE_URL}${unused.url}` : `${BASE_URL}/dashboard`;
-    const suggestText = unused ? `נסה גם את <strong>${unused.name}</strong> - כלי שרוב המשתמשים אוהבים.` : 'המשך לנצל את כל הכלים!';
-
-    return {
-      flowName: 'milestone',
-      dayNumber: 0,
-      subject: 'חמש פעמים - מקצוענים!',
-      reason: 'milestone_5_uses',
-      html: wrapEmail(
-        'חמש פעם',
-        'מקצוענים!',
-        greet(user.name || undefined) +
-        bigNumber('5', 'שימושים בכלים') +
-        para('כבר השתמשתם ב-5 כלי עיצוב! <strong>אתם יודעים מה אתם עושים.</strong>') +
-        para(suggestText),
-        'להמשיך',
-        suggestUrl,
-        user.email,
-      ),
-    };
-  }
-
-  // #3: second purchase - suggest Pro
-  if (!sent.has(2) && user.purchased) {
-    // Check if user has more than one purchase transaction
-    const purchaseTransactions = ctx.creditTransactions.filter(
-      t => t.amount > 0 && !['trial', 'gift_inactive'].includes(t.action)
-    );
-    if (purchaseTransactions.length >= 2) {
-      return {
-        flowName: 'milestone',
-        dayNumber: 2,
-        subject: 'אולי תוכנית חודשית מתאימה?',
-        reason: 'milestone_second_purchase',
-        html: wrapEmail(
-          'אולי תוכנית חודשית?',
-          'חוסך לכם כסף וזמן',
-          greet(user.name || undefined) +
-          para('שמנו לב שכבר רכשתם קרדיטים פעמיים. <strong>תוכנית חודשית יכולה לחסוך לכם</strong>:') +
-          infoBox([
-            '✅ <strong>מחיר טוב יותר</strong> לקרדיט',
-            '✅ <strong>קרדיטים אוטומטיים</strong> כל חודש',
-            '✅ <strong>בלי לדאוג</strong> שיגמרו',
-          ]),
-          'לצפות בתוכניות',
-          `${BASE_URL}/pricing`,
-          user.email,
-        ),
-      };
-    }
-  }
-
-  // #4: project 100% budget - TODO: needs project tracking system
-
-  return null;
-}
-
 // ============================================================
 // HELPER QUERIES
 // ============================================================
@@ -1128,9 +1053,6 @@ export async function GET(request: NextRequest) {
             break;
           case 'referral':
             action = evaluateReferral(ctx);
-            break;
-          case 'milestone':
-            action = evaluateMilestone(ctx);
             break;
           default:
             break;

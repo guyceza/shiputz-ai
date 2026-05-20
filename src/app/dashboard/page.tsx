@@ -12,7 +12,6 @@ import NewProjectWizard from "@/components/NewProjectWizard";
 import RoleSelector from "@/components/RoleSelector";
 import type { Role } from "@/components/RoleSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { SettingsModal } from "@/components/SettingsModal";
 import LoadingScreen from "@/components/LoadingScreen";
 import { 
   getProjects, 
@@ -47,7 +46,6 @@ function DashboardContent() {
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -522,14 +520,12 @@ function DashboardContent() {
                 <button onClick={() => setShowAdminPanel(!showAdminPanel)} className={`text-xs font-medium ${showAdminPanel ? 'text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}>🔧 Admin</button>
               </>
             )}
-            <button onClick={() => setShowSettings(true)} className="text-xs text-gray-500 hover:text-gray-900">⚙️ הגדרות</button>
             <ThemeToggle />
             <button onClick={handleLogout} className="text-xs text-gray-500 hover:text-gray-900">התנתקות</button>
           </div>
           {/* Mobile nav */}
           <div className="flex md:hidden items-center gap-3">
             <Link href="/" className="text-xs text-gray-500">דף הבית</Link>
-            <button onClick={() => setShowSettings(true)} className="text-xs text-gray-500">⚙️</button>
             <ThemeToggle />
             <button onClick={handleLogout} className="text-xs text-gray-500">יציאה</button>
           </div>
@@ -930,13 +926,6 @@ function DashboardContent() {
           </div>
         </div>
       )}
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        userId={user?.id || ""}
-      />
     </div>
   );
 }

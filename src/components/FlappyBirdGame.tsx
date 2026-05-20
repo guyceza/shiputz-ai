@@ -25,8 +25,8 @@ interface Pipe {
 }
 
 interface FlappyBirdGameProps {
-  isReady?: boolean; // When true, show "result ready" banner
-  onShowResult?: () => void; // Callback when user clicks to see result
+  isReady?: boolean;
+  onShowResult?: () => void;
 }
 
 export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGameProps) {
@@ -46,12 +46,17 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
   const animRef = useRef<number>(0);
   const isTouchDevice = useRef(false);
 
-  // Show ready banner when isReady changes
+  // If the user did not start the game, show the finished result immediately.
+  // If they are playing, keep the ready banner so the game is not interrupted.
   useEffect(() => {
     if (isReady) {
+      if (gameStateRef.current === "idle") {
+        onShowResult?.();
+        return;
+      }
       setShowReadyBanner(true);
     }
-  }, [isReady]);
+  }, [isReady, onShowResult]);
 
   const resetGame = useCallback(() => {
     birdY.current = CANVAS_H / 2;

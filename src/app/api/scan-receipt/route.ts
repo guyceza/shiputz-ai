@@ -80,8 +80,7 @@ export async function POST(request: NextRequest) {
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
 
     const response = await fetch(
-      // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
-      `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {

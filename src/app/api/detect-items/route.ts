@@ -45,9 +45,8 @@ export async function POST(request: NextRequest) {
     const base64 = Buffer.from(bytes).toString("base64");
     const mimeType = imageFile.type;
 
-    // Use Gemini Vision to detect items
-    // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
-    const model = genAI.getGenerativeModel({ model: AI_MODELS.IMAGE_GEN });
+    // Use the fastest strong vision model for item detection.
+    const model = genAI.getGenerativeModel({ model: AI_MODELS.VISION_FAST });
 
     const prompt = `אתה מומחה לזיהוי רהיטים ופריטי עיצוב בתמונות.
 

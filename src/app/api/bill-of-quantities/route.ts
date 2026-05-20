@@ -263,8 +263,7 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
 
 החזר **רק JSON תקין**, ללא טקסט נוסף!`;
 
-    // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
-    const response = await fetch(`${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

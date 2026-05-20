@@ -4,18 +4,19 @@
  * כל שמות המודלים במקום אחד!
  * אם גוגל משנים שמות - מעדכנים רק פה.
  * 
- * Last updated: 2026-02-27
+ * Last updated: 2026-05-20
  * Docs: https://ai.google.dev/models/gemini
  */
 
 export const AI_MODELS = {
-  // For text + vision tasks (receipt scanning, quote analysis, etc.)
-  VISION_PRO: "gemini-3-pro-preview",
+  // Strongest model for complex reasoning when latency is less important.
+  VISION_PRO: "gemini-3.1-pro-preview",
   
-  // For fast text tasks (chat support, simple Q&A)
-  TEXT_FAST: "gemini-3-flash-preview",
+  // Best fast+strong default for text and vision analysis.
+  TEXT_FAST: "gemini-3.5-flash",
+  VISION_FAST: "gemini-3.5-flash",
   
-  // For image generation + all AI tasks (Nano Banana 2)
+  // For image generation tasks (Nano Banana 2)
   // Upgraded 2026-02-27: 63% faster than Nano Banana Pro!
   IMAGE_GEN: "gemini-3.1-flash-image-preview",
 } as const;
@@ -40,7 +41,7 @@ export const MODEL_CAPABILITIES = {
     vision: true,
     text: true,
     maxTokens: 65536,
-    description: "Gemini 3 Flash - fast for simple tasks"
+    description: "Gemini 3.5 Flash - fastest strong default for text and vision analysis"
   },
   [AI_MODELS.IMAGE_GEN]: {
     vision: true,

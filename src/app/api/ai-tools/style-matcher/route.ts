@@ -42,34 +42,18 @@ export async function POST(request: NextRequest) {
           contents: [{
             parts: [
               { inlineData: { mimeType, data: base64 } },
-              { text: `Analyze this interior image and return ONLY valid JSON. No markdown, no explanations.
-
-Return:
-- style names in Hebrew and English
-- 4-6 characteristics in Hebrew
-- 4-6 visible materials with textureType
-- lighting object
-- exactly 6 shoppingList items for recreating the look in Israel
-- exactly 3 practical tips in Hebrew
-
-textureType must be one of:
-wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork.
-
-Position values must be percentages from 0 to 100. top=0 is top edge, left=0 is left edge.
-
-Use this exact JSON shape:
+              { text: `Analyze this interior image and return ONLY valid JSON with this exact structure:
 {
-  "style": "שם הסגנון",
-  "styleEnglish": "Style Name",
+  "style": "Hebrew style name",
+  "styleEnglish": "English style name",
   "confidence": 85,
-  "characteristics": ["מאפיין 1", "מאפיין 2"],
-  "materials": [{"name": "עץ אלון", "usage": "רצפה ורהיטים", "textureType": "wood"}],
-  "lighting": {"type": "חמה/קרה/טבעית", "description": "תיאור"},
-  "shoppingList": [
-    {"item": "ספה", "description": "ספת בד פשתן בגוון טבעי", "material": "פשתן", "priceRange": "₪3,000-8,000", "searchQuery": "ספה פשתן סקנדינבית מודרנית", "position": {"top": 60, "left": 45}}
-  ],
-  "tips": ["טיפ 1", "טיפ 2"]
-}` }
+  "characteristics": ["Hebrew characteristic"],
+  "materials": [{"name":"Hebrew material", "usage":"Hebrew usage", "textureType":"wood"}],
+  "lighting": {"type":"Hebrew type", "description":"Hebrew description"},
+  "shoppingList": [{"item":"Hebrew item", "description":"Hebrew description", "material":"Hebrew material", "priceRange":"ILS range", "searchQuery":"Hebrew shopping query", "position":{"top":60,"left":45}}],
+  "tips": ["Hebrew tip"]
+}
+Rules: textureType must be one of wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork. Return 5 materials, 6 shoppingList items, 3 tips. No markdown.` }
             ]
           }],
           generationConfig: {

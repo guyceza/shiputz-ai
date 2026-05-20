@@ -42,21 +42,22 @@ export async function POST(request: NextRequest) {
           contents: [{
             parts: [
               { inlineData: { mimeType, data: base64 } },
-              { text: `אתה מעצב פנים מומחה. נתח את התמונה הזו וזהה את סגנון העיצוב.
+              { text: `Analyze this interior image and return ONLY valid JSON. No markdown, no explanations.
 
-ספק:
-1. **סגנון עיקרי**: מהו סגנון העיצוב (מינימליסטי, בוהו, תעשייתי, סקנדינבי, מודרני, כפרי, ים-תיכוני, מזרחי, Art Deco וכו')
-2. **מאפיינים**: מה מאפיין את הסגנון בתמונה
-3. **חומרים מזוהים**: עץ, מתכת, אבן, בד, זכוכית וכו'
-4. **תאורה**: סוג התאורה והאווירה
-5. **רשימת קניות**: 8-10 פריטים ספציפיים שצריך לקנות כדי לשחזר את הסגנון הזה (כולל סוג, חומר, צבע, טווח מחירים משוער בשקלים). לכל פריט, ציין את המיקום שלו בתמונה כאחוזים (0-100) מלמעלה ומשמאל.
-6. **טיפים לשחזור**: 3-5 טיפים פרקטיים
+Return:
+- style names in Hebrew and English
+- 4-6 characteristics in Hebrew
+- 4-6 visible materials with textureType
+- lighting object
+- exactly 6 shoppingList items for recreating the look in Israel
+- exactly 3 practical tips in Hebrew
 
-IMPORTANT: For each material, include textureType from this list: wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork.
+textureType must be one of:
+wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork.
 
-IMPORTANT: Position values (top, left) MUST be percentages from 0 to 100, NOT pixels! top=0 is the top edge, top=100 is the bottom. left=0 is the left edge, left=100 is the right edge.
+Position values must be percentages from 0 to 100. top=0 is top edge, left=0 is left edge.
 
-החזר JSON בלבד:
+Use this exact JSON shape:
 {
   "style": "שם הסגנון",
   "styleEnglish": "Style Name",

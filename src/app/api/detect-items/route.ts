@@ -5,12 +5,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 
 // Bug #21 fix: Removed unused GEMINI_BASE_URL import
 import { AI_MODELS } from "@/lib/ai-config";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `detect-items_${reason}`);
+
   try {
     const contentType = request.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
@@ -19,10 +25,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const imageFile = formData.get("image") as File;
     const userEmail = formData.get("userEmail") as string;
-
-    // Credit check
-    const guard = await creditGuard(userEmail, 'detect-items');
-    if ('error' in guard) return guard.error;
 
     // Rate limiting - 20 requests per minute
     const clientId = getClientId(request);
@@ -39,6 +41,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const guard = await creditGuard(userEmail, 'detect-items');
+    if ('error' in guard) return guard.error;
+    chargedUserEmail = userEmail;
+    chargedCost = guard.cost;
 
     // Convert file to base64
     const bytes = await imageFile.arrayBuffer();
@@ -94,16 +101,21 @@ export async function POST(request: NextRequest) {
     // Parse the JSON response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      await refundIfNeeded("no_json");
       return NextResponse.json({ items: [] });
     }
     
     try {
       const parsedResponse = JSON.parse(jsonMatch[0]);
+      chargedUserEmail = null;
+      chargedCost = 0;
       return NextResponse.json(parsedResponse);
     } catch {
+      await refundIfNeeded("parse_error");
       return NextResponse.json({ items: [] });
     }
-  } catch (error) {
+  } catch {
+    await refundIfNeeded("server_error");
     return NextResponse.json(
       { error: "Failed to detect items" },
       { status: 500 }

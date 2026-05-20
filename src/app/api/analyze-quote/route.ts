@@ -4,6 +4,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { getMidragPricingReference } from "@/lib/pricing-data";
 
@@ -27,6 +28,11 @@ async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, p
 }
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `analyze-quote_${reason}`);
+
   try {
     const body = await request.json();
     const { image, budget, userEmail } = body;
@@ -38,17 +44,13 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    const { exists, premium } = await verifyUserPremium(userEmail);
+    const { exists } = await verifyUserPremium(userEmail);
     if (!exists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
     }
     
-    // Credit check
-    const creditCheck = await creditGuard(userEmail, 'analyze-quote');
-    if ('error' in creditCheck) return creditCheck.error;
-
     // Rate limiting - 15 requests per minute
     const clientId = getClientId(request);
     const rateLimit = checkRateLimit(clientId, 15, 60000);
@@ -67,6 +69,11 @@ export async function POST(request: NextRequest) {
         analysis: "מצטער, שירות ה-AI לא זמין כרגע. נסה שוב מאוחר יותר." 
       });
     }
+
+    const creditCheck = await creditGuard(userEmail, 'analyze-quote');
+    if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     const base64Data = image.split(",")[1] || image;
     const mimeType = image.includes("image/png") ? "image/png" : "image/jpeg";
@@ -136,15 +143,22 @@ ${midragPricing}
     );
 
     if (!response.ok) {
-      const error = await response.text();
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: "AI analysis failed" }, { status: 500 });
     }
 
     const data = await response.json();
     const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא הצלחתי לנתח את ההצעה";
+    if (!analysis || analysis === "לא הצלחתי לנתח את ההצעה") {
+      await refundIfNeeded("empty_response");
+      return NextResponse.json({ error: "AI analysis failed" }, { status: 500 });
+    }
 
+    chargedUserEmail = null;
+    chargedCost = 0;
     return NextResponse.json({ analysis });
-  } catch (error) {
+  } catch {
+    await refundIfNeeded("server_error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
-import { isAdminEmail } from "@/lib/admin";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -42,6 +42,11 @@ const STYLES: Record<string, { name: string; prompt: string }> = {
 };
 
 export async function POST(req: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `floorplan_${reason}`);
+
   try {
     const formData = await req.formData();
     const image = formData.get("image") as File | null;
@@ -56,6 +61,8 @@ export async function POST(req: NextRequest) {
     if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
     const creditCheck = await creditGuard(userEmail, 'floorplan');
     if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     const style = STYLES[styleKey];
     // Allow custom style text (not in STYLES dict)
@@ -94,6 +101,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const err = await response.text();
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: `AI generation failed: ${err.substring(0, 200)}` }, { status: 500 });
     }
 
@@ -101,6 +109,7 @@ export async function POST(req: NextRequest) {
     
     // Check for blocked/filtered response
     if (data.candidates?.[0]?.finishReason === "SAFETY") {
+      await refundIfNeeded("safety");
       return NextResponse.json({ error: "Content was filtered by safety settings. Try a different image." }, { status: 400 });
     }
     
@@ -122,18 +131,23 @@ export async function POST(req: NextRequest) {
     }
 
     if (!resultImage) {
+      await refundIfNeeded("no_image");
       return NextResponse.json({
         error: resultText || "No image generated - the AI returned text only. Try again.",
       }, { status: 500 });
     }
 
+    chargedUserEmail = null;
+    chargedCost = 0;
     return NextResponse.json({
       image: resultImage,
       text: resultText,
       style: style?.name || styleKey,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    await refundIfNeeded("server_error");
+    const message = error instanceof Error ? error.message : "Floorplan generation failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

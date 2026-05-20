@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
-import { isAdminEmail } from "@/lib/admin";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -25,6 +25,11 @@ const STYLE_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `room-photo_${reason}`);
+
   try {
     const formData = await req.formData();
     const floorplanImage = formData.get("floorplan") as File | null; // the top-down rendering
@@ -40,6 +45,8 @@ export async function POST(req: NextRequest) {
     if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
     const creditCheck = await creditGuard(userEmail, 'room-photo');
     if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     const styleDesc = STYLE_PROMPTS[styleKey] || (styleKey ? `${styleKey} style - apply this design aesthetic with appropriate materials, colors, furniture, and atmosphere` : STYLE_PROMPTS["modern-cabin"]);
 
@@ -81,7 +88,7 @@ Output a single photorealistic interior photograph.`;
     );
 
     if (!response.ok) {
-      const err = await response.text();
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: "Room generation failed" }, { status: 500 });
     }
 
@@ -99,11 +106,16 @@ Output a single photorealistic interior photograph.`;
     }
 
     if (!resultImage) {
+      await refundIfNeeded("no_image");
       return NextResponse.json({ error: "No image generated", text: resultText }, { status: 500 });
     }
 
+    chargedUserEmail = null;
+    chargedCost = 0;
     return NextResponse.json({ image: resultImage, text: resultText, room: roomName });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    await refundIfNeeded("server_error");
+    const message = error instanceof Error ? error.message : "Room generation failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

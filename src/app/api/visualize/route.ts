@@ -10,6 +10,7 @@ import { trackRequest } from "@/lib/usage-monitor";
 const RESEND_KEY = process.env.RESEND_API_KEY;
 import { ADMIN_EMAILS, isAdminEmail } from '@/lib/admin';
 import { creditGuard } from '@/lib/credit-guard';
+import { refundCreditCharge } from '@/lib/credit-refunds';
 const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 // Send notification to admin when API rate limit is hit
@@ -380,6 +381,11 @@ function calculateCosts(analysisText: string, roomSize: number = 20): CostEstima
 }
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `visualize_${reason}`);
+
   try {
     const body = await request.json();
     const { image, description, userEmail } = body;
@@ -462,11 +468,14 @@ export async function POST(request: NextRequest) {
       if ('error' in creditCheck) return creditCheck.error;
       usedCredit = creditCheck.cost > 0;
       vizCreditsAfter = creditCheck.balance;
+      chargedUserEmail = userEmail;
+      chargedCost = creditCheck.cost;
     }
 
     // Read API key from environment
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      await refundIfNeeded("missing_api_key");
       return NextResponse.json(
         { error: "API key not configured. Please add GEMINI_API_KEY to Vercel environment variables." },
         { status: 500 }
@@ -530,6 +539,7 @@ export async function POST(request: NextRequest) {
       if (isTrialRun && userEmail) {
         await rollbackTrial(userEmail);
       }
+      await refundIfNeeded("analysis_error");
       
       // Handle rate limit / quota exceeded from Gemini
       if (geminiResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
@@ -614,6 +624,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
           if (finishReason === "OTHER" && isTrialRun && userEmail) {
             await rollbackTrial(userEmail);
           }
+          await refundIfNeeded(`image_${String(finishReason || "unsupported").toLowerCase()}`);
           return NextResponse.json({
             success: false,
             error: "IMAGE_NOT_SUPPORTED",
@@ -643,6 +654,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
           if (isTrialRun && userEmail) {
             await rollbackTrial(userEmail);
           }
+          await refundIfNeeded("no_image");
           return NextResponse.json({
             success: false,
             error: "IMAGE_NOT_SUPPORTED",
@@ -658,6 +670,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
         if (isTrialRun && userEmail) {
           await rollbackTrial(userEmail);
         }
+        await refundIfNeeded("image_error");
         
         // Handle rate limit / quota exceeded from Gemini Image API
         if (editResponse.status === 429 || errorText.includes("RESOURCE_EXHAUSTED") || errorText.includes("quota")) {
@@ -686,6 +699,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       if (isTrialRun && userEmail) {
         await rollbackTrial(userEmail);
       }
+      await refundIfNeeded("image_exception");
       
       // Handle timeout specifically
       const isTimeout = editError instanceof Error &&
@@ -710,6 +724,8 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
 
     // Step 5: Track successful request and return results
     trackRequest('/api/visualize', false);
+    chargedUserEmail = null;
+    chargedCost = 0;
     
     return NextResponse.json({
       success: true,
@@ -725,6 +741,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
   } catch (error) {
     // Track error
     trackRequest('/api/visualize', true);
+    await refundIfNeeded("server_error");
     
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     

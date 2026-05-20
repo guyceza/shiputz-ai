@@ -4,18 +4,20 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `ai-assistant_${reason}`);
+
   try {
     const body = await request.json();
     const { message, context, userEmail } = body;
-
-    // Credit check (guests allowed with rate limit only)
-    const guard = await creditGuard(userEmail, 'analyze-quote');
-    if ('error' in guard) return guard.error;
 
     // Rate limiting - 20 requests per minute
     const clientId = getClientId(request);
@@ -35,6 +37,11 @@ export async function POST(request: NextRequest) {
         response: "מצטער, שירות ה-AI לא זמין כרגע. נסה שוב מאוחר יותר." 
       });
     }
+
+    const guard = await creditGuard(userEmail, 'analyze-quote');
+    if ('error' in guard) return guard.error;
+    chargedUserEmail = userEmail;
+    chargedCost = guard.cost;
 
     const systemPrompt = `אתה עוזר פרקטי לניהול שיפוצים. המטרה שלך: לעזור, לא לבקר.
 
@@ -97,14 +104,22 @@ export async function POST(request: NextRequest) {
     );
 
     if (!response.ok) {
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: "AI failed" }, { status: 500 });
     }
 
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "מצטער, לא הצלחתי לענות";
+    if (!aiResponse || aiResponse === "מצטער, לא הצלחתי לענות") {
+      await refundIfNeeded("empty_response");
+      return NextResponse.json({ error: "AI failed" }, { status: 500 });
+    }
 
+    chargedUserEmail = null;
+    chargedCost = 0;
     return NextResponse.json({ response: aiResponse });
-  } catch (error) {
+  } catch {
+    await refundIfNeeded("server_error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -4,19 +4,21 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { getMidragPricingReference } from "@/lib/pricing-data";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `analyze-quote-text_${reason}`);
+
   try {
     const body = await request.json();
     const { text, budget, userEmail } = body;
-
-    // Credit check (handles guests, credits, and admin)
-    const guard = await creditGuard(userEmail, 'analyze-quote');
-    if ('error' in guard) return guard.error;
 
     // Rate limiting - 20 requests per minute
     const clientId = getClientId(request);
@@ -38,6 +40,11 @@ export async function POST(request: NextRequest) {
         analysis: "מצטער, שירות ה-AI לא זמין כרגע. נסה שוב מאוחר יותר." 
       });
     }
+
+    const guard = await creditGuard(userEmail, 'analyze-quote');
+    if ('error' in guard) return guard.error;
+    chargedUserEmail = userEmail;
+    chargedCost = guard.cost;
 
     const midragPricing = getMidragPricingReference();
 
@@ -100,7 +107,7 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
     );
 
     if (!response.ok) {
-      const error = await response.text();
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: "שגיאה בניתוח. נסה שוב." }, { status: 500 });
     }
 
@@ -109,6 +116,7 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
 
     // Check if AI detected invalid input
     if (rawAnalysis.trim() === "INVALID_QUOTE" || rawAnalysis.includes("INVALID_QUOTE")) {
+      await refundIfNeeded("invalid_input");
       return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
     }
 
@@ -135,8 +143,11 @@ VERDICT: [מציאה/סביר/יקר/יקר_מדי]
         .trim();
     }
 
+    chargedUserEmail = null;
+    chargedCost = 0;
     return NextResponse.json({ analysis, verdict });
-  } catch (error) {
+  } catch {
+    await refundIfNeeded("server_error");
     return NextResponse.json({ error: "שגיאה פנימית. נסה שוב." }, { status: 500 });
   }
 }

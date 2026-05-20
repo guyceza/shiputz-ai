@@ -4,6 +4,7 @@ export const maxDuration = 60; // 60 second timeout
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
 
@@ -27,6 +28,11 @@ async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, p
 }
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `scan-receipt_${reason}`);
+
   try {
     const body = await request.json();
     const { image, userEmail } = body;
@@ -38,17 +44,13 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
     
-    const { exists, premium } = await verifyUserPremium(userEmail);
+    const { exists } = await verifyUserPremium(userEmail);
     if (!exists) {
       return NextResponse.json({ 
         error: "נדרשת התחברות לשימוש בשירות זה" 
       }, { status: 401 });
     }
     
-    // Credit check
-    const creditCheck = await creditGuard(userEmail, 'scan-receipt');
-    if ('error' in creditCheck) return creditCheck.error;
-
     // Rate limiting - 30 requests per minute
     const clientId = getClientId(request);
     const rateLimit = checkRateLimit(clientId, 30, 60000);
@@ -74,6 +76,11 @@ export async function POST(request: NextRequest) {
         fullText: "מצב דמו - אין API key",
       });
     }
+
+    const creditCheck = await creditGuard(userEmail, 'scan-receipt');
+    if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     // Extract base64 data
     const base64Data = image.split(",")[1] || image;
@@ -130,6 +137,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const error = await response.text();
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ 
         error: "AI scan failed", 
         details: error.substring(0, 200),
@@ -142,6 +150,7 @@ export async function POST(request: NextRequest) {
 
     // Debug: return raw content if empty
     if (!content) {
+      await refundIfNeeded("empty_response");
       return NextResponse.json({ 
         error: "Empty AI response", 
         debug: JSON.stringify(data).substring(0, 500) 
@@ -151,15 +160,18 @@ export async function POST(request: NextRequest) {
     // Parse JSON from response - strip markdown code blocks first
     try {
       // Remove markdown code blocks if present
-      let cleanContent = content.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const cleanContent = content.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
       const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         trackRequest('/api/scan-receipt', false);
+        chargedUserEmail = null;
+        chargedCost = 0;
         return NextResponse.json(parsed);
       }
-    } catch (e) {
+    } catch {
       trackRequest('/api/scan-receipt', true);
+      await refundIfNeeded("parse_error");
       return NextResponse.json({ 
         error: "לא הצלחנו לקרוא את הקבלה. נסה לצלם שוב בתאורה טובה יותר.", 
         code: "PARSE_ERROR"
@@ -167,12 +179,14 @@ export async function POST(request: NextRequest) {
     }
 
     trackRequest('/api/scan-receipt', true);
+    await refundIfNeeded("no_data");
     return NextResponse.json({ 
       error: "לא הצלחנו לזהות את פרטי הקבלה. נסה להעלות תמונה ברורה יותר.",
       code: "NO_DATA"
     }, { status: 422 });
-  } catch (error) {
+  } catch {
     trackRequest('/api/scan-receipt', true);
+    await refundIfNeeded("server_error");
     return NextResponse.json({ 
       error: "אירעה שגיאה בסריקת הקבלה. נסה שוב מאוחר יותר.",
       code: "SERVER_ERROR"

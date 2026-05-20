@@ -6,6 +6,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { refundCreditCharge } from "@/lib/credit-refunds";
 
 // Verify user exists (Shop the Look is part of the visualization experience, including trial)
 async function verifyUserExists(userEmail: string): Promise<boolean> {
@@ -129,6 +130,11 @@ function normalizeDetectedProducts(items: unknown[]): DetectedProduct[] {
 }
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+  const refundIfNeeded = (reason: string) =>
+    refundCreditCharge(chargedUserEmail, chargedCost, `shop-look_${reason}`);
+
   try {
     // Rate limit: 30 requests per minute
     const clientId = getClientId(request);
@@ -151,10 +157,6 @@ export async function POST(request: NextRequest) {
     if (!userExists) {
       return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
     }
-
-    // Credit check
-    const creditCheck = await creditGuard(userEmail, 'shop-look');
-    if ('error' in creditCheck) return creditCheck.error;
 
     if (!image) {
       return NextResponse.json({ error: "Missing image" }, { status: 400 });
@@ -192,6 +194,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const creditCheck = await creditGuard(userEmail, 'shop-look');
+    if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
+
     // Use the fastest strong vision model for product detection.
     const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${apiKey}`;
     
@@ -218,6 +225,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!geminiResponse.ok) {
+      await refundIfNeeded("ai_error");
       return NextResponse.json({ items: [] });
     }
 
@@ -229,15 +237,25 @@ export async function POST(request: NextRequest) {
       const items = extractJsonArray(responseText);
       if (items) {
         const validItems = normalizeDetectedProducts(items);
+        if (validItems.length === 0) {
+          await refundIfNeeded("empty_result");
+        } else {
+          chargedUserEmail = null;
+          chargedCost = 0;
+        }
         return NextResponse.json({ items: validItems, products: validItems });
       }
     } catch (parseError) {
       console.error("[detect-products] Failed to parse product detection response:", parseError);
+      await refundIfNeeded("parse_error");
+      return NextResponse.json({ items: [] });
     }
 
+    await refundIfNeeded("no_data");
     return NextResponse.json({ items: [] });
 
   } catch {
+    await refundIfNeeded("server_error");
     return NextResponse.json({ items: [] });
   }
 }

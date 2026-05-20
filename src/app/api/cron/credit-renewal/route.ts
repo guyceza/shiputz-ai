@@ -31,12 +31,13 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   let renewed = 0;
   let alerts = 0;
+  let skippedPayPlusRecurring = 0;
 
   try {
     // Get all users with active plans
     const { data: users, error } = await supabase
       .from('users')
-      .select('email, name, plan, plan_started_at, viz_credits')
+      .select('email, name, plan, plan_started_at, viz_credits, payplus_recurring_uid, payplus_subscription_status')
       .in('plan', ['starter', 'pro', 'business'])
       .not('plan_started_at', 'is', null);
 
@@ -47,6 +48,13 @@ export async function GET(request: NextRequest) {
     for (const user of users) {
       const credits = PLAN_CREDITS[user.plan];
       if (!credits) continue;
+
+      // PayPlus monthly subscriptions receive credits only after a successful
+      // recurring payment webhook. This cron is kept for annual/legacy plans.
+      if (user.payplus_recurring_uid || user.payplus_subscription_status === 'active') {
+        skippedPayPlusRecurring++;
+        continue;
+      }
 
       // Check if renewal is due (same day of month as plan_started_at)
       const started = new Date(user.plan_started_at);
@@ -132,10 +140,11 @@ export async function GET(request: NextRequest) {
       success: true,
       renewed,
       alerts,
+      skippedPayPlusRecurring,
       checked: users.length,
     });
 
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

@@ -40,6 +40,51 @@ const PLAN_PRICING: Record<string, { monthly: number; annual: number; credits: n
   business: { monthly: 199, annual: 99, credits: 600 },
 };
 
+function getNextMonthlyChargeDate(): string {
+  const now = new Date();
+  const next = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth() + 1,
+    Math.min(now.getUTCDate(), 28)
+  ));
+
+  return next.toISOString().slice(0, 10);
+}
+
+type PayPlusBody = {
+  payment_page_uid: string;
+  charge_method: number;
+  amount: number;
+  currency_code: string;
+  sendEmailApproval: boolean;
+  sendEmailFailure: boolean;
+  customer: {
+    customer_name: string;
+    email: string;
+  };
+  refURL_success: string;
+  refURL_failure: string;
+  refURL_callback: string;
+  more_info: string;
+  more_info_1: string;
+  more_info_2: string;
+  more_info_3: string;
+  initial_invoice: boolean;
+  language_code: string;
+  product_name?: string;
+  recurring_settings?: {
+    instant_first_payment: boolean;
+    recurring_type: number;
+    recurring_range: number;
+    number_of_charges: number;
+    start_date: string;
+    jump_payments?: number;
+    successful_invoice?: boolean;
+    customer_failure_email?: boolean;
+    send_customer_success_email?: boolean;
+  };
+};
+
 // Legacy pricing (keep for old customers)
 const LEGACY_PRICING: Record<string, { amount: number; chargeMethod: number }> = {
   pro: { amount: 99, chargeMethod: 1 },
@@ -128,7 +173,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build PayPlus request
-    const payPlusBody: any = {
+    const payPlusBody: PayPlusBody = {
       payment_page_uid: PAYPLUS_PAGE_UID,
       charge_method: chargeMethod,
       amount,
@@ -161,8 +206,7 @@ export async function POST(request: NextRequest) {
         recurring_type: 2,
         recurring_range: 1,
         number_of_charges: 0,
-        start_date_on_payment_date: true,
-        start_date: new Date().getDate(),
+        start_date: getNextMonthlyChargeDate(),
         jump_payments: 0,
         successful_invoice: true,
         customer_failure_email: true,
@@ -178,8 +222,7 @@ export async function POST(request: NextRequest) {
         recurring_type: 2,
         recurring_range: 1,
         number_of_charges: 0,
-        start_date_on_payment_date: true,
-        start_date: new Date().getDate(),
+        start_date: getNextMonthlyChargeDate(),
       };
     }
 
@@ -236,7 +279,7 @@ export async function POST(request: NextRequest) {
       transaction_uid: pageRequestUid,
     });
 
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to create payment link' }, { status: 500 });
   }
 }

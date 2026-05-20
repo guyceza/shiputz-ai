@@ -144,21 +144,25 @@ export default function RootLayout({
             
             // Track AI search referrals
             var ref = document.referrer || '';
-            var aiPattern = /chatgpt|perplexity|gemini|claude|copilot|you\.com|phind|bing\.com\/chat/i;
-            if (aiPattern.test(ref)) {
+            var aiSources = ['chatgpt', 'perplexity', 'gemini', 'claude', 'copilot', 'you.com', 'phind', 'bing.com/chat'];
+            var refLower = ref.toLowerCase();
+            var matchedAiSource = aiSources.find(function(source) { return refLower.indexOf(source) !== -1; });
+            if (matchedAiSource) {
               gtag('event', 'ai_referral', {
                 'event_category': 'acquisition',
-                'event_label': ref.match(aiPattern)[0],
+                'event_label': matchedAiSource,
                 'referrer': ref
               });
             }
             // Also track UTM from AI sources
             var params = new URLSearchParams(window.location.search);
             var utmSource = params.get('utm_source') || '';
-            if (aiPattern.test(utmSource)) {
+            var utmLower = utmSource.toLowerCase();
+            var matchedUtmAiSource = aiSources.find(function(source) { return utmLower.indexOf(source) !== -1; });
+            if (matchedUtmAiSource) {
               gtag('event', 'ai_utm_referral', {
                 'event_category': 'acquisition',
-                'event_label': utmSource,
+                'event_label': matchedUtmAiSource,
                 'utm_medium': params.get('utm_medium') || '',
                 'utm_campaign': params.get('utm_campaign') || ''
               });

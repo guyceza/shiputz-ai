@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { verifyUserId } from "@/lib/api-auth";
 
 // Bug #20 fix: Don't use hardcoded fallback - fail if not configured
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,6 +18,10 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !beforeImage || !afterImage || !description) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
     // Bug #20 fix: Check if SUPABASE_URL is configured

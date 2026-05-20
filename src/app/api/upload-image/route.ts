@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserId } from '@/lib/api-auth';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -11,6 +12,10 @@ export async function POST(request: NextRequest) {
     
     if (!image || !userId) {
       return NextResponse.json({ error: 'Missing image or userId' }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
     // Extract base64 data and mime type

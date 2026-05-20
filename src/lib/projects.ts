@@ -1,4 +1,5 @@
 import { getSupabaseClient } from './supabase';
+import { authFetch } from './auth-fetch';
 
 export interface Project {
   id: string;
@@ -127,7 +128,7 @@ const MIGRATION_KEY = 'projects_migrated_to_supabase_v2';
 
 // Get all projects for current user (via API to bypass RLS)
 export async function getProjects(userId: string): Promise<Project[]> {
-  const response = await fetch(`/api/projects?userId=${encodeURIComponent(userId)}`);
+  const response = await authFetch(`/api/projects?userId=${encodeURIComponent(userId)}`);
   
   if (!response.ok) {
     const error = await response.json();
@@ -139,8 +140,8 @@ export async function getProjects(userId: string): Promise<Project[]> {
 }
 
 // Get single project by ID (via API to bypass RLS)
-export async function getProject(projectId: string): Promise<Project | null> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`);
+export async function getProject(projectId: string, userId: string): Promise<Project | null> {
+  const response = await authFetch(`/api/projects/${encodeURIComponent(projectId)}?userId=${encodeURIComponent(userId)}`);
   
   if (response.status === 404) {
     return null;
@@ -162,7 +163,7 @@ export async function createProject(userId: string, name: string, budget: number
   budgetRange?: string;
   timeline?: string;
 }): Promise<Project> {
-  const response = await fetch('/api/projects', {
+  const response = await authFetch('/api/projects', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId, name, budget, onboardingData }),
@@ -179,7 +180,7 @@ export async function createProject(userId: string, name: string, budget: number
 
 // Update a project (including nested data) - via API to bypass RLS
 export async function updateProject(projectId: string, updates: Partial<Pick<Project, 'name' | 'budget' | 'spent' | 'data'>>, userId: string): Promise<Project> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}`, {
+  const response = await authFetch(`/api/projects/${encodeURIComponent(projectId)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId, ...updates }),
@@ -196,7 +197,7 @@ export async function updateProject(projectId: string, updates: Partial<Pick<Pro
 
 // Delete a project - via API to bypass RLS
 export async function deleteProject(projectId: string, userId: string): Promise<void> {
-  const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}?userId=${encodeURIComponent(userId)}`, {
+  const response = await authFetch(`/api/projects/${encodeURIComponent(projectId)}?userId=${encodeURIComponent(userId)}`, {
     method: 'DELETE',
   });
   

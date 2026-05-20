@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { verifyAuth } from "@/lib/api-auth";
+import { verifyUserId } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,9 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    // Bug fix: Verify user has a valid session (cookie present)
-    // The userId parameter scopes the query to only their data
-    if (!verifyAuth(request)) {
+    if (!(await verifyUserId(request, userId))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

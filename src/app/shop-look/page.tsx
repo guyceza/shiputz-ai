@@ -5,6 +5,7 @@ import Link from "next/link";
 import CreditBadge from "@/components/CreditBadge";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
+import { authFetch } from "@/lib/auth-fetch";
 // Trial tracking uses /api/vision-trial endpoint
 
 // Fun loading messages
@@ -195,7 +196,7 @@ export default function ShopLookPage() {
     if (!userId) return;
     
     try {
-      const response = await fetch(`/api/get-shop-look-history?userId=${userId}`);
+      const response = await authFetch(`/api/get-shop-look-history?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.hasHistory && data.imageUrl) {
@@ -395,7 +396,7 @@ export default function ShopLookPage() {
                       
                       try {
                         // Save image to Supabase and get visionId
-                        const response = await fetch('/api/save-shop-look-image', {
+                        const response = await authFetch('/api/save-shop-look-image', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ userId, image: imageData })

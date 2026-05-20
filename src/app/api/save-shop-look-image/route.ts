@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { verifyUserId } from "@/lib/api-auth";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vghfcdtzywbmlacltnjp.supabase.co';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -19,6 +20,10 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !image) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Validate image size

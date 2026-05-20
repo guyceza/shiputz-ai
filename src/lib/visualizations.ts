@@ -1,3 +1,5 @@
+import { authFetch } from './auth-fetch';
+
 export interface Visualization {
   id: string;
   user_id: string;
@@ -20,7 +22,7 @@ export async function saveVisualization(
   costs: any
 ): Promise<Visualization | null> {
   try {
-    const response = await fetch('/api/save-visualization', {
+    const response = await authFetch('/api/save-visualization', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -66,22 +68,7 @@ export async function saveVisualization(
 // Load user's visualizations via API
 export async function loadVisualizations(userId: string): Promise<Visualization[]> {
   try {
-    // Get Supabase session token from localStorage
-    const supabaseKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-    let accessToken = '';
-    if (supabaseKey) {
-      try {
-        const session = JSON.parse(localStorage.getItem(supabaseKey) || '{}');
-        accessToken = session.access_token || '';
-      } catch (e) {
-        console.error('Failed to parse Supabase session:', e);
-      }
-    }
-    
-    const response = await fetch(`/api/get-visualizations?userId=${encodeURIComponent(userId)}`, {
-      credentials: 'include',
-      headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}
-    });
+    const response = await authFetch(`/api/get-visualizations?userId=${encodeURIComponent(userId)}`);
     
     if (!response.ok) {
       console.error('Load API error:', response.status);
@@ -99,7 +86,7 @@ export async function loadVisualizations(userId: string): Promise<Visualization[
 // Delete visualization via API
 export async function deleteVisualization(id: string, userId: string): Promise<boolean> {
   try {
-    const response = await fetch('/api/delete-visualization', {
+    const response = await authFetch('/api/delete-visualization', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, userId })

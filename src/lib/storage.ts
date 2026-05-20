@@ -1,3 +1,5 @@
+import { authFetch } from './auth-fetch';
+
 // Upload image to Supabase Storage and return URL
 export async function uploadImage(
   base64Image: string, 
@@ -5,7 +7,7 @@ export async function uploadImage(
   folder: 'receipts' | 'photos' | 'vision' | 'quotes' | 'misc' = 'misc'
 ): Promise<string | null> {
   try {
-    const response = await fetch('/api/upload-image', {
+    const response = await authFetch('/api/upload-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: base64Image, folder, userId })

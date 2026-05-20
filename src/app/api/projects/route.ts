@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserId } from '@/lib/api-auth';
 
 // Note: Auth check removed - users query by their own userId
 // and can only access their own projects.
@@ -13,6 +14,10 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -42,6 +47,10 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !name) {
       return NextResponse.json({ error: 'Missing required fields: userId, name' }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();
@@ -93,6 +102,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
 
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = createServiceClient();
     
     // Verify ownership before update
@@ -142,6 +155,10 @@ export async function DELETE(request: NextRequest) {
     // Bug #5 fix: Require userId and verify ownership
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    }
+
+    if (!(await verifyUserId(request, userId))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

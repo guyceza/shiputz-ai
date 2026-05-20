@@ -478,7 +478,7 @@ export default function ProjectPage() {
         await migrateLocalStorageProjects(userId);
         
         // Load project from Supabase
-        const supabaseProject = await getProject(params.id as string);
+        const supabaseProject = await getProject(params.id as string, userId);
         
         if (supabaseProject) {
           // Convert Supabase format to local format

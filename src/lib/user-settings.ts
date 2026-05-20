@@ -1,3 +1,5 @@
+import { authFetch } from './auth-fetch';
+
 export interface UserSettings {
   user_id: string;
   vision_usage_date: string | null;
@@ -10,7 +12,7 @@ export interface UserSettings {
 // Get or create user settings via API
 export async function getUserSettings(userId: string): Promise<UserSettings | null> {
   try {
-    const res = await fetch(`/api/user-settings?userId=${encodeURIComponent(userId)}`);
+    const res = await authFetch(`/api/user-settings?userId=${encodeURIComponent(userId)}`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.settings || null;
@@ -23,7 +25,7 @@ export async function getUserSettings(userId: string): Promise<UserSettings | nu
 // Update user settings via API
 export async function updateUserSettings(userId: string, updates: Partial<UserSettings>): Promise<boolean> {
   try {
-    const res = await fetch('/api/user-settings', {
+    const res = await authFetch('/api/user-settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, updates })

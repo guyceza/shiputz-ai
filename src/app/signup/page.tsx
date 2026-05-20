@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { isAdminEmail } from "@/lib/admin";
 import { useRouter } from "next/navigation";
+import { getStoredAttribution } from "@/lib/attribution";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function SignupPage() {
         const userRes = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, auth_provider: 'email', auth_id: data.user?.id }),
+          body: JSON.stringify({ email, name, auth_provider: 'email', auth_id: data.user?.id, attribution: getStoredAttribution() }),
         });
         const userData = await userRes.json();
         console.log('👤 User save result:', userData);

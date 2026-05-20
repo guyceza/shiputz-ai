@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { getStoredAttribution } from '@/lib/attribution';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function AuthCallbackPage() {
       await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, auth_provider: 'google', auth_id: session.user.id }),
+        body: JSON.stringify({ email, name, auth_provider: 'google', auth_id: session.user.id, attribution: getStoredAttribution() }),
       });
     } catch (e) {
       console.error('User save failed:', e);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
+import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
 
 import { ADMIN_EMAILS } from '@/lib/admin';
 
@@ -10,6 +11,24 @@ import { ADMIN_EMAILS } from '@/lib/admin';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
+
+async function saveUserAttribution(supabase: ReturnType<typeof createServiceClient>, params: {
+  userId?: string | null;
+  email: string;
+  attribution: unknown;
+  request: NextRequest;
+}) {
+  const clean = sanitizeAttribution(params.attribution);
+  if (!clean) return;
+
+  await supabase.from('user_attribution').upsert({
+    user_id: params.userId || null,
+    email: params.email.toLowerCase(),
+    ...clean,
+    ip_address: getRequestIp(params.request.headers),
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'email' });
+}
 
 // Send welcome email immediately
 async function sendWelcomeEmail(email: string, name: string) {
@@ -92,7 +111,7 @@ export async function GET(request: NextRequest) {
 // Register a new user
 export async function POST(request: NextRequest) {
   try {
-    const { email, name: rawName, auth_provider, auth_id } = await request.json();
+    const { email, name: rawName, auth_provider, auth_id, attribution } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -120,6 +139,12 @@ export async function POST(request: NextRequest) {
           existing_provider: existing.auth_provider
         }, { status: 409 });
       }
+      await saveUserAttribution(supabase, {
+        userId: existing.id,
+        email: normalizedEmail,
+        attribution,
+        request,
+      });
       return NextResponse.json({ message: 'User already exists', id: existing.id });
     }
 
@@ -143,6 +168,13 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
+
+    await saveUserAttribution(supabase, {
+      userId: data.id,
+      email: normalizedEmail,
+      attribution,
+      request,
+    });
 
     // Send welcome email immediately
     await sendWelcomeEmail(normalizedEmail, name || '');

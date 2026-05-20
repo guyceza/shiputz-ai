@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { getStoredAttribution } from "@/lib/attribution";
 
 // Same anchor points as pricing page
 const CREDIT_ANCHORS = [
@@ -136,6 +137,7 @@ function CheckoutContent() {
           productType,
           email: email.toLowerCase(),
           billing,
+          attribution: getStoredAttribution(),
         }),
       });
 

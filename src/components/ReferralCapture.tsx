@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { captureAttribution } from '@/lib/attribution';
 
 /**
  * Captures ?ref=CODE from URL and stores in localStorage.
@@ -11,6 +12,8 @@ export default function ReferralCapture() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    captureAttribution();
+
     const ref = searchParams.get('ref');
     if (ref) {
       localStorage.setItem('referralCode', ref.toUpperCase());

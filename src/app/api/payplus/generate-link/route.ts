@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
 
 const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY;
 const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY;
@@ -53,7 +54,7 @@ const LEGACY_PRICING: Record<string, { amount: number; chargeMethod: number }> =
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { productType, email, billing, discountCode } = body;
+    const { productType, email, billing, discountCode, attribution } = body;
 
     if (!PAYPLUS_API_KEY || !PAYPLUS_SECRET_KEY || !PAYPLUS_PAGE_UID) {
       return NextResponse.json({ error: 'Payment service not configured' }, { status: 500 });
@@ -213,6 +214,19 @@ export async function POST(request: NextRequest) {
         amount,
         status: 'pending',
       }, { onConflict: 'page_request_uid' });
+
+      const cleanAttribution = sanitizeAttribution(attribution);
+      if (cleanAttribution) {
+        await supabase.from('payment_attribution').upsert({
+          page_request_uid: pageRequestUid,
+          email: email.toLowerCase(),
+          product_type: productType,
+          amount,
+          ...cleanAttribution,
+          ip_address: getRequestIp(request.headers),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'page_request_uid' });
+      }
       // Fire-and-forget, ignore errors
     }
 

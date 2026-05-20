@@ -17,6 +17,26 @@ function PaymentSuccessContent() {
     || (typeof window !== 'undefined' ? localStorage.getItem('payplus_page_request_uid') : null);
 
   useEffect(() => {
+    if (verificationStatus !== 'verified' || typeof window === 'undefined') return;
+
+    const transactionId = pageRequestUid || `no-uid-${product}`;
+    const conversionKey = `gads_purchase_conversion_${transactionId}`;
+    if (localStorage.getItem(conversionKey)) return;
+
+    const gtag = (window as typeof window & {
+      gtag?: (...args: unknown[]) => void;
+    }).gtag;
+
+    if (typeof gtag === 'function') {
+      gtag('event', 'conversion', {
+        send_to: 'AW-17986657494/kwLzCLKnzLAcENa52oBD',
+        transaction_id: transactionId,
+      });
+      localStorage.setItem(conversionKey, '1');
+    }
+  }, [verificationStatus, pageRequestUid, product]);
+
+  useEffect(() => {
     // Verify payment via IPN check (fallback for when webhook doesn't fire)
     async function verifyPayment() {
       // Get email from localStorage (user is logged in)

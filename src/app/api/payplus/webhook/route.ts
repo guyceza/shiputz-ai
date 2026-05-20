@@ -512,7 +512,7 @@ async function sendPlanEmail(email: string, planId: string, credits: number, sup
     const name = escapeHtml(userData?.name || 'משפץ יקר');
     const planNames: Record<string, string> = { starter: 'Starter', pro: 'Pro', business: 'Business' };
 
-    await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -534,6 +534,21 @@ async function sendPlanEmail(email: string, planId: string, credits: number, sup
         </div>`,
       }),
     });
+    const result = await response.json();
+
+    await supabase.from('email_sequences').upsert({
+      user_email: email.toLowerCase(),
+      sequence_type: 'post_purchase',
+      day_number: 0,
+      status: result.id ? 'sent' : 'failed',
+      sent_at: result.id ? new Date().toISOString() : null,
+      resend_id: result.id || null,
+      run_id: 'payplus-plan-webhook',
+      reason: `plan_${planId}_confirmed`,
+      error: result.id ? null : (result.message || 'Failed to send plan welcome email'),
+    }, { onConflict: 'user_email,sequence_type,day_number' });
+
+    return result;
   } catch (e) { console.error('Failed to send plan email:', e); }
 }
 

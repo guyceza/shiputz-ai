@@ -30,8 +30,8 @@ async function saveUserAttribution(supabase: ReturnType<typeof createServiceClie
   }, { onConflict: 'email' });
 }
 
-// Send welcome email immediately
-async function sendWelcomeEmail(email: string, name: string) {
+// Send welcome email immediately and return Resend result for sequence tracking.
+async function sendWelcomeEmail(email: string, name: string): Promise<{ id?: string; message?: string } | null> {
   if (!RESEND_KEY) {
     console.warn('RESEND_API_KEY not configured, skipping welcome email');
     return null;
@@ -47,16 +47,68 @@ async function sendWelcomeEmail(email: string, name: string) {
   const unsubUrl = `https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}${unsubToken ? `&token=${unsubToken}` : ''}`;
   
   const html = `
-    <div dir="rtl" style="font-family: -apple-system, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-      <h1 style="color: #111; font-size: 24px; font-weight: 600; margin-bottom: 24px;">👋 ברוך הבא ל-ShiputzAI!</h1>
-      <p style="color: #333; font-size: 16px; line-height: 1.6;">היי ${displayName},</p>
-      <p style="color: #333; font-size: 16px; line-height: 1.6;">תודה שנרשמת! אנחנו כאן כדי לעזור לך לנהל את השיפוץ בצורה חכמה.</p>
-      <p style="color: #333; font-size: 16px; line-height: 1.6; margin-bottom: 32px;">ShiputzAI עוזר לך לעקוב אחרי התקציב, לסרוק קבלות, ולקבל התראות לפני שחורגים.</p>
-      <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #111; color: white; padding: 14px 28px; border-radius: 25px; text-decoration: none; font-weight: 500;">כניסה לאזור האישי ←</a>
-      <p style="margin-top: 40px; color: #666; font-size: 14px;">בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
-      <p style="margin-top: 30px; text-align: center;"><a href="${unsubUrl}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
-    </div>
-  `;
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 60px 20px;" dir="rtl">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
+          <tr>
+            <td align="center" style="padding-bottom: 40px;">
+              <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" />
+              <span style="font-size: 28px; font-weight: 600; color: #1d1d1f; vertical-align: middle;">ShiputzAI</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #ffffff; border-radius: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);" dir="rtl">
+              <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
+                <tr>
+                  <td style="padding: 60px 50px; text-align: right;" dir="rtl">
+                    <h1 style="font-size: 34px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px; text-align: center;">ברוכים הבאים</h1>
+                    <p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">יש לכם 10 קרדיטים חינם לניסיון</p>
+                    <p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${displayName}</strong>,</p>
+                    <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">תודה שהצטרפתם. עם ShiputzAI תוכלו לראות איך הבית ייראה אחרי עיצוב מחדש לפני שמוציאים שקל.</p>
+                    <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">
+                      <p style="font-size: 16px; color: #1d1d1f; line-height: 2; margin: 0;">
+                        <strong>הדמיית חדר</strong> - מצלמים ומקבלים עיצוב חדש תוך שניות<br>
+                        <strong>Style Match</strong> - מוצאים את הסגנון שמתאים לכם<br>
+                        <strong>Shop the Look</strong> - מזהים מוצרים וקונים ישירות<br>
+                        <strong>סרטון סיור</strong> - וידאו תלת-מימדי של החדר
+                      </p>
+                    </div>
+                    <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">התחילו עם הדמיה ראשונה: מצלמים חדר, בוחרים סגנון, ומקבלים תוצאה תוך זמן קצר.</p>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 40px;">
+                      <tr>
+                        <td align="center">
+                          <a href="https://shipazti.com/visualize" style="display: inline-block; background: #1d1d1f; color: #ffffff; padding: 18px 48px; border-radius: 980px; text-decoration: none; font-size: 17px; font-weight: 500;">צור הדמיה ראשונה</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 20px; text-align: center;">
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ!</p>
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 16px;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 11px; color: #aeaeb2; margin: 0;">
+                <a href="${unsubUrl}" style="color: #aeaeb2; text-decoration: underline;">להסרה מרשימת התפוצה</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -68,8 +120,12 @@ async function sendWelcomeEmail(email: string, name: string) {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: email,
-        subject: '👋 ברוך הבא ל-ShiputzAI!',
+        subject: 'ברוכים הבאים - יש לכם קרדיטים חינם',
         html,
+        headers: {
+          'List-Unsubscribe': `<${unsubUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       }),
     });
     const result = await response.json();
@@ -176,17 +232,22 @@ export async function POST(request: NextRequest) {
       request,
     });
 
-    // Send welcome email immediately
-    await sendWelcomeEmail(normalizedEmail, name || '');
+    // Send welcome email immediately and mark the real lifecycle flow as sent.
+    const welcomeResult = await sendWelcomeEmail(normalizedEmail, name || '');
 
-    // Mark Day 0 as sent so cron skips it and moves to day 1
+    // Mark day 0 of the current lifecycle flow as sent so cron continues the sequence.
     try {
-      await supabase.from('email_sequences').insert({
+      await supabase.from('email_sequences').upsert({
         user_email: normalizedEmail,
-        sequence_type: 'non_purchased',
+        sequence_type: 'welcome',
         day_number: 0,
         status: 'sent',
-      });
+        sent_at: new Date().toISOString(),
+        resend_id: welcomeResult?.id || 'signup-inline',
+        run_id: 'signup-inline',
+        reason: 'new_signup',
+        ...(welcomeResult?.message ? { error: welcomeResult.message } : {}),
+      }, { onConflict: 'user_email,sequence_type,day_number' });
     } catch (e) {
       // Ignore
     }

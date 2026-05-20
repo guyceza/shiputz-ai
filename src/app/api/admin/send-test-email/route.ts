@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { ADMIN_EMAILS } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
 // Bug #3 fix: Never use hardcoded API keys - use env var only
 const RESEND_KEY = process.env.RESEND_API_KEY;
 
@@ -138,8 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing template or email' }, { status: 400 });
     }
 
-    // Bug #4 fix: Verify admin consistently
-    if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

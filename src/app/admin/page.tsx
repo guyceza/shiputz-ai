@@ -26,6 +26,7 @@ interface Stats {
 }
 
 import { ADMIN_EMAILS, isAdmin as isAdminCheck } from '@/lib/admin';
+import { adminFetch } from '@/lib/admin-api';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -89,14 +90,13 @@ export default function AdminDashboard() {
     
     try {
       const params = new URLSearchParams({
-        adminEmail,
         search,
         filter,
         page: page.toString(),
         limit: "50",
       });
       
-      const res = await fetch(`/api/admin/users?${params}`);
+      const res = await adminFetch(`/api/admin/users?${params}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -128,10 +128,10 @@ export default function AdminDashboard() {
     setActionLoading(email);
     
     try {
-      const res = await fetch("/api/admin/users", {
+      const res = await adminFetch("/api/admin/users", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminEmail, userEmail: email, updates }),
+        body: JSON.stringify({ userEmail: email, updates }),
       });
       
       if (res.ok) {
@@ -171,10 +171,10 @@ export default function AdminDashboard() {
     setActionLoading(user.email);
     
     try {
-      const res = await fetch("/api/admin/banned", {
+      const res = await adminFetch("/api/admin/banned", {
         method: user.banned ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, adminEmail }),
+        body: JSON.stringify({ email: user.email }),
       });
       
       if (res.ok) {

@@ -2,21 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-import { ADMIN_EMAILS } from '@/lib/admin';
-
-// Verify admin exists in database (not just string match)
-async function verifyAdmin(email: string | null): Promise<boolean> {
-  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
-    return false;
-  }
-  const supabase = createServiceClient();
-  const { data } = await supabase
-    .from('users')
-    .select('email')
-    .eq('email', email.toLowerCase())
-    .single();
-  return !!data;
-}
+import { isAdminRequest } from '@/lib/admin-auth';
 
 // Send welcome premium email
 async function sendWelcomePremiumEmail(email: string, name?: string) {
@@ -81,13 +67,10 @@ async function sendWelcomePremiumEmail(email: string, name?: string) {
 // GET - Get premium users list or check if email has premium
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
-  const adminEmail = request.nextUrl.searchParams.get('adminEmail');
   const supabase = createServiceClient();
   
   if (!email) {
-    // Bug fix: Require admin auth to get full premium list
-    const isAdmin = await verifyAdmin(adminEmail);
-    if (!isAdmin) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     
@@ -127,10 +110,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, adminEmail } = body;
+    const { email } = body;
     
-    const isAdmin = await verifyAdmin(adminEmail);
-    if (!isAdmin) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     
@@ -206,10 +188,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, adminEmail } = body;
+    const { email } = body;
     
-    const isAdmin = await verifyAdmin(adminEmail);
-    if (!isAdmin) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
     

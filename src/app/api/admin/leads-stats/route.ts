@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { isAdmin } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth check via cookie or header
-    const authEmail = request.headers.get('x-admin-email') || '';
-    if (!isAdmin(authEmail)) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { isAdmin } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
 import crypto from 'crypto';
 
 const HASH_SECRET = 'shiputzai-unsubscribe-2024';
@@ -118,8 +118,7 @@ const PROFESSION_EMAILS: Record<string, { subject1: string; hook: string; value:
 
 export async function GET(request: NextRequest) {
   try {
-    const authEmail = request.headers.get('x-admin-email') || '';
-    if (!isAdmin(authEmail)) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

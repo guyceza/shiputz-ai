@@ -1,29 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { getUsageStats, checkRateLimitWarning } from '@/lib/usage-monitor';
-
-import { ADMIN_EMAILS } from '@/lib/admin';
-
-// Verify admin
-async function verifyAdmin(email: string | null): Promise<boolean> {
-  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
-    return false;
-  }
-  const supabase = createServiceClient();
-  const { data } = await supabase
-    .from('users')
-    .select('email')
-    .eq('email', email.toLowerCase())
-    .single();
-  return !!data;
-}
+import { isAdminRequest } from '@/lib/admin-auth';
 
 // GET - Get system stats and alerts
 export async function GET(request: NextRequest) {
-  const adminEmail = request.nextUrl.searchParams.get('adminEmail');
-  
-  const isAdmin = await verifyAdmin(adminEmail);
-  if (!isAdmin) {
+  if (!(await isAdminRequest(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
   

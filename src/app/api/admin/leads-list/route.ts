@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { isAdmin } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,8 +25,7 @@ function scoreLead(lead: any): number {
 
 export async function GET(request: NextRequest) {
   try {
-    const authEmail = request.headers.get('x-admin-email') || '';
-    if (!isAdmin(authEmail)) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

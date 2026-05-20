@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { adminFetch } from "@/lib/admin-api";
 
-import { ADMIN_EMAILS, isAdmin as isAdminEmail } from '@/lib/admin';
+import { ADMIN_EMAILS } from '@/lib/admin';
 
 // Email template metadata
 const EMAIL_TEMPLATES = [
@@ -58,22 +59,20 @@ export default function AdminEmails() {
 
   // Load preview when template selected
   useEffect(() => {
-    if (selectedTemplate) {
-      loadPreview(selectedTemplate);
-    }
-  }, [selectedTemplate]);
-
-  const loadPreview = async (templateId: string) => {
-    try {
-      const res = await fetch(`/api/admin/email-preview?template=${templateId}`);
-      const data = await res.json();
-      if (data.html) {
-        setPreviewHtml(data.html);
+    if (!selectedTemplate) return;
+    const loadPreview = async () => {
+      try {
+        const res = await adminFetch(`/api/admin/email-preview?template=${selectedTemplate}`);
+        const data = await res.json();
+        if (data.html) {
+          setPreviewHtml(data.html);
+        }
+      } catch (e) {
+        console.error("Failed to load preview:", e);
       }
-    } catch (e) {
-      console.error("Failed to load preview:", e);
-    }
-  };
+    };
+    loadPreview();
+  }, [selectedTemplate]);
 
   const sendTestEmail = async () => {
     if (!selectedTemplate || !testEmail) return;
@@ -82,7 +81,7 @@ export default function AdminEmails() {
     setSendResult(null);
     
     try {
-      const res = await fetch('/api/admin/send-test-email', {
+      const res = await adminFetch('/api/admin/send-test-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

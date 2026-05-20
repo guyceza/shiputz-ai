@@ -1,75 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
 
-// Admin emails
-import { ADMIN_EMAILS } from '@/lib/admin';
-
-// Verify admin from auth header
-async function verifyAdmin(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-  
-  const token = authHeader.slice(7);
-  
-  try {
-    // Create a client with the user's token to verify their identity
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseKey) {
-      return null;
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } }
-    });
-    
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
-    if (error || !user?.email) {
-      return null;
-    }
-    
-    // Check if email is admin
-    if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-      return null;
-    }
-    
-    return user.email;
-  } catch (e) {
-    return null;
-  }
-}
-
 // GET - Get all users with full data
 export async function GET(request: NextRequest) {
-  // Try auth header first, fallback to query param with secret check
-  let adminEmail = await verifyAdmin(request);
-  
-  // Fallback: Check query param + verify from database that this user exists and is admin
-  if (!adminEmail) {
-    const queryEmail = request.nextUrl.searchParams.get('adminEmail');
-    if (queryEmail && ADMIN_EMAILS.includes(queryEmail.toLowerCase())) {
-      // Additional check: verify this email exists in our users table
-      const supabase = createServiceClient();
-      const { data: user } = await supabase
-        .from('users')
-        .select('email')
-        .eq('email', queryEmail.toLowerCase())
-        .single();
-      
-      if (user) {
-        adminEmail = queryEmail;
-      }
-    }
-  }
-  
+  const adminEmail = await verifyAdminRequest(request);
   if (!adminEmail) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -173,24 +111,9 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { adminEmail: queryAdminEmail, userEmail, updates } = body;
+    const { userEmail, updates } = body;
     
-    // Verify admin
-    let adminEmail = await verifyAdmin(request);
-    
-    if (!adminEmail && queryAdminEmail && ADMIN_EMAILS.includes(queryAdminEmail.toLowerCase())) {
-      const supabase = createServiceClient();
-      const { data: user } = await supabase
-        .from('users')
-        .select('email')
-        .eq('email', queryAdminEmail.toLowerCase())
-        .single();
-      
-      if (user) {
-        adminEmail = queryAdminEmail;
-      }
-    }
-    
+    const adminEmail = await verifyAdminRequest(request);
     if (!adminEmail) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }

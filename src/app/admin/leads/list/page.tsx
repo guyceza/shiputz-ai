@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ADMIN_EMAILS, isAdmin as isAdminCheck } from "@/lib/admin";
+import { adminFetch } from "@/lib/admin-api";
 
 interface Lead {
   id: string;
@@ -110,12 +111,10 @@ export default function LeadsListPage() {
     }
   }, []);
 
-  const fetchLeads = useCallback(async (email: string) => {
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true);
-      const resp = await fetch("/api/admin/leads-list", {
-        headers: { "x-admin-email": email },
-      });
+      const resp = await adminFetch("/api/admin/leads-list");
       if (!resp.ok) throw new Error("Failed to fetch");
       const data = await resp.json();
       setLeads(data.leads);
@@ -128,7 +127,7 @@ export default function LeadsListPage() {
   }, []);
 
   useEffect(() => {
-    if (adminEmail) fetchLeads(adminEmail);
+    if (adminEmail) fetchLeads();
   }, [adminEmail, fetchLeads]);
 
   // Filtered + sorted leads
@@ -237,7 +236,7 @@ export default function LeadsListPage() {
             <span className="text-sm text-gray-500">({filtered.length} מתוך {leads.length})</span>
           </div>
           <button
-            onClick={() => adminEmail && fetchLeads(adminEmail)}
+            onClick={() => adminEmail && fetchLeads()}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition"
           >
             🔄 רענן

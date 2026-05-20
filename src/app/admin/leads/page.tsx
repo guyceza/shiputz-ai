@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ADMIN_EMAILS, isAdmin as isAdminCheck } from "@/lib/admin";
+import { isAdmin as isAdminCheck } from "@/lib/admin";
+import { adminFetch } from "@/lib/admin-api";
 
 interface LeadEmail {
   id: string;
@@ -63,11 +64,9 @@ export default function AdminLeads() {
   const [preview, setPreview] = useState<{ email: string; seq: number; data: EmailPreview } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  const fetchStats = useCallback(async (email: string) => {
+  const fetchStats = useCallback(async () => {
     try {
-      const resp = await fetch("/api/admin/leads-stats", {
-        headers: { "x-admin-email": email },
-      });
+      const resp = await adminFetch("/api/admin/leads-stats");
       if (!resp.ok) throw new Error("Failed to fetch stats");
       const data = await resp.json();
       setStats(data);
@@ -83,9 +82,7 @@ export default function AdminLeads() {
     if (!adminEmail) return;
     setPreviewLoading(true);
     try {
-      const resp = await fetch(`/api/admin/lead-preview?email=${encodeURIComponent(email)}&seq=${seq}`, {
-        headers: { "x-admin-email": adminEmail },
-      });
+      const resp = await adminFetch(`/api/admin/lead-preview?email=${encodeURIComponent(email)}&seq=${seq}`);
       if (!resp.ok) throw new Error("Failed");
       const data = await resp.json();
       setPreview({ email, seq, data });
@@ -103,7 +100,7 @@ export default function AdminLeads() {
         const user = JSON.parse(userData);
         if (user.email && isAdminCheck(user.email)) {
           setAdminEmail(user.email);
-          fetchStats(user.email);
+          fetchStats();
           return;
         }
       } catch {}
@@ -169,7 +166,7 @@ export default function AdminLeads() {
               onClick={() => {
                 if (adminEmail) {
                   setLoading(true);
-                  fetchStats(adminEmail);
+                  fetchStats();
                 }
               }}
               disabled={loading}

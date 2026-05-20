@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { adminFetch } from "@/lib/admin-api";
 
 interface AdminPanelProps {
   onClose: () => void;
   adminEmail: string;
 }
 
-export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
+export default function AdminPanel({ onClose }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'trials' | 'premium' | 'users' | 'stats'>('trials');
   const [resetList, setResetList] = useState<string[]>([]);
   const [premiumList, setPremiumList] = useState<{email: string, days: number, until: string}[]>([]);
@@ -17,29 +18,28 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load trial reset list
+        const trialRes = await adminFetch("/api/admin/trial-reset");
+        const trialData = await trialRes.json();
+        setResetList(trialData.list || []);
+        
+        // Load premium list
+        const premiumRes = await adminFetch("/api/admin/premium");
+        const premiumData = await premiumRes.json();
+        setPremiumList(premiumData.list || []);
+        
+        // Load banned list
+        const bannedRes = await adminFetch("/api/admin/banned");
+        const bannedData = await bannedRes.json();
+        setBannedList(bannedData.list || []);
+      } catch (e) {
+        console.error("Failed to load admin data:", e);
+      }
+    };
     loadData();
   }, []);
-
-  const loadData = async () => {
-    try {
-      // Load trial reset list
-      const trialRes = await fetch("/api/admin/trial-reset");
-      const trialData = await trialRes.json();
-      setResetList(trialData.list || []);
-      
-      // Load premium list
-      const premiumRes = await fetch("/api/admin/premium");
-      const premiumData = await premiumRes.json();
-      setPremiumList(premiumData.list || []);
-      
-      // Load banned list
-      const bannedRes = await fetch("/api/admin/banned");
-      const bannedData = await bannedRes.json();
-      setBannedList(bannedData.list || []);
-    } catch (e) {
-      console.error("Failed to load admin data:", e);
-    }
-  };
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -50,10 +50,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
   const resetTrial = async () => {
     if (!email) return;
     try {
-      const res = await fetch("/api/admin/trial-reset", {
+      const res = await adminFetch("/api/admin/trial-reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, adminEmail })
+        body: JSON.stringify({ email })
       });
       const data = await res.json();
       if (data.success) {
@@ -68,10 +68,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
 
   const removeFromResetList = async (emailToRemove: string) => {
     try {
-      const res = await fetch("/api/admin/trial-reset", {
+      const res = await adminFetch("/api/admin/trial-reset", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToRemove, adminEmail })
+        body: JSON.stringify({ email: emailToRemove })
       });
       const data = await res.json();
       if (data.success) setResetList(data.list);
@@ -84,10 +84,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
   const addPremium = async () => {
     if (!email || !days) return;
     try {
-      const res = await fetch("/api/admin/premium", {
+      const res = await adminFetch("/api/admin/premium", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, days: parseInt(days), adminEmail })
+        body: JSON.stringify({ email, days: parseInt(days) })
       });
       const data = await res.json();
       if (data.success) {
@@ -102,10 +102,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
 
   const removePremium = async (emailToRemove: string) => {
     try {
-      const res = await fetch("/api/admin/premium", {
+      const res = await adminFetch("/api/admin/premium", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToRemove, adminEmail })
+        body: JSON.stringify({ email: emailToRemove })
       });
       const data = await res.json();
       if (data.success) {
@@ -121,10 +121,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
   const banUser = async () => {
     if (!email) return;
     try {
-      const res = await fetch("/api/admin/banned", {
+      const res = await adminFetch("/api/admin/banned", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, adminEmail })
+        body: JSON.stringify({ email })
       });
       const data = await res.json();
       if (data.success) {
@@ -139,10 +139,10 @@ export default function AdminPanel({ onClose, adminEmail }: AdminPanelProps) {
 
   const unbanUser = async (emailToUnban: string) => {
     try {
-      const res = await fetch("/api/admin/banned", {
+      const res = await adminFetch("/api/admin/banned", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToUnban, adminEmail })
+        body: JSON.stringify({ email: emailToUnban })
       });
       const data = await res.json();
       if (data.success) {

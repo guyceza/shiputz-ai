@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Import email templates - we'll read from the scripts file
 // For now, return a placeholder that tells them to check the actual file
 
-import { ADMIN_EMAILS } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
 
 // Simplified template generator for preview
 const generatePreview = (templateId: string): string => {
@@ -96,31 +96,12 @@ const generatePreview = (templateId: string): string => {
   return templateFn();
 };
 
-import { createServiceClient } from '@/lib/supabase';
-
-// Verify admin exists in database
-async function verifyAdmin(email: string | null): Promise<boolean> {
-  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
-    return false;
-  }
-  const supabase = createServiceClient();
-  const { data } = await supabase
-    .from('users')
-    .select('email')
-    .eq('email', email.toLowerCase())
-    .single();
-  return !!data;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const template = searchParams.get('template');
-    const adminEmail = searchParams.get('adminEmail');
 
-    // Bug #M01 fix: Require admin verification
-    const isAdmin = await verifyAdmin(adminEmail);
-    if (!isAdmin) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

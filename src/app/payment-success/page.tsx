@@ -23,17 +23,34 @@ function PaymentSuccessContent() {
     const conversionKey = `gads_purchase_conversion_${transactionId}`;
     if (localStorage.getItem(conversionKey)) return;
 
-    const gtag = (window as typeof window & {
-      gtag?: (...args: unknown[]) => void;
-    }).gtag;
+    const firePurchaseConversion = () => {
+      const gtag = (window as typeof window & {
+        gtag?: (...args: unknown[]) => void;
+      }).gtag;
 
-    if (typeof gtag === 'function') {
+      if (typeof gtag !== 'function' || localStorage.getItem(conversionKey)) {
+        return false;
+      }
+
       gtag('event', 'conversion', {
         send_to: 'AW-17986657494/kwLzCLKnzLAcENa52oBD',
         transaction_id: transactionId,
       });
       localStorage.setItem(conversionKey, '1');
-    }
+      return true;
+    };
+
+    if (firePurchaseConversion()) return;
+
+    let attempts = 0;
+    const retryTimer = window.setInterval(() => {
+      attempts += 1;
+      if (firePurchaseConversion() || attempts >= 20) {
+        window.clearInterval(retryTimer);
+      }
+    }, 250);
+
+    return () => window.clearInterval(retryTimer);
   }, [verificationStatus, pageRequestUid, product]);
 
   useEffect(() => {

@@ -30,10 +30,17 @@ const STEPS = [
   { num: 3, label: "פעולה" },
 ];
 
-type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-upload" | "video-select" | "video-result";
+type Phase = "upload" | "floorplan-ready" | "floorplan" | "room-actions" | "furniture-click" | "furniture-select" | "furniture-result" | "video-select" | "video-result";
 
 interface ClickMarker { x: number; y: number; }
 interface RoomInfo { room: string; roomHe: string; description: string; dimensions?: { width: number; height: number }; }
+interface VideoHistoryItem {
+  id: string;
+  videoUrl: string;
+  fromRoomHe: string;
+  toRoomHe: string;
+  createdAt: string;
+}
 
 const ROOM_PURPOSES = [
   { key: "bedroom", label: "חדר שינה", icon: "🛏️" },
@@ -118,11 +125,21 @@ const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
 
 export default function FloorplanPage() {
   const [phase, setPhase] = useState<Phase>("upload");
+  const [videoIntent, setVideoIntent] = useState(false);
 
   // Check URL param on mount + load saved rooms
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("mode") === "video") setPhase("video-upload");
+    if (params.get("mode") === "video") {
+      setVideoIntent(true);
+      setPhase("upload");
+    }
+    try {
+      const savedVideos = JSON.parse(localStorage.getItem("floorplan_video_history") || "[]");
+      if (Array.isArray(savedVideos)) setVideoHistory(savedVideos);
+    } catch {
+      setVideoHistory([]);
+    }
 
     // Generate or restore session ID
     let sessionId = sessionStorage.getItem("floorplan_session_id");
@@ -162,6 +179,22 @@ export default function FloorplanPage() {
               grouped[r.session_id].push({ roomName: r.room_name, roomNameHe: r.room_name_he, imageData: r.image_url });
             }
             setAllUserRooms(Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms })));
+          }
+        }
+
+        const videoRes = await fetch(`/api/floorplan/video-history?userId=${encodeURIComponent(email)}`);
+        if (videoRes.ok) {
+          const videoData = await videoRes.json();
+          if (Array.isArray(videoData.videos)) {
+            const videos: VideoHistoryItem[] = videoData.videos.map((video: any) => ({
+              id: video.id,
+              videoUrl: video.video_url,
+              fromRoomHe: video.from_room_he || "חדר התחלה",
+              toRoomHe: video.to_room_he || "חדר סיום",
+              createdAt: video.created_at,
+            }));
+            setVideoHistory(videos);
+            localStorage.setItem("floorplan_video_history", JSON.stringify(videos));
           }
         }
       } catch (e) { console.error("Failed to load rooms:", e); }
@@ -204,12 +237,9 @@ export default function FloorplanPage() {
   const [videoResult, setVideoResult] = useState<string | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoProgress, setVideoProgress] = useState("");
-  const [videoFirstImage, setVideoFirstImage] = useState<string | null>(null);
-  const [videoLastImage, setVideoLastImage] = useState<string | null>(null);
   const [allUserRooms, setAllUserRooms] = useState<{sessionId: string; rooms: RoomPhoto[]}[]>([]);
+  const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const [roomsLoaded, setRoomsLoaded] = useState(false);
-  const videoFirstInputRef = useRef<HTMLInputElement>(null);
-  const videoLastInputRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [loadingLabel, setLoadingLabel] = useState("");
@@ -270,7 +300,7 @@ export default function FloorplanPage() {
     });
   };
 
-  const submitAndPollVideo = async (fd: FormData) => {
+  const submitAndPollVideo = async (fd: FormData): Promise<string> => {
     setVideoProgress("שולח לייצור סרטון...");
     const res = await fetch("/api/floorplan/video", { method: "POST", body: fd });
     const data = await res.json();
@@ -291,7 +321,7 @@ export default function FloorplanPage() {
         if (pollData.videoUrl) {
           setVideoResult(pollData.videoUrl);
           setPhase("video-result");
-          return;
+          return pollData.videoUrl;
         }
         throw new Error("No video URL in response");
       }
@@ -310,6 +340,45 @@ export default function FloorplanPage() {
       }
     }
     throw new Error("Video generation timed out");
+  };
+
+  const saveVideoHistory = useCallback((item: Omit<VideoHistoryItem, "id" | "createdAt"> & { prompt?: string }) => {
+    const nextItem: VideoHistoryItem = {
+      ...item,
+      id: `video_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      createdAt: new Date().toISOString(),
+    };
+    setVideoHistory((prev) => {
+      const next = [nextItem, ...prev].slice(0, 12);
+      localStorage.setItem("floorplan_video_history", JSON.stringify(next));
+      return next;
+    });
+    const email = getEmail();
+    if (email) {
+      fetch("/api/floorplan/video-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: email,
+          videoUrl: item.videoUrl,
+          fromRoomHe: item.fromRoomHe,
+          toRoomHe: item.toRoomHe,
+          prompt: item.prompt || null,
+        }),
+      }).catch((e) => console.error("Failed to save video history:", e));
+    }
+  }, []);
+
+  const startVideoFromRoomGroup = (sessionId: string, rooms: RoomPhoto[]) => {
+    setFloorplanSessionId(sessionId);
+    setAllRoomPhotos(rooms);
+    setCurrentRoomPhoto(null);
+    setVideoFromRoom(null);
+    setVideoToRoom(null);
+    setVideoClickMode(false);
+    setVideoClickA(null);
+    setVideoClickB(null);
+    setPhase("video-select");
   };
 
   // Save room photo to DB (fire and forget)
@@ -370,8 +439,16 @@ export default function FloorplanPage() {
       const data = await res.json();
       checkCredits(res, data); if (!res.ok) throw new Error(data.error || "AI generation failed");
       if (data.image) {
-        setFloorplanResult(`data:${data.image.mimeType};base64,${data.image.data}`);
-        setPhase("floorplan-ready");
+        const result = `data:${data.image.mimeType};base64,${data.image.data}`;
+        setFloorplanResult(result);
+        if (videoIntent) {
+          setVideoClickMode(true);
+          setVideoClickA(null);
+          setVideoClickB(null);
+          setPhase("floorplan");
+        } else {
+          setPhase("floorplan-ready");
+        }
         clearAction();
       } else throw new Error(data.text || "No image returned");
     } catch (err: any) { setError(err.message); }
@@ -589,31 +666,13 @@ export default function FloorplanPage() {
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
-      await submitAndPollVideo(fd);
-    } catch (err: any) { setError(err.message); }
-    finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
-  };
-
-  // === Step 4b: Direct video from uploaded images ===
-  const generateDirectVideo = async () => {
-    if (!videoFirstImage || !videoLastImage) return;
-    setVideoLoading(true);
-    setVideoResult(null);
-    setVideoProgress("מכין תמונות...");
-    setLoadingLabel("מייצר סרטון סיור...");
-    setError(null);
-    try {
-      setVideoProgress("ממיר תמונות...");
-      const firstBlob = await resizeToJpeg(videoFirstImage);
-      const lastBlob = await resizeToJpeg(videoLastImage);
-      const fd = new FormData();
-      fd.append("firstFrame", firstBlob, "first.jpg");
-      fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = "Smooth steadicam walkthrough of a home interior. The camera starts in the first room and physically glides forward at eye level through a bright open doorway or well-lit hallway, continuously moving into the next room. The rooms are connected - the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition area is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.";
-      const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
-      fd.append("prompt", fullPrompt);
-      fd.append("email", getEmail() || "");
-      await submitAndPollVideo(fd);
+      const videoUrl = await submitAndPollVideo(fd);
+      saveVideoHistory({
+        videoUrl,
+        fromRoomHe: fromPhoto.roomNameHe,
+        toRoomHe: toPhoto.roomNameHe,
+        prompt: videoCustomPrompt.trim(),
+      });
     } catch (err: any) { setError(err.message); }
     finally { setVideoLoading(false); setVideoProgress(""); setLoadingLabel(""); }
   };
@@ -640,10 +699,18 @@ export default function FloorplanPage() {
             <button
               onClick={() => {
                 if (s.num === 1) setPhase("upload");
-                if (s.num === 2 && floorplanResult) { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }
+                if (s.num === 2 && floorplanResult) {
+                  setCurrentRoomPhoto(null);
+                  if (videoIntent) {
+                    setVideoClickMode(true);
+                    setPhase("floorplan");
+                  } else {
+                    setPhase("floorplan-ready");
+                  }
+                }
                 if (s.num === 3 && allRoomPhotos.length > 0) {
                   if (!currentRoomPhoto) setCurrentRoomPhoto(allRoomPhotos[allRoomPhotos.length - 1]);
-                  setPhase("room-actions");
+                  setPhase(videoIntent ? "video-select" : "room-actions");
                 }
               }}
               disabled={(s.num === 2 && !floorplanResult) || (s.num === 3 && allRoomPhotos.length === 0)}
@@ -692,12 +759,90 @@ export default function FloorplanPage() {
           <>
             <div className="text-center space-y-3">
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-                מתוכנית קומה ל<span className="text-emerald-600">דירה מעוצבת</span>
+                {videoIntent ? (
+                  <>מסרטון סיור ל<span className="text-emerald-600">דירה זורמת</span></>
+                ) : (
+                  <>מתוכנית קומה ל<span className="text-emerald-600">דירה מעוצבת</span></>
+                )}
               </h1>
               <p className="text-gray-500 max-w-lg mx-auto">
-                העלו תוכנית קומה ובחרו סגנון עיצוב - ה-AI ייצור הדמיה מלמעלה של הדירה כולה
+                {videoIntent
+                  ? "התחילו מתוכנית קומה, בחרו סגנון, ואז סמנו שני חדרים על ההדמיה מלמעלה ליצירת סיור."
+                  : "העלו תוכנית קומה ובחרו סגנון עיצוב - ה-AI ייצור הדמיה מלמעלה של הדירה כולה"}
               </p>
             </div>
+
+            {videoIntent && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-2xl border border-gray-200 p-5 space-y-4">
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">היסטוריית תוכניות וחדרים</h3>
+                    <p className="text-sm text-gray-500 mt-1">בחרו הדמיה קיימת עם חדרים שכבר נוצרו, או העלו תוכנית חדשה למטה.</p>
+                  </div>
+                  {!roomsLoaded ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Spinner className="h-4 w-4" />
+                      טוען היסטוריה...
+                    </div>
+                  ) : allUserRooms.filter((group) => group.rooms.length >= 2).length > 0 ? (
+                    <div className="space-y-3">
+                      {allUserRooms.filter((group) => group.rooms.length >= 2).slice(0, 4).map((group, index) => (
+                        <button
+                          key={group.sessionId}
+                          onClick={() => startVideoFromRoomGroup(group.sessionId, group.rooms)}
+                          className="w-full bg-white border border-gray-200 hover:border-gray-900 rounded-xl p-3 text-right transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs text-gray-400">הדמיה {index + 1}</span>
+                            <span className="text-xs font-medium text-emerald-700">{group.rooms.length} חדרים</span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-1.5 mt-2">
+                            {group.rooms.slice(0, 4).map((room, roomIndex) => (
+                              <img
+                                key={`${group.sessionId}-${room.roomName}-${roomIndex}`}
+                                src={room.imageData}
+                                alt={room.roomNameHe}
+                                className="aspect-[4/3] w-full rounded-lg object-cover"
+                              />
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">בחרו שני חדרים מההדמיה הזאת לסרטון</p>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">אין עדיין תוכניות עם שני חדרים מוכנים. העלו תוכנית חדשה והמערכת תעביר אתכם לבחירת שני חדרים.</p>
+                  )}
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl border border-gray-200 p-5 space-y-4">
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">היסטוריית סרטונים</h3>
+                    <p className="text-sm text-gray-500 mt-1">סרטונים שנוצרו במכשיר הזה יופיעו כאן לצפייה או הורדה.</p>
+                  </div>
+                  {videoHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      {videoHistory.slice(0, 4).map((video) => (
+                        <div key={video.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                          <video src={video.videoUrl} controls className="w-full aspect-video bg-black" />
+                          <div className="p-3 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{video.fromRoomHe} → {video.toRoomHe}</p>
+                              <p className="text-xs text-gray-400">{new Date(video.createdAt).toLocaleDateString("he-IL")}</p>
+                            </div>
+                            <a href={video.videoUrl} download="walkthrough.mp4" className="text-xs font-medium text-gray-900 hover:text-emerald-700">
+                              הורדה
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">עדיין אין סרטונים שמורים במכשיר הזה.</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Upload area */}
             <div>
@@ -770,7 +915,9 @@ export default function FloorplanPage() {
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800 shadow-xl hover:shadow-2xl"
               }`}>
-              {loading ? <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> יוצר הדמיה...</span> : "צור הדמיה →"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> יוצר הדמיה...</span>
+              ) : videoIntent ? "צור תוכנית ובחר 2 חדרים →" : "צור הדמיה →"}
             </button>
             <p className="text-xs text-gray-400 text-center mt-2">10 קרדיטים להדמיה · 5 לצילום חדר · 25 לסרטון</p>
 
@@ -895,7 +1042,7 @@ export default function FloorplanPage() {
                 <button onClick={() => { setVideoClickMode(false); setVideoClickA(null); setVideoClickB(null); }}
                   className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">ביטול מצב סרטון</button>
               ) : <div />}
-              <button onClick={() => { setPhase("floorplan-ready"); setVideoClickMode(false); }}
+              <button onClick={() => { setPhase(videoIntent ? "upload" : "floorplan-ready"); setVideoClickMode(false); }}
                 className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">← חזרה</button>
             </div>
 
@@ -1217,211 +1364,6 @@ export default function FloorplanPage() {
           </>
         )}
 
-        {/* ======== STEP 4: Video select ======== */}
-        {phase === "video-upload" && (
-          <>
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">סרטון סיור AI</h2>
-              <p className="text-gray-500 text-sm">העלו שתי תמונות - חדר התחלה וחדר סיום - והסרטון ייוצר אוטומטית</p>
-            </div>
-
-            {/* Loading rooms */}
-            {!roomsLoaded && (
-              <div className="flex items-center justify-center py-12 gap-3">
-                <Spinner className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-400 text-sm">טוען הדמיות...</span>
-              </div>
-            )}
-
-            {/* No images yet - friendly redirect */}
-            {roomsLoaded && allUserRooms.length === 0 && (
-              <div className="max-w-md mx-auto text-center bg-amber-50 border border-amber-200 rounded-2xl p-8 space-y-4">
-                <div className="text-4xl">🎬</div>
-                <h3 className="text-lg font-semibold text-gray-900">אין עדיין הדמיות לסרטון</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  כדי ליצור סרטון סיור, צריך קודם להעלות תוכנית קומה וליצור הדמיות של החדרים. אחרי שיהיו לכם לפחות 2 חדרים - תוכלו ליצור סרטון מדהים!
-                </p>
-                <a
-                  href="/floorplan"
-                  className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-                >
-                  עברו לתוכנית קומה חכמה ←
-                </a>
-              </div>
-            )}
-
-            {/* Previously generated rooms - grouped by session (house) */}
-            {allUserRooms.length > 0 && (
-              <div className="max-w-2xl mx-auto space-y-4">
-                <h3 className="text-sm font-semibold text-gray-500 text-center">חדרים שנוצרו - בחרו 2 מאותו בית</h3>
-                {allUserRooms.filter(g => g.rooms.length >= 1).map((group, gi) => (
-                  <div key={group.sessionId} className="space-y-2">
-                    {allUserRooms.length > 1 && (
-                      <p className="text-xs text-gray-400 font-medium">הדמיה {gi + 1}</p>
-                    )}
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                      {group.rooms.map((photo) => {
-                        const isFirst = videoFirstImage === photo.imageData;
-                        const isLast = videoLastImage === photo.imageData;
-                        return (
-                          <button key={photo.roomName + group.sessionId} onClick={() => {
-                            if (isFirst) { setVideoFirstImage(null); return; }
-                            if (isLast) { setVideoLastImage(null); return; }
-                            if (!videoFirstImage) setVideoFirstImage(photo.imageData);
-                            else if (!videoLastImage) setVideoLastImage(photo.imageData);
-                          }}
-                            className={`rounded-xl overflow-hidden border-2 transition-all relative ${
-                              isFirst || isLast ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                            }`}>
-                            <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                            {(isFirst || isLast) && (
-                              <div className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                                {isFirst ? "A" : "B"}
-                              </div>
-                            )}
-                            <div className={`text-center text-[10px] py-1 ${
-                              isFirst || isLast ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
-                            }`}>
-                              {photo.roomNameHe}
-                              {isFirst && " - התחלה"}
-                              {isLast && " - סיום"}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Or upload custom images */}
-            <div className="max-w-2xl mx-auto">
-              {allRoomPhotos.length > 0 && (
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs text-gray-400">או העלו תמונות</span>
-                  <div className="flex-1 h-px bg-gray-200" />
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                {/* First frame */}
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה ראשונה (התחלה)</label>
-                  <input ref={videoFirstInputRef} type="file" accept="image/*" className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => setVideoFirstImage(ev.target?.result as string);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  <button onClick={() => videoFirstInputRef.current?.click()}
-                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                      videoFirstImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                    }`}>
-                    {videoFirstImage ? (
-                      <img src={videoFirstImage} alt="First frame" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center p-4">
-                        <div className="text-3xl mb-2 opacity-40">A</div>
-                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                      </div>
-                    )}
-                  </button>
-                </div>
-
-                {/* Last frame */}
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-2 block text-center">תמונה שנייה (סיום)</label>
-                  <input ref={videoLastInputRef} type="file" accept="image/*" className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => setVideoLastImage(ev.target?.result as string);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  <button onClick={() => videoLastInputRef.current?.click()}
-                    className={`w-full aspect-[4/3] rounded-2xl border-2 border-dashed overflow-hidden flex items-center justify-center transition-all ${
-                      videoLastImage ? "border-gray-900 bg-white" : "border-gray-300 hover:border-gray-400 bg-gray-50"
-                    }`}>
-                    {videoLastImage ? (
-                      <img src={videoLastImage} alt="Last frame" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center p-4">
-                        <div className="text-3xl mb-2 opacity-40">B</div>
-                        <p className="text-xs text-gray-400">לחצו להעלאה</p>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {videoFirstImage && videoLastImage && (
-              <div className="flex items-center justify-center gap-3 text-sm">
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר A</span>
-                <span className="text-gray-300">→</span>
-                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">חדר B</span>
-              </div>
-            )}
-
-            {/* Optional custom prompt */}
-            <div className="max-w-2xl mx-auto space-y-4">
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1.5 block">הוספת פרטים (אופציונלי)</label>
-                <input
-                  type="text"
-                  value={videoCustomPrompt}
-                  onChange={(e) => setVideoCustomPrompt(e.target.value)}
-                  placeholder="למשל: תאורה חמה, סגנון סינמטי, מעבר דרך מסדרון..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
-                  dir="rtl"
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-
-              <button onClick={generateDirectVideo} disabled={!videoFirstImage || !videoLastImage || videoLoading}
-                className={`w-full py-4 rounded-full font-bold text-lg transition-all relative overflow-hidden ${
-                  videoLoading
-                    ? "bg-emerald-800 text-white"
-                    : videoFirstImage && videoLastImage
-                    ? "bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }`}>
-                {videoLoading && (
-                  <div
-                    className="absolute inset-0 bg-emerald-600 transition-all duration-1000 ease-out"
-                    style={{ width: `${parseInt(videoProgress.match?.(/\d+/)?.[0] || "5")}%` }}
-                  />
-                )}
-                <span className="relative z-10">
-                {videoLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Spinner className="h-5 w-5" />
-                    {videoProgress || "מייצר סרטון..."}
-                  </span>
-                ) : "🎬 צור סרטון סיור"}
-                </span>
-              </button>
-
-
-              <div className="text-center">
-                <button onClick={() => { setPhase("upload"); setVideoFirstImage(null); setVideoLastImage(null); }}
-                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה לתוכנית קומה</button>
-              </div>
-            </div>
-          </>
-        )}
-
         {phase === "video-select" && (
           <>
             {(() => {
@@ -1511,7 +1453,18 @@ export default function FloorplanPage() {
               ) : "צור סרטון סיור →"}
             </button>
 
-            <button onClick={() => setPhase("room-actions")}
+            <button onClick={() => {
+              if (videoIntent || !currentRoomPhoto) {
+                if (floorplanResult) {
+                  setVideoClickMode(true);
+                  setPhase("floorplan");
+                } else {
+                  setPhase("upload");
+                }
+                return;
+              }
+              setPhase("room-actions");
+            }}
               className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors">← חזרה</button>
           </>
         )}
@@ -1535,7 +1488,19 @@ export default function FloorplanPage() {
                 className="px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800">הורד סרטון</a>
               <button onClick={() => { setVideoResult(null); setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }}
                 className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">סרטון נוסף</button>
-              <button onClick={() => { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }}
+              <button onClick={() => {
+                if (videoIntent) {
+                  if (floorplanResult) {
+                    setVideoClickMode(true);
+                    setPhase("floorplan");
+                  } else {
+                    setPhase("upload");
+                  }
+                } else {
+                  setPhase("floorplan-ready");
+                }
+                setCurrentRoomPhoto(null);
+              }}
                 className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200">חזרה להדמיה</button>
             </div>
           </>

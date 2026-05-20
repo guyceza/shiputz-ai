@@ -22,6 +22,20 @@ type ShopLookProduct = {
   searchQuery: string;
 };
 
+function clampPercentage(value: number) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function getShopLookMarkerPosition(position: ShopLookProduct["position"]) {
+  const width = Number(position.width || 0);
+  const height = Number(position.height || 0);
+
+  return {
+    left: clampPercentage(position.left + (Number.isFinite(width) ? width / 2 : 0)),
+    top: clampPercentage(position.top + (Number.isFinite(height) ? height / 2 : 0)),
+  };
+}
+
 // Add keyframes for animations
 const animationStyles = `
 @keyframes bounce-in {
@@ -1938,28 +1952,36 @@ export default function VisualizePage() {
                 )}
                 
                 {/* Product Hotspots */}
-                {detectedProducts.map((product, index) => (
-                  <div
-                    key={product.id || index}
-                    className="absolute"
-                    style={{ left: `${product.position.left}%`, top: `${product.position.top}%` }}
-                  >
-                    <a
-                      href={`https://www.google.com/search?q=${encodeURIComponent(product.searchQuery + ' לקנות בישראל')}&tbm=shop`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group"
+                {detectedProducts.map((product, index) => {
+                  const marker = getShopLookMarkerPosition(product.position);
+
+                  return (
+                    <div
+                      key={product.id || index}
+                      className="absolute"
+                      style={{
+                        left: `${marker.left}%`,
+                        top: `${marker.top}%`,
+                        transform: "translate(-50%, -50%)",
+                      }}
                     >
-                      <div className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse">
-                        <span className="text-xs font-bold text-emerald-600">+</span>
-                      </div>
-                      <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
-                        <p className="text-sm font-medium text-gray-900 mb-2">{product.name}</p>
-                        <span className="text-xs text-emerald-600 font-medium">חפש בגוגל שופינג ←</span>
-                      </div>
-                    </a>
-                  </div>
-                ))}
+                      <a
+                        href={`https://www.google.com/search?q=${encodeURIComponent(product.searchQuery + ' לקנות בישראל')}&tbm=shop`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group"
+                      >
+                        <div className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse">
+                          <span className="text-xs font-bold text-emerald-600">+</span>
+                        </div>
+                        <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                          <p className="text-sm font-medium text-gray-900 mb-2">{product.name}</p>
+                          <span className="text-xs text-emerald-600 font-medium">חפש בגוגל שופינג ←</span>
+                        </div>
+                      </a>
+                    </div>
+                  );
+                })}
               </div>
               
               {!detectingProducts && detectedProducts.length === 0 && (

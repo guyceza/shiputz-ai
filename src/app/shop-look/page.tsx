@@ -33,6 +33,12 @@ const demoItems: ShoppableItem[] = [
   { id: "spotlights", name: "ספוטים שקועים", position: { top: 2, left: 20, width: 60, height: 8 }, searchQuery: "ספוטים שקועים LED תקרה לבן" },
 ];
 
+type ShopLookHistory = {
+  hasHistory?: boolean;
+  imageUrl?: string;
+  items?: ShoppableItem[];
+};
+
 export default function ShopLookPage() {
   const [imageSrc, setImageSrc] = useState<string>("/after-room.jpg");
   const [items, setItems] = useState<ShoppableItem[]>(demoItems);
@@ -48,7 +54,7 @@ export default function ShopLookPage() {
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
   const [showPaywall, setShowPaywall] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
-  const [userHistory, setUserHistory] = useState<any>(null);
+  const [userHistory, setUserHistory] = useState<ShopLookHistory | null>(null);
 
   // Auth check
   useEffect(() => {
@@ -205,10 +211,13 @@ export default function ShopLookPage() {
 
   const analyzeImage = async (imageUrl: string, visionId?: string) => {
     try {
+      const userData = localStorage.getItem("user");
+      const userEmail = userData ? JSON.parse(userData).email : null;
+
       const response = await fetch('/api/detect-products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageUrl })
+        body: JSON.stringify({ image: imageUrl, userEmail })
       });
       
       const data = await response.json();

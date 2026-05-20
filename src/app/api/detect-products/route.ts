@@ -51,11 +51,13 @@ const PRODUCT_DETECTION_PROMPT = `You are a visual product matching expert for i
 
 Your job is NOT to label objects generically. Your job is to create precise Google Shopping searches for products that visually match the room image.
 
-CRITICAL: Position values MUST be percentages (0-100), NOT pixels.
-- top: percentage from top of image to the CENTER of the item
-- left: percentage from left of image to the CENTER of the item
-- width: approximate item width as percentage of image width
-- height: approximate item height as percentage of image height
+CRITICAL: Position values MUST be a tight bounding box in percentages (0-100), NOT pixels.
+- top: percentage from top of image to the TOP EDGE of the item box
+- left: percentage from left of image to the LEFT EDGE of the item box
+- width: approximate item box width as percentage of image width
+- height: approximate item box height as percentage of image height
+- The clickable marker will be rendered in the center of this box, so the box must tightly cover the visible product.
+- Do not place boxes on empty floor/wall areas near the product.
 
 Find 5-8 purchasable furniture/decor items only. Prefer visible items a user would reasonably buy:
 - sofas, armchairs, chairs, tables, rugs, lamps, chandeliers, curtains, art, pillows, plants, sideboards, kitchen stools, shelves
@@ -80,7 +82,7 @@ Search query rules:
   - "ספת עור שחורה דו מושבית מודרנית"
 
 Return ONLY a JSON array, no markdown and no explanation:
-[{"id":"item-1","name":"שטיח שאגי אפור מלבני","position":{"top":72,"left":52,"width":28,"height":18},"searchQuery":"שטיח שאגי אפור מלבני עבה לסלון"}]`;
+[{"id":"item-1","name":"שטיח שאגי אפור מלבני","position":{"top":63,"left":38,"width":28,"height":18},"searchQuery":"שטיח שאגי אפור מלבני עבה לסלון"}]`;
 
 function extractJsonArray(text: string): unknown[] | null {
   const cleanText = text.replace(/```json\n?/g, "").replace(/```/g, "").trim();

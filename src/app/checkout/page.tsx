@@ -43,6 +43,7 @@ function CheckoutContent() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
+  const [userPlan, setUserPlan] = useState("free");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -106,6 +107,10 @@ function CheckoutContent() {
           const user = JSON.parse(userData);
           if (user.email && user.id) {
             setEmail(user.email);
+            fetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
+              .then(r => r.json())
+              .then(d => setUserPlan(d.plan || "free"))
+              .catch(() => {});
             setCheckingAuth(false);
             return;
           }
@@ -114,6 +119,10 @@ function CheckoutContent() {
         const session = await getSession();
         if (session?.user?.email) {
           setEmail(session.user.email);
+          fetch(`/api/credits?email=${encodeURIComponent(session.user.email)}`)
+            .then(r => r.json())
+            .then(d => setUserPlan(d.plan || "free"))
+            .catch(() => {});
           setCheckingAuth(false);
           return;
         }
@@ -127,6 +136,7 @@ function CheckoutContent() {
 
   const handlePurchase = async () => {
     if (!email.trim() || !productType) return;
+    if (isPlan && userPlan === planId) return;
     setLoading(true);
 
     try {
@@ -150,9 +160,14 @@ function CheckoutContent() {
         }
         window.location.href = data.payment_url;
       } else {
+        if (response.status === 409) {
+          alert("זו כבר התוכנית הנוכחית שלך.");
+          setLoading(false);
+          return;
+        }
         throw new Error(data.error || "Failed to create payment link");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Payment error:", error);
       alert("אירעה שגיאה. אנא נסה שוב.");
       setLoading(false);
@@ -213,6 +228,11 @@ function CheckoutContent() {
               {isPlan && <span className="text-gray-400 text-sm">/לחודש</span>}
             </div>
             <p className="text-gray-500 text-sm mt-2">{subtitle}</p>
+            {isPlan && (
+              <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                * קרדיטים של מנוי מתאפסים ומתחדשים בכל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים.
+              </p>
+            )}
           </div>
 
           {/* Email */}
@@ -226,10 +246,10 @@ function CheckoutContent() {
           {/* CTA */}
           <button
             onClick={handlePurchase}
-            disabled={loading}
-            className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-full text-sm font-bold transition-all disabled:opacity-50 shadow-lg"
+            disabled={loading || (Boolean(isPlan) && userPlan === planId)}
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-full text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
-            {loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
+            {userPlan === planId && isPlan ? "התוכנית הנוכחית שלך" : loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
           </button>
 
           <p className="text-center text-gray-400 text-xs mt-3">

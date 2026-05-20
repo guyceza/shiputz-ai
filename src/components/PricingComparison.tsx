@@ -18,6 +18,7 @@ const plans = [
     cta: "התחל בחינם",
     href: "/signup",
     highlighted: false,
+    isEnterprise: false,
   },
   {
     id: "starter",
@@ -36,6 +37,7 @@ const plans = [
     cta: "התחל עכשיו",
     href: "/pricing",
     highlighted: false,
+    isEnterprise: false,
   },
   {
     id: "pro",
@@ -55,6 +57,7 @@ const plans = [
     cta: "התחל עכשיו",
     href: "/pricing",
     highlighted: true,
+    isEnterprise: false,
   },
   {
     id: "enterprise",
@@ -81,7 +84,7 @@ export default function PricingComparison() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full px-4 lg:px-8">
       {plans.map((plan) => {
-        const isEnterprise = (plan as any).isEnterprise;
+        const isEnterprise = plan.isEnterprise;
         return (
           <div
             key={plan.id}
@@ -125,6 +128,11 @@ export default function PricingComparison() {
               <p className={`text-sm mt-1 ${isEnterprise ? "text-gray-400" : "text-gray-500"}`}>
                 {plan.credits}
               </p>
+              {plan.id !== "free" && !isEnterprise && (
+                <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                  * קרדיטים של מנוי מתאפסים ומתחדשים בכל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים.
+                </p>
+              )}
             </div>
 
             <ul className="space-y-3 mb-8 flex-grow">

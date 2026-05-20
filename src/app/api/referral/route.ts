@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     // Check if new user actually exists (registered)
     const { data: newUser } = await supabase
       .from('users')
-      .select('email, viz_credits')
+      .select('email, viz_credits, purchased_credits')
       .eq('email', newUserEmail.toLowerCase())
       .single();
 
@@ -145,14 +145,18 @@ export async function POST(request: NextRequest) {
     // 2. Credit referrer +20
     const { data: referrerData } = await supabase
       .from('users')
-      .select('viz_credits')
+      .select('viz_credits, purchased_credits')
       .eq('email', referrer.email)
       .single();
 
     const newReferrerCredits = (referrerData?.viz_credits || 0) + REFERRAL_CREDITS;
+    const newReferrerPurchasedCredits = (referrerData?.purchased_credits || 0) + REFERRAL_CREDITS;
     await supabase
       .from('users')
-      .update({ viz_credits: newReferrerCredits })
+      .update({
+        viz_credits: newReferrerCredits,
+        purchased_credits: newReferrerPurchasedCredits,
+      })
       .eq('email', referrer.email);
 
     await supabase.from('credit_transactions').insert({
@@ -164,9 +168,14 @@ export async function POST(request: NextRequest) {
 
     // 3. Credit referred +20
     const newReferredCredits = (newUser.viz_credits || 0) + REFERRAL_CREDITS;
+    const newReferredPurchasedCredits = (newUser.purchased_credits || 0) + REFERRAL_CREDITS;
     await supabase
       .from('users')
-      .update({ viz_credits: newReferredCredits, referred_by: referralCode.toUpperCase() })
+      .update({
+        viz_credits: newReferredCredits,
+        purchased_credits: newReferredPurchasedCredits,
+        referred_by: referralCode.toUpperCase(),
+      })
       .eq('email', newUserEmail.toLowerCase());
 
     await supabase.from('credit_transactions').insert({

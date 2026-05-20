@@ -58,6 +58,18 @@ const PLANS = [
   },
 ];
 
+const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
+
+function getPlanCta(planId: string, planName: string, userPlan: string, defaultCta: string) {
+  if (!userPlan || userPlan === "free") return defaultCta;
+  if (userPlan === planId) return "התוכנית הנוכחית שלך";
+
+  const currentRank = PLAN_RANK[userPlan] || 0;
+  const targetRank = PLAN_RANK[planId] || 0;
+  if (targetRank > currentRank) return `שדרג ל-${planName}`;
+  return `עבור ל-${planName}`;
+}
+
 const CREDIT_COSTS = [
   { action: "הדמיית חדר", credits: 10, icon: "🎨" },
   { action: "הדמיית תוכנית קומה", credits: 10, icon: "📐" },
@@ -106,7 +118,7 @@ const FAQ = [
   },
   {
     q: "האם הקרדיטים מצטברים?",
-    a: "כן! קרדיטים שלא נוצלו עוברים לחודש הבא. בנוסף, אפשר לרכוש חבילות קרדיטים נוספות בכל עת.",
+    a: "קרדיטים של מנוי מתאפסים ומתחדשים כל חודש לפי התוכנית. קרדיטים שנרכשו בנפרד בתשלום חד-פעמי לא מתאפסים ונשארים בחשבון.",
   },
   {
     q: "אפשר לנסות בחינם?",
@@ -114,7 +126,7 @@ const FAQ = [
   },
   {
     q: "איך משדרגים או מבטלים?",
-    a: "אפשר לשדרג בכל רגע - הקרדיטים החדשים נוספים מיד. ביטול נכנס לתוקף בסוף תקופת החיוב.",
+    a: "אפשר לבטל בכל רגע. שדרוג תוכנית עדיין לא מחושב אוטומטית לפי יתרת החודש, ולכן כרגע עדיף לפנות אלינו לשדרוג יחסי מסודר.",
   },
 ];
 
@@ -133,7 +145,7 @@ export default function PricingPage() {
       if (userData) {
         const user = JSON.parse(userData);
         if (user.id) {
-          setIsLoggedIn(true);
+          queueMicrotask(() => setIsLoggedIn(true));
           if (user.email) {
             fetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
               .then(r => r.json())
@@ -228,6 +240,8 @@ export default function PricingPage() {
           {PLANS.map((plan) => {
             const price = billingCycle === "annual" ? plan.annualPrice : plan.monthlyPrice;
             const perCredit = (price / plan.credits).toFixed(2);
+            const isCurrentPlan = userPlan === plan.id;
+            const ctaLabel = getPlanCta(plan.id, plan.name, userPlan, plan.cta);
             return (
               <div
                 key={plan.id}
@@ -263,6 +277,9 @@ export default function PricingPage() {
                     <span className="text-sm font-semibold text-emerald-600">{plan.credits} קרדיטים</span>
                     <span className="text-xs text-gray-400">(₪{perCredit} לקרדיט)</span>
                   </div>
+                  <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                    * קרדיטים של מנוי מתאפסים ומתחדשים בכל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים.
+                  </p>
                 </div>
 
                 <ul className="space-y-3 mb-6">
@@ -276,16 +293,26 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={isLoggedIn ? `/checkout?plan=${plan.id}&billing=${billingCycle}` : `/signup?redirect=/checkout?plan=${plan.id}&billing=${billingCycle}`}
-                  className={`block w-full py-3 rounded-full text-center font-bold text-sm transition-all ${
-                    plan.highlighted
-                      ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  }`}
-                >
-                  {userPlan === plan.id ? "התוכנית הנוכחית שלך" : plan.cta}
-                </Link>
+                {isCurrentPlan ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="block w-full py-3 rounded-full text-center font-bold text-sm bg-gray-200 text-gray-500 cursor-not-allowed"
+                  >
+                    {ctaLabel}
+                  </button>
+                ) : (
+                  <Link
+                    href={isLoggedIn ? `/checkout?plan=${plan.id}&billing=${billingCycle}` : `/signup?redirect=/checkout?plan=${plan.id}&billing=${billingCycle}`}
+                    className={`block w-full py-3 rounded-full text-center font-bold text-sm transition-all ${
+                      plan.highlighted
+                        ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"
+                        : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                    }`}
+                  >
+                    {ctaLabel}
+                  </Link>
+                )}
               </div>
             );
           })}

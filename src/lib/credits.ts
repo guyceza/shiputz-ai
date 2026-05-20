@@ -79,9 +79,25 @@ const ADMIN_EMAILS = ['guyceza@gmail.com'];
 
 export interface CreditBalance {
   credits: number;
+  subscriptionCredits: number;
+  purchasedCredits: number;
   plan: string;
   monthlyCredits: number;
   nextReset: string | null;
+}
+
+type CreditRow = {
+  viz_credits?: number | null;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
+};
+
+function splitCreditBalance(user: CreditRow | null | undefined) {
+  const total = user?.viz_credits || 0;
+  const subscriptionCredits = user?.subscription_credits || 0;
+  const explicitPurchasedCredits = user?.purchased_credits;
+  const purchasedCredits = explicitPurchasedCredits ?? Math.max(total - subscriptionCredits, 0);
+  return { total, subscriptionCredits, purchasedCredits };
 }
 
 /**
@@ -91,12 +107,12 @@ export async function getCredits(email: string): Promise<CreditBalance> {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('users')
-    .select('viz_credits, plan, plan_started_at')
+    .select('viz_credits, subscription_credits, purchased_credits, plan, plan_started_at')
     .eq('email', email.toLowerCase())
     .single();
 
   if (error || !data) {
-    return { credits: 0, plan: 'free', monthlyCredits: 0, nextReset: null };
+    return { credits: 0, subscriptionCredits: 0, purchasedCredits: 0, plan: 'free', monthlyCredits: 0, nextReset: null };
   }
 
   const plan = (data.plan || 'free') as PlanId;
@@ -114,8 +130,12 @@ export async function getCredits(email: string): Promise<CreditBalance> {
     nextReset = nextResetDate.toISOString();
   }
 
+  const { total, subscriptionCredits, purchasedCredits } = splitCreditBalance(data);
+
   return {
-    credits: data.viz_credits || 0,
+    credits: total,
+    subscriptionCredits,
+    purchasedCredits,
     plan,
     monthlyCredits: planConfig.monthlyCredits,
     nextReset,
@@ -155,7 +175,7 @@ export async function deductCredits(email: string, action: CreditAction): Promis
   // Atomic deduction using RPC or manual check+update
   const { data: user, error: fetchError } = await supabase
     .from('users')
-    .select('viz_credits')
+    .select('viz_credits, subscription_credits, purchased_credits')
     .eq('email', email.toLowerCase())
     .single();
 
@@ -163,15 +183,23 @@ export async function deductCredits(email: string, action: CreditAction): Promis
     throw new Error('משתמש לא נמצא');
   }
 
-  const currentCredits = user.viz_credits || 0;
+  const { total: currentCredits, subscriptionCredits, purchasedCredits } = splitCreditBalance(user);
   if (currentCredits < cost) {
     throw new Error(`אין מספיק קרדיטים (${currentCredits}/${cost})`);
   }
 
+  const subscriptionDeduction = Math.min(subscriptionCredits, cost);
+  const purchasedDeduction = cost - subscriptionDeduction;
+  const newSubscriptionCredits = subscriptionCredits - subscriptionDeduction;
+  const newPurchasedCredits = Math.max(purchasedCredits - purchasedDeduction, 0);
   const newBalance = currentCredits - cost;
   const { error: updateError } = await supabase
     .from('users')
-    .update({ viz_credits: newBalance })
+    .update({
+      viz_credits: newBalance,
+      subscription_credits: newSubscriptionCredits,
+      purchased_credits: newPurchasedCredits,
+    })
     .eq('email', email.toLowerCase());
 
   if (updateError) {
@@ -200,16 +228,21 @@ export async function addCredits(email: string, amount: number, reason: string):
 
   const { data: user } = await supabase
     .from('users')
-    .select('viz_credits')
+    .select('viz_credits, purchased_credits')
     .eq('email', email.toLowerCase())
     .single();
 
   const currentCredits = user?.viz_credits || 0;
+  const currentPurchasedCredits = user?.purchased_credits || 0;
   const newBalance = currentCredits + amount;
+  const newPurchasedCredits = currentPurchasedCredits + amount;
 
   const { error } = await supabase
     .from('users')
-    .update({ viz_credits: newBalance })
+    .update({
+      viz_credits: newBalance,
+      purchased_credits: newPurchasedCredits,
+    })
     .eq('email', email.toLowerCase());
 
   if (error) throw new Error('Failed to add credits');
@@ -240,12 +273,12 @@ export async function setPlan(email: string, planId: PlanId): Promise<void> {
   // Get current credits
   const { data: user } = await supabase
     .from('users')
-    .select('viz_credits')
+    .select('purchased_credits')
     .eq('email', email.toLowerCase())
     .single();
 
-  const currentCredits = user?.viz_credits || 0;
-  const newCredits = currentCredits + plan.monthlyCredits;
+  const purchasedCredits = user?.purchased_credits || 0;
+  const newCredits = purchasedCredits + plan.monthlyCredits;
 
   await supabase
     .from('users')
@@ -253,6 +286,8 @@ export async function setPlan(email: string, planId: PlanId): Promise<void> {
       plan: planId,
       plan_started_at: new Date().toISOString(),
       viz_credits: newCredits,
+      subscription_credits: plan.monthlyCredits,
+      purchased_credits: purchasedCredits,
       purchased: true,
       purchased_at: new Date().toISOString(),
     })

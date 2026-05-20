@@ -701,14 +701,18 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
     try {
       const { data: userData } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, purchased_credits')
         .eq('email', user.email)
         .single();
       const currentCredits = userData?.viz_credits || 0;
+      const currentPurchasedCredits = userData?.purchased_credits || 0;
       const newBalance = currentCredits + 5;
       await supabase
         .from('users')
-        .update({ viz_credits: newBalance })
+        .update({
+          viz_credits: newBalance,
+          purchased_credits: currentPurchasedCredits + 5,
+        })
         .eq('email', user.email);
       await supabase.from('credit_transactions').insert({
         user_email: user.email,

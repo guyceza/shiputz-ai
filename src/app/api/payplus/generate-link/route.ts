@@ -120,6 +120,17 @@ export async function POST(request: NextRequest) {
       const planId = planMatch[1];
       const cycle = planMatch[2] as 'monthly' | 'annual';
       const plan = PLAN_PRICING[planId];
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('plan, vision_subscription')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (currentUser?.plan === planId && currentUser?.vision_subscription === 'active') {
+        return NextResponse.json({ error: 'You are already on this plan' }, { status: 409 });
+      }
       
       if (cycle === 'annual') {
         amount = plan.annual * 12; // Charge full year

@@ -130,14 +130,18 @@ export async function POST(request: NextRequest) {
       const credits = PACK_CREDITS[productType];
       const { data: currentUser } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, purchased_credits')
         .eq('email', email.toLowerCase())
         .single();
       
       const currentCredits = currentUser?.viz_credits || 0;
+      const currentPurchasedCredits = currentUser?.purchased_credits || 0;
       await supabase
         .from('users')
-        .update({ viz_credits: currentCredits + credits })
+        .update({
+          viz_credits: currentCredits + credits,
+          purchased_credits: currentPurchasedCredits + credits,
+        })
         .eq('email', email.toLowerCase());
       
     }

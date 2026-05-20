@@ -10,6 +10,19 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+type CreditBucketRow = {
+  viz_credits?: number | null;
+  subscription_credits?: number | null;
+  purchased_credits?: number | null;
+};
+
+function getCreditBuckets(user: CreditBucketRow | null | undefined) {
+  const total = user?.viz_credits || 0;
+  const subscriptionCredits = user?.subscription_credits || 0;
+  const purchasedCredits = user?.purchased_credits ?? Math.max(total - subscriptionCredits, 0);
+  return { total, subscriptionCredits, purchasedCredits };
+}
+
 // Shared secret for webhook authentication
 const WEBHOOK_SECRET = process.env.PAYPLUS_WEBHOOK_SECRET;
 
@@ -234,12 +247,12 @@ export async function POST(request: NextRequest) {
 
       const { data: currentUser } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, subscription_credits, purchased_credits')
         .eq('email', email.toLowerCase())
         .single();
 
-      const currentCredits = currentUser?.viz_credits || 0;
-      const newCredits = currentCredits + credits;
+      const { purchasedCredits } = getCreditBuckets(currentUser);
+      const newCredits = purchasedCredits + credits;
 
       await supabase.from('users').upsert({
         email: email.toLowerCase(),
@@ -249,6 +262,8 @@ export async function POST(request: NextRequest) {
         plan_started_at: new Date().toISOString(),
         vision_subscription: 'active',
         viz_credits: newCredits,
+        subscription_credits: credits,
+        purchased_credits: purchasedCredits,
         payplus_recurring_uid: recurringUid,
         payplus_customer_uid: customerUid,
         payplus_subscription_status: cycle === 'monthly' ? 'active' : null,
@@ -274,33 +289,35 @@ export async function POST(request: NextRequest) {
     // Credit slider purchases: credits_50, credits_100, etc.
     const creditsMatch = productType?.match?.(/^credits_(\d+)$/);
     if (creditsMatch) {
-      const purchasedCredits = parseInt(creditsMatch[1]);
+      const boughtCredits = parseInt(creditsMatch[1]);
 
       const { data: currentUser } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, subscription_credits, purchased_credits')
         .eq('email', email.toLowerCase())
         .single();
 
-      const currentCredits = currentUser?.viz_credits || 0;
-      const newCredits = currentCredits + purchasedCredits;
+      const { total: currentCredits, purchasedCredits } = getCreditBuckets(currentUser);
+      const newCredits = currentCredits + boughtCredits;
+      const newPurchasedCredits = purchasedCredits + boughtCredits;
 
       await supabase.from('users').update({
         viz_credits: newCredits,
+        purchased_credits: newPurchasedCredits,
       }).eq('email', email.toLowerCase());
 
       // Log transaction
       await supabase.from('credit_transactions').insert({
         user_email: email.toLowerCase(),
         action: `purchase_credits`,
-        amount: purchasedCredits,
+        amount: boughtCredits,
         balance_after: newCredits,
         created_at: new Date().toISOString(),
       });
 
 
       // Send credits purchase email
-      await sendCreditsEmail(email, purchasedCredits, newCredits, supabase);
+      await sendCreditsEmail(email, boughtCredits, newCredits, supabase);
 
       return NextResponse.json({ received: true, status: 'success', product: productType });
     }
@@ -312,7 +329,7 @@ export async function POST(request: NextRequest) {
       // Get current credits
       const { data: currentUser } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, purchased_credits')
         .eq('email', email.toLowerCase())
         .single();
       
@@ -348,15 +365,19 @@ export async function POST(request: NextRequest) {
       // First get current credits
       const { data: currentUser } = await supabase
         .from('users')
-        .select('viz_credits')
+        .select('viz_credits, purchased_credits')
         .eq('email', email.toLowerCase())
         .single();
       
       const currentCredits = currentUser?.viz_credits || 0;
+      const currentPurchasedCredits = currentUser?.purchased_credits || 0;
       
       const { error: creditError } = await supabase
         .from('users')
-        .update({ viz_credits: currentCredits + credits })
+        .update({
+          viz_credits: currentCredits + credits,
+          purchased_credits: currentPurchasedCredits + credits,
+        })
         .eq('email', email.toLowerCase());
 
       if (creditError) {
@@ -530,7 +551,7 @@ async function sendPlanEmail(email: string, planId: string, credits: number, sup
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
           </div>
-          <p style="color: #888; font-size: 14px;">הקרדיטים מתחדשים כל חודש. בהצלחה!<br>צוות ShiputzAI</p>
+          <p style="color: #888; font-size: 14px;">קרדיטי המנוי מתאפסים ומתחדשים כל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים. בהצלחה!<br>צוות ShiputzAI</p>
         </div>`,
       }),
     });

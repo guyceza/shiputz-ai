@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     // Get all users with active plans
     const { data: users, error } = await supabase
       .from('users')
-      .select('email, name, plan, plan_started_at, viz_credits, payplus_recurring_uid, payplus_subscription_status')
+      .select('email, name, plan, plan_started_at, viz_credits, purchased_credits, payplus_recurring_uid, payplus_subscription_status')
       .in('plan', ['starter', 'pro', 'business'])
       .not('plan_started_at', 'is', null);
 
@@ -77,12 +77,14 @@ export async function GET(request: NextRequest) {
 
       if (existing && existing.length > 0) continue; // Already renewed today
 
-      // Renew credits
-      const currentCredits = user.viz_credits || 0;
-      const newBalance = currentCredits + credits;
+      // Reset subscription credits and preserve separately purchased credits.
+      const purchasedCredits = user.purchased_credits || 0;
+      const newBalance = purchasedCredits + credits;
 
       await supabase.from('users').update({
         viz_credits: newBalance,
+        subscription_credits: credits,
+        purchased_credits: purchasedCredits,
       }).eq('email', user.email);
 
       await supabase.from('credit_transactions').insert({
@@ -169,7 +171,7 @@ async function sendRenewalEmail(email: string, name: string | null, credits: num
         html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #111; text-align: center;">הקרדיטים החודשיים שלך חודשו!</h1>
           <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
-          <p style="font-size: 16px; color: #333;">קיבלת <strong>${credits} קרדיטים חדשים</strong> במסגרת המנוי שלך.</p>
+          <p style="font-size: 16px; color: #333;">קרדיטי המנוי שלך התאפסו והתחדשו ל-<strong>${credits} קרדיטים</strong>.</p>
           <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
             <div style="font-size: 48px; font-weight: bold; color: #10b981;">${total}</div>
             <div style="color: #666;">סה"כ קרדיטים זמינים</div>
@@ -177,7 +179,7 @@ async function sendRenewalEmail(email: string, name: string | null, credits: num
           <div style="text-align: center; margin: 30px 0;">
             <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
           </div>
-          <p style="color: #888; font-size: 14px;">בהצלחה!<br>צוות ShiputzAI</p>
+          <p style="color: #888; font-size: 14px;">קרדיטים שנרכשו בנפרד לא מתאפסים ונשארים בחשבון. בהצלחה!<br>צוות ShiputzAI</p>
         </div>`,
       }),
     });

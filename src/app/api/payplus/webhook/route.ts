@@ -126,6 +126,8 @@ export async function POST(request: NextRequest) {
     // and may not include email - try customer_uid lookup as fallback
     let email = more_info_1 || tx.email || tx.customer_email || data.email || data.customer_email || data.more_info_1;
     const productType = more_info || tx.extra_info || data.extra_info || tx.product_type || data.product_type;
+    const recurringUid = tx.recurring_uid || tx.recurring_id || recurring_id || data.recurring_uid || data.recurring_id || null;
+    const customerUid = tx.customer_uid || data.customer_uid || null;
 
     // Fallback: if no email found but we have customer_uid, look up customer in PayPlus
     if (!email && (tx.customer_uid || data.customer_uid)) {
@@ -182,6 +184,11 @@ export async function POST(request: NextRequest) {
           .from('users')
           .update({ 
             vision_subscription: 'canceled',
+            vision_canceled_at: new Date().toISOString(),
+            payplus_recurring_uid: recurringUid,
+            payplus_customer_uid: customerUid,
+            payplus_subscription_status: 'canceled',
+            payplus_last_checked_at: new Date().toISOString(),
           })
           .eq('email', email.toLowerCase());
 
@@ -242,6 +249,10 @@ export async function POST(request: NextRequest) {
         plan_started_at: new Date().toISOString(),
         vision_subscription: 'active',
         viz_credits: newCredits,
+        payplus_recurring_uid: recurringUid,
+        payplus_customer_uid: customerUid,
+        payplus_subscription_status: cycle === 'monthly' ? 'active' : null,
+        payplus_last_checked_at: new Date().toISOString(),
       }, { onConflict: 'email' });
 
       // Log transaction
@@ -313,6 +324,10 @@ export async function POST(request: NextRequest) {
         purchased: true,
         purchased_at: new Date().toISOString(),
         vision_subscription: 'active', // Pro includes everything
+        payplus_recurring_uid: recurringUid,
+        payplus_customer_uid: customerUid,
+        payplus_subscription_status: productType === 'pro_monthly' ? 'active' : null,
+        payplus_last_checked_at: new Date().toISOString(),
         ...(proCredits > 0 ? { viz_credits: currentCredits + proCredits } : {}),
       };
 
@@ -376,6 +391,10 @@ export async function POST(request: NextRequest) {
       const upsertData: any = { 
         email: email.toLowerCase(),
         vision_subscription: 'active',
+        payplus_recurring_uid: recurringUid,
+        payplus_customer_uid: customerUid,
+        payplus_subscription_status: 'active',
+        payplus_last_checked_at: new Date().toISOString(),
       };
       
       const { error: upsertError } = await supabase

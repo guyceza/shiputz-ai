@@ -178,8 +178,8 @@ async function incrementUsage(userEmail: string): Promise<{ success: boolean; ne
       return { success: true, newCount };
     }
     
-    return { success: true, newCount: (data as any)?.vision_usage_count || 1 };
-  } catch (e) {
+    return { success: true, newCount: (data as { vision_usage_count?: number } | null)?.vision_usage_count || 1 };
+  } catch {
     return { success: false, newCount: 0 };
   }
 }
@@ -196,7 +196,7 @@ async function markTrialUsed(userEmail: string): Promise<boolean> {
     
     // If no error and row was updated, we successfully claimed the trial
     return !error;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -400,10 +400,6 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Credit check
-    const creditCheck = await creditGuard(userEmail, 'visualize');
-    if ('error' in creditCheck) return creditCheck.error;
-
     // Rate limiting - 10 requests per minute (expensive operation)
     const clientId = getClientId(request);
     const rateLimit = checkRateLimit(clientId, 10, 60000);
@@ -457,6 +453,15 @@ export async function POST(request: NextRequest) {
           }, { status: subscription.isPro ? 429 : 403 });
         }
       }
+    }
+
+    let usedCredit = false;
+    let vizCreditsAfter = subscription.vizCredits;
+    if (!isTrialRun && !isAdminEmail(userEmail)) {
+      const creditCheck = await creditGuard(userEmail, 'visualize');
+      if ('error' in creditCheck) return creditCheck.error;
+      usedCredit = creditCheck.cost > 0;
+      vizCreditsAfter = creditCheck.balance;
     }
 
     // Read API key from environment
@@ -675,7 +680,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
           costs: costEstimate
         });
       }
-    } catch (editError: any) {
+    } catch (editError: unknown) {
       
       // Bug fix: Rollback trial if this was a trial run - user shouldn't lose trial due to system error
       if (isTrialRun && userEmail) {
@@ -683,7 +688,8 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       }
       
       // Handle timeout specifically
-      const isTimeout = editError?.name === 'AbortError' || editError?.message?.includes('abort');
+      const isTimeout = editError instanceof Error &&
+        (editError.name === 'AbortError' || editError.message.includes('abort'));
       
       return NextResponse.json({
         success: false,
@@ -696,22 +702,10 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       });
     }
 
-    // Step 4: Increment usage counter and deduct credits if needed
+    // Step 4: Increment usage counter. Credits were deducted once by creditGuard.
     // Bug #12: Trial was already marked used before generation
-    let usedCredit = false;
     if (userEmail && !isTrialRun) {
       await incrementUsage(userEmail);
-      
-      // Deduct credit for every visualization (except admin)
-      const isAdmin = isAdminEmail(userEmail);
-      if (!isAdmin && subscription.vizCredits > 0) {
-        const supabase = createServiceClient();
-        await supabase
-          .from('users')
-          .update({ viz_credits: subscription.vizCredits - 1 })
-          .eq('email', userEmail.toLowerCase());
-        usedCredit = true;
-      }
     }
 
     // Step 5: Track successful request and return results
@@ -724,7 +718,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       costs: costEstimate,
       prompt: editPrompt,
       description: description,
-      vizCredits: usedCredit ? subscription.vizCredits - 1 : subscription.vizCredits,
+      vizCredits: vizCreditsAfter,
       usedCredit
     });
 

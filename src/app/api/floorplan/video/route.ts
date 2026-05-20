@@ -6,11 +6,11 @@ import { creditGuard } from "@/lib/credit-guard";
 import { addCredits } from "@/lib/credits";
 import { createServiceClient } from "@/lib/supabase";
 
-// Replicate API - google/veo-3.1-fast
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || "";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 const GEMINI_VEO_MODEL = "veo-3.1-fast-generate-preview";
+const REPLICATE_VEO_MODEL = "google/veo-3.1-fast";
 
 // POST - start video generation, return prediction ID
 export async function POST(req: NextRequest) {
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     chargedUserEmail = userEmail;
     chargedCost = creditCheck.cost;
 
-    // Convert to base64 data URIs for Replicate
+    // Replicate needs data URIs, Gemini needs raw base64.
     const firstBytes = await firstFrameFile.arrayBuffer();
     const firstB64 = Buffer.from(firstBytes).toString("base64");
     const firstDataUri = `data:image/jpeg;base64,${firstB64}`;
@@ -90,48 +90,49 @@ export async function POST(req: NextRequest) {
 
       const err = await geminiRes.text();
       console.error("Gemini Veo start failed:", geminiRes.status, err);
+
+      if (shouldFallbackToReplicate(geminiRes.status, err) && REPLICATE_TOKEN) {
+        const replicateResult = await startReplicatePrediction(finalPrompt, firstDataUri, lastDataUri);
+        if ("predictionId" in replicateResult) {
+          return NextResponse.json({
+            predictionId: replicateResult.predictionId,
+            status: "starting",
+            provider: "replicate",
+            fallbackFrom: "gemini",
+          });
+        }
+
+        await refundIfNeeded("replicate_fallback_start_failed");
+        return NextResponse.json({
+          error: friendlyVideoStartError(replicateResult.status, replicateResult.error),
+        }, { status: responseStatus(replicateResult.status) });
+      }
+
       await refundIfNeeded("gemini_start_failed");
       return NextResponse.json({
         error: friendlyVideoStartError(geminiRes.status, err),
-      }, { status: geminiRes.status >= 400 && geminiRes.status < 500 ? geminiRes.status : 500 });
+      }, { status: responseStatus(geminiRes.status) });
     }
 
-    // Fallback: create prediction on Replicate
-    const createRes = await fetch("https://api.replicate.com/v1/models/google/veo-3.1-fast/predictions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${REPLICATE_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        input: {
-          prompt: finalPrompt,
-          image: firstDataUri,
-          last_frame: lastDataUri,
-          duration: 8,
-          aspect_ratio: "16:9",
-        },
-      }),
-    });
+    if (!REPLICATE_TOKEN) {
+      await refundIfNeeded("missing_video_provider");
+      return NextResponse.json({ error: "ספק הווידאו לא מוגדר כרגע. הקרדיטים הוחזרו אוטומטית." }, { status: 500 });
+    }
 
-    if (!createRes.ok) {
-      const err = await createRes.text();
-      console.error("Replicate Veo start failed:", createRes.status, err);
+    const replicateResult = await startReplicatePrediction(finalPrompt, firstDataUri, lastDataUri);
+    if (!("predictionId" in replicateResult)) {
+      console.error("Replicate Veo start failed:", replicateResult.status, replicateResult.error);
       await refundIfNeeded("replicate_start_failed");
       return NextResponse.json({
-        error: friendlyVideoStartError(createRes.status, err),
-      }, { status: createRes.status >= 400 && createRes.status < 500 ? createRes.status : 500 });
+        error: friendlyVideoStartError(replicateResult.status, replicateResult.error),
+      }, { status: responseStatus(replicateResult.status) });
     }
-
-    const prediction = await createRes.json();
-
-    if (!prediction.id) {
+    if (!replicateResult.predictionId) {
       await refundIfNeeded("replicate_no_prediction");
       return NextResponse.json({ error: "No prediction ID returned" }, { status: 500 });
     }
 
-    // Return immediately with prediction ID - client will poll
-    return NextResponse.json({ predictionId: prediction.id, status: "starting" });
+    return NextResponse.json({ predictionId: replicateResult.predictionId, status: "starting", provider: "replicate" });
   } catch (err: unknown) {
     await refundIfNeeded("server_error");
     return NextResponse.json({ error: errorMessage(err) }, { status: 500 });
@@ -275,4 +276,51 @@ function friendlyVideoStartError(status: number, rawError: string) {
     return "יש בעיית הרשאה מול ספק הווידאו. הקרדיטים הוחזרו אוטומטית.";
   }
   return "יצירת הסרטון לא התחילה אצל ספק הווידאו. הקרדיטים הוחזרו אוטומטית.";
+}
+
+async function startReplicatePrediction(finalPrompt: string, firstDataUri: string, lastDataUri: string) {
+  const createRes = await fetch(`https://api.replicate.com/v1/models/${REPLICATE_VEO_MODEL}/predictions`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${REPLICATE_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      input: {
+        prompt: finalPrompt,
+        image: firstDataUri,
+        last_frame: lastDataUri,
+        duration: 8,
+        aspect_ratio: "16:9",
+      },
+    }),
+  });
+
+  if (!createRes.ok) {
+    return { status: createRes.status, error: await createRes.text() };
+  }
+
+  const prediction = await createRes.json();
+  return { predictionId: prediction.id as string | undefined };
+}
+
+function shouldFallbackToReplicate(status: number, rawError: string) {
+  const lower = rawError.toLowerCase();
+  return (
+    status === 408 ||
+    status === 409 ||
+    status === 429 ||
+    status >= 500 ||
+    lower.includes("quota") ||
+    lower.includes("rate limit") ||
+    lower.includes("resource_exhausted") ||
+    lower.includes("resource exhausted") ||
+    lower.includes("unavailable") ||
+    lower.includes("timeout") ||
+    lower.includes("deadline")
+  );
+}
+
+function responseStatus(status: number) {
+  return status >= 400 && status < 500 ? status : 500;
 }

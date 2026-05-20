@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
+import { addCredits } from "@/lib/credits";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -25,6 +26,20 @@ async function verifyUserPremium(userEmail: string): Promise<{exists: boolean, p
 }
 
 export async function POST(request: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+
+  async function refundIfNeeded(reason: string) {
+    if (!chargedUserEmail || chargedCost <= 0) return;
+    try {
+      await addCredits(chargedUserEmail, chargedCost, `refund_bill-of-quantities_${reason}`);
+      chargedUserEmail = null;
+      chargedCost = 0;
+    } catch (refundError) {
+      console.error("Failed to refund BOQ credits:", refundError);
+    }
+  }
+
   try {
     // Rate limit: 20 requests per minute
     const clientId = getClientId(request);
@@ -44,9 +59,6 @@ export async function POST(request: NextRequest) {
     if (!exists) {
       return NextResponse.json({ error: "נדרשת התחברות לשימוש בשירות זה" }, { status: 401 });
     }
-    // Credit check (replaces old premium-only check)
-    const creditCheck = await creditGuard(userEmail, 'bill-of-quantities');
-    if ('error' in creditCheck) return creditCheck.error;
 
     const { 
       image, 
@@ -79,6 +91,12 @@ export async function POST(request: NextRequest) {
 
     const mimeType = base64Match[1];
     const imageData = base64Match[2];
+
+    // Charge only after request validation. Refund later if the AI call or parsing fails.
+    const creditCheck = await creditGuard(userEmail, 'bill-of-quantities');
+    if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     // Build context from additional inputs
     const contextParts: string[] = [];
@@ -271,10 +289,12 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
     const geminiData = await response.json();
 
     if (geminiData.error) {
+      await refundIfNeeded('ai_error');
       return NextResponse.json({ error: "שגיאה בשירות AI", details: geminiData.error?.message || "Unknown error" }, { status: 500 });
     }
 
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
+      await refundIfNeeded('empty_response');
       return NextResponse.json({ error: "לא התקבלה תשובה מה-AI" }, { status: 500 });
     }
 
@@ -291,6 +311,7 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
         throw new Error("No JSON found");
       }
     } catch (parseError) {
+      await refundIfNeeded('parse_error');
       
       // Return a generic error if we can't parse the response
       return NextResponse.json({
@@ -301,6 +322,7 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
 
     // Check if AI returned an error
     if (result.error) {
+      await refundIfNeeded('invalid_image');
       return NextResponse.json(result, { status: 400 });
     }
 
@@ -325,6 +347,7 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
     return NextResponse.json(result);
 
   } catch (error) {
+    await refundIfNeeded('server_error');
     return NextResponse.json({ error: "שגיאה בעיבוד הבקשה" }, { status: 500 });
   }
 }

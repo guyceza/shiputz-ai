@@ -3,13 +3,31 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
 import { creditGuard } from "@/lib/credit-guard";
+import { addCredits } from "@/lib/credits";
 import { createServiceClient } from "@/lib/supabase";
 
 // Replicate API - google/veo-3.1-fast
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || "";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
+const GEMINI_VEO_MODEL = "veo-3.1-fast-generate-preview";
 
 // POST - start video generation, return prediction ID
 export async function POST(req: NextRequest) {
+  let chargedUserEmail: string | null = null;
+  let chargedCost = 0;
+
+  async function refundIfNeeded(reason: string) {
+    if (!chargedUserEmail || chargedCost <= 0) return;
+    try {
+      await addCredits(chargedUserEmail, chargedCost, `refund_video-walkthrough_${reason}`);
+      chargedUserEmail = null;
+      chargedCost = 0;
+    } catch (refundError) {
+      console.error("Failed to refund video credits:", refundError);
+    }
+  }
+
   try {
     const formData = await req.formData();
     const firstFrameFile = formData.get("firstFrame") as File | null;
@@ -24,6 +42,8 @@ export async function POST(req: NextRequest) {
     if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
     const creditCheck = await creditGuard(userEmail, 'video-walkthrough');
     if ('error' in creditCheck) return creditCheck.error;
+    chargedUserEmail = userEmail;
+    chargedCost = creditCheck.cost;
 
     // Convert to base64 data URIs for Replicate
     const firstBytes = await firstFrameFile.arrayBuffer();
@@ -40,7 +60,43 @@ export async function POST(req: NextRequest) {
 
     const finalPrompt = (prompt || defaultPrompt) + noCutSuffix;
 
-    // Create prediction on Replicate
+    if (GEMINI_API_KEY) {
+      const geminiRes = await fetch(`${GEMINI_BASE_URL}/models/${GEMINI_VEO_MODEL}:predictLongRunning`, {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": GEMINI_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instances: [{
+            prompt: finalPrompt,
+            image: { bytesBase64Encoded: firstB64, mimeType: "image/jpeg" },
+            lastFrame: { bytesBase64Encoded: lastB64, mimeType: "image/jpeg" },
+          }],
+          parameters: {
+            resolution: "720p",
+          },
+        }),
+      });
+
+      if (geminiRes.ok) {
+        const operation = await geminiRes.json();
+        if (!operation.name) {
+          await refundIfNeeded("gemini_no_operation");
+          return NextResponse.json({ error: "ספק הווידאו לא החזיר מזהה פעולה" }, { status: 500 });
+        }
+        return NextResponse.json({ predictionId: `gemini:${operation.name}`, status: "starting" });
+      }
+
+      const err = await geminiRes.text();
+      console.error("Gemini Veo start failed:", geminiRes.status, err);
+      await refundIfNeeded("gemini_start_failed");
+      return NextResponse.json({
+        error: friendlyVideoStartError(geminiRes.status, err),
+      }, { status: geminiRes.status >= 400 && geminiRes.status < 500 ? geminiRes.status : 500 });
+    }
+
+    // Fallback: create prediction on Replicate
     const createRes = await fetch("https://api.replicate.com/v1/models/google/veo-3.1-fast/predictions", {
       method: "POST",
       headers: {
@@ -60,19 +116,25 @@ export async function POST(req: NextRequest) {
 
     if (!createRes.ok) {
       const err = await createRes.text();
-      return NextResponse.json({ error: "Video generation failed to start" }, { status: 500 });
+      console.error("Replicate Veo start failed:", createRes.status, err);
+      await refundIfNeeded("replicate_start_failed");
+      return NextResponse.json({
+        error: friendlyVideoStartError(createRes.status, err),
+      }, { status: createRes.status >= 400 && createRes.status < 500 ? createRes.status : 500 });
     }
 
     const prediction = await createRes.json();
 
     if (!prediction.id) {
+      await refundIfNeeded("replicate_no_prediction");
       return NextResponse.json({ error: "No prediction ID returned" }, { status: 500 });
     }
 
     // Return immediately with prediction ID - client will poll
     return NextResponse.json({ predictionId: prediction.id, status: "starting" });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+  } catch (err: unknown) {
+    await refundIfNeeded("server_error");
+    return NextResponse.json({ error: errorMessage(err) }, { status: 500 });
   }
 }
 
@@ -82,6 +144,61 @@ export async function GET(req: NextRequest) {
   if (!predictionId) return NextResponse.json({ error: "Missing prediction ID" }, { status: 400 });
 
   try {
+    if (predictionId.startsWith("gemini:")) {
+      const operationName = predictionId.slice("gemini:".length);
+      const statusRes = await fetch(`${GEMINI_BASE_URL}/${operationName}`, {
+        headers: { "x-goog-api-key": GEMINI_API_KEY },
+      });
+      const statusData = await statusRes.json();
+
+      if (!statusRes.ok) {
+        return NextResponse.json({
+          status: "failed",
+          error: friendlyVideoStartError(statusRes.status, JSON.stringify(statusData)),
+        }, { status: statusRes.status >= 400 && statusRes.status < 500 ? statusRes.status : 500 });
+      }
+
+      if (!statusData.done) {
+        return NextResponse.json({ status: "processing", progress: null });
+      }
+
+      if (statusData.error) {
+        return NextResponse.json({
+          status: "failed",
+          error: statusData.error.message || "Video generation failed",
+        }, { status: 500 });
+      }
+
+      const videoUri = statusData.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      if (!videoUri) return NextResponse.json({ error: "No video in response" }, { status: 500 });
+
+      const videoRes = await fetch(videoUri, { headers: { "x-goog-api-key": GEMINI_API_KEY } });
+      if (!videoRes.ok) return NextResponse.json({ error: "Failed to download video" }, { status: 500 });
+      const videoBuffer = Buffer.from(await videoRes.arrayBuffer());
+
+      const supabase = createServiceClient();
+      const operationId = operationName.split("/").pop()?.replace(/[^a-zA-Z0-9_-]/g, "") || Date.now().toString();
+      const filename = `videos/gemini-${operationId}-${Date.now()}.mp4`;
+      const { error: uploadError } = await supabase.storage
+        .from("visualizations")
+        .upload(filename, videoBuffer, { contentType: "video/mp4", upsert: true });
+
+      if (uploadError) {
+        return NextResponse.json({
+          status: "succeeded",
+          videoUrl: videoUri,
+        });
+      }
+
+      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const storedUrl = `${SUPABASE_URL}/storage/v1/object/public/visualizations/${filename}`;
+
+      return NextResponse.json({
+        status: "succeeded",
+        videoUrl: storedUrl,
+      });
+    }
+
     const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
       headers: { "Authorization": `Bearer ${REPLICATE_TOKEN}` },
     });
@@ -137,7 +254,25 @@ export async function GET(req: NextRequest) {
       started_at: pollData.started_at,
       created_at: pollData.created_at,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: errorMessage(err) }, { status: 500 });
   }
+}
+
+function errorMessage(err: unknown) {
+  return err instanceof Error ? err.message : "Internal error";
+}
+
+function friendlyVideoStartError(status: number, rawError: string) {
+  const lower = rawError.toLowerCase();
+  if (status === 402 || lower.includes("insufficient credit") || lower.includes("billing")) {
+    return "ספק הווידאו לא זמין כרגע בגלל חוסר קרדיט/בילינג. הקרדיטים הוחזרו אוטומטית.";
+  }
+  if (status === 429 || lower.includes("quota") || lower.includes("rate limit")) {
+    return "ספק הווידאו עמוס או חרג מהמכסה כרגע. הקרדיטים הוחזרו אוטומטית, נסו שוב עוד מעט.";
+  }
+  if (status === 401 || status === 403 || lower.includes("permission") || lower.includes("api key")) {
+    return "יש בעיית הרשאה מול ספק הווידאו. הקרדיטים הוחזרו אוטומטית.";
+  }
+  return "יצירת הסרטון לא התחילה אצל ספק הווידאו. הקרדיטים הוחזרו אוטומטית.";
 }

@@ -43,14 +43,15 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
   const frameCount = useRef(0);
   const scoreRef = useRef(0);
   const gameStateRef = useRef<"idle" | "playing" | "dead">("idle");
+  const hasStartedPlayingRef = useRef(false);
   const animRef = useRef<number>(0);
   const isTouchDevice = useRef(false);
 
-  // If the user did not start the game, show the finished result immediately.
-  // If they are playing, keep the ready banner so the game is not interrupted.
+  // Auto-open only for users who never touched the mini-game.
+  // Once they started playing, keep the ready banner so the game is not interrupted.
   useEffect(() => {
     if (isReady) {
-      if (gameStateRef.current === "idle") {
+      if (!hasStartedPlayingRef.current) {
         onShowResult?.();
         return;
       }
@@ -69,6 +70,7 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
 
   const doJump = useCallback(() => {
     if (gameStateRef.current === "idle") {
+      hasStartedPlayingRef.current = true;
       resetGame();
       gameStateRef.current = "playing";
       setGameState("playing");
@@ -76,6 +78,7 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
     } else if (gameStateRef.current === "playing") {
       birdVel.current = JUMP_FORCE;
     } else if (gameStateRef.current === "dead") {
+      hasStartedPlayingRef.current = true;
       resetGame();
       gameStateRef.current = "playing";
       setGameState("playing");

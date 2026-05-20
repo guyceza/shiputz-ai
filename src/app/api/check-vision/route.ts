@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 // Note: Auth check removed - users query by their own email
 // and subscription status is not sensitive data.
@@ -12,6 +13,9 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ hasSubscription: false, error: 'Missing email' });
+    }
+    if (!(await verifyUserEmail(request, email))) {
+      return NextResponse.json({ hasSubscription: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

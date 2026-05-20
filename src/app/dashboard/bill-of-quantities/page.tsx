@@ -6,6 +6,7 @@ import CreditBadge from "@/components/CreditBadge";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
+import { authFetch } from "@/lib/auth-fetch";
 
 // Types
 interface BOQSummary {
@@ -184,7 +185,7 @@ export default function BillOfQuantitiesPage() {
           // Check premium status
           if (user.email) {
             const email = encodeURIComponent(user.email);
-            const premiumRes = await fetch(`/api/users?email=${email}`);
+            const premiumRes = await authFetch(`/api/users?email=${email}`);
             if (premiumRes.ok) {
               const premiumData = await premiumRes.json();
               setIsPremium(premiumData.purchased === true);
@@ -205,7 +206,7 @@ export default function BillOfQuantitiesPage() {
           // Check premium
           if (session.user.email) {
             const email = encodeURIComponent(session.user.email);
-            const premiumRes = await fetch(`/api/users?email=${email}`);
+            const premiumRes = await authFetch(`/api/users?email=${email}`);
             if (premiumRes.ok) {
               const premiumData = await premiumRes.json();
               setIsPremium(premiumData.purchased === true);

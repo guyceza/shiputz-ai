@@ -92,7 +92,7 @@ export default function ShopLookPage() {
         if (currentUserId && userEmail) {
           // Check trial from DB
           try {
-            const trialRes = await fetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
+            const trialRes = await authFetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
             if (trialRes.ok) {
               const trialData = await trialRes.json();
               setTrialUsed(trialData.trialUsed || false);
@@ -103,7 +103,7 @@ export default function ShopLookPage() {
           
           // Check Vision subscription from Supabase
           try {
-            const visionRes = await fetch(`/api/check-vision?email=${encodeURIComponent(userEmail)}`);
+            const visionRes = await authFetch(`/api/check-vision?email=${encodeURIComponent(userEmail)}`);
             if (visionRes.ok) {
               const visionData = await visionRes.json();
               const hasSub = visionData.hasSubscription || false;
@@ -121,7 +121,7 @@ export default function ShopLookPage() {
         if (user.id && user.email) {
           setUserId(user.id);
           // Check trial from API
-          fetch(`/api/vision-trial?email=${encodeURIComponent(user.email)}`)
+          authFetch(`/api/vision-trial?email=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
               setTrialUsed(data.trialUsed || false);
@@ -129,7 +129,7 @@ export default function ShopLookPage() {
             .catch(e => console.error("Failed to check trial:", e));
           
           // Check Vision subscription from Supabase
-          fetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`)
+          authFetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`)
             .then(res => res.json())
             .then(data => {
               const hasSub = data.hasSubscription || false;
@@ -149,7 +149,7 @@ export default function ShopLookPage() {
       const userData = localStorage.getItem("user");
       const userEmail = userData ? JSON.parse(userData).email : null;
       if (userEmail) {
-        await fetch('/api/vision-trial', {
+        await authFetch('/api/vision-trial', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: userEmail })

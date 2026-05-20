@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface User {
   id: string;
@@ -42,8 +43,8 @@ export function useAuth(options?: { requireAuth?: boolean }) {
           
           // Check premium & vision in parallel
           const [premiumRes, visionRes] = await Promise.all([
-            fetch(`/api/admin/premium?email=${encodeURIComponent(user.email)}`).catch(() => null),
-            fetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`).catch(() => null),
+            authFetch(`/api/admin/premium?email=${encodeURIComponent(user.email)}`).catch(() => null),
+            authFetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`).catch(() => null),
           ]);
           
           let isPremium = false;
@@ -79,8 +80,8 @@ export function useAuth(options?: { requireAuth?: boolean }) {
               
               if (parsed.email) {
                 const [premiumRes, visionRes] = await Promise.all([
-                  fetch(`/api/admin/premium?email=${encodeURIComponent(parsed.email)}`).catch(() => null),
-                  fetch(`/api/check-vision?email=${encodeURIComponent(parsed.email)}`).catch(() => null),
+                  authFetch(`/api/admin/premium?email=${encodeURIComponent(parsed.email)}`).catch(() => null),
+                  authFetch(`/api/check-vision?email=${encodeURIComponent(parsed.email)}`).catch(() => null),
                 ]);
                 
                 if (premiumRes?.ok) {

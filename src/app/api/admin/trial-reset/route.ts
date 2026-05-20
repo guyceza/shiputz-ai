@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { isAdminRequest } from '@/lib/admin-auth';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 // GET - Check if email should have trial reset
 export async function GET(request: NextRequest) {
@@ -24,6 +25,10 @@ export async function GET(request: NextRequest) {
     }
     
     // Check specific user
+    if (!(await verifyUserEmail(request, email)) && !(await isAdminRequest(request))) {
+      return NextResponse.json({ error: 'Unauthorized', shouldReset: false }, { status: 401 });
+    }
+
     const { data } = await supabase
       .from('trial_resets')
       .select('id')

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY;
 const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY;
@@ -109,6 +110,9 @@ export async function POST(request: NextRequest) {
 
     if (!productType || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+    if (!(await verifyUserEmail(request, email))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     let amount = 0;

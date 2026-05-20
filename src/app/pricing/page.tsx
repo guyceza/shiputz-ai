@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { authFetch } from "@/lib/auth-fetch";
 
 const PLANS = [
   {
@@ -153,7 +154,7 @@ export default function PricingPage() {
         if (user.id) {
           queueMicrotask(() => setIsLoggedIn(true));
           if (user.email) {
-            fetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
+            authFetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
               .then(r => r.json())
               .then(d => {
                 setUserCredits(d.credits);

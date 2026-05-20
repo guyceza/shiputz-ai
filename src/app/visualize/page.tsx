@@ -7,6 +7,7 @@ import { saveVisualization, loadVisualizations, deleteVisualization, Visualizati
 import PricingComparison from "@/components/PricingComparison";
 import CreditBadge from "@/components/CreditBadge";
 import { trackAction, clearAction } from "@/lib/track-action";
+import { authFetch } from "@/lib/auth-fetch";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -589,7 +590,7 @@ export default function VisualizePage() {
         // Check if user should have trial reset (from admin panel)
         if (userEmail) {
           try {
-            const res = await fetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
+            const res = await authFetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
             const data = await res.json();
             if (data.shouldReset) {
               // Trial reset triggered from admin - DB already updated
@@ -602,7 +603,7 @@ export default function VisualizePage() {
           
           // Check if user has the main ShiputzAI subscription (purchased) and Vision subscription
           try {
-            const premRes = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
+            const premRes = await authFetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
             const premData = await premRes.json();
             if (premData.hasPremium) {
               // User has main premium - update localStorage ONLY if we have valid user data
@@ -622,7 +623,7 @@ export default function VisualizePage() {
           
           // Fetch viz credits
           try {
-            const creditsRes = await fetch(`/api/viz-credits?email=${encodeURIComponent(userEmail)}`);
+            const creditsRes = await authFetch(`/api/viz-credits?email=${encodeURIComponent(userEmail)}`);
             const creditsData = await creditsRes.json();
             setVizCredits(creditsData.vizCredits || 0);
           } catch (e) {
@@ -633,7 +634,7 @@ export default function VisualizePage() {
         // Check trial status from database
         if (userEmail) {
           try {
-            const trialRes = await fetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
+            const trialRes = await authFetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
             if (trialRes.ok) {
               const trialData = await trialRes.json();
               setTrialUsed(trialData.trialUsed || false);
@@ -868,7 +869,7 @@ export default function VisualizePage() {
           // Consume trial if not subscribed - save to DB
           if (!hasSubscription && userEmail) {
             try {
-              await fetch('/api/vision-trial', {
+              await authFetch('/api/vision-trial', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userEmail })

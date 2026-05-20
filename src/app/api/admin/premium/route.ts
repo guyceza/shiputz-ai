@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 import { isAdminRequest } from '@/lib/admin-auth';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 // Send welcome premium email
 async function sendWelcomePremiumEmail(email: string, name?: string) {
@@ -92,6 +93,10 @@ export async function GET(request: NextRequest) {
   }
   
   // Check specific user
+  if (!(await verifyUserEmail(request, email)) && !(await isAdminRequest(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { data } = await supabase
     .from('users')
     .select('purchased, purchased_at, vision_subscription, vision_trial_used')

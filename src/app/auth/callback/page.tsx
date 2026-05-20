@@ -48,7 +48,10 @@ export default function AuthCallbackPage() {
     try {
       await fetch('/api/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ email, name, auth_provider: 'google', auth_id: session.user.id, attribution: getStoredAttribution() }),
       });
     } catch (e) {
@@ -62,7 +65,10 @@ export default function AuthCallbackPage() {
         if (referralCode) {
           await fetch('/api/referral', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(session.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+            },
             body: JSON.stringify({ referralCode, newUserEmail: email }),
           });
           localStorage.removeItem('referralCode');

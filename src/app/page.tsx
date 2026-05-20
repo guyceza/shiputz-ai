@@ -15,6 +15,7 @@ import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
 import RoleSelector from "@/components/RoleSelector";
 import type { Role } from "@/components/RoleSelector";
+import { authFetch } from "@/lib/auth-fetch";
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,7 +94,7 @@ export default function Home() {
         // Check premium & vision from database (most reliable)
         if (userEmail) {
           try {
-            const res = await fetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
+            const res = await authFetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
             if (res.ok) {
               const data = await res.json();
               setIsPremium(data.hasPremium || false);
@@ -776,4 +777,3 @@ function BrandsMarquee() {
     </>
   );
 }
-

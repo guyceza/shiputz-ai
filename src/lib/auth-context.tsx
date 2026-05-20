@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authFetch } from '@/lib/auth-fetch';
 
 // Centralized admin emails - single source of truth
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
@@ -70,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Verify against DB (async, non-blocking)
           if (parsed.email) {
             try {
-              const res = await fetch(`/api/admin/premium?email=${encodeURIComponent(parsed.email)}`);
+              const res = await authFetch(`/api/admin/premium?email=${encodeURIComponent(parsed.email)}`);
               if (res.ok) {
                 const data = await res.json();
                 setUser(prev => prev ? {

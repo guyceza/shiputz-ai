@@ -13,6 +13,7 @@ import RoleSelector from "@/components/RoleSelector";
 import type { Role } from "@/components/RoleSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import LoadingScreen from "@/components/LoadingScreen";
+import { authFetch } from "@/lib/auth-fetch";
 import { 
   getProjects, 
   createProject, 
@@ -130,8 +131,8 @@ function DashboardContent() {
             
             // Start both requests at once
             const [premiumRes, visionRes] = await Promise.all([
-              fetch(`/api/users?email=${email}`).catch(() => null),
-              fetch(`/api/check-vision?email=${email}`).catch(() => null)
+              authFetch(`/api/users?email=${email}`).catch(() => null),
+              authFetch(`/api/check-vision?email=${email}`).catch(() => null)
             ]);
             
             // Handle premium result
@@ -280,7 +281,7 @@ function DashboardContent() {
     
     // Cancel vision subscription via Supabase
     try {
-      const res = await fetch('/api/cancel-vision', {
+      const res = await authFetch('/api/cancel-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY;
 const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY;
@@ -104,6 +105,9 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+    }
+    if (!(await verifyUserEmail(request, email))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

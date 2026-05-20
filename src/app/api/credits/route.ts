@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCredits, canPerformAction, CREDIT_COSTS, PLANS, CREDIT_ANCHORS } from '@/lib/credits';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 // GET /api/credits?email=...
 // GET /api/credits?email=...&check=visualize
@@ -8,6 +9,9 @@ export async function GET(request: NextRequest) {
     const email = request.nextUrl.searchParams.get('email');
     if (!email) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
+    }
+    if (!(await verifyUserEmail(request, email))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const action = request.nextUrl.searchParams.get('check') as keyof typeof CREDIT_COSTS | null;

@@ -3,7 +3,8 @@ import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
 import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
 
-import { ADMIN_EMAILS } from '@/lib/admin';
+import { isAdminRequest } from '@/lib/admin-auth';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 // Note: Auth check removed - users can only query their own email
 // and the data exposed (purchase status, name) is not sensitive.
@@ -145,6 +146,9 @@ export async function GET(request: NextRequest) {
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
+    if (!(await verifyUserEmail(request, email)) && !(await isAdminRequest(request))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const supabase = createServiceClient();
 
@@ -264,14 +268,13 @@ export async function POST(request: NextRequest) {
 // Note: This endpoint is unused - admin uses /api/admin/premium instead
 export async function PATCH(request: NextRequest) {
   try {
-    const { email, adminEmail } = await request.json();
+    const { email } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Admin check: must provide admin email
-    if (!adminEmail || !ADMIN_EMAILS.includes(adminEmail.toLowerCase())) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ error: 'Unauthorized - admin only' }, { status: 403 });
     }
 

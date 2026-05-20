@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
+import { verifyUserEmail } from '@/lib/api-auth';
 
 export const runtime = 'nodejs';
 
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
   if (!email) {
     return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+  }
+  if (!(await verifyUserEmail(request, email))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const supabase = createServiceClient();
@@ -79,6 +83,9 @@ export async function POST(request: NextRequest) {
 
     if (!referralCode || !newUserEmail) {
       return NextResponse.json({ error: 'Missing referralCode or newUserEmail' }, { status: 400 });
+    }
+    if (!(await verifyUserEmail(request, newUserEmail))) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createServiceClient();

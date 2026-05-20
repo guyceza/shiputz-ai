@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getStoredAttribution } from "@/lib/attribution";
+import { authFetch } from "@/lib/auth-fetch";
 
 // Same anchor points as pricing page
 const CREDIT_ANCHORS = [
@@ -124,7 +125,7 @@ function CheckoutContent() {
           const user = JSON.parse(userData);
           if (user.email && user.id) {
             setEmail(user.email);
-            fetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
+            authFetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
               .then(r => r.json())
               .then(d => setUserPlan(d.plan || "free"))
               .catch(() => {});
@@ -136,7 +137,7 @@ function CheckoutContent() {
         const session = await getSession();
         if (session?.user?.email) {
           setEmail(session.user.email);
-          fetch(`/api/credits?email=${encodeURIComponent(session.user.email)}`)
+          authFetch(`/api/credits?email=${encodeURIComponent(session.user.email)}`)
             .then(r => r.json())
             .then(d => setUserPlan(d.plan || "free"))
             .catch(() => {});
@@ -157,7 +158,7 @@ function CheckoutContent() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/payplus/generate-link", {
+      const response = await authFetch("/api/payplus/generate-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

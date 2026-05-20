@@ -15,6 +15,7 @@ function handleCreditError(res: Response, data: any): boolean {
 }
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
+import { authFetch } from "@/lib/auth-fetch";
 
 // Dynamic import for Lottie (client-side only)
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -454,8 +455,8 @@ export default function ProjectPage() {
       if (email) {
         try {
           const [premiumRes, visionRes] = await Promise.all([
-            fetch(`/api/admin/premium?email=${encodeURIComponent(email)}`),
-            fetch(`/api/check-vision?email=${encodeURIComponent(email)}`)
+            authFetch(`/api/admin/premium?email=${encodeURIComponent(email)}`),
+            authFetch(`/api/check-vision?email=${encodeURIComponent(email)}`)
           ]);
           
           if (premiumRes.ok) {

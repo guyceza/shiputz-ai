@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface ReferralData {
   code: string;
@@ -16,7 +17,7 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
 
   useEffect(() => {
     if (!userEmail) return;
-    fetch(`/api/referral?email=${encodeURIComponent(userEmail)}`)
+    authFetch(`/api/referral?email=${encodeURIComponent(userEmail)}`)
       .then(r => r.json())
       .then(d => {
         if (d.code) setData(d);

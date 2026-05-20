@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminEmail } from "@/lib/admin";
+import { authFetch } from "@/lib/auth-fetch";
 import { Suspense } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 
@@ -66,7 +67,7 @@ function LoginContent() {
         let purchased = false;
         let userName = "";
         try {
-          const userRes = await fetch(`/api/users?email=${encodeURIComponent(data.user.email)}`);
+          const userRes = await authFetch(`/api/users?email=${encodeURIComponent(data.user.email)}`);
           if (userRes.ok) {
             const userData = await userRes.json();
             purchased = userData.purchased === true;

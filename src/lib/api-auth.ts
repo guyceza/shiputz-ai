@@ -54,3 +54,12 @@ export async function verifyUserId(request: NextRequest, userId: string): Promis
   const user = await getAuthenticatedUser(request);
   return Boolean(user?.id && user.id === userId);
 }
+
+export async function verifyUserEmail(request: NextRequest, email: string): Promise<boolean> {
+  const user = await getAuthenticatedUser(request);
+  return Boolean(
+    user?.email &&
+    email &&
+    user.email.toLowerCase() === email.toLowerCase()
+  );
+}

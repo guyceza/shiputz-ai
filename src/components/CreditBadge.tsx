@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { authFetch } from "@/lib/auth-fetch";
 
 /**
  * Credit balance badge for navbar. Shows current credit count.
@@ -17,7 +18,7 @@ export default function CreditBadge() {
       const user = JSON.parse(userData);
       if (!user.email) return;
 
-      fetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
+      authFetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
         .then((r) => r.json())
         .then((d) => {
           if (typeof d.credits === "number") setCredits(d.credits);

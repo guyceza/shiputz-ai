@@ -74,7 +74,7 @@ Use this exact JSON shape:
           }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 4096,
+            maxOutputTokens: 8192,
             responseMimeType: "application/json"
           }
         })
@@ -87,17 +87,29 @@ Use this exact JSON shape:
     }
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const text = parts
+      .map((part: { text?: string }) => part.text || "")
+      .join("\n")
+      .trim();
     
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    if (!text) {
       await refundIfNeeded('empty_response');
       return NextResponse.json({ error: "Failed to parse response" }, { status: 500 });
     }
     
     let result;
     try {
-      result = JSON.parse(jsonMatch[0]);
+      const cleanText = text
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+      const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+      result = JSON.parse(jsonMatch?.[0] || cleanText);
+      if (typeof result === "string") {
+        result = JSON.parse(result);
+      }
     } catch {
       await refundIfNeeded('parse_error');
       return NextResponse.json({ error: "Failed to parse response" }, { status: 500 });

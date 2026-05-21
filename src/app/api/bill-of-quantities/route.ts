@@ -6,6 +6,7 @@ import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { addCredits } from "@/lib/credits";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -343,7 +344,8 @@ ${hasPlumbingPlan ? '11. זהה נקודות אינסטלציה מהתכנית' 
       generatedAt: new Date().toISOString()
     };
 
-    return NextResponse.json(result);
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'bill-of-quantities');
+    return NextResponse.json({ ...result, giftClaim });
 
   } catch (error) {
     await refundIfNeeded('server_error');

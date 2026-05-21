@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -112,7 +113,8 @@ Output a single photorealistic interior photograph.`;
 
     chargedUserEmail = null;
     chargedCost = 0;
-    return NextResponse.json({ image: resultImage, text: resultText, room: roomName });
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'room-photo');
+    return NextResponse.json({ image: resultImage, text: resultText, room: roomName, giftClaim });
   } catch (error: unknown) {
     await refundIfNeeded("server_error");
     const message = error instanceof Error ? error.message : "Room generation failed";

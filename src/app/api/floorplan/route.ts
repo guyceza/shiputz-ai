@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -139,10 +140,12 @@ export async function POST(req: NextRequest) {
 
     chargedUserEmail = null;
     chargedCost = 0;
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'floorplan');
     return NextResponse.json({
       image: resultImage,
       text: resultText,
       style: style?.name || styleKey,
+      giftClaim,
     });
   } catch (error: unknown) {
     await refundIfNeeded("server_error");

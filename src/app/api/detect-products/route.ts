@@ -7,6 +7,7 @@ import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 // Verify user exists (Shop the Look is part of the visualization experience, including trial)
 async function verifyUserExists(userEmail: string): Promise<boolean> {
@@ -243,7 +244,10 @@ export async function POST(request: NextRequest) {
           chargedUserEmail = null;
           chargedCost = 0;
         }
-        return NextResponse.json({ items: validItems, products: validItems });
+        const giftClaim = validItems.length > 0
+          ? await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'shop-look')
+          : { claimed: false, reason: 'empty_result' };
+        return NextResponse.json({ items: validItems, products: validItems, giftClaim });
       }
     } catch (parseError) {
       console.error("[detect-products] Failed to parse product detection response:", parseError);

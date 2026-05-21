@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { addCredits } from "@/lib/credits";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 export async function POST(request: NextRequest) {
   let chargedUserEmail: string | null = null;
@@ -99,7 +100,10 @@ Rules: textureType must be one of wood, metal, glass, fabric, linen, stone, marb
       return NextResponse.json({ error: "Failed to parse response" }, { status: 500 });
     }
 
-    return NextResponse.json(result);
+    chargedUserEmail = null;
+    chargedCost = 0;
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'style-match');
+    return NextResponse.json({ ...result, giftClaim });
   } catch (error: unknown) {
     await refundIfNeeded('server_error');
     return NextResponse.json({ error: error instanceof Error ? error.message : "Style analysis failed" }, { status: 500 });

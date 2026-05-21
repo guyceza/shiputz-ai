@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { creditGuard } from "@/lib/credit-guard";
 import { addCredits } from "@/lib/credits";
 import { createServiceClient } from "@/lib/supabase";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const REPLICATE_TOKEN = process.env.REPLICATE_API_TOKEN || "";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
@@ -85,7 +86,10 @@ export async function POST(req: NextRequest) {
           await refundIfNeeded("gemini_no_operation");
           return NextResponse.json({ error: "ספק הווידאו לא החזיר מזהה פעולה" }, { status: 500 });
         }
-        return NextResponse.json({ predictionId: `gemini:${operation.name}`, status: "starting" });
+        chargedUserEmail = null;
+        chargedCost = 0;
+        const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'video-walkthrough');
+        return NextResponse.json({ predictionId: `gemini:${operation.name}`, status: "starting", giftClaim });
       }
 
       const err = await geminiRes.text();
@@ -94,11 +98,15 @@ export async function POST(req: NextRequest) {
       if (shouldFallbackToReplicate(geminiRes.status, err) && REPLICATE_TOKEN) {
         const replicateResult = await startReplicatePrediction(finalPrompt, firstDataUri, lastDataUri);
         if ("predictionId" in replicateResult) {
+          chargedUserEmail = null;
+          chargedCost = 0;
+          const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'video-walkthrough');
           return NextResponse.json({
             predictionId: replicateResult.predictionId,
             status: "starting",
             provider: "replicate",
             fallbackFrom: "gemini",
+            giftClaim,
           });
         }
 
@@ -132,7 +140,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No prediction ID returned" }, { status: 500 });
     }
 
-    return NextResponse.json({ predictionId: replicateResult.predictionId, status: "starting", provider: "replicate" });
+    chargedUserEmail = null;
+    chargedCost = 0;
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'video-walkthrough');
+    return NextResponse.json({ predictionId: replicateResult.predictionId, status: "starting", provider: "replicate", giftClaim });
   } catch (err: unknown) {
     await refundIfNeeded("server_error");
     return NextResponse.json({ error: errorMessage(err) }, { status: 500 });

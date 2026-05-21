@@ -11,6 +11,7 @@ const RESEND_KEY = process.env.RESEND_API_KEY;
 import { ADMIN_EMAILS, isAdminEmail } from '@/lib/admin';
 import { creditGuard } from '@/lib/credit-guard';
 import { refundCreditCharge } from '@/lib/credit-refunds';
+import { claimShavuotGiftAfterSuccessfulAction } from '@/lib/gift-campaigns';
 const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 // Send notification to admin when API rate limit is hit
@@ -726,6 +727,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
     trackRequest('/api/visualize', false);
     chargedUserEmail = null;
     chargedCost = 0;
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'visualize');
     
     return NextResponse.json({
       success: true,
@@ -735,7 +737,8 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       prompt: editPrompt,
       description: description,
       vizCredits: vizCreditsAfter,
-      usedCredit
+      usedCredit,
+      giftClaim
     });
 
   } catch (error) {

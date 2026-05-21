@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { getMidragPricingReference } from "@/lib/pricing-data";
 
@@ -156,7 +157,8 @@ ${midragPricing}
 
     chargedUserEmail = null;
     chargedCost = 0;
-    return NextResponse.json({ analysis });
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'analyze-quote');
+    return NextResponse.json({ analysis, giftClaim });
   } catch {
     await refundIfNeeded("server_error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

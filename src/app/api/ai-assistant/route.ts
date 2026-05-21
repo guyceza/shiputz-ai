@@ -6,6 +6,7 @@ import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -117,7 +118,8 @@ export async function POST(request: NextRequest) {
 
     chargedUserEmail = null;
     chargedCost = 0;
-    return NextResponse.json({ response: aiResponse });
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'ai-assistant');
+    return NextResponse.json({ response: aiResponse, giftClaim });
   } catch {
     await refundIfNeeded("server_error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -6,6 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 // Bug #21 fix: Removed unused GEMINI_BASE_URL import
 import { AI_MODELS } from "@/lib/ai-config";
@@ -109,7 +110,8 @@ export async function POST(request: NextRequest) {
       const parsedResponse = JSON.parse(jsonMatch[0]);
       chargedUserEmail = null;
       chargedCost = 0;
-      return NextResponse.json(parsedResponse);
+      const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'detect-items');
+      return NextResponse.json({ ...parsedResponse, giftClaim });
     } catch {
       await refundIfNeeded("parse_error");
       return NextResponse.json({ items: [] });

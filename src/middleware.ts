@@ -6,7 +6,9 @@ export async function middleware(request: NextRequest) {
   if (host.startsWith('www.')) {
     const url = request.nextUrl.clone();
     url.host = host.replace('www.', '');
-    return NextResponse.redirect(url, 301);
+    const response = NextResponse.redirect(url, 301);
+    setGiftCampaignCookie(request, response);
+    return response;
   }
 
   // PayPlus redirects via POST to payment-success/payment-failed
@@ -32,10 +34,13 @@ export async function middleware(request: NextRequest) {
       // Ignore parse errors
     }
 
-    return NextResponse.redirect(url, 303);
+    const response = NextResponse.redirect(url, 303);
+    setGiftCampaignCookie(request, response);
+    return response;
   }
 
   const response = NextResponse.next();
+  setGiftCampaignCookie(request, response);
   
   // Security headers
   response.headers.set('X-Frame-Options', 'DENY');
@@ -45,6 +50,19 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-DNS-Prefetch-Control', 'on');
   
   return response;
+}
+
+function setGiftCampaignCookie(request: NextRequest, response: NextResponse) {
+  const gift = request.nextUrl.searchParams.get('gift');
+  if (gift !== 'shavuot20') return;
+
+  response.cookies.set('shiputzai_gift_campaign', 'shavuot_2026', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 21,
+  });
 }
 
 export const config = {

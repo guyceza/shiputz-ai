@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -90,7 +91,8 @@ Replace or add the furniture from the second image into the room shown in the fi
 
     chargedUserEmail = null;
     chargedCost = 0;
-    return NextResponse.json({ image: resultImage, text: resultText });
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'furniture-swap');
+    return NextResponse.json({ image: resultImage, text: resultText, giftClaim });
   } catch (error: unknown) {
     await refundIfNeeded("server_error");
     const message = error instanceof Error ? error.message : "Furniture swap failed";

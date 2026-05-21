@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
+import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { trackRequest } from "@/lib/usage-monitor";
 
@@ -167,7 +168,8 @@ export async function POST(request: NextRequest) {
         trackRequest('/api/scan-receipt', false);
         chargedUserEmail = null;
         chargedCost = 0;
-        return NextResponse.json(parsed);
+        const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'scan-receipt');
+        return NextResponse.json({ ...parsed, giftClaim });
       }
     } catch {
       trackRequest('/api/scan-receipt', true);

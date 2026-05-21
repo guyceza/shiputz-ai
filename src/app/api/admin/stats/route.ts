@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase';
 import { getUsageStats, checkRateLimitWarning } from '@/lib/usage-monitor';
 import { isAdminRequest } from '@/lib/admin-auth';
 
+const EXCLUDED_REPORTING_EMAILS = ['shiputzai-real-test@shipazti.com'];
+
 // GET - Get system stats and alerts
 export async function GET(request: NextRequest) {
   if (!(await isAdminRequest(request))) {
@@ -19,17 +21,20 @@ export async function GET(request: NextRequest) {
     // Get database stats
     const { count: totalUsers } = await supabase
       .from('users')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .not('email', 'in', `(${EXCLUDED_REPORTING_EMAILS.join(',')})`);
     
     const { count: premiumUsers } = await supabase
       .from('users')
       .select('*', { count: 'exact', head: true })
-      .eq('purchased', true);
+      .eq('purchased', true)
+      .not('email', 'in', `(${EXCLUDED_REPORTING_EMAILS.join(',')})`);
     
     const { count: visionUsers } = await supabase
       .from('users')
       .select('*', { count: 'exact', head: true })
-      .eq('vision_subscription', 'active');
+      .eq('vision_subscription', 'active')
+      .not('email', 'in', `(${EXCLUDED_REPORTING_EMAILS.join(',')})`);
     
     // Get users approaching monthly limit (8+ uses this month)
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -37,7 +42,8 @@ export async function GET(request: NextRequest) {
       .from('users')
       .select('email, vision_usage_count')
       .eq('vision_usage_month', currentMonth)
-      .gte('vision_usage_count', 8);
+      .gte('vision_usage_count', 8)
+      .not('email', 'in', `(${EXCLUDED_REPORTING_EMAILS.join(',')})`);
     
     // Combine all alerts
     const alerts = [...usageStats.alerts];

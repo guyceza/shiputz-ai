@@ -4,6 +4,7 @@ import { verifyAdminRequest } from '@/lib/admin-auth';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_AUDIENCE_ID = process.env.RESEND_NEWSLETTER_AUDIENCE_ID;
+const EXCLUDED_REPORTING_EMAILS = ['shiputzai-real-test@shipazti.com'];
 
 // GET - Get all users with full data
 export async function GET(request: NextRequest) {
@@ -80,9 +81,10 @@ export async function GET(request: NextRequest) {
     })) || [];
     
     // Get stats
-    const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
-    const { count: premiumUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('purchased', true);
-    const { count: visionUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('vision_subscription', 'active');
+    const reportingEmailFilter = `(${EXCLUDED_REPORTING_EMAILS.join(',')})`;
+    const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).not('email', 'in', reportingEmailFilter);
+    const { count: premiumUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('purchased', true).not('email', 'in', reportingEmailFilter);
+    const { count: visionUsers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('vision_subscription', 'active').not('email', 'in', reportingEmailFilter);
     const { count: trialUsed } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('vision_trial_used', true);
     
     return NextResponse.json({

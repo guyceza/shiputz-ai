@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { trackAction, clearAction } from "@/lib/track-action";
 import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 
 // Demo data for preview
+const DEMO_IMAGE_SRC = "/images/ai-vision/style-match-showcase.jpg";
+
 const DEMO_RESULT = {
   style: "סקנדינבי מודרני",
   styleEnglish: "Modern Scandinavian",
@@ -77,6 +80,14 @@ export default function StyleMatchPage() {
 
   const activeResult = result || (showDemo ? DEMO_RESULT : null);
 
+  const openDemo = () => {
+    setImageSrc(DEMO_IMAGE_SRC);
+    setResult(null);
+    setError("");
+    setShowDemo(true);
+    setHighlightedItem(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#fafafa]" dir="rtl">
       {/* Header */}
@@ -92,6 +103,75 @@ export default function StyleMatchPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {!imageSrc && !activeResult && (
+          <section className="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="relative min-h-[260px] bg-gray-100 lg:order-2">
+                <Image
+                  src={DEMO_IMAGE_SRC}
+                  alt="דוגמת Style Matcher עם נקודות זיהוי ורשימת קניות"
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-5 text-white">
+                  <div className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">
+                    דוגמה אמיתית
+                  </div>
+                  <p className="mt-3 max-w-sm text-sm text-white/90">
+                    כך נראה ניתוח אחרי העלאה: סגנון, חומרים, פריטים ומחירי חיפוש בישראל.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 md:p-8">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  ניתוח סגנון + רשימת קניות
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+                  ראיתם חדר יפה? קבלו את המתכון שלו
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-gray-500">
+                  העלו השראה מפינטרסט, אינסטגרם או צילום של חדר, והמערכת מפרקת אותו לסגנון, צבעים, חומרים ופריטים שאפשר לחפש ולקנות.
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  {[
+                    ["95%", "ביטחון בזיהוי"],
+                    ["8", "פריטים לשחזור"],
+                    ["5", "חומרים מזוהים"],
+                    ["₪", "טווחי מחיר"],
+                  ].map(([value, label]) => (
+                    <div key={label} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                      <div className="text-2xl font-bold text-gray-900">{value}</div>
+                      <div className="mt-1 text-xs text-gray-500">{label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={openDemo}
+                    className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
+                  >
+                    ראו דוגמה מלאה
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                  >
+                    העלו תמונה משלכם
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Upload section */}
         <div className="mb-8">
           {!imageSrc ? (
@@ -114,7 +194,7 @@ export default function StyleMatchPage() {
                 <div className="relative inline-block max-w-full">
                   <img src={imageSrc} alt="uploaded" className="block max-w-full max-h-[500px] rounded-2xl" />
                   {/* Numbered markers on image */}
-                  {activeResult?.shoppingList?.map((item: any, i: number) => (
+                  {!showDemo && activeResult?.shoppingList?.map((item: any, i: number) => (
                     item.position && (
                       <div
                         key={i}
@@ -164,7 +244,7 @@ export default function StyleMatchPage() {
                   </button>
                 </div>
               </div>
-              {!result && !loading && (
+              {!result && !loading && !showDemo && (
                 <button
                   onClick={analyze}
                   className="w-full mt-4 bg-gray-900 text-white py-4 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg"

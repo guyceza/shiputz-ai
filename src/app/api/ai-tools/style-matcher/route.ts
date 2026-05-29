@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
   "characteristics": ["Hebrew characteristic"],
   "materials": [{"name":"Hebrew material", "usage":"Hebrew usage", "textureType":"wood"}],
   "lighting": {"type":"Hebrew type", "description":"Hebrew description"},
-  "shoppingList": [{"item":"Hebrew item", "description":"Hebrew description", "material":"Hebrew material", "priceRange":"ILS range", "searchQuery":"Hebrew shopping query", "position":{"top":60,"left":45}}],
+  "shoppingList": [{"item":"Hebrew item", "description":"Hebrew description", "material":"Hebrew material", "priceRange":"1,200-3,000 ש״ח", "searchQuery":"Hebrew shopping query", "position":{"top":60,"left":45}}],
   "tips": ["Hebrew tip"]
 }
-Rules: textureType must be one of wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork. Return 5 materials, 6 shoppingList items, 3 tips. No markdown.` }
+Rules: textureType must be one of wood, metal, glass, fabric, linen, stone, marble, ceramic, concrete, leather, wool, rattan, bamboo, brick, tile, velvet, cotton, plastic, paper, cork. Return 5 materials, 6 shoppingList items, 3 tips. For priceRange, write simple Hebrew shekel ranges ending with ש״ח, never ILS. No markdown.` }
             ]
           }],
           generationConfig: {

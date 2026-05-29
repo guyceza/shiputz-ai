@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { trackAction, clearAction } from "@/lib/track-action";
@@ -43,6 +43,7 @@ const DEMO_RESULT = {
 export default function StyleMatchPage() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [showDemo, setShowDemo] = useState(false);
@@ -58,9 +59,18 @@ export default function StyleMatchPage() {
     reader.readAsDataURL(file);
   };
 
+  useEffect(() => {
+    if (!loading) return;
+    setLoadingProgress(12);
+    const timer = window.setInterval(() => {
+      setLoadingProgress((progress) => Math.min(progress + Math.max(3, Math.round((92 - progress) / 6)), 92));
+    }, 650);
+    return () => window.clearInterval(timer);
+  }, [loading]);
+
   const analyze = async () => {
     if (!imageSrc) return;
-    setLoading(true); setResult(null); setError("");
+    setLoading(true); setLoadingProgress(12); setResult(null); setError("");
     try {
       const res = await fetch("/api/ai-tools/style-matcher", {
         method: "POST",
@@ -69,6 +79,7 @@ export default function StyleMatchPage() {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
+      setLoadingProgress(100);
       setResult(data);
       clearAction();
     } catch (err: any) {
@@ -219,7 +230,7 @@ export default function StyleMatchPage() {
                         {highlightedItem === i && (
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl pointer-events-none">
                             {item.item}
-                            <span className="text-gray-400 mr-2"> · {item.priceRange}</span>
+                            <span className="text-gray-400 mr-2"> · {formatShekelRange(item.priceRange)}</span>
                             <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45 -mt-1" />
                           </div>
                         )}
@@ -227,10 +238,18 @@ export default function StyleMatchPage() {
                     )
                   ))}
                   {loading && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20 rounded-2xl">
-                      <div className="text-center">
+                    <div className="absolute inset-0 bg-white/88 backdrop-blur-sm flex items-center justify-center z-20 rounded-2xl">
+                      <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-xl">
                         <div className="w-12 h-12 border-3 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-3" />
-                        <p className="text-gray-600 font-medium">מנתח סגנון...</p>
+                        <p className="text-gray-900 font-semibold">מנתח את הסגנון...</p>
+                        <p className="mt-1 text-xs text-gray-500">מזהה צבעים, חומרים ופריטים לקנייה</p>
+                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100">
+                          <div
+                            className="h-full rounded-full bg-gray-900 transition-all duration-500"
+                            style={{ width: `${loadingProgress}%` }}
+                          />
+                        </div>
+                        <div className="mt-2 text-xs font-semibold text-gray-500">{loadingProgress}%</div>
                       </div>
                     </div>
                   )}
@@ -305,6 +324,18 @@ export default function StyleMatchPage() {
   );
 }
 
+function formatShekelRange(value?: string) {
+  if (!value) return "";
+  const cleaned = String(value)
+    .replace(/\bILS\b/gi, "")
+    .replace(/₪/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (/ש["״']?ח/.test(cleaned)) return cleaned;
+  return `${cleaned} ש״ח`;
+}
+
 // Material texture images (AI-generated, stored locally)
 const TEXTURE_TYPES = [
   "wood", "metal", "glass", "fabric", "linen", "stone", "marble",
@@ -363,7 +394,7 @@ function StyleResults({ data, isDemo, highlightedItem, onHighlight }: { data: an
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 mr-2 ${
                     highlightedItem === i ? "bg-white/20 text-white border border-white/20" : "text-gray-500 bg-white border border-gray-100"
                   }`}>
-                    {item.priceRange}
+                    {formatShekelRange(item.priceRange)}
                   </span>
                 </div>
                 <p className={`text-xs mt-0.5 truncate ${highlightedItem === i ? "text-gray-300" : "text-gray-500"}`}>{item.description}</p>

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import CreditBadge from "@/components/CreditBadge";
 import { trackAction, clearAction } from "@/lib/track-action";
+import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
 function checkCredits(res: Response, data: any) {
   if (res.status === 402 || data?.creditError) {
@@ -23,6 +24,37 @@ const STYLES = [
   { key: "boho", nameHe: "בוהמייני", desc: "טקסטילים, שטיחים, ראטאן" },
   { key: "classic", nameHe: "קלאסי אלגנטי", desc: "עיטורים, פרקט, נברשות" },
 ];
+
+const DEMO_FLOORPLANS = [
+  {
+    key: "option-1",
+    title: "שרטוט 1",
+    source: "/examples/floorplan-demo-option-1.jpg",
+  },
+  {
+    key: "option-2",
+    title: "שרטוט 2",
+    source: "/examples/floorplan-demo-option-2.jpg",
+  },
+] as const;
+
+const FLOORPLAN_WINNING_AD_IMAGE = "/examples/floorplan-winning-ad.jpg";
+const FLOORPLAN_DEMO_RESUME_KEY = "floorplan_demo_resume";
+
+type DemoFloorplanKey = typeof DEMO_FLOORPLANS[number]["key"];
+
+type FloorplanDemoResumeAction = "room" | "own";
+
+interface FloorplanDemoResumeState {
+  action: FloorplanDemoResumeAction;
+  demoKey: DemoFloorplanKey;
+  uploadedImage: string;
+  floorplanResult: string;
+  selectedStyle: string | null;
+  customStyle: string;
+  floorplanNotes: string;
+  createdAt: number;
+}
 
 const STEPS = [
   { num: 1, label: "תוכנית" },
@@ -57,7 +89,32 @@ const ROOM_PURPOSES = [
   { key: "guest-room", label: "חדר אורחים", icon: "🛎️" },
 ];
 interface FurnitureInfo { item: string; itemHe: string; description: string; suggestions: string[]; }
-interface RoomPhoto { roomName: string; roomNameHe: string; imageData: string; }
+interface RoomPhoto { id: string; roomName: string; roomNameHe: string; imageData: string; }
+
+const createRoomPhotoId = (roomName: string) =>
+  `room-${Date.now()}-${roomName}-${Math.random().toString(36).slice(2, 8)}`;
+
+const normalizeRoomPhoto = (photo: Partial<RoomPhoto> & Omit<RoomPhoto, "id">): RoomPhoto => ({
+  ...photo,
+  id: photo.id || createRoomPhotoId(photo.roomName),
+});
+
+const getRoomDisplayName = (photo: RoomPhoto, photos: RoomPhoto[]) => {
+  const sameTypeRooms = photos.filter((item) => item.roomNameHe === photo.roomNameHe);
+  if (sameTypeRooms.length <= 1) return photo.roomNameHe;
+  const index = sameTypeRooms.findIndex((item) => item.id === photo.id);
+  return `${photo.roomNameHe} ${index + 1}`;
+};
+
+const hasHebrewText = (text?: string) => /[\u0590-\u05FF]/.test(text || "");
+
+const getRoomDescriptionHe = (room?: RoomInfo | null) => {
+  if (!room) return "";
+  if (hasHebrewText(room.description)) return room.description;
+
+  const dimensions = room.dimensions ? ` בגודל משוער של ${room.dimensions.width}×${room.dimensions.height} מ׳` : "";
+  return `${room.roomHe}${dimensions}, לפי האזור שנבחר בתוכנית.`;
+};
 
 // Spinner
 const Spinner = ({ className = "h-5 w-5" }: { className?: string }) => (
@@ -123,9 +180,17 @@ const ProgressBar = ({ active, label }: { active: boolean; label: string }) => {
   );
 };
 
+const getStoredUserEmail = () => {
+  if (typeof window === "undefined") return null;
+  try { return JSON.parse(localStorage.getItem("user") || "{}")?.email || null; }
+  catch { return null; }
+};
+
 export default function FloorplanPage() {
   const [phase, setPhase] = useState<Phase>("upload");
   const [videoIntent, setVideoIntent] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Check URL param on mount + load saved rooms
   useEffect(() => {
@@ -134,6 +199,12 @@ export default function FloorplanPage() {
       setVideoIntent(true);
       setPhase("upload");
     }
+    if (params.get("fresh") === "1") {
+      localStorage.removeItem(FLOORPLAN_DEMO_RESUME_KEY);
+    }
+    const storedEmail = getStoredUserEmail();
+    setUserEmail(storedEmail);
+    setAuthChecked(true);
     try {
       const savedVideos = JSON.parse(localStorage.getItem("floorplan_video_history") || "[]");
       if (Array.isArray(savedVideos)) setVideoHistory(savedVideos);
@@ -151,7 +222,7 @@ export default function FloorplanPage() {
 
     // Load saved rooms for this user
     const loadRooms = async () => {
-      const email = getEmail();
+      const email = storedEmail;
       if (!email) { setRoomsLoaded(true); return; }
       const roomGroupsCacheKey = `floorplan_room_groups_${email}`;
       try {
@@ -159,7 +230,10 @@ export default function FloorplanPage() {
         if (cachedRaw !== null) {
           const cachedGroups = JSON.parse(cachedRaw);
           if (Array.isArray(cachedGroups)) {
-            setAllUserRooms(cachedGroups);
+            setAllUserRooms(cachedGroups.map((group: any) => ({
+              ...group,
+              rooms: Array.isArray(group.rooms) ? group.rooms.map((room: any) => normalizeRoomPhoto(room)) : [],
+            })));
             setRoomsLoaded(true);
           }
         }
@@ -173,6 +247,7 @@ export default function FloorplanPage() {
           const data = await res.json();
           if (data.rooms?.length > 0) {
             const photos: RoomPhoto[] = data.rooms.map((r: any) => ({
+              id: String(r.id || `${r.session_id}-${r.room_name}-${r.created_at || r.image_url}`),
               roomName: r.room_name,
               roomNameHe: r.room_name_he,
               imageData: r.image_url,
@@ -189,7 +264,12 @@ export default function FloorplanPage() {
             const grouped: Record<string, RoomPhoto[]> = {};
             for (const r of allData.rooms) {
               if (!grouped[r.session_id]) grouped[r.session_id] = [];
-              grouped[r.session_id].push({ roomName: r.room_name, roomNameHe: r.room_name_he, imageData: r.image_url });
+              grouped[r.session_id].push({
+                id: String(r.id || `${r.session_id}-${r.room_name}-${r.created_at || r.image_url}`),
+                roomName: r.room_name,
+                roomNameHe: r.room_name_he,
+                imageData: r.image_url,
+              });
             }
             const groups = Object.entries(grouped).map(([sid, rooms]) => ({ sessionId: sid, rooms }));
             setAllUserRooms(groups);
@@ -222,11 +302,14 @@ export default function FloorplanPage() {
   }, []);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [customStyle, setCustomStyle] = useState("");
+  const [floorplanNotes, setFloorplanNotes] = useState("");
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [floorplanResult, setFloorplanResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const [selectedDemoFloorplan, setSelectedDemoFloorplan] = useState<DemoFloorplanKey>(DEMO_FLOORPLANS[0].key);
 
   const [floorplanClick, setFloorplanClick] = useState<ClickMarker | null>(null);
   const [detectedRoom, setDetectedRoom] = useState<RoomInfo | null>(null);
@@ -266,11 +349,119 @@ export default function FloorplanPage() {
   const furnitureInputRef = useRef<HTMLInputElement>(null);
   const floorplanImgRef = useRef<HTMLImageElement>(null);
   const roomImgRef = useRef<HTMLImageElement>(null);
+  const styleSectionRef = useRef<HTMLDivElement>(null);
 
-  const getEmail = () => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}")?.email || null; }
-    catch { return null; }
+  const getEmail = useCallback(() => userEmail || getStoredUserEmail(), [userEmail]);
+  const isLoggedIn = Boolean(getEmail());
+
+  const getStyleLabel = useCallback(() => customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || "", [customStyle, selectedStyle]);
+
+  const getStyleInstruction = useCallback(() => {
+    const baseStyle = customStyle || selectedStyle || "";
+    const notes = floorplanNotes.trim();
+    return notes ? `${baseStyle}. דגשים לשינויים: ${notes}` : baseStyle;
+  }, [customStyle, selectedStyle, floorplanNotes]);
+
+  const trackFloorplanEvent = useCallback((eventName: string, targetUrl = "/floorplan") => {
+    trackAcquisitionEvent("cta_click", { eventName, targetUrl });
+  }, []);
+
+  const getVideoRoomPhoto = useCallback((roomId: string | null) => {
+    if (!roomId) return undefined;
+    return allRoomPhotos.find((photo) => photo.id === roomId) || allRoomPhotos.find((photo) => photo.roomName === roomId);
+  }, [allRoomPhotos]);
+
+  const shouldBlurDemoRoom = false;
+
+  const startDemoFloorplan = (demoKey: DemoFloorplanKey = selectedDemoFloorplan) => {
+    const demo = DEMO_FLOORPLANS.find((item) => item.key === demoKey) || DEMO_FLOORPLANS[0];
+    trackFloorplanEvent("floorplan_demo_start");
+    setSelectedDemoFloorplan(demo.key);
+    setDemoMode(true);
+    setUploadedFile(null);
+    setUploadedImage(demo.source);
+    setFloorplanResult(null);
+    setAllRoomPhotos([]);
+    setCurrentRoomPhoto(null);
+    setFloorplanClick(null);
+    setError(null);
+    setPhase("upload");
+    window.setTimeout(() => styleSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 80);
   };
+
+  const resetToOwnFloorplanUpload = () => {
+    localStorage.removeItem(FLOORPLAN_DEMO_RESUME_KEY);
+    setDemoMode(false);
+    setPhase("upload");
+    setFloorplanResult(null);
+    setUploadedImage(null);
+    setUploadedFile(null);
+    setSelectedStyle(null);
+    setCustomStyle("");
+    setFloorplanNotes("");
+    setAllRoomPhotos([]);
+    setCurrentRoomPhoto(null);
+    setFloorplanClick(null);
+    setError(null);
+    const newSession = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    sessionStorage.setItem("floorplan_session_id", newSession);
+    setFloorplanSessionId(newSession);
+  };
+
+  const continueDemoAfterSignup = (action: FloorplanDemoResumeAction) => {
+    if (action === "room") {
+      trackFloorplanEvent("floorplan_room_click");
+      setPhase("floorplan");
+      return;
+    }
+
+    if (isLoggedIn) {
+      resetToOwnFloorplanUpload();
+      return;
+    }
+
+    trackFloorplanEvent("floorplan_signup_wall_seen", "/signup?redirect=/floorplan");
+    const redirect = "/floorplan?fresh=1";
+    localStorage.removeItem(FLOORPLAN_DEMO_RESUME_KEY);
+    localStorage.setItem("authRedirect", redirect);
+    window.location.href = `/signup?redirect=${encodeURIComponent(redirect)}`;
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("resume") !== "demo-room") return;
+
+    try {
+      const raw = localStorage.getItem(FLOORPLAN_DEMO_RESUME_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as FloorplanDemoResumeState;
+      const isRecent = Date.now() - Number(saved.createdAt || 0) < 1000 * 60 * 60 * 12;
+      const demo = DEMO_FLOORPLANS.find((item) => item.key === saved.demoKey);
+      if (!isRecent || saved.action !== "room" || !saved.floorplanResult || !demo) {
+        localStorage.removeItem(FLOORPLAN_DEMO_RESUME_KEY);
+        return;
+      }
+
+      setSelectedDemoFloorplan(saved.demoKey);
+      setDemoMode(true);
+      setUploadedFile(null);
+      setUploadedImage(saved.uploadedImage || demo.source);
+      setFloorplanResult(saved.floorplanResult);
+      setSelectedStyle(saved.selectedStyle);
+      setCustomStyle(saved.customStyle || "");
+      setFloorplanNotes(saved.floorplanNotes || "");
+      setAllRoomPhotos([]);
+      setCurrentRoomPhoto(null);
+      setFloorplanClick(null);
+      setDetectedRoom(null);
+      setVideoClickMode(false);
+      setError(null);
+      setPhase("floorplan");
+    } catch (error) {
+      console.error("Failed to restore floorplan demo resume:", error);
+      localStorage.removeItem(FLOORPLAN_DEMO_RESUME_KEY);
+    }
+  }, []);
 
   const currentStep = () => {
     if (phase === "upload") return 1;
@@ -389,7 +580,7 @@ export default function FloorplanPage() {
 
   const startVideoFromRoomGroup = (sessionId: string, rooms: RoomPhoto[]) => {
     setFloorplanSessionId(sessionId);
-    setAllRoomPhotos(rooms);
+    setAllRoomPhotos(rooms.map((room) => normalizeRoomPhoto(room)));
     setCurrentRoomPhoto(null);
     setVideoFromRoom(null);
     setVideoToRoom(null);
@@ -412,18 +603,18 @@ export default function FloorplanPage() {
         roomName: photo.roomName,
         roomNameHe: photo.roomNameHe,
         imageData: photo.imageData,
-        style: customStyle || selectedStyle,
+        style: getStyleInstruction(),
       }),
     })
       .then(async (res) => {
         if (!res.ok) return;
         const data = await res.json();
-        const cachedPhoto = data.imageUrl ? { ...photo, imageData: data.imageUrl } : photo;
+        const cachedPhoto = data.imageUrl ? { ...photo, imageData: data.imageUrl, id: data.roomId || photo.id } : photo;
         setAllUserRooms((prev) => {
           const next = [...prev];
           const groupIndex = next.findIndex((group) => group.sessionId === floorplanSessionId);
           if (groupIndex >= 0) {
-            const rooms = next[groupIndex].rooms.filter((room) => room.roomName !== cachedPhoto.roomName);
+            const rooms = next[groupIndex].rooms.filter((room) => room.id !== cachedPhoto.id);
             next[groupIndex] = { ...next[groupIndex], rooms: [...rooms, cachedPhoto] };
           } else {
             next.unshift({ sessionId: floorplanSessionId, rooms: [cachedPhoto] });
@@ -433,12 +624,13 @@ export default function FloorplanPage() {
         });
       })
       .catch((e) => console.error("Failed to save room:", e));
-  }, [floorplanSessionId, customStyle, selectedStyle]);
+  }, [floorplanSessionId, getStyleInstruction]);
 
   // === File handlers ===
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setDemoMode(false);
     setUploadedFile(file);
     setFloorplanResult(null);
     setError(null);
@@ -452,6 +644,7 @@ export default function FloorplanPage() {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
+    setDemoMode(false);
     setUploadedFile(file);
     setFloorplanResult(null);
     setError(null);
@@ -462,15 +655,53 @@ export default function FloorplanPage() {
 
   // === Step 1 ===
   const generateFloorplan = async () => {
-    if (!uploadedFile || !selectedStyle) return;
+    const selectedDemo = DEMO_FLOORPLANS.find((item) => item.key === selectedDemoFloorplan);
+    const isDemoGeneration = demoMode && !!selectedDemo && uploadedImage === selectedDemo.source;
+    if ((!uploadedFile && !isDemoGeneration) || (!selectedStyle && !customStyle)) return;
+    if (isDemoGeneration) {
+      setLoading(true);
+      setLoadingLabel("ה-AI יוצר הדמיית דוגמה...");
+      setError(null);
+      try {
+        const formData = new FormData();
+        formData.append("demo", "true");
+        formData.append("demoKey", selectedDemoFloorplan);
+        formData.append("style", getStyleInstruction());
+        const res = await fetch("/api/floorplan", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "AI generation failed");
+        if (!data.image) throw new Error(data.text || "No image returned");
+        const result = `data:${data.image.mimeType};base64,${data.image.data}`;
+        setFloorplanResult(result);
+        setPhase("floorplan-ready");
+        trackFloorplanEvent("floorplan_demo_complete");
+        clearAction();
+      } catch (err: any) {
+        setError(err.message || "AI generation failed");
+      } finally {
+        setLoading(false);
+        setLoadingLabel("");
+      }
+      return;
+    }
+
+    const file = uploadedFile;
+    if (!file) return;
+
+    const email = getEmail();
+    if (!email) {
+      trackFloorplanEvent("floorplan_signup_wall_seen", videoIntent ? "/signup?redirect=/floorplan?mode=video" : "/signup?redirect=/floorplan");
+      window.location.href = `/signup?redirect=${encodeURIComponent(videoIntent ? "/floorplan?mode=video" : "/floorplan")}`;
+      return;
+    }
     setLoading(true);
     setLoadingLabel("יוצר הדמיה מלמעלה...");
     setError(null);
     try {
       const formData = new FormData();
-      formData.append("image", uploadedFile);
-      formData.append("style", customStyle || selectedStyle);
-      formData.append("email", getEmail() || "");
+      formData.append("image", file);
+      formData.append("style", getStyleInstruction());
+      formData.append("email", email);
       const res = await fetch("/api/floorplan", { method: "POST", body: formData });
       const data = await res.json();
       checkCredits(res, data); if (!res.ok) throw new Error(data.error || "AI generation failed");
@@ -511,6 +742,7 @@ export default function FloorplanPage() {
       fd1.append("clickX", x.toFixed(1));
       fd1.append("clickY", y.toFixed(1));
       fd1.append("email", getEmail() || "");
+      if (demoMode && !getEmail()) fd1.append("demoRoom", "true");
       const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
       const roomInfo = await detectRes.json();
       checkCredits(detectRes, roomInfo); if (!detectRes.ok) throw new Error(roomInfo.error);
@@ -519,21 +751,20 @@ export default function FloorplanPage() {
       const fd2 = new FormData();
       fd2.append("floorplan", blob, "floorplan.png");
       fd2.append("room", roomInfo.room);
-      fd2.append("style", customStyle || selectedStyle || "modern-cabin");
+      fd2.append("style", getStyleInstruction() || "modern-cabin");
       fd2.append("email", getEmail() || "");
+      if (demoMode && !getEmail()) fd2.append("demoRoom", "true");
       const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
       const roomData = await roomRes.json();
       checkCredits(roomRes, roomData); if (!roomRes.ok) throw new Error(roomData.error);
       if (roomData.image) {
         const photo: RoomPhoto = {
+          id: createRoomPhotoId(roomInfo.room),
           roomName: roomInfo.room, roomNameHe: roomInfo.roomHe,
           imageData: `data:${roomData.image.mimeType};base64,${roomData.image.data}`,
         };
         setCurrentRoomPhoto(photo);
-        setAllRoomPhotos((prev) => {
-          if (prev.some(p => p.roomName === photo.roomName)) return prev;
-          return [...prev, photo];
-        });
+        setAllRoomPhotos((prev) => [...prev, photo]);
         saveRoomToDB(photo);
         setPhase("room-actions");
       }
@@ -569,6 +800,7 @@ export default function FloorplanPage() {
           fd1.append("clickX", clickPos.x.toFixed(1));
           fd1.append("clickY", clickPos.y.toFixed(1));
           fd1.append("email", email);
+          if (demoMode && !email) fd1.append("demoRoom", "true");
           const detectRes = await fetch("/api/floorplan/detect-room", { method: "POST", body: fd1 });
           const roomInfo = await detectRes.json();
           if (!detectRes.ok) throw new Error(roomInfo.error);
@@ -576,13 +808,15 @@ export default function FloorplanPage() {
           const fd2 = new FormData();
           fd2.append("floorplan", blob, "floorplan.png");
           fd2.append("room", roomInfo.room);
-          fd2.append("style", customStyle || selectedStyle || "modern-cabin");
+          fd2.append("style", getStyleInstruction() || "modern-cabin");
           fd2.append("email", email);
+          if (demoMode && !email) fd2.append("demoRoom", "true");
           const roomRes = await fetch("/api/floorplan/room", { method: "POST", body: fd2 });
           const roomData = await roomRes.json();
           if (!roomRes.ok) throw new Error(roomData.error);
 
           return {
+            id: createRoomPhotoId(roomInfo.room),
             roomName: roomInfo.room,
             roomNameHe: roomInfo.roomHe,
             imageData: `data:${roomData.image.mimeType};base64,${roomData.image.data}`,
@@ -596,17 +830,14 @@ export default function FloorplanPage() {
 
         // Add to allRoomPhotos + save to DB
         setAllRoomPhotos((prev) => {
-          const updated = [...prev];
-          if (!updated.some(p => p.roomName === roomA.roomName)) updated.push(roomA);
-          if (!updated.some(p => p.roomName === roomB.roomName)) updated.push(roomB);
-          return updated;
+          return [...prev, roomA, roomB];
         });
         saveRoomToDB(roomA);
         saveRoomToDB(roomB);
 
         // Go directly to video select with these 2 rooms pre-selected
-        setVideoFromRoom(roomA.roomName);
-        setVideoToRoom(roomB.roomName);
+        setVideoFromRoom(roomA.id);
+        setVideoToRoom(roomB.id);
         setPhase("video-select");
       } catch (err: any) { setError(err.message); }
       finally { setGeneratingBothRooms(false); setLoadingLabel(""); setVideoClickA(null); setVideoClickB(null); }
@@ -683,8 +914,8 @@ export default function FloorplanPage() {
   // === Step 4: Video ===
   const generateVideo = async () => {
     if (!videoFromRoom || !videoToRoom) return;
-    const fromPhoto = allRoomPhotos.find(p => p.roomName === videoFromRoom);
-    const toPhoto = allRoomPhotos.find(p => p.roomName === videoToRoom);
+    const fromPhoto = getVideoRoomPhoto(videoFromRoom);
+    const toPhoto = getVideoRoomPhoto(videoToRoom);
     if (!fromPhoto || !toPhoto) return;
     setVideoLoading(true);
     setVideoResult(null);
@@ -698,7 +929,7 @@ export default function FloorplanPage() {
       const fd = new FormData();
       fd.append("firstFrame", firstBlob, "first.jpg");
       fd.append("lastFrame", lastBlob, "last.jpg");
-      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts in the ${fromPhoto.roomName} and physically glides forward at eye level through a bright doorway or well-lit hallway, continuously moving into the ${toPhoto.roomName}. The rooms are connected - the camera passes through the doorframe showing walls, ceiling and floor the entire time. Bright warm natural daylight fills both rooms. The transition corridor is well-lit and visible. Photorealistic interior design showcase, fluid cinematic camera, never stopping.`;
+      const basePrompt = `Smooth steadicam walkthrough from a ${fromPhoto.roomName} into a ${toPhoto.roomName}. The camera starts inside the ${fromPhoto.roomName}, turns toward a real visible doorway, and exits only through that doorway. It then physically follows the natural apartment path through a bright hallway or corridor if one is needed, and enters the ${toPhoto.roomName} only through its doorway. The route must respect normal apartment architecture: walls remain solid and continuous, doorframes remain visible, and the camera never passes through, dissolves through, cuts through, erases, opens, breaks, or morphs any wall. If the two rooms are not directly adjacent, show the hallway/corridor connection between them. Keep floor, ceiling, side walls, corners, and doorframes visible throughout the move so the viewer understands the path. Photorealistic interior design showcase, bright warm natural daylight, fluid cinematic camera, never stopping.`;
       const fullPrompt = videoCustomPrompt.trim() ? `${basePrompt} Additional details: ${videoCustomPrompt.trim()}` : basePrompt;
       fd.append("prompt", fullPrompt);
       fd.append("email", getEmail() || "");
@@ -798,13 +1029,13 @@ export default function FloorplanPage() {
                 {videoIntent ? (
                   <>מסרטון סיור ל<span className="text-emerald-600">דירה זורמת</span></>
                 ) : (
-                  <>מתוכנית קומה ל<span className="text-emerald-600">דירה מעוצבת</span></>
+                  <>מתוכנית קומה ל<span className="text-emerald-600">חדרים ומוצרים</span></>
                 )}
               </h1>
               <p className="text-gray-500 max-w-lg mx-auto">
                 {videoIntent
                   ? "התחילו מתוכנית קומה, בחרו סגנון, ואז סמנו שני חדרים על ההדמיה מלמעלה ליצירת סיור."
-                  : "העלו תוכנית קומה ובחרו סגנון עיצוב - ה-AI ייצור הדמיה מלמעלה של הדירה כולה"}
+                  : "ראו מהר איך שרטוט הופך להדמיה, לחדרים מעוצבים ולרעיונות למוצרים שאפשר לחפש אחר כך"}
               </p>
             </div>
 
@@ -880,14 +1111,62 @@ export default function FloorplanPage() {
               </div>
             )}
 
+            {!videoIntent && (
+              <div className="rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+                <div className="mx-auto mb-5 max-w-lg overflow-hidden rounded-3xl border border-gray-100 bg-gray-950 shadow-sm">
+                  <img
+                    src={FLOORPLAN_WINNING_AD_IMAGE}
+                    alt="מתוכנית קומה להדמיית AI של בית מעוצב"
+                    className="h-auto w-full object-contain"
+                  />
+                </div>
+
+                <div className="grid gap-5 md:grid-cols-[1fr_520px] md:items-start">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-gray-500">דוגמה חינמית ללא הרשמה</p>
+                    <h2 className="mt-1 text-xl font-black text-gray-900">נסו דוגמה: שרטוט → חדר → מוצרים</h2>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                      התחילו משרטוט מובנה, בחרו סגנון, קבלו הדמיה מלמעלה ואז לחצו על חדר כדי לראות אותו מבפנים. הדוגמה לא דורשת הרשמה ולא משתמשת בקרדיטים.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {DEMO_FLOORPLANS.map((demo) => {
+                      const selected = demoMode && selectedDemoFloorplan === demo.key;
+                      return (
+                        <button
+                          key={demo.key}
+                          type="button"
+                          onClick={() => startDemoFloorplan(demo.key)}
+                          disabled={loading}
+                          className={`group overflow-hidden rounded-2xl border bg-white text-right shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                            selected ? "border-gray-950 ring-2 ring-gray-950/10" : "border-gray-200 hover:border-gray-400 hover:shadow-md"
+                          }`}
+                        >
+                          <div className="flex aspect-[3/4] w-full items-center justify-center bg-gray-50 p-2">
+                            <img src={demo.source} alt={demo.title} className="h-full w-full object-contain transition-transform group-hover:scale-[1.04]" />
+                          </div>
+                          <div className="flex items-center justify-between px-3 py-2">
+                            <span className="text-xs font-bold text-gray-900">{demo.title}</span>
+                            <span className="text-[11px] font-bold text-gray-500">
+                              {selected ? "נבחר" : "בחרו"}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Upload area */}
             <div>
               <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-gray-700">
                 <span className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">א</span>
-                העלאת תוכנית קומה
+                {videoIntent ? "העלאת תוכנית קומה" : "או העלאת תוכנית קומה משלכם"}
               </label>
               <div
-                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
+                className={`border-2 border-dashed rounded-2xl p-4 text-center transition-all cursor-pointer sm:p-6 ${
                   uploadedImage ? "border-emerald-300 bg-emerald-50/50" : "border-gray-300 hover:border-gray-400 bg-gray-50"
                 }`}
                 onClick={() => fileInputRef.current?.click()}
@@ -897,7 +1176,7 @@ export default function FloorplanPage() {
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
                 {uploadedImage ? (
                   <div className="space-y-2">
-                    <img src={uploadedImage} alt="Floor plan" className="max-h-52 mx-auto rounded-xl shadow-sm" />
+                    <img src={uploadedImage} alt="Floor plan" className="mx-auto max-h-[420px] w-auto max-w-full rounded-xl object-contain shadow-sm md:max-h-[520px]" />
                     <p className="text-xs text-gray-400">לחצו להחלפה</p>
                   </div>
                 ) : (
@@ -913,7 +1192,7 @@ export default function FloorplanPage() {
             </div>
 
             {/* Style selection */}
-            <div>
+            <div ref={styleSectionRef}>
               <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-700">
                 <span className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">ב</span>
                 בחירת סגנון עיצוב
@@ -943,19 +1222,51 @@ export default function FloorplanPage() {
                   dir="rtl"
                 />
               </div>
+              <div className="mt-3">
+                <label className="mb-1.5 block text-xs font-semibold text-gray-500">פירוט לשינויים (אופציונלי)</label>
+                <textarea
+                  value={floorplanNotes}
+                  onChange={(e) => setFloorplanNotes(e.target.value)}
+                  placeholder="למשל: לפתוח את הסלון, להוסיף אי במטבח, יותר אור טבעי, לשמור על שני חדרי שינה..."
+                  className="min-h-24 w-full resize-none rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-gray-400 focus:outline-none"
+                  dir="rtl"
+                />
+              </div>
             </div>
 
-            <button onClick={generateFloorplan} disabled={!uploadedFile || (!selectedStyle && !customStyle) || loading}
+            <button onClick={generateFloorplan} disabled={(!uploadedFile && !demoMode) || (!selectedStyle && !customStyle) || loading}
               className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
-                !uploadedFile || (!selectedStyle && !customStyle) || loading
+                (!uploadedFile && !demoMode) || (!selectedStyle && !customStyle) || loading
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-gray-900 text-white hover:bg-gray-800 shadow-xl hover:shadow-2xl"
               }`}>
               {loading ? (
                 <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> יוצר הדמיה...</span>
-              ) : videoIntent ? "צור תוכנית ובחר 2 חדרים →" : "צור הדמיה →"}
+              ) : demoMode ? "נסו דוגמה עכשיו →" : !isLoggedIn && uploadedFile ? "הירשמו כדי ליצור מתוכנית משלכם →" : videoIntent ? "צור תוכנית ובחר 2 חדרים →" : "צור הדמיה →"}
             </button>
-            <p className="text-xs text-gray-400 text-center mt-2">10 קרדיטים להדמיה · 5 לצילום חדר · 25 לסרטון</p>
+            <p className="text-xs text-gray-400 text-center mt-2">
+              {!authChecked
+                ? "דוגמה מובנית ללא קרדיטים"
+                : isLoggedIn
+                ? "דוגמה מובנית ללא קרדיטים · העלאת תוכנית משלכם משתמשת בקרדיטים"
+                : "דוגמה מובנית ללא קרדיטים · העלאת תוכנית משלכם דורשת הרשמה"}
+            </p>
+
+            {loading && demoMode && (
+              <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/70 p-4 text-right shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 shadow-sm">
+                    <Spinner className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-gray-900">הדמו עובר עכשיו דרך ה-AI</p>
+                    <p className="mt-1 text-xs leading-relaxed text-gray-500">
+                      מנתח את שרטוט הדוגמה, מיישם את הסגנון שבחרתם ומחזיר הדמיה חדשה.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* How it works */}
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
@@ -978,67 +1289,143 @@ export default function FloorplanPage() {
               <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד</p>
             </div>
 
-            {/* Before / After side by side */}
-            <div className="grid grid-cols-2 gap-3 max-w-3xl mx-auto">
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                <img src={uploadedImage!} alt="Original" className="w-full" />
-                <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">תוכנית מקורית</div>
-              </div>
-              <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-sm">
-                <img src={floorplanResult} alt="Rendering" className="w-full" />
-                <div className="text-center text-xs text-emerald-600 py-1.5 bg-emerald-50">
-                  {STYLES.find((s) => s.key === selectedStyle)?.nameHe}
+            {demoMode ? (
+              <div className="mx-auto max-w-3xl overflow-hidden rounded-[28px] border-2 border-emerald-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
+                <div className="bg-gradient-to-l from-emerald-50 via-white to-sky-50 px-4 py-3 text-center">
+                  <p className="text-xs font-black text-emerald-700">דוגמת ההדמיה</p>
+                  <p className="mt-1 text-sm font-bold text-gray-900">{getStyleLabel()}</p>
+                </div>
+                <div className="bg-white p-2 sm:p-4">
+                  <img
+                    src={floorplanResult}
+                    alt="הדמיית דוגמה מוכנה"
+                    className="aspect-[900/620] w-full rounded-2xl object-contain"
+                  />
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 max-w-3xl mx-auto">
+                <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                  <img src={uploadedImage!} alt="Original" className="w-full" />
+                  <div className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">תוכנית מקורית</div>
+                </div>
+                <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-sm">
+                  <img src={floorplanResult} alt="Rendering" className="w-full" />
+                  <div className="text-center text-xs text-emerald-600 py-1.5 bg-emerald-50">
+                    {getStyleLabel()}
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Action cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
-              {/* Room photo */}
-              <button onClick={() => setPhase("floorplan")}
-                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
+            {demoMode ? (
+              <div className="mx-auto max-w-3xl rounded-[28px] border border-emerald-200 bg-gradient-to-l from-emerald-50 via-white to-sky-50 p-5 text-center shadow-sm">
+                <p className="text-xs font-black text-emerald-700">הדוגמה הסתיימה ללא שימוש בקרדיטים</p>
+                <h3 className="mt-2 text-2xl font-black leading-tight text-gray-950">
+                  רוצים לראות איך חדר ספציפי נראה?
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  אפשר להמשיך מהדוגמה שכבר יצרתם, או להתחיל מחדש עם שרטוט אמיתי שלכם.
+                </p>
+                {!isLoggedIn && (
+                  <p className="mt-2 text-xs font-bold text-gray-500">
+                    את החדר הראשון בדוגמה אפשר לראות בלי הרשמה. המשך עם תוכנית אמיתית דורש הרשמה.
+                  </p>
+                )}
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => continueDemoAfterSignup("room")}
+                    className="group rounded-2xl border-2 border-gray-950 bg-gray-950 p-4 text-right text-white shadow-lg transition-all hover:bg-gray-800"
+                  >
+                    <span className="block text-base font-black">לראות חדר מתוך הדוגמה</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-white/70">
+                      {isLoggedIn
+                        ? "תעברו ישר לבחירת חדר על ההדמיה הזאת."
+                        : "תעברו ישר לבחירת חדר על ההדמיה הזאת, בלי הרשמה ובלי קרדיטים."}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => continueDemoAfterSignup("own")}
+                    className="rounded-2xl border border-gray-200 bg-white p-4 text-right shadow-sm transition-all hover:border-gray-400 hover:shadow-md"
+                  >
+                    <span className="block text-base font-black text-gray-950">לנסות על השרטוט שלי</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-gray-500">
+                      {isLoggedIn
+                        ? "נפתח לכם את מסך ההעלאה מחדש, נקי מהדוגמה."
+                        : "אחרי ההרשמה תחזרו ל־Floorplan נקי ותעלו תוכנית משלכם."}
+                    </span>
+                  </button>
                 </div>
-                <div className="font-bold text-gray-900 text-sm">הדמיית חדר</div>
-                <div className="text-xs text-gray-400 mt-1">לחצו על חדר וראו אותו מבפנים</div>
-              </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+                {/* Room photo */}
+                <button onClick={() => setPhase("floorplan")}
+                  className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
+                  <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
+                  </div>
+                  <div className="font-bold text-gray-900 text-sm">הדמיית חדר</div>
+                  <div className="text-xs text-gray-400 mt-1">לחצו על חדר וראו אותו מבפנים</div>
+                </button>
 
-              {/* Video */}
-              <button onClick={() => {
-                if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
-                else { setVideoClickMode(true); setVideoClickA(null); setVideoClickB(null); setPhase("floorplan"); }
-              }}
-                className="bg-white border-2 border-gray-200 hover:border-emerald-500 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-emerald-50 group-hover:bg-emerald-500 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-emerald-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" /></svg>
-                </div>
-                <div className="font-bold text-gray-900 text-sm">סרטון סיור</div>
-                <div className="text-xs text-gray-400 mt-1">לחצו על 2 חדרים בתוכנית</div>
-              </button>
+                {/* Video */}
+                <button onClick={() => {
+                  if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
+                  else { setVideoClickMode(true); setVideoClickA(null); setVideoClickB(null); setPhase("floorplan"); }
+                }}
+                  className="bg-white border-2 border-gray-200 hover:border-emerald-500 rounded-2xl p-5 text-center transition-all group">
+                  <div className="w-11 h-11 mx-auto rounded-full bg-emerald-50 group-hover:bg-emerald-500 flex items-center justify-center transition-colors mb-3">
+                    <svg className="w-5 h-5 text-emerald-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" /></svg>
+                  </div>
+                  <div className="font-bold text-gray-900 text-sm">סרטון סיור</div>
+                  <div className="text-xs text-gray-400 mt-1">לחצו על 2 חדרים בתוכנית</div>
+                </button>
 
-              {/* Furniture */}
-              <button onClick={() => {
-                if (allRoomPhotos.length > 0) {
-                  if (!currentRoomPhoto) setCurrentRoomPhoto(allRoomPhotos[allRoomPhotos.length - 1]);
-                  setPhase("furniture-click");
-                  setRoomClick(null);
-                  setDetectedFurniture(null);
-                } else {
-                  setPhase("floorplan");
-                }
-              }}
-                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
-                <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
-                  <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
-                </div>
-                <div className="font-bold text-gray-900 text-sm">החלפת רהיט</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {allRoomPhotos.length > 0
-                    ? "בחרו רהיט והחליפו אותו"
-                    : "צרו חדר קודם"}
-                </div>
-              </button>
+                {/* Furniture */}
+                <button onClick={() => {
+                  if (allRoomPhotos.length > 0) {
+                    if (!currentRoomPhoto) setCurrentRoomPhoto(allRoomPhotos[allRoomPhotos.length - 1]);
+                    setPhase("furniture-click");
+                    setRoomClick(null);
+                    setDetectedFurniture(null);
+                  } else {
+                    setPhase("floorplan");
+                  }
+                }}
+                  className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-5 text-center transition-all group">
+                  <div className="w-11 h-11 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
+                  </div>
+                  <div className="font-bold text-gray-900 text-sm">החלפת רהיט</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {allRoomPhotos.length > 0
+                      ? "בחרו רהיט והחליפו אותו"
+                      : "צרו חדר קודם"}
+                  </div>
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
+              <Link
+                href="/visualize"
+                onClick={() => trackFloorplanEvent("floorplan_to_visualize_click", "/visualize")}
+                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-4 text-center transition-all"
+              >
+                <div className="font-bold text-gray-900 text-sm">רוצים רק לעצב חדר?</div>
+                <div className="text-xs text-gray-400 mt-1">עברו להדמיה רגילה ומהירה</div>
+              </Link>
+              <Link
+                href="/shop-look"
+                onClick={() => trackFloorplanEvent("floorplan_to_shoplook_click", "/shop-look")}
+                className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-4 text-center transition-all"
+              >
+                <div className="font-bold text-gray-900 text-sm">מצאו מוצרים דומים</div>
+                <div className="text-xs text-gray-400 mt-1">המשיכו ל-Shop the Look</div>
+              </Link>
             </div>
 
             {/* Room thumbnails if any */}
@@ -1046,11 +1433,11 @@ export default function FloorplanPage() {
               <div className="space-y-3 max-w-3xl mx-auto">
                 <h3 className="text-sm font-semibold text-gray-500">חדרים שנוצרו ({allRoomPhotos.length})</h3>
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {allRoomPhotos.map((photo, i) => (
-                    <button key={i} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
+                  {allRoomPhotos.map((photo) => (
+                    <button key={photo.id} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
                       className="rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all">
                       <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{photo.roomNameHe}</div>
+                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{getRoomDisplayName(photo, allRoomPhotos)}</div>
                     </button>
                   ))}
                 </div>
@@ -1059,12 +1446,7 @@ export default function FloorplanPage() {
 
             {/* Start fresh */}
             <div className="text-center">
-              <button onClick={() => { 
-                setPhase("upload"); setFloorplanResult(null); setUploadedImage(null); setUploadedFile(null); setAllRoomPhotos([]); 
-                const newSession = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-                sessionStorage.setItem("floorplan_session_id", newSession);
-                setFloorplanSessionId(newSession);
-              }}
+              <button onClick={resetToOwnFloorplanUpload}
                 className="text-sm text-gray-400 hover:text-gray-600 transition-colors">תוכנית חדשה</button>
             </div>
           </>
@@ -1124,7 +1506,7 @@ export default function FloorplanPage() {
                 <div className={`text-center text-xs py-1.5 ${videoClickMode ? "text-purple-600 bg-purple-50" : "text-emerald-600 bg-emerald-50"}`}>
                   {videoClickMode
                     ? `🎬 מצב סרטון - ${videoClickA ? "1/2 נבחרו" : "בחרו חדר A"}`
-                    : `${customStyle || STYLES.find((s) => s.key === selectedStyle)?.nameHe || ""} - לחצו על חדר`}
+                    : `${getStyleLabel()} - לחצו על חדר`}
                 </div>
               </div>
             </div>
@@ -1139,11 +1521,11 @@ export default function FloorplanPage() {
                   </button>
                 )}
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                  {allRoomPhotos.map((photo, i) => (
-                    <button key={i} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
+                  {allRoomPhotos.map((photo) => (
+                    <button key={photo.id} onClick={() => { setCurrentRoomPhoto(photo); setPhase("room-actions"); }}
                       className="rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all">
                       <img src={photo.imageData} alt={photo.roomNameHe} className="w-full aspect-[4/3] object-cover" />
-                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{photo.roomNameHe}</div>
+                      <div className="text-center text-[10px] text-gray-500 py-1 bg-gray-50">{getRoomDisplayName(photo, allRoomPhotos)}</div>
                     </button>
                   ))}
                 </div>
@@ -1174,8 +1556,8 @@ export default function FloorplanPage() {
                   </span>
                 )}
               </div>
-              {detectedRoom?.description && (
-                <p className="text-sm text-gray-500 mb-3">{detectedRoom.description}</p>
+              {detectedRoom && (
+                <p className="text-sm text-gray-500 mb-3">{getRoomDescriptionHe(detectedRoom)}</p>
               )}
               {/* Change Purpose */}
               <div className="flex flex-wrap gap-1.5">
@@ -1195,19 +1577,21 @@ export default function FloorplanPage() {
                         const fd = new FormData();
                         fd.append("floorplan", blob, "floorplan.png");
                         fd.append("room", r.key);
-                        fd.append("style", customStyle || selectedStyle || "modern-cabin");
+                        fd.append("style", getStyleInstruction() || "modern-cabin");
                         fd.append("email", getEmail() || "");
+                        if (demoMode && !getEmail()) fd.append("demoRoom", "true");
                         const res = await fetch("/api/floorplan/room", { method: "POST", body: fd });
                         const data = await res.json();
                         checkCredits(res, data); if (!res.ok) throw new Error(data.error);
                         if (data.image) {
                           const photo: RoomPhoto = {
+                            id: currentRoomPhoto.id,
                             roomName: r.key, roomNameHe: r.label,
                             imageData: `data:${data.image.mimeType};base64,${data.image.data}`,
                           };
                           setCurrentRoomPhoto(photo);
                           setAllRoomPhotos(prev => {
-                            const filtered = prev.filter(p => p.roomName !== currentRoomPhoto.roomName);
+                            const filtered = prev.filter(p => p.id !== currentRoomPhoto.id);
                             return [...filtered, photo];
                           });
                           saveRoomToDB(photo);
@@ -1224,15 +1608,44 @@ export default function FloorplanPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-2xl mx-auto">
-              <img src={currentRoomPhoto.imageData} alt={currentRoomPhoto.roomNameHe} className="w-full" />
+            <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-w-2xl mx-auto bg-gray-100">
+              <img
+                src={currentRoomPhoto.imageData}
+                alt={currentRoomPhoto.roomNameHe}
+                className={`w-full transition-all duration-500 ${shouldBlurDemoRoom ? "scale-[1.03] blur-md brightness-90" : ""}`}
+              />
+              {shouldBlurDemoRoom && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/20 px-5 text-center backdrop-blur-[1px]">
+                  <div className="max-w-sm rounded-[24px] border border-white/70 bg-white/90 px-5 py-4 shadow-xl">
+                    <p className="text-xs font-black text-emerald-700">תצוגה מקדימה מהדוגמה</p>
+                    <h3 className="mt-1 text-lg font-black text-gray-950">רוצים לראות חדר ברור מהשרטוט שלכם?</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                      העלו תוכנית אמיתית וקבלו צילום פנים מלא לפי הסגנון שבחרתם.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={resetToOwnFloorplanUpload}
+                      className="mt-3 inline-flex items-center justify-center rounded-full bg-gray-950 px-5 py-2.5 text-sm font-black text-white transition-colors hover:bg-gray-800"
+                    >
+                      לנסות על השרטוט שלי
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <p className="text-center text-gray-500 text-sm">מה תרצו לעשות עם החדר?</p>
+            {!shouldBlurDemoRoom && <p className="text-center text-gray-500 text-sm">מה תרצו לעשות עם החדר?</p>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+            {!shouldBlurDemoRoom && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
               <button
-                onClick={() => { setPhase("furniture-click"); setRoomClick(null); setDetectedFurniture(null); }}
+                onClick={() => {
+                  if (demoMode && !isLoggedIn) {
+                    trackFloorplanEvent("floorplan_signup_wall_seen", "/signup?redirect=/floorplan");
+                    window.location.href = `/signup?redirect=${encodeURIComponent("/floorplan?fresh=1")}`;
+                    return;
+                  }
+                  setPhase("furniture-click"); setRoomClick(null); setDetectedFurniture(null);
+                }}
                 className="bg-white border-2 border-gray-200 hover:border-gray-900 rounded-2xl p-6 text-center transition-all group"
               >
                 <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 group-hover:bg-gray-900 flex items-center justify-center transition-colors mb-3">
@@ -1244,6 +1657,11 @@ export default function FloorplanPage() {
 
               <button
                 onClick={() => {
+                  if (demoMode && !isLoggedIn) {
+                    trackFloorplanEvent("floorplan_signup_wall_seen", "/signup?redirect=/floorplan");
+                    window.location.href = `/signup?redirect=${encodeURIComponent("/floorplan?fresh=1")}`;
+                    return;
+                  }
                   if (allRoomPhotos.length >= 2) { setVideoFromRoom(null); setVideoToRoom(null); setPhase("video-select"); }
                   else { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }
                 }}
@@ -1259,7 +1677,7 @@ export default function FloorplanPage() {
                     : `צרו עוד ${2 - allRoomPhotos.length} חדר/ים - לחצו לחזור`}
                 </div>
               </button>
-            </div>
+            </div>}
 
             <div className="text-center">
               <button onClick={() => { setPhase("floorplan-ready"); setCurrentRoomPhoto(null); }}
@@ -1359,7 +1777,7 @@ export default function FloorplanPage() {
 
                 <button onClick={doSwap} disabled={(!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || swapping}
                   className={`w-full py-3.5 rounded-full font-bold transition-all ${
-                    (!selectedSuggestion && !furnitureFile) || swapping ? "bg-gray-200 text-gray-400"
+                    (!selectedSuggestion && !furnitureFile && !customFurnitureText?.trim()) || swapping ? "bg-gray-200 text-gray-400"
                       : "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"
                   }`}>
                   {swapping ? <span className="flex items-center justify-center gap-2"><Spinner className="h-5 w-5" /> מחליף...</span>
@@ -1422,15 +1840,16 @@ export default function FloorplanPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
               {allRoomPhotos.map((photo) => {
-                const isFrom = videoFromRoom === photo.roomName;
-                const isTo = videoToRoom === photo.roomName;
+                const label = getRoomDisplayName(photo, allRoomPhotos);
+                const isFrom = videoFromRoom === photo.id || videoFromRoom === photo.roomName;
+                const isTo = videoToRoom === photo.id || videoToRoom === photo.roomName;
                 const isSelected = isFrom || isTo;
                 return (
-                  <button key={photo.roomName} onClick={() => {
+                  <button key={photo.id} onClick={() => {
                     if (isFrom) { setVideoFromRoom(null); return; }
                     if (isTo) { setVideoToRoom(null); return; }
-                    if (!videoFromRoom) { setVideoFromRoom(photo.roomName); }
-                    else if (!videoToRoom) { setVideoToRoom(photo.roomName); }
+                    if (!videoFromRoom) { setVideoFromRoom(photo.id); }
+                    else if (!videoToRoom) { setVideoToRoom(photo.id); }
                   }}
                     className={`rounded-2xl overflow-hidden border-2 transition-all relative ${
                       isSelected ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:border-gray-300 hover:shadow-md"
@@ -1444,7 +1863,7 @@ export default function FloorplanPage() {
                     <div className={`text-center text-xs py-1.5 ${
                       isSelected ? "bg-gray-900 text-white font-medium" : "bg-gray-50 text-gray-500"
                     }`}>
-                      {photo.roomNameHe}
+                      {label}
                       {isFrom && " - התחלה"}
                       {isTo && " - סיום"}
                     </div>
@@ -1456,11 +1875,17 @@ export default function FloorplanPage() {
             {videoFromRoom && videoToRoom && (
               <div className="flex items-center justify-center gap-3 text-sm">
                 <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">
-                  {allRoomPhotos.find(p => p.roomName === videoFromRoom)?.roomNameHe}
+                  {(() => {
+                    const photo = getVideoRoomPhoto(videoFromRoom);
+                    return photo ? getRoomDisplayName(photo, allRoomPhotos) : "";
+                  })()}
                 </span>
                 <span className="text-gray-300">→</span>
                 <span className="px-3 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">
-                  {allRoomPhotos.find(p => p.roomName === videoToRoom)?.roomNameHe}
+                  {(() => {
+                    const photo = getVideoRoomPhoto(videoToRoom);
+                    return photo ? getRoomDisplayName(photo, allRoomPhotos) : "";
+                  })()}
                 </span>
               </div>
             )}
@@ -1511,7 +1936,11 @@ export default function FloorplanPage() {
             <div className="text-center space-y-2">
               <h2 className="text-xl font-bold text-gray-900">הסרטון מוכן</h2>
               <p className="text-gray-500 text-sm">
-                {allRoomPhotos.find(p => p.roomName === videoFromRoom)?.roomNameHe} → {allRoomPhotos.find(p => p.roomName === videoToRoom)?.roomNameHe}
+                {(() => {
+                  const fromPhoto = getVideoRoomPhoto(videoFromRoom);
+                  const toPhoto = getVideoRoomPhoto(videoToRoom);
+                  return `${fromPhoto ? getRoomDisplayName(fromPhoto, allRoomPhotos) : ""} → ${toPhoto ? getRoomDisplayName(toPhoto, allRoomPhotos) : ""}`;
+                })()}
               </p>
             </div>
 

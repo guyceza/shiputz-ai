@@ -3,6 +3,7 @@ import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
 import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -38,16 +39,24 @@ export async function POST(req: NextRequest) {
     const styleKey = formData.get("style") as string;
     const userEmail = formData.get("email") as string;
     const cameraAngle = formData.get("cameraAngle") as string || "";
+    const isDemoRoom = formData.get("demoRoom") === "true";
 
     if (!floorplanImage || !roomName) {
       return NextResponse.json({ error: "Missing floorplan image or room name" }, { status: 400 });
     }
 
-    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
-    const creditCheck = await creditGuard(userEmail, 'room-photo');
-    if ('error' in creditCheck) return creditCheck.error;
-    chargedUserEmail = userEmail;
-    chargedCost = creditCheck.cost;
+    if (!userEmail && !isDemoRoom) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    if (isDemoRoom && !userEmail) {
+      const rateLimit = checkRateLimit(`floorplan-demo-room:${getClientId(req)}`, 2, 24 * 60 * 60 * 1000);
+      if (!rateLimit.success) {
+        return NextResponse.json({ error: "יותר מדי חדרי דוגמה כרגע. נסו שוב מאוחר יותר." }, { status: 429 });
+      }
+    } else {
+      const creditCheck = await creditGuard(userEmail, 'room-photo');
+      if ('error' in creditCheck) return creditCheck.error;
+      chargedUserEmail = userEmail;
+      chargedCost = creditCheck.cost;
+    }
 
     const styleDesc = STYLE_PROMPTS[styleKey] || (styleKey ? `${styleKey} style - apply this design aesthetic with appropriate materials, colors, furniture, and atmosphere` : STYLE_PROMPTS["modern-cabin"]);
 
@@ -113,7 +122,9 @@ Output a single photorealistic interior photograph.`;
 
     chargedUserEmail = null;
     chargedCost = 0;
-    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'room-photo');
+    const giftClaim = userEmail
+      ? await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'room-photo')
+      : null;
     return NextResponse.json({ image: resultImage, text: resultText, room: roomName, giftClaim });
   } catch (error: unknown) {
     await refundIfNeeded("server_error");

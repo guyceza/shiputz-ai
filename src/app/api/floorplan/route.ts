@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readFile } from "fs/promises";
+import path from "path";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { creditGuard } from "@/lib/credit-guard";
 import { refundCreditCharge } from "@/lib/credit-refunds";
 import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
+
+const DEMO_FLOORPLANS: Record<string, { filename: string; mimeType: string }> = {
+  "option-1": { filename: "floorplan-demo-option-1.jpg", mimeType: "image/jpeg" },
+  "option-2": { filename: "floorplan-demo-option-2.jpg", mimeType: "image/jpeg" },
+};
 
 // Style presets with detailed prompts
 const STYLES: Record<string, { name: string; prompt: string }> = {
@@ -53,17 +61,30 @@ export async function POST(req: NextRequest) {
     const image = formData.get("image") as File | null;
     const styleKey = formData.get("style") as string;
     const userEmail = formData.get("email") as string;
+    const isDemo = formData.get("demo") === "true";
+    const demoKey = String(formData.get("demoKey") || "option-1");
 
-    if (!image || !styleKey) {
+    if ((!image && !isDemo) || !styleKey) {
       return NextResponse.json({ error: "Missing image or style" }, { status: 400 });
     }
 
-    // Credit check
-    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
-    const creditCheck = await creditGuard(userEmail, 'floorplan');
-    if ('error' in creditCheck) return creditCheck.error;
-    chargedUserEmail = userEmail;
-    chargedCost = creditCheck.cost;
+    if (isDemo) {
+      if (!DEMO_FLOORPLANS[demoKey]) {
+        return NextResponse.json({ error: "Invalid demo floorplan" }, { status: 400 });
+      }
+      const clientId = getClientId(req);
+      const rateLimit = checkRateLimit(`floorplan-demo:${clientId}:${demoKey}`, 3, 24 * 60 * 60 * 1000);
+      if (!rateLimit.success) {
+        return NextResponse.json({ error: "יותר מדי הדמיות דוגמה כרגע. נסו שוב מאוחר יותר." }, { status: 429 });
+      }
+    } else {
+      // Credit check
+      if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+      const creditCheck = await creditGuard(userEmail, 'floorplan');
+      if ('error' in creditCheck) return creditCheck.error;
+      chargedUserEmail = userEmail;
+      chargedCost = creditCheck.cost;
+    }
 
     const style = STYLES[styleKey];
     // Allow custom style text (not in STYLES dict)
@@ -71,12 +92,29 @@ export async function POST(req: NextRequest) {
       ? style.prompt
       : `Style: ${styleKey} - apply this design style throughout the apartment with appropriate materials, colors, furniture, and atmosphere that match this aesthetic.`;
 
-    // Convert image to base64
-    const bytes = await image.arrayBuffer();
+    const demoFloorplan = DEMO_FLOORPLANS[demoKey] || DEMO_FLOORPLANS["option-1"];
+    const bytes = isDemo
+      ? await readFile(path.join(process.cwd(), "public/examples", demoFloorplan.filename))
+      : Buffer.from(await image!.arrayBuffer());
     const base64 = Buffer.from(bytes).toString("base64");
-    const mimeType = image.type || "image/jpeg";
+    const mimeType = isDemo ? demoFloorplan.mimeType : image!.type || "image/jpeg";
 
-    const prompt = `Analyze the provided floor plan and generate a photorealistic top-down (true 90° orthographic) rendering of the entire apartment, strictly preserving the exact dimensions, proportions, walls, doors, windows, and furniture placement as shown. Do not modify layout, scale, structure, or orientation. ${stylePrompt} Architectural visualization style, ultra-realistic materials, physically accurate lighting, no perspective distortion, no added or removed structural elements. The output must be a single cohesive image showing the full apartment from directly above.`;
+    const prompt = `Analyze the provided floor plan and generate a finished interior design rendering of the entire apartment from directly above.
+
+Critical output requirements:
+- True 90 degree top-down orthographic apartment render, like a furnished dollhouse floor seen from the ceiling.
+- Preserve the exact room layout, proportions, walls, doors, openings, windows, and orientation from the uploaded plan.
+- Convert the flat plan into a realistic furnished overhead interior: floors, rugs, beds, sofas, kitchen counters, dining table, bathroom fixtures, cabinetry, lighting, and decor should be visible from above.
+- Use a bright premium architectural maquette look: soft white or cream walls, pale natural materials, gentle shadows, clean real-estate presentation, and clear daylight.
+- Keep all walls and rooms readable, but the image must look like a designed apartment render, not a schematic drawing.
+- Do not add labels, text, captions, room names, arrows, icons, UI elements, or watermark.
+- Do not output another blueprint, line diagram, cartoon map, or simplified floor-plan sketch.
+- Do not use perspective camera, isometric angle, side view, or 3D exterior view.
+- Avoid dark blueprint-like walls, thick black outlines, neon colors, and technical diagram styling.
+
+${stylePrompt}
+
+Single cohesive image only. Ultra-realistic materials, clean architectural visualization quality, physically plausible daylight, no perspective distortion, no added or removed structural elements.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,
@@ -140,7 +178,7 @@ export async function POST(req: NextRequest) {
 
     chargedUserEmail = null;
     chargedCost = 0;
-    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'floorplan');
+    const giftClaim = isDemo ? null : await claimShavuotGiftAfterSuccessfulAction(req, userEmail, 'floorplan');
     return NextResponse.json({
       image: resultImage,
       text: resultText,

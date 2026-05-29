@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { isAdminEmail } from "@/lib/admin";
 import { creditGuard } from "@/lib/credit-guard";
+import { checkRateLimit, getClientId } from "@/lib/rate-limit";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -12,13 +13,21 @@ export async function POST(req: NextRequest) {
     const clickX = parseFloat(formData.get("clickX") as string); // 0-100 percentage
     const clickY = parseFloat(formData.get("clickY") as string); // 0-100 percentage
     const userEmail = formData.get("email") as string;
+    const isDemoRoom = formData.get("demoRoom") === "true";
 
     if (!image || isNaN(clickX) || isNaN(clickY)) {
       return NextResponse.json({ error: "Missing image or click position" }, { status: 400 });
     }
 
-    // Auth only - detect-room is free (credit charged on room photo generation)
-    if (!userEmail) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    // Auth only - detect-room is free (credit charged on room photo generation).
+    // Demo rooms are allowed without auth so ad visitors can see one real result before signup.
+    if (!userEmail && !isDemoRoom) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
+    if (isDemoRoom && !userEmail) {
+      const rateLimit = checkRateLimit(`floorplan-demo-room-detect:${getClientId(req)}`, 4, 24 * 60 * 60 * 1000);
+      if (!rateLimit.success) {
+        return NextResponse.json({ error: "יותר מדי ניסיונות דוגמה כרגע. נסו שוב מאוחר יותר." }, { status: 429 });
+      }
+    }
 
     const bytes = await image.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");
@@ -30,12 +39,14 @@ Identify which room or area the user clicked on. Also estimate the room's dimens
 {
   "room": "the room name in English (e.g. living room, kitchen, bedroom, bathroom, hallway, balcony, dining area, home office)",
   "roomHe": "the room name in Hebrew",
-  "description": "brief description of what you see in that area of the floor plan",
+  "description": "תיאור קצר בעברית בלבד של מה שרואים באזור שנבחר בתוכנית, למשל: פינת אוכל עם שולחן מלבני וארבעה כיסאות",
   "dimensions": { "width": 3.5, "height": 4.0 }
 }
 
 For dimensions, estimate in meters based on typical Israeli apartment proportions. If you can see dimension labels on the plan, use those. Otherwise estimate based on room type and relative size.
-If the click is on a wall, door, or unclear area, pick the nearest room. Respond with ONLY the JSON, no other text.`;
+If the click is on a wall, door, or unclear area, pick the nearest room.
+Important: "roomHe" and "description" must be in Hebrew only. Do not return English text in "description".
+Respond with ONLY the JSON, no other text.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${GEMINI_KEY}`,

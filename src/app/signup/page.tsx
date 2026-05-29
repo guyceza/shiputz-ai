@@ -6,6 +6,7 @@ import Link from "next/link";
 import { isAdminEmail } from "@/lib/admin";
 import { useRouter } from "next/navigation";
 import { getStoredAttribution } from "@/lib/attribution";
+import { trackSignupConversion } from "@/lib/ads-tracking";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +20,20 @@ export default function SignupPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
+  const getPostSignupRedirect = () => {
+    if (typeof window === "undefined") return "/start";
+
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+    return redirect && redirect.startsWith("/") ? redirect : "/start";
+  };
+
+  const getSignupTitle = () => {
+    const redirect = getPostSignupRedirect();
+    if (redirect.startsWith("/floorplan")) return "המשיכו ל-Floor Plan";
+    if (redirect.startsWith("/visualize")) return "המשיכו להדמיה";
+    return "הרשמה";
+  };
+
   // Check if already logged in
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,7 +41,7 @@ export default function SignupPage() {
         const { getSession } = await import("@/lib/auth");
         const session = await getSession();
         if (session) {
-          router.push("/dashboard");
+          router.push(getPostSignupRedirect());
         }
       } catch (e) {
         console.error("Auth check error:", e);
@@ -71,10 +86,15 @@ export default function SignupPage() {
       }
 
       const { signUp } = await import("@/lib/auth");
+      const redirect = getPostSignupRedirect();
+      if (redirect !== "/start") {
+        localStorage.setItem("authRedirect", redirect);
+      }
       const data = await signUp(email, password, name);
       
       // Save to users table (welcome email will be sent after email verification in callback)
       console.log('🚀 Signup success, saving user:', email);
+      let createdUserData: { vizCredits?: number } | null = null;
       
       try {
         const userRes = await fetch('/api/users', {
@@ -83,6 +103,10 @@ export default function SignupPage() {
           body: JSON.stringify({ email, name, auth_provider: 'email', auth_id: data.user?.id, attribution: getStoredAttribution() }),
         });
         const userData = await userRes.json();
+        createdUserData = userData;
+        if (userRes.ok) {
+          trackSignupConversion("email");
+        }
         console.log('👤 User save result:', userData);
       } catch (e) {
         console.error('❌ User save failed:', e);
@@ -100,16 +124,19 @@ export default function SignupPage() {
           id: data.user?.id,
           name,
           isAdmin: isAdminEmail(email),
-          purchased: false  // New users are not premium yet
+          purchased: false,  // New users are not premium yet
+          viz_credits: createdUserData?.vizCredits ?? 10,
         }));
-        router.push("/visualize");
+        trackSignupConversion("email");
+        localStorage.removeItem("authRedirect");
+        router.push(getPostSignupRedirect());
       } else {
         // Email confirmation required
         setSuccess(true);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup error:", err);
-      const errorMsg = err.message || err.toString();
+      const errorMsg = err instanceof Error ? err.message : String(err);
       if (errorMsg.includes("already registered")) {
         setError("משתמש עם אימייל זה כבר קיים");
       } else if (errorMsg.includes("valid email")) {
@@ -174,7 +201,7 @@ export default function SignupPage() {
 
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-sm">
-          <h1 className="text-3xl font-semibold text-gray-900 text-center mb-8">הרשמה</h1>
+          <h1 className="text-3xl font-semibold text-gray-900 text-center mb-8">{getSignupTitle()}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
@@ -237,7 +264,10 @@ export default function SignupPage() {
               />
               <span className="text-sm text-gray-600">
                 קראתי ואני מסכים/ה ל
-                <a href="/privacy" className="text-gray-900 underline hover:no-underline" target="_blank">תנאי השימוש ומדיניות הפרטיות</a>
+                <a href="/terms" className="text-gray-900 underline hover:no-underline" target="_blank">תנאי השימוש</a>
+                {" "}ול
+                <a href="/privacy" className="text-gray-900 underline hover:no-underline" target="_blank">מדיניות הפרטיות</a>
+                , כולל האפשרות ש-ShiputzAI תעדכן מעת לעת את המחירים, המסלולים, הקרדיטים ותנאי השימוש בכלים.
               </span>
             </label>
 
@@ -261,14 +291,14 @@ export default function SignupPage() {
 
           <button
             onClick={async () => {
-              if (!acceptedTerms) {
-                setError("יש לאשר את תנאי השימוש לפני ההרשמה");
-                return;
+              const redirect = getPostSignupRedirect();
+              if (redirect !== "/start") {
+                localStorage.setItem("authRedirect", redirect);
               }
               const { signInWithGoogle } = await import("@/lib/auth");
               await signInWithGoogle();
             }}
-            className={`w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 py-3 rounded-full text-base transition-colors ${acceptedTerms ? 'hover:bg-gray-50' : 'opacity-60 cursor-not-allowed'}`}
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 py-3 rounded-full text-base transition-colors hover:bg-gray-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -278,6 +308,9 @@ export default function SignupPage() {
             </svg>
             המשך עם Google
           </button>
+          <p className="mt-3 text-center text-xs leading-relaxed text-gray-400">
+            בהמשך עם Google אתם מאשרים את תנאי השימוש ומדיניות הפרטיות.
+          </p>
 
           <p className="text-center text-gray-500 mt-8">
             יש לך חשבון?{" "}

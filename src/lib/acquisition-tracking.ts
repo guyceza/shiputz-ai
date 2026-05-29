@@ -3,6 +3,16 @@
 import { captureAttribution, getStoredAttribution } from '@/lib/attribution';
 
 const SESSION_KEY = 'shiputzai_acquisition_session';
+const AI_SOURCES = [
+  'chatgpt',
+  'openai',
+  'perplexity',
+  'claude',
+  'gemini',
+  'copilot',
+  'you.com',
+  'phind',
+];
 
 function getSessionId() {
   let sessionId = localStorage.getItem(SESSION_KEY);
@@ -21,13 +31,26 @@ export function trackAcquisitionEvent(
 
   try {
     const attribution = getStoredAttribution() || captureAttribution();
+    const aiSignal = AI_SOURCES.some((source) => {
+      const firstSource = attribution?.first_source?.toLowerCase() || '';
+      const firstMedium = attribution?.first_medium?.toLowerCase() || '';
+      const firstReferrer = attribution?.first_referrer?.toLowerCase() || '';
+      const utmSource = attribution?.utm_source?.toLowerCase() || '';
+      return (
+        firstMedium === 'ai_referral' ||
+        firstSource.includes(source) ||
+        firstReferrer.includes(source) ||
+        utmSource.includes(source)
+      );
+    });
     const hasPaidOrCampaignSignal = Boolean(
       attribution?.gclid ||
         attribution?.fbclid ||
         attribution?.msclkid ||
         attribution?.utm_source ||
         attribution?.utm_campaign ||
-        attribution?.first_source === 'google'
+        attribution?.first_source === 'google' ||
+        aiSignal
     );
 
     if (!hasPaidOrCampaignSignal && eventType === 'page_view') return;

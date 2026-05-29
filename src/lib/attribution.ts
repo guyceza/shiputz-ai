@@ -45,6 +45,18 @@ function inferSource(referrer: string | null, params: URLSearchParams): { source
     const host = new URL(referrer).hostname.replace(/^www\./, '').toLowerCase();
     if (host.includes('google.')) return { source: 'google', medium: 'organic' };
     if (host.includes('bing.')) return { source: 'bing', medium: 'organic' };
+    if (
+      host.includes('chatgpt.com') ||
+      host.includes('openai.com') ||
+      host.includes('perplexity.ai') ||
+      host.includes('claude.ai') ||
+      host.includes('gemini.google.com') ||
+      host.includes('copilot.microsoft.com') ||
+      host.includes('you.com') ||
+      host.includes('phind.com')
+    ) {
+      return { source: host, medium: 'ai_referral' };
+    }
     if (host.includes('facebook.') || host.includes('instagram.')) return { source: host, medium: 'social' };
     if (host.includes('payplus.co.il')) return { source: 'payments.payplus.co.il', medium: 'referral' };
     return { source: host, medium: 'referral' };

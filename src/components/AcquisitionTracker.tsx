@@ -18,6 +18,17 @@ const TOOL_PATHS = [
   '/dashboard/bill-of-quantities',
 ];
 
+const AI_SOURCES = [
+  'chatgpt',
+  'openai',
+  'perplexity',
+  'claude',
+  'gemini',
+  'copilot',
+  'you.com',
+  'phind',
+];
+
 function shouldTrackPage(pageKey: string) {
   try {
     const seen = JSON.parse(sessionStorage.getItem(SEEN_PAGES_KEY) || '[]') as string[];
@@ -46,7 +57,19 @@ export default function AcquisitionTracker() {
         searchParams.get('fbclid') ||
         searchParams.get('msclkid') ||
         searchParams.get('utm_source') ||
-        searchParams.get('utm_campaign')
+        searchParams.get('utm_campaign') ||
+        AI_SOURCES.some((source) => {
+          const firstSource = attribution.first_source?.toLowerCase() || '';
+          const firstMedium = attribution.first_medium?.toLowerCase() || '';
+          const firstReferrer = attribution.first_referrer?.toLowerCase() || '';
+          const utmSource = attribution.utm_source?.toLowerCase() || '';
+          return (
+            firstMedium === 'ai_referral' ||
+            firstSource.includes(source) ||
+            firstReferrer.includes(source) ||
+            utmSource.includes(source)
+          );
+        })
     );
 
     trackAcquisitionEvent(isLanding ? 'landing_view' : 'page_view');

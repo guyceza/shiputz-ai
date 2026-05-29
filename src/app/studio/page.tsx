@@ -5,12 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Check,
-  ClipboardList,
   ImagePlus,
-  Layers3,
-  Paintbrush,
-  SlidersHorizontal,
-  Sparkles,
 } from "lucide-react";
 import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
@@ -225,8 +220,7 @@ export default function StudioPage() {
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-8 lg:grid-cols-[0.92fr_1.08fr] lg:py-14">
         <div className="space-y-7">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-stone-600 shadow-sm">
-              <Layers3 className="h-4 w-4" />
+            <div className="mb-5 inline-flex rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-stone-600 shadow-sm">
               סטודיו אחד לכל המסע
             </div>
             <h1 className="max-w-xl text-4xl font-black leading-tight tracking-normal text-stone-950 md:text-6xl">
@@ -351,10 +345,9 @@ export default function StudioPage() {
 
           {activeStep === "goal" && (
             <div>
-              <div className="mb-4 flex items-center gap-2">
-                <ClipboardList className="h-5 w-5 text-stone-500" />
-                <h2 className="font-bold text-stone-950">1. מה רוצים לעשות?</h2>
-              </div>
+              <h2 className="mb-4 font-bold text-stone-950">
+                1. מה רוצים לעשות?
+              </h2>
               <div className="grid gap-3 md:grid-cols-3">
                 {goals.map((goal) => (
                   <button
@@ -385,10 +378,7 @@ export default function StudioPage() {
 
           {activeStep === "strength" && (
             <div>
-              <div className="mb-4 flex items-center gap-2">
-                <SlidersHorizontal className="h-5 w-5 text-stone-500" />
-                <h2 className="font-bold text-stone-950">2. כמה לשנות?</h2>
-              </div>
+              <h2 className="mb-4 font-bold text-stone-950">2. כמה לשנות?</h2>
               <div className="grid gap-3 md:grid-cols-3">
                 {strengths.map((strength) => (
                   <button
@@ -419,12 +409,9 @@ export default function StudioPage() {
 
           {activeStep === "direction" && (
             <div>
-              <div className="mb-4 flex items-center gap-2">
-                <Paintbrush className="h-5 w-5 text-stone-500" />
-                <h2 className="font-bold text-stone-950">
-                  3. איזה כיוון עיצובי?
-                </h2>
-              </div>
+              <h2 className="mb-4 font-bold text-stone-950">
+                3. איזה כיוון עיצובי?
+              </h2>
               <div className="grid gap-3 md:grid-cols-3">
                 {directions.map((direction) => (
                   <button
@@ -456,8 +443,7 @@ export default function StudioPage() {
           {activeStep === "ready" && (
             <div className="flex flex-col gap-4 border-t border-stone-100 pt-5 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="flex items-center gap-2 text-sm font-bold text-stone-500">
-                  <Sparkles className="h-4 w-4" />
+                <div className="text-sm font-bold text-stone-500">
                   הכיוון מוכן
                 </div>
                 <h2 className="mt-1 text-xl font-black text-stone-950 md:text-2xl">

@@ -17,6 +17,13 @@ import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
 const intentCards = [
   {
+    title: "רוצה מסלול אחד שמחבר הכל?",
+    description: "העלו תמונה, בחרו מטרה ועוצמת שינוי, והמשיכו להדמיה, מוצרים ועלויות.",
+    href: "/studio",
+    cta: "פתחו סטודיו",
+    surface: "border-gray-200 bg-white hover:border-gray-900 hover:bg-gray-50",
+  },
+  {
     title: "רוצה לראות איך זה ייראה?",
     description: "העלו תמונה וקבלו לפני/אחרי ברור לפני שקונים, צובעים או מתחילים עבודה.",
     href: "/visualize",
@@ -159,6 +166,9 @@ export default function Home() {
           </Link>
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-3">
+            <Link href="/studio" className="text-xs text-gray-900 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 px-3 py-1.5 rounded-full transition-all">
+              סטודיו
+            </Link>
             <Link href="/ai-vision" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
               🎨 AI Vision
             </Link>
@@ -208,6 +218,9 @@ export default function Home() {
       {mobileMenu && (
         <div className="fixed top-11 left-0 right-0 bg-white border-b border-gray-200 z-40 md:hidden shadow-lg" dir="rtl">
           <div className="px-6 py-4 space-y-3">
+            <Link href="/studio" className="block text-sm font-semibold text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
+              סטודיו מאוחד
+            </Link>
             <Link href="/ai-vision" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
               🎨 AI Vision - כלי העיצוב
             </Link>
@@ -256,7 +269,7 @@ export default function Home() {
             <p className="text-sm text-gray-400 tracking-widest uppercase mb-2">מה צריך עכשיו?</p>
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">בחרו לפי השאלה שמעסיקה אתכם.</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-5">
             {intentCards.map((card) => (
               <Link
                 key={card.title}

@@ -101,6 +101,29 @@ const FAQ = [
   },
 ];
 
+const OUTCOME_EXAMPLES = [
+  {
+    title: "בדיקת רעיון לחדר",
+    description: "הדמיה אחת + המשך למציאת מוצרים דומים",
+    credits: CREDIT_COSTS.visualize + CREDIT_COSTS["shop-look"],
+  },
+  {
+    title: "השוואת שלושה כיווני עיצוב",
+    description: "שלוש הדמיות לאותו חדר לפני שמחליטים",
+    credits: CREDIT_COSTS.visualize * 3,
+  },
+  {
+    title: "תוכנית קומה לחדר ומוצרים",
+    description: "הדמיית תוכנית, תמונת חדר, ואז Shop the Look",
+    credits: CREDIT_COSTS.floorplan + CREDIT_COSTS["room-photo"] + CREDIT_COSTS["shop-look"],
+  },
+  {
+    title: "בדיקת שיפוץ מול תקציב",
+    description: "הדמיה + כתב כמויות + ניתוח הצעת מחיר",
+    credits: CREDIT_COSTS.visualize + CREDIT_COSTS["bill-of-quantities"] + CREDIT_COSTS["analyze-quote"],
+  },
+];
+
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -444,6 +467,27 @@ export default function PricingPage() {
             {planChangeMessage.text}
           </div>
         )}
+      </section>
+
+      <section className="px-4 pb-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">כמה קרדיטים צריך לתוצאה אמיתית?</h2>
+            <p className="text-gray-500">במקום לחשוב רק על מספרים, הנה דוגמאות לפי תרחישי שיפוץ נפוצים.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            {OUTCOME_EXAMPLES.map((example) => (
+              <div key={example.title} className="rounded-2xl border border-gray-200 bg-white p-5">
+                <div className="text-sm font-bold text-gray-900">{example.title}</div>
+                <p className="mt-2 min-h-12 text-sm leading-6 text-gray-500">{example.description}</p>
+                <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3">
+                  <div className="text-2xl font-black text-gray-900">{example.credits}</div>
+                  <div className="text-xs text-gray-400">קרדיטים משוערים</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Credit Slider */}

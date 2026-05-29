@@ -943,6 +943,27 @@ export default function VisualizePage() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("studio") !== "1") return;
+
+      const rawDraft = localStorage.getItem("shiputzai_studio_draft");
+      if (!rawDraft) return;
+
+      const draft = JSON.parse(rawDraft);
+      if (typeof draft.prompt === "string" && draft.prompt.trim()) {
+        setDescription(draft.prompt);
+        setSelectedControlChip(null);
+      }
+      if (typeof draft.image === "string" && draft.image.startsWith("data:image/")) {
+        setUploadedImage(draft.image);
+      }
+      setShowUploadModal(true);
+      localStorage.removeItem("shiputzai_studio_draft");
+    } catch {}
+  }, []);
+
   // Countdown and tips rotation when generating
   useEffect(() => {
     if (!generating) {

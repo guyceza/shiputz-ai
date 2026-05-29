@@ -23,6 +23,14 @@ const QUICK_EXTRA_CREDIT_PACKS = [
   { credits: 300, badge: "לשימוש כבד", variant: "value" },
 ] as const;
 
+const seoIntentLinks = [
+  { href: "/tips/room-visualization-ai", label: "הדמיית חדרים" },
+  { href: "/tips/ai-renovation-from-photo", label: "הדמיית שיפוץ מתמונה" },
+  { href: "/tips/ai-kitchen-renovation", label: "הדמיית מטבח AI" },
+  { href: "/tips/living-room-before-after-ai", label: "הדמיית סלון לפני שיפוץ" },
+  { href: "/studio", label: "סטודיו מודרך" },
+];
+
 type ShopLookProduct = {
   id: string;
   name: string;
@@ -1252,6 +1260,17 @@ export default function VisualizePage() {
 
           {/* Social proof */}
           <p className="text-sm text-gray-400 mb-2">נועד לתת כיוון לפני ביצוע, לא להחליף בדיקה מקצועית בשטח</p>
+          <div className="mx-auto mt-5 flex max-w-2xl flex-wrap justify-center gap-2">
+            {seoIntentLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-950"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -1389,6 +1408,57 @@ export default function VisualizePage() {
         </div>
       </section>
 
+      {/* SEO Context - compact content, no redesign */}
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-3xl rounded-3xl border border-gray-100 bg-gray-50 p-6 md:p-8">
+          <p className="mb-3 text-sm font-bold text-gray-500">הדמיית חדרים, בתים ומטבחים</p>
+          <h2 className="text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
+            הדמיית חדרים ב-AI מתוך תמונה קיימת
+          </h2>
+          <p className="mt-4 leading-8 text-gray-600">
+            ShiputzAI מיועד למי שרוצה לראות חדר לפני שיפוץ בלי לנחש: מעלים תמונה של סלון,
+            מטבח, חדר שינה, חדר רחצה או חלל בבית, כותבים בעברית מה לשנות, ומקבלים הדמיית
+            לפני ואחרי שאפשר להראות למשפחה, למעצב או לקבלן.
+          </p>
+          <div className="mt-6 grid gap-3 md:grid-cols-3">
+            {[
+              {
+                title: "הדמיית חדרים",
+                body: "בדיקה מהירה של צבעים, חומרים, תאורה וריהוט בלי לשנות את הבית בפועל.",
+              },
+              {
+                title: "הדמיית בתים",
+                body: "כיוון ויזואלי לדירה או בית לפני החלטות גדולות כמו ריצוף, קירות ומטבח.",
+              },
+              {
+                title: "הדמיית מטבח AI",
+                body: "בדיקה של חזיתות, שיש, תאורה וריצוף לפני הזמנה או פגישה עם ספק.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="rounded-2xl border border-gray-200 bg-white p-4">
+                <h3 className="font-bold text-gray-950">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleTryNow}
+              className="rounded-full bg-gray-950 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-gray-800"
+            >
+              התחילו הדמיית חדר
+            </button>
+            <Link
+              href="/tips/room-visualization-ai"
+              className="rounded-full border border-gray-300 px-5 py-3 text-sm font-bold text-gray-800 transition-colors hover:border-gray-500"
+            >
+              מדריך הדמיית חדרים
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section - Show if not subscribed to Pro */}
       {isLoggedIn && !hasSubscription && (
         <section className="py-20 px-6 bg-gray-50">
@@ -1417,31 +1487,31 @@ export default function VisualizePage() {
           <div className="space-y-6">
             <details className="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-colors">
               <summary className="flex items-center justify-between cursor-pointer font-medium text-gray-900">
+                מה זה הדמיית חדרים ב-AI?
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
+              </summary>
+              <p className="mt-4 text-gray-500 text-sm leading-relaxed">
+                הדמיית חדרים ב-AI היא יצירת תמונת לפני ואחרי מתוך צילום קיים של חדר. מעלים תמונה, מתארים בעברית את השינוי הרצוי, ומקבלים כיוון ויזואלי לפני שמתחילים לקנות או לשפץ.
+              </p>
+            </details>
+            
+            <details className="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-colors">
+              <summary className="flex items-center justify-between cursor-pointer font-medium text-gray-900">
+                האם זה מתאים להדמיית בתים ומטבחים?
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
+              </summary>
+              <p className="mt-4 text-gray-500 text-sm leading-relaxed">
+                כן. אפשר להשתמש בכלי להדמיית בתים, סלונים, מטבחים, חדרי שינה, חדרי רחצה ומרפסות. תמונה ברורה של החלל תיתן תוצאה טובה יותר.
+              </p>
+            </details>
+            
+            <details className="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-colors">
+              <summary className="flex items-center justify-between cursor-pointer font-medium text-gray-900">
                 כמה מדויקת הערכת העלויות?
                 <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
               </summary>
               <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                ההערכות מבוססות על מחירי שוק מעודכנים ומדויקות ל-±15%. המערכת לוקחת בחשבון את סוג העבודה, חומרים, ואזור גיאוגרפי.
-              </p>
-            </details>
-            
-            <details className="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-colors">
-              <summary className="flex items-center justify-between cursor-pointer font-medium text-gray-900">
-                כמה הדמיות אפשר ליצור?
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
-              </summary>
-              <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                עם Pro אפשר ליצור 4 הדמיות שיפוץ AI. צריך עוד? קנה חבילת הדמיות נוספות.
-              </p>
-            </details>
-            
-            <details className="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-colors">
-              <summary className="flex items-center justify-between cursor-pointer font-medium text-gray-900">
-                איך משתפים את ההדמיה עם קבלן?
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">↓</span>
-              </summary>
-              <p className="mt-4 text-gray-500 text-sm leading-relaxed">
-                כל הדמיה נשמרת אוטומטית בפרויקט שלך. אפשר לשתף באמצעות לינק ישיר או להוריד כ-PDF עם כל פירוט העלויות.
+                ההערכות נועדו לתת סדר גודל ראשוני לפי סוג העבודה והחומרים. לפני ביצוע בפועל עדיין צריך הצעת מחיר מסודרת ובדיקת בעל מקצוע בשטח.
               </p>
             </details>
             

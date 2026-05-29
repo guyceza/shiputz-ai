@@ -54,6 +54,7 @@ const intentCards = [
 ];
 
 const seoTopicLinks = [
+  { href: "/tips/room-visualization-ai", label: "הדמיית חדרים" },
   { href: "/tips/ai-renovation-from-photo", label: "הדמיית שיפוץ מתמונה" },
   { href: "/tips/hebrew-ai-interior-design", label: "עיצוב פנים AI בעברית" },
   { href: "/tips/ai-kitchen-renovation", label: "הדמיית מטבח AI" },

@@ -176,6 +176,9 @@ export default function TipsPage() {
             <Link href="/tips/renovation-costs-2026" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
               עלויות שיפוץ 2026
             </Link>
+            <Link href="/tips/room-visualization-ai" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              הדמיית חדרים
+            </Link>
             <Link href="/tips/ai-renovation-from-photo" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
               הדמיית שיפוץ מתמונה
             </Link>

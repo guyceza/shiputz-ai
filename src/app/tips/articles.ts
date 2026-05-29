@@ -17,6 +17,7 @@ export interface Article {
 // New standalone pages (have their own page.tsx, not using [slug] route)
 // Listed here so they appear in the tips index
 const standalonePages: {slug: string; title: string; excerpt: string; category: string; readingTime: number}[] = [
+  { slug: "room-visualization-ai", title: "הדמיית חדרים ב-AI - לראות חדר לפני שיפוץ", excerpt: "מדריך ממוקד להדמיית חדרים מתמונה: סלון, מטבח, חדר שינה או בית לפני החלטה", category: "AI", readingTime: 5 },
   { slug: "ai-renovation-from-photo", title: "הדמיית שיפוץ מתמונה - לראות לפני שמתחילים", excerpt: "איך מעלים תמונת חדר ומקבלים הדמיית לפני/אחרי בעברית עם המשך למוצרים ועלויות", category: "AI", readingTime: 5 },
   { slug: "hebrew-ai-interior-design", title: "עיצוב פנים AI בעברית - כלי ישראלי לתכנון הבית", excerpt: "מדריך לעיצוב פנים עם AI בעברית: הדמיות, סגנון, מוצרים ותהליך שיפוץ מקומי", category: "AI", readingTime: 5 },
   { slug: "ai-kitchen-renovation", title: "הדמיית מטבח AI - לבדוק לפני שמזמינים", excerpt: "חזיתות, שיש, תאורה וריצוף: איך לבדוק שיפוץ מטבח על תמונה אמיתית", category: "חדרים", readingTime: 5 },

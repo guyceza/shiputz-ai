@@ -33,6 +33,9 @@ const AI_SOURCES = [
 const QUERIES = [
   'אתר ישראלי לדמיין שיפוץ',
   'Redesign AI בעברית',
+  'הדמיית חדרים',
+  'הדמיית בתים',
+  'הדמיה AI',
   'הדמיית שיפוץ מתמונה',
   'עיצוב פנים AI בעברית',
   'הדמיית מטבח AI',
@@ -54,6 +57,7 @@ const HEALTH_URLS = [
   'https://shipazti.com/',
   'https://shipazti.com/studio',
   'https://shipazti.com/tips/redesign-ai-hebrew',
+  'https://shipazti.com/tips/room-visualization-ai',
   'https://shipazti.com/tips/ai-renovation-from-photo',
   'https://shipazti.com/tips/hebrew-ai-interior-design',
   'https://shipazti.com/tips/ai-kitchen-renovation',

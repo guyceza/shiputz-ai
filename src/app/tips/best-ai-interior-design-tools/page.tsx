@@ -64,7 +64,7 @@ export default function BestAIInteriorDesignToolsPage() {
         "name": "כמה עולה הדמיית עיצוב פנים בAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים 10 קרדיטים חינם להיכרות.`
+          "text": `המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות.`
         }
       },
       {
@@ -154,7 +154,7 @@ export default function BestAIInteriorDesignToolsPage() {
               <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✅</span> <span><strong>ניתוח הצעת מחיר</strong> - AI שבודק אם המחיר הגיוני</span></li>
             </ul>
             <p className="text-gray-700 leading-relaxed mb-2">
-              <strong>יתרונות:</strong> ממשק עברי מלא, מותאם לשוק הישראלי, 10 קרדיטים חינם בהרשמה, 7 כלים בפלטפורמה אחת, מחירים בשקלים.
+              <strong>יתרונות:</strong> ממשק עברי מלא, מותאם לשוק הישראלי, ניסיון ראשון חינם בהרשמה, 7 כלים בפלטפורמה אחת, מחירים בשקלים.
             </p>
             <p className="text-gray-700 leading-relaxed">
               <strong>חסרונות:</strong> זמין רק באינטרנט (אין אפליקציה ייעודית עדיין).
@@ -201,7 +201,7 @@ export default function BestAIInteriorDesignToolsPage() {
               <strong>חסרונות:</strong> אין עברית, תוצאות בסיסיות, אין כלים נוספים, אין תמיכה, מוגבל בסגנונות.
             </p>
             <p className="text-gray-600 text-sm italic">
-              למה ShiputzAI עדיף? איכות הדמיות גבוהה בהרבה, 7 כלים, ממשק עברי, ו-10 קרדיטים חינם לניסיון.
+              למה ShiputzAI עדיף? איכות הדמיות גבוהה בהרבה, 7 כלים, ממשק עברי, וניסיון ראשון חינם.
             </p>
           </div>
 
@@ -338,7 +338,7 @@ export default function BestAIInteriorDesignToolsPage() {
             אם אתם מתכננים שיפוץ בישראל, <strong>ShiputzAI הוא הבחירה הברורה</strong>. זה הכלי היחיד שמציע ממשק עברי מלא, 7 כלי AI בפלטפורמה אחת, ומחירים נגישים בשקלים. בעוד שכלים אחרים מציעים רק הדמיות בסיסיות, ShiputzAI נותן לכם את כל מה שצריך - מהדמיה ועד כתב כמויות וניתוח הצעות מחיר.
           </p>
           <p className="text-gray-700 leading-relaxed mb-8">
-            התחילו עם 10 קרדיטים חינם ותראו בעצמכם למה אלפי ישראלים כבר בחרו בShiputzAI.
+            התחילו עם ניסיון ראשון חינם ותראו בעצמכם למה אלפי ישראלים כבר בחרו בShiputzAI.
           </p>
         </div>
 
@@ -348,7 +348,7 @@ export default function BestAIInteriorDesignToolsPage() {
             href="/signup"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            התחילו עם 10 קרדיטים חינם →
+            התחילו עם ניסיון ראשון חינם →
           </Link>
         </div>
 
@@ -362,7 +362,7 @@ export default function BestAIInteriorDesignToolsPage() {
             />
             <FaqItem
               question="כמה עולה הדמיית עיצוב פנים בAI?"
-              answer={`המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים 10 קרדיטים חינם להיכרות.`}
+              answer={`המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות.`}
             />
             <FaqItem
               question="האם יש כלי AI לעיצוב פנים בעברית?"

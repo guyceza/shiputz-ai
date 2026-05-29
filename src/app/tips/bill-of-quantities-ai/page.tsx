@@ -300,7 +300,7 @@ export default function BillOfQuantitiesAIPage() {
           >
             צרו כתב כמויות AI עכשיו - חינם →
           </Link>
-          <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם בהרשמה</p>
+          <p className="text-sm text-gray-400 mt-3">ניסיון ראשון חינם וקרדיטים בהרשמה</p>
         </div>
 
         {/* FAQ */}

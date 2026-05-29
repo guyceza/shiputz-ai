@@ -51,7 +51,7 @@ export default function AIKitchenVisualizationPage() {
       {
         "@type": "Question",
         "name": "כמה עולה הדמיית מטבח בAI?",
-        "acceptedAnswer": { "@type": "Answer", "text": `הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים 10 קרדיטים חינם להיכרות.` }
+        "acceptedAnswer": { "@type": "Answer", "text": `הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות.` }
       },
       {
         "@type": "Question",
@@ -252,7 +252,7 @@ export default function AIKitchenVisualizationPage() {
             href="/visualize"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            נסו הדמיית מטבח עכשיו - 10 קרדיטים חינם →
+            נסו הדמיית מטבח עכשיו - {CREDIT_COSTS.visualize} קרדיטים חינם →
           </Link>
           <p className="text-sm text-gray-400 mt-3">לא צריך כרטיס אשראי להרשמה</p>
         </div>
@@ -263,7 +263,7 @@ export default function AIKitchenVisualizationPage() {
           <div className="space-y-4">
             <FaqItem
               question="כמה עולה הדמיית מטבח בAI?"
-              answer={`הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים 10 קרדיטים חינם להיכרות.`}
+              answer={`הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות.`}
             />
             <FaqItem
               question="כמה זמן לוקח לקבל הדמיית מטבח?"

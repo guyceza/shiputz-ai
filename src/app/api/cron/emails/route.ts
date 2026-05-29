@@ -305,7 +305,7 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
       reason: 'new_signup',
       html: wrapEmail(
         'ברוכים הבאים',
-        'יש לכם 10 קרדיטים חינם לניסיון',
+        'יש לכם ניסיון ראשון חינם וקרדיטים לניסיון',
         greet(user.name || undefined) +
         para('תודה שהצטרפתם! עם ShiputzAI תוכלו <strong>לראות איך הבית ייראה אחרי עיצוב מחדש</strong> - לפני שמוציאים שקל.') +
         infoBox([
@@ -363,7 +363,7 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
           greet(user.name || undefined) +
           para('שמנו לב שעדיין לא ניסיתם את <strong>הדמיית החדר</strong> - הכלי הכי פופולרי שלנו!') +
           para('מצלמים את החדר, בוחרים סגנון עיצוב - ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
-          bigNumber('10 קרדיטים', 'מחכים לכם בחשבון - מספיק להתחלה'),
+          bigNumber('ניסיון חינם', 'וקרדיטים מחכים לכם בחשבון'),
           'לנסות עכשיו',
           `${BASE_URL}/visualize`,
           user.email,

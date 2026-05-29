@@ -241,6 +241,12 @@ export default function ShopLookPage() {
       }
       if (response.ok) {
         if (data.items && data.items.length > 0) {
+          if (data.usedCredit && typeof data.vizCredits === "number") {
+            try {
+              const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+              localStorage.setItem("user", JSON.stringify({ ...storedUser, viz_credits: data.vizCredits }));
+            } catch {}
+          }
           setItems(data.items);
           
           // Save detected products to Supabase vision_history
@@ -583,7 +589,7 @@ export default function ShopLookPage() {
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  10 קרדיטים חינם · ללא כרטיס אשראי
+                  ניסיון ראשון חינם · {CREDIT_COSTS.visualize} קרדיטים בהרשמה
                 </p>
               </>
             ) : (
@@ -617,7 +623,7 @@ export default function ShopLookPage() {
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  10 קרדיטים חינם · ללא כרטיס אשראי
+                  ניסיון ראשון חינם · {CREDIT_COSTS.visualize} קרדיטים בהרשמה
                 </p>
               </>
             )}

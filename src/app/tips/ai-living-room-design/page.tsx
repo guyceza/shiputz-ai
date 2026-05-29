@@ -56,7 +56,7 @@ export default function AILivingRoomDesignPage() {
       {
         "@type": "Question",
         "name": "כמה עולה עיצוב סלון בAI?",
-        "acceptedAnswer": { "@type": "Answer", "text": `עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים 10 קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.` }
+        "acceptedAnswer": { "@type": "Answer", "text": `עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.` }
       },
       {
         "@type": "Question",
@@ -238,7 +238,7 @@ export default function AILivingRoomDesignPage() {
           >
             עצבו את הסלון שלכם עכשיו - חינם →
           </Link>
-          <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם בהרשמה</p>
+          <p className="text-sm text-gray-400 mt-3">{CREDIT_COSTS.visualize} קרדיטים חינם בהרשמה</p>
         </div>
 
         {/* FAQ */}
@@ -251,7 +251,7 @@ export default function AILivingRoomDesignPage() {
             />
             <FaqItem
               question="כמה עולה עיצוב סלון בAI?"
-              answer={`עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים 10 קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.`}
+              answer={`עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.`}
             />
             <FaqItem
               question="איזה סגנון סלון הכי פופולרי בישראל?"

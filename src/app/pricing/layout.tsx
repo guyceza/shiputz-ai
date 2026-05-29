@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "מחירים וקרדיטים ל-AI שיפוצים",
-  description: "מחירי ShiputzAI: בחרו מנוי חודשי או שנתי, ומנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים. 10 קרדיטים בחינם לכל משתמש חדש.",
+  description: "מחירי ShiputzAI: בחרו מנוי חודשי או שנתי, ומנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים. ניסיון ראשון חינם וקרדיטים לכל משתמש חדש.",
   alternates: {
     canonical: "https://shipazti.com/pricing",
   },

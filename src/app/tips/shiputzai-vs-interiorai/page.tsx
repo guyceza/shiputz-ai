@@ -80,7 +80,7 @@ export default function ShiputzAIvsInteriorAIPage() {
         "name": "האם ShiputzAI מציע ניסיון חינם?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
+          "text": "כן, ShiputzAI מציע ניסיון ראשון חינם וקרדיטים בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
         }
       }
     ]
@@ -170,7 +170,7 @@ export default function ShiputzAIvsInteriorAIPage() {
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 font-medium text-gray-900">ניסיון חינם</td>
-                  <td className="py-3 px-4 bg-emerald-50">10 קרדיטים</td>
+                  <td className="py-3 px-4 bg-emerald-50">ניסיון + קרדיטים</td>
                   <td className="py-3 px-4">1 הדמיה</td>
                 </tr>
                 <tr className="border-b border-gray-100">
@@ -247,7 +247,7 @@ export default function ShiputzAIvsInteriorAIPage() {
             <li>• Starter - ₪29 לחודש ו-50 קרדיטים</li>
             <li>• Pro - ₪79 לחודש ו-200 קרדיטים</li>
             <li>• תוספת 100 קרדיטים למנויים - ₪{getCreditPackPrice(100)}</li>
-            <li>• 10 קרדיטים חינם בהרשמה</li>
+            <li>• ניסיון ראשון חינם וקרדיטים בהרשמה</li>
           </ul>
           <p className="text-gray-700 leading-relaxed mb-4">
             <strong>InteriorAI</strong> דורש מנוי חודשי של $29 (~₪107), גם אם אתם משתמשים רק פעם אחת בחודש. זה מודל שמתאים למי שמשתמש באינטנסיביות, אבל יקר מדי למשתמש הממוצע שמתכנן שיפוץ.
@@ -287,7 +287,7 @@ export default function ShiputzAIvsInteriorAIPage() {
             href="/signup"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            נסו את ShiputzAI - 10 קרדיטים חינם →
+            נסו את ShiputzAI - ניסיון ראשון חינם →
           </Link>
         </div>
 
@@ -309,7 +309,7 @@ export default function ShiputzAIvsInteriorAIPage() {
             />
             <FaqItem
               question="האם ShiputzAI מציע ניסיון חינם?"
-              answer="כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
+              answer="כן, ShiputzAI מציע ניסיון ראשון חינם וקרדיטים בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
             />
           </div>
         </div>

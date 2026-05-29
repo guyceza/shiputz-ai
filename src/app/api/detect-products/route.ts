@@ -250,6 +250,7 @@ export async function POST(request: NextRequest) {
     if ('error' in creditCheck) return creditCheck.error;
     chargedUserEmail = userEmail;
     chargedCost = creditCheck.cost;
+    const vizCreditsAfter = creditCheck.balance;
 
     // Use the fastest strong vision model for product detection.
     const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${apiKey}`;
@@ -298,7 +299,14 @@ export async function POST(request: NextRequest) {
         const giftClaim = validItems.length > 0
           ? await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'shop-look')
           : { claimed: false, reason: 'empty_result' };
-        return NextResponse.json({ items: validItems, products: validItems, giftClaim });
+        return NextResponse.json({
+          items: validItems,
+          products: validItems,
+          vizCredits: validItems.length > 0 ? vizCreditsAfter : undefined,
+          creditsBalance: validItems.length > 0 ? vizCreditsAfter : undefined,
+          usedCredit: validItems.length > 0 && creditCheck.cost > 0,
+          giftClaim
+        });
       }
     } catch (parseError) {
       console.error("[detect-products] Failed to parse product detection response:", parseError);

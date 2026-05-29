@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "הדמיית עיצוב פנים בAI",
-  description: "ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים בAI. העלו תמונה של חדר, תארו מה לשנות, וקבלו הדמיה פוטוריאליסטית תוך 30 שניות. 10 קרדיטים חינם לניסיון.",
+  description: "ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים בAI. העלו תמונה של חדר, תארו מה לשנות, וקבלו הדמיה פוטוריאליסטית תוך 30 שניות. ניסיון ראשון חינם.",
   keywords: ["הדמיית עיצוב פנים", "AI room visualization", "הדמיית חדר", "עיצוב פנים AI", "ShiputzAI", "הדמיית שיפוץ"],
   alternates: {
     canonical: "https://shipazti.com/visualize",

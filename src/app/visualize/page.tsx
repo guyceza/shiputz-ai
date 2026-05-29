@@ -1329,8 +1329,12 @@ export default function VisualizePage() {
         setShowUploadModal(false);
         clearAction(); // User completed - clear abandoned tracking
         // Update credits after successful generation
-        if (data.usedCredit && vizCredits !== null) {
-          setVizCredits(Math.max(0, vizCredits - 1));
+        if (data.usedCredit && typeof data.vizCredits === "number") {
+          setVizCredits(data.vizCredits);
+          try {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem("user", JSON.stringify({ ...storedUser, viz_credits: data.vizCredits }));
+          } catch {}
         }
         clearProductsCache(); // Clear products for new image
         
@@ -1405,6 +1409,13 @@ export default function VisualizePage() {
         return;
       }
       if (data.items && data.items.length > 0) {
+        if (data.usedCredit && typeof data.vizCredits === "number") {
+          setVizCredits(data.vizCredits);
+          try {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem("user", JSON.stringify({ ...storedUser, viz_credits: data.vizCredits }));
+          } catch {}
+        }
         // Single write to cache - this is the only place products live
         setCachedProducts(cacheKey, data.items);
         
@@ -1964,7 +1975,7 @@ export default function VisualizePage() {
                 </Link>
                 
                 <p className="text-center text-xs text-gray-400 mt-4">
-                  10 קרדיטים חינם · ללא כרטיס אשראי
+                  ניסיון ראשון חינם · {CREDIT_COSTS.visualize} קרדיטים בהרשמה
                 </p>
               </>
             ) : (
@@ -2012,7 +2023,7 @@ export default function VisualizePage() {
                 >
                   לצפייה בתוכניות ←
                 </Link>
-                <p className="text-center text-xs text-gray-400 mt-3">10 קרדיטים חינם · ללא כרטיס אשראי</p>
+                <p className="text-center text-xs text-gray-400 mt-3">ניסיון ראשון חינם · {CREDIT_COSTS.visualize} קרדיטים בהרשמה</p>
               </>
             )}
           </div>

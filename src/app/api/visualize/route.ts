@@ -739,6 +739,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       prompt: editPrompt,
       description: description,
       vizCredits: vizCreditsAfter,
+      creditsBalance: vizCreditsAfter,
       usedCredit,
       giftClaim
     });

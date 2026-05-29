@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 const examples = [
   {
@@ -211,7 +212,7 @@ export default function BeforeAfterGallery({ showGuestTrial = false }: { showGue
               </div>
               {showGuestTrial && (
                 <p className="text-center text-xs font-medium text-gray-500 md:absolute md:bottom-1 md:left-1/2 md:-translate-x-1/2">
-                  בלי כרטיס אשראי · 10 קרדיטים בהרשמה · תוצאה תוך דקה
+                  בלי כרטיס אשראי · {CREDIT_COSTS.visualize} קרדיטים בהרשמה · תוצאה תוך דקה
                 </p>
               )}
             </div>

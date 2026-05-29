@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { authFetch } from "@/lib/auth-fetch";
-import { CREDIT_COSTS, CREDIT_PACK_STEPS, getCreditPackPrice } from "@/lib/credit-costs";
+import { CREDIT_COSTS, CREDIT_PACK_STEPS, SIGNUP_BONUS_CREDITS, getCreditPackPrice } from "@/lib/credit-costs";
 import {
   ANNUAL_DISCOUNT_PERCENT,
   getPlanChangeState,
@@ -93,7 +93,7 @@ const FAQ = [
   },
   {
     q: "אפשר לנסות בחינם?",
-    a: "בהחלט. כל משתמש חדש מקבל 10 קרדיטים בחינם כדי להכיר את המערכת. הכלים הכבדים מיועדים למנוי פעיל.",
+    a: `בהחלט. כל משתמש חדש מקבל ניסיון הדמיה ראשון בחינם ו-${SIGNUP_BONUS_CREDITS} קרדיטים כדי להכיר את המערכת. הכלים הכבדים מיועדים למנוי פעיל.`,
   },
   {
     q: "איך משדרגים או מבטלים?",
@@ -284,7 +284,7 @@ export default function PricingPage() {
           {/* Trial badge */}
           <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-2 mb-10">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm text-emerald-800 font-medium">10 קרדיטים בחינם לכל משתמש חדש</span>
+            <span className="text-sm text-emerald-800 font-medium">ניסיון ראשון חינם + {SIGNUP_BONUS_CREDITS} קרדיטים לכל משתמש חדש</span>
           </div>
         </div>
       </section>

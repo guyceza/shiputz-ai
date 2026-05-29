@@ -20,7 +20,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export default function HowMuchRenovationVisualizationPage() {
   const visualizationAnswer = `הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה ${CREDIT_COSTS.visualize} קרדיטים.`;
-  const freeTrialAnswer = "כן. בShiputzAI מקבלים 10 קרדיטים חינם לניסיון ולהיכרות עם המערכת. שימוש בכלים הכבדים דורש מנוי פעיל.";
+  const freeTrialAnswer = `כן. בShiputzAI מקבלים ניסיון הדמיה ראשון חינם ו-${CREDIT_COSTS.visualize} קרדיטים לניסיון ולהיכרות עם המערכת. שימוש בכלים הכבדים דורש מנוי פעיל.`;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "כמה עולות חבילות הקרדיטים בShiputzAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.`
+          "text": `ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם לניסיון.`
         }
       },
       {
@@ -136,7 +136,7 @@ export default function HowMuchRenovationVisualizationPage() {
         <div className="prose prose-gray max-w-none">
           {/* ANSWER-FIRST */}
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה {CREDIT_COSTS.visualize} קרדיטים. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.
+            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה {CREDIT_COSTS.visualize} קרדיטים. בהרשמה מקבלים {CREDIT_COSTS.visualize} קרדיטים חינם לניסיון.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
@@ -161,7 +161,7 @@ export default function HowMuchRenovationVisualizationPage() {
                   <td className="py-3 px-4 font-semibold text-gray-900">ShiputzAI</td>
                   <td className="py-3 px-4">מנוי מ-₪29 + תוספות למנויים</td>
                   <td className="py-3 px-4">₪3-15</td>
-                  <td className="py-3 px-4">10 קרדיטים</td>
+                  <td className="py-3 px-4">{CREDIT_COSTS.visualize} קרדיטים</td>
                   <td className="py-3 px-4">✅</td>
                 </tr>
                 <tr className="border-b border-gray-100">
@@ -311,7 +311,7 @@ export default function HowMuchRenovationVisualizationPage() {
             href="/signup"
             className="inline-block bg-gray-900 text-white px-10 py-4 rounded-full text-base font-medium hover:bg-gray-800 transition-colors"
           >
-            התחילו חינם - 10 קרדיטים במתנה →
+            התחילו חינם - {CREDIT_COSTS.visualize} קרדיטים במתנה →
           </Link>
         </div>
 
@@ -329,7 +329,7 @@ export default function HowMuchRenovationVisualizationPage() {
             />
             <FaqItem
               question="כמה עולות חבילות הקרדיטים בShiputzAI?"
-              answer={`ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.`}
+              answer={`ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים ${CREDIT_COSTS.visualize} קרדיטים חינם לניסיון.`}
             />
             <FaqItem
               question="האם הדמיית AI שווה את הכסף לעומת מעצב פנים?"

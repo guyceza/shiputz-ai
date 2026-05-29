@@ -13,6 +13,8 @@ export const CREDIT_COSTS = {
   "detect-items": 6, // Detect items in image
 } as const;
 
+export const SIGNUP_BONUS_CREDITS = CREDIT_COSTS.visualize;
+
 export type CreditAction = keyof typeof CREDIT_COSTS;
 
 export const CREDIT_FEATURE_LABELS: Record<CreditAction, string> = {

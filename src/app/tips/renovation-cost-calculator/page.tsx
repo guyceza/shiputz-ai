@@ -329,7 +329,7 @@ export default function RenovationCostCalculatorPage() {
           >
             קבלו הערכת עלות AI לשיפוץ שלכם →
           </Link>
-          <p className="text-sm text-gray-400 mt-3">10 קרדיטים חינם להיכרות - הכלים הכבדים נפתחים עם מנוי</p>
+          <p className="text-sm text-gray-400 mt-3">ניסיון ראשון חינם וקרדיטים להיכרות - הכלים הכבדים נפתחים עם מנוי</p>
         </div>
 
         {/* FAQ */}

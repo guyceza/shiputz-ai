@@ -17,7 +17,7 @@ export const PLANS = {
     nameEn: 'Free',
     price: 0,
     monthlyCredits: 0,
-    features: ['10 קרדיטים לניסיון', 'הדמיית חדר', 'כתב כמויות'],
+    features: [`${CREDIT_COSTS.visualize} קרדיטים לניסיון`, 'הדמיית חדר', 'כתב כמויות'],
     highlighted: false,
   },
   starter: {

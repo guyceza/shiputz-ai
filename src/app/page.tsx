@@ -11,7 +11,7 @@ import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
 import { authFetch } from "@/lib/auth-fetch";
 import BeforeAfterGallery from "@/components/BeforeAfterGallery";
-import { CREDIT_COSTS } from "@/lib/credit-costs";
+import { CREDIT_COSTS, SIGNUP_BONUS_CREDITS } from "@/lib/credit-costs";
 import { ArrowLeft } from "lucide-react";
 import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
@@ -52,8 +52,8 @@ export default function Home() {
   const [isPremium, setIsPremium] = useState(false);
   const [hasVisionSubscription, setHasVisionSubscription] = useState(false);
   const showGuestTrial = !isLoggedIn;
-  const creditFaqText = `קרדיט = שימוש בכלי AI איכותי. הדמיית חדר עולה ${CREDIT_COSTS.visualize} קרדיטים, תוכנית קומה ${CREDIT_COSTS.floorplan}, כתב כמויות ${CREDIT_COSTS["bill-of-quantities"]}, סרטון סיור ${CREDIT_COSTS["video-walkthrough"]}, ניתוח הצעת מחיר ${CREDIT_COSTS["analyze-quote"]}. בהרשמה מקבלים 10 קרדיטים בחינם להיכרות, והכלים הכבדים מיועדים למנוי פעיל. מנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים שלא מתאפסים.`;
-  const visualizationCostText = `הדמיית שיפוץ בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים. משתמש חדש מקבל 10 קרדיטים לניסיון, ובהמשך עובדים דרך מנוי חודשי או שנתי. מנויים פעילים יכולים לקנות קרדיטים נוספים שלא מתאפסים.`;
+  const creditFaqText = `קרדיט = שימוש בכלי AI איכותי. הדמיית חדר עולה ${CREDIT_COSTS.visualize} קרדיטים, תוכנית קומה ${CREDIT_COSTS.floorplan}, כתב כמויות ${CREDIT_COSTS["bill-of-quantities"]}, סרטון סיור ${CREDIT_COSTS["video-walkthrough"]}, ניתוח הצעת מחיר ${CREDIT_COSTS["analyze-quote"]}. בהרשמה מקבלים ${SIGNUP_BONUS_CREDITS} קרדיטים בחינם להיכרות, והכלים הכבדים מיועדים למנוי פעיל. מנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים שלא מתאפסים.`;
+  const visualizationCostText = `הדמיית שיפוץ בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים. משתמש חדש מקבל ניסיון ראשון חינם ו-${SIGNUP_BONUS_CREDITS} קרדיטים לניסיון, ובהמשך עובדים דרך מנוי חודשי או שנתי. מנויים פעילים יכולים לקנות קרדיטים נוספים שלא מתאפסים.`;
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -298,7 +298,7 @@ export default function Home() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <p className="mt-1 text-center text-[11px] font-medium text-gray-500">
-            בלי כרטיס אשראי · 10 קרדיטים בהרשמה
+            בלי כרטיס אשראי · {SIGNUP_BONUS_CREDITS} קרדיטים בהרשמה
           </p>
         </div>
       )}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import crypto from 'crypto';
 import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
+import { SIGNUP_BONUS_CREDITS } from '@/lib/credit-costs';
 
 import { isAdminRequest } from '@/lib/admin-auth';
 import { verifyUserEmail } from '@/lib/api-auth';
@@ -13,7 +14,6 @@ import { verifyUserEmail } from '@/lib/api-auth';
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
 const SIGNUP_DISCORD_WEBHOOK_URL = process.env.DISCORD_SIGNUP_WEBHOOK_URL;
-const SIGNUP_BONUS_CREDITS = 10;
 
 function formatDiscordField(value: unknown): string {
   if (value === null || value === undefined || value === '') return 'לא ידוע';
@@ -160,7 +160,7 @@ async function sendWelcomeEmail(email: string, name: string): Promise<{ id?: str
                 <tr>
                   <td style="padding: 60px 50px; text-align: right;" dir="rtl">
                     <h1 style="font-size: 34px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px; text-align: center;">ברוכים הבאים</h1>
-                    <p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">יש לכם 10 קרדיטים חינם לניסיון</p>
+                    <p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">יש לכם ניסיון ראשון חינם ו-${SIGNUP_BONUS_CREDITS} קרדיטים לניסיון</p>
                     <p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${displayName}</strong>,</p>
                     <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">תודה שהצטרפתם. עם ShiputzAI תוכלו לראות איך הבית ייראה אחרי עיצוב מחדש לפני שמוציאים שקל.</p>
                     <div style="background: #f5f5f7; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: right;">

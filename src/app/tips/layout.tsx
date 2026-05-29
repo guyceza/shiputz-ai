@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "מאמרים וטיפים לשיפוץ | ShiputzAI",
     description: "מדריכים מקצועיים לשיפוץ הבית - כל מה שצריך לדעת לפני שמתחילים",
-    images: ["/og-image.jpg"],
+    images: ["/og/shiputzai-og-ai-renovation-1200x630.png"],
   },
 };
 

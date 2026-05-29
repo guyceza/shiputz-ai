@@ -99,8 +99,10 @@ export const generateProjectPDF = async (project: Project): Promise<void> => {
     color: #1f2937;
   `;
 
-  const remaining = project.budget - project.spent;
-  const progress = Math.min((project.spent / project.budget) * 100, 100);
+  const safeBudget = Number.isFinite(project.budget) ? project.budget : 0;
+  const safeSpent = Number.isFinite(project.spent) ? project.spent : 0;
+  const remaining = safeBudget - safeSpent;
+  const progress = safeBudget > 0 ? Math.min((safeSpent / safeBudget) * 100, 100) : 0;
   const categorySpending = getCategorySpending(project.expenses);
   const expenseCount = project.expenses?.length || 0;
   const avgExpense = expenseCount > 0 ? project.spent / expenseCount : 0;
@@ -141,11 +143,11 @@ export const generateProjectPDF = async (project: Project): Promise<void> => {
       <div style="display: flex; gap: 20px;">
         <div style="flex: 1; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 4px solid #4f46e5;">
           <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">💰 תקציב כולל</div>
-          <div style="font-size: 28px; font-weight: bold; color: #1e293b;">₪${project.budget.toLocaleString()}</div>
+          <div style="font-size: 28px; font-weight: bold; color: #1e293b;">₪${safeBudget.toLocaleString()}</div>
         </div>
         <div style="flex: 1; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 4px solid #dc2626;">
           <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">📉 הוצאות</div>
-          <div style="font-size: 28px; font-weight: bold; color: #dc2626;">₪${project.spent.toLocaleString()}</div>
+          <div style="font-size: 28px; font-weight: bold; color: #dc2626;">₪${safeSpent.toLocaleString()}</div>
           <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${progress.toFixed(1)}% מהתקציב</div>
         </div>
         <div style="flex: 1; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 4px solid #16a34a;">

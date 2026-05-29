@@ -103,9 +103,11 @@ export async function GET(request: NextRequest) {
     .eq('email', email.toLowerCase())
     .single();
     
+  const visionSubscription = String(data?.vision_subscription || '').toLowerCase();
+
   return NextResponse.json({ 
     hasPremium: data?.purchased || false, 
-    hasVision: data?.vision_subscription === 'active' || data?.vision_subscription === true,
+    hasVision: visionSubscription === 'active' || visionSubscription === 'true',
     trialUsed: data?.vision_trial_used || false,
     since: data?.purchased_at 
   });

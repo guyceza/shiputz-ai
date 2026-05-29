@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "google-ads:status": "node scripts/google-ads-api.js status",
+    "google-ads:accessible": "node scripts/google-ads-api.js accessible",
+    "google-ads:campaigns": "node scripts/google-ads-api.js campaigns",
+    "ads-brief:dry": "DRY_RUN=1 node scripts/ads-ai-brief-discord.js",
+    "ads-brief:send": "SEND=1 node scripts/ads-ai-brief-discord.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

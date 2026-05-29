@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -55,7 +56,7 @@ export default function AILivingRoomDesignPage() {
       {
         "@type": "Question",
         "name": "כמה עולה עיצוב סלון בAI?",
-        "acceptedAnswer": { "@type": "Answer", "text": "עיצוב סלון בAI בShiputzAI עולה ₪3-15 להדמיה. בהרשמה מקבלים 10 קרדיטים חינם. לעומת מעצב פנים שגובה ₪5,000-₪15,000." }
+        "acceptedAnswer": { "@type": "Answer", "text": `עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים 10 קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.` }
       },
       {
         "@type": "Question",
@@ -250,7 +251,7 @@ export default function AILivingRoomDesignPage() {
             />
             <FaqItem
               question="כמה עולה עיצוב סלון בAI?"
-              answer="עיצוב סלון בAI בShiputzAI עולה ₪3-15 להדמיה. בהרשמה מקבלים 10 קרדיטים חינם. לעומת מעצב פנים שגובה ₪5,000-₪15,000."
+              answer={`עיצוב סלון בAI בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים להדמיה. בהרשמה מקבלים 10 קרדיטים חינם להיכרות. לעומת מעצב פנים שגובה ₪5,000-₪15,000.`}
             />
             <FaqItem
               question="איזה סגנון סלון הכי פופולרי בישראל?"

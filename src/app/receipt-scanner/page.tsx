@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getSupabaseClient } from "@/lib/supabase";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 interface ScanResult {
   description: string;
@@ -105,7 +106,7 @@ export default function ReceiptScannerPage() {
             <div className="text-5xl mb-4">🔒</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">נדרשת התחברות</h2>
             <p className="text-gray-500 mb-6">התחברו כדי לסרוק קבלות</p>
-            <Link href="/auth" className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors">
+            <Link href="/login?redirect=/receipt-scanner" className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors">
               התחברות
             </Link>
           </div>
@@ -145,7 +146,7 @@ export default function ReceiptScannerPage() {
                   >
                     📸 צלמו או העלו קבלות
                   </button>
-                  <p className="text-xs text-gray-400 text-center">עד 3 קבלות · JPG, PNG, HEIC · 2 קרדיטים לקבלה</p>
+                  <p className="text-xs text-gray-400 text-center">עד 3 קבלות · JPG, PNG, HEIC · {CREDIT_COSTS["scan-receipt"]} קרדיטים לקבלה</p>
                 </div>
               )}
 

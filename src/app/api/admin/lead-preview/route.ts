@@ -3,10 +3,18 @@ import { createServiceClient } from '@/lib/supabase';
 import { isAdminRequest } from '@/lib/admin-auth';
 import crypto from 'crypto';
 
-const HASH_SECRET = 'shiputzai-unsubscribe-2024';
+function getUnsubscribeSecret(): string {
+  return process.env.UNSUBSCRIBE_SECRET || process.env.CRON_SECRET || '';
+}
 
 function generateToken(email: string): string {
-  return crypto.createHmac('sha256', HASH_SECRET).update(email).digest('hex').slice(0, 16);
+  const secret = getUnsubscribeSecret();
+  if (!secret) return '';
+  return crypto
+    .createHmac('sha256', secret)
+    .update(email.toLowerCase())
+    .digest('hex')
+    .slice(0, 16);
 }
 
 function tryNameFromEmail(email: string): string {
@@ -30,7 +38,7 @@ function tryNameFromEmail(email: string): string {
 function getFirstName(name: string, email?: string): string {
   if (!name && !email) return 'שלום';
   if (!name) return tryNameFromEmail(email || '');
-  let cleaned = name
+  const cleaned = name
     .replace(/\|.*/g, '')
     .replace(/[---].*(?:עיצוב|אדריכל|מעצב|סטודיו|לימודי|ביה"ס).*/g, '')
     .replace(/\s*[---]\s*/g, ' ')
@@ -85,34 +93,40 @@ function getFirstName(name: string, email?: string): string {
 
 const PROFESSION_EMAILS: Record<string, { subject1: string; hook: string; value: string; followup: string }> = {
   'מעצבי פנים': {
-    subject1: 'כלי חדש למעצבי פנים',
+    subject1: 'פנייה חד־פעמית לגבי כלי AI למעצבי פנים',
     hook: 'ראיתי את העבודות שלכם בגוגל ונראה מרשים.',
-    value: 'בניתי כלי שמייצר הדמיות AI לפרויקטי שיפוץ. מעלים תמונה של חדר ומקבלים הדמיה מקצועית תוך שניות. מעצבי פנים משתמשים בזה כדי להציג ללקוחות לפני שמתחילים.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של החלל, כך שאפשר לבדוק כיוון עיצובי לפני שמתחילים לעבוד על הדמיה מלאה.',
     followup: 'מעצבים שמשתמשים ב-ShiputzAI אומרים שזה חוסך להם שעות של עבודה על הדמיות ומרשים את הלקוחות.',
   },
   'אדריכלים': {
-    subject1: 'כלי AI חדש לאדריכלים',
+    subject1: 'פנייה חד־פעמית לגבי כלי AI לאדריכלים',
     hook: 'ראיתי את המשרד שלכם בגוגל. עבודות מרשימות.',
-    value: 'בניתי כלי שמייצר הדמיות AI לפרויקטי שיפוץ ובנייה. מעלים תמונה של חלל ומקבלים הדמיה מקצועית תוך שניות. אדריכלים משתמשים בזה כדי להציג אופציות ללקוחות בלי לחכות לרנדר.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של חלל, ועוזר לבדוק כיוון ראשוני לפני שמתקדמים לרנדרים או תוכניות מפורטות.',
     followup: 'אדריכלים שמשתמשים ב-ShiputzAI אומרים שזה חוסך להם זמן יקר על הדמיות ראשוניות ומזרז את תהליך האישור מול לקוחות.',
   },
   'קבלני שיפוצים': {
-    subject1: 'כלי AI שעוזר לקבלני שיפוצים',
+    subject1: 'פנייה חד־פעמית לגבי כלי AI לקבלני שיפוצים',
     hook: 'ראיתי את העסק שלכם בגוגל.',
-    value: 'בניתי כלי שמייצר הדמיות AI לפרויקטי שיפוץ. הלקוח מעלה תמונה של החדר ורואה איך זה ייראה אחרי השיפוץ. קבלנים משתמשים בזה כדי לסגור עסקאות מהר יותר.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של החדר, כדי שיהיה קל יותר להבין איך השיפוץ יכול להיראות לפני שמקבלים החלטה.',
     followup: 'קבלנים שמשתמשים ב-ShiputzAI אומרים שהלקוחות מתלהבים כשהם רואים הדמיה של התוצאה הסופית. וזה עוזר לסגור עסקאות.',
   },
   'מטבחים ואמבטיות': {
-    subject1: 'כלי AI לעיצוב מטבחים ואמבטיות',
+    subject1: 'פנייה חד־פעמית לגבי כלי AI למטבחים ואמבטיות',
     hook: 'ראיתי את העסק שלכם בגוגל.',
-    value: 'בניתי כלי שמייצר הדמיות AI. הלקוח מעלה תמונה של המטבח או האמבטיה ורואה איך זה ייראה אחרי שיפוץ. עוזר ללקוחות להחליט על סגנון לפני שמתחילים.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של המטבח או חדר הרחצה, ועוזר לבדוק סגנון לפני שמתקדמים לתכנון מלא.',
     followup: 'עסקים בתחום המטבחים והאמבטיות משתמשים ב-ShiputzAI כדי להראות ללקוחות הדמיות של התוצאה הסופית. וזה מזרז החלטות.',
   },
   'נגרות אדריכלית': {
-    subject1: 'כלי AI לנגרות ועיצוב',
+    subject1: 'פנייה חד־פעמית לגבי כלי AI לנגרות ועיצוב',
     hook: 'ראיתי את העבודות שלכם בגוגל.',
-    value: 'בניתי כלי שמייצר הדמיות AI לפרויקטי עיצוב ושיפוץ. מעלים תמונה של חלל ורואים איך ייראה עם הנגרות החדשה. עוזר ללקוחות לדמיין את התוצאה.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של החלל, ועוזר לדמיין שינויי עיצוב, חומרים ונגרות לפני ביצוע.',
     followup: 'אנשי מקצוע בתחום הנגרות משתמשים ב-ShiputzAI כדי להציג ללקוחות הדמיות מהירות של פרויקטים. בלי לחכות לרנדרים.',
+  },
+  'תאורה ועיצוב': {
+    subject1: 'פנייה חד־פעמית לגבי כלי AI לתאורה ועיצוב',
+    hook: 'ראיתי את העסק שלכם בגוגל.',
+    value: 'הכלי מציג ללקוח לפני/אחרי על בסיס תמונה של החלל, ועוזר לבדוק אווירה, סגנון ותאורה לפני שמתקדמים לתכנון מלא.',
+    followup: 'עסקים בתחום התאורה והעיצוב משתמשים ב-ShiputzAI כדי להראות ללקוחות כיוון חזותי ברור במהירות.',
   },
 };
 
@@ -144,7 +158,7 @@ export async function GET(request: NextRequest) {
 
     if (seq === 1) {
       subject = content.subject1;
-      body = `היי ${firstName},\n\n${content.hook}\n\n${content.value} הדמיות, סיור וירטואלי, זיהוי מוצרים, כתב כמויות ועוד. 130+ אנשי מקצוע כבר משתמשים.\n\nלנסות בחינם: https://shipazti.com`;
+      body = `היי ${firstName},\n\n${content.hook} אני פונה אליכם חד־פעמית כי אתם בתחום ${profession || 'עיצוב ושיפוצים'}, וחשבתי שזה עשוי להיות רלוונטי מקצועית.\n\nבניתי את ShiputzAI, כלי ישראלי שמייצר הדמיות AI לשיפוץ ועיצוב מתוך תמונה קיימת.\n\n${content.value}\n\n[תמונת לפני/אחרי מותאמת למקצוע]\n\nאם מעניין אתכם שאשלח עוד פרטים או שתראו דוגמה, אפשר להיכנס כאן:\nhttps://shipazti.com/visualize`;
     } else {
       subject = 'Re: ' + content.subject1;
       body = `היי ${firstName},\n\nשלחתי מייל לפני כמה ימים. אולי נחת בספאם.\n\n${content.followup}\n\nאשמח לשמוע מה אתם חושבים. https://shipazti.com`;
@@ -156,7 +170,7 @@ export async function GET(request: NextRequest) {
       name,
       profession,
       firstName,
-      unsubscribeUrl: `https://shipazti.com/unsubscribe?token=${token}&email=${encodeURIComponent(email)}&source=leads`,
+      unsubscribeUrl: `https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}${token ? `&token=${token}` : ''}&source=leads`,
     });
   } catch (error) {
     console.error('Lead preview error:', error);

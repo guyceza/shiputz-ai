@@ -1,0 +1,12 @@
+screenshots/
+test-screenshots/
+qa-screenshots/
+qa-screenshots-v2/
+comprehensive-qa/
+logs/
+backups/
+
+src/app/mockup-video-lab/
+src/components/MockupVideoExperiments.tsx
+src/app/homepage-preview/
+src/components/HomepagePreview.tsx

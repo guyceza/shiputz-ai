@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyUserEmail } from '@/lib/api-auth';
+import { getCreditPackPrice, getCreditPackUnitPrice } from '@/lib/credit-costs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceClient();
     const { data, error } = await supabase
       .from('users')
-      .select('purchased, vision_subscription, viz_credits')
+      .select('purchased, vision_subscription, viz_credits, plan, plan_period_end')
       .eq('email', email.toLowerCase())
       .single();
 
@@ -34,21 +35,34 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const isPro = data.purchased === true && 
-      (data.vision_subscription === true || data.vision_subscription === 'active');
+    const visionSubscription = String(data.vision_subscription || '').toLowerCase();
+    const hasActiveVisionSubscription = visionSubscription === 'active' || visionSubscription === 'true';
+    const isPro = data.purchased === true && hasActiveVisionSubscription;
     const vizCredits = data.viz_credits || 0;
+    const canBuyExtraCredits = Boolean(
+      data.plan &&
+      ['starter', 'pro', 'business'].includes(data.plan) &&
+      hasActiveVisionSubscription &&
+      (!data.plan_period_end || new Date(data.plan_period_end).getTime() >= Date.now())
+    );
+    const packCredits = [20, 50, 100, 200, 300];
 
     return NextResponse.json({
       isPro,
       vizCredits,
       remaining: vizCredits,
-      packs: [
-        { id: 'pack_10', name: '10 הדמיות', credits: 10, price: 29, perViz: 2.90 },
-        { id: 'pack_30', name: '30 הדמיות', credits: 30, price: 69, perViz: 2.30, popular: true },
-        { id: 'pack_100', name: '100 הדמיות', credits: 100, price: 149, perViz: 1.49, discount: '49%' },
-      ]
+      canBuyExtraCredits,
+      requiresSubscriptionForPacks: true,
+      packs: packCredits.map((credits) => ({
+        id: `credits_${credits}`,
+        name: `${credits} קרדיטים`,
+        credits,
+        price: getCreditPackPrice(credits),
+        perCredit: Number(getCreditPackUnitPrice(credits)),
+        popular: credits === 100,
+      })),
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

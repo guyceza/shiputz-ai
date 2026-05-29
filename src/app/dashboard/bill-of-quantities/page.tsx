@@ -30,6 +30,10 @@ interface BOQResult {
   summary: BOQSummary;
   items: BOQItem[];
   notes: string[];
+  missingItems?: string[];
+  contractorQuestions?: string[];
+  riskFlags?: string[];
+  revisionRequest?: string;
   accuracyScore?: number;
   error?: string;
   suggestion?: string;
@@ -408,6 +412,36 @@ export default function BillOfQuantitiesPage() {
               </ul>
             </div>
           ` : ''}
+          ${result.missingItems && result.missingItems.length > 0 ? `
+            <div class="notes">
+              <h3>סעיפים שצריך לוודא מול הקבלן</h3>
+              <ul>
+                ${result.missingItems.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          ${result.contractorQuestions && result.contractorQuestions.length > 0 ? `
+            <div class="notes">
+              <h3>שאלות לקבלן</h3>
+              <ul>
+                ${result.contractorQuestions.map(question => `<li>${question}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          ${result.riskFlags && result.riskFlags.length > 0 ? `
+            <div class="notes">
+              <h3>חריגות וסיכונים</h3>
+              <ul>
+                ${result.riskFlags.map(flag => `<li>${flag}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          ${result.revisionRequest ? `
+            <div class="notes">
+              <h3>מה לבקש בהצעה מתוקנת</h3>
+              <p>${result.revisionRequest}</p>
+            </div>
+          ` : ''}
           
           <p style="margin-top: 30px; font-size: 12px; color: #999;">
             נוצר ב-ShiputzAI | ${new Date().toLocaleDateString('he-IL')}
@@ -442,6 +476,22 @@ export default function BillOfQuantitiesPage() {
     csv += `${result.summary.walls.label},${result.summary.walls.value},${result.summary.walls.unit}\n`;
     csv += `${result.summary.doors.label},${result.summary.doors.value},${result.summary.doors.unit}\n`;
     csv += `${result.summary.windows.label},${result.summary.windows.value},${result.summary.windows.unit}\n`;
+    if (result.missingItems?.length) {
+      csv += '\n\nסעיפים לבדיקה מול קבלן\n';
+      result.missingItems.forEach(item => { csv += `"${item}"\n`; });
+    }
+    if (result.contractorQuestions?.length) {
+      csv += '\n\nשאלות לקבלן\n';
+      result.contractorQuestions.forEach(question => { csv += `"${question}"\n`; });
+    }
+    if (result.riskFlags?.length) {
+      csv += '\n\nחריגות וסיכונים\n';
+      result.riskFlags.forEach(flag => { csv += `"${flag}"\n`; });
+    }
+    if (result.revisionRequest) {
+      csv += '\n\nמה לבקש בהצעה מתוקנת\n';
+      csv += `"${result.revisionRequest}"\n`;
+    }
     
     // Download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -540,7 +590,7 @@ export default function BillOfQuantitiesPage() {
             <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
             <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900">דשבורד</Link>
           </div>
-          <span className="text-xs text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Premium ✨</span>
+          <span className="text-xs text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Premium</span>
         </div>
       </nav>
 
@@ -908,6 +958,56 @@ export default function BillOfQuantitiesPage() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {((result.missingItems && result.missingItems.length > 0) ||
+                  (result.contractorQuestions && result.contractorQuestions.length > 0) ||
+                  (result.riskFlags && result.riskFlags.length > 0) ||
+                  result.revisionRequest) && (
+                  <div className="border border-gray-200 rounded-2xl overflow-hidden">
+                    <div className="bg-gray-950 px-6 py-4 text-white">
+                      <h2 className="text-lg font-semibold">דוח פעולה לקבלן</h2>
+                      <p className="mt-1 text-sm text-gray-300">מה צריך לוודא לפני שמבקשים הצעה מתוקנת או סוגרים עבודה.</p>
+                    </div>
+                    <div className="grid gap-px bg-gray-200 md:grid-cols-2">
+                      {result.missingItems && result.missingItems.length > 0 && (
+                        <div className="bg-white p-5">
+                          <h3 className="mb-3 text-sm font-semibold text-gray-900">סעיפים שצריך לוודא</h3>
+                          <ul className="space-y-2">
+                            {result.missingItems.map((item, idx) => (
+                              <li key={idx} className="text-sm leading-6 text-gray-600">• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {result.contractorQuestions && result.contractorQuestions.length > 0 && (
+                        <div className="bg-white p-5">
+                          <h3 className="mb-3 text-sm font-semibold text-gray-900">שאלות לקבלן</h3>
+                          <ul className="space-y-2">
+                            {result.contractorQuestions.map((question, idx) => (
+                              <li key={idx} className="text-sm leading-6 text-gray-600">• {question}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {result.riskFlags && result.riskFlags.length > 0 && (
+                        <div className="bg-white p-5">
+                          <h3 className="mb-3 text-sm font-semibold text-gray-900">חריגות וסיכונים</h3>
+                          <ul className="space-y-2">
+                            {result.riskFlags.map((flag, idx) => (
+                              <li key={idx} className="text-sm leading-6 text-gray-600">• {flag}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {result.revisionRequest && (
+                        <div className="bg-white p-5">
+                          <h3 className="mb-3 text-sm font-semibold text-gray-900">מה לבקש בהצעה מתוקנת</h3>
+                          <p className="text-sm leading-6 text-gray-600">{result.revisionRequest}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 

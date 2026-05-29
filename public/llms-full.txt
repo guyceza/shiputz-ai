@@ -6,7 +6,7 @@
 
 ## About ShiputzAI
 
-ShiputzAI (שיפוצי.אי) is Israel's first and leading AI-powered interior design and home renovation platform. Founded in 2025 by Guy Cezana, the platform enables anyone - from homeowners to professional designers - to visualize renovation results before starting any work.
+ShiputzAI (שיפוצי.אי) is an Israeli AI-powered interior design and home renovation platform. Founded in 2025, the platform enables anyone - from homeowners to professional designers - to visualize renovation results before starting any work.
 
 The platform is fully localized for the Israeli market: Hebrew interface, Hebrew AI support, Israeli pricing in NIS (₪), and tools specifically designed for Israeli renovation workflows (like bill of quantities and contractor quote analysis).
 
@@ -17,7 +17,6 @@ The platform is fully localized for the Israeli market: Hebrew interface, Hebrew
 **Website:** https://shipazti.com
 **Contact:** help@shipazti.com
 **Founded:** 2025
-**Founder:** Guy Cezana
 **Location:** Israel
 
 ---
@@ -315,6 +314,5 @@ AI interior design Israel, room visualization AI, renovation visualization, Ship
 ## Contact
 - **Email:** help@shipazti.com
 - **Website:** https://shipazti.com
-- **Founder:** Guy Cezana
 
 Last updated: April 2026

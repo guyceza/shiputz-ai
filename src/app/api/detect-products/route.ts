@@ -33,6 +33,10 @@ type DetectedProduct = {
     width: number;
     height: number;
   };
+  marker: {
+    top: number;
+    left: number;
+  };
   searchQuery: string;
 };
 
@@ -41,11 +45,23 @@ type RawDetectedProduct = {
   name?: unknown;
   searchQuery?: unknown;
   query?: unknown;
+  marker?: {
+    top?: unknown;
+    left?: unknown;
+    x?: unknown;
+    y?: unknown;
+  };
   position?: {
     top?: unknown;
     left?: unknown;
     width?: unknown;
     height?: unknown;
+    x?: unknown;
+    y?: unknown;
+    centerTop?: unknown;
+    centerLeft?: unknown;
+    centerX?: unknown;
+    centerY?: unknown;
   };
 };
 
@@ -60,6 +76,9 @@ CRITICAL: Position values MUST be a tight bounding box in percentages (0-100), N
 - height: approximate item box height as percentage of image height
 - The clickable marker will be rendered in the center of this box, so the box must tightly cover the visible product.
 - Do not place boxes on empty floor/wall areas near the product.
+- Never return a box outside the visible image. If an item is partly cropped, box only the visible part.
+- If the image has blank padding, side margins, letterboxing, or a generated empty background around the room/photo, ignore those empty areas. Coordinates still use the full image percentages, but every box and marker must sit on the actual visible product content.
+- If you are uncertain, use a smaller centered box on the visible object instead of a large loose box.
 
 Find 5-8 purchasable furniture/decor items only. Prefer visible items a user would reasonably buy:
 - sofas, armchairs, chairs, tables, rugs, lamps, chandeliers, curtains, art, pillows, plants, sideboards, kitchen stools, shelves
@@ -67,7 +86,11 @@ Find 5-8 purchasable furniture/decor items only. Prefer visible items a user wou
 
 For EVERY item:
 1. name: a specific Hebrew commercial product name, not a category.
-2. searchQuery: a Hebrew Google Shopping query that is specific enough to find a visually similar product.
+2. marker: the exact center point where the app should show the magnifying-glass icon, in percentages of the full image.
+   - marker.top: percentage from top of image to the visual center of the item
+   - marker.left: percentage from left of image to the visual center of the item
+   - The marker must sit on the object itself, not on nearby wall, floor, blank padding, side margins, or empty space.
+3. searchQuery: a Hebrew Google Shopping query that is specific enough to find a visually similar product.
 
 Search query rules:
 - NEVER use one-word or generic searches like "שטיח", "ספה", "כיסא", "מנורה".
@@ -84,7 +107,7 @@ Search query rules:
   - "ספת עור שחורה דו מושבית מודרנית"
 
 Return ONLY a JSON array, no markdown and no explanation:
-[{"id":"item-1","name":"שטיח שאגי אפור מלבני","position":{"top":63,"left":38,"width":28,"height":18},"searchQuery":"שטיח שאגי אפור מלבני עבה לסלון"}]`;
+[{"id":"item-1","name":"שטיח שאגי אפור מלבני","position":{"top":63,"left":38,"width":28,"height":18},"marker":{"top":72,"left":52},"searchQuery":"שטיח שאגי אפור מלבני עבה לסלון"}]`;
 
 function extractJsonArray(text: string): unknown[] | null {
   const cleanText = text.replace(/```json\n?/g, "").replace(/```/g, "").trim();
@@ -100,25 +123,53 @@ function cleanProductText(value: unknown): string {
     .trim();
 }
 
+function finiteNumber(value: unknown): number | null {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function clampPercent(value: number, min = 0, max = 100): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 function normalizeDetectedProducts(items: unknown[]): DetectedProduct[] {
   return items
     .map((raw, index) => {
       const item = raw as RawDetectedProduct;
       const pos = item?.position || {};
-      const top = Number(pos.top);
-      const left = Number(pos.left);
-      const width = Number(pos.width ?? 8);
-      const height = Number(pos.height ?? 8);
+      const top = finiteNumber(pos.top ?? pos.y);
+      const left = finiteNumber(pos.left ?? pos.x);
+      const width = finiteNumber(pos.width) ?? 8;
+      const height = finiteNumber(pos.height) ?? 8;
       const name = cleanProductText(item?.name);
       const searchQuery = cleanProductText(item?.searchQuery || item?.query || name);
+
+      if (top === null || left === null) return null;
+
+      const safeLeft = clampPercent(left, 0, 97);
+      const safeTop = clampPercent(top, 0, 97);
+      const safeWidth = Math.max(3, Math.min(width, 100 - safeLeft));
+      const safeHeight = Math.max(3, Math.min(height, 100 - safeTop));
+      const rawMarker = item?.marker || {};
+      const markerLeft =
+        finiteNumber(rawMarker.left ?? rawMarker.x ?? pos.centerLeft ?? pos.centerX) ??
+        safeLeft + safeWidth / 2;
+      const markerTop =
+        finiteNumber(rawMarker.top ?? rawMarker.y ?? pos.centerTop ?? pos.centerY) ??
+        safeTop + safeHeight / 2;
 
       return {
         id: cleanProductText(item?.id) || `item-${index + 1}`,
         name,
-        position: { top, left, width, height },
+        position: { top: safeTop, left: safeLeft, width: safeWidth, height: safeHeight },
+        marker: {
+          top: clampPercent(markerTop, 2, 98),
+          left: clampPercent(markerLeft, 2, 98),
+        },
         searchQuery,
       };
     })
+    .filter((item): item is DetectedProduct => item !== null)
     .filter((item) => {
       const pos = item.position;
       return item.name.length > 0 &&

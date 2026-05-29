@@ -11,6 +11,14 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  if (request.nextUrl.pathname === '/editor3d' || request.nextUrl.pathname.startsWith('/editor3d/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/floorplan';
+    const response = NextResponse.redirect(url, 307);
+    setGiftCampaignCookie(request, response);
+    return response;
+  }
+
   // PayPlus redirects via POST to payment-success/payment-failed
   // Next.js pages only handle GET, so we redirect POST → GET
   if (request.method === 'POST' && 

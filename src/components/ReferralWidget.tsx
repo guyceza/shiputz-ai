@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { authFetch } from '@/lib/auth-fetch';
+import { Copy, MessageCircle } from 'lucide-react';
 
 interface ReferralData {
   code: string;
@@ -39,14 +40,30 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  if (loading) return null;
-  if (!data) return null;
+  if (loading) {
+    return (
+      <section id="referral" className="scroll-mt-20 rounded-2xl border border-stone-200 bg-white p-5 mt-6">
+        <div className="h-4 w-40 rounded bg-stone-100 animate-pulse" />
+        <div className="mt-3 h-10 rounded-xl bg-stone-100 animate-pulse" />
+      </section>
+    );
+  }
+  if (!data) {
+    return (
+      <section id="referral" className="scroll-mt-20 rounded-2xl border border-amber-200 bg-amber-50 p-5 mt-6">
+        <h3 className="font-bold text-amber-950 text-sm">לא הצלחנו לפתוח כרגע את לינק החברים</h3>
+        <p className="mt-1 text-xs leading-5 text-amber-800">רעננו את הדף או התחברו מחדש כדי לקבל לינק אישי.</p>
+      </section>
+    );
+  }
 
   return (
-    <div className="bg-gradient-to-l from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5 mt-6">
+    <section id="referral" className="scroll-mt-20 bg-[#eef8f4] border border-emerald-100 rounded-2xl p-5 mt-6">
       <div className="flex items-center gap-3 mb-3">
-        <span className="text-2xl">🎁</span>
-        <div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-sm">
+          <Copy className="h-5 w-5" />
+        </div>
+        <div className="min-w-0">
           <h3 className="font-bold text-gray-900 text-sm">הזמן חבר - שניכם מרוויחים!</h3>
           <p className="text-xs text-gray-600">כל חבר שנרשם = <strong>20 קרדיטים לך + 20 לחבר</strong></p>
         </div>
@@ -62,7 +79,7 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
         />
         <button
           onClick={copyLink}
-          className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
+          className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all whitespace-nowrap ${
             copied
               ? 'bg-emerald-100 text-emerald-700'
               : 'bg-gray-900 text-white hover:bg-gray-800'
@@ -77,7 +94,8 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
           onClick={shareWhatsApp}
           className="text-xs text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-1"
         >
-          📱 שלח בוואטסאפ
+          <MessageCircle className="h-4 w-4" />
+          שלח בוואטסאפ
         </button>
         {data.completedReferrals > 0 && (
           <span className="text-xs text-gray-500">
@@ -85,6 +103,6 @@ export default function ReferralWidget({ userEmail }: { userEmail: string }) {
           </span>
         )}
       </div>
-    </div>
+    </section>
   );
 }

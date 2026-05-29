@@ -12,6 +12,30 @@ const PROFESSION_PRIORITY: Record<string, number> = {
   'נגרות אדריכלית': 5,
 };
 
+const ALLOWED_PROFESSIONS = new Set([
+  'מעצבי פנים',
+  'אדריכלים',
+  'קבלני שיפוצים',
+  'מטבחים ואמבטיות',
+  'נגרות אדריכלית',
+  'תאורה ועיצוב',
+  'ריהוט ועיצוב הבית',
+  'ריצוף וחיפוי',
+]);
+const EXCLUDE_EMAIL_PREFIXES = new Set(['unsubscribe', 'abuse', 'privacy', 'noreply', 'no-reply', 'donotreply']);
+const EXCLUDE_DOMAINS = new Set(['midrag.co.il', 'd.co.il', 'zap.co.il']);
+const EXCLUDE_NAME_PATTERNS = [
+  /עמותת/i, /איגוד/i, /התאחדות/i, /מדרג/i, /דפי זהב/i, /לימודי/i, /בית ספר/i, /קורס/i,
+  /מכללה/i, /חומרי בניין/i, /טמבור/i, /כלי עבודה/i, /שמלות/i, /כלה/i, /פרחים/i,
+  /גלריה לעיצוב הבית/i, /קניון/i, /סנטר/i, /רהיטי/i, /רהיטים/i, /מזרנים/i, /וילונות/i,
+  /טקסטיל/i, /קרמיקה/i, /עיצוב גרפי/i, /מיתוג/i, /קליניקה/i, /טיפול/i, /משפחה/i,
+];
+const STRONG_RELEVANCE_PATTERNS = [
+  /עיצוב פנים/i, /מעצב/i, /מעצבת/i, /אדריכל/i, /אדריכלות/i, /סטודיו/i, /interior/i,
+  /architect/i, /architecture/i, /design/i, /שיפוצ/i, /קבלן/i, /מטבח/i, /נגר/i,
+  /חיפוי/i, /ריצוף/i, /תאורה/i,
+];
+
 function scoreLead(lead: any): number {
   let score = 0;
   const profRank = PROFESSION_PRIORITY[lead.profession] || 6;
@@ -21,6 +45,27 @@ function scoreLead(lead: any): number {
   }
   score += (lead.rating || 0) * 10;
   return score;
+}
+
+function isValidLeadEmail(email: string | null | undefined): boolean {
+  if (!email || email !== email.trim()) return false;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  const [local, domain] = email.toLowerCase().split('@');
+  if (!local || !domain) return false;
+  if (EXCLUDE_EMAIL_PREFIXES.has(local)) return false;
+  if (EXCLUDE_DOMAINS.has(domain)) return false;
+  if (email.includes('%') || email.includes(',')) return false;
+  return true;
+}
+
+function isQualifiedLead(lead: any): boolean {
+  if (!ALLOWED_PROFESSIONS.has(lead.profession || '')) return false;
+  if (!isValidLeadEmail(lead.email)) return false;
+  if (!lead.website || String(lead.website).includes('midrag.co.il')) return false;
+  const name = lead.name || '';
+  if (EXCLUDE_NAME_PATTERNS.some((pattern) => pattern.test(name))) return false;
+  const haystack = `${lead.name || ''} ${lead.website || ''} ${lead.profession || ''}`;
+  return STRONG_RELEVANCE_PATTERNS.some((pattern) => pattern.test(haystack));
 }
 
 export async function GET(request: NextRequest) {
@@ -74,10 +119,10 @@ export async function GET(request: NextRequest) {
 
     // Determine next batch (unsent leads sorted by quality)
     const unsent = leads?.filter(l => 
-      ['new', 'pending'].includes(l.status) && !l.unsubscribed_at
+      ['new', 'pending'].includes(l.status) && !l.unsubscribed_at && isQualifiedLead(l)
     ) || [];
     const sortedUnsent = unsent.sort((a, b) => scoreLead(b) - scoreLead(a));
-    const nextBatchEmails = new Set(sortedUnsent.slice(0, 30).map(l => l.email));
+    const nextBatchEmails = new Set(sortedUnsent.slice(0, 20).map(l => l.email));
 
     const enrichedLeads = leads?.map(lead => {
       const leadEmails = emailsByLead[lead.email] || [];

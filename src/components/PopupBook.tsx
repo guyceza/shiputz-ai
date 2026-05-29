@@ -330,7 +330,7 @@ export default function PopupBook() {
   return (
     <section className="py-20 px-4 overflow-hidden" dir="rtl">
       <div className="max-w-4xl mx-auto text-center mb-10">
-        <p className="text-sm text-gray-400 mb-3 tracking-wider">✦ חוויה אינטראקטיבית</p>
+        <p className="text-sm text-gray-400 mb-3 tracking-wider">חוויה אינטראקטיבית</p>
         <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
           הדירה שלך, בסגנון{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-l from-amber-600 to-orange-500">

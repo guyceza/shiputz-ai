@@ -65,7 +65,7 @@ export default function DesignLandingPage() {
             <p className="text-sm text-gray-500">&quot;סלון מודרני&quot;, &quot;מטבח לבן&quot;, &quot;חדר ילדים צבעוני&quot;</p>
           </div>
           <div>
-            <span className="text-3xl mb-3 block">✨</span>
+            <span className="text-3xl mb-3 block">🖼️</span>
             <h3 className="font-semibold text-gray-900 mb-1">מקבלים הדמיה</h3>
             <p className="text-sm text-gray-500">תמונה מלאה של החדר אחרי השינוי, תוך 30 שניות</p>
           </div>
@@ -76,7 +76,7 @@ export default function DesignLandingPage() {
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-            <div className="flex gap-1 justify-center mb-3 text-amber-400 text-lg">{'★★★★★'}</div>
+            <div className="mb-3 text-center text-sm font-semibold text-amber-600">5/5</div>
             <p className="text-gray-700 leading-relaxed mb-4">
               &quot;העליתי תמונה של הסלון וקיבלתי הדמיה מדהימה. הלקוחה אישרה את הפרויקט באותו יום.&quot;
             </p>

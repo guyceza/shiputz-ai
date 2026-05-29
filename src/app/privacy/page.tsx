@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <div className="pt-24 pb-16 px-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-semibold text-gray-900 mb-8">מדיניות פרטיות</h1>
-          <p className="text-sm text-gray-500 mb-12">עודכן לאחרונה: פברואר 2026</p>
+          <p className="text-sm text-gray-500 mb-12">עודכן לאחרונה: מאי 2026</p>
 
           <div className="prose prose-gray max-w-none space-y-8 text-gray-600">
             <section>
@@ -114,6 +114,9 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">10. יצירת קשר</h2>
+              <p className="mb-4">
+                ShiputzAI מופעל על ידי <span dir="ltr">WED4ME</span>.
+              </p>
               <p>
                 לשאלות בנוגע למדיניות הפרטיות שלנו, ניתן לפנות אלינו בכתובת:
               </p>

@@ -36,6 +36,50 @@ function verifyUnsubscribeToken(email: string, token: string | null): boolean {
   return token === expectedToken;
 }
 
+async function readUnsubscribeInput(request: NextRequest): Promise<{ email: string; token: string | null }> {
+  const { searchParams } = new URL(request.url);
+  let email = searchParams.get('email') || '';
+  let token = searchParams.get('token');
+
+  try {
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+      const body = await request.json();
+      email = body?.email || email;
+      token = body?.token ?? token;
+    } else if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      email = String(formData.get('email') || email);
+      token = formData.get('token') ? String(formData.get('token')) : token;
+    } else {
+      const rawBody = await request.text().catch(() => '');
+      if (rawBody) {
+        try {
+          const body = JSON.parse(rawBody);
+          email = body?.email || email;
+          token = body?.token ?? token;
+        } catch {
+          const bodyParams = new URLSearchParams(rawBody);
+          email = bodyParams.get('email') || email;
+          token = bodyParams.get('token') || token;
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to parse unsubscribe request body, using query params:', error);
+  }
+
+  return {
+    email: email.trim().toLowerCase(),
+    token: token ? token.trim() : null,
+  };
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 // Helper to generate unsubscribe token (for email templates)
 export function generateUnsubscribeToken(email: string): string {
   const secret = getUnsubscribeSecret();
@@ -61,7 +105,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
     
     // Check all tables
     const [newsletterResult, userResult, leadsResult] = await Promise.all([
@@ -69,22 +113,22 @@ export async function GET(request: NextRequest) {
         .from('newsletter_subscribers')
         .select('unsubscribed_at')
         .eq('email', normalizedEmail)
-        .single(),
+        .maybeSingle(),
       supabase
         .from('users')
         .select('marketing_unsubscribed_at')
         .eq('email', normalizedEmail)
-        .single(),
+        .maybeSingle(),
       supabase
         .from('leads')
         .select('unsubscribed_at')
         .eq('email', normalizedEmail)
-        .single()
+        .maybeSingle()
     ]);
 
-    const nlUnsub = newsletterResult.data?.unsubscribed_at !== null;
-    const mktUnsub = userResult.data?.marketing_unsubscribed_at !== null;
-    const leadUnsub = leadsResult.data?.unsubscribed_at !== null;
+    const nlUnsub = !!newsletterResult.data?.unsubscribed_at;
+    const mktUnsub = !!userResult.data?.marketing_unsubscribed_at;
+    const leadUnsub = !!leadsResult.data?.unsubscribed_at;
 
     return NextResponse.json({ 
       newsletter_unsubscribed: nlUnsub,
@@ -92,7 +136,7 @@ export async function GET(request: NextRequest) {
       leads_unsubscribed: leadUnsub,
       unsubscribed: nlUnsub || mktUnsub || leadUnsub
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ unsubscribed: false });
   }
 }
@@ -100,11 +144,10 @@ export async function GET(request: NextRequest) {
 // POST - Unsubscribe user
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, token } = body;
+    const { email, token } = await readUnsubscribeInput(request);
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email required' }, { status: 400 });
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json({ error: 'Valid email required' }, { status: 400 });
     }
 
     // Token verification: if token is provided and valid → auto-unsubscribe
@@ -117,17 +160,17 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email;
     const now = new Date().toISOString();
     
-    let unsubscribedFrom: string[] = [];
+    const unsubscribedFrom: string[] = [];
 
     // 1. Try to unsubscribe from users table (marketing emails / 14 email flow)
     const { data: existingUser } = await supabase
       .from('users')
       .select('id')
       .eq('email', normalizedEmail)
-      .single();
+      .maybeSingle();
 
     if (existingUser) {
       const { error } = await supabase
@@ -143,11 +186,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Try to unsubscribe from newsletter_subscribers table
-    const { data: existingNewsletter } = await supabase
+    const { data: existingNewsletter, error: newsletterLookupError } = await supabase
       .from('newsletter_subscribers')
       .select('id')
       .eq('email', normalizedEmail)
-      .single();
+      .maybeSingle();
 
     if (existingNewsletter) {
       const { error } = await supabase
@@ -160,6 +203,8 @@ export async function POST(request: NextRequest) {
       } else {
         console.error('Newsletter unsubscribe error:', error);
       }
+    } else if (newsletterLookupError) {
+      console.error('Newsletter lookup error:', newsletterLookupError);
     } else {
       // Create record to remember they unsubscribed (even if they sign up later)
       const { error } = await supabase
@@ -171,6 +216,18 @@ export async function POST(request: NextRequest) {
 
       if (!error) {
         unsubscribedFrom.push('newsletter');
+      } else if (error.code === '23505') {
+        const { error: updateAfterConflictError } = await supabase
+          .from('newsletter_subscribers')
+          .update({ unsubscribed_at: now })
+          .eq('email', normalizedEmail);
+        if (!updateAfterConflictError) {
+          unsubscribedFrom.push('newsletter');
+        } else {
+          console.error('Newsletter unsubscribe conflict update error:', updateAfterConflictError);
+        }
+      } else {
+        console.error('Newsletter unsubscribe insert error:', error);
       }
     }
 
@@ -179,26 +236,51 @@ export async function POST(request: NextRequest) {
       .from('leads')
       .select('id')
       .eq('email', normalizedEmail)
-      .single();
+      .maybeSingle();
 
     if (existingLead) {
       const { error } = await supabase
         .from('leads')
-        .update({ unsubscribed_at: now, status: 'unsubscribed' })
+        .update({ unsubscribed_at: now })
         .eq('email', normalizedEmail);
 
       if (!error) {
         unsubscribedFrom.push('leads');
+        const { error: statusError } = await supabase
+          .from('leads')
+          .update({ status: 'unsubscribed' })
+          .eq('email', normalizedEmail);
+        if (statusError) {
+          console.error('Lead unsubscribe status update error:', statusError);
+        }
+      } else {
+        console.error('Lead unsubscribe error:', error);
       }
     }
 
     if (unsubscribedFrom.length === 0) {
       // Even if not found anywhere, create a newsletter record to prevent future emails
-      await supabase
+      const { error } = await supabase
         .from('newsletter_subscribers')
         .insert({ email: normalizedEmail, unsubscribed_at: now })
         .single();
-      unsubscribedFrom.push('newsletter');
+      if (!error) {
+        unsubscribedFrom.push('newsletter');
+      } else if (error.code === '23505') {
+        const { error: updateAfterConflictError } = await supabase
+          .from('newsletter_subscribers')
+          .update({ unsubscribed_at: now })
+          .eq('email', normalizedEmail);
+        if (!updateAfterConflictError) {
+          unsubscribedFrom.push('newsletter');
+        } else {
+          console.error('Fallback unsubscribe conflict update error:', updateAfterConflictError);
+          return NextResponse.json({ error: 'Unable to unsubscribe' }, { status: 500 });
+        }
+      } else {
+        console.error('Fallback unsubscribe insert error:', error);
+        return NextResponse.json({ error: 'Unable to unsubscribe' }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ 
@@ -206,6 +288,7 @@ export async function POST(request: NextRequest) {
       unsubscribed_from: unsubscribedFrom
     });
   } catch (error) {
+    console.error('Unsubscribe API error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

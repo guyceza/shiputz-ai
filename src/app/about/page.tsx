@@ -13,7 +13,7 @@ export default function AboutPage() {
       const userData = localStorage.getItem("user");
       if (userData) {
         const user = JSON.parse(userData);
-        if (user.id) setIsLoggedIn(true);
+        if (user.id) queueMicrotask(() => setIsLoggedIn(true));
       }
     } catch {}
   }, []);
@@ -26,11 +26,6 @@ export default function AboutPage() {
     "url": "https://shipazti.com",
     "description": "הכלי המוביל בישראל להדמיית עיצוב פנים ושיפוצים באמצעות בינה מלאכותית",
     "foundingDate": "2025",
-    "founder": {
-      "@type": "Person",
-      "name": "Guy Cezana",
-      "alternateName": "גיא צזנה"
-    },
     "sameAs": [],
     "logo": "https://shipazti.com/icon-512.png",
     "contactPoint": {
@@ -70,7 +65,7 @@ export default function AboutPage() {
   const values = [
     { icon: "💡", title: "חדשנות", desc: "שימוש בטכנולוגיות AI מתקדמות ליצירת חוויה פשוטה וחכמה" },
     { icon: "🌍", title: "נגישות", desc: "כלי מקצועי שזמין לכל אחד - בעלי דירות, מעצבים וקבלנים" },
-    { icon: "✨", title: "פשטות", desc: "ממשק אינטואיטיבי שלא דורש ידע טכני או ניסיון בעיצוב" },
+    { icon: "✓", title: "פשטות", desc: "ממשק אינטואיטיבי שלא דורש ידע טכני או ניסיון בעיצוב" },
     { icon: "🇮🇱", title: "עברית-first", desc: "נבנה מהיסוד בעברית - לא תרגום, אלא חוויה מקומית מלאה" },
   ];
 
@@ -133,7 +128,7 @@ export default function AboutPage() {
               ShiputzAI נולד מתוך תסכול אמיתי. כל מי ששיפץ פעם יודע את הרגע הזה - עומדים מול הקבלן, מנסים לדמיין איך הסלון ייראה אחרי השיפוץ, ומקווים לטוב. המציאות? ברוב המקרים התוצאה לא תואמת את הדמיון.
             </p>
             <p>
-              <strong>גיא צזנה</strong>, יזם טכנולוגי ישראלי, החליט שהגיע הזמן לשנות את זה. ב-2025 הוא הקים את ShiputzAI עם חזון ברור: לאפשר לכל אחד לראות את תוצאת השיפוץ לפני שמשקיעים שקל אחד.
+              צוות ישראלי קטן החליט שהגיע הזמן לשנות את זה. ב-2025 הקמנו את ShiputzAI עם חזון ברור: לאפשר לכל אחד לראות את תוצאת השיפוץ לפני שמשקיעים שקל אחד.
             </p>
             <p>
               במקום להסתמך על דמיון או על הדמיות יקרות שלוקחות ימים, ShiputzAI מאפשר ליצור הדמיה פוטוריאליסטית תוך 30 שניות בלבד - פשוט מעלים תמונה, מתארים את השינוי, ומקבלים תוצאה.
@@ -188,9 +183,9 @@ export default function AboutPage() {
       {/* Team */}
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">הצוות</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">מי עומד מאחורי ShiputzAI</h2>
           <p className="text-gray-600 leading-relaxed">
-            ShiputzAI פותח על ידי <strong>גיא צזנה</strong>, יזם טכנולוגי ישראלי. הפלטפורמה נבנתה מהיסוד בישראל, עם דגש על חוויית משתמש בעברית, הבנה של שוק השיפוצים הישראלי, ומחירוני שוק מקומיים.
+            ShiputzAI פותח בישראל על ידי צוות טכנולוגי קטן שמכיר את שוק השיפוצים המקומי. הפלטפורמה נבנתה מהיסוד בעברית, עם דגש על חוויית משתמש פשוטה, מחירי שוק מקומיים, וכלים שעוזרים לקבל החלטות לפני שמתחילים עבודה.
           </p>
         </div>
       </section>

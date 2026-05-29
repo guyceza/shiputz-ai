@@ -4,6 +4,7 @@ export const maxDuration = 30;
 import { NextRequest, NextResponse } from "next/server";
 // Bug #29 fix: Use shared rate limiter instead of duplicating logic
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
+import { CREDIT_COSTS, getCreditPackPrice } from "@/lib/credit-costs";
 
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -20,11 +21,12 @@ const SYSTEM_PROMPT = `אתה נציג תמיכה ומכירות של ShiputzAI 
 - הדמיית חדרים - לראות איך השיפוץ יראה
 
 💰 מחיר:
-- 10 קרדיטים חינם בלי הרשמה, +10 עם הרשמה
-- Starter: ₪29/חודש (50 קרדיטים) - הדמיות, כתב כמויות, Shop the Look, סריקת קבלות
+- 10 קרדיטים חינם לניסיון
+- Starter: ₪29/חודש (50 קרדיטים) - מספיק לכמה פעולות AI איכותיות בכל חודש
 - Pro: ₪79/חודש (200 קרדיטים) - כולל סרטון סיור, תוכנית קומה, שימוש מסחרי
 - Business: ₪199/חודש (600 קרדיטים) - הכל ללא הגבלה + תמיכה עדיפה
-- אפשר גם לקנות קרדיטים בודדים ללא מנוי (החל מ-₪10 ל-10 קרדיטים)
+- קרדיטים נוספים זמינים רק למנויים פעילים: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 ב-₪${getCreditPackPrice(50)}, 100 ב-₪${getCreditPackPrice(100)}
+- עלויות עיקריות: הדמיה ${CREDIT_COSTS.visualize}, תוכנית קומה ${CREDIT_COSTS.floorplan}, ניתוח הצעת מחיר ${CREDIT_COSTS["analyze-quote"]}, כתב כמויות ${CREDIT_COSTS["bill-of-quantities"]}, Shop the Look ו-Style Matcher עולים ${CREDIT_COSTS["shop-look"]}/${CREDIT_COSTS["style-match"]}, סרטון סיור ${CREDIT_COSTS["video-walkthrough"]}
 - ביטול בכל עת
 
 🎯 קהל יעד:

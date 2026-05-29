@@ -103,7 +103,7 @@ export default function RevealPage() {
               color: "white",
             }}
           >
-            {isHovering ? "✨ אחרי" : "📷 לפני"}
+            {isHovering ? "אחרי" : "📷 לפני"}
           </span>
         </div>
 

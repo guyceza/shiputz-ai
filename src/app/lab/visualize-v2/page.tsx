@@ -79,7 +79,7 @@ export default function VisualizeV2Preview() {
             <div className="flex items-center gap-1">
               <span className="animate-pulse-arrow text-2xl text-emerald-500">←</span>
             </div>
-            <span className="text-lg font-bold text-emerald-600">אחרי ✨</span>
+            <span className="text-lg font-bold text-emerald-600">אחרי</span>
           </div>
 
           {/* Phone Mockup with Before/After */}
@@ -118,7 +118,7 @@ export default function VisualizeV2Preview() {
                   </div>
                   <div className="absolute top-8 left-3 z-10">
                     <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-float-badge">
-                      ✨ אחרי
+                      אחרי
                     </span>
                   </div>
 
@@ -200,7 +200,7 @@ export default function VisualizeV2Preview() {
                           <span className="bg-white/90 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-full">📷 לפני</span>
                         </div>
                         <div className="absolute top-4 left-2 z-10">
-                          <span className="bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full">✨ אחרי</span>
+                          <span className="bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full">אחרי</span>
                         </div>
                       </div>
                     </div>
@@ -222,7 +222,7 @@ export default function VisualizeV2Preview() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="text-lg font-bold text-gray-400">לפני</span>
             <span className="animate-pulse-arrow text-2xl text-emerald-500">←</span>
-            <span className="text-lg font-bold text-emerald-600">אחרי ✨</span>
+            <span className="text-lg font-bold text-emerald-600">אחרי</span>
           </div>
 
           {/* Full Width Before/After */}
@@ -249,7 +249,7 @@ export default function VisualizeV2Preview() {
               </div>
               <div className="absolute top-4 left-4 z-10">
                 <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate-float-badge">
-                  ✨ אחרי
+                  אחרי
                 </span>
               </div>
               

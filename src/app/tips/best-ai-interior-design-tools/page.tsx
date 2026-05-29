@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -63,7 +64,7 @@ export default function BestAIInteriorDesignToolsPage() {
         "name": "כמה עולה הדמיית עיצוב פנים בAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה כ-5 קרדיטים (₪3-15), ובהרשמה מקבלים 10 קרדיטים חינם."
+          "text": `המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים 10 קרדיטים חינם להיכרות.`
         }
       },
       {
@@ -136,7 +137,7 @@ export default function BestAIInteriorDesignToolsPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">1. ShiputzAI - הכלי המוביל בישראל 🏆</h2>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <div className="flex flex-wrap gap-4 mb-4">
-              <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">מחיר: ₪29-149 לחבילה</span>
+              <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">מחיר: מנוי מ-₪29/חודש</span>
               <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">שפה: עברית + English</span>
               <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">7 כלי AI</span>
             </div>
@@ -281,7 +282,7 @@ export default function BestAIInteriorDesignToolsPage() {
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 font-medium text-gray-900">מחיר</td>
-                  <td className="py-3 px-4 bg-emerald-50">₪29-149</td>
+                  <td className="py-3 px-4 bg-emerald-50">מ-₪29/חודש</td>
                   <td className="py-3 px-4">$29/חודש</td>
                   <td className="py-3 px-4">חינם</td>
                   <td className="py-3 px-4">$9.99/חודש</td>
@@ -361,7 +362,7 @@ export default function BestAIInteriorDesignToolsPage() {
             />
             <FaqItem
               question="כמה עולה הדמיית עיצוב פנים בAI?"
-              answer="המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה כ-5 קרדיטים (₪3-15), ובהרשמה מקבלים 10 קרדיטים חינם."
+              answer={`המחירים נעים בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה. בShiputzAI הדמיה עולה ${CREDIT_COSTS.visualize} קרדיטים, ובהרשמה מקבלים 10 קרדיטים חינם להיכרות.`}
             />
             <FaqItem
               question="האם יש כלי AI לעיצוב פנים בעברית?"

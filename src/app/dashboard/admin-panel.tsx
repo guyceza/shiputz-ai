@@ -198,7 +198,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
               activeTab === 'premium' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             }`}
           >
-            ⭐ פרימיום
+            פרימיום
           </button>
           <button
             onClick={() => setActiveTab('users')}
@@ -307,7 +307,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                     <div key={p.email} className="flex items-center justify-between bg-gray-700 px-4 py-3 rounded-xl">
                       <div>
                         <span className="text-white font-mono" dir="ltr">{p.email}</span>
-                        <span className="text-amber-400 text-sm mr-4">⭐ עד {p.until}</span>
+                        <span className="text-amber-400 text-sm mr-4">עד {p.until}</span>
                       </div>
                       <button onClick={() => removePremium(p.email)} className="text-red-400 hover:text-red-300 px-3">הסר פרימיום</button>
                     </div>

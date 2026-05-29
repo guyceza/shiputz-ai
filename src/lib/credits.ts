@@ -1,21 +1,13 @@
 import { createServiceClient } from './supabase';
-
-// ====== Credit Costs per Action ======
-export const CREDIT_COSTS = {
-  'visualize': 10,         // AI Room Visualization
-  'floorplan': 10,         // Floor Plan rendering
-  'room-photo': 5,         // Room photo from floorplan
-  'furniture-swap': 5,     // Furniture replacement
-  'video-walkthrough': 25, // Video tour (Veo)
-  'shop-look': 3,          // Product detection
-  'bill-of-quantities': 5, // כתב כמויות
-  'scan-receipt': 2,       // Receipt scanning
-  'analyze-quote': 3,      // Quote analysis
-  'style-match': 3,        // Style Matcher
-  'detect-items': 3,       // Detect items in image
-} as const;
-
-export type CreditAction = keyof typeof CREDIT_COSTS;
+import { inferPlanBillingCycle, PLAN_PRICING, type BillingCycle } from './plan-pricing';
+export {
+  CREDIT_COSTS,
+  CREDIT_PACK_ANCHORS,
+  CREDIT_PACK_STEPS,
+  getCreditPackPrice,
+  type CreditAction,
+} from './credit-costs';
+import { CREDIT_COSTS, CREDIT_PACK_ANCHORS, type CreditAction } from './credit-costs';
 
 // ====== Plans ======
 export const PLANS = {
@@ -32,45 +24,38 @@ export const PLANS = {
     id: 'starter',
     name: 'Starter',
     nameEn: 'Starter',
-    price: 29,
-    annualPrice: 15,
-    monthlyCredits: 50,
-    features: ['50 קרדיטים לחודש', 'הדמיית חדר', 'כתב כמויות', 'החלפת רהיט', 'Shop the Look'],
+    price: PLAN_PRICING.starter.monthlyPrice,
+    annualPrice: PLAN_PRICING.starter.annualMonthlyPrice,
+    monthlyCredits: PLAN_PRICING.starter.credits,
+    features: PLAN_PRICING.starter.features,
     highlighted: false,
   },
   pro: {
     id: 'pro',
     name: 'Pro',
     nameEn: 'Pro',
-    price: 79,
-    annualPrice: 39,
-    monthlyCredits: 200,
-    features: ['200 קרדיטים לחודש', 'כל הכלים', 'סרטון סיור', 'קניית קרדיטים נוספים', 'שימוש מסחרי'],
+    price: PLAN_PRICING.pro.monthlyPrice,
+    annualPrice: PLAN_PRICING.pro.annualMonthlyPrice,
+    monthlyCredits: PLAN_PRICING.pro.credits,
+    features: PLAN_PRICING.pro.features,
     highlighted: true,
   },
   business: {
     id: 'business',
     name: 'Business',
     nameEn: 'Business',
-    price: 199,
-    annualPrice: 99,
-    monthlyCredits: 600,
-    features: ['600 קרדיטים לחודש', 'כל הכלים', 'סרטון סיור', 'קניית קרדיטים נוספים', 'שימוש מסחרי', 'תמיכה עדיפה'],
+    price: PLAN_PRICING.business.monthlyPrice,
+    annualPrice: PLAN_PRICING.business.annualMonthlyPrice,
+    monthlyCredits: PLAN_PRICING.business.credits,
+    features: PLAN_PRICING.business.features,
     highlighted: false,
   },
 } as const;
 
 export type PlanId = keyof typeof PLANS;
 
-// ====== Credit Slider Anchors (for dynamic pricing) ======
-export const CREDIT_ANCHORS = [
-  { credits: 10, price: 10 },   // ₪1.00/credit
-  { credits: 20, price: 19 },   // ₪0.95
-  { credits: 50, price: 42 },   // ₪0.84
-  { credits: 100, price: 75 },  // ₪0.75
-  { credits: 200, price: 129 }, // ₪0.65
-  { credits: 300, price: 179 }, // ₪0.60
-] as const;
+// ====== Extra credit packs for active subscribers ======
+export const CREDIT_ANCHORS = CREDIT_PACK_ANCHORS;
 
 // ====== Admin emails (bypass credits) ======
 const ADMIN_EMAILS = ['guyceza@gmail.com'];
@@ -82,8 +67,13 @@ export interface CreditBalance {
   subscriptionCredits: number;
   purchasedCredits: number;
   plan: string;
+  billingCycle: BillingCycle | null;
   monthlyCredits: number;
   nextReset: string | null;
+  periodEnd: string | null;
+  scheduledPlan: string | null;
+  scheduledBillingCycle: BillingCycle | null;
+  scheduledChangeAt: string | null;
 }
 
 type CreditRow = {
@@ -91,6 +81,39 @@ type CreditRow = {
   subscription_credits?: number | null;
   purchased_credits?: number | null;
 };
+
+type ActiveSubscriptionRow = {
+  plan?: string | null;
+  vision_subscription?: string | boolean | null;
+  payplus_subscription_status?: string | null;
+  plan_period_end?: string | null;
+};
+
+function hasActivePaidPlanSubscription(user: ActiveSubscriptionRow | null | undefined): boolean {
+  if (!user) return false;
+  const hasPaidPlan = ['starter', 'pro', 'business'].includes(user.plan || '');
+  const visionSubscription = String(user.vision_subscription || '').toLowerCase();
+  const hasActiveSubscription =
+    visionSubscription === 'active' ||
+    visionSubscription === 'true' ||
+    user.payplus_subscription_status === 'active';
+  const periodIsActive =
+    !user.plan_period_end || new Date(user.plan_period_end).getTime() >= Date.now();
+
+  return hasPaidPlan && hasActiveSubscription && periodIsActive;
+}
+
+export async function hasActiveAiAssistantSubscription(email: string): Promise<boolean> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from('users')
+    .select('plan, vision_subscription, payplus_subscription_status, plan_period_end')
+    .eq('email', email.toLowerCase())
+    .single();
+
+  if (error || !data) return false;
+  return hasActivePaidPlanSubscription(data);
+}
 
 function splitCreditBalance(user: CreditRow | null | undefined) {
   const total = user?.viz_credits || 0;
@@ -107,12 +130,12 @@ export async function getCredits(email: string): Promise<CreditBalance> {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('users')
-    .select('viz_credits, subscription_credits, purchased_credits, plan, plan_started_at')
+    .select('viz_credits, subscription_credits, purchased_credits, plan, plan_started_at, vision_subscription, payplus_recurring_uid, payplus_subscription_status, plan_billing_cycle, plan_period_end, scheduled_plan, scheduled_billing_cycle, scheduled_plan_change_at, scheduled_plan_change_status')
     .eq('email', email.toLowerCase())
     .single();
 
   if (error || !data) {
-    return { credits: 0, subscriptionCredits: 0, purchasedCredits: 0, plan: 'free', monthlyCredits: 0, nextReset: null };
+    return { credits: 0, subscriptionCredits: 0, purchasedCredits: 0, plan: 'free', billingCycle: null, monthlyCredits: 0, nextReset: null, periodEnd: null, scheduledPlan: null, scheduledBillingCycle: null, scheduledChangeAt: null };
   }
 
   const plan = (data.plan || 'free') as PlanId;
@@ -137,21 +160,45 @@ export async function getCredits(email: string): Promise<CreditBalance> {
     subscriptionCredits,
     purchasedCredits,
     plan,
+    billingCycle: inferPlanBillingCycle({
+      plan,
+      planBillingCycle: data.plan_billing_cycle,
+      visionSubscription: data.vision_subscription,
+      payplusSubscriptionStatus: data.payplus_subscription_status,
+      payplusRecurringUid: data.payplus_recurring_uid,
+    }),
     monthlyCredits: planConfig.monthlyCredits,
     nextReset,
+    periodEnd: data.plan_period_end,
+    scheduledPlan: data.scheduled_plan,
+    scheduledBillingCycle: data.scheduled_billing_cycle === 'monthly' || data.scheduled_billing_cycle === 'annual'
+      ? data.scheduled_billing_cycle
+      : null,
+    scheduledChangeAt: data.scheduled_plan_change_status === 'pending' ? data.scheduled_plan_change_at : null,
   };
 }
 
 /**
  * Check if user can perform an action (has enough credits)
  */
-export async function canPerformAction(email: string, action: CreditAction): Promise<{ allowed: boolean; cost: number; balance: number; isAdmin: boolean }> {
+export async function canPerformAction(email: string, action: CreditAction): Promise<{ allowed: boolean; cost: number; balance: number; isAdmin: boolean; subscriptionRequired?: boolean }> {
   if (ADMIN_EMAILS.includes(email.toLowerCase())) {
     return { allowed: true, cost: 0, balance: 999, isAdmin: true };
   }
 
   const cost = CREDIT_COSTS[action];
   const { credits } = await getCredits(email);
+
+  if (action === 'ai-assistant') {
+    const allowed = await hasActiveAiAssistantSubscription(email);
+    return {
+      allowed,
+      cost,
+      balance: credits,
+      isAdmin: false,
+      subscriptionRequired: !allowed,
+    };
+  }
 
   return {
     allowed: credits >= cost,

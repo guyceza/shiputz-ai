@@ -23,6 +23,22 @@ export async function creditGuard(
     }
 
     if (!check.allowed) {
+      if (check.subscriptionRequired) {
+        return {
+          error: NextResponse.json(
+            {
+              error: 'עוזר ה-AI פתוח למנויים פעילים בלבד. אחרי בחירת מנוי אפשר להשתמש בו ללא הגבלת קרדיטים.',
+              code: 'SUBSCRIPTION_REQUIRED',
+            },
+            { status: 403 }
+          ),
+        };
+      }
+
+      if (check.cost === 0) {
+        return { ok: true, cost: 0, balance: check.balance };
+      }
+
       return {
         error: NextResponse.json(
           { 
@@ -38,10 +54,11 @@ export async function creditGuard(
 
     const result = await deductCredits(email, action);
     return { ok: true, cost: result.cost, balance: result.newBalance };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Credit check failed';
     return {
       error: NextResponse.json(
-        { error: err.message || 'Credit check failed', creditError: true },
+        { error: message, creditError: true },
         { status: 402 }
       ),
     };

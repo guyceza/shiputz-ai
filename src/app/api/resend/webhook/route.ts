@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import crypto from 'crypto';
-
-const WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET || '';
 
 // Resend webhook events we care about
 // https://resend.com/docs/dashboard/webhooks/introduction
@@ -16,6 +13,16 @@ type ResendEvent = {
     subject: string;
     created_at: string;
   };
+};
+
+const STATUS_RANK: Record<string, number> = {
+  error: 0,
+  sent: 1,
+  delivered: 2,
+  opened: 3,
+  clicked: 4,
+  bounced: 5,
+  complained: 6,
 };
 
 export async function POST(request: NextRequest) {
@@ -36,7 +43,6 @@ export async function POST(request: NextRequest) {
       'email.opened': 'opened',
       'email.bounced': 'bounced',
       'email.complained': 'complained',
-      'email.delivery_delayed': 'delayed',
     };
 
     const newStatus = statusMap[eventType];
@@ -46,11 +52,31 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
-    // Update lead_emails status by resend_id
+    const { data: existing, error: lookupError } = await supabase
+      .from('lead_emails')
+      .select('id, email, lead_id, status')
+      .eq('resend_id', resendId)
+      .maybeSingle();
+
+    if (lookupError) {
+      console.error('Webhook DB lookup error:', lookupError);
+      return NextResponse.json({ error: 'DB error' }, { status: 500 });
+    }
+
+    if (!existing) {
+      return NextResponse.json({ ok: true, updated: 0 });
+    }
+
+    const currentRank = STATUS_RANK[existing.status] ?? 0;
+    const newRank = STATUS_RANK[newStatus] ?? 0;
+    if (currentRank > newRank) {
+      return NextResponse.json({ ok: true, updated: 0, kept: existing.status });
+    }
+
     const { data: updated, error } = await supabase
       .from('lead_emails')
       .update({ status: newStatus })
-      .eq('resend_id', resendId)
+      .eq('id', existing.id)
       .select('id, email, lead_id');
 
     if (error) {

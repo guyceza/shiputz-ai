@@ -16,7 +16,7 @@ const EMAIL_TEMPLATES = [
   { id: 'budget_tips', name: 'טיפים לתקציב', day: 5, flow: 'purchased', subject: '💰 איך לא לחרוג מהתקציב' },
   { id: 'checkin', name: 'צ׳ק-אין', day: 7, flow: 'purchased', subject: '❓ איך הולך?' },
   { id: 'quote_analysis', name: 'ניתוח הצעות מחיר', day: 10, flow: 'purchased', subject: '🔥 הכלי שרוב המשפצים לא מכירים' },
-  { id: 'feedback_request', name: 'בקשת משוב', day: 14, flow: 'purchased', subject: '⭐ 30 שניות מזמנך?' },
+  { id: 'feedback_request', name: 'בקשת משוב', day: 14, flow: 'purchased', subject: '30 שניות מזמנך?' },
   // Non-purchased flow
   { id: 'reminder', name: 'תזכורת', day: 1, flow: 'non_purchased', subject: '👋 שכחת משהו?' },
   { id: 'discount_offer', name: 'הנחה 20% Premium', day: 3, flow: 'non_purchased', subject: '🎁 מתנה בשבילך - 20% הנחה' },

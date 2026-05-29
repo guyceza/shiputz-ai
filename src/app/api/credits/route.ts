@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const action = request.nextUrl.searchParams.get('check') as keyof typeof CREDIT_COSTS | null;
 
     // If checking specific action
-    if (action && CREDIT_COSTS[action]) {
+    if (action && Object.prototype.hasOwnProperty.call(CREDIT_COSTS, action)) {
       const result = await canPerformAction(email, action);
       return NextResponse.json(result);
     }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       plans: PLANS,
       creditAnchors: CREDIT_ANCHORS,
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

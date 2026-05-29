@@ -12,14 +12,7 @@ export async function GET(request: NextRequest) {
       const supabase = createServiceClient();
       await supabase.from('lead_emails').update({
         status: 'clicked',
-        updated_at: new Date().toISOString(),
-      }).eq('email', email).eq('sequence_number', parseInt(seq)).eq('status', 'opened');
-      
-      // Also try updating from 'delivered' or 'sent' status
-      await supabase.from('lead_emails').update({
-        status: 'clicked',
-        updated_at: new Date().toISOString(),
-      }).eq('email', email).eq('sequence_number', parseInt(seq)).in('status', ['delivered', 'sent']);
+      }).eq('email', email).eq('sequence_number', parseInt(seq)).in('status', ['sent', 'delivered', 'opened']);
     } catch (err) {
       console.error('Click tracking error:', err);
     }

@@ -20,7 +20,7 @@ export default function TermsPage() {
       <div className="pt-24 pb-16 px-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-semibold text-gray-900 mb-8">תנאי שימוש</h1>
-          <p className="text-sm text-gray-500 mb-12">עודכן לאחרונה: פברואר 2026</p>
+          <p className="text-sm text-gray-500 mb-12">עודכן לאחרונה: מאי 2026</p>
 
           <div className="prose prose-gray max-w-none space-y-8 text-gray-600">
             <section>
@@ -61,9 +61,17 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">4. תשלום ומחירים</h2>
               <ul className="list-disc list-inside space-y-2">
-                <li>התשלום עבור השירות הוא חד-פעמי כמפורט בעמוד התמחור. ניתן לרכוש גם חבילות הדמיות נוספות בתשלום חד-פעמי</li>
+                <li>התשלום עבור השירות, מסלולי המנוי וחבילות הקרדיטים מפורטים בעמודי התמחור והרכישה באתר</li>
                 <li>כל המחירים כוללים מע״מ כחוק</li>
-                <li>אנו שומרים לעצמנו את הזכות לשנות מחירים בהתראה מראש</li>
+                <li>
+                  אנו רשאים לעדכן בכל עת, לפי שיקול דעתנו הבלעדי, את המחירים, מסלולי המנוי,
+                  חבילות הקרדיטים, היקף הקרדיטים, זמינות הכלים, ההטבות ותנאי השימוש בכל כלי.
+                  עדכון כזה יכול לכלול הוספה, הסרה, שינוי או תמחור מחדש של שירותים וחבילות.
+                </li>
+                <li>
+                  שינויי תמחור יחולו ממועד פרסומם או מהמועד שייקבע על ידינו, ולא יחולו רטרואקטיבית
+                  על תשלום שכבר נגבה בפועל, אלא אם נדרש אחרת לפי דין
+                </li>
                 <li>תשלום שבוצע לא יוחזר, למעט במקרים חריגים ובהתאם לשיקול דעתנו</li>
               </ul>
             </section>
@@ -134,9 +142,10 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">11. פרטי החברה</h2>
               <p>
-                ShiputzAI הוא מוצר של גיא סזנה.
+                ShiputzAI מופעל על ידי <span dir="ltr">WED4ME</span>.
               </p>
               <ul className="list-none space-y-2 mt-4">
+                <li><strong>שם משפטי/מסחרי:</strong> <span dir="ltr">WED4ME</span></li>
                 <li><strong>דוא״ל:</strong> support@shipazti.com</li>
                 <li><strong>אתר:</strong> shipazti.com</li>
               </ul>

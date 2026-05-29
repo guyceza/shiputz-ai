@@ -87,6 +87,7 @@ export default function Footer() {
             ShiputzAI הוא כלי דיגיטלי המבוסס על בינה מלאכותית (AI) לסיוע בתכנון וניהול שיפוצים. 
             כל ההדמיות, הניתוחים וההמלצות נוצרים באמצעות AI להמחשה בלבד ואינם מהווים תחליף לייעוץ מקצועי. 
             התוצאות עשויות להשתנות בפועל. ShiputzAI אינו קבלן שיפוצים, מהנדס או יועץ מקצועי.
+            ShiputzAI מופעל על ידי <span dir="ltr">WED4ME</span>.
           </p>
         </div>
       </div>
@@ -96,7 +97,7 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-500">
-              © {currentYear} ShiputzAI. כל הזכויות שמורות.
+              © {currentYear} ShiputzAI. כל הזכויות שמורות. מופעל על ידי <span dir="ltr">WED4ME</span>.
             </p>
             <div className="flex items-center gap-6">
               <Link href="/privacy" className="text-xs text-gray-500 hover:text-gray-900">

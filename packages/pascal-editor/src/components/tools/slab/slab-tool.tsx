@@ -271,8 +271,7 @@ export const SlabTool: React.FC = () => {
       )}
 
       {/* Main line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={mainLineRef}
@@ -281,11 +280,10 @@ export const SlabTool: React.FC = () => {
       >
         <bufferGeometry />
         <lineBasicNodeMaterial color="#818cf8" depthTest={false} depthWrite={false} linewidth={3} />
-      </line>
+      </threeLine>
 
       {/* Closing line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={closingLineRef}
@@ -301,7 +299,7 @@ export const SlabTool: React.FC = () => {
           opacity={0.5}
           transparent
         />
-      </line>
+      </threeLine>
 
       {/* Point markers */}
       {points.map(([x, z], index) => (

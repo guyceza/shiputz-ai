@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { ArrowLeft, Check, FileSearch, Loader2, LockKeyhole, Search, ShoppingBag, Trophy, Wand2 } from "lucide-react";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
 import PricingComparison from "@/components/PricingComparison";
 import CreditBadge from "@/components/CreditBadge";
 import { trackAction, clearAction } from "@/lib/track-action";
 import { authFetch } from "@/lib/auth-fetch";
+import { CREDIT_COSTS, getCreditPackPrice, getCreditPackUnitPrice } from "@/lib/credit-costs";
 const FlappyBirdGame = dynamic(() => import('@/components/FlappyBirdGame'), { ssr: false });
 
 // Dynamic import for Lottie (client-side only)
@@ -15,26 +17,287 @@ const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 // Popcorn waiting animation URL
 const POPCORN_ANIMATION_URL = '/popcorn-waiting.json';
+const QUICK_EXTRA_CREDIT_PACKS = [
+  { credits: 20, badge: null, variant: "default" },
+  { credits: 100, badge: "מאוזן", variant: "popular" },
+  { credits: 300, badge: "לשימוש כבד", variant: "value" },
+] as const;
 
 type ShopLookProduct = {
   id: string;
   name: string;
   position: { top: number; left: number; width?: number; height?: number };
+  marker?: { top?: number; left?: number };
   searchQuery: string;
 };
 
-function clampPercentage(value: number) {
-  return Math.max(0, Math.min(100, value));
+function clampPercentage(value: number, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, value));
 }
 
-function getShopLookMarkerPosition(position: ShopLookProduct["position"]) {
-  const width = Number(position.width || 0);
-  const height = Number(position.height || 0);
+function finitePercent(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function getShopLookMarkerPosition(product: ShopLookProduct) {
+  const position = product.position || { top: 50, left: 50 };
+  const width = finitePercent(position.width) ?? 0;
+  const height = finitePercent(position.height) ?? 0;
+  const fallbackLeft = (finitePercent(position.left) ?? 50) + width / 2;
+  const fallbackTop = (finitePercent(position.top) ?? 50) + height / 2;
+  const markerLeft = finitePercent(product.marker?.left) ?? fallbackLeft;
+  const markerTop = finitePercent(product.marker?.top) ?? fallbackTop;
+  const left = clampPercentage(markerLeft, 2, 98);
+  const top = clampPercentage(markerTop, 2, 98);
 
   return {
-    left: clampPercentage(position.left + (Number.isFinite(width) ? width / 2 : 0)),
-    top: clampPercentage(position.top + (Number.isFinite(height) ? height / 2 : 0)),
+    left,
+    top,
+    adjusted: Math.abs(left - markerLeft) > 0.1 || Math.abs(top - markerTop) > 0.1,
   };
+}
+
+function getRenderedImageContentBox(image: HTMLImageElement, frame: HTMLElement) {
+  const frameRect = frame.getBoundingClientRect();
+  const imageRect = image.getBoundingClientRect();
+  let left = imageRect.left - frameRect.left;
+  let top = imageRect.top - frameRect.top;
+  let width = imageRect.width;
+  let height = imageRect.height;
+
+  if (image.naturalWidth > 0 && image.naturalHeight > 0 && width > 0 && height > 0) {
+    const naturalRatio = image.naturalWidth / image.naturalHeight;
+    const renderedRatio = width / height;
+
+    if (renderedRatio > naturalRatio) {
+      const contentWidth = height * naturalRatio;
+      left += (width - contentWidth) / 2;
+      width = contentWidth;
+    } else if (renderedRatio < naturalRatio) {
+      const contentHeight = width / naturalRatio;
+      top += (height - contentHeight) / 2;
+      height = contentHeight;
+    }
+  }
+
+  return {
+    left: Math.round(left * 100) / 100,
+    top: Math.round(top * 100) / 100,
+    width: Math.round(width * 100) / 100,
+    height: Math.round(height * 100) / 100,
+  };
+}
+
+function getCleanAnalysisParagraphs(analysis: string) {
+  return analysis
+    .split(/\n{2,}/)
+    .map((paragraph) =>
+      paragraph
+        .split("\n")
+        .map((line) =>
+          line
+            .replace(/^#{1,6}\s*/, "")
+            .replace(/\*\*/g, "")
+            .replace(/^\s*[-*]\s*/, "")
+            .trim()
+        )
+        .filter(Boolean)
+        .join(" ")
+    )
+    .filter(Boolean);
+}
+
+async function getOptimizedImageDataUrl(file: File): Promise<string> {
+  const originalDataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => resolve(event.target?.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+  if (!file.type.startsWith("image/") || file.type === "image/gif") {
+    return originalDataUrl;
+  }
+
+  return new Promise<string>((resolve) => {
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const maxSide = 1920;
+        const largestSide = Math.max(image.width, image.height);
+        const scale = largestSide > maxSide ? maxSide / largestSide : 1;
+        const width = Math.round(image.width * scale);
+        const height = Math.round(image.height * scale);
+
+        if (scale === 1 && file.size < 1_500_000) {
+          resolve(originalDataUrl);
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          resolve(originalDataUrl);
+          return;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      } catch {
+        resolve(originalDataUrl);
+      }
+    };
+
+    image.onerror = () => resolve(originalDataUrl);
+    image.src = originalDataUrl;
+  });
+}
+
+function DesignQuestPanel({
+  productsCount,
+  detectingProducts,
+  onShopTheLook,
+  compact = false,
+}: {
+  productsCount: number;
+  detectingProducts?: boolean;
+  onShopTheLook?: () => void;
+  compact?: boolean;
+}) {
+  const hasProducts = productsCount > 0;
+  const progress = hasProducts ? 100 : detectingProducts ? 66 : 48;
+  const stages = [
+    {
+      title: "הדמיה",
+      subtitle: "התמונה נוצרה",
+      icon: Wand2,
+      state: "done",
+    },
+    {
+      title: "פריטים",
+      subtitle: detectingProducts ? "סורקים עכשיו" : hasProducts ? `${productsCount} פריטים נמצאו` : "המשימה פתוחה",
+      icon: ShoppingBag,
+      state: hasProducts ? "done" : "active",
+    },
+    {
+      title: "קנייה",
+      subtitle: hasProducts ? "בחרו פריט לחיפוש" : "ייפתח אחרי זיהוי",
+      icon: FileSearch,
+      state: hasProducts ? "active" : "locked",
+    },
+  ];
+
+  return (
+    <section
+      data-testid="visualize-quest-panel"
+      className={`relative overflow-hidden rounded-[28px] border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-200/70 ${compact ? "p-4" : "p-4 sm:p-5"}`}
+    >
+      <div className="quest-grid-light absolute inset-0 opacity-70" aria-hidden="true" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-l from-transparent via-emerald-300/80 to-transparent" aria-hidden="true" />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+              מסע העיצוב שלך
+            </div>
+            {compact ? (
+              <p className="text-sm font-black leading-snug text-slate-950">
+                {hasProducts ? "הצעה נפתחה" : detectingProducts ? "סורקים פריטים עכשיו" : "ציד פריטים"}
+              </p>
+            ) : (
+              <>
+                <h4 className="text-xl sm:text-2xl font-black leading-tight tracking-normal">
+                  {hasProducts ? "המשימה הבאה נפתחה" : "הפכו את התוצאה לרשימת קניות"}
+                </h4>
+                <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                  {hasProducts
+                    ? "יש כבר פריטים בתמונה. עכשיו אפשר לבדוק אם הצעת המחיר שקיבלתם הגיונית."
+                    : "אחרי רגע הוואו, ממשיכים בלי לעזוב את הדף: מזהים פריטים דומים ומתקדמים לשלב הבא."}
+                </p>
+              </>
+            )}
+          </div>
+          <div className="shrink-0 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+            <div className="text-[10px] font-semibold text-slate-500">שלב</div>
+            <div className="text-lg font-black text-emerald-700">{hasProducts ? "3/3" : "2/3"}</div>
+          </div>
+        </div>
+
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full rounded-full bg-gradient-to-l from-emerald-300 via-cyan-300 to-amber-300 transition-all duration-700"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className={`${compact ? "mt-3" : "mt-4"} grid grid-cols-3 gap-2`}>
+          {stages.map((stage, index) => {
+            const Icon = stage.icon;
+            const isDone = stage.state === "done";
+            const isActive = stage.state === "active";
+            const isLocked = stage.state === "locked";
+
+            return (
+              <div
+                key={stage.title}
+                className={`relative ${compact ? "min-h-[86px] p-2.5" : "min-h-[104px] p-3"} rounded-2xl border transition-all ${
+                  isActive
+                    ? "border-emerald-200 bg-emerald-50 shadow-lg shadow-emerald-100/70"
+                    : isDone
+                      ? "border-slate-200 bg-white"
+                      : "border-slate-200 bg-slate-50 opacity-70"
+                }`}
+              >
+                <div className={`mb-2 flex ${compact ? "h-8 w-8" : "h-9 w-9"} items-center justify-center rounded-xl ${
+                  isActive ? "bg-emerald-100 text-emerald-700" : isDone ? "bg-slate-100 text-slate-700" : "bg-slate-100 text-slate-400"
+                }`}>
+                  {isDone ? <Check className="h-5 w-5" /> : isLocked ? <LockKeyhole className="h-4 w-4" /> : <Icon className="h-5 w-5" />}
+                </div>
+                <div className="text-[10px] font-semibold text-slate-400">משימה {index + 1}</div>
+                <div className="mt-0.5 text-sm font-black leading-tight text-slate-950">{stage.title}</div>
+                <div className={`${compact ? "hidden" : "mt-1"} text-[11px] leading-snug text-slate-500`}>{stage.subtitle}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className={`${compact ? "mt-3" : "mt-4"} flex flex-col gap-3 sm:flex-row`}>
+          {compact && (
+            <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 sm:w-auto">
+              {detectingProducts ? <Loader2 className="h-4 w-4 animate-spin text-emerald-600" /> : <Trophy className="h-4 w-4 text-amber-500" />}
+              {hasProducts ? "התקדמות נשמרה" : detectingProducts ? "הסריקה רצה" : "מוכן לסריקה"}
+            </div>
+          )}
+          {!compact && !hasProducts && onShopTheLook && (
+            <button
+              type="button"
+              onClick={onShopTheLook}
+              disabled={detectingProducts}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-300 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+            >
+              {detectingProducts ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {detectingProducts ? "סורק פריטים..." : "התחילו ציד פריטים"}
+            </button>
+          )}
+          {hasProducts && (
+            <div className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-amber-500/20 sm:w-auto">
+              בחרו פריט בתמונה
+              <Search className="h-4 w-4" />
+            </div>
+          )}
+          {!compact && <div className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600 sm:justify-start">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            {hasProducts ? "התקדמות נשמרה" : "פותחים יכולת חדשה אחרי ההדמיה"}
+          </div>}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 // Add keyframes for animations
@@ -106,6 +369,20 @@ const animationStyles = `
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+@keyframes quest-ping {
+  0% { transform: scale(0.9); opacity: 0.55; }
+  70%, 100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes quest-scan {
+  0% { transform: translateY(-120%); opacity: 0; }
+  15% { opacity: 0.8; }
+  85% { opacity: 0.8; }
+  100% { transform: translateY(120%); opacity: 0; }
+}
+@keyframes quest-glow {
+  0%, 100% { opacity: 0.7; filter: saturate(1); }
+  50% { opacity: 1; filter: saturate(1.25); }
+}
 .animate-slide-reveal {
   animation: slide-reveal 6s ease-in-out infinite;
 }
@@ -115,6 +392,27 @@ const animationStyles = `
 .animate-float-badge {
   animation: float-badge 3s ease-in-out infinite;
 }
+.animate-quest-ping {
+  animation: quest-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.animate-quest-scan {
+  animation: quest-scan 2.4s ease-in-out infinite;
+}
+.animate-quest-glow {
+  animation: quest-glow 2.8s ease-in-out infinite;
+}
+.quest-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.quest-grid-light {
+  background-image:
+    linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
 `;
 
 interface ShopItem {
@@ -122,6 +420,7 @@ interface ShopItem {
   y: number;
   title: string;
   price: string;
+  searchQuery: string;
 }
 
 interface ExampleCard {
@@ -141,8 +440,8 @@ const EXAMPLES: ExampleCard[] = [
   {
     id: 1,
     title: "סלון מודרני",
-    beforeImg: "/before-room.jpg",
-    afterImg: "/after-room.jpg",
+    beforeImg: "/examples/visualize-room-before-v2.jpg",
+    afterImg: "/examples/visualize-room-after-v2.jpg",
     beforeDesc: "סלון קלאסי עם ריהוט מסורתי, שטיח פרסי ותאורה ישנה",
     afterDesc: "סלון מודרני עם ספה אפורה, כורסה כתומה, תמונות גרפיות ותאורת LED",
     changes: "ריהוט מודרני חדש, תאורת LED, תמונות דקורטיביות, שטיח גיאומטרי",
@@ -154,12 +453,13 @@ const EXAMPLES: ExampleCard[] = [
     ],
     total: 15550,
     shopItems: [
-      { x: 20, y: 45, title: "ספה מודולרית אפורה", price: "₪8,500" },
-      { x: 75, y: 55, title: "כורסה כתומה", price: "₪2,200" },
-      { x: 45, y: 15, title: "שלישיית תמונות", price: "₪1,800" },
-      { x: 8, y: 35, title: "מנורת רצפה", price: "₪1,400" },
-      { x: 60, y: 70, title: "שולחן סלון זכוכית", price: "₪1,900" },
-      { x: 35, y: 85, title: "שטיח גיאומטרי", price: "₪2,400" },
+      { x: 23, y: 52, title: "ספה פינתית אפורה עם שזלונג", price: "₪8,500", searchQuery: "ספה פינתית אפורה בד עם שזלונג ורגלי מתכת שחורות" },
+      { x: 54, y: 79, title: "כורסה כתומה מודרנית", price: "₪2,200", searchQuery: "כורסה כתומה בד מודרנית רגלי מתכת שחורות" },
+      { x: 42, y: 21, title: "סט תמונות אבסטרקט שחור כתום", price: "₪1,800", searchQuery: "סט שלוש תמונות אבסטרקט שחור כתום אפור מסגרת שחורה לסלון" },
+      { x: 25, y: 22, title: "מנורת קשת כרום עם אהיל כיפה", price: "₪1,400", searchQuery: "מנורת קשת רצפה כרום אהיל כיפה כסוף לסלון" },
+      { x: 64, y: 65, title: "שולחן סלון זכוכית מסגרת שחורה", price: "₪1,900", searchQuery: "שולחן סלון זכוכית מלבני מסגרת מתכת שחורה מדף תחתון" },
+      { x: 53, y: 82, title: "שטיח גיאומטרי אפור בז", price: "₪2,400", searchQuery: "שטיח סלון גיאומטרי אפור בז מלבני מודרני" },
+      { x: 86, y: 28, title: "וילונות פשתן אפורים נשפכים", price: "₪1,300", searchQuery: "וילון פשתן אפור ארוך לסלון שקוף למחצה" },
     ],
   },
   {
@@ -178,13 +478,13 @@ const EXAMPLES: ExampleCard[] = [
     ],
     total: 17800,
     shopItems: [
-      { x: 18, y: 12, title: "מנורת ראטן תלויה", price: "₪890" },
-      { x: 42, y: 12, title: "מנורת ראטן תלויה", price: "₪890" },
-      { x: 30, y: 35, title: "ברז מטבח וינטג׳", price: "₪1,200" },
-      { x: 75, y: 45, title: "מדפי עץ פתוחים", price: "₪1,600" },
-      { x: 55, y: 65, title: "מדיח כלים נירוסטה", price: "₪3,200" },
-      { x: 50, y: 85, title: "שטיח מטבח בוהו", price: "₪450" },
-      { x: 10, y: 55, title: "עציץ בזיליקום", price: "₪85" },
+      { x: 19, y: 11, title: "מנורת תלייה ראטן כיפה", price: "₪890", searchQuery: "מנורת תלייה ראטן כיפה טבעית למטבח כפרי" },
+      { x: 46, y: 9, title: "מנורת תלייה ראטן רחבה", price: "₪890", searchQuery: "מנורת תלייה ראטן רחבה קלועה למטבח כפרי" },
+      { x: 46, y: 49, title: "ברז מטבח ברונזה וינטג׳", price: "₪1,200", searchQuery: "ברז מטבח ברונזה עתיק וינטג פיה גבוהה" },
+      { x: 78, y: 34, title: "מדפי עץ פתוחים לכלים", price: "₪1,600", searchQuery: "מדפי עץ פתוחים למטבח כפרי עם תומכים שחורים" },
+      { x: 54, y: 61, title: "מדיח כלים נירוסטה אינטגרלי", price: "₪3,200", searchQuery: "מדיח כלים נירוסטה חזית מלאה 60 סנטימטר" },
+      { x: 45, y: 79, title: "שטיח מטבח קילים שחור לבן", price: "₪450", searchQuery: "שטיח מטבח קילים שחור לבן גיאומטרי מלבני" },
+      { x: 17, y: 50, title: "עציץ עשבי תיבול בסל קש", price: "₪85", searchQuery: "עציץ עשבי תיבול בסל קש למטבח" },
     ],
   },
   {
@@ -204,14 +504,41 @@ const EXAMPLES: ExampleCard[] = [
     ],
     total: 20350,
     shopItems: [
-      { x: 18, y: 52, title: "ארון הזזה עם מראה", price: "₪9,500" },
-      { x: 62, y: 58, title: "מיטה זוגית מרופדת", price: "₪4,200" },
-      { x: 88, y: 52, title: "מנורת שולחן מודרנית", price: "₪380" },
-      { x: 85, y: 65, title: "שידת לילה עגולה", price: "₪650" },
-      { x: 72, y: 28, title: "תמונת אבסטרקט", price: "₪890" },
-      { x: 12, y: 80, title: "כורסת עץ סקנדינבית", price: "₪1,800" },
-      { x: 35, y: 90, title: "שטיח גיאומטרי", price: "₪1,200" },
+      { x: 20, y: 43, title: "ארון הזזה לבן עם מראה", price: "₪9,500", searchQuery: "ארון הזזה לבן עם דלת מראה לחדר שינה" },
+      { x: 64, y: 58, title: "מיטה זוגית מרופדת אפורה", price: "₪4,200", searchQuery: "מיטה זוגית מרופדת אפורה ראש מיטה נמוך מודרני" },
+      { x: 90, y: 50, title: "מנורת שולחן זכוכית לבנה", price: "₪380", searchQuery: "מנורת שולחן זכוכית שקופה אהיל לבן לחדר שינה" },
+      { x: 86, y: 66, title: "שידת לילה עגולה בטון", price: "₪650", searchQuery: "שידת לילה עגולה אפורה בטון מודרנית" },
+      { x: 74, y: 30, title: "תמונת אבסטרקט שחור בז׳", price: "₪890", searchQuery: "תמונת קנבס אבסטרקט שחור בז אפור לחדר שינה" },
+      { x: 13, y: 77, title: "כיסא לאונג׳ עץ בהיר", price: "₪1,800", searchQuery: "כיסא לאונג עץ בהיר סקנדינבי לחדר שינה" },
+      { x: 38, y: 86, title: "שטיח גיאומטרי אפור בהיר", price: "₪1,200", searchQuery: "שטיח חדר שינה גיאומטרי אפור בהיר מלבני" },
     ],
+  },
+];
+
+const VISUALIZE_CONTROL_CHIPS = [
+  {
+    label: "שמור מבנה",
+    text: "שמור על מבנה החדר, החלונות, הדלתות והפרספקטיבה. שנה רק עיצוב, חומרים וריהוט.",
+  },
+  {
+    label: "רק קירות",
+    text: "שנה רק את צבע וטקסטורת הקירות. אל תשנה ריצוף, חלונות או מבנה.",
+  },
+  {
+    label: "רק ריצוף",
+    text: "החלף רק את הריצוף לפרקט/אבן/אריחים חדשים. שמור על שאר החדר כפי שהוא.",
+  },
+  {
+    label: "הסר רהיטים",
+    text: "נקה רהיטים קיימים והצע סידור חדש, בלי לשנות את מבנה החדר.",
+  },
+  {
+    label: "מודרני חם",
+    text: "עיצוב מודרני חם: צבעים טבעיים, עץ בהיר, תאורה רכה, טקסטיל נעים ותחושה ביתית.",
+  },
+  {
+    label: "יוקרתי נקי",
+    text: "עיצוב יוקרתי נקי: חומרים איכותיים, קווים שקטים, תאורה נסתרת ופלטה ניטרלית.",
   },
 ];
 
@@ -219,6 +546,7 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [selectedShopItem, setSelectedShopItem] = useState<ShopItem | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMove = (clientX: number) => {
@@ -261,6 +589,15 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
         }
       }
     }
+  };
+
+  const closeShopModal = () => {
+    setShowModal(false);
+    setSelectedShopItem(null);
+  };
+
+  const getDemoShoppingUrl = (item: ShopItem) => {
+    return `https://www.google.com/search?q=${encodeURIComponent(item.searchQuery + ' לקנות בישראל')}&tbm=shop`;
   };
 
   return (
@@ -333,14 +670,14 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
       {showModal && (
         <div 
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowModal(false)}
+          onClick={closeShopModal}
         >
           <div 
             className="relative bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-auto"
             onClick={e => e.stopPropagation()}
           >
             <button 
-              onClick={() => setShowModal(false)}
+              onClick={closeShopModal}
               className="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100"
             >
               ✕
@@ -348,16 +685,49 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
             
             <div className="p-4">
               <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center flex items-center justify-center gap-2"><img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-6 h-6" /> Shop the Look</h3>
-              <p className="text-sm text-gray-500 text-center mb-4">לחץ על המוצרים בתמונה לקנייה</p>
+              <p className="text-sm text-gray-500 text-center mb-4">בחרו פריט בתמונה, ואז עברו לחיפוש קנייה מדויק.</p>
               
               <div className="relative">
                 <img src={afterImg} alt="אחרי" className="w-full rounded-xl" />
                 
                 {/* Product Hotspots - dynamic per room */}
                 {shopItems.map((item, index) => (
-                  <ShopHotspot key={index} x={item.x} y={item.y} title={item.title} price={item.price} />
+                  <ShopHotspot
+                    key={index}
+                    item={item}
+                    selected={selectedShopItem?.title === item.title}
+                    onSelect={setSelectedShopItem}
+                  />
                 ))}
               </div>
+
+              {selectedShopItem && (
+                <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-emerald-700 mb-1">הפריט שנבחר</p>
+                      <h4 className="text-base font-semibold text-gray-900 leading-snug break-words">{selectedShopItem.title}</h4>
+                      <p className="mt-1 text-sm font-bold text-emerald-700">{selectedShopItem.price}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedShopItem(null)}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm ring-1 ring-gray-200 transition-colors hover:text-gray-900"
+                      aria-label="בטל בחירת פריט"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <a
+                    href={getDemoShoppingUrl(selectedShopItem)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-full bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 sm:w-auto"
+                  >
+                    חיפוש בגוגל שופינג
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -366,35 +736,28 @@ function BeforeAfterSlider({ beforeImg, afterImg, showShopLook = false, shopItem
   );
 }
 
-function ShopHotspot({ x, y, title, price }: { x: number; y: number; title: string; price: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  
+function ShopHotspot({ item, selected, onSelect }: { item: ShopItem; selected: boolean; onSelect: (item: ShopItem) => void }) {
   return (
     <div 
       className="absolute"
-      style={{ left: `${x}%`, top: `${y}%` }}
+      style={{ left: `${item.x}%`, top: `${item.y}%` }}
     >
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse"
+        type="button"
+        onClick={() => onSelect(item)}
+        aria-label={`הצג את הפריט ${item.title}`}
+        aria-pressed={selected}
+        className="group block"
       >
-        <span className="text-xs font-bold text-emerald-600">+</span>
-      </button>
-      
-      {isOpen && (
-        <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100">
-          <p className="text-sm font-medium text-gray-900 mb-1">{title}</p>
-          <p className="text-sm text-emerald-600 font-bold mb-2">{price}</p>
-          <a 
-            href={`https://www.google.com/search?q=${encodeURIComponent(title + ' לקנות בישראל')}&tbm=shop`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:underline"
-          >
-            חפש בגוגל שופינג ←
-          </a>
+        <div className={`w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 ${selected ? "border-gray-900 scale-110" : "border-emerald-500 animate-pulse"}`}>
+          <span className="text-xs font-bold text-emerald-600">+</span>
         </div>
-      )}
+        <div className="absolute top-9 right-1/2 translate-x-1/2 bg-white rounded-xl shadow-xl p-3 min-w-[190px] max-w-[240px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity pointer-events-none">
+          <p className="text-sm font-medium text-gray-900 mb-1 leading-snug">{item.title}</p>
+          <p className="text-sm text-emerald-600 font-bold mb-1">{item.price}</p>
+          <p className="text-xs text-blue-600">לחצו להצגת פריט</p>
+        </div>
+      </button>
     </div>
   );
 }
@@ -456,6 +819,7 @@ export default function VisualizePage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [description, setDescription] = useState("");
+  const [selectedControlChip, setSelectedControlChip] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [showGameLoading, setShowGameLoading] = useState(false); // keeps game visible after generation done
   const [selectedPlan, setSelectedPlan] = useState<'plus' | 'separate'>('plus');
@@ -464,13 +828,20 @@ export default function VisualizePage() {
   const [countdown, setCountdown] = useState(60);
   const [currentTip, setCurrentTip] = useState(0);
   const [showShopModal, setShowShopModal] = useState(false);
-  // Products cache: keyed by visualization ID - single source of truth
+  const [shopLookError, setShopLookError] = useState("");
+  const [selectedShopLookProduct, setSelectedShopLookProduct] = useState<ShopLookProduct | null>(null);
+  // Products cache: keyed by result image URL so it also works before DB save completes.
   const [productsCache, setProductsCache] = useState<Record<string, ShopLookProduct[]>>({});
   const [currentVisualizationId, setCurrentVisualizationId] = useState<string | null>(null);
   const [detectingProducts, setDetectingProducts] = useState(false);
+  const shopLookFrameRef = useRef<HTMLDivElement>(null);
+  const shopLookImageRef = useRef<HTMLImageElement>(null);
+  const [shopLookImageBox, setShopLookImageBox] = useState({ left: 0, top: 0, width: 0, height: 0 });
+  const persistedShopLookKeys = useRef<Set<string>>(new Set());
   
   // Get products for current visualization from cache
-  const detectedProducts = currentVisualizationId ? (productsCache[currentVisualizationId] || []) : [];
+  const activeShopLookCacheKey = generatedResult?.image || currentVisualizationId;
+  const detectedProducts = activeShopLookCacheKey ? (productsCache[activeShopLookCacheKey] || []) : [];
   
   // Helper to set products for a specific visualization
   const setCachedProducts = (vizId: string, products: ShopLookProduct[]) => {
@@ -488,6 +859,50 @@ export default function VisualizePage() {
   const [waitingAnimationData, setWaitingAnimationData] = useState<object | null>(null);
   
   const [packsAnimationData, setPacksAnimationData] = useState<object | null>(null);
+
+  const updateShopLookImageBox = useCallback(() => {
+    const frame = shopLookFrameRef.current;
+    const image = shopLookImageRef.current;
+
+    if (!frame || !image) return;
+
+    const nextBox = getRenderedImageContentBox(image, frame);
+    if (nextBox.width <= 0 || nextBox.height <= 0) return;
+
+    setShopLookImageBox(current => {
+      if (
+        Math.abs(current.left - nextBox.left) < 0.5 &&
+        Math.abs(current.top - nextBox.top) < 0.5 &&
+        Math.abs(current.width - nextBox.width) < 0.5 &&
+        Math.abs(current.height - nextBox.height) < 0.5
+      ) {
+        return current;
+      }
+
+      return nextBox;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!showShopModal || !generatedResult?.image) {
+      setShopLookImageBox({ left: 0, top: 0, width: 0, height: 0 });
+      return;
+    }
+
+    updateShopLookImageBox();
+    const animationFrame = window.requestAnimationFrame(updateShopLookImageBox);
+    window.addEventListener("resize", updateShopLookImageBox);
+
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateShopLookImageBox) : null;
+    if (shopLookFrameRef.current) resizeObserver?.observe(shopLookFrameRef.current);
+    if (shopLookImageRef.current) resizeObserver?.observe(shopLookImageRef.current);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", updateShopLookImageBox);
+      resizeObserver?.disconnect();
+    };
+  }, [generatedResult?.image, showShopModal, updateShopLookImageBox]);
   
   // Load animations
   useEffect(() => {
@@ -552,6 +967,14 @@ export default function VisualizePage() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      let releasedInitialState = false;
+      const releaseInitialState = () => {
+        if (!releasedInitialState) {
+          setAuthLoading(false);
+          releasedInitialState = true;
+        }
+      };
+
       try {
         const userData = localStorage.getItem("user");
         let userEmail = "";
@@ -566,8 +989,20 @@ export default function VisualizePage() {
             userEmail = user.email;
             currentUserId = user.id;
             setHasPurchased(user.purchased === true);
+            setHasSubscription(user.vision_subscription === true || user.vision_subscription === "active" || user.vision_subscription === "true");
+            setTrialUsed(user.vision_trial_used === true);
+            if (typeof user.viz_credits === "number") {
+              setVizCredits(user.viz_credits);
+            }
+            const hasCachedCreditBalance = typeof user.viz_credits === "number";
+            const needsCreditBalance =
+              user.vision_subscription === true || user.vision_subscription === "active" || user.vision_subscription === "true";
+            if (!needsCreditBalance || hasCachedCreditBalance) {
+              releaseInitialState();
+            }
           }
         } else {
+          releaseInitialState();
           const { getSession } = await import("@/lib/auth");
           const session = await getSession();
           if (session?.user) {
@@ -589,58 +1024,52 @@ export default function VisualizePage() {
         
         // Check if user should have trial reset (from admin panel)
         if (userEmail) {
-          try {
-            const res = await authFetch(`/api/admin/trial-reset?email=${encodeURIComponent(userEmail)}`);
-            const data = await res.json();
-            if (data.shouldReset) {
-              // Trial reset triggered from admin - DB already updated
-              setTrialUsed(false);
-              console.log("Trial reset for user:", userEmail);
-            }
-          } catch (e) {
-            console.error("Failed to check trial reset:", e);
+          const encodedEmail = encodeURIComponent(userEmail);
+          const [resetResult, premiumResult, creditsResult, trialResult] = await Promise.allSettled([
+            authFetch(`/api/admin/trial-reset?email=${encodedEmail}`).then(res => res.json()),
+            authFetch(`/api/admin/premium?email=${encodedEmail}`).then(res => res.json()),
+            authFetch(`/api/viz-credits?email=${encodedEmail}`).then(res => res.json()),
+            authFetch(`/api/vision-trial?email=${encodedEmail}`).then(async res => res.ok ? res.json() : null),
+          ]);
+
+          if (resetResult.status === "fulfilled" && resetResult.value?.shouldReset) {
+            // Trial reset triggered from admin - DB already updated
+            setTrialUsed(false);
+            console.log("Trial reset for user:", userEmail);
           }
-          
+
           // Check if user has the main ShiputzAI subscription (purchased) and Vision subscription
-          try {
-            const premRes = await authFetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
-            const premData = await premRes.json();
-            if (premData.hasPremium) {
+          if (premiumResult.status === "fulfilled") {
+            const premData = premiumResult.value;
+            if (premData?.hasPremium) {
               // User has main premium - update localStorage ONLY if we have valid user data
               const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
               if (storedUser.id) {
-                localStorage.setItem("user", JSON.stringify({ ...storedUser, purchased: true }));
+                localStorage.setItem("user", JSON.stringify({
+                  ...storedUser,
+                  purchased: true,
+                  vision_subscription: premData.hasVision ? "active" : storedUser.vision_subscription,
+                  viz_credits: typeof premData.vizCredits === "number" ? premData.vizCredits : storedUser.viz_credits,
+                }));
               }
               setHasPurchased(true);
             }
             // Check Vision subscription from database
-            if (premData.hasVision) {
-              setHasSubscription(true);
-            }
-          } catch (e) {
-            console.error("Failed to check premium:", e);
+            setHasSubscription(premData?.hasVision === true);
           }
           
           // Fetch viz credits
-          try {
-            const creditsRes = await authFetch(`/api/viz-credits?email=${encodeURIComponent(userEmail)}`);
-            const creditsData = await creditsRes.json();
-            setVizCredits(creditsData.vizCredits || 0);
-          } catch (e) {
-            console.error("Failed to fetch viz credits:", e);
+          if (creditsResult.status === "fulfilled") {
+            setVizCredits(
+              typeof creditsResult.value?.vizCredits === "number"
+                ? creditsResult.value.vizCredits
+                : 0
+            );
           }
-        }
-        
-        // Check trial status from database
-        if (userEmail) {
-          try {
-            const trialRes = await authFetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
-            if (trialRes.ok) {
-              const trialData = await trialRes.json();
-              setTrialUsed(trialData.trialUsed || false);
-            }
-          } catch (e) {
-            console.error("Failed to check trial:", e);
+
+          // Check trial status from database
+          if (trialResult.status === "fulfilled" && trialResult.value) {
+            setTrialUsed(trialResult.value.trialUsed || false);
           }
         }
       } catch {
@@ -648,12 +1077,17 @@ export default function VisualizePage() {
         setIsLoggedIn(!!user.id);
         setUserEmail(user.email || null);
         setHasPurchased(user.purchased === true);
+        setHasSubscription(user.vision_subscription === true || user.vision_subscription === "active" || user.vision_subscription === "true");
+        setTrialUsed(user.vision_trial_used === true);
+        if (typeof user.viz_credits === "number") {
+          setVizCredits(user.viz_credits);
+        }
         if (user.id) {
           setUserId(user.id);
           // Trial and subscription are checked from DB, this is fallback
         }
       } finally {
-        setAuthLoading(false);
+        releaseInitialState();
       }
     };
     checkAuth();
@@ -684,6 +1118,7 @@ export default function VisualizePage() {
       mapped.forEach(v => {
         if (v.detectedProducts && v.detectedProducts.length > 0) {
           newCache[v.id] = v.detectedProducts;
+          newCache[v.afterImage] = v.detectedProducts;
         }
       });
       setProductsCache(prev => ({ ...prev, ...newCache }));
@@ -785,7 +1220,7 @@ export default function VisualizePage() {
     }
   };
 
-  const processImageFile = (file: File) => {
+  const processImageFile = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       setGenerateError('יש להעלות קובץ תמונה בלבד');
@@ -802,12 +1237,13 @@ export default function VisualizePage() {
     // Clear any previous errors
     setGenerateError('');
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setUploadedImage(event.target?.result as string);
+    try {
+      const optimizedImage = await getOptimizedImageDataUrl(file);
+      setUploadedImage(optimizedImage);
       trackAction('visualize', '/visualize');
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setGenerateError('לא הצלחנו לקרוא את התמונה. נסה קובץ אחר');
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -853,8 +1289,10 @@ export default function VisualizePage() {
       const data = await res.json();
       
       if (res.status === 402 || data.creditError) {
+        setShowGameLoading(false);
         setGenerateError(`אין מספיק קרדיטים (נדרש: ${data.required || '?'}, יתרה: ${data.balance || 0}). <a href="/pricing" style="color:#10b981;text-decoration:underline">רכישת קרדיטים</a>`);
       } else if (data.error) {
+        setShowGameLoading(false);
         setGenerateError(data.error);
       } else {
         const generatedImage = data.generatedImage;
@@ -887,6 +1325,8 @@ export default function VisualizePage() {
           analysis: analysis,
           costs: costs
         });
+        setShowGameLoading(false);
+        setShowUploadModal(false);
         clearAction(); // User completed - clear abandoned tracking
         // Update credits after successful generation
         if (data.usedCredit && vizCredits !== null) {
@@ -914,14 +1354,36 @@ export default function VisualizePage() {
         }
       }
     } catch (err) {
+      setShowGameLoading(false);
       setGenerateError("שגיאה בחיבור לשרת. ייתכן שיש אנשים בתמונה - נסה תמונה ללא אנשים.");
     }
     
     setGenerating(false);
   };
 
-  const detectProductsForVisualization = async (vizId: string, imageUrl: string) => {
+  const persistProductsForVisualization = (visualizationId: string, products: ShopLookProduct[]) => {
+    if (!visualizationId || products.length === 0) return;
+
+    const persistKey = `${visualizationId}:${products.map(product => product.id).join(",")}`;
+    if (persistedShopLookKeys.current.has(persistKey)) return;
+    persistedShopLookKeys.current.add(persistKey);
+
+    fetch('/api/update-visualization-products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visualizationId, products, userId })
+    }).catch(e => console.error('Failed to save products to DB:', e));
+  };
+
+  useEffect(() => {
+    if (!currentVisualizationId || !generatedResult?.image) return;
+    const products = productsCache[generatedResult.image] || [];
+    persistProductsForVisualization(currentVisualizationId, products);
+  }, [currentVisualizationId, generatedResult?.image, productsCache]);
+
+  const detectProductsForVisualization = async (cacheKey: string, imageUrl: string, persistVisualizationId?: string | null) => {
     setDetectingProducts(true);
+    setShopLookError("");
     
     try {
       const userData = localStorage.getItem("user");
@@ -934,19 +1396,28 @@ export default function VisualizePage() {
       });
       
       const data = await res.json();
+      if (res.status === 401) {
+        setShopLookError("כדי לזהות מוצרים ולקבל קישורי Google Shopping צריך להתחבר או להירשם.");
+        return;
+      }
+      if (res.status === 402 || data?.creditError) {
+        setShopLookError(`אין מספיק קרדיטים ל-Shop the Look. נדרש: ${data?.required || "?"}, יתרה: ${data?.balance || 0}.`);
+        return;
+      }
       if (data.items && data.items.length > 0) {
         // Single write to cache - this is the only place products live
-        setCachedProducts(vizId, data.items);
+        setCachedProducts(cacheKey, data.items);
         
         // Persist to DB (fire and forget)
-        fetch('/api/update-visualization-products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ visualizationId: vizId, products: data.items, userId })
-        }).catch(e => console.error('Failed to save products to DB:', e));
+        if (persistVisualizationId) {
+          persistProductsForVisualization(persistVisualizationId, data.items);
+        }
+      } else {
+        setShopLookError("לא זוהו מוצרים ברורים בתמונה. אפשר לנסות סריקה מחדש.");
       }
     } catch (err) {
       console.error("Failed to detect products:", err);
+      setShopLookError("הסריקה נכשלה כרגע. נסה שוב בעוד רגע.");
     } finally {
       setDetectingProducts(false);
     }
@@ -955,17 +1426,31 @@ export default function VisualizePage() {
   const handleShopTheLook = async () => {
     if (!generatedResult?.image) return;
     
+    const cacheKey = generatedResult.image;
+    setShopLookError("");
+    setSelectedShopLookProduct(null);
     setShowShopModal(true);
     
     // Products are derived from cache - if already there, nothing to do
-    if (detectedProducts.length > 0) {
+    if ((productsCache[cacheKey] || []).length > 0) {
       return;
     }
     
     // No products in cache - scan and save
-    if (!currentVisualizationId) return;
-    await detectProductsForVisualization(currentVisualizationId, generatedResult.image);
+    await detectProductsForVisualization(cacheKey, generatedResult.image, currentVisualizationId);
   };
+
+  const heroCtaLabel = (() => {
+    if (isLoggedIn) {
+      if (hasSubscription) {
+        if (vizCredits === null) return "בודק יתרת הדמיות...";
+        return vizCredits === 0 ? "רכוש חבילת הדמיות" : `צור הדמיה (${vizCredits} נותרו)`;
+      }
+      return trialUsed ? "שדרגו לתוכנית מנוי" : "נסו עכשיו בחינם →";
+    }
+
+    return guestUsed ? "הירשם בחינם - צור עוד הדמיות →" : "נסו עכשיו בחינם →";
+  })();
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
@@ -999,12 +1484,12 @@ export default function VisualizePage() {
         <div className="max-w-4xl mx-auto text-center">
           
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-gray-900 leading-tight">
-            העלה תמונה של החדר.<br />
-            <span className="text-emerald-600">קבל הדמיית שיפוץ תוך 30 שניות.</span>
+            ראו את השיפוץ לפני שמתחילים.<br />
+            <span className="text-gray-900">העלו תמונה וקבלו כיוון ויזואלי.</span>
           </h1>
           
           <p className="text-lg text-gray-500 max-w-xl mx-auto mb-6 leading-relaxed">
-            AI שמראה לך איך השיפוץ יראה - עם הערכת עלויות מדויקת
+            שומרים ככל האפשר על מבנה החדר, מחליפים עיצוב וחומרים, ומקבלים בסיס החלטה לפני שיחה עם קבלן.
           </p>
 
           {/* CTA FIRST on mobile - before the image */}
@@ -1018,20 +1503,16 @@ export default function VisualizePage() {
               <>
                 <button
                   onClick={handleTryNow}
-                  className="bg-gray-900 text-white px-10 py-5 rounded-full text-xl font-bold hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:scale-105 animate-bounce-subtle"
+                  disabled={isLoggedIn && hasSubscription && vizCredits === null}
+                  className="rounded-full border border-gray-200 bg-white px-10 py-5 text-xl font-bold text-gray-950 shadow-[0_18px_42px_rgba(15,23,42,0.12)] ring-1 ring-white transition-all hover:scale-105 hover:border-gray-300 hover:bg-gray-50 hover:shadow-[0_22px_48px_rgba(15,23,42,0.16)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gray-200/80 animate-bounce-subtle"
                 >
-                  {isLoggedIn
-                    ? (hasSubscription 
-                        ? (vizCredits === 0 ? '📦 רכוש חבילת הדמיות' : `🎨 צור הדמיה (${vizCredits} נותרו)`)
-                        : trialUsed ? 'שדרגו לתוכנית מנוי' : 'נסו עכשיו בחינם →')
-                    : (guestUsed ? 'הירשם בחינם - צור עוד הדמיות →' : 'נסו עכשיו בחינם →')
-                  }
+                  {heroCtaLabel}
                 </button>
                 {!isLoggedIn && !guestUsed && (
                   <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> בחינם</span>
-                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> בלי הרשמה</span>
-                    <span className="flex items-center gap-1"><span className="text-green-500">✓</span> תוך 30 שניות</span>
+                    <span className="flex items-center gap-1"><span className="text-gray-400">✓</span> בחינם</span>
+                    <span className="flex items-center gap-1"><span className="text-gray-400">✓</span> בלי הרשמה</span>
+                    <span className="flex items-center gap-1"><span className="text-gray-400">✓</span> לפני/אחרי אמיתי</span>
                   </div>
                 )}
                 {!isLoggedIn && guestUsed && (
@@ -1061,18 +1542,18 @@ export default function VisualizePage() {
           </div>
 
           {/* Before/After Image - lazy loaded */}
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 mb-6">
+          <div className="relative mx-auto mb-6 max-w-[340px] overflow-hidden rounded-2xl border border-gray-200 shadow-xl sm:max-w-xl md:max-w-2xl">
             <div className="relative aspect-[4/3]">
-              <img 
-                src="/before-room.jpg" 
+              <img
+                src="/examples/visualize-room-before-v2.jpg"
                 alt="לפני השיפוץ"
                 className="w-full h-full object-cover"
                 loading="eager"
                 fetchPriority="high"
               />
               <div className="absolute inset-0 animate-slide-reveal">
-                <img 
-                  src="/after-room.jpg" 
+                <img
+                  src="/examples/visualize-room-after-v2.jpg"
                   alt="אחרי השיפוץ"
                   className="w-full h-full object-cover"
                   loading="eager"
@@ -1098,7 +1579,7 @@ export default function VisualizePage() {
           </div>
 
           {/* Social proof */}
-          <p className="text-sm text-gray-400 mb-2">127+ משתמשים כבר ניסו השבוע</p>
+          <p className="text-sm text-gray-400 mb-2">נועד לתת כיוון לפני ביצוע, לא להחליף בדיקה מקצועית בשטח</p>
         </div>
       </section>
 
@@ -1211,39 +1692,6 @@ export default function VisualizePage() {
         </div>
       </section>
 
-      {/* Demo Video - moved below examples */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-4">
-              ראה איך זה עובד בפועל
-            </h2>
-            <p className="text-gray-500">צפו בהדגמה קצרה של התהליך</p>
-          </div>
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline
-              preload="metadata"
-              className="w-full cursor-pointer"
-              poster="/demo-video-poster.jpg"
-              onClick={(e) => {
-                const video = e.currentTarget;
-                if (video.paused) {
-                  video.play();
-                } else {
-                  video.pause();
-                }
-              }}
-            >
-              <source src="/demo-video.mp4" type="video/mp4" />
-            </video>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works */}
       <section className="py-20 px-6">
         <div className="max-w-3xl mx-auto">
@@ -1298,7 +1746,7 @@ export default function VisualizePage() {
               <p className="text-gray-500">שדרג ל-Pro כדי להמשיך</p>
             </div>
             
-            <PricingComparison />
+            <PricingComparison isLoggedIn={isLoggedIn} />
           </div>
         </section>
       )}
@@ -1386,10 +1834,10 @@ export default function VisualizePage() {
               onClick={handleTryNow}
               className="bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-colors"
             >
-              ✨ צור הדמיה חדשה
+              צור הדמיה חדשה
             </button>
           )}
-          <p className="text-xs text-white/60 mt-3">10 קרדיטים להדמיה</p>
+          <p className="text-xs text-white/60 mt-3">{CREDIT_COSTS.visualize} קרדיטים להדמיה</p>
         </div>
       </section>
 
@@ -1463,7 +1911,7 @@ export default function VisualizePage() {
               <>
                 <div className="text-center mb-8">
                   <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-white text-lg">✦</span>
+                    <span className="text-white text-lg">✓</span>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">הניסיון החינמי נגמר</h3>
                   <p className="text-gray-500 text-sm">שדרג כדי להמשיך ליצור הדמיות</p>
@@ -1524,7 +1972,7 @@ export default function VisualizePage() {
               <>
                 <div className="text-center mb-6">
                   <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-white text-lg">✦</span>
+                    <span className="text-white text-lg">✓</span>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">שדרגו לתוכנית מנוי</h3>
                   <p className="text-gray-500 text-sm">קרדיטים חודשיים לכל הכלים</p>
@@ -1593,64 +2041,62 @@ export default function VisualizePage() {
                 )}
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-1">נגמרו ההדמיות</h3>
-              <p className="text-gray-500 text-sm">רכוש חבילת הדמיות כדי להמשיך</p>
+              <p className="text-gray-500 text-sm">רכשו קרדיטים נוספים למנוי כדי להמשיך</p>
             </div>
             
             <div className="space-y-3 mb-6">
-              {/* Quick buy options */}
-              <a href="/pricing#credits" className="block border border-gray-200 rounded-2xl p-4 hover:border-gray-400 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="text-right">
-                    <div className="font-medium text-gray-900">20 קרדיטים</div>
-                    <div className="text-xs text-gray-400">₪0.95 לקרדיט</div>
+              {QUICK_EXTRA_CREDIT_PACKS.map((pack) => (
+                <a
+                  key={pack.credits}
+                  href={`/checkout?credits=${pack.credits}`}
+                  className={`block rounded-2xl p-4 relative transition-colors ${
+                    pack.variant === "popular"
+                      ? "border-2 border-gray-900 hover:bg-gray-50"
+                      : pack.variant === "value"
+                        ? "border border-green-200 bg-green-50/30 hover:border-green-400"
+                        : "border border-gray-200 hover:border-gray-400"
+                  }`}
+                >
+                  {pack.badge && (
+                    <div className={`absolute -top-2.5 right-4 text-white text-[10px] font-bold px-3 py-0.5 rounded-full ${
+                      pack.variant === "value" ? "bg-green-600" : "bg-gray-900"
+                    }`}>
+                      {pack.badge}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="text-right">
+                      <div className="font-medium text-gray-900">{pack.credits} קרדיטים</div>
+                      <div className={`text-xs ${pack.variant === "value" ? "text-green-600 font-medium" : "text-gray-400"}`}>
+                        ₪{getCreditPackUnitPrice(pack.credits)} לקרדיט
+                      </div>
+                    </div>
+                    <div className="text-xl font-bold text-gray-900">₪{getCreditPackPrice(pack.credits)}</div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">₪19</div>
-                </div>
-              </a>
-              
-              <a href="/pricing#credits" className="block border-2 border-gray-900 rounded-2xl p-4 relative hover:bg-gray-50 transition-colors">
-                <div className="absolute -top-2.5 right-4 bg-gray-900 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי פופולרי</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-right">
-                    <div className="font-medium text-gray-900">50 קרדיטים</div>
-                    <div className="text-xs text-gray-400">₪0.84 לקרדיט</div>
-                  </div>
-                  <div className="text-xl font-bold text-gray-900">₪42</div>
-                </div>
-              </a>
-              
-              <a href="/pricing#credits" className="block border border-green-200 bg-green-50/30 rounded-2xl p-4 relative hover:border-green-400 transition-colors">
-                <div className="absolute -top-2.5 right-4 bg-green-600 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">הכי משתלם</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-right">
-                    <div className="font-medium text-gray-900">200 קרדיטים</div>
-                    <div className="text-xs text-green-600 font-medium">35% הנחה - ₪0.65 לקרדיט</div>
-                  </div>
-                  <div className="text-xl font-bold text-gray-900">₪129</div>
-                </div>
-              </a>
+                </a>
+              ))}
             </div>
             
-            <p className="text-center text-xs text-gray-400">קרדיטים לא פגים · או <a href="/pricing" className="underline hover:text-gray-600">שדרגו לתוכנית חודשית</a></p>
+            <p className="text-center text-xs text-gray-400">קרדיטים נוספים לא מתאפסים · זמין למנויים פעילים</p>
           </div>
         </div>
       )}
 
       {/* Upload Modal */}
       {showUploadModal && (!generatedResult || showGameLoading) && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-6 overflow-auto">
-          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative">
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/80 px-4 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm sm:flex sm:items-start sm:justify-center sm:p-6">
+          <div className="relative mx-auto w-full max-w-2xl rounded-3xl bg-white p-5 pt-14 shadow-2xl sm:p-8 sm:pt-8">
             <button
               onClick={() => { setShowUploadModal(false); setUploadedImage(null); setDescription(""); setGenerateError(""); }}
-              className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 rounded-full text-xl transition-colors z-10"
+              className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-xl text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900 sm:left-4 sm:top-4"
               aria-label="חזרה"
             >
               ✕
             </button>
             
             <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {!isLoggedIn ? '✨ נסו בחינם - הדמיה אחת עלינו!' : hasSubscription ? '🎨 צור הדמיה חדשה' : '✨ הניסיון החינמי שלך'}
+              <h3 className="mx-auto max-w-[240px] text-xl font-bold leading-tight text-gray-900 mb-2 sm:max-w-none sm:text-2xl">
+                {!isLoggedIn ? 'נסו הדמיה בחינם' : hasSubscription ? 'צור הדמיה חדשה' : 'הניסיון החינמי שלך'}
               </h3>
               <p className="text-gray-500">העלו תמונה של החדר ותאר מה אתה רוצה לשנות</p>
               <p className="text-amber-600 text-sm mt-1">💡 טיפ: העלו תמונה ללא אנשים לתוצאות טובות יותר</p>
@@ -1667,7 +2113,7 @@ export default function VisualizePage() {
                   onDrop={handleDrop}
                   data-testid="image-upload-label"
                 >
-                  <div className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
+                  <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all sm:p-12 ${
                     isDragOver 
                       ? 'border-green-500 bg-green-50 scale-[1.02]' 
                       : 'border-gray-300 hover:border-gray-400'
@@ -1703,9 +2149,31 @@ export default function VisualizePage() {
             {/* Description */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">מה לשנות?</label>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {VISUALIZE_CONTROL_CHIPS.map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => {
+                      setSelectedControlChip(chip.label);
+                      setDescription(chip.text);
+                    }}
+                    className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+                      selectedControlChip === chip.label
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-900 hover:text-gray-950"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
               <textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setSelectedControlChip(null);
+                  setDescription(e.target.value);
+                }}
                 placeholder="למשל: רוצה פרקט במקום אריחים, קירות בגוון אפור, תאורה שקועה, וסגנון מודרני..."
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 resize-none h-24"
                 data-testid="description-input"
@@ -1772,14 +2240,22 @@ export default function VisualizePage() {
               ✕
             </button>
             
-            <div className="text-center mb-6">
+            <div className="text-center mb-4 sm:mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">🎉 ההדמיה שלך מוכנה!</h3>
               <p className="text-xs text-gray-400">הדמיית AI להמחשה בלבד - התוצאה בפועל עשויה להשתנות</p>
             </div>
+
+            <div className="mb-5 hidden md:block">
+              <DesignQuestPanel
+                productsCount={detectedProducts.length}
+                detectingProducts={detectingProducts}
+                onShopTheLook={handleShopTheLook}
+              />
+            </div>
             
             {/* Before/After Comparison */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="relative">
+            <div className="grid md:grid-cols-2 gap-4 mb-5 sm:mb-6">
+              <div className="relative order-2 md:order-1">
                 {(generatedResult.beforeImage || uploadedImage) ? (
                   <>
                     <img src={generatedResult.beforeImage || uploadedImage || ''} alt="לפני" className="w-full rounded-2xl" />
@@ -1791,17 +2267,30 @@ export default function VisualizePage() {
                   </div>
                 )}
               </div>
-              <div 
-                className="relative cursor-pointer group"
+              <button
+                type="button"
+                aria-label="פתח Shop the Look לתמונת אחרי"
+                className="relative order-1 block cursor-pointer group appearance-none border-0 bg-transparent p-0 text-right md:order-2"
                 onClick={handleShopTheLook}
               >
                 <img src={generatedResult.image} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
-                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
-                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors animate-shop-pulse shop-btn-ripple">
-                  <span>🛒</span>
-                  <span>Shop the Look</span>
-                </button>
-              </div>
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי</span>
+                <span className="absolute bottom-3 left-3 bg-slate-950 group-hover:bg-emerald-300 group-hover:text-slate-950 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
+                  <ShoppingBag className="h-4 w-4" />
+                  <span>מצאו פריטים</span>
+                </span>
+                <span className="absolute bottom-3 right-3 bg-white/95 text-gray-800 text-xs px-3 py-2 rounded-full shadow-md opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100">
+                  לחצו למציאת פריטים דומים
+                </span>
+              </button>
+            </div>
+
+            <div className="mb-5 md:hidden">
+              <DesignQuestPanel
+                productsCount={detectedProducts.length}
+                detectingProducts={detectingProducts}
+                onShopTheLook={handleShopTheLook}
+              />
             </div>
             
             {/* Analysis */}
@@ -1809,8 +2298,8 @@ export default function VisualizePage() {
               <div className="bg-blue-50 rounded-2xl p-4 mb-6">
                 <h4 className="font-semibold text-gray-900 mb-2">📝 ניתוח מקצועי</h4>
                 <div className="text-gray-700 text-sm leading-relaxed space-y-3">
-                  {generatedResult.analysis.split('\n\n').map((paragraph, idx) => (
-                    <p key={idx}>{paragraph.replace(/\*\*/g, '').replace(/\n/g, ' ').trim()}</p>
+                  {getCleanAnalysisParagraphs(generatedResult.analysis).map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
               </div>
@@ -1868,14 +2357,14 @@ export default function VisualizePage() {
                   onClick={() => { setGeneratedResult(null); setUploadedImage(null); setDescription(""); clearProductsCache(); }}
                   className="flex-1 border border-gray-300 text-gray-900 py-3 rounded-full text-center font-medium hover:bg-gray-50 transition-all"
                 >
-                  🎨 צור הדמיה נוספת
+                  צור הדמיה נוספת
                 </button>
               ) : hasPurchased ? (
                 <Link
                   href="/pricing"
                   className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-full text-center font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
                 >
-                  ⭐ שדרג להדמיות נוספות
+                  שדרג להדמיות נוספות
                 </Link>
               ) : (
                 <Link
@@ -1909,84 +2398,215 @@ export default function VisualizePage() {
       {showShopModal && generatedResult && (
         <div 
           className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4"
-          onClick={() => setShowShopModal(false)}
+          onClick={() => {
+            setShowShopModal(false);
+            setSelectedShopLookProduct(null);
+          }}
         >
           <div 
-            className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            data-testid="quest-shop-modal"
+            className="relative overflow-hidden rounded-[30px] bg-white max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl shadow-black/30"
             onClick={e => e.stopPropagation()}
           >
             <button 
-              onClick={() => setShowShopModal(false)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100"
+              onClick={() => {
+                setShowShopModal(false);
+                setSelectedShopLookProduct(null);
+              }}
+              className="absolute top-4 right-4 z-20 w-9 h-9 bg-white/95 text-slate-900 rounded-full shadow-lg flex items-center justify-center hover:bg-white"
             >
               ✕
             </button>
             
-            <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center flex items-center justify-center gap-2">
-                🛒 Shop the Look
-              </h3>
-              <div className="mb-4 flex flex-col items-center gap-2">
-                <p className="text-sm text-gray-500 text-center">לחץ על המוצרים בתמונה לחיפוש בגוגל שופינג</p>
-                {currentVisualizationId && generatedResult?.image && detectedProducts.length > 0 && (
+            <div className="relative overflow-hidden border-b border-slate-200 bg-white p-4 pt-14 text-slate-950 sm:p-6 sm:pt-6">
+              <div className="quest-grid-light absolute inset-0 opacity-70" aria-hidden="true" />
+              <div className="relative">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">
+                      <Search className="h-3.5 w-3.5" />
+                      משימה 2 נפתחה
+                    </div>
+                    <h3 className="text-2xl font-black leading-tight tracking-normal sm:text-3xl">
+                      ציד פריטים מתוך ההדמיה
+                    </h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                      לחצו על נקודה בתמונה, קראו את שם הפריט המלא, ואז עברו לחיפוש קנייה מדויק.
+                    </p>
+                  </div>
+                  <div className="hidden rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center sm:block">
+                    <div className="text-[10px] font-semibold text-slate-500">נמצאו</div>
+                    <div className="text-xl font-black text-emerald-700">{detectedProducts.length}</div>
+                  </div>
+                </div>
+                <DesignQuestPanel
+                  productsCount={detectedProducts.length}
+                  detectingProducts={detectingProducts}
+                  onShopTheLook={detectedProducts.length === 0 ? handleShopTheLook : undefined}
+                  compact
+                />
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              {currentVisualizationId && generatedResult?.image && detectedProducts.length > 0 && (
+                <div className="mb-4 flex justify-end">
                   <button
                     type="button"
-                    onClick={() => detectProductsForVisualization(currentVisualizationId, generatedResult.image)}
+                    onClick={() => detectProductsForVisualization(generatedResult.image, generatedResult.image, currentVisualizationId)}
                     disabled={detectingProducts}
-                    className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-emerald-700 shadow-sm ring-1 ring-slate-200 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
-                    {detectingProducts ? "סורק מחדש..." : "סרוק מחדש לחיפוש מדויק יותר"}
+                    {detectingProducts && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {detectingProducts ? "סורק מחדש..." : "סרוק מחדש"}
                   </button>
-                )}
-              </div>
+                </div>
+              )}
               
-              <div className="relative">
-                <img src={generatedResult.image} alt="אחרי" className="w-full rounded-xl" />
+              <div className="relative overflow-hidden rounded-[26px] border border-slate-200 bg-slate-100 shadow-inner">
+                <div className="relative flex justify-center">
+                  <div ref={shopLookFrameRef} className="relative inline-block max-w-full">
+                    <img
+                      ref={shopLookImageRef}
+                      src={generatedResult.image}
+                      alt="אחרי"
+                      className="block h-auto w-auto max-h-[58vh] max-w-full"
+                      onLoad={updateShopLookImageBox}
+                    />
                 
-                {detectingProducts && (
-                  <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <div className="animate-spin text-3xl mb-2">⏳</div>
-                      <p>מזהה מוצרים...</p>
+                    {detectingProducts && (
+                      <div
+                        className="absolute flex items-center justify-center bg-slate-950/70"
+                        style={{
+                          left: shopLookImageBox.left,
+                          top: shopLookImageBox.top,
+                          width: shopLookImageBox.width || "100%",
+                          height: shopLookImageBox.height || "100%",
+                        }}
+                      >
+                    <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-white/10 px-6 py-5 text-center text-white backdrop-blur-md">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-emerald-300/20 animate-quest-scan" />
+                      <Loader2 className="mx-auto mb-3 h-9 w-9 animate-spin text-emerald-200" />
+                      <p className="text-sm font-black">סורק את החדר...</p>
+                      <p className="mt-1 text-xs text-slate-200">מחפש פריטים שאפשר לקנות</p>
                     </div>
-                  </div>
-                )}
+                      </div>
+                    )}
                 
-                {/* Product Hotspots */}
-                {detectedProducts.map((product, index) => {
-                  const marker = getShopLookMarkerPosition(product.position);
-
-                  return (
+                    {/* Product Hotspots */}
                     <div
-                      key={product.id || index}
-                      className="absolute"
+                      data-testid="shop-look-hotspot-layer"
+                      className="pointer-events-none absolute"
                       style={{
-                        left: `${marker.left}%`,
-                        top: `${marker.top}%`,
-                        transform: "translate(-50%, -50%)",
+                        left: shopLookImageBox.left,
+                        top: shopLookImageBox.top,
+                        width: shopLookImageBox.width || "100%",
+                        height: shopLookImageBox.height || "100%",
                       }}
                     >
+                      {detectedProducts.map((product, index) => {
+                        const marker = getShopLookMarkerPosition(product);
+
+                        return (
+                          <div
+                            key={product.id || index}
+                            className="pointer-events-auto absolute"
+                            style={{
+                              left: `clamp(18px, ${marker.left}%, calc(100% - 18px))`,
+                              top: `clamp(18px, ${marker.top}%, calc(100% - 18px))`,
+                              transform: "translate(-50%, -50%)",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setSelectedShopLookProduct(current => current?.id === product.id ? null : product)}
+                              className="group relative"
+                              aria-label={`הצג את הפריט ${product.name}`}
+                              aria-pressed={selectedShopLookProduct?.id === product.id}
+                            >
+                              <div className="absolute inset-0 rounded-full bg-white/45" />
+                              <div className={`relative flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-xl transition-transform hover:scale-110 ${selectedShopLookProduct?.id === product.id ? "ring-4 ring-slate-950 scale-110" : "ring-4 ring-teal-200/80"}`}>
+                                <Search className="h-3.5 w-3.5 text-teal-700" />
+                              </div>
+                              <div className="absolute top-11 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[190px] max-w-[260px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity pointer-events-none">
+                                <p className="text-sm font-medium text-gray-900 mb-2 leading-snug break-words">{product.name}</p>
+                                <span className="text-xs text-emerald-600 font-medium">לחצו להצגת פריט</span>
+                              </div>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {selectedShopLookProduct && (
+                      <div data-testid="quest-selected-product" className="absolute inset-x-3 bottom-3 z-20 overflow-hidden rounded-[22px] border border-white/20 bg-slate-950/95 text-white shadow-2xl backdrop-blur-md">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedShopLookProduct(null)}
+                      className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                      aria-label="בטל בחירת פריט"
+                    >
+                      ✕
+                    </button>
+                    <div className="flex items-start gap-3 p-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-300 text-slate-950">
+                        <ShoppingBag className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold text-emerald-200">הפריט שנבחר</p>
+                        <h4 className="mt-0.5 text-base font-black leading-snug break-words">
+                          {selectedShopLookProduct.name}
+                        </h4>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 border-t border-white/10 p-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs leading-relaxed text-slate-300">
+                        קודם קוראים, ורק אז עוברים לחיפוש.
+                      </p>
                       <a
-                        href={`https://www.google.com/search?q=${encodeURIComponent(product.searchQuery + ' לקנות בישראל')}&tbm=shop`}
+                        href={`https://www.google.com/search?q=${encodeURIComponent(selectedShopLookProduct.searchQuery + ' לקנות בישראל')}&tbm=shop`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-300 px-4 py-2.5 text-sm font-black text-slate-950 transition-colors hover:bg-emerald-200 sm:w-auto"
                       >
-                        <div className="w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-125 transition-transform cursor-pointer border-2 border-emerald-500 animate-pulse">
-                          <span className="text-xs font-bold text-emerald-600">+</span>
-                        </div>
-                        <div className="absolute top-8 right-0 bg-white rounded-xl shadow-xl p-3 min-w-[160px] z-10 border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
-                          <p className="text-sm font-medium text-gray-900 mb-2">{product.name}</p>
-                          <span className="text-xs text-emerald-600 font-medium">חפש בגוגל שופינג ←</span>
-                        </div>
+                        חיפוש בגוגל שופינג
+                        <ArrowLeft className="h-4 w-4" />
                       </a>
                     </div>
-                  );
-                })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {!detectingProducts && detectedProducts.length > 0 && (
+                <div data-testid="quest-shopping-cta" className="mt-4 rounded-[24px] border border-amber-200 bg-gradient-to-l from-amber-50 via-white to-emerald-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-amber-700 mb-1">משימה 3 נפתחה</p>
+                    <h4 className="font-black text-gray-900">בחרו פריט והמשיכו לחיפוש קנייה</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      עכשיו ההמשך טבעי: לוחצים על פריט בתמונה, קוראים את השם המלא, ואז עוברים לחיפוש מדויק.
+                    </p>
+                  </div>
+                  <div className="inline-flex shrink-0 w-full items-center justify-center gap-2 sm:w-auto text-center bg-slate-950 text-white px-5 py-3 rounded-full text-sm font-black">
+                    סמנו פריט בתמונה
+                    <Search className="h-4 w-4" />
+                  </div>
+                </div>
+              )}
               
               {!detectingProducts && detectedProducts.length === 0 && (
-                <p className="text-center text-gray-500 text-sm mt-4">לא זוהו מוצרים בתמונה</p>
+                <div className="text-center mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-gray-600 text-sm">{shopLookError || "לא זוהו מוצרים בתמונה"}</p>
+                  {!isLoggedIn && (
+                    <Link
+                      href="/signup?redirect=/visualize"
+                      className="inline-flex mt-3 bg-slate-950 text-white text-sm font-bold px-5 py-2.5 rounded-full hover:bg-slate-800 transition-all"
+                    >
+                      הירשמו בחינם להפעלת זיהוי פריטים
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -2019,29 +2639,36 @@ export default function VisualizePage() {
                 <img src={selectedHistoryItem.beforeImage} alt="לפני" className="w-full rounded-2xl" />
                 <span className="absolute top-3 right-3 bg-gray-900 text-white text-sm px-3 py-1 rounded-full">לפני</span>
               </div>
-              <div 
-                className="relative cursor-pointer group"
+              <button
+                type="button"
+                aria-label="פתח Shop the Look לתמונת אחרי מההיסטוריה"
+                className="relative block cursor-pointer group appearance-none border-0 bg-transparent p-0 text-right"
                 onClick={() => {
                   // Set the generated result to the history item so Shop the Look works
                   setGeneratedResult({ image: selectedHistoryItem.afterImage, beforeImage: selectedHistoryItem.beforeImage, analysis: selectedHistoryItem.analysis, costs: selectedHistoryItem.costs });
                   setCurrentVisualizationId(selectedHistoryItem.id);
+                  setShopLookError("");
                   setShowShopModal(true);
                   
                   // Products come from cache automatically via currentVisualizationId
                   // If not in cache, scan and save
                   const vizId = selectedHistoryItem.id;
-                  if (!productsCache[vizId] || productsCache[vizId].length === 0) {
-                    detectProductsForVisualization(vizId, selectedHistoryItem.afterImage);
+                  const cacheKey = selectedHistoryItem.afterImage;
+                  if (!productsCache[cacheKey] || productsCache[cacheKey].length === 0) {
+                    detectProductsForVisualization(cacheKey, selectedHistoryItem.afterImage, vizId);
                   }
                 }}
               >
                 <img src={selectedHistoryItem.afterImage} alt="אחרי" className="w-full rounded-2xl group-hover:brightness-110 transition-all" />
-                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
-                <button className="absolute bottom-3 left-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors animate-shop-pulse shop-btn-ripple">
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי</span>
+                <span className="absolute bottom-3 left-3 bg-emerald-500 group-hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-full flex items-center gap-1.5 shadow-lg transition-colors">
                   <span>🛒</span>
                   <span>Shop the Look</span>
-                </button>
-              </div>
+                </span>
+                <span className="absolute bottom-3 right-3 bg-white/95 text-gray-800 text-xs px-3 py-2 rounded-full shadow-md opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100">
+                  לחצו למציאת פריטים דומים
+                </span>
+              </button>
             </div>
             
             {/* Description */}
@@ -2055,8 +2682,8 @@ export default function VisualizePage() {
               <div className="bg-blue-50 rounded-2xl p-4 mb-6">
                 <h4 className="font-semibold text-gray-900 mb-2">📋 ניתוח מקצועי</h4>
                 <div className="text-gray-700 text-sm leading-relaxed space-y-3">
-                  {selectedHistoryItem.analysis.split('\n\n').map((paragraph, idx) => (
-                    <p key={idx}>{paragraph.replace(/\*\*/g, '').replace(/\n/g, ' ').trim()}</p>
+                  {getCleanAnalysisParagraphs(selectedHistoryItem.analysis).map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
               </div>

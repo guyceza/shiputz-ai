@@ -109,12 +109,13 @@ async function verifySubscription(userEmail: string | null): Promise<{
       monthlyUsed = 0;
     }
     
-    const isPro = data?.purchased === true && 
-      (data?.vision_subscription === true || data?.vision_subscription === 'active');
+    const visionSubscription = String(data?.vision_subscription || '').toLowerCase();
+    const hasVisionSubscription = visionSubscription === 'active' || visionSubscription === 'true';
+    const isPro = data?.purchased === true && hasVisionSubscription;
     
     return { 
       hasPurchased: data?.purchased === true,
-      hasVision: data?.vision_subscription === true || data?.vision_subscription === 'active',
+      hasVision: hasVisionSubscription,
       trialUsed: data?.vision_trial_used === true,
       monthlyUsage: usageCount,
       vizCredits: data?.viz_credits || 0,
@@ -484,9 +485,9 @@ export async function POST(request: NextRequest) {
     }
     // API key verified
 
-    // Step 1: Use Gemini to understand the request and enhance the prompt
-    // Using IMAGE_GEN instead of VISION_PRO to avoid March 9 deprecation
-    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
+    // Step 1: Use the fast vision model to understand the request.
+    // Keep the image-generation model only for the actual render below.
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${apiKey}`;
     
     // Extract base64 data if it's a data URL
     let imageBase64 = image;
@@ -516,7 +517,8 @@ export async function POST(request: NextRequest) {
 - פירוט העבודות הנדרשות לביצוע השינוי
 - הערות מקצועיות רלוונטיות (אם יש)
 
-כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.`
+כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.
+אל תשתמש בפורמט Markdown, בכותרות Markdown, בסימני # או בכוכביות.`
           }
         ]
       }]

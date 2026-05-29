@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { CREDIT_COSTS, getCreditPackPrice, getCreditPackUnitPrice } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -18,6 +19,8 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function HowMuchRenovationVisualizationPage() {
+  const visualizationAnswer = `הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה ${CREDIT_COSTS.visualize} קרדיטים.`;
+  const freeTrialAnswer = "כן. בShiputzAI מקבלים 10 קרדיטים חינם לניסיון ולהיכרות עם המערכת. שימוש בכלים הכבדים דורש מנוי פעיל.";
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function HowMuchRenovationVisualizationPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "כמה עולה הדמיית שיפוץ בAI? - מדריך מחירים 2026",
-    "description": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15.",
+    "description": visualizationAnswer,
     "author": { "@type": "Organization", "name": "ShiputzAI" },
     "publisher": { "@type": "Organization", "name": "ShiputzAI", "url": "https://shipazti.com" },
     "mainEntityOfPage": { "@type": "WebPage", "@id": "https://shipazti.com/tips/how-much-renovation-visualization" },
@@ -55,7 +58,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "כמה עולה הדמיית שיפוץ בAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15 תלוי בגודל החבילה."
+          "text": visualizationAnswer
         }
       },
       {
@@ -63,7 +66,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "האם אפשר לקבל הדמיית שיפוץ בחינם?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
+          "text": freeTrialAnswer
         }
       },
       {
@@ -71,7 +74,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "כמה עולות חבילות הקרדיטים בShiputzAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ShiputzAI מציע 3 חבילות: 10 קרדיטים ב-₪29 (₪2.9 לקרדיט), 30 קרדיטים ב-₪69 (₪2.3 לקרדיט), ו-100 קרדיטים ב-₪149 (₪1.49 לקרדיט). בהרשמה מקבלים 10 קרדיטים חינם."
+          "text": `ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.`
         }
       },
       {
@@ -79,7 +82,7 @@ export default function HowMuchRenovationVisualizationPage() {
         "name": "האם הדמיית AI שווה את הכסף לעומת מעצב פנים?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "בהחלט. מעצב פנים גובה 5,000-15,000₪ לתכנון דירה מלאה, בעוד שעם ShiputzAI אפשר לקבל עשרות הדמיות, כתב כמויות וניתוח הצעת מחיר ב-₪149. החיסכון הוא של אלפי שקלים."
+          "text": "בהחלט. מעצב פנים גובה 5,000-15,000₪ לתכנון דירה מלאה, בעוד שעם ShiputzAI אפשר לקבל הדמיות, כתב כמויות וניתוח הצעת מחיר מחבילת קרדיטים אחת. החיסכון הוא של אלפי שקלים."
         }
       }
     ]
@@ -133,7 +136,7 @@ export default function HowMuchRenovationVisualizationPage() {
         <div className="prose prose-gray max-w-none">
           {/* ANSWER-FIRST */}
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15. בהרשמה מקבלים 10 קרדיטים חינם.
+            <strong>הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת</strong>, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה {CREDIT_COSTS.visualize} קרדיטים. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-8">
@@ -156,7 +159,7 @@ export default function HowMuchRenovationVisualizationPage() {
               <tbody>
                 <tr className="border-b border-gray-100 bg-emerald-50">
                   <td className="py-3 px-4 font-semibold text-gray-900">ShiputzAI</td>
-                  <td className="py-3 px-4">₪29-149 (חבילה)</td>
+                  <td className="py-3 px-4">מנוי מ-₪29 + תוספות למנויים</td>
                   <td className="py-3 px-4">₪3-15</td>
                   <td className="py-3 px-4">10 קרדיטים</td>
                   <td className="py-3 px-4">✅</td>
@@ -200,13 +203,13 @@ export default function HowMuchRenovationVisualizationPage() {
           </p>
           <div className="bg-gray-50 rounded-2xl p-6 mb-6">
             <ul className="space-y-3 text-gray-700">
-              <li className="flex items-center justify-between"><span>🎨 הדמיית עיצוב</span> <span className="font-semibold">5 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>🔍 Style Match</span> <span className="font-semibold">2 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>🛒 Shop the Look</span> <span className="font-semibold">3 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>🎬 סרטון סיור</span> <span className="font-semibold">5 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>📐 תוכנית קומה</span> <span className="font-semibold">3 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>📋 כתב כמויות</span> <span className="font-semibold">3 קרדיטים</span></li>
-              <li className="flex items-center justify-between"><span>📊 ניתוח הצעת מחיר</span> <span className="font-semibold">3 קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>🎨 הדמיית עיצוב</span> <span className="font-semibold">{CREDIT_COSTS.visualize} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>🔍 Style Match</span> <span className="font-semibold">{CREDIT_COSTS["style-match"]} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>🛒 Shop the Look</span> <span className="font-semibold">{CREDIT_COSTS["shop-look"]} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>🎬 סרטון סיור</span> <span className="font-semibold">{CREDIT_COSTS["video-walkthrough"]} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>📐 תוכנית קומה</span> <span className="font-semibold">{CREDIT_COSTS.floorplan} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>📋 כתב כמויות</span> <span className="font-semibold">{CREDIT_COSTS["bill-of-quantities"]} קרדיטים</span></li>
+              <li className="flex items-center justify-between"><span>📊 ניתוח הצעת מחיר</span> <span className="font-semibold">{CREDIT_COSTS["analyze-quote"]} קרדיטים</span></li>
             </ul>
           </div>
 
@@ -214,26 +217,26 @@ export default function HowMuchRenovationVisualizationPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">חבילות מחירים בShiputzAI</h2>
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             <div className="border border-gray-200 rounded-2xl p-6 text-center">
-              <h3 className="font-semibold text-gray-900 mb-2">חבילת בסיס</h3>
-              <div className="text-3xl font-bold text-gray-900 mb-1">₪29</div>
-              <div className="text-sm text-gray-500 mb-4">10 קרדיטים</div>
-              <div className="text-sm text-gray-700 mb-2">₪2.9 לקרדיט</div>
-              <div className="text-sm text-gray-500">מספיק ל-2 הדמיות</div>
+              <h3 className="font-semibold text-gray-900 mb-2">תוספת בסיס</h3>
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪{getCreditPackPrice(20)}</div>
+              <div className="text-sm text-gray-500 mb-4">20 קרדיטים</div>
+              <div className="text-sm text-gray-700 mb-2">₪{getCreditPackUnitPrice(20)} לקרדיט</div>
+              <div className="text-sm text-gray-500">למנויים פעילים בלבד</div>
             </div>
             <div className="border-2 border-gray-900 rounded-2xl p-6 text-center relative">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-1 rounded-full">פופולרי</span>
               <h3 className="font-semibold text-gray-900 mb-2">חבילת ביניים</h3>
-              <div className="text-3xl font-bold text-gray-900 mb-1">₪69</div>
-              <div className="text-sm text-gray-500 mb-4">30 קרדיטים</div>
-              <div className="text-sm text-gray-700 mb-2">₪2.3 לקרדיט</div>
-              <div className="text-sm text-gray-500">מספיק ל-6 הדמיות</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪{getCreditPackPrice(50)}</div>
+              <div className="text-sm text-gray-500 mb-4">50 קרדיטים</div>
+              <div className="text-sm text-gray-700 mb-2">₪{getCreditPackUnitPrice(50)} לקרדיט</div>
+              <div className="text-sm text-gray-500">מספיק ל-{Math.floor(50 / CREDIT_COSTS.visualize)} הדמיות</div>
             </div>
             <div className="border border-gray-200 rounded-2xl p-6 text-center">
               <h3 className="font-semibold text-gray-900 mb-2">חבילת פרו</h3>
-              <div className="text-3xl font-bold text-gray-900 mb-1">₪149</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪{getCreditPackPrice(100)}</div>
               <div className="text-sm text-gray-500 mb-4">100 קרדיטים</div>
-              <div className="text-sm text-gray-700 mb-2">₪1.49 לקרדיט</div>
-              <div className="text-sm text-gray-500">מספיק ל-20 הדמיות</div>
+              <div className="text-sm text-gray-700 mb-2">₪{getCreditPackUnitPrice(100)} לקרדיט</div>
+              <div className="text-sm text-gray-500">מספיק ל-{Math.floor(100 / CREDIT_COSTS.visualize)} הדמיות</div>
             </div>
           </div>
 
@@ -241,7 +244,7 @@ export default function HowMuchRenovationVisualizationPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mt-10 mb-4">מה משפיע על המחיר?</h2>
           <p className="text-gray-700 leading-relaxed mb-4">מספר גורמים משפיעים על העלות הסופית:</p>
           <ul className="space-y-3 text-gray-700 mb-6">
-            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">1.</span><span><strong>גודל החבילה</strong> - ככל שקונים יותר קרדיטים, המחיר לקרדיט נמוך יותר. בחבילת 100 קרדיטים (₪149), קרדיט עולה ₪1.49 לעומת ₪2.9 בחבילת 10.</span></li>
+            <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">1.</span><span><strong>גודל התוספת</strong> - ככל שמוסיפים יותר קרדיטים, המחיר לקרדיט נמוך יותר. בתוספת 100 קרדיטים (₪{getCreditPackPrice(100)}), קרדיט עולה ₪{getCreditPackUnitPrice(100)} לעומת ₪{getCreditPackUnitPrice(20)} בתוספת 20.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">2.</span><span><strong>הפלטפורמה</strong> - כלים שונים גובים מחירים שונים. מנויים חודשיים (כמו InteriorAI) יכולים להיות יקרים אם לא משתמשים מספיק.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">3.</span><span><strong>מספר ההדמיות</strong> - תכנון שיפוץ דירה שלמה דורש 5-10 הדמיות (חדר אחד × כמה סגנונות). תכנון חדר בודד - 2-3 הדמיות מספיקות.</span></li>
             <li className="flex items-start gap-2"><span className="font-semibold text-gray-900 mt-0">4.</span><span><strong>כלים נוספים</strong> - אם משתמשים גם בכתב כמויות, ניתוח הצעת מחיר ותוכנית קומה, צריך יותר קרדיטים - אבל זה חוסך אלפי שקלים בייעוץ מקצועי.</span></li>
@@ -261,12 +264,12 @@ export default function HowMuchRenovationVisualizationPage() {
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🤖</span>
                 <div>
-                  <strong>ShiputzAI (חבילת 100):</strong> ₪149 ל-100 קרדיטים = 20 הדמיות + כתב כמויות + ניתוח הצעת מחיר. זמן: דקות.
+                  <strong>ShiputzAI (תוספת 100 למנוי):</strong> ₪{getCreditPackPrice(100)} ל-100 קרדיטים = {Math.floor(100 / CREDIT_COSTS.visualize)} הדמיות או שילוב של הדמיות, כתב כמויות וניתוח הצעת מחיר. זמן: דקות.
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <p className="font-semibold text-gray-900">
-                  חיסכון: 4,851-14,851₪ 🎉
+                  חיסכון: 4,801-14,801₪ 🎉
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   * לא מחליף מעצב פנים לפרויקטים מורכבים, אבל מושלם לתכנון ראשוני ולשיפוצים קוסמטיים-מקיפים.
@@ -288,7 +291,7 @@ export default function HowMuchRenovationVisualizationPage() {
           <div className="bg-gray-900 text-white rounded-2xl p-8 mb-8">
             <h2 className="text-xl font-semibold mb-4">💡 הטיפ שיחסוך לכם הכי הרבה</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-              התחילו עם 10 הקרדיטים החינמיים. עשו 2 הדמיות - אחת לסלון ואחת למטבח. אם אהבתם את התוצאות, קנו את חבילת ה-100 קרדיטים ב-₪149 וכך:
+              התחילו עם 10 הקרדיטים החינמיים ועשו הדמיה אחת טובה. אם אהבתם את התוצאה, בחרו מנוי ואז הוסיפו קרדיטים לפי הצורך:
             </p>
             <ul className="space-y-2 text-gray-300">
               <li>• תוכלו לנסות 10+ סגנונות שונים לכל חדר</li>
@@ -297,7 +300,7 @@ export default function HowMuchRenovationVisualizationPage() {
               <li>• ליצור סרטון סיור להציג למשפחה</li>
             </ul>
             <p className="text-gray-300 leading-relaxed mt-4">
-              <strong className="text-white">₪149 על כל הכלים האלה - במקום ₪5,000+ למעצב פנים.</strong>
+              <strong className="text-white">תוספת קרדיטים למנוי יכולה לחסוך החלטות יקרות - במקום ₪5,000+ למעצב פנים.</strong>
             </p>
           </div>
         </div>
@@ -318,19 +321,19 @@ export default function HowMuchRenovationVisualizationPage() {
           <div className="space-y-4">
             <FaqItem
               question="כמה עולה הדמיית שיפוץ בAI?"
-              answer="הדמיית שיפוץ בAI עולה בין ₪3 ל-₪30 להדמיה בודדת, תלוי בפלטפורמה ובחבילה. בShiputzAI, הדמיה אחת עולה 5 קרדיטים - בערך ₪3-15 תלוי בגודל החבילה."
+              answer={visualizationAnswer}
             />
             <FaqItem
               question="האם אפשר לקבל הדמיית שיפוץ בחינם?"
-              answer="כן! בShiputzAI מקבלים 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. גם RoomGPT מציע הדמיות חינמיות אך באיכות נמוכה יותר."
+              answer={freeTrialAnswer}
             />
             <FaqItem
               question="כמה עולות חבילות הקרדיטים בShiputzAI?"
-              answer="ShiputzAI מציע 3 חבילות: 10 קרדיטים ב-₪29 (₪2.9 לקרדיט), 30 קרדיטים ב-₪69 (₪2.3 לקרדיט), ו-100 קרדיטים ב-₪149 (₪1.49 לקרדיט). בהרשמה מקבלים 10 קרדיטים חינם."
+              answer={`ShiputzAI מציע מנויים חודשיים החל מ-₪29. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 קרדיטים ב-₪${getCreditPackPrice(20)}, 50 קרדיטים ב-₪${getCreditPackPrice(50)}, ו-100 קרדיטים ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון.`}
             />
             <FaqItem
               question="האם הדמיית AI שווה את הכסף לעומת מעצב פנים?"
-              answer="בהחלט. מעצב פנים גובה 5,000-15,000₪ לתכנון דירה מלאה, בעוד שעם ShiputzAI אפשר לקבל עשרות הדמיות, כתב כמויות וניתוח הצעת מחיר ב-₪149. החיסכון הוא של אלפי שקלים."
+              answer="בהחלט. מעצב פנים גובה 5,000-15,000₪ לתכנון דירה מלאה, בעוד שעם ShiputzAI אפשר לקבל הדמיות, כתב כמויות וניתוח הצעת מחיר מחבילת קרדיטים אחת. החיסכון הוא של אלפי שקלים."
             />
           </div>
         </div>

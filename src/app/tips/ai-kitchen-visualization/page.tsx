@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -50,7 +51,7 @@ export default function AIKitchenVisualizationPage() {
       {
         "@type": "Question",
         "name": "כמה עולה הדמיית מטבח בAI?",
-        "acceptedAnswer": { "@type": "Answer", "text": "הדמיית מטבח בAI עולה בין ₪3 ל-₪15 בShiputzAI, תלוי בחבילה שרכשתם. בהרשמה מקבלים 10 קרדיטים חינם לניסיון." }
+        "acceptedAnswer": { "@type": "Answer", "text": `הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים 10 קרדיטים חינם להיכרות.` }
       },
       {
         "@type": "Question",
@@ -262,7 +263,7 @@ export default function AIKitchenVisualizationPage() {
           <div className="space-y-4">
             <FaqItem
               question="כמה עולה הדמיית מטבח בAI?"
-              answer="הדמיית מטבח בAI עולה בין ₪3 ל-₪15 בShiputzAI, תלוי בחבילה שרכשתם. בהרשמה מקבלים 10 קרדיטים חינם לניסיון."
+              answer={`הדמיית מטבח בAI עולה ${CREDIT_COSTS.visualize} קרדיטים בShiputzAI. בהרשמה מקבלים 10 קרדיטים חינם להיכרות.`}
             />
             <FaqItem
               question="כמה זמן לוקח לקבל הדמיית מטבח?"

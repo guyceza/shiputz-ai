@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import { CREDIT_COSTS, getCreditPackPrice } from "@/lib/credit-costs";
 import Footer from "@/components/Footer";
 
 function FaqItem({ q, a }: { q: string; a: string }) {
@@ -37,7 +38,7 @@ export default function GuidePage() {
     "mainEntity": [
       { "@type": "Question", "name": "כמה זמן לוקח לקבל הדמיה?", "acceptedAnswer": { "@type": "Answer", "text": "כ-30 שניות. העלו תמונה, כתבו תיאור, וה-AI מייצר את ההדמיה." } },
       { "@type": "Question", "name": "האם צריך ידע בעיצוב פנים?", "acceptedAnswer": { "@type": "Answer", "text": "ממש לא. ShiputzAI מיועד לכולם - בעלי דירות, מעצבים וקבלנים." } },
-      { "@type": "Question", "name": "כמה עולה להשתמש?", "acceptedAnswer": { "@type": "Answer", "text": "הדמיה ראשונה חינם. חבילת Pro עולה ₪99 ל-4 הדמיות, או חבילות קרדיטים מ-₪29." } },
+      { "@type": "Question", "name": "כמה עולה להשתמש?", "acceptedAnswer": { "@type": "Answer", "text": `הדמיה ראשונה חינם. מנויים מתחילים ב-₪29 לחודש, וקרדיטים נוספים זמינים למנויים פעילים בלבד החל מ-₪${getCreditPackPrice(20)}.` } },
       { "@type": "Question", "name": "אפשר להשתמש בעברית?", "acceptedAnswer": { "@type": "Answer", "text": "כן! ShiputzAI בנוי מהיסוד בעברית - ממשק, תיאורים, ותוצאות AI בעברית מלאה." } },
       { "@type": "Question", "name": "מה ההבדל בין הדמיה ל-3D?", "acceptedAnswer": { "@type": "Answer", "text": "הדמיית AI מבוססת תמונה אמיתית ונותנת תוצאה פוטוריאליסטית ב-30 שניות. תכנון 3D דורש שעות עבודה ותוכנה מקצועית." } },
     ],
@@ -132,13 +133,13 @@ export default function GuidePage() {
         {/* Credit System */}
         <section className="mt-16 bg-amber-50 rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">מערכת קרדיטים</h2>
-          <p className="text-gray-700 mb-4">כל הדמיה צורכת קרדיט אחד. שאר הכלים (Style Matcher, Shop the Look, כתב כמויות, ניתוח הצעת מחיר) - חינם ללא הגבלה.</p>
+          <p className="text-gray-700 mb-4">כל כלי AI צורך קרדיטים לפי הערך שלו: הדמיה {CREDIT_COSTS.visualize}, תוכנית קומה {CREDIT_COSTS.floorplan}, ניתוח הצעת מחיר {CREDIT_COSTS["analyze-quote"]}, וכתב כמויות {CREDIT_COSTS["bill-of-quantities"]} קרדיטים.</p>
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: "Pro", price: "₪99", credits: "4 הדמיות" },
-              { name: "Pack 10", price: "₪29", credits: "10 הדמיות" },
-              { name: "Pack 30", price: "₪69", credits: "30 הדמיות" },
-              { name: "Pack 100", price: "₪149", credits: "100 הדמיות" },
+              { name: "Starter", price: "₪29", credits: "50 קרדיטים בחודש" },
+              { name: "Pro", price: "₪79", credits: "200 קרדיטים בחודש" },
+              { name: "Business", price: "₪199", credits: "600 קרדיטים בחודש" },
+              { name: "תוספת 100", price: `₪${getCreditPackPrice(100)}`, credits: "100 קרדיטים למנויים" },
             ].map((pkg, i) => (
               <div key={i} className="bg-white rounded-xl p-4 text-center border border-amber-200">
                 <div className="font-bold text-gray-900">{pkg.name}</div>
@@ -158,7 +159,7 @@ export default function GuidePage() {
           <div className="space-y-3">
             <FaqItem q="כמה זמן לוקח לקבל הדמיה?" a="כ-30 שניות. העלו תמונה, כתבו תיאור, וה-AI מייצר את ההדמיה." />
             <FaqItem q="האם צריך ידע בעיצוב פנים?" a="ממש לא. ShiputzAI מיועד לכולם - בעלי דירות, מעצבים וקבלנים. כל מה שצריך זה תמונה ותיאור." />
-            <FaqItem q="כמה עולה להשתמש?" a="הדמיה ראשונה חינם. חבילת Pro עולה ₪99 ל-4 הדמיות, או חבילות קרדיטים מ-₪29." />
+            <FaqItem q="כמה עולה להשתמש?" a={`הדמיה ראשונה חינם. מנויים מתחילים ב-₪29 לחודש, וקרדיטים נוספים זמינים למנויים פעילים בלבד החל מ-₪${getCreditPackPrice(20)}.`} />
             <FaqItem q="אפשר להשתמש בעברית?" a="כן! ShiputzAI בנוי מהיסוד בעברית - ממשק, תיאורים, ותוצאות AI בעברית מלאה." />
             <FaqItem q="מה ההבדל בין הדמיית AI ל-הדמיה תלת מימדית?" a="הדמיית AI מבוססת תמונה אמיתית ונותנת תוצאה פוטוריאליסטית ב-30 שניות. תכנון 3D דורש שעות עבודה ותוכנה מקצועית." />
           </div>

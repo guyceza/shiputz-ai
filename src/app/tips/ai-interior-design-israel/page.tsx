@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { getCreditPackPrice } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -60,7 +61,7 @@ export default function AIInteriorDesignIsraelPage() {
       {
         "@type": "Question",
         "name": "כמה עולה עיצוב פנים בAI?",
-        "acceptedAnswer": { "@type": "Answer", "text": "בShiputzAI, חבילת 10 קרדיטים עולה ₪29, חבילת 30 עולה ₪69, וחבילת 100 עולה ₪149. בהרשמה מקבלים 10 קרדיטים חינם. לעומת מעצב פנים שגובה ₪10,000-₪50,000." }
+        "acceptedAnswer": { "@type": "Answer", "text": `בShiputzAI, מנויים מתחילים ב-₪29 לחודש. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 ב-₪${getCreditPackPrice(20)}, 50 ב-₪${getCreditPackPrice(50)}, ו-100 ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון. לעומת מעצב פנים שגובה ₪10,000-₪50,000.` }
       },
       {
         "@type": "Question",
@@ -225,7 +226,7 @@ export default function AIInteriorDesignIsraelPage() {
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 font-medium text-gray-900">ייעוץ עיצוב מלא</td>
-                  <td className="py-3 px-4 bg-emerald-50">₪29-149 (ללא הגבלת ניסיונות)</td>
+                  <td className="py-3 px-4 bg-emerald-50">מנוי מ-₪29/חודש</td>
                   <td className="py-3 px-4">₪10,000-₪50,000</td>
                 </tr>
                 <tr>
@@ -256,7 +257,7 @@ export default function AIInteriorDesignIsraelPage() {
             <li className="flex items-start gap-2"><span className="text-gray-400 mt-1">•</span> <span><strong>InteriorAI:</strong> הדמיות בלבד, אנגלית בלבד, $29/חודש, כלי אחד</span></li>
             <li className="flex items-start gap-2"><span className="text-gray-400 mt-1">•</span> <span><strong>RoomGPT:</strong> חינמי אך בסיסי, אנגלית בלבד, ללא כלים נוספים</span></li>
             <li className="flex items-start gap-2"><span className="text-gray-400 mt-1">•</span> <span><strong>ReRoom AI:</strong> $9.99/חודש, אנגלית בלבד, הדמיות בלבד</span></li>
-            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">★</span> <span><strong>ShiputzAI:</strong> 7 כלי AI, עברית מלאה, ₪29-149 לחבילה, ממשק ישראלי</span></li>
+            <li className="flex items-start gap-2"><span className="text-emerald-500 mt-1">✓</span> <span><strong>ShiputzAI:</strong> 7 כלי AI, עברית מלאה, חבילות קרדיטים ומנויים, ממשק ישראלי</span></li>
           </ul>
         </div>
 
@@ -277,7 +278,7 @@ export default function AIInteriorDesignIsraelPage() {
           <div className="space-y-4">
             <FaqItem question="מה זה עיצוב פנים בAI?" answer="עיצוב פנים בAI הוא שימוש בבינה מלאכותית ליצירת הדמיות של חדרים מעוצבים. מעלים תמונה של החדר הקיים, מתארים את השינוי הרצוי, ומקבלים הדמיה פוטוריאליסטית תוך שניות." />
             <FaqItem question="האם יש כלי עיצוב פנים AI בעברית?" answer="כן, ShiputzAI הוא הכלי היחיד בישראל עם ממשק בעברית מלא, מחירים בשקלים, ותמיכה בסגנונות עיצוב ישראליים. 7 כלי AI בפלטפורמה אחת." />
-            <FaqItem question="כמה עולה עיצוב פנים בAI?" answer="בShiputzAI, חבילת 10 קרדיטים עולה ₪29, חבילת 30 עולה ₪69, וחבילת 100 עולה ₪149. בהרשמה מקבלים 10 קרדיטים חינם. לעומת מעצב פנים שגובה ₪10,000-₪50,000." />
+            <FaqItem question="כמה עולה עיצוב פנים בAI?" answer={`בShiputzAI, מנויים מתחילים ב-₪29 לחודש. קרדיטים נוספים זמינים למנויים פעילים בלבד: 20 ב-₪${getCreditPackPrice(20)}, 50 ב-₪${getCreditPackPrice(50)}, ו-100 ב-₪${getCreditPackPrice(100)}. בהרשמה מקבלים 10 קרדיטים חינם לניסיון. לעומת מעצב פנים שגובה ₪10,000-₪50,000.`} />
             <FaqItem question="למי מתאים עיצוב פנים בAI?" answer='עיצוב פנים בAI מתאים לבעלי דירות שמתכננים שיפוץ, מעצבי פנים שרוצים לייצר הדמיות מהירות, קבלנים שרוצים להציג הצעות ללקוחות, ומתווכי נדל"ן שרוצים Virtual Staging.' />
             <FaqItem question="מה ההבדל בין ShiputzAI לכלים אחרים?" answer="ShiputzAI הוא הכלי היחיד שמשלב 7 כלי AI - הדמיה, כתב כמויות, ניתוח הצעות מחיר, סרטון סיור, Style Match, Shop the Look ותוכנית קומה. כל הכלים האחרים מציעים רק הדמיה בסיסית." />
             <FaqItem question="האם התוצאות מדויקות?" answer="הדמיות AI הן פוטוריאליסטיות ונותנות תמונה מצוינת של הכיוון העיצובי. לתכנון מדויק של מידות וחומרים, מומלץ לשלב עם מעצב פנים מקצועי." />

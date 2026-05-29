@@ -21,6 +21,35 @@ interface NextBatchLead {
   name: string;
   profession: string;
   nextEmail: number;
+  qualityScore?: number;
+  plannedReason?: string;
+}
+
+interface UpcomingSendDay {
+  date: string;
+  dateKey: string;
+  label: string;
+  dailyLimit: number;
+  followupLimit: number;
+  newLeadLimit: number;
+  alreadySent: number;
+  alreadySentEmail1: number;
+  alreadySentEmail2: number;
+  plannedCount: number;
+  leads: NextBatchLead[];
+}
+
+interface ProfessionTemplate {
+  profession: string;
+  imageUrl: string;
+  email1: {
+    subject: string;
+    body: string;
+  };
+  email2: {
+    subject: string;
+    body: string;
+  };
 }
 
 interface LeadsStats {
@@ -36,15 +65,21 @@ interface LeadsStats {
   unsubscribed: number;
   remaining: number;
   sentToday: number;
+  sentTodayEmail1: number;
+  sentTodayEmail2: number;
   totalEmailsSent: number;
   warmupWeek: number;
   dailyLimit: number;
+  followupDailyLimit: number;
+  newLeadDailyLimit: number;
   campaignStarted: boolean;
   campaignStartDate: string | null;
   nextBatch: string;
   recentEmails: LeadEmail[];
   statusBreakdown: Record<string, number>;
   nextBatchLeads: NextBatchLead[];
+  upcomingSendDays: UpcomingSendDay[];
+  professionTemplates: ProfessionTemplate[];
 }
 
 interface EmailPreview {
@@ -63,6 +98,7 @@ export default function AdminLeads() {
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ email: string; seq: number; data: EmailPreview } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [selectedScheduleIndex, setSelectedScheduleIndex] = useState(0);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -147,6 +183,7 @@ export default function AdminLeads() {
       : hoursUntilNext <= 24
       ? `בעוד ${hoursUntilNext} שעות`
       : `מחר 09:00`;
+  const selectedSchedule = stats.upcomingSendDays?.[selectedScheduleIndex] || stats.upcomingSendDays?.[0];
 
   return (
     <div
@@ -178,7 +215,7 @@ export default function AdminLeads() {
               href="/admin/leads/list"
               className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-sm transition-colors font-medium"
             >
-              📋 כל הלידים
+              📋 כל האנשים והסינונים
             </Link>
             <Link
               href="/admin"
@@ -191,18 +228,18 @@ export default function AdminLeads() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="סה״כ לידים" value={stats.total} icon="👥" />
-          <StatCard label="נשלח מייל #1" value={stats.email1Sent} icon="📧" color="emerald" />
-          <StatCard label="נשלח מייל #2" value={stats.email2Sent} icon="📨" color="blue" />
-          <StatCard label="נשלח היום" value={stats.sentToday} icon="📤" color="yellow" />
-          <StatCard label="נמסרו" value={stats.delivered || 0} icon="✅" color="emerald" />
-          <StatCard label="פתחו" value={stats.opened || 0} icon="👀" color="blue" />
-          <StatCard label="לחצו על הלינק" value={stats.clicked || 0} icon="🔗" color="emerald" />
-          <StatCard label="באונס" value={stats.bounced} icon="⚠️" color="red" />
-          <StatCard label="התלוננו" value={stats.complained || 0} icon="🚨" color="red" />
-          <StatCard label="הסירו עצמם" value={stats.unsubscribed} icon="🚫" color="orange" />
-          <StatCard label="שגיאות" value={stats.errors} icon="❌" color="red" />
-          <StatCard label="נותרו לשלוח" value={stats.remaining} icon="📋" color="purple" />
+          <StatCard label="סה״כ לידים" value={stats.total} icon="👥" href="/admin/leads/list" />
+          <StatCard label="נשלח מייל #1" value={stats.email1Sent} icon="📧" color="emerald" href="/admin/leads/list?segment=email1_any" />
+          <StatCard label="נשלח מייל #2" value={stats.email2Sent} icon="📨" color="blue" href="/admin/leads/list?segment=email2_any" />
+          <StatCard label="נשלח היום" value={stats.sentToday} icon="📤" color="yellow" href="/admin/leads/list?segment=sent_today" />
+          <StatCard label="נמסרו" value={stats.delivered || 0} icon="✅" color="emerald" href="/admin/leads/list?segment=delivered" />
+          <StatCard label="פתחו" value={stats.opened || 0} icon="👀" color="blue" href="/admin/leads/list?segment=opened" />
+          <StatCard label="לחצו על הלינק" value={stats.clicked || 0} icon="🔗" color="emerald" href="/admin/leads/list?segment=clicked" />
+          <StatCard label="באונס" value={stats.bounced} icon="⚠️" color="red" href="/admin/leads/list?segment=bounced" />
+          <StatCard label="התלוננו" value={stats.complained || 0} icon="🚨" color="red" href="/admin/leads/list?segment=complained" />
+          <StatCard label="הסירו עצמם" value={stats.unsubscribed} icon="🚫" color="orange" href="/admin/leads/list?unsubscribed=yes" />
+          <StatCard label="שגיאות" value={stats.errors} icon="❌" color="red" href="/admin/leads/list?segment=error" />
+          <StatCard label="נותרו לשלוח" value={stats.remaining} icon="📋" color="purple" href="/admin/leads/list?segment=remaining" />
         </div>
 
         {/* Progress + Warm-up */}
@@ -232,7 +269,7 @@ export default function AdminLeads() {
                 <span className="text-2xl">🔥</span>
                 <div>
                   <div className="font-semibold text-emerald-400">
-                    שבוע {stats.warmupWeek} - {stats.dailyLimit}/יום
+                    שבוע {stats.warmupWeek} - {stats.followupDailyLimit} המשך + {stats.newLeadDailyLimit} חדשים ביום
                   </div>
                   <div className="text-sm text-gray-400">
                     {stats.campaignStarted
@@ -253,12 +290,89 @@ export default function AdminLeads() {
                       day: "numeric",
                       month: "long",
                     })}{" "}
-                    09:00
+                    11:15
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Weekly Schedule */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+            <div>
+              <h3 className="text-lg font-semibold">תכנון שליחות לפי יום</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                סימולציה לפי הלוגיקה של הקמפיין: עד {stats.followupDailyLimit} מיילי המשך ועד {stats.newLeadDailyLimit} לידים חדשים בכל יום שליחה.
+              </p>
+            </div>
+            <Link
+              href="/admin/leads/list"
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm transition-colors text-center"
+            >
+              סינון מלא: נשלח / לא נשלח
+            </Link>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
+            {stats.upcomingSendDays?.map((day, index) => (
+              <button
+                key={day.dateKey}
+                onClick={() => setSelectedScheduleIndex(index)}
+                className={`shrink-0 rounded-lg border px-4 py-3 text-right transition-colors ${
+                  selectedScheduleIndex === index
+                    ? "border-emerald-500 bg-emerald-500/15 text-white"
+                    : "border-gray-800 bg-gray-950 text-gray-300 hover:bg-gray-800"
+                }`}
+              >
+                <div className="text-sm font-semibold">{day.label}</div>
+                <div className="text-xs text-gray-400 mt-1">
+                  {day.plannedCount} מתוכננים
+                  {day.alreadySent > 0 ? ` · ${day.alreadySent} כבר נשלחו (${day.alreadySentEmail2} המשך, ${day.alreadySentEmail1} חדשים)` : ""}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {!selectedSchedule?.leads?.length ? (
+            <p className="text-gray-500 text-center py-6">אין מתוכננים ליום הזה לפי המצב הנוכחי.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-800">
+                    <th className="text-right py-2 px-3">#</th>
+                    <th className="text-right py-2 px-3">מייל</th>
+                    <th className="text-right py-2 px-3">שם</th>
+                    <th className="text-right py-2 px-3">מקצוע</th>
+                    <th className="text-right py-2 px-3">סוג</th>
+                    <th className="text-right py-2 px-3">דירוג</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedSchedule.leads.map((lead, i) => (
+                    <tr
+                      key={`${selectedSchedule.dateKey}-${lead.id}-${lead.nextEmail}`}
+                      className="border-b border-gray-800/50 hover:bg-gray-800/30 cursor-pointer"
+                      onClick={() => fetchPreview(lead.email, lead.nextEmail)}
+                    >
+                      <td className="py-2 px-3 text-gray-500">{i + 1}</td>
+                      <td className="py-2 px-3 font-mono text-xs text-emerald-400 underline" dir="ltr">{lead.email}</td>
+                      <td className="py-2 px-3">{lead.name || '-'}</td>
+                      <td className="py-2 px-3 text-gray-400">{lead.profession || 'מעצבי פנים'}</td>
+                      <td className="py-2 px-3">
+                        <span className={`px-2 py-0.5 rounded text-xs ${lead.nextEmail === 1 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'}`}>
+                          {lead.nextEmail === 1 ? 'מייל ראשון' : 'מייל המשך'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3 text-gray-400">{lead.qualityScore ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Status Breakdown */}
@@ -280,7 +394,7 @@ export default function AdminLeads() {
         {/* Next Batch Preview */}
         <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
           <h3 className="text-lg font-semibold mb-4">
-            📋 שליחה הבאה - {stats.nextBatchLeads?.length || 0} לידים
+            📋 השליחה הקרובה - {stats.nextBatchLeads?.length || 0} לידים
           </h3>
           {!stats.nextBatchLeads?.length ? (
             <p className="text-gray-500 text-center py-4">אין לידים בתור</p>
@@ -318,6 +432,41 @@ export default function AdminLeads() {
               </table>
             </div>
           )}
+        </div>
+
+        {/* Profession Templates */}
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 mb-8">
+          <h3 className="text-lg font-semibold mb-4">תבניות לפי מקצוע</h3>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {stats.professionTemplates?.map((template) => (
+              <div key={template.profession} className="bg-gray-950 rounded-lg border border-gray-800 overflow-hidden">
+                <img
+                  src={template.imageUrl}
+                  alt=""
+                  className="w-full aspect-[16/9] object-cover border-b border-gray-800"
+                />
+                <div className="p-4">
+                  <div className="text-base font-semibold text-white mb-3">{template.profession}</div>
+                  <div className="space-y-4 text-sm">
+                    <div>
+                      <div className="text-emerald-300 font-semibold mb-1">מייל ראשון</div>
+                      <div className="text-white mb-2">{template.email1.subject}</div>
+                      <div className="bg-gray-900 rounded p-3 text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                        {template.email1.body}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-blue-300 font-semibold mb-1">מייל המשך</div>
+                      <div className="text-white mb-2">{template.email2.subject}</div>
+                      <div className="bg-gray-900 rounded p-3 text-gray-300 whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
+                        {template.email2.body}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Recent Activity */}
@@ -374,18 +523,18 @@ export default function AdminLeads() {
             <div>
               <h4 className="font-semibold text-white mb-2">🔄 תהליך השליחה</h4>
               <ol className="list-decimal list-inside space-y-1 mr-2">
-                <li>הסקריפט רץ כל בוקר 09:00 (ראשון-חמישי)</li>
-                <li><strong>קודם follow-ups</strong>: לידים שקיבלו מייל #1 לפני 5+ ימים מקבלים מייל #2</li>
-                <li><strong>אח&quot;כ חדשים</strong>: לידים חדשים מקבלים מייל #1</li>
+                <li>הסקריפט רץ כל יום 11:15 (ראשון-חמישי)</li>
+                <li><strong>מיילי המשך</strong>: עד {stats.followupDailyLimit} לידים שקיבלו מייל #1 לפני 5+ ימים מקבלים מייל #2</li>
+                <li><strong>לידים חדשים</strong>: עד {stats.newLeadDailyLimit} לידים חדשים מקבלים מייל #1</li>
                 <li>אחרי 2 מיילים - הליד לא מקבל יותר</li>
               </ol>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-2">📊 Warm-up (חימום דומיין)</h4>
               <div className="flex gap-4">
-                <span className={`px-3 py-1 rounded ${stats.warmupWeek === 1 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 1: 30/יום</span>
-                <span className={`px-3 py-1 rounded ${stats.warmupWeek === 2 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 2: 40/יום</span>
-                <span className={`px-3 py-1 rounded ${stats.warmupWeek >= 3 ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-gray-800 text-gray-500'}`}>שבוע 3+: 50/יום</span>
+                    <span className="px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                      קמפיין נוכחי: {stats.followupDailyLimit} המשך + {stats.newLeadDailyLimit} חדשים ביום
+                    </span>
               </div>
             </div>
             <div>
@@ -486,11 +635,13 @@ function StatCard({
   value,
   icon,
   color = "gray",
+  href,
 }: {
   label: string;
   value: number;
   icon: string;
   color?: string;
+  href?: string;
 }) {
   const colorMap: Record<string, string> = {
     emerald: "text-emerald-400",
@@ -502,8 +653,8 @@ function StatCard({
     gray: "text-gray-300",
   };
 
-  return (
-    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+  const content = (
+    <>
       <div className="flex items-center gap-2 mb-2">
         <span>{icon}</span>
         <span className="text-sm text-gray-400">{label}</span>
@@ -511,6 +662,23 @@ function StatCard({
       <div className={`text-2xl font-bold ${colorMap[color] || colorMap.gray}`}>
         {value.toLocaleString()}
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="bg-gray-900 rounded-xl p-4 border border-gray-800 transition-colors hover:border-emerald-500/70 hover:bg-gray-800"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800">
+      {content}
     </div>
   );
 }

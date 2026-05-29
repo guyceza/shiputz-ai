@@ -5,6 +5,8 @@ import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import ChatWidget from "@/components/ChatWidget";
 import CookieConsent from "@/components/CookieConsent";
+import FreeVisualizationPopup from "@/components/FreeVisualizationPopup";
+import AcquisitionTracker from "@/components/AcquisitionTracker";
 import { Suspense } from "react";
 import ReferralCapture from "@/components/ReferralCapture";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -35,7 +37,7 @@ export const metadata: Metadata = {
     description: "ShiputzAI - הכלי המוביל בישראל להדמיית עיצוב פנים ב-AI. 7 כלים: הדמיות, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og/shiputzai-og-ai-renovation-1200x630.png",
         width: 1200,
         height: 630,
         alt: "ShiputzAI - עיצוב הבית ב-AI",
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ShiputzAI - עיצוב הבית ב-AI",
     description: "העלו תמונה של חדר וקבלו הדמיית עיצוב תוך שניות. AI לעיצוב פנים.",
-    images: ["/og-image.jpg"],
+    images: ["/og/shiputzai-og-ai-renovation-1200x630.png"],
   },
   icons: {
     icon: [
@@ -103,12 +105,12 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": "https://shipazti.com/#organization",
-      "name": "ShiputzAI",
-      "alternateName": "שיפוצי.אי",
+      "name": "WED4ME",
+      "legalName": "WED4ME",
+      "alternateName": ["ShiputzAI", "שיפוצי.אי"],
       "url": "https://shipazti.com",
       "logo": {"@type": "ImageObject", "url": "https://shipazti.com/icon-512.png", "width": 512, "height": 512},
       "description": "ShiputzAI היא פלטפורמת AI ישראלית לעיצוב הבית - הדמיות חדרים, זיהוי סגנון, רשימת קניות, סרטון סיור, כתב כמויות וניתוח הצעות מחיר. הכל באמצעות בינה מלאכותית.",
-      "founder": {"@type": "Person", "name": "Guy Cezana"},
       "foundingDate": "2025",
       "email": "help@shipazti.com",
       "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": "help@shipazti.com", "availableLanguage": ["Hebrew", "English"]},
@@ -189,11 +191,13 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <Suspense fallback={null}><ReferralCapture /></Suspense>
+            <Suspense fallback={null}><AcquisitionTracker /></Suspense>
             <main id="main-content">
               {children}
             </main>
             <ChatWidget />
             <CookieConsent />
+            <FreeVisualizationPopup />
           </ThemeProvider>
         </AuthProvider>
         <Analytics />

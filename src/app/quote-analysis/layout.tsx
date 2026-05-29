@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ניתוח הצעת מחיר בAI - גלו אם הקבלן מייקר | ShiputzAI",
+  title: "ניתוח הצעת מחיר בAI - גלו אם הקבלן מייקר",
   description: "כלי AI לניתוח הצעות מחיר של קבלנים. העלו את ההצעה ו-ShiputzAI ינתח כל סעיף, ישווה למחירי שוק, ויזהה תמחור יתר. 67% מבעלי דירות חווים חריגה בתקציב - אל תהיו אחד מהם.",
   keywords: ["ניתוח הצעת מחיר", "השוואת מחירי קבלנים", "AI quote analysis", "תמחור יתר שיפוץ", "ShiputzAI"],
   alternates: {

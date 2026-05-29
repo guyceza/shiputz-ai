@@ -9,10 +9,9 @@ import ReferralWidget from "@/components/ReferralWidget";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import NewProjectWizard from "@/components/NewProjectWizard";
-import RoleSelector from "@/components/RoleSelector";
-import type { Role } from "@/components/RoleSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import LoadingScreen from "@/components/LoadingScreen";
+import HelpTour, { HelpTourStep } from "@/components/HelpTour";
 import { authFetch } from "@/lib/auth-fetch";
 import { 
   getProjects, 
@@ -34,21 +33,69 @@ interface DisplayProject {
   createdAt: string;
 }
 
+function safeMoney(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function getBudgetProgress(spent: unknown, budget: unknown) {
+  const safeSpent = safeMoney(spent);
+  const safeBudget = safeMoney(budget);
+  if (safeBudget <= 0) {
+    return {
+      percentage: 0,
+      remaining: 0,
+      isOverBudget: false,
+      isNearLimit: false,
+    };
+  }
+
+  const percentage = Math.max(0, (safeSpent / safeBudget) * 100);
+  const remaining = safeBudget - safeSpent;
+  return {
+    percentage,
+    remaining,
+    isOverBudget: remaining < 0,
+    isNearLimit: percentage > 80 && remaining >= 0,
+  };
+}
+
 const TIPS = [
   "בקש מהקבלן אחריות בכתב על העבודה",
   "תמיד השאר 10-15% מהתקציב לבלת״מים",
+];
+
+const DASHBOARD_TOUR_STEPS: HelpTourStep[] = [
+  {
+    title: "זה האזור האישי שלך",
+    body: "כאן רואים את כל הפרויקטים, התקציבים והסטטוס הכללי. זה המקום לחזור אליו בכל פעם שרוצים להמשיך לעבוד על שיפוץ.",
+    selector: "[data-tour='dashboard-header']",
+  },
+  {
+    title: "מתחילים מפרויקט",
+    body: "כל עבודה באתר מתחברת לפרויקט. יצירת פרויקט שומרת תקציב, הוצאות, הצעות מחיר ותוצרים במקום אחד.",
+    selector: "[data-tour='new-project-button']",
+  },
+  {
+    title: "תקציב במבט מהיר",
+    body: "אחרי שיש פרויקטים, הכרטיסים האלה מראים כמה תקציב הוגדר, כמה כבר נוצל וכמה נשאר.",
+    selector: "[data-tour='dashboard-stats']",
+  },
+  {
+    title: "נכנסים לפרויקט עצמו",
+    body: "לחיצה על כרטיס פרויקט פותחת את המסך הפנימי, שם נמצאים כלי ה-AI, הוצאות, ספקים וציר הזמן.",
+    selector: "[data-tour='projects-list']",
+  },
 ];
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const actionParam = searchParams.get("action");
-  const [user, setUser] = useState<{ name?: string; email: string; id?: string; role?: string } | null>(null);
+  const [user, setUser] = useState<{ name?: string; email: string; id?: string } | null>(null);
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [showNewProject, setShowNewProject] = useState(false);
-  const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
-  const [showRoleModal, setShowRoleModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectBudget, setNewProjectBudget] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -84,19 +131,6 @@ function DashboardContent() {
     }
   }, [projectMenuOpen]);
 
-  // Google Ads conversion tracking - fire once per session on dashboard load
-  useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      const key = 'gads_signup_fired';
-      if (!sessionStorage.getItem(key)) {
-        (window as any).gtag('event', 'conversion', {
-          send_to: 'AW-17986657494/d13QCJrKn4IcENa52oBD',
-        });
-        sessionStorage.setItem(key, '1');
-      }
-    }
-  }, []);
-
   useEffect(() => {
     // Check for auth session
     const checkAuth = async () => {
@@ -109,17 +143,11 @@ function DashboardContent() {
         if (session?.user) {
           // Real authenticated user
           userId = session.user.id;
-          const userRole = session.user.user_metadata?.role;
           setUser({ 
             id: session.user.id,
             email: session.user.email || "", 
             name: session.user.user_metadata?.name,
-            role: userRole,
           });
-          // Show role selector for existing users without a role
-          if (!userRole) {
-            setShowRoleModal(true);
-          }
           // Check if admin
           if (isAdminEmail(session.user.email || "")) {
             setIsAdmin(true);
@@ -203,8 +231,8 @@ function DashboardContent() {
             const displayProjects: DisplayProject[] = supabaseProjects.map(p => ({
               id: p.id,
               name: p.name,
-              budget: p.budget,
-              spent: p.spent,
+              budget: safeMoney(p.budget),
+              spent: safeMoney(p.spent),
               createdAt: p.created_at
             }));
             setProjects(displayProjects);
@@ -226,8 +254,8 @@ function DashboardContent() {
               setProjects(cached.map(p => ({
                 id: p.id,
                 name: p.name,
-                budget: p.budget,
-                spent: p.spent,
+                budget: safeMoney(p.budget),
+                spent: safeMoney(p.spent),
                 createdAt: p.created_at
               })));
             }
@@ -255,8 +283,8 @@ function DashboardContent() {
               setProjects(cached.map(p => ({
                 id: p.id,
                 name: p.name,
-                budget: p.budget,
-                spent: p.spent,
+                budget: safeMoney(p.budget),
+                spent: safeMoney(p.spent),
                 createdAt: p.created_at
               })));
             }
@@ -371,8 +399,8 @@ function DashboardContent() {
       const displayProject: DisplayProject = {
         id: newProject.id,
         name: newProject.name,
-        budget: newProject.budget,
-        spent: newProject.spent,
+        budget: safeMoney(newProject.budget),
+        spent: safeMoney(newProject.spent),
         createdAt: newProject.created_at
       };
       
@@ -494,8 +522,8 @@ function DashboardContent() {
     setProjectMenuOpen(null);
   };
 
-  const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
-  const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0);
+  const totalBudget = projects.reduce((sum, p) => sum + safeMoney(p.budget), 0);
+  const totalSpent = projects.reduce((sum, p) => sum + safeMoney(p.spent), 0);
   const totalRemaining = totalBudget - totalSpent;
   const spentPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
@@ -544,7 +572,7 @@ function DashboardContent() {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {/* Header */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-6" data-tour="dashboard-header">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold text-stone-800">
               {user.name ? `שלום, ${user.name}` : "הפרויקטים שלך"}
@@ -552,29 +580,10 @@ function DashboardContent() {
             {user.email && (
               <p className="text-sm text-stone-500 mt-0.5">{user.email}</p>
             )}
-            {user.role && (
-              <div className="flex items-center gap-2 mt-2">
-                <button
-                  onClick={() => setShowRoleModal(true)}
-                  className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
-                >
-                  🔄 {(() => {
-                    const labels: Record<string, string> = { homeowner: "בעל/ת בית", designer: "מעצב/ת פנים", architect: "אדריכל/ית", contractor: "קבלן", realtor: "נדל״ן", other: "אחר" };
-                    return labels[user.role] || user.role;
-                  })()}
-                </button>
-                <button
-                  onClick={() => setViewMode(viewMode === 'role' ? 'all' : 'role')}
-                  className="text-xs px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full hover:bg-stone-200 transition-colors"
-                  title={viewMode === 'role' ? 'הצג את כל הכלים' : 'הצג כלים מותאמים'}
-                >
-                  {viewMode === 'role' ? '👁️ הצג הכל' : '🎯 מותאם לי'}
-                </button>
-              </div>
-            )}
           </div>
           <button
             onClick={() => setShowNewProject(true)}
+            data-tour="new-project-button"
             className="bg-stone-800 text-white px-5 py-2 rounded-full text-sm hover:bg-stone-700 transition-colors whitespace-nowrap"
           >
             פרויקט חדש
@@ -586,7 +595,7 @@ function DashboardContent() {
 
         {/* Mini Stats Overview */}
         {projects.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" data-tour="dashboard-stats">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="bg-white p-3.5 rounded-xl border border-stone-200/80">
                 <p className="text-xs text-stone-500 mb-0.5">סה״כ תקציב</p>
@@ -613,7 +622,7 @@ function DashboardContent() {
         {/* Account status line */}
         {(isPremium || hasVisionSub || hasLocalVision) && (
           <div className="mb-8 flex items-center gap-3 text-xs text-stone-500">
-            {isPremium && <span className="bg-stone-100 px-3 py-1 rounded-full">✦ Pro</span>}
+            {isPremium && <span className="bg-stone-100 px-3 py-1 rounded-full">Pro</span>}
             {(hasVisionSub || hasLocalVision) && (
               <>
                 <span className="bg-stone-100 px-3 py-1 rounded-full">הדמיות AI</span>
@@ -632,7 +641,7 @@ function DashboardContent() {
         {projectsLoading ? (
           <DashboardSkeleton />
         ) : projects.length === 0 ? (
-          <div className="bg-white border border-stone-200/60 rounded-2xl p-16 shadow-sm text-center animate-fade-in-up">
+          <div className="bg-white border border-stone-200/60 rounded-2xl p-16 shadow-sm text-center animate-fade-in-up" data-tour="projects-list">
             {/* Empty state illustration */}
             <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -649,17 +658,17 @@ function DashboardContent() {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" data-tour="projects-list">
             {projects.map((project) => {
-              const percentage = (project.spent / project.budget) * 100;
-              const remaining = project.budget - project.spent;
-              const isOverBudget = remaining < 0;
-              const isNearLimit = percentage > 80 && !isOverBudget;
+              const safeBudget = safeMoney(project.budget);
+              const safeSpent = safeMoney(project.spent);
+              const { percentage, remaining, isOverBudget, isNearLimit } = getBudgetProgress(safeSpent, safeBudget);
+              const progressLabel = safeBudget > 0 ? `${percentage.toFixed(0)}% נוצל` : "אין תקציב";
               
               return (
                 <div
                   key={project.id}
-                  className="relative bg-white border border-stone-200/60 rounded-2xl p-5 md:p-8 hover:border-stone-300 hover:shadow-md shadow-sm transition-all duration-200"
+                  className="relative bg-white border border-stone-200/60 rounded-2xl p-5 md:p-6 hover:border-stone-300 hover:shadow-md shadow-sm transition-all duration-200"
                 >
                   {/* Project Menu Button */}
                   <div className="absolute top-4 left-4">
@@ -704,28 +713,28 @@ function DashboardContent() {
                   </div>
 
                   <Link href={`/project/${project.id}`} className="block">
-                    <div className="flex items-start justify-between mb-6">
-                      <h3 className="text-xl font-semibold text-stone-800">{project.name}</h3>
+                    <div className="flex items-start justify-between gap-4 mb-5 pl-12">
+                      <h3 className="text-lg md:text-xl font-semibold text-stone-800 leading-tight">{project.name}</h3>
                       <span className={`text-sm px-3 py-1 rounded-full ${
                         isOverBudget ? 'bg-rose-50 text-rose-600' :
                         isNearLimit ? 'bg-amber-50 text-amber-600' :
                         'bg-stone-100 text-stone-500'
                       }`}>
-                        {percentage.toFixed(0)}% נוצל
+                        {progressLabel}
                       </span>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-3 gap-3 md:gap-6">
                       <div>
                         <p className="text-sm text-stone-500 mb-1">תקציב</p>
-                        <p className="text-lg font-medium text-stone-800">₪{project.budget.toLocaleString()}</p>
+                        <p className="text-base md:text-lg font-medium text-stone-800">₪{safeBudget.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-sm text-stone-500 mb-1">הוצאות</p>
-                        <p className="text-lg font-medium text-stone-800">₪{project.spent.toLocaleString()}</p>
+                        <p className="text-base md:text-lg font-medium text-stone-800">₪{safeSpent.toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-sm text-stone-500 mb-1">נותר</p>
-                        <p className={`text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
+                        <p className={`text-base md:text-lg font-medium ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
                           ₪{remaining.toLocaleString()}
                         </p>
                       </div>
@@ -748,46 +757,19 @@ function DashboardContent() {
         )}
       </div>
 
+      {!isLoading && !projectsLoading && (
+        <HelpTour
+          steps={DASHBOARD_TOUR_STEPS}
+          storageKey="shiputzai_dashboard_tour_seen"
+        />
+      )}
+
       {/* New Project Wizard */}
       {showNewProject && (
         <NewProjectWizard
           onComplete={handleWizardComplete}
           onCancel={() => setShowNewProject(false)}
         />
-      )}
-
-      {/* Role Selection Modal for existing users */}
-      {showRoleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <RoleSelector onSelect={async (role: Role) => {
-              try {
-                const { getSupabaseClient } = await import('@/lib/supabase');
-                const supabase = getSupabaseClient();
-                await supabase.auth.updateUser({ data: { role: role.key } });
-                
-                const userData = localStorage.getItem('user');
-                if (userData) {
-                  const u = JSON.parse(userData);
-                  u.role = role.key;
-                  localStorage.setItem('user', JSON.stringify(u));
-                }
-                
-                setUser(prev => prev ? { ...prev, role: role.key } : prev);
-                setShowRoleModal(false);
-              } catch (err) {
-                console.error('Failed to save role:', err);
-                setShowRoleModal(false);
-              }
-            }} />
-            <button
-              onClick={() => setShowRoleModal(false)}
-              className="w-full mt-4 text-sm text-gray-400 hover:text-gray-600 py-2"
-            >
-              אולי אח״כ
-            </button>
-          </div>
-        </div>
       )}
 
       {/* Edit Project Modal */}

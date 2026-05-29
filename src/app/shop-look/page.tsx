@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { ArrowLeft, ImagePlus, Loader2, LockKeyhole, UploadCloud } from "lucide-react";
 import CreditBadge from "@/components/CreditBadge";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
 import { authFetch } from "@/lib/auth-fetch";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 // Trial tracking uses /api/vision-trial endpoint
 
 // Fun loading messages
@@ -53,6 +55,7 @@ export default function ShopLookPage() {
   const [trialUsed, setTrialUsed] = useState(false);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false); // Main subscription
+  const [accessLoading, setAccessLoading] = useState(true);
   const [showPaywall, setShowPaywall] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [userHistory, setUserHistory] = useState<ShopLookHistory | null>(null);
@@ -60,7 +63,9 @@ export default function ShopLookPage() {
   // Auth check
   useEffect(() => {
     const checkAuth = async () => {
+      let resolvedAccess = false;
       try {
+        setAccessLoading(true);
         const userData = localStorage.getItem("user");
         let userEmail = "";
         let currentUserId = "";
@@ -73,6 +78,11 @@ export default function ShopLookPage() {
             userEmail = user.email;
             currentUserId = user.id;
             setHasPurchased(user.purchased === true);
+            const cachedVisionSub = user.vision_subscription === true || user.vision_subscription === "active" || user.vision_subscription === "true";
+            const cachedTrialUsed = user.vision_trial_used === true;
+            setHasSubscription(cachedVisionSub);
+            setTrialUsed(cachedTrialUsed);
+            setHasAccess(cachedVisionSub || !cachedTrialUsed);
           }
         } else {
           const { getSession } = await import("@/lib/auth");
@@ -85,34 +95,45 @@ export default function ShopLookPage() {
             // Check purchased from localStorage
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
             setHasPurchased(storedUser.purchased === true);
+            const cachedVisionSub = storedUser.vision_subscription === true || storedUser.vision_subscription === "active" || storedUser.vision_subscription === "true";
+            const cachedTrialUsed = storedUser.vision_trial_used === true;
+            setHasSubscription(cachedVisionSub);
+            setTrialUsed(cachedTrialUsed);
+            setHasAccess(cachedVisionSub || !cachedTrialUsed);
           }
         }
         
-        // Check trial & subscription status from APIs
         if (currentUserId && userEmail) {
-          // Check trial from DB
           try {
-            const trialRes = await authFetch(`/api/vision-trial?email=${encodeURIComponent(userEmail)}`);
-            if (trialRes.ok) {
-              const trialData = await trialRes.json();
-              setTrialUsed(trialData.trialUsed || false);
-            }
-          } catch (e) {
-            console.error("Failed to check trial:", e);
-          }
-          
-          // Check Vision subscription from Supabase
-          try {
-            const visionRes = await authFetch(`/api/check-vision?email=${encodeURIComponent(userEmail)}`);
-            if (visionRes.ok) {
-              const visionData = await visionRes.json();
-              const hasSub = visionData.hasSubscription || false;
+            const premiumRes = await authFetch(`/api/admin/premium?email=${encodeURIComponent(userEmail)}`);
+            if (premiumRes.ok) {
+              const premiumData = await premiumRes.json();
+              const hasSub = premiumData.hasVision || false;
+              const nextTrialUsed = premiumData.trialUsed || false;
+              const nextPurchased = premiumData.hasPremium || false;
+
+              setHasPurchased(nextPurchased);
               setHasSubscription(hasSub);
-              setHasAccess(hasSub || !trialUsed);
+              setTrialUsed(nextTrialUsed);
+              setHasAccess(hasSub || !nextTrialUsed);
+
+              const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+              if (storedUser.id) {
+                localStorage.setItem("user", JSON.stringify({
+                  ...storedUser,
+                  purchased: nextPurchased,
+                  vision_subscription: hasSub ? "active" : null,
+                  vision_trial_used: nextTrialUsed,
+                }));
+              }
+              resolvedAccess = true;
             }
           } catch (e) {
-            console.error("Failed to check vision subscription:", e);
+            console.error("Failed to check premium access:", e);
           }
+        } else {
+          setHasAccess(false);
+          resolvedAccess = true;
         }
       } catch {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -120,24 +141,14 @@ export default function ShopLookPage() {
         setHasPurchased(user.purchased === true);
         if (user.id && user.email) {
           setUserId(user.id);
-          // Check trial from API
-          authFetch(`/api/vision-trial?email=${encodeURIComponent(user.email)}`)
-            .then(res => res.json())
-            .then(data => {
-              setTrialUsed(data.trialUsed || false);
-            })
-            .catch(e => console.error("Failed to check trial:", e));
-          
-          // Check Vision subscription from Supabase
-          authFetch(`/api/check-vision?email=${encodeURIComponent(user.email)}`)
-            .then(res => res.json())
-            .then(data => {
-              const hasSub = data.hasSubscription || false;
-              setHasSubscription(hasSub);
-              setHasAccess(hasSub || !trialUsed);
-            })
-            .catch(e => console.error("Failed to check vision:", e));
+          const cachedVisionSub = user.vision_subscription === true || user.vision_subscription === "active" || user.vision_subscription === "true";
+          const cachedTrialUsed = user.vision_trial_used === true;
+          setHasSubscription(cachedVisionSub);
+          setTrialUsed(cachedTrialUsed);
+          setHasAccess(cachedVisionSub || !cachedTrialUsed);
         }
+      } finally {
+        setAccessLoading(!resolvedAccess);
       }
     };
     checkAuth();
@@ -257,6 +268,49 @@ export default function ShopLookPage() {
     setLoading(false);
   };
 
+  const handleImageFile = async (file?: File) => {
+    if (!file || !userId) return;
+
+    setIsUploading(true);
+    setLoading(true);
+    setShowGameLoading(true);
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageData = event.target?.result as string;
+
+      try {
+        const response = await authFetch('/api/save-shop-look-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, image: imageData })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          setImageSrc(data.imageUrl);
+          setIsCustomImage(true);
+          setVisionHistoryId(data.visionId);
+
+          consumeTrial();
+
+          await analyzeImage(data.imageUrl, data.visionId);
+        } else {
+          console.error('Failed to save image to server');
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        setLoading(false);
+      }
+
+      setIsUploading(false);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -284,18 +338,116 @@ export default function ShopLookPage() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-20 pb-8 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 mb-6">
-            <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-5 h-5" />
-            <span className="text-sm font-medium text-gray-900">Shop the Look</span>
+      <section className="pt-20 pb-10 px-6">
+        <div className="max-w-5xl mx-auto grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="text-center lg:text-right">
+            <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 mb-6">
+              <img src="/icons/cart.png" alt="סמל עגלת קניות" className="w-5 h-5" />
+              <span className="text-sm font-medium text-gray-900">Shop the Look</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4 text-gray-900">
+              מצאו איפה לקנות את מה שרואים בתמונה.
+            </h1>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto lg:mx-0">
+              העלו תמונה של חדר, השראה או הדמיה. ה-AI יסמן מוצרים בתמונה ויעזור למצוא פריטים דומים בחנויות בישראל.
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4 text-gray-900">
-            קנה את הסגנון
-          </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            לחצו על כל פריט בתמונה כדי למצוא היכן לקנות אותו בישראל
-          </p>
+
+          <div className="rounded-[2rem] border border-gray-200 bg-gray-950 p-5 text-white shadow-[0_24px_80px_rgba(17,24,39,0.18)] md:p-7">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <ImagePlus className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white/55">התחילו כאן</p>
+                <h2 className="text-2xl font-semibold">העלאת תמונה לניתוח</h2>
+              </div>
+            </div>
+
+            {!isLoggedIn ? (
+              <Link
+                href="/login?redirect=/shop-look"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-gray-950 transition-all hover:bg-gray-100"
+              >
+                התחברו והעלו תמונה
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            ) : accessLoading && !hasSubscription ? (
+              <button
+                disabled
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-gray-950 opacity-90"
+              >
+                <Loader2 className="h-5 w-5 animate-spin" />
+                בודקים את החשבון...
+              </button>
+            ) : hasAccess || hasSubscription ? (
+              <label className={`block cursor-pointer ${isUploading ? 'pointer-events-none opacity-60' : ''}`}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isUploading}
+                  onChange={(e) => handleImageFile(e.target.files?.[0])}
+                />
+                <span className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-gray-950 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-gray-100">
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      מעלה ומנתח...
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="h-5 w-5" />
+                      {hasSubscription ? 'העלו תמונה וקבלו מוצרים' : 'העלו תמונה לניתוח חינם'}
+                    </>
+                  )}
+                </span>
+              </label>
+            ) : (
+              <button
+                onClick={() => setShowPaywall(true)}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-base font-semibold text-gray-950 transition-all hover:bg-gray-100"
+              >
+                <LockKeyhole className="h-5 w-5" />
+                שדרגו והעלו תמונה
+              </button>
+            )}
+
+            <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs text-white/60">
+              <div className="rounded-2xl bg-white/[0.08] px-3 py-3">
+                <p className="font-semibold text-white">{CREDIT_COSTS["shop-look"]} קרדיטים</p>
+                <p className="mt-1">לניתוח</p>
+              </div>
+              <div className="rounded-2xl bg-white/[0.08] px-3 py-3">
+                <p className="font-semibold text-white">מוצרים</p>
+                <p className="mt-1">מסומנים</p>
+              </div>
+              <div className="rounded-2xl bg-white/[0.08] px-3 py-3">
+                <p className="font-semibold text-white">ישראל</p>
+                <p className="mt-1">חנויות</p>
+              </div>
+            </div>
+
+            {!accessLoading && !hasSubscription && !trialUsed && isLoggedIn && (
+              <p className="mt-4 text-center text-sm text-white/50">ניסיון אחד חינם · ללא כרטיס אשראי</p>
+            )}
+            {!accessLoading && !hasSubscription && trialUsed && isLoggedIn && (
+              <p className="mt-4 text-center text-sm text-amber-300">השתמשתם בניסיון החינמי</p>
+            )}
+            {userHistory?.imageUrl && (
+              <button
+                type="button"
+                onClick={() => {
+                  setImageSrc(userHistory.imageUrl!);
+                  if (userHistory.items?.length) setItems(userHistory.items);
+                  setIsCustomImage(true);
+                }}
+                className="mt-4 w-full rounded-2xl border border-white/15 px-5 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/10"
+              >
+                פתחו את התמונה האחרונה שלכם
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
@@ -360,95 +512,6 @@ export default function ShopLookPage() {
               <p className="text-sm text-gray-600">מצאו את המחיר הטוב ביותר</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Upload Your Own Image CTA */}
-      <section className="py-16 px-6 bg-gradient-to-br from-gray-900 to-gray-800">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">רוצה לראות את החדר שלך?</h2>
-          <p className="text-gray-300 mb-8">העלה תמונה של החדר שלך וה-AI יזהה את המוצרים ויעזור לך לקנות אותם</p>
-          
-          {!isLoggedIn ? (
-            <Link
-              href="/login?redirect=/shop-look"
-              className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-all"
-            >
-              התחבר כדי להעלות תמונה
-            </Link>
-          ) : hasAccess ? (
-            <label className={`inline-block cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={isUploading}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file && userId) {
-                    setIsUploading(true);
-                    setLoading(true);
-                    setShowGameLoading(true);
-                    
-                    const reader = new FileReader();
-                    reader.onload = async (event) => {
-                      const imageData = event.target?.result as string;
-                      
-                      try {
-                        // Save image to Supabase and get visionId
-                        const response = await authFetch('/api/save-shop-look-image', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ userId, image: imageData })
-                        });
-                        
-                        if (response.ok) {
-                          const data = await response.json();
-                          
-                          // Update state directly - no localStorage
-                          setImageSrc(data.imageUrl);
-                          setIsCustomImage(true);
-                          setVisionHistoryId(data.visionId);
-                          
-                          // Consume trial
-                          consumeTrial();
-                          
-                          // Analyze and save products to DB
-                          await analyzeImage(data.imageUrl, data.visionId);
-                        } else {
-                          console.error('Failed to save image to server');
-                          setLoading(false);
-                        }
-                      } catch (error) {
-                        console.error('Failed to upload image:', error);
-                        setLoading(false);
-                      }
-                      
-                      setIsUploading(false);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              <span className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full text-base font-medium hover:bg-gray-100 transition-all">
-                {isUploading ? '⏳ מעלה...' : hasSubscription ? '📸 העלה תמונה' : '✨ נסה עכשיו בחינם (ניסיון אחד)'}
-              </span>
-            </label>
-          ) : (
-            <button
-              onClick={() => setShowPaywall(true)}
-              className="inline-block bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full text-base font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg"
-            >
-              🔓 שדרג לגישה מלאה
-            </button>
-          )}
-          
-          {!hasSubscription && !trialUsed && isLoggedIn && (
-            <p className="text-gray-400 text-sm mt-4">ניסיון אחד חינם · ללא כרטיס אשראי</p>
-          )}
-          {!hasSubscription && trialUsed && isLoggedIn && (
-            <p className="text-amber-400 text-sm mt-4">השתמשת בניסיון החינמי</p>
-          )}
         </div>
       </section>
 

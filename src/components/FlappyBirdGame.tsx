@@ -269,7 +269,7 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(`${scoreRef.current} ⭐`, CANVAS_W / 2, CANVAS_H / 2 - 18);
+        ctx.fillText(`${scoreRef.current} נק׳`, CANVAS_W / 2, CANVAS_H / 2 - 18);
         ctx.font = "12px Arial";
         ctx.fillText(`שיא: ${Math.max(scoreRef.current, bestScore)}`, CANVAS_W / 2, CANVAS_H / 2 + 2);
         ctx.font = "11px Arial";
@@ -302,7 +302,6 @@ export default function FlappyBirdGame({ isReady, onShowResult }: FlappyBirdGame
             onTouchStart={(e) => { e.stopPropagation(); e.preventDefault(); onShowResult?.(); }}
             className="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold text-sm px-5 py-2.5 rounded-full shadow-xl flex items-center gap-2 transition-colors"
           >
-            <span>✨</span>
             <span>ההדמיה מוכנה! לחצו לצפות</span>
           </button>
         </div>

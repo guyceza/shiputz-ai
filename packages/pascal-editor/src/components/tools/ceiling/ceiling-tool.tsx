@@ -373,8 +373,7 @@ export const CeilingTool: React.FC = () => {
       )}
 
       {/* Main line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={mainLineRef}
@@ -383,11 +382,10 @@ export const CeilingTool: React.FC = () => {
       >
         <bufferGeometry />
         <lineBasicNodeMaterial color="#818cf8" depthTest={false} depthWrite={false} linewidth={3} />
-      </line>
+      </threeLine>
 
       {/* Closing line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={closingLineRef}
@@ -403,11 +401,10 @@ export const CeilingTool: React.FC = () => {
           opacity={0.5}
           transparent
         />
-      </line>
+      </threeLine>
 
       {/* Ground main line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={groundMainLineRef}
@@ -423,11 +420,10 @@ export const CeilingTool: React.FC = () => {
           opacity={0.3}
           transparent
         />
-      </line>
+      </threeLine>
 
       {/* Ground closing line */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={groundClosingLineRef}
@@ -443,7 +439,7 @@ export const CeilingTool: React.FC = () => {
           opacity={0.15}
           transparent
         />
-      </line>
+      </threeLine>
 
       {/* Point markers */}
       {points.map(([x, z], index) => (

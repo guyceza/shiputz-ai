@@ -136,8 +136,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 1: Gemini analysis
-    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
+    // Step 1: Fast Gemini vision analysis. Image generation uses IMAGE_GEN below.
+    const geminiUrl = `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${apiKey}`;
+    const imageGenerationUrl = `${GEMINI_BASE_URL}/${AI_MODELS.IMAGE_GEN}:generateContent?key=${apiKey}`;
 
     const geminiPayload = {
       contents: [{
@@ -151,7 +152,8 @@ export async function POST(request: NextRequest) {
 - פירוט העבודות הנדרשות לביצוע השינוי
 - הערות מקצועיות רלוונטיות (אם יש)
 
-כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.`
+כתוב בגוף שלישי, ללא פניה ישירה למשתמש. ללא ביטויים רגשיים כמו "וואו", "מדהים", "נהדר". רק עובדות ומידע מקצועי.
+אל תשתמש בפורמט Markdown, בכותרות Markdown, בסימני # או בכוכביות.`
           }
         ]
       }]
@@ -214,7 +216,7 @@ If the request is to "remove wall", "break wall", or "open the space" - you MUST
       const imageController = new AbortController();
       const imageTimeout = setTimeout(() => imageController.abort(), 60000);
 
-      const editResponse = await fetch(geminiUrl, {
+      const editResponse = await fetch(imageGenerationUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editPayload),

@@ -35,8 +35,33 @@ export async function POST(request: NextRequest) {
     refundCreditCharge(chargedUserEmail, chargedCost, `analyze-quote_${reason}`);
 
   try {
-    const body = await request.json();
-    const { image, budget, userEmail } = body;
+    const contentType = request.headers.get("content-type") || "";
+    let image: string | null = null;
+    let budget: string | null = null;
+    let userEmail: string | null = null;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const imageEntry = formData.get("image");
+
+      if (imageEntry instanceof File) {
+        const buffer = Buffer.from(await imageEntry.arrayBuffer());
+        const mimeType = imageEntry.type || "image/jpeg";
+        image = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      } else if (typeof imageEntry === "string") {
+        image = imageEntry;
+      }
+
+      const budgetEntry = formData.get("budget");
+      const userEmailEntry = formData.get("userEmail");
+      budget = typeof budgetEntry === "string" ? budgetEntry : null;
+      userEmail = typeof userEmailEntry === "string" ? userEmailEntry : null;
+    } else {
+      const body = await request.json();
+      image = body.image || null;
+      budget = body.budget || null;
+      userEmail = body.userEmail || null;
+    }
 
     // Auth check - verify user exists in DB
     if (!userEmail) {
@@ -114,7 +139,13 @@ ${midragPricing}
    - על מה לנהל מו"מ?
    - מה לבקש לפני חתימה?
 
-כתוב בעברית, בצורה ברורה. היה ספציפי עם מספרים - השווה כל מחיר לטווח מידרג.`;
+7. 🧾 דוח משא ומתן לקבלן
+   - סעיפים חשודים או כלליים מדי
+   - סעיפים חסרים שצריך להוסיף להצעה
+   - שאלות מדויקות לקבלן
+   - מה לבקש בהצעה מתוקנת
+
+כתוב בעברית, בצורה ברורה. היה ספציפי עם מספרים כשאפשר - השווה כל מחיר לטווח מידרג. אם אין מספיק מידע בתמונה, כתוב בדיוק איזה פירוט חסר ולא להמציא.`;
 
     const response = await fetch(
       `${GEMINI_BASE_URL}/${AI_MODELS.VISION_FAST}:generateContent?key=${GEMINI_API_KEY}`,

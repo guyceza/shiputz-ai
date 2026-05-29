@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ hasSubscription: false });
     }
 
-    // User has vision if they have active subscription (string 'active' or boolean true)
-    const hasSubscription = user.vision_subscription === 'active' || user.vision_subscription === true;
+    const visionSubscription = String(user.vision_subscription || '').toLowerCase();
+    const hasSubscription = visionSubscription === 'active' || visionSubscription === 'true';
 
     return NextResponse.json({ 
       hasSubscription,

@@ -100,7 +100,7 @@ A: ShiputzAI is Hebrew-first with 7 AI tools including unique features like bill
 - Renovation Cost Calculator Israel 2026: https://shipazti.com/tips/renovation-cost-calculator
 
 ## Company
-Founded by Guy Cezana, 2025
+Founded in Israel, 2025
 Based in Israel
 Built with Next.js, Google Gemini AI, Supabase, PayPlus
 

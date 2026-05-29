@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { isToolAvailable } from "./RoleSelector";
 
 interface Feature {
   title: string;
@@ -14,7 +13,7 @@ interface Feature {
   cta?: string;
   video?: string;
   isGif?: boolean;
-  toolKey?: string; // maps to role tool keys
+  toolKey?: string;
 }
 
 const mainFeatures: Feature[] = [
@@ -39,7 +38,7 @@ const mainFeatures: Feature[] = [
   {
     title: "סיור וידאו AI",
     subtitle: "הליכה וירטואלית בדירה החדשה",
-    description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן - כולם רואים את אותה חזון.",
+    description: "סרטון AI שמדמה הליכה אמיתית בתוך ההדמיה שלכם. שתפו עם בן/בת הזוג, המעצב או הקבלן - כולם רואים את אותו חזון.",
     image: "/images/ai-vision/video-tour-thumb.jpg",
     video: "/images/ai-vision/video-tour-showcase.mp4",
     href: "/floorplan?mode=video",
@@ -127,7 +126,7 @@ function CardDeck({ features }: { features: Feature[] }) {
               <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg group-hover:shadow-xl transition-shadow">
                 <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                   {feature.video ? (
-                    <video src={feature.video} poster={feature.image} autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover" />
+                    <video src={feature.video} poster={feature.image} muted playsInline preload="none" className="w-full h-full object-cover" />
                   ) : feature.isGif ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
@@ -147,20 +146,17 @@ function CardDeck({ features }: { features: Feature[] }) {
   );
 }
 
-export default function FeaturesShowcase({ userRole }: { userRole?: string | null }) {
-  const filteredMain = userRole ? mainFeatures.filter(f => !f.toolKey || isToolAvailable(userRole, f.toolKey)) : mainFeatures;
-  const filteredTeaser = userRole ? teaserFeatures.filter(f => !f.toolKey || isToolAvailable(userRole, f.toolKey)) : teaserFeatures;
-
+export default function FeaturesShowcase() {
   return (
     <div className="space-y-24 md:space-y-32">
       {/* Main Features - Alternating Layout */}
-      {filteredMain.map((feature, index) => {
-        const imageOnRight = index % 2 === 0; // 0,2 = right, 1 = left
+      {mainFeatures.map((feature, index) => {
+        const imageOnLeft = index % 2 === 0;
 
         return (
           <div
             key={feature.title}
-            className={`flex flex-col ${imageOnRight ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-8 md:gap-16`}
+            className={`flex flex-col ${imageOnLeft ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-8 md:gap-16`}
           >
             {/* Image */}
             <div className="w-full md:w-1/2">
@@ -174,6 +170,7 @@ export default function FeaturesShowcase({ userRole }: { userRole?: string | nul
                       loop
                       muted
                       playsInline
+                      preload="metadata"
                       className="w-full h-auto object-cover"
                     />
                   ) : feature.isGif ? (
@@ -211,7 +208,7 @@ export default function FeaturesShowcase({ userRole }: { userRole?: string | nul
                 href={feature.href}
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4 rotate-180" />
+                <ArrowLeft className={`w-4 h-4 ${imageOnLeft ? '' : 'rotate-180'}`} />
                 {feature.cta}
               </Link>
             </div>
@@ -220,7 +217,7 @@ export default function FeaturesShowcase({ userRole }: { userRole?: string | nul
       })}
 
       {/* Card Deck Section */}
-      <CardDeck features={filteredTeaser} />
+      <CardDeck features={teaserFeatures} />
     </div>
   );
 }

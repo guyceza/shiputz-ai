@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { getCreditPackPrice } from "@/lib/credit-costs";
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
@@ -71,7 +72,7 @@ export default function ShiputzAIvsInteriorAIPage() {
         "name": "כמה עולה ShiputzAI לעומת InteriorAI?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ShiputzAI מציע חבילות החל מ-₪29 ל-10 קרדיטים (ללא מנוי חודשי), עם 10 קרדיטים חינם בהרשמה. InteriorAI עולה $29 לחודש (כ-₪107) כמנוי חודשי מחייב."
+          "text": "ShiputzAI מציע מנוי החל מ-₪29 לחודש, עם אפשרות לקנות קרדיטים נוספים למנויים פעילים בלבד. InteriorAI עולה $29 לחודש (כ-₪107) כמנוי חודשי מחייב."
         }
       },
       {
@@ -79,7 +80,7 @@ export default function ShiputzAIvsInteriorAIPage() {
         "name": "האם ShiputzAI מציע ניסיון חינם?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. InteriorAI מציע רק הדמיה אחת בחינם."
+          "text": "כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
         }
       }
     ]
@@ -164,7 +165,7 @@ export default function ShiputzAIvsInteriorAIPage() {
                 </tr>
                 <tr className="border-b border-gray-100">
                   <td className="py-3 px-4 font-medium text-gray-900">מחיר</td>
-                  <td className="py-3 px-4 bg-emerald-50">החל מ-₪29 (חבילה)</td>
+                  <td className="py-3 px-4 bg-emerald-50">מנוי החל מ-₪29/חודש</td>
                   <td className="py-3 px-4">$29/חודש (~₪107)</td>
                 </tr>
                 <tr className="border-b border-gray-100">
@@ -204,7 +205,7 @@ export default function ShiputzAIvsInteriorAIPage() {
                 </tr>
                 <tr>
                   <td className="py-3 px-4 font-medium text-gray-900">מודל תשלום</td>
-                  <td className="py-3 px-4 bg-emerald-50">חבילות קרדיטים (ללא התחייבות)</td>
+                  <td className="py-3 px-4 bg-emerald-50">מנוי + תוספות קרדיטים למנויים</td>
                   <td className="py-3 px-4">מנוי חודשי</td>
                 </tr>
               </tbody>
@@ -240,12 +241,12 @@ export default function ShiputzAIvsInteriorAIPage() {
           {/* Pricing */}
           <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-3">💰 מחיר</h3>
           <p className="text-gray-700 leading-relaxed mb-4">
-            <strong>ShiputzAI</strong> עובד על מודל חבילות קרדיטים ללא התחייבות חודשית:
+            <strong>ShiputzAI</strong> עובד על מודל מנוי עם קרדיטים חודשיים, ותוספות קרדיטים למנויים פעילים:
           </p>
           <ul className="space-y-1 text-gray-700 mb-4">
-            <li>• חבילת 10 קרדיטים - ₪29</li>
-            <li>• חבילת 30 קרדיטים - ₪69</li>
-            <li>• חבילת 100 קרדיטים - ₪149</li>
+            <li>• Starter - ₪29 לחודש ו-50 קרדיטים</li>
+            <li>• Pro - ₪79 לחודש ו-200 קרדיטים</li>
+            <li>• תוספת 100 קרדיטים למנויים - ₪{getCreditPackPrice(100)}</li>
             <li>• 10 קרדיטים חינם בהרשמה</li>
           </ul>
           <p className="text-gray-700 leading-relaxed mb-4">
@@ -272,7 +273,7 @@ export default function ShiputzAIvsInteriorAIPage() {
           <div className="bg-gray-900 text-white rounded-2xl p-8 mb-8">
             <h2 className="text-xl font-semibold mb-4">🏆 השורה התחתונה</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
-              אם אתם מתכננים שיפוץ בישראל, <strong className="text-white">ShiputzAI הוא הבחירה הברורה</strong>. עם 7 כלי AI, ממשק עברי מלא, ומחיר של ₪29 לחבילה בסיסית (ללא מנוי חודשי), זה יותר כלי תכנון שיפוץ מאשר &quot;רק&quot; כלי הדמיה.
+              אם אתם מתכננים שיפוץ בישראל, <strong className="text-white">ShiputzAI הוא הבחירה הברורה</strong>. עם 7 כלי AI, ממשק עברי מלא, ומנוי שמתחיל ב-₪29 לחודש, זה יותר כלי תכנון שיפוץ מאשר &quot;רק&quot; כלי הדמיה.
             </p>
             <p className="text-gray-300 leading-relaxed">
               InteriorAI מתאים למי שצריך הדמיות בלבד, מרגיש נוח באנגלית, ומוכן לשלם $29 לחודש. אבל למשתמש הישראלי שרוצה כלי מקיף לתכנון שיפוץ - ShiputzAI מנצח בכל קטגוריה.
@@ -304,11 +305,11 @@ export default function ShiputzAIvsInteriorAIPage() {
             />
             <FaqItem
               question="כמה עולה ShiputzAI לעומת InteriorAI?"
-              answer="ShiputzAI מציע חבילות החל מ-₪29 ל-10 קרדיטים (ללא מנוי חודשי), עם 10 קרדיטים חינם בהרשמה. InteriorAI עולה $29 לחודש (כ-₪107) כמנוי חודשי מחייב."
+              answer="ShiputzAI מציע מנוי החל מ-₪29 לחודש, עם אפשרות לקנות קרדיטים נוספים למנויים פעילים בלבד. InteriorAI עולה $29 לחודש (כ-₪107) כמנוי חודשי מחייב."
             />
             <FaqItem
               question="האם ShiputzAI מציע ניסיון חינם?"
-              answer="כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה - מספיק ל-2 הדמיות מלאות. InteriorAI מציע רק הדמיה אחת בחינם."
+              answer="כן, ShiputzAI מציע 10 קרדיטים חינם בהרשמה להיכרות עם המערכת. InteriorAI מציע רק הדמיה אחת בחינם."
             />
           </div>
         </div>

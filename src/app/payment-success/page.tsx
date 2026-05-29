@@ -3,6 +3,35 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  GOOGLE_ADS_CONVERSIONS,
+  trackAnalyticsEvent,
+  trackGoogleAdsConversion,
+} from '@/lib/ads-tracking';
+import { getCreditPackPrice } from '@/lib/credit-costs';
+import { PLAN_PRICING } from '@/lib/plan-pricing';
+
+const PURCHASE_VALUES: Record<string, number> = {
+  plan_starter_monthly: PLAN_PRICING.starter.monthlyPrice,
+  plan_pro_monthly: PLAN_PRICING.pro.monthlyPrice,
+  plan_business_monthly: PLAN_PRICING.business.monthlyPrice,
+  plan_starter_annual: PLAN_PRICING.starter.annualTotalPrice,
+  plan_pro_annual: PLAN_PRICING.pro.annualTotalPrice,
+  plan_business_annual: PLAN_PRICING.business.annualTotalPrice,
+  credits_10: 10,
+  credits_20: getCreditPackPrice(20),
+  credits_50: getCreditPackPrice(50),
+  credits_100: getCreditPackPrice(100),
+  credits_200: getCreditPackPrice(200),
+  credits_300: getCreditPackPrice(300),
+  pack_10: getCreditPackPrice(10),
+  pack_30: getCreditPackPrice(30),
+  pack_100: getCreditPackPrice(100),
+  pro: 99,
+  premium: 299.99,
+  vision: 39.99,
+  premium_plus: 349.99,
+};
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -22,19 +51,32 @@ function PaymentSuccessContent() {
     const transactionId = pageRequestUid || `no-uid-${product}`;
     const conversionKey = `gads_purchase_conversion_${transactionId}`;
     if (localStorage.getItem(conversionKey)) return;
+    const value = PURCHASE_VALUES[product] || 1;
 
     const firePurchaseConversion = () => {
-      const gtag = (window as typeof window & {
-        gtag?: (...args: unknown[]) => void;
-      }).gtag;
-
-      if (typeof gtag !== 'function' || localStorage.getItem(conversionKey)) {
+      if (localStorage.getItem(conversionKey)) {
         return false;
       }
 
-      gtag('event', 'conversion', {
-        send_to: 'AW-17986657494/kwLzCLKnzLAcENa52oBD',
+      const fired = trackGoogleAdsConversion(GOOGLE_ADS_CONVERSIONS.purchase, {
         transaction_id: transactionId,
+        value,
+        currency: 'ILS',
+      });
+      if (!fired) return false;
+
+      trackAnalyticsEvent('purchase', {
+        transaction_id: transactionId,
+        value,
+        currency: 'ILS',
+        items: [
+          {
+            item_id: product,
+            item_name: product,
+            price: value,
+            quantity: 1,
+          },
+        ],
       });
       localStorage.setItem(conversionKey, '1');
       return true;
@@ -144,9 +186,14 @@ function PaymentSuccessContent() {
     pro: 'Pro',
     pro_monthly: 'Pro (legacy)',
     pro_annual: 'Pro (שנתי legacy)',
-    pack_10: '10 הדמיות',
-    pack_30: '30 הדמיות',
-    pack_100: '100 הדמיות',
+    pack_10: '10 קרדיטים',
+    pack_30: '30 קרדיטים',
+    pack_100: '100 קרדיטים',
+    credits_20: '20 קרדיטים',
+    credits_50: '50 קרדיטים',
+    credits_100: '100 קרדיטים',
+    credits_200: '200 קרדיטים',
+    credits_300: '300 קרדיטים',
     premium: 'Premium',
     vision: 'AI Vision',
     premium_plus: 'Premium Plus',

@@ -32,12 +32,13 @@ export async function GET(request: NextRequest) {
   let renewed = 0;
   let alerts = 0;
   let skippedPayPlusRecurring = 0;
+  let skippedExpiredAnnual = 0;
 
   try {
     // Get all users with active plans
     const { data: users, error } = await supabase
       .from('users')
-      .select('email, name, plan, plan_started_at, viz_credits, purchased_credits, payplus_recurring_uid, payplus_subscription_status')
+      .select('email, name, plan, plan_started_at, plan_billing_cycle, plan_period_end, viz_credits, purchased_credits, payplus_recurring_uid, payplus_subscription_status')
       .in('plan', ['starter', 'pro', 'business'])
       .not('plan_started_at', 'is', null);
 
@@ -49,10 +50,18 @@ export async function GET(request: NextRequest) {
       const credits = PLAN_CREDITS[user.plan];
       if (!credits) continue;
 
+      const billingCycle = user.plan_billing_cycle || ((user.payplus_recurring_uid || user.payplus_subscription_status === 'active') ? 'monthly' : null);
+
       // PayPlus monthly subscriptions receive credits only after a successful
-      // recurring payment webhook. This cron is kept for annual/legacy plans.
-      if (user.payplus_recurring_uid || user.payplus_subscription_status === 'active') {
+      // recurring payment webhook. Annual users pay yearly but still receive
+      // subscription credits monthly while their annual period is active.
+      if (billingCycle === 'monthly') {
         skippedPayPlusRecurring++;
+        continue;
+      }
+
+      if (billingCycle === 'annual' && user.plan_period_end && new Date(user.plan_period_end) <= now) {
+        skippedExpiredAnnual++;
         continue;
       }
 
@@ -143,6 +152,7 @@ export async function GET(request: NextRequest) {
       renewed,
       alerts,
       skippedPayPlusRecurring,
+      skippedExpiredAnnual,
       checked: users.length,
     });
 

@@ -12,7 +12,7 @@ const TEMPLATE_SUBJECTS: Record<string, string> = {
   budget_tips: '💰 איך לא לחרוג מהתקציב',
   checkin: '❓ איך הולך?',
   quote_analysis: '🔥 הכלי שרוב המשפצים לא מכירים',
-  feedback_request: '⭐ 30 שניות מזמנך?',
+  feedback_request: '30 שניות מזמנך?',
   reminder: '👋 שכחת משהו?',
   discount_offer: '🎁 מתנה בשבילך - 20% הנחה',
   problem_highlight: '😱 70% מהשיפוצים חורגים מהתקציב',

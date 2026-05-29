@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 const features = [
   {
     title: "תוכנית קומה",
     subtitle: "Floor Plan",
     description: "העלו תוכנית אדריכלית וקבלו הדמיה תלת-ממדית של הדירה",
-    credits: 10,
+    credits: CREDIT_COSTS.floorplan,
     href: "/floorplan",
     image: "/images/ai-vision/floorplan.jpg",
     hasRealImage: true,
@@ -18,19 +18,19 @@ const features = [
     title: "עיצוב מחדש",
     subtitle: "Reimagine My Room",
     description: "העלו תמונה של החדר וקבלו הדמיה של איך הוא יראה אחרי שיפוץ",
-    credits: 10,
+    credits: CREDIT_COSTS.visualize,
     href: "/visualize",
     image: "/images/ai-vision/visualize.jpg",
     hasSlider: true,
-    sliderBefore: "/before-room.jpg",
-    sliderAfter: "/after-room.jpg",
+    sliderBefore: "/examples/visualize-room-before-v2.jpg",
+    sliderAfter: "/examples/visualize-room-after-v2.jpg",
     gradient: "from-emerald-500/10 to-teal-500/10",
   },
   {
     title: "Shop the Look",
     subtitle: "קנו את העיצוב",
     description: "מצאו וקנו מוצרים דומים למה שרואים בהדמיה",
-    credits: 3,
+    credits: CREDIT_COSTS["shop-look"],
     href: "/shop-look",
     image: "/images/ai-vision/shop-look.jpg",
     hasRealImage: true,
@@ -40,7 +40,7 @@ const features = [
     title: "סיור וידאו",
     subtitle: "Video Walkthrough",
     description: "צרו סרטון AI שמדמה הליכה בחדר לפני ואחרי השיפוץ",
-    credits: 25,
+    credits: CREDIT_COSTS["video-walkthrough"],
     href: "/floorplan?mode=video",
     image: "/images/ai-vision/video-tour.gif",
     hasRealImage: true,
@@ -50,7 +50,7 @@ const features = [
     title: "כתב כמויות",
     subtitle: "Bill of Quantities",
     description: "קבלו פירוט מדויק של חומרים, כמויות ועלויות לפרויקט",
-    credits: 5,
+    credits: CREDIT_COSTS["bill-of-quantities"],
     href: "/dashboard/bill-of-quantities",
     image: "/images/ai-vision/boq.gif",
     hasRealImage: true,
@@ -60,8 +60,8 @@ const features = [
     title: "ניתוח הצעת מחיר",
     subtitle: "Quote Analysis",
     description: "העלו הצעת מחיר מקבלן וקבלו ניתוח AI - מה סביר ומה חסר",
-    credits: 3,
-    href: "/dashboard",
+    credits: CREDIT_COSTS["analyze-quote"],
+    href: "/quote-analysis",
     image: "/images/ai-vision/quote-analysis.gif",
     hasRealImage: true,
     gradient: "from-rose-500/10 to-red-500/10",
@@ -70,8 +70,8 @@ const features = [
     title: "סריקת קבלות",
     subtitle: "Receipt Scanner",
     description: "צלמו קבלה - ה-AI קורא סכום, תאריך וקטגוריה אוטומטית",
-    credits: 2,
-    href: "/dashboard",
+    credits: CREDIT_COSTS["scan-receipt"],
+    href: "/receipt-scanner",
     image: "/images/ai-vision/receipt-scanner.gif",
     hasRealImage: true,
     gradient: "from-cyan-500/10 to-sky-500/10",
@@ -79,6 +79,48 @@ const features = [
 ];
 
 export default function AIVisionPage() {
+  const renderStaticBeforeAfter = (feature: (typeof features)[number]) => (
+    <div className="pointer-events-none relative h-full w-full select-none overflow-hidden">
+      <img
+        src={feature.sliderAfter}
+        alt={`${feature.title} אחרי`}
+        draggable={false}
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden border-l border-white/90">
+        <img
+          src={feature.sliderBefore}
+          alt={`${feature.title} לפני`}
+          draggable={false}
+          className="h-full w-[200%] max-w-none object-cover"
+        />
+      </div>
+      <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-gray-900 shadow-sm">
+        לפני
+      </span>
+      <span className="absolute left-3 top-3 rounded-full bg-gray-950 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+        אחרי
+      </span>
+    </div>
+  );
+
+  const renderCardText = (feature: (typeof features)[number]) => (
+    <>
+      <div className="flex items-start justify-between mb-1">
+        <h3 className="text-base font-semibold text-gray-900 group-hover:text-gray-700">
+          {feature.title}
+        </h3>
+        <span className="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap mr-2">
+          {feature.credits} קרדיטים
+        </span>
+      </div>
+      <p className="text-xs text-gray-400 mb-2">{feature.subtitle}</p>
+      <p className="text-sm text-gray-500 leading-relaxed">
+        {feature.description}
+      </p>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -113,12 +155,7 @@ export default function AIVisionPage() {
                   {/* Image */}
                   <div className={`aspect-[4/3] bg-gradient-to-br ${feature.gradient} flex items-center justify-center overflow-hidden`}>
                     {feature.hasSlider && feature.sliderBefore && feature.sliderAfter ? (
-                      <BeforeAfterSlider
-                        beforeImg={feature.sliderBefore}
-                        afterImg={feature.sliderAfter}
-                        className="w-full aspect-[4/3]"
-                        compact
-                      />
+                      renderStaticBeforeAfter(feature)
                     ) : feature.image && feature.hasRealImage ? (
                       <img 
                         src={feature.image} 
@@ -139,31 +176,13 @@ export default function AIVisionPage() {
                   </div>
 
                   {/* Content */}
-                  <Link href={feature.href} className="block p-4">
-                    <div className="flex items-start justify-between mb-1">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-gray-700">
-                        {feature.title}
-                      </h3>
-                      <span className="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap mr-2">
-                        {feature.credits} קרדיטים
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400 mb-2">{feature.subtitle}</p>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </Link>
+                  <div className="block p-4">
+                    {renderCardText(feature)}
+                  </div>
                 </>
               );
 
-              return feature.hasSlider ? (
-                <div
-                  key={feature.href + feature.title}
-                  className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300"
-                >
-                  {cardContent}
-                </div>
-              ) : (
+              return (
                 <Link
                   key={feature.href + feature.title}
                   href={feature.href}

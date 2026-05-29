@@ -5,41 +5,17 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getStoredAttribution } from "@/lib/attribution";
 import { authFetch } from "@/lib/auth-fetch";
-
-// Same anchor points as pricing page
-const CREDIT_ANCHORS = [
-  { credits: 10, price: 10 },
-  { credits: 20, price: 19 },
-  { credits: 50, price: 42 },
-  { credits: 100, price: 75 },
-  { credits: 200, price: 129 },
-  { credits: 300, price: 179 },
-];
-
-function getCreditPrice(credits: number): number {
-  const anchors = CREDIT_ANCHORS;
-  if (credits <= anchors[0].credits) return anchors[0].price;
-  if (credits >= anchors[anchors.length - 1].credits) {
-    const last = anchors[anchors.length - 1];
-    return Math.round(credits * (last.price / last.credits));
-  }
-  for (let i = 0; i < anchors.length - 1; i++) {
-    if (credits >= anchors[i].credits && credits <= anchors[i + 1].credits) {
-      const t = (credits - anchors[i].credits) / (anchors[i + 1].credits - anchors[i].credits);
-      return Math.round(anchors[i].price + t * (anchors[i + 1].price - anchors[i].price));
-    }
-  }
-  return 0;
-}
-
-// Plan config matching pricing page
-const PLAN_CONFIG: Record<string, { name: string; monthlyPrice: number; annualPrice: number; credits: number }> = {
-  starter: { name: "Starter", monthlyPrice: 29, annualPrice: 15, credits: 50 },
-  pro: { name: "Pro", monthlyPrice: 79, annualPrice: 39, credits: 200 },
-  business: { name: "Business", monthlyPrice: 199, annualPrice: 99, credits: 600 },
-};
-
-const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
+import { trackAnalyticsEvent } from "@/lib/ads-tracking";
+import { getCreditPackPrice } from "@/lib/credit-costs";
+import {
+  getPlanChangeState,
+  getPlanCheckoutAmount,
+  getPlanDisplayPrice,
+  PLAN_PRICING,
+  PLAN_RANK,
+  type BillingCycle,
+  type PlanId,
+} from "@/lib/plan-pricing";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -47,66 +23,87 @@ function CheckoutContent() {
 
   const [email, setEmail] = useState("");
   const [userPlan, setUserPlan] = useState("free");
+  const [userBillingCycle, setUserBillingCycle] = useState<BillingCycle | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Parse URL params
   const planId = searchParams.get("plan"); // starter/pro/business
-  const billing = (searchParams.get("billing") || "monthly") as "monthly" | "annual";
+  const billing = (searchParams.get("billing") || "monthly") as BillingCycle;
   const creditsParam = searchParams.get("credits"); // slider credits (number)
 
   // Legacy support
   const legacyProduct = searchParams.get("product");
   const legacyPack = searchParams.get("pack");
 
-  const isPlan = planId && PLAN_CONFIG[planId];
+  const isPlan = Boolean(planId && PLAN_PRICING[planId as PlanId]);
   const isCredits = creditsParam && !isNaN(Number(creditsParam));
+  const isCreditProduct = Boolean(isCredits || legacyPack);
+  const canBuyExtraCredits = Boolean(userPlan && PLAN_PRICING[userPlan as PlanId]);
+  const isCreditPurchaseBlocked = Boolean(isCreditProduct && !canBuyExtraCredits);
 
-  const currentPlan = PLAN_CONFIG[userPlan];
-  const targetPlan = isPlan ? PLAN_CONFIG[planId] : null;
-  const isMonthlyUpgrade = Boolean(
+  const currentPlan = PLAN_PRICING[userPlan as PlanId];
+  const targetPlan = isPlan ? PLAN_PRICING[planId as PlanId] : null;
+  const isSameCycleUpgrade = Boolean(
     targetPlan &&
     currentPlan &&
-    billing === "monthly" &&
+    userBillingCycle === billing &&
     userPlan !== "free" &&
     userPlan !== planId &&
-    (PLAN_RANK[planId || ""] || 0) > (PLAN_RANK[userPlan] || 0)
+    (PLAN_RANK[planId as keyof typeof PLAN_RANK] || 0) > (PLAN_RANK[userPlan as keyof typeof PLAN_RANK] || 0)
   );
+  const planChangeState = isPlan
+    ? getPlanChangeState({
+        currentPlanId: userPlan,
+        currentBillingCycle: userBillingCycle,
+        targetPlanId: planId as PlanId,
+        targetBillingCycle: billing,
+      })
+    : null;
+  const isUnsupportedPlanChange = Boolean(isPlan && planChangeState && !planChangeState.available && !planChangeState.current);
 
   // Calculate pricing
   let productLabel = "";
   let price = 0;
+  let checkoutAmount = 0;
   let productType = "";
   let subtitle = "";
 
   if (isPlan) {
-    const plan = PLAN_CONFIG[planId];
-    price = isMonthlyUpgrade && currentPlan
-      ? Math.max(1, plan.monthlyPrice - currentPlan.monthlyPrice)
-      : billing === "annual" ? plan.annualPrice : plan.monthlyPrice;
-    productLabel = isMonthlyUpgrade ? `שדרוג ל-${plan.name}` : `תוכנית ${plan.name}`;
+    const plan = PLAN_PRICING[planId as PlanId];
+    price = isSameCycleUpgrade && currentPlan
+      ? Math.max(1, getPlanCheckoutAmount(plan.id, billing) - getPlanCheckoutAmount(currentPlan.id, billing))
+      : getPlanDisplayPrice(plan.id, billing);
+    checkoutAmount = isSameCycleUpgrade && currentPlan
+      ? Math.max(1, getPlanCheckoutAmount(plan.id, billing) - getPlanCheckoutAmount(currentPlan.id, billing))
+      : getPlanCheckoutAmount(plan.id, billing);
+    productLabel = isSameCycleUpgrade ? `שדרוג ל-${plan.name}` : `תוכנית ${plan.name}`;
     productType = `plan_${planId}_${billing}`;
-    subtitle = isMonthlyUpgrade && currentPlan
-      ? `הפרש מהמסלול הנוכחי לחודש הזה בלבד · מהחודש הבא ₪${plan.monthlyPrice}/חודש`
+    subtitle = isSameCycleUpgrade && currentPlan
+      ? billing === "annual"
+        ? `הפרש מהמסלול השנתי הנוכחי · החידוש השנתי הבא יעודכן ל-₪${plan.annualTotalPrice}`
+        : `הפרש מהמסלול הנוכחי לחודש הזה בלבד · מהחודש הבא ₪${plan.monthlyPrice}/חודש`
       : billing === "annual"
-      ? `₪${price * 12} לשנה · ${plan.credits} קרדיטים/חודש`
+      ? `₪${checkoutAmount} לשנה · ${plan.credits} קרדיטים/חודש`
       : `${plan.credits} קרדיטים לחודש`;
   } else if (isCredits) {
     const credits = Number(creditsParam);
-    price = getCreditPrice(credits);
+    price = getCreditPackPrice(credits);
+    checkoutAmount = price;
     productLabel = `${credits} קרדיטים`;
     productType = `credits_${credits}`;
-    subtitle = `₪${(price / credits).toFixed(2)} לקרדיט · תשלום חד-פעמי`;
+    subtitle = `₪${(price / credits).toFixed(2)} לקרדיט · תוספת למנויים בלבד`;
   } else if (legacyPack) {
     // Legacy pack support
     const packs: Record<string, { name: string; price: number }> = {
-      "20": { name: "20 קרדיטים", price: 19 },
-      "60": { name: "60 קרדיטים", price: 49 },
-      "200": { name: "200 קרדיטים", price: 129 },
+      "20": { name: "20 קרדיטים", price: getCreditPackPrice(20) },
+      "60": { name: "60 קרדיטים", price: getCreditPackPrice(60) },
+      "200": { name: "200 קרדיטים", price: getCreditPackPrice(200) },
     };
     const pack = packs[legacyPack];
     if (pack) {
       price = pack.price;
+      checkoutAmount = price;
       productLabel = pack.name;
       productType = `credits_${legacyPack}`;
       subtitle = "תשלום חד-פעמי";
@@ -119,16 +116,39 @@ function CheckoutContent() {
   // Auth check
   useEffect(() => {
     const checkAuth = async () => {
+      const loadPlan = async (userEmail: string, fallbackPlan = "free", fallbackBillingCycle: BillingCycle | null = null) => {
+        try {
+          const response = await authFetch(`/api/credits?email=${encodeURIComponent(userEmail)}`);
+          const data = await response.json();
+          setUserPlan(data.plan || fallbackPlan);
+          setUserBillingCycle(data.billingCycle || fallbackBillingCycle);
+          try {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem("user", JSON.stringify({
+              ...storedUser,
+              plan: data.plan || storedUser.plan || fallbackPlan,
+              plan_billing_cycle: data.billingCycle || fallbackBillingCycle,
+            }));
+          } catch {}
+        } catch {
+          setUserPlan(fallbackPlan);
+          setUserBillingCycle(fallbackBillingCycle);
+        }
+      };
+
       try {
         const userData = localStorage.getItem("user");
         if (userData) {
           const user = JSON.parse(userData);
           if (user.email && user.id) {
             setEmail(user.email);
-            authFetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
-              .then(r => r.json())
-              .then(d => setUserPlan(d.plan || "free"))
-              .catch(() => {});
+            await loadPlan(
+              user.email,
+              user.plan || "free",
+              user.plan_billing_cycle === "monthly" || user.plan_billing_cycle === "annual"
+                ? user.plan_billing_cycle
+                : null
+            );
             setCheckingAuth(false);
             return;
           }
@@ -137,10 +157,7 @@ function CheckoutContent() {
         const session = await getSession();
         if (session?.user?.email) {
           setEmail(session.user.email);
-          authFetch(`/api/credits?email=${encodeURIComponent(session.user.email)}`)
-            .then(r => r.json())
-            .then(d => setUserPlan(d.plan || "free"))
-            .catch(() => {});
+          await loadPlan(session.user.email);
           setCheckingAuth(false);
           return;
         }
@@ -154,10 +171,25 @@ function CheckoutContent() {
 
   const handlePurchase = async () => {
     if (!email.trim() || !productType) return;
-    if (isPlan && userPlan === planId) return;
+    if (isPlan && planChangeState?.current) return;
+    if (isUnsupportedPlanChange) return;
+    if (isCreditPurchaseBlocked) return;
     setLoading(true);
 
     try {
+      trackAnalyticsEvent("begin_checkout", {
+        currency: "ILS",
+        value: checkoutAmount,
+        items: [
+          {
+            item_id: productType,
+            item_name: productType,
+            price: checkoutAmount,
+            quantity: 1,
+          },
+        ],
+      });
+
       const response = await authFetch("/api/payplus/generate-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,7 +213,7 @@ function CheckoutContent() {
         if (response.status === 409) {
           alert(data.error === "You are already on this plan"
             ? "זו כבר התוכנית הנוכחית שלך."
-            : "השינוי הזה לא זמין כרגע דרך הסליקה האוטומטית.");
+            : "השינוי הזה נעשה דרך תמיכה כדי למנוע חיוב כפול.");
           setLoading(false);
           return;
         }
@@ -241,17 +273,28 @@ function CheckoutContent() {
             )}
             <h2 className="text-2xl font-bold text-gray-900 mb-1">{productLabel}</h2>
             <div className="flex items-baseline justify-center gap-2 mt-3">
-              {isPlan && billing === "annual" && (
-                <span className="text-lg text-gray-400 line-through">₪{PLAN_CONFIG[planId!].monthlyPrice}</span>
+              {isPlan && billing === "annual" && !isSameCycleUpgrade && (
+                <span className="text-lg text-gray-400 line-through">₪{PLAN_PRICING[planId as PlanId].monthlyPrice}</span>
               )}
               <span className="text-4xl font-bold text-gray-900">₪{price}</span>
-              {isPlan && <span className="text-gray-400 text-sm">/לחודש</span>}
+              {isPlan && !isSameCycleUpgrade && <span className="text-gray-400 text-sm">/לחודש</span>}
             </div>
             <p className="text-gray-500 text-sm mt-2">{subtitle}</p>
             {isPlan && (
               <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
                 * קרדיטים של מנוי מתאפסים ומתחדשים בכל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים.
               </p>
+            )}
+            {isCreditPurchaseBlocked && (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-right">
+                <p className="text-sm font-bold text-amber-900">קרדיטים נוספים זמינים רק למנויים פעילים.</p>
+                <p className="mt-1 text-xs leading-relaxed text-amber-800">
+                  קרדיטים שכבר קיימים בחשבון נשארים לשימוש. כדי לקנות עוד קרדיטים, בחרו קודם תוכנית מנוי.
+                </p>
+                <Link href="/pricing#plans" className="mt-3 inline-block text-xs font-bold text-amber-900 underline">
+                  מעבר לבחירת מנוי
+                </Link>
+              </div>
             )}
           </div>
 
@@ -266,18 +309,26 @@ function CheckoutContent() {
           {/* CTA */}
           <button
             onClick={handlePurchase}
-            disabled={loading || (Boolean(isPlan) && userPlan === planId)}
+            disabled={loading || isCreditPurchaseBlocked || Boolean(isPlan && (planChangeState?.current || isUnsupportedPlanChange))}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3.5 rounded-full text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
-            {userPlan === planId && isPlan
+            {isCreditPurchaseBlocked
+              ? "זמין למנויים בלבד"
+              : planChangeState?.current && isPlan
               ? "התוכנית הנוכחית שלך"
-              : isMonthlyUpgrade
+              : isUnsupportedPlanChange
+                ? "שינוי דרך תמיכה"
+              : isSameCycleUpgrade
                 ? `לתשלום הפרש - ₪${price}`
-                : loading ? "מעבד..." : `לתשלום - ₪${isPlan && billing === "annual" ? price * 12 : price}`}
+                : loading ? "מעבד..." : `לתשלום - ₪${checkoutAmount || price}`}
           </button>
 
           <p className="text-center text-gray-400 text-xs mt-3">
-            {isPlan ? "מנוי מתחדש · ניתן לבטל בכל עת" : "תשלום חד-פעמי · לא מנוי"}
+            {isCreditPurchaseBlocked
+              ? "החסימה היא רק על רכישה חדשה. יתרה קיימת לא נמחקת."
+              : isUnsupportedPlanChange
+              ? "שנמוך או מעבר בין חודשי לשנתי לא מתבצע אוטומטית כדי למנוע חיוב כפול."
+              : isPlan ? "מנוי מתחדש · ניתן לבטל בכל עת" : "תשלום חד-פעמי · לא מנוי"}
           </p>
         </div>
 

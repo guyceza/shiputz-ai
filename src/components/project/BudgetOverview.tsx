@@ -37,8 +37,10 @@ export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewPro
     }));
   };
 
-  const budgetPercentage = (project.spent / project.budget) * 100;
-  const remaining = project.budget - project.spent;
+  const safeBudget = Number.isFinite(project.budget) ? project.budget : 0;
+  const safeSpent = Number.isFinite(project.spent) ? project.spent : 0;
+  const budgetPercentage = safeBudget > 0 ? Math.max(0, (safeSpent / safeBudget) * 100) : 0;
+  const remaining = safeBudget - safeSpent;
   const expensesByCategory = getExpensesByCategory();
   const budgetAlerts = getBudgetAlerts();
   const maxCategoryExpense = Math.max(...Object.values(expensesByCategory), 1);
@@ -49,11 +51,11 @@ export function BudgetOverview({ project, onOpenBudgetModal }: BudgetOverviewPro
       <div className="grid md:grid-cols-3 gap-px bg-gray-100 rounded-2xl overflow-hidden mb-8">
         <div className="bg-white p-8">
           <p className="text-sm text-gray-500 mb-1">תקציב</p>
-          <p className="text-3xl font-semibold text-gray-900">₪{project.budget.toLocaleString()}</p>
+          <p className="text-3xl font-semibold text-gray-900">₪{safeBudget.toLocaleString()}</p>
         </div>
         <div className="bg-white p-8">
           <p className="text-sm text-gray-500 mb-1">הוצאות</p>
-          <p className="text-3xl font-semibold text-gray-900">₪{project.spent.toLocaleString()}</p>
+          <p className="text-3xl font-semibold text-gray-900">₪{safeSpent.toLocaleString()}</p>
         </div>
         <div className="bg-white p-8">
           <p className="text-sm text-gray-500 mb-1">נותר</p>

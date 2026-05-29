@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "זיהוי סגנון עיצוב פנים בAI - Style Matcher | ShiputzAI",
+  title: "זיהוי סגנון עיצוב פנים בAI - Style Matcher",
   description: "Style Matcher של ShiputzAI מזהה את סגנון העיצוב שלכם באמצעות AI. העלו תמונה של חדר וקבלו ניתוח סגנון מפורט, רשימת קניות מותאמת, וטקסטורות חומרים - תוך שניות.",
   keywords: ["זיהוי סגנון עיצוב", "Style Matcher", "AI style identification", "עיצוב פנים", "ShiputzAI"],
   alternates: {

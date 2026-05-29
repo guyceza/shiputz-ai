@@ -225,6 +225,9 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-semibold text-gray-900">ניהול משתמשים</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/admin/ads-dashboard" className="text-sm bg-gray-900 text-white px-3 py-1 rounded-lg hover:bg-gray-800 transition-colors">
+              דשבורד פרסום
+            </Link>
             <Link href="/admin/leads" className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg hover:bg-emerald-200 transition-colors">
               📧 לידים
             </Link>

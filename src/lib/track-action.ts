@@ -3,8 +3,17 @@
  * Call trackAction when user uploads/starts, clearAction when they complete.
  */
 
+import { trackAnalyticsEvent } from "./ads-tracking";
+import { trackAcquisitionEvent } from "./acquisition-tracking";
+
 export function trackAction(action: string, page: string) {
   try {
+    trackAnalyticsEvent("tool_start", {
+      tool_name: action,
+      page,
+    });
+    trackAcquisitionEvent("tool_start", { eventName: action, targetUrl: page });
+
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);
@@ -20,6 +29,8 @@ export function trackAction(action: string, page: string) {
 
 export function clearAction() {
   try {
+    trackAnalyticsEvent("tool_complete");
+
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
     const user = JSON.parse(userStr);

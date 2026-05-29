@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import CreditBadge from "@/components/CreditBadge";
+import { getCreditPackPrice } from "@/lib/credit-costs";
 
 function handleCreditError(res: Response, data: any): boolean {
   if (res.status === 402 || data?.creditError) {
@@ -45,7 +46,7 @@ import { ExpenseListSkeleton } from "@/components/Skeleton";
 import { FormattedText } from "@/components/FormattedText";
 import { BarChart3, Calendar, Users, Camera } from "lucide-react";
 import ProjectWizardStepper, { WizardStep } from "@/components/ProjectWizardStepper";
-import { isToolAvailable } from "@/components/RoleSelector";
+import HelpTour, { HelpTourStep } from "@/components/HelpTour";
 
 // Check for admin mode from localStorage (set during login)
 const getIsAdmin = () => {
@@ -153,7 +154,7 @@ const SCAN_TIPS = [
   "🔍 קוראים כל מילה קטנה בקבלה...",
   "🧮 מחשבים את הסכומים בדיוק מקסימלי",
   "📝 מנתחים את הפרטים עבורך",
-  "✨ עוד רגע מסיימים, סבלנות",
+  "עוד רגע מסיימים, סבלנות",
   "🎯 מוודאים שהכל נקלט נכון",
   "💪 עובדים קשה מאחורי הקלעים",
   "🚀 כמעט שם! עוד שנייה...",
@@ -169,6 +170,44 @@ const DEFAULT_PHASES: Omit<Phase, "id">[] = [
 ];
 
 const PROFESSIONS = ["קבלן ראשי", "חשמלאי", "אינסטלטור", "רצף", "צבעי", "נגר", "מזגן", "גבס", "אלומיניום", "אחר"];
+
+const PROJECT_TOUR_STEPS: HelpTourStep[] = [
+  {
+    title: "כאן מנהלים פרויקט אחד",
+    body: "המסך הזה מרכז את התקציב, הכלים, ההוצאות והספקים של הפרויקט הנוכחי. כל מה שתוסיפו כאן נשמר לפרויקט הזה.",
+    selector: "[data-tour='project-nav']",
+  },
+  {
+    title: "הטאבים מחלקים את העבודה",
+    body: "סקירה היא המקום היומיומי. ציר זמן מתאים למשימות ושלבים, וספקים מיועד לקבלנים והצעות מחיר.",
+    selector: "[data-tour='project-tabs']",
+  },
+  {
+    title: "מדריך הפרויקט",
+    body: "זה הציר המומלץ: תוכנית, הדמיות, כתב כמויות, הצעות מחיר ואז מעקב ביצוע. לא חייבים להשלים הכל לפי הסדר, אבל זה נותן כיוון ברור.",
+    selector: "[data-tour='project-wizard']",
+  },
+  {
+    title: "תקציב והוצאות",
+    body: "כאן רואים אם הפרויקט נשאר במסגרת התקציב. אחרי סריקת קבלות או הוספת הוצאות, המספרים מתעדכנים אוטומטית.",
+    selector: "[data-tour='project-budget']",
+  },
+  {
+    title: "כלי ה-AI של הפרויקט",
+    body: "מכאן עוברים להדמיות, תוכנית וחדרים, כתב כמויות, ניתוח הצעות מחיר, עוזר AI וסריקת קבלות.",
+    selector: "[data-tour='project-ai-tools']",
+  },
+  {
+    title: "מעקב אחרי קבלות",
+    body: "כאן מוסיפים או סורקים הוצאות. זה החלק שהופך את האזור האישי ממקום סטטי לכלי ניהול אמיתי.",
+    selector: "[data-tour='project-expenses']",
+  },
+  {
+    title: "שיתוף וייצוא",
+    body: "אפשר לשתף את הפרויקט או להוציא דוח PDF/Excel כשצריך לשלוח מצב לקבלן, שותף או לקוח.",
+    selector: "[data-tour='project-actions']",
+  },
+];
 
 export default function ProjectPage() {
   const router = useRouter();
@@ -1078,7 +1117,7 @@ export default function ProjectPage() {
       const userData = localStorage.getItem("user");
       const userEmailForChat = userData ? JSON.parse(userData).email : null;
       
-      const response = await fetch("/api/ai-assistant", {
+      const response = await authFetch("/api/ai-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -1093,9 +1132,21 @@ export default function ProjectPage() {
           }
         }),
       });
+      const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        const data = await response.json();
         setChatHistory(prev => [...prev, { role: "assistant", content: data.response }]);
+      } else if (data.code === "SUBSCRIPTION_REQUIRED") {
+        setChatHistory(prev => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "עוזר ה-AI פתוח למנויים פעילים בלבד. אחרי בחירת מנוי אפשר להשתמש בו ללא הגבלת קרדיטים.",
+          },
+        ]);
+      } else if (data.code === "AUTH_REQUIRED" || response.status === 401) {
+        setChatHistory(prev => [...prev, { role: "assistant", content: "צריך להתחבר מחדש כדי להשתמש בעוזר ה-AI." }]);
+      } else {
+        setChatHistory(prev => [...prev, { role: "assistant", content: data.error || "מצטער, לא הצלחתי לענות." }]);
       }
     } catch {
       setChatHistory(prev => [...prev, { role: "assistant", content: "מצטער, לא הצלחתי לענות." }]);
@@ -1674,8 +1725,10 @@ export default function ProjectPage() {
     return <LoadingScreen text="טוען את הפרויקט..." tip="רגע ונהיה מוכנים" variant="project" />;
   }
 
-  const budgetPercentage = (project.spent / project.budget) * 100;
-  const remaining = project.budget - project.spent;
+  const safeProjectBudget = Number.isFinite(project.budget) ? project.budget : 0;
+  const safeProjectSpent = Number.isFinite(project.spent) ? project.spent : 0;
+  const budgetPercentage = safeProjectBudget > 0 ? Math.max(0, (safeProjectSpent / safeProjectBudget) * 100) : 0;
+  const remaining = safeProjectBudget - safeProjectSpent;
   const expensesByCategory = getExpensesByCategory();
   const budgetAlerts = getBudgetAlerts();
   const maxCategoryExpense = Math.max(...Object.values(expensesByCategory), 1);
@@ -1683,7 +1736,7 @@ export default function ProjectPage() {
   return (
     <div className="min-h-screen bg-white print:bg-white">
       {/* Navigation */}
-      <nav className="h-11 border-b border-gray-100 print:hidden">
+      <nav className="h-11 border-b border-gray-100 print:hidden" data-tour="project-nav">
         <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-6 min-w-0">
             <Link href="/" className="text-base font-semibold text-gray-900 hover:text-blue-600 flex-shrink-0">ShiputzAI</Link>
@@ -1692,7 +1745,7 @@ export default function ProjectPage() {
             <span className="hidden md:inline text-gray-300">|</span>
             <span className="text-xs md:text-sm text-gray-900 truncate max-w-[100px] md:max-w-none">{project.name}</span>
           </div>
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2" data-tour="project-actions">
             <CreditBadge />
             <button 
               onClick={generateShareLink} 
@@ -1712,7 +1765,7 @@ export default function ProjectPage() {
       </nav>
 
       {/* Tabs */}
-      <div className="border-b border-gray-100 print:hidden">
+      <div className="border-b border-gray-100 print:hidden" data-tour="project-tabs">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex justify-center gap-2 md:gap-3">
             {[
@@ -1804,11 +1857,13 @@ export default function ProjectPage() {
         }
 
         return (
-          <ProjectWizardStepper
-            steps={wizardSteps}
-            projectId={project.id}
-            onDismiss={() => setShowWizard(false)}
-          />
+          <div data-tour="project-wizard">
+            <ProjectWizardStepper
+              steps={wizardSteps}
+              projectId={project.id}
+              onDismiss={() => setShowWizard(false)}
+            />
+          </div>
         );
       })()}
 
@@ -1817,17 +1872,19 @@ export default function ProjectPage() {
         {activeTab === "overview" && (
           <>
             {/* Budget Overview - includes grid, progress, alerts, and category chart */}
-            <BudgetOverview project={project} onOpenBudgetModal={openBudgetModal} />
+            <div data-tour="project-budget">
+              <BudgetOverview project={project} onOpenBudgetModal={openBudgetModal} />
+            </div>
 
             {/* Vision section removed - users access via /visualize directly */}
 
             {/* AI Tools - Requires Premium subscription */}
-            <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden">
+            <div className="border border-gray-100 rounded-2xl p-8 mb-8 print:hidden" data-tour="project-ai-tools">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">כלי AI</h2>
-                {!isPremium && (
+                {!hasVisionSub && (
                   <a href="/pricing" className="text-sm text-purple-600 hover:text-purple-700">
-                    🔒 דורש Pro
+                    🔒 דורש מנוי פעיל
                   </a>
                 )}
               </div>
@@ -1853,12 +1910,12 @@ export default function ProjectPage() {
                   <p className="text-xs text-gray-500">בדוק אם המחיר סביר</p>
                 </button>
                 <button
-                  onClick={() => isPremium ? setShowAIChat(true) : null}
-                  disabled={!isPremium}
-                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${isPremium ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
+                  onClick={() => hasVisionSub ? setShowAIChat(true) : null}
+                  disabled={!hasVisionSub}
+                  className={`text-right bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all ${hasVisionSub ? 'hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'}`}
                 >
                   <p className="font-medium text-gray-900 mb-1">עוזר AI</p>
-                  <p className="text-xs text-gray-500">שאל שאלות על השיפוץ</p>
+                  <p className="text-xs text-gray-500">שימוש חופשי למנויים</p>
                 </button>
                 <button
                   onClick={() => isPremium ? (fileInputRef.current?.click(), setShowAddExpense(true)) : null}
@@ -1872,7 +1929,7 @@ export default function ProjectPage() {
             </div>
 
             {/* Expenses */}
-            <div className="border border-gray-100 rounded-2xl p-8">
+            <div className="border border-gray-100 rounded-2xl p-8" data-tour="project-expenses">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">הוצאות</h2>
                 <div className="flex gap-2 print:hidden">
@@ -2297,6 +2354,11 @@ export default function ProjectPage() {
           </div>
         )}
       </div>
+
+      <HelpTour
+        steps={PROJECT_TOUR_STEPS}
+        storageKey={`shiputzai_project_tour_seen_${project.id}`}
+      />
 
       {/* Add Expense Modal */}
       {showAddExpense && (
@@ -3399,8 +3461,8 @@ export default function ProjectPage() {
             </p>
             
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 mb-6">
-              <div className="text-3xl font-bold text-gray-900 mb-1">₪29</div>
-              <div className="text-sm text-gray-500 mb-4">חבילת 10 הדמיות נוספות</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">₪{getCreditPackPrice(20)}</div>
+              <div className="text-sm text-gray-500 mb-4">20 קרדיטים נוספים למנויים</div>
               <ul className="text-sm text-gray-600 space-y-2 text-right">
                 <li className="flex items-center gap-2 justify-end">
                   <span>הדמיות באיכות גבוהה</span>
@@ -3411,7 +3473,7 @@ export default function ProjectPage() {
                   <span className="text-green-500">✓</span>
                 </li>
                 <li className="flex items-center gap-2 justify-end">
-                  <span>תקף ל-30 יום</span>
+                  <span>לא מתאפס</span>
                   <span className="text-green-500">✓</span>
                 </li>
               </ul>
@@ -3457,7 +3519,7 @@ export default function ProjectPage() {
               </div>
               <div className="relative">
                 <img src={selectedVisionItem.afterImage} alt="אחרי" className="w-full rounded-2xl" />
-                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי ✨</span>
+                <span className="absolute top-3 right-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full">אחרי</span>
               </div>
             </div>
             

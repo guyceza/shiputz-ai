@@ -56,34 +56,24 @@ export async function POST(req: NextRequest) {
 
     const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/visualizations/${filename}`;
 
-    // Check if room already exists for this session
-    const { data: existing } = await supabase
+    const { data: inserted, error: insertError } = await supabase
       .from("floorplan_rooms")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("session_id", sessionId)
-      .eq("room_name", roomName)
-      .single();
-
-    if (existing) {
-      // Update existing
-      await supabase
-        .from("floorplan_rooms")
-        .update({ image_url: imageUrl, room_name_he: roomNameHe || roomName, style })
-        .eq("id", existing.id);
-    } else {
-      // Insert new
-      await supabase.from("floorplan_rooms").insert({
+      .insert({
         user_id: userId,
         session_id: sessionId,
         room_name: roomName,
         room_name_he: roomNameHe || roomName,
         image_url: imageUrl,
         style: style || null,
-      });
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, imageUrl });
+    return NextResponse.json({ success: true, imageUrl, roomId: inserted?.id });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

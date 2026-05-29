@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getRequestIp, sanitizeAttribution } from '@/lib/attribution-server';
 import { verifyUserEmail } from '@/lib/api-auth';
+import { CREDIT_PACK_MAX, CREDIT_PACK_MIN, getCreditPackPrice } from '@/lib/credit-costs';
+import {
+  getBillingCycleMonths,
+  getPlanChangeState,
+  getPlanCheckoutAmount,
+  getNextChargeDate,
+  inferPlanBillingCycle,
+  PLAN_PRICING,
+  toPayPlusDate,
+  type BillingCycle,
+  type PlanId,
+} from '@/lib/plan-pricing';
 
 const PAYPLUS_API_KEY = process.env.PAYPLUS_API_KEY;
 const PAYPLUS_SECRET_KEY = process.env.PAYPLUS_SECRET_KEY;
@@ -11,47 +23,22 @@ const PAYPLUS_BASE_URL = process.env.PAYPLUS_BASE_URL || 'https://restapi.payplu
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Credit slider pricing - same anchors as frontend
-const CREDIT_ANCHORS = [
-  { credits: 10, price: 10 },
-  { credits: 20, price: 19 },
-  { credits: 50, price: 42 },
-  { credits: 100, price: 75 },
-  { credits: 200, price: 129 },
-  { credits: 300, price: 179 },
-];
-
-function getCreditPrice(credits: number): number {
-  if (credits <= CREDIT_ANCHORS[0].credits) return CREDIT_ANCHORS[0].price;
-  const last = CREDIT_ANCHORS[CREDIT_ANCHORS.length - 1];
-  if (credits >= last.credits) return Math.round(credits * (last.price / last.credits));
-  for (let i = 0; i < CREDIT_ANCHORS.length - 1; i++) {
-    if (credits >= CREDIT_ANCHORS[i].credits && credits <= CREDIT_ANCHORS[i + 1].credits) {
-      const t = (credits - CREDIT_ANCHORS[i].credits) / (CREDIT_ANCHORS[i + 1].credits - CREDIT_ANCHORS[i].credits);
-      return Math.round(CREDIT_ANCHORS[i].price + t * (CREDIT_ANCHORS[i + 1].price - CREDIT_ANCHORS[i].price));
-    }
-  }
-  return 0;
+function getNextMonthlyChargeDate(): string {
+  return toPayPlusDate(getNextChargeDate('monthly'));
 }
 
-// Plan pricing
-const PLAN_PRICING: Record<string, { monthly: number; annual: number; credits: number }> = {
-  starter: { monthly: 29, annual: 15, credits: 50 },
-  pro: { monthly: 79, annual: 39, credits: 200 },
-  business: { monthly: 199, annual: 99, credits: 600 },
+type UserSubscriptionState = {
+  plan?: string | null;
+  vision_subscription?: string | boolean | null;
+  plan_period_end?: string | null;
 };
 
-const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
-
-function getNextMonthlyChargeDate(): string {
-  const now = new Date();
-  const next = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth() + 1,
-    Math.min(now.getUTCDate(), 28)
-  ));
-
-  return next.toISOString().slice(0, 10);
+function hasActiveSubscriptionForCreditPacks(user: UserSubscriptionState | null | undefined): boolean {
+  if (!user?.plan || !(user.plan in PLAN_PRICING)) return false;
+  const visionSubscription = String(user.vision_subscription || '').toLowerCase();
+  if (visionSubscription !== 'active' && visionSubscription !== 'true') return false;
+  if (user.plan_period_end && new Date(user.plan_period_end).getTime() < Date.now()) return false;
+  return true;
 }
 
 type PayPlusBody = {
@@ -91,12 +78,15 @@ type PayPlusBody = {
 // Legacy pricing (keep for old customers)
 const LEGACY_PRICING: Record<string, { amount: number; chargeMethod: number }> = {
   pro: { amount: 99, chargeMethod: 1 },
-  pack_10: { amount: 29, chargeMethod: 1 },
-  pack_30: { amount: 69, chargeMethod: 1 },
-  pack_100: { amount: 149, chargeMethod: 1 },
   premium: { amount: 299.99, chargeMethod: 1 },
   vision: { amount: 39.99, chargeMethod: 1 },
   premium_plus: { amount: 349.99, chargeMethod: 1 },
+};
+
+const LEGACY_CREDIT_PACKS: Record<string, number> = {
+  pack_10: 10,
+  pack_30: 30,
+  pack_100: 100,
 };
 
 export async function POST(request: NextRequest) {
@@ -125,39 +115,69 @@ export async function POST(request: NextRequest) {
     const planMatch = productType.match(/^plan_(starter|pro|business)_(monthly|annual)$/);
     if (planMatch) {
       const planId = planMatch[1];
-      const cycle = planMatch[2] as 'monthly' | 'annual';
-      const plan = PLAN_PRICING[planId];
+      const cycle = planMatch[2] as BillingCycle;
+      const plan = PLAN_PRICING[planId as PlanId];
 
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       const { data: currentUser } = await supabase
         .from('users')
-        .select('plan, vision_subscription')
+        .select('plan, vision_subscription, payplus_subscription_status, payplus_recurring_uid, plan_billing_cycle')
         .eq('email', email.toLowerCase())
         .single();
 
-      if (currentUser?.plan === planId && currentUser?.vision_subscription === 'active') {
-        return NextResponse.json({ error: 'You are already on this plan' }, { status: 409 });
-      }
+      const currentVisionSubscription = String(currentUser?.vision_subscription || '').toLowerCase();
+      if (currentUser?.plan && currentUser.plan !== 'free' && (currentVisionSubscription === 'active' || currentVisionSubscription === 'true')) {
+        const currentPlan = PLAN_PRICING[currentUser.plan as PlanId];
+        const currentBillingCycle = inferPlanBillingCycle({
+          plan: currentUser.plan,
+          planBillingCycle: currentUser.plan_billing_cycle,
+          visionSubscription: currentUser.vision_subscription,
+          payplusSubscriptionStatus: currentUser.payplus_subscription_status,
+          payplusRecurringUid: currentUser.payplus_recurring_uid,
+        });
+        const changeState = getPlanChangeState({
+          currentPlanId: currentUser.plan,
+          currentBillingCycle,
+          targetPlanId: planId as PlanId,
+          targetBillingCycle: cycle,
+        });
 
-      if (currentUser?.plan && currentUser.plan !== 'free' && currentUser?.vision_subscription === 'active') {
-        const currentPlan = PLAN_PRICING[currentUser.plan];
-        const currentRank = PLAN_RANK[currentUser.plan] || 0;
-        const targetRank = PLAN_RANK[planId] || 0;
+        if (changeState.current) {
+          return NextResponse.json({ error: 'You are already on this plan' }, { status: 409 });
+        }
 
-        if (cycle !== 'monthly' || !currentPlan || targetRank <= currentRank) {
+        if (!changeState.available || !currentPlan) {
           return NextResponse.json({
             error: 'This plan change is not available through checkout',
           }, { status: 409 });
         }
 
-        amount = Math.max(1, plan.monthly - currentPlan.monthly);
-        payPlusProductType = `upgrade_${currentUser.plan}_to_${planId}_monthly`;
-        description = `שדרוג מ-${currentUser.plan} ל-${planId} - הפרש לחודש הנוכחי`;
+        if (currentBillingCycle === 'monthly' && cycle === 'monthly' && changeState.upgrade) {
+          amount = Math.max(1, plan.monthlyPrice - currentPlan.monthlyPrice);
+          payPlusProductType = `upgrade_${currentUser.plan}_to_${planId}_monthly`;
+          description = `שדרוג מ-${currentUser.plan} ל-${planId} - הפרש לחודש הנוכחי`;
+        } else if (currentBillingCycle === 'monthly' && cycle === 'annual') {
+          amount = getPlanCheckoutAmount(plan.id, 'annual');
+          isRecurring = true;
+          chargeMethod = 3;
+          payPlusProductType = `switch_${currentUser.plan}_monthly_to_${planId}_annual`;
+          description = `מעבר מ-${currentUser.plan} חודשי ל-${planId} שנתי`;
+        } else if (currentBillingCycle === 'annual' && cycle === 'annual' && changeState.upgrade) {
+          amount = Math.max(1, plan.annualTotalPrice - currentPlan.annualTotalPrice);
+          payPlusProductType = `upgrade_${currentUser.plan}_to_${planId}_annual`;
+          description = `שדרוג שנתי מ-${currentUser.plan} ל-${planId} - הפרש לתקופה הנוכחית`;
+        } else {
+          return NextResponse.json({
+            error: 'This plan change is not available through checkout',
+          }, { status: 409 });
+        }
       } else if (cycle === 'annual') {
-        amount = plan.annual * 12; // Charge full year
+        amount = getPlanCheckoutAmount(plan.id, 'annual');
+        isRecurring = true;
+        chargeMethod = 3;
         description = `תוכנית ${planId} - שנתית (${plan.credits} קרדיטים/חודש)`;
       } else {
-        amount = plan.monthly;
+        amount = plan.monthlyPrice;
         isRecurring = true;
         chargeMethod = 3; // recurring
         description = `תוכנית ${planId} - חודשית (${plan.credits} קרדיטים/חודש)`;
@@ -168,11 +188,44 @@ export async function POST(request: NextRequest) {
     const creditsMatch = productType.match(/^credits_(\d+)$/);
     if (creditsMatch) {
       const credits = parseInt(creditsMatch[1]);
-      if (credits < 10 || credits > 300) {
+      if (credits < CREDIT_PACK_MIN || credits > CREDIT_PACK_MAX) {
         return NextResponse.json({ error: 'Invalid credit amount' }, { status: 400 });
       }
-      amount = getCreditPrice(credits);
-      description = `${credits} קרדיטים`;
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('plan, vision_subscription, plan_period_end')
+        .eq('email', email.toLowerCase())
+        .maybeSingle();
+
+      if (!hasActiveSubscriptionForCreditPacks(currentUser)) {
+        return NextResponse.json({
+          error: 'Extra credits are available only for active subscribers',
+        }, { status: 403 });
+      }
+
+      amount = getCreditPackPrice(credits);
+      description = `${credits} קרדיטים נוספים למנוי`;
+    }
+
+    if (!amount && LEGACY_CREDIT_PACKS[productType]) {
+      const credits = LEGACY_CREDIT_PACKS[productType];
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('plan, vision_subscription, plan_period_end')
+        .eq('email', email.toLowerCase())
+        .maybeSingle();
+
+      if (!hasActiveSubscriptionForCreditPacks(currentUser)) {
+        return NextResponse.json({
+          error: 'Extra credits are available only for active subscribers',
+        }, { status: 403 });
+      }
+
+      amount = getCreditPackPrice(credits);
+      description = `${credits} קרדיטים נוספים למנוי`;
     }
 
     // LEGACY support
@@ -231,14 +284,15 @@ export async function POST(request: NextRequest) {
       payPlusBody.product_name = description;
     }
 
-    // Recurring settings for monthly plans
+    // Recurring settings for monthly and annual plans.
     if (isRecurring) {
+      const recurringCycle = payPlusProductType.endsWith('_annual') ? 'annual' : 'monthly';
       payPlusBody.recurring_settings = {
         instant_first_payment: true,
         recurring_type: 2,
-        recurring_range: 1,
+        recurring_range: getBillingCycleMonths(recurringCycle),
         number_of_charges: 0,
-        start_date: getNextMonthlyChargeDate(),
+        start_date: toPayPlusDate(getNextChargeDate(recurringCycle)),
         jump_payments: 0,
         successful_invoice: true,
         customer_failure_email: true,

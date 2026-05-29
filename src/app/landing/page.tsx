@@ -448,11 +448,11 @@ const PRICING = [
     popular: true,
   },
   {
-    name: "חבילת 30",
-    price: "₪69",
-    priceNum: "69",
+    name: "תוספת 50",
+    price: "₪49",
+    priceNum: "49",
     features: [
-      "30 הדמיות",
+      "50 קרדיטים למנויים",
       "כל הסגנונות",
       "רזולוציה גבוהה",
       "כתב כמויות",
@@ -1028,12 +1028,8 @@ function TestimonialsSection() {
                 }
               >
                 <TiltCard className="testimonial-card">
-                  <div style={{ display: "flex", gap: 2, marginBottom: "1rem" }}>
-                    {Array.from({ length: t.rating }).map((_, j) => (
-                      <span key={j} style={{ color: "#F59E0B", fontSize: "1.2rem" }}>
-                        ★
-                      </span>
-                    ))}
+                  <div style={{ color: "#D97706", fontSize: "0.9rem", fontWeight: 700, marginBottom: "1rem" }}>
+                    {t.rating}/5
                   </div>
                   <p style={{ color: "#374151", lineHeight: 1.7, marginBottom: "1rem" }}>
                     &ldquo;{t.text}&rdquo;

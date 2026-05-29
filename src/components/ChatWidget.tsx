@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2, Minus } from "lucide-react";
+import { X, Send, Loader2, Minus } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -10,8 +10,6 @@ interface Message {
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
-  const [bubbleDismissed, setBubbleDismissed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -43,24 +41,6 @@ export default function ChatWidget() {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
-
-  // Show bubble after 3 seconds
-  useEffect(() => {
-    if (!bubbleDismissed && !isOpen) {
-      const timer = setTimeout(() => {
-        setShowBubble(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [bubbleDismissed, isOpen]);
-
-  // Hide bubble when chat opens
-  useEffect(() => {
-    if (isOpen) {
-      setShowBubble(false);
-      setBubbleDismissed(true);
-    }
-  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,44 +101,10 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Chat Bubble - Points to robot button */}
-      {showBubble && !isOpen && (
-        <div className="fixed bottom-20 right-4 z-50 animate-in slide-in-from-bottom-4 duration-500">
-          <div 
-            onClick={() => setIsOpen(true)}
-            className="relative bg-white rounded-2xl shadow-2xl p-4 max-w-[220px] border border-gray-100 cursor-pointer hover:shadow-xl transition-shadow"
-          >
-            {/* Close button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowBubble(false);
-                setBubbleDismissed(true);
-              }}
-              className="absolute -top-2 -left-2 w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs"
-            >
-              ✕
-            </button>
-            {/* Arrow pointing down to robot */}
-            <div className="absolute -bottom-2 right-4 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
-            {/* Content - simpler, just text */}
-            <div className="text-center">
-              <p className="text-gray-800 font-medium text-sm mb-1">צריך עזרה?</p>
-              <p className="text-gray-500 text-xs leading-relaxed">
-                יש לי תשובות לכל שאלה
-              </p>
-              <span className="mt-2 text-emerald-600 text-xs font-medium inline-block">
-                לחצו לשיחה ↓
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Chat Button - Right side, bottom - Always visible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-4 z-50 flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-6 right-4 z-50 hidden items-center justify-center transition-all duration-300 md:flex ${
           isOpen
             ? "w-12 h-12 rounded-full bg-gray-600 hover:bg-gray-700 shadow-lg"
             : "w-12 h-12 hover:scale-110 drop-shadow-lg"
@@ -168,19 +114,13 @@ export default function ChatWidget() {
         {isOpen ? (
           <X className="w-5 h-5 text-white" />
         ) : (
-          <>
-            <img src="/robot-support.png" alt="Support" className="w-12 h-12 object-contain" />
-            {/* Notification dot */}
-            {!bubbleDismissed && (
-              <span className="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-            )}
-          </>
+          <img src="/robot-support.png" alt="Support" className="w-12 h-12 object-contain" />
         )}
       </button>
 
       {/* Chat Window - Right side, bottom */}
       {isOpen && (
-        <div className="fixed bottom-24 right-4 z-50 w-[350px] max-w-[calc(100vw-2rem)] h-[450px] max-h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-24 right-4 z-50 hidden h-[450px] max-h-[70vh] w-[350px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl animate-in slide-in-from-bottom-4 duration-300 md:flex">
           {/* Header */}
           <div className="bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
             <div className="w-12 h-12 flex items-center justify-center">
@@ -200,10 +140,7 @@ export default function ChatWidget() {
                 <Minus className="w-4 h-4" />
               </button>
               <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setBubbleDismissed(true);
-                }}
+                onClick={() => setIsOpen(false)}
                 className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
                 aria-label="סגור"
               >

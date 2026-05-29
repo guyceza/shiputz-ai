@@ -71,6 +71,24 @@ export async function GET(request: NextRequest) {
         const email = tx.more_info_1 || tx.customer_email || payment.email;
         const productType = tx.more_info || payment.product_type;
 
+        if (/^(plan_|upgrade_|switch_|credits_)/.test(productType || '')) {
+          const checkResponse = await fetch(new URL('/api/payplus/check', request.url), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              page_request_uid: payment.page_request_uid,
+              email,
+              product: productType,
+            }),
+          });
+
+          if (checkResponse.ok) {
+            updated++;
+          }
+
+          continue;
+        }
+
         // Check if user already updated (by webhook or success page)
         const { data: user } = await supabase
           .from('users')

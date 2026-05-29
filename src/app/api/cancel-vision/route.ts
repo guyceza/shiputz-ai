@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('payplus_recurring_uid, payplus_customer_uid, payplus_subscription_status')
+      .select('payplus_recurring_uid, payplus_customer_uid, payplus_subscription_status, plan_billing_cycle, plan_period_end')
       .eq('email', normalizedEmail)
       .single();
 
@@ -138,6 +138,37 @@ export async function POST(request: NextRequest) {
       }, { status: 502 });
     }
 
+    if (user.plan_billing_cycle === 'annual' && user.plan_period_end && new Date(user.plan_period_end) > new Date()) {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          vision_canceled_at: new Date().toISOString(),
+          payplus_recurring_uid: recurring?.uid || user.payplus_recurring_uid || null,
+          payplus_customer_uid: recurring?.customer_uid || user.payplus_customer_uid || null,
+          payplus_recurring_number: recurring?.number || null,
+          payplus_subscription_status: 'canceled',
+          subscription_cancel_at_period_end: true,
+          scheduled_plan: null,
+          scheduled_billing_cycle: null,
+          scheduled_plan_change_at: null,
+          scheduled_plan_change_created_at: null,
+          scheduled_plan_change_status: null,
+          payplus_last_checked_at: new Date().toISOString(),
+        })
+        .eq('email', normalizedEmail);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        canceledInPayPlus: Boolean(recurring?.uid),
+        cancelAtPeriodEnd: true,
+        activeUntil: user.plan_period_end,
+      });
+    }
+
     const { error } = await supabase
       .from('users')
       .update({ 
@@ -149,6 +180,15 @@ export async function POST(request: NextRequest) {
         payplus_customer_uid: recurring?.customer_uid || user.payplus_customer_uid || null,
         payplus_recurring_number: recurring?.number || null,
         payplus_subscription_status: 'canceled',
+        plan_billing_cycle: null,
+        plan_period_start: null,
+        plan_period_end: null,
+        scheduled_plan: null,
+        scheduled_billing_cycle: null,
+        scheduled_plan_change_at: null,
+        scheduled_plan_change_created_at: null,
+        scheduled_plan_change_status: null,
+        subscription_cancel_at_period_end: false,
         payplus_last_checked_at: new Date().toISOString(),
       })
       .eq('email', normalizedEmail);

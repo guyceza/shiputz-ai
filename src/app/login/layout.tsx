@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "התחברות | ShiputzAI",
     description: "התחבר לחשבון ShiputzAI שלך",
-    images: ["/og-image.jpg"],
+    images: ["/og/shiputzai-og-ai-renovation-1200x630.png"],
   },
 };
 

@@ -3,19 +3,14 @@ export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientId } from "@/lib/rate-limit";
-import { creditGuard } from "@/lib/credit-guard";
-import { refundCreditCharge } from "@/lib/credit-refunds";
 import { AI_MODELS, GEMINI_BASE_URL } from "@/lib/ai-config";
 import { claimShavuotGiftAfterSuccessfulAction } from "@/lib/gift-campaigns";
+import { verifyUserEmail } from "@/lib/api-auth";
+import { hasActiveAiAssistantSubscription } from "@/lib/credits";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function POST(request: NextRequest) {
-  let chargedUserEmail: string | null = null;
-  let chargedCost = 0;
-  const refundIfNeeded = (reason: string) =>
-    refundCreditCharge(chargedUserEmail, chargedCost, `ai-assistant_${reason}`);
-
   try {
     const body = await request.json();
     const { message, context, userEmail } = body;
@@ -33,16 +28,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No message provided" }, { status: 400 });
     }
 
+    const normalizedEmail = typeof userEmail === "string" ? userEmail.trim().toLowerCase() : "";
+    if (!normalizedEmail || !(await verifyUserEmail(request, normalizedEmail))) {
+      return NextResponse.json(
+        { error: "נדרשת התחברות לשימוש בעוזר ה-AI", code: "AUTH_REQUIRED" },
+        { status: 401 }
+      );
+    }
+
+    if (!(await hasActiveAiAssistantSubscription(normalizedEmail))) {
+      return NextResponse.json(
+        {
+          error: "עוזר ה-AI פתוח למנויים פעילים בלבד. אחרי בחירת מנוי אפשר להשתמש בו ללא הגבלת קרדיטים.",
+          code: "SUBSCRIPTION_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
+
     if (!GEMINI_API_KEY) {
       return NextResponse.json({ 
         response: "מצטער, שירות ה-AI לא זמין כרגע. נסה שוב מאוחר יותר." 
       });
     }
-
-    const guard = await creditGuard(userEmail, 'analyze-quote');
-    if ('error' in guard) return guard.error;
-    chargedUserEmail = userEmail;
-    chargedCost = guard.cost;
 
     const systemPrompt = `אתה עוזר פרקטי לניהול שיפוצים. המטרה שלך: לעזור, לא לבקר.
 
@@ -105,23 +113,18 @@ export async function POST(request: NextRequest) {
     );
 
     if (!response.ok) {
-      await refundIfNeeded("ai_error");
       return NextResponse.json({ error: "AI failed" }, { status: 500 });
     }
 
     const data = await response.json();
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "מצטער, לא הצלחתי לענות";
     if (!aiResponse || aiResponse === "מצטער, לא הצלחתי לענות") {
-      await refundIfNeeded("empty_response");
       return NextResponse.json({ error: "AI failed" }, { status: 500 });
     }
 
-    chargedUserEmail = null;
-    chargedCost = 0;
-    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, userEmail, 'ai-assistant');
+    const giftClaim = await claimShavuotGiftAfterSuccessfulAction(request, normalizedEmail, 'ai-assistant');
     return NextResponse.json({ response: aiResponse, giftClaim });
   } catch {
-    await refundIfNeeded("server_error");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

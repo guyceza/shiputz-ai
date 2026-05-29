@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { CREDIT_COSTS } from '@/lib/credit-costs';
 import crypto from 'crypto';
 
 // Vercel: use Node.js runtime with 60s timeout (NOT Edge)
@@ -362,7 +363,7 @@ function evaluateWelcome(ctx: FlowContext): EmailAction | null {
           greet(user.name || undefined) +
           para('שמנו לב שעדיין לא ניסיתם את <strong>הדמיית החדר</strong> - הכלי הכי פופולרי שלנו!') +
           para('מצלמים את החדר, בוחרים סגנון עיצוב - ותוך שניות רואים <strong>איך זה ייראה בעיצוב חדש</strong>.') +
-          bigNumber('10 קרדיטים', 'מחכים לכם בחשבון - מספיק להדמיה אחת'),
+          bigNumber('10 קרדיטים', 'מחכים לכם בחשבון - מספיק להתחלה'),
           'לנסות עכשיו',
           `${BASE_URL}/visualize`,
           user.email,
@@ -552,8 +553,8 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
           `📊 ${usageCount} שימושים בכלים`,
           `💰 ${totalSpent} קרדיטים נוצלו`,
         ]) +
-        para('חבילות מתחילות מ-<strong>₪10 בלבד</strong>.'),
-        'לרכוש קרדיטים',
+        para('בחרו מנוי כדי לקבל קרדיטים חודשיים. מנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים לפי הצורך.'),
+        'לבחירת מנוי',
         `${BASE_URL}/pricing`,
         user.email,
       ),
@@ -623,7 +624,7 @@ async function evaluateZeroCredits(ctx: FlowContext, supabase: any): Promise<Ema
             greet(user.name || undefined) +
             para('לא רוצים לוותר עליכם. הנה <strong>ההנחה הכי גבוהה שלנו</strong>:') +
             bigNumber('25% הנחה', `קוד: <strong>${code}</strong>`) +
-            para('חבילות קרדיטים מ-₪10 - <strong>עם ההנחה עוד פחות</strong>.'),
+            para('הנחה על מנוי ועל תוספות קרדיטים למנויים פעילים.'),
             'לנצל את ההנחה',
             `${BASE_URL}/pricing?code=${code}`,
             user.email,
@@ -731,7 +732,7 @@ async function evaluateInactive(ctx: FlowContext, supabase: any): Promise<EmailA
         greet(user.name || undefined) +
         para('עבר חודש מהשימוש האחרון שלכם. רצינו להגיד שלום ולתת לכם <strong>מתנה קטנה</strong>.') +
         bigNumber('5 קרדיטים', 'כבר בחשבון שלכם - מוכנים לשימוש') +
-        para('מספיק ל-Style Match, ניתוח הצעת מחיר, או סריקת קבלות.'),
+        para('מספיק לטעימה מכלי AI קלים, ובהמשך מנוי פותח את הכלים הכבדים.'),
         'להשתמש במתנה',
         `${BASE_URL}/visualize`,
         user.email,
@@ -808,9 +809,9 @@ function evaluatePostPurchase(ctx: FlowContext): EmailAction | null {
         greet(user.name || undefined) +
         para('הנה כמה טיפים <strong>לנצל כל קרדיט בצורה חכמה</strong>:') +
         infoBox([
-          '🎨 <strong>הדמיה בסגנונות שונים</strong> - נסו מודרני, כפרי, מינימליסטי (10 קרדיטים)',
-          '🛋️ <strong>Style Match</strong> - AI מזהה את הסגנון שלכם ומציע מוצרים (3 קרדיטים)',
-          '🛒 <strong>Shop the Look</strong> - זיהוי מוצרים בתמונה + קישורי קנייה (3 קרדיטים)',
+          `🎨 <strong>הדמיה בסגנונות שונים</strong> - נסו מודרני, כפרי, מינימליסטי (${CREDIT_COSTS.visualize} קרדיטים)`,
+          `🛋️ <strong>Style Match</strong> - AI מזהה את הסגנון שלכם ומציע מוצרים (${CREDIT_COSTS["style-match"]} קרדיטים)`,
+          `🛒 <strong>Shop the Look</strong> - זיהוי מוצרים בתמונה + קישורי קנייה (${CREDIT_COSTS["shop-look"]} קרדיטים)`,
         ]) +
         para('הכלי הכי פופולרי? <strong>הדמיית חדר</strong> - 30 שניות ורואים את העתיד.'),
         'צור הדמיה',

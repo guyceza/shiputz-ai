@@ -12,6 +12,95 @@ import { verifyUserEmail } from '@/lib/api-auth';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = 'ShiputzAI <help@shipazti.com>';
+const SIGNUP_DISCORD_WEBHOOK_URL = process.env.DISCORD_SIGNUP_WEBHOOK_URL;
+const SIGNUP_BONUS_CREDITS = 10;
+
+function formatDiscordField(value: unknown): string {
+  if (value === null || value === undefined || value === '') return 'לא ידוע';
+  return String(value).slice(0, 300);
+}
+
+function formatDiscordMetric(icon: string, label: string, value: unknown): string {
+  return `${icon} ${label}: ${formatDiscordField(value)}`;
+}
+
+function buildDiscordSignupEmbed(params: {
+  email: string;
+  name?: string;
+  authProvider?: string;
+  attribution: unknown;
+}) {
+  const attribution = sanitizeAttribution(params.attribution);
+  const source = attribution?.utm_source || attribution?.first_source;
+  const medium = attribution?.utm_medium || attribution?.first_medium;
+  const campaign = attribution?.utm_campaign;
+  const landingPath = attribution?.first_landing_path || attribution?.first_landing_page;
+  const referrer = attribution?.first_referrer;
+  const clickId = attribution?.gclid ? 'Google Ads' : attribution?.fbclid ? 'Meta Ads' : attribution?.msclkid ? 'Microsoft Ads' : null;
+  const signupTime = new Date().toLocaleString('he-IL', {
+    timeZone: 'Asia/Jerusalem',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  const lines = [
+    formatDiscordMetric('👤', 'Name', params.name),
+    formatDiscordMetric('✉️', 'Email', params.email),
+    formatDiscordMetric('🔐', 'Auth', params.authProvider || 'email'),
+    '',
+    formatDiscordMetric('📍', 'Source', [source, medium].filter(Boolean).join(' / ')),
+    formatDiscordMetric('🎯', 'Campaign', campaign),
+    formatDiscordMetric('🚪', 'Landing page', landingPath),
+    formatDiscordMetric('🔗', 'Referrer', referrer),
+    formatDiscordMetric('🖱️', 'Click platform', clickId),
+    '',
+    formatDiscordMetric('🕒', 'Signup time', signupTime),
+  ];
+
+  return {
+    title: '🆕 ShiputzAI New Signup',
+    description: lines.join('\n'),
+    color: 0xF59E0B,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+async function notifyDiscordSignup(params: {
+  email: string;
+  name?: string;
+  authProvider?: string;
+  attribution: unknown;
+}): Promise<void> {
+  if (!SIGNUP_DISCORD_WEBHOOK_URL) return;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const response = await fetch(SIGNUP_DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'ShiputzAI',
+        embeds: [buildDiscordSignupEmbed(params)],
+        allowed_mentions: { parse: [] },
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      console.warn('Discord signup notification failed:', response.status, await response.text());
+    }
+  } catch (err) {
+    console.warn('Discord signup notification failed:', err);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 async function saveUserAttribution(supabase: ReturnType<typeof createServiceClient>, params: {
   userId?: string | null;
@@ -213,7 +302,11 @@ export async function POST(request: NextRequest) {
     const insertData: Record<string, any> = { 
       email: normalizedEmail, 
       name, 
-      auth_provider: auth_provider || 'email' 
+      auth_provider: auth_provider || 'email',
+      plan: 'free',
+      viz_credits: SIGNUP_BONUS_CREDITS,
+      purchased_credits: SIGNUP_BONUS_CREDITS,
+      subscription_credits: 0,
     };
     if (auth_id) {
       insertData.id = auth_id;
@@ -236,11 +329,26 @@ export async function POST(request: NextRequest) {
       request,
     });
 
+    await notifyDiscordSignup({
+      email: normalizedEmail,
+      name,
+      authProvider: auth_provider || 'email',
+      attribution,
+    });
+
     // Send welcome email immediately and mark the real lifecycle flow as sent.
     const welcomeResult = await sendWelcomeEmail(normalizedEmail, name || '');
 
     // Mark day 0 of the current lifecycle flow as sent so cron continues the sequence.
     try {
+      await supabase.from('credit_transactions').insert({
+        user_email: normalizedEmail,
+        action: 'signup_bonus',
+        amount: SIGNUP_BONUS_CREDITS,
+        balance_after: SIGNUP_BONUS_CREDITS,
+        created_at: new Date().toISOString(),
+      });
+
       await supabase.from('email_sequences').upsert({
         user_email: normalizedEmail,
         sequence_type: 'welcome',
@@ -256,7 +364,7 @@ export async function POST(request: NextRequest) {
       // Ignore
     }
 
-    return NextResponse.json({ message: 'User created', id: data.id });
+    return NextResponse.json({ message: 'User created', id: data.id, vizCredits: SIGNUP_BONUS_CREDITS });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

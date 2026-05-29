@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { trackAction, clearAction } from "@/lib/track-action";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 
 // Demo data for preview
@@ -86,7 +87,7 @@ export default function StyleMatchPage() {
             <h1 className="text-2xl font-bold text-gray-900 mt-1">Style Matcher</h1>
             <p className="text-gray-500 text-sm mt-1">העלו תמונה של חדר שאהבתם - נזהה את הסגנון ונעזור לכם לשחזר אותו</p>
           </div>
-          <span className="bg-gray-100 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-full">3 קרדיטים</span>
+          <span className="bg-gray-100 text-gray-600 text-sm font-medium px-3 py-1.5 rounded-full">{CREDIT_COSTS["style-match"]} קרדיטים</span>
         </div>
       </div>
 

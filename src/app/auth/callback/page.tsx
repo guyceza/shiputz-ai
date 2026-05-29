@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getStoredAttribution } from '@/lib/attribution';
+import { trackSignupConversion } from '@/lib/ads-tracking';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function AuthCallbackPage() {
     
     // Save to users table with Google provider - pass auth ID for consistency
     try {
-      await fetch('/api/users', {
+      const userResponse = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,12 +55,22 @@ export default function AuthCallbackPage() {
         },
         body: JSON.stringify({ email, name, auth_provider: 'google', auth_id: session.user.id, attribution: getStoredAttribution() }),
       });
+      const userData = await userResponse.json().catch(() => ({}));
+      if (typeof userData?.vizCredits === 'number') {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        localStorage.setItem("user", JSON.stringify({
+          ...storedUser,
+          viz_credits: userData.vizCredits,
+        }));
+      }
     } catch (e) {
       console.error('User save failed:', e);
     }
     
     // Complete referral if user signed up via referral link
     if (isNewUser) {
+      trackSignupConversion('google');
+
       try {
         const referralCode = localStorage.getItem('referralCode');
         if (referralCode) {
@@ -78,11 +89,17 @@ export default function AuthCallbackPage() {
       }
     }
     
+    // Check for saved redirect URL (e.g., from a tool page → signup/login → Google OAuth)
+    const savedRedirect = localStorage.getItem('authRedirect');
+
     if (isNewUser && !hasCompletedOnboarding) {
-      router.push('/visualize');
+      if (savedRedirect) {
+        localStorage.removeItem('authRedirect');
+        router.push(savedRedirect);
+      } else {
+        router.push('/start');
+      }
     } else {
-      // Check for saved redirect URL (e.g., from discount email → login → Google OAuth)
-      const savedRedirect = localStorage.getItem('authRedirect');
       if (savedRedirect) {
         localStorage.removeItem('authRedirect');
         router.push(savedRedirect);

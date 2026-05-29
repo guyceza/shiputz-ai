@@ -162,6 +162,10 @@ export default function ContactPage() {
               support@shipazti.com
             </a>
           </p>
+
+          <p className="text-center text-gray-400 text-xs mt-4">
+            ShiputzAI מופעל על ידי <span dir="ltr">WED4ME</span>
+          </p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { RoofNode } from '@pascal-app/core'
+import { useScene, type RoofNode, type RoofSegmentNode } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
 import Image from 'next/image'
 import { useState } from 'react'
@@ -20,6 +20,10 @@ export function RoofTreeNode({ node, depth, isLast }: RoofTreeNodeProps) {
   const isHovered = useViewer((state) => state.hoveredId === node.id)
   const setSelection = useViewer((state) => state.setSelection)
   const setHoveredId = useViewer((state) => state.setHoveredId)
+  const segmentId = node.children?.[0]
+  const segment = useScene((state) =>
+    segmentId ? (state.nodes[segmentId] as RoofSegmentNode | undefined) : undefined,
+  )
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -41,9 +45,7 @@ export function RoofTreeNode({ node, depth, isLast }: RoofTreeNodeProps) {
     setHoveredId(null)
   }
 
-  // Calculate dimensions: length × total width (leftWidth + rightWidth)
-  const totalWidth = node.leftWidth + node.rightWidth
-  const sizeLabel = `${node.length.toFixed(1)}×${totalWidth.toFixed(1)}m`
+  const sizeLabel = segment ? `${segment.width.toFixed(1)}×${segment.depth.toFixed(1)}m` : 'empty'
   const defaultName = `Roof (${sizeLabel})`
 
   return (

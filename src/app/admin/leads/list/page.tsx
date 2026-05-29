@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ADMIN_EMAILS, isAdmin as isAdminCheck } from "@/lib/admin";
 import { adminFetch } from "@/lib/admin-api";
@@ -34,6 +33,7 @@ type SortDir = "asc" | "desc";
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-gray-100 text-gray-700",
+  pending: "bg-yellow-100 text-yellow-700",
   email1_sent: "bg-blue-100 text-blue-700",
   email2_sent: "bg-indigo-100 text-indigo-700",
   bounced: "bg-red-100 text-red-700",
@@ -44,22 +44,76 @@ const STATUS_COLORS: Record<string, string> = {
   complained: "bg-red-200 text-red-800",
 };
 
+const LEAD_STATUS_LABELS: Record<string, string> = {
+  new: "חדש",
+  pending: "ממתין",
+  email1_sent: "מייל 1 נשלח",
+  email2_sent: "מייל 2 נשלח",
+  bounced: "חזר",
+  error: "שגיאה",
+  unsubscribed: "הוסר",
+};
+
 const EMAIL_STATUS_BADGE: Record<string, { color: string; label: string }> = {
   sent: { color: "bg-blue-100 text-blue-700", label: "נשלח" },
   delivered: { color: "bg-cyan-100 text-cyan-700", label: "נמסר" },
   opened: { color: "bg-green-100 text-green-700", label: "נפתח" },
-  clicked: { color: "bg-amber-100 text-amber-700", label: "לחץ" },
+  clicked: { color: "bg-amber-100 text-amber-800", label: "לחץ על לינק" },
   bounced: { color: "bg-red-100 text-red-700", label: "חזר" },
   error: { color: "bg-red-100 text-red-600", label: "שגיאה" },
   complained: { color: "bg-red-200 text-red-800", label: "תלונה" },
 };
 
+const SEGMENT_LABELS: Record<string, { label: string; description: string }> = {
+  email1_any: {
+    label: "נשלח מייל 1",
+    description: "לידים שקיבלו את המייל הראשון בכל סטטוס",
+  },
+  email2_any: {
+    label: "נשלח מייל 2",
+    description: "לידים שקיבלו את מייל ההמשך בכל סטטוס",
+  },
+  sent_today: {
+    label: "נשלח היום",
+    description: "לידים שקיבלו מייל היום",
+  },
+  delivered: {
+    label: "נמסרו",
+    description: "מיילים שהגיעו לתיבה",
+  },
+  opened: {
+    label: "פתחו",
+    description: "לידים שפתחו מייל או לחצו על לינק",
+  },
+  clicked: {
+    label: "לחצו על הלינק",
+    description: "לידים שלחצו על לינק במייל 1 או במייל 2",
+  },
+  bounced: {
+    label: "חזרו",
+    description: "מיילים שחזרו ולא נמסרו",
+  },
+  complained: {
+    label: "התלוננו",
+    description: "לידים שסימנו את המייל כתלונה",
+  },
+  error: {
+    label: "שגיאות",
+    description: "מיילים שנכשלו בשליחה או בעיבוד",
+  },
+  remaining: {
+    label: "נותרו לשליחה",
+    description: "לידים שעדיין ממתינים לתחילת הקמפיין",
+  },
+};
+
 const PROFESSIONS: Record<string, string> = {
   "מעצבי פנים": "מעצבי פנים",
   "אדריכלים": "אדריכלים",
-  "קבלנים": "קבלנים",
-  "מטבחים": "מטבחים",
-  "נגרות": "נגרות",
+  "קבלני שיפוצים": "קבלני שיפוצים",
+  "מטבחים ואמבטיות": "מטבחים ואמבטיות",
+  "נגרות אדריכלית": "נגרות אדריכלית",
+  "תאורה ועיצוב": "תאורה ועיצוב",
 };
 
 function formatDate(dateStr: string | null) {
@@ -74,8 +128,23 @@ function formatDateTime(dateStr: string | null) {
   return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+function getLeadStatusLabel(status: string) {
+  return LEAD_STATUS_LABELS[status] || status;
+}
+
+function getLeadEngagementSummary(lead: Lead) {
+  if (lead.email2_status === "clicked") return "לחץ על לינק במייל 2";
+  if (lead.email1_status === "clicked") return "לחץ על לינק במייל 1";
+  if (lead.email2_status === "opened") return "פתח את מייל 2";
+  if (lead.email1_status === "opened") return "פתח את מייל 1";
+  if (lead.email2_status === "delivered") return "מייל 2 נמסר";
+  if (lead.email1_status === "delivered") return "מייל 1 נמסר";
+  if (lead.email2_status === "bounced") return "מייל 2 חזר";
+  if (lead.email1_status === "bounced") return "מייל 1 חזר";
+  return null;
+}
+
 export default function LeadsListPage() {
-  const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +157,7 @@ export default function LeadsListPage() {
   const [filterEmail1, setFilterEmail1] = useState<string>("all");
   const [filterEmail2, setFilterEmail2] = useState<string>("all");
   const [filterUnsubscribed, setFilterUnsubscribed] = useState<string>("all");
+  const [filterSegment, setFilterSegment] = useState<string>("all");
 
   // Sort
   const [sortKey, setSortKey] = useState<SortKey>("quality_score");
@@ -130,6 +200,25 @@ export default function LeadsListPage() {
     if (adminEmail) fetchLeads();
   }, [adminEmail, fetchLeads]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const segment = params.get("segment");
+    const status = params.get("status");
+    const profession = params.get("profession");
+    const email1 = params.get("email1");
+    const email2 = params.get("email2");
+    const unsubscribed = params.get("unsubscribed");
+    const q = params.get("q");
+
+    if (segment) setFilterSegment(segment);
+    if (status) setFilterStatus(status);
+    if (profession) setFilterProfession(profession);
+    if (email1) setFilterEmail1(email1);
+    if (email2) setFilterEmail2(email2);
+    if (unsubscribed) setFilterUnsubscribed(unsubscribed);
+    if (q) setSearch(q);
+  }, []);
+
   // Filtered + sorted leads
   const filtered = useMemo(() => {
     let result = leads;
@@ -152,14 +241,31 @@ export default function LeadsListPage() {
     if (filterProfession !== "all") result = result.filter((l) => l.profession === filterProfession);
     if (filterEmail1 !== "all") {
       if (filterEmail1 === "not_sent") result = result.filter((l) => !l.email1_status);
+      else if (filterEmail1 === "any") result = result.filter((l) => !!l.email1_status);
       else result = result.filter((l) => l.email1_status === filterEmail1);
     }
     if (filterEmail2 !== "all") {
       if (filterEmail2 === "not_sent") result = result.filter((l) => !l.email2_status);
+      else if (filterEmail2 === "any") result = result.filter((l) => !!l.email2_status);
       else result = result.filter((l) => l.email2_status === filterEmail2);
     }
     if (filterUnsubscribed !== "all") {
       result = result.filter((l) => (filterUnsubscribed === "yes" ? l.unsubscribed : !l.unsubscribed));
+    }
+    if (filterSegment !== "all") {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      result = result.filter((l) => {
+        if (filterSegment === "email1_any") return !!l.email1_status;
+        if (filterSegment === "email2_any") return !!l.email2_status;
+        if (filterSegment === "remaining") return ["new", "pending"].includes(l.status);
+        if (filterSegment === "sent_today") {
+          const email1Today = l.email1_sent_at ? new Date(l.email1_sent_at) >= today : false;
+          const email2Today = l.email2_sent_at ? new Date(l.email2_sent_at) >= today : false;
+          return email1Today || email2Today;
+        }
+        return l.email1_status === filterSegment || l.email2_status === filterSegment || l.status === filterSegment;
+      });
     }
 
     // Sort
@@ -172,14 +278,14 @@ export default function LeadsListPage() {
     });
 
     return result;
-  }, [leads, search, filterStatus, filterProfession, filterEmail1, filterEmail2, filterUnsubscribed, sortKey, sortDir]);
+  }, [leads, search, filterStatus, filterProfession, filterEmail1, filterEmail2, filterUnsubscribed, filterSegment, sortKey, sortDir]);
 
   // Pagination
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
   // Reset page on filter change
-  useEffect(() => { setPage(1); }, [search, filterStatus, filterProfession, filterEmail1, filterEmail2, filterUnsubscribed]);
+  useEffect(() => { setPage(1); }, [search, filterStatus, filterProfession, filterEmail1, filterEmail2, filterUnsubscribed, filterSegment]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -198,10 +304,10 @@ export default function LeadsListPage() {
   // Stats summary
   const statsSummary = useMemo(() => {
     const total = leads.length;
-    const sent = leads.filter((l) => l.email1_status).length;
+    const sent = leads.filter((l) => l.email1_status || l.email2_status).length;
     const opened = leads.filter((l) => l.email1_status === "opened" || l.email2_status === "opened" || l.email1_status === "clicked" || l.email2_status === "clicked").length;
     const clicked = leads.filter((l) => l.email1_status === "clicked" || l.email2_status === "clicked").length;
-    const bounced = leads.filter((l) => l.email1_status === "bounced" || l.status === "bounced").length;
+    const bounced = leads.filter((l) => l.email1_status === "bounced" || l.email2_status === "bounced" || l.status === "bounced").length;
     const unsub = leads.filter((l) => l.unsubscribed).length;
     const newLeads = leads.filter((l) => l.status === "new").length;
     return { total, sent, opened, clicked, bounced, unsub, newLeads };
@@ -252,7 +358,7 @@ export default function LeadsListPage() {
             { label: "חדשים", value: statsSummary.newLeads, color: "bg-gray-50" },
             { label: "נשלחו", value: statsSummary.sent, color: "bg-blue-50" },
             { label: "נפתחו", value: statsSummary.opened, color: "bg-green-50" },
-            { label: "לחצו", value: statsSummary.clicked, color: "bg-amber-50" },
+            { label: "לחצו על לינק", value: statsSummary.clicked, color: "bg-amber-50" },
             { label: "חזרו", value: statsSummary.bounced, color: "bg-red-50" },
             { label: "הסירו", value: statsSummary.unsub, color: "bg-gray-50" },
           ].map((s) => (
@@ -293,10 +399,30 @@ export default function LeadsListPage() {
             >
               <option value="all">כל הסטטוסים</option>
               <option value="new">חדש</option>
+              <option value="pending">ממתין</option>
               <option value="email1_sent">מייל 1 נשלח</option>
               <option value="email2_sent">מייל 2 נשלח</option>
               <option value="bounced">חזר</option>
               <option value="error">שגיאה</option>
+            </select>
+
+            {/* Segment filter */}
+            <select
+              value={filterSegment}
+              onChange={(e) => setFilterSegment(e.target.value)}
+              className="px-3 py-2 border rounded-lg text-sm bg-white"
+            >
+              <option value="all">קוביה / אירוע - הכל</option>
+              <option value="email1_any">נשלח מייל 1</option>
+              <option value="email2_any">נשלח מייל 2</option>
+              <option value="sent_today">נשלח היום</option>
+              <option value="delivered">נמסר</option>
+              <option value="opened">נפתח</option>
+              <option value="clicked">לחץ על לינק</option>
+              <option value="bounced">חזר</option>
+              <option value="complained">התלונן</option>
+              <option value="error">שגיאה</option>
+              <option value="remaining">נותר לשליחה</option>
             </select>
 
             {/* Profession filter */}
@@ -319,10 +445,11 @@ export default function LeadsListPage() {
             >
               <option value="all">מייל 1 - הכל</option>
               <option value="not_sent">לא נשלח</option>
+              <option value="any">נשלח בכל סטטוס</option>
               <option value="sent">נשלח</option>
               <option value="delivered">נמסר</option>
               <option value="opened">נפתח</option>
-              <option value="clicked">לחץ</option>
+              <option value="clicked">לחץ על לינק</option>
               <option value="bounced">חזר</option>
             </select>
 
@@ -334,10 +461,11 @@ export default function LeadsListPage() {
             >
               <option value="all">מייל 2 - הכל</option>
               <option value="not_sent">לא נשלח</option>
+              <option value="any">נשלח בכל סטטוס</option>
               <option value="sent">נשלח</option>
               <option value="delivered">נמסר</option>
               <option value="opened">נפתח</option>
-              <option value="clicked">לחץ</option>
+              <option value="clicked">לחץ על לינק</option>
               <option value="bounced">חזר</option>
             </select>
 
@@ -353,7 +481,7 @@ export default function LeadsListPage() {
             </select>
 
             {/* Clear filters */}
-            {(search || filterStatus !== "all" || filterProfession !== "all" || filterEmail1 !== "all" || filterEmail2 !== "all" || filterUnsubscribed !== "all") && (
+            {(search || filterStatus !== "all" || filterProfession !== "all" || filterEmail1 !== "all" || filterEmail2 !== "all" || filterUnsubscribed !== "all" || filterSegment !== "all") && (
               <button
                 onClick={() => {
                   setSearch("");
@@ -362,6 +490,7 @@ export default function LeadsListPage() {
                   setFilterEmail1("all");
                   setFilterEmail2("all");
                   setFilterUnsubscribed("all");
+                  setFilterSegment("all");
                 }}
                 className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
               >
@@ -370,6 +499,16 @@ export default function LeadsListPage() {
             )}
           </div>
         </div>
+
+        {filterSegment !== "all" && SEGMENT_LABELS[filterSegment] && (
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span className="font-bold">מציג: {SEGMENT_LABELS[filterSegment].label}</span>
+            <span className="mx-2 text-amber-600">•</span>
+            <span>{SEGMENT_LABELS[filterSegment].description}</span>
+            <span className="mx-2 text-amber-600">•</span>
+            <span>{filtered.length} לידים</span>
+          </div>
+        )}
 
         {/* Table */}
         <div className="bg-white rounded-lg border overflow-hidden">
@@ -395,8 +534,8 @@ export default function LeadsListPage() {
                   </th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600">מייל 1</th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600">מייל 2</th>
-                  <th className="px-3 py-3 text-center font-medium text-gray-600 cursor-pointer hover:bg-gray-100" onClick={() => handleSort("quality_score" as SortKey)}>
-                    דירוג <SortArrow col={"quality_score" as any} />
+                  <th className="px-3 py-3 text-center font-medium text-gray-600 cursor-pointer hover:bg-gray-100" onClick={() => handleSort("quality_score")}>
+                    דירוג <SortArrow col="quality_score" />
                   </th>
                   <th className="px-3 py-3 text-right font-medium text-gray-600 cursor-pointer hover:bg-gray-100" onClick={() => handleSort("created_at")}>
                     נוצר <SortArrow col="created_at" />
@@ -409,8 +548,9 @@ export default function LeadsListPage() {
                   <tr key={lead.id} className={`transition ${
                     lead.unsubscribed ? "opacity-50 bg-gray-50" : 
                     lead.in_next_batch ? "bg-amber-50 hover:bg-amber-100" :
-                    lead.email1_status ? "bg-blue-50/30 hover:bg-blue-50" :
+                    lead.email1_status === "clicked" || lead.email2_status === "clicked" ? "bg-amber-50/70 hover:bg-amber-100" :
                     lead.email2_status ? "bg-indigo-50/30 hover:bg-indigo-50" :
+                    lead.email1_status ? "bg-blue-50/30 hover:bg-blue-50" :
                     "hover:bg-gray-50"
                   }`}>
                     <td className="px-3 py-2.5 font-medium text-gray-900 max-w-[200px] truncate" title={lead.name}>
@@ -425,9 +565,19 @@ export default function LeadsListPage() {
                     <td className="px-3 py-2.5 text-gray-600">{lead.city || "-"}</td>
                     <td className="px-3 py-2.5 text-gray-600 font-mono text-xs" dir="ltr">{lead.phone || "-"}</td>
                     <td className="px-3 py-2.5">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-600"}`}>
-                        {lead.status}
-                      </span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-600"}`}
+                          title={lead.status}
+                        >
+                          {getLeadStatusLabel(lead.status)}
+                        </span>
+                        {getLeadEngagementSummary(lead) && (
+                          <span className="text-[11px] font-medium text-amber-800">
+                            {getLeadEngagementSummary(lead)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-3 py-2.5 text-center">
                       {lead.email1_status ? (

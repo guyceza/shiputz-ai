@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: parsed.name,
             isAdmin: isAdminEmail(parsed.email || ''),
             isPremium: parsed.purchased === true,
-            hasVisionSub: parsed.vision_subscription === true,
+            hasVisionSub: parsed.vision_subscription === true || parsed.vision_subscription === 'active' || parsed.vision_subscription === 'true',
             vizCredits: parsed.viz_credits ?? 0,
           };
           setUser(authUser);
@@ -80,6 +80,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   hasVisionSub: data.hasVision || false,
                   vizCredits: data.vizCredits ?? prev.vizCredits,
                 } : prev);
+                const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                if (storedUser.id) {
+                  localStorage.setItem('user', JSON.stringify({
+                    ...storedUser,
+                    purchased: data.hasPremium || false,
+                    vision_subscription: data.hasVision ? 'active' : null,
+                    vision_trial_used: data.trialUsed || false,
+                    viz_credits: data.vizCredits ?? storedUser.viz_credits,
+                  }));
+                }
               }
             } catch {}
           }

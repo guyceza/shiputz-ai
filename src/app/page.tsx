@@ -3,39 +3,68 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
-import HeroAnimation from "@/components/HeroAnimation";
-
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
 import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
-import RoleSelector from "@/components/RoleSelector";
-import type { Role } from "@/components/RoleSelector";
 import { authFetch } from "@/lib/auth-fetch";
+import BeforeAfterGallery from "@/components/BeforeAfterGallery";
+import { CREDIT_COSTS } from "@/lib/credit-costs";
+import { ArrowLeft } from "lucide-react";
+import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
+
+const intentCards = [
+  {
+    title: "רוצה לראות איך זה ייראה?",
+    description: "העלו תמונה וקבלו לפני/אחרי ברור לפני שקונים, צובעים או מתחילים עבודה.",
+    href: "/visualize",
+    cta: "הדמיית עיצוב",
+    surface: "border-emerald-100 bg-emerald-50/70 hover:border-emerald-200 hover:bg-emerald-50",
+  },
+  {
+    title: "רוצה לדעת כמה זה יעלה?",
+    description: "קבלו טווחי מחיר ישראליים כדי להבין סדר גודל לפני שיחה עם בעל מקצוע.",
+    href: "/pricing-guide",
+    cta: "מחירון כללי",
+    surface: "border-sky-100 bg-sky-50/70 hover:border-sky-200 hover:bg-sky-50",
+  },
+  {
+    title: "רוצה לבדוק הצעה שקיבלת?",
+    description: "מסמנים חריגות, סעיפים חסרים ושאלות שכדאי להחזיר לבעל המקצוע.",
+    href: "/quote-analysis",
+    cta: "ניתוח הצעה",
+    surface: "border-amber-100 bg-amber-50/75 hover:border-amber-200 hover:bg-amber-50",
+  },
+  {
+    title: "צריך כתב כמויות?",
+    description: "הופכים תוכנית לדוח כמויות שאפשר להוריד, לערוך ולשלוח הלאה.",
+    href: "/dashboard/bill-of-quantities",
+    cta: "כתב כמויות",
+    surface: "border-rose-100 bg-rose-50/65 hover:border-rose-200 hover:bg-rose-50",
+  },
+];
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [hasVisionSubscription, setHasVisionSubscription] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'role' | 'all'>('role');
+  const showGuestTrial = !isLoggedIn;
+  const creditFaqText = `קרדיט = שימוש בכלי AI איכותי. הדמיית חדר עולה ${CREDIT_COSTS.visualize} קרדיטים, תוכנית קומה ${CREDIT_COSTS.floorplan}, כתב כמויות ${CREDIT_COSTS["bill-of-quantities"]}, סרטון סיור ${CREDIT_COSTS["video-walkthrough"]}, ניתוח הצעת מחיר ${CREDIT_COSTS["analyze-quote"]}. בהרשמה מקבלים 10 קרדיטים בחינם להיכרות, והכלים הכבדים מיועדים למנוי פעיל. מנויים פעילים יכולים להוסיף קרדיטים חד-פעמיים שלא מתאפסים.`;
+  const visualizationCostText = `הדמיית שיפוץ בShiputzAI עולה ${CREDIT_COSTS.visualize} קרדיטים. משתמש חדש מקבל 10 קרדיטים לניסיון, ובהמשך עובדים דרך מנוי חודשי או שנתי. מנויים פעילים יכולים לקנות קרדיטים נוספים שלא מתאפסים.`;
 
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+      {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": creditFaqText}},
       {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים - תירשמו בחינם."}},
       {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
       {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות (למשל 'סלון מודרני עם ספה אפורה'). ה-AI יוצר תמונה חדשה של אותו חדר בדיוק - אחרי השינוי. תוך 30 שניות."}},
       {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
-      {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
+      {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": visualizationCostText}},
       {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},
       {"@type": "Question", "name": "האם ShiputzAI מתאים לקבלנים?", "acceptedAnswer": {"@type": "Answer", "text": "כן. קבלני שיפוצים משתמשים בShiputzAI כדי להציג ללקוחות הדמיות לפני תחילת עבודה, ליצור כתבי כמויות אוטומטיים, ולנתח הצעות מחיר של ספקים."}},
       {"@type": "Question", "name": "איך עובד סרטון הסיור?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר, בוחרים סגנון עיצוב, והAI יוצר סרטון סיור קצר שמדמה הליכה בחדר המעוצב. מושלם להצגה ללקוחות או לשיתוף ברשתות חברתיות."}},
@@ -72,7 +101,6 @@ export default function Home() {
             setIsAdmin(user.isAdmin === true);
             setIsPremium(user.purchased === true);
             userEmail = user.email;
-            if (user.role) setUserRole(user.role);
           }
         }
         
@@ -86,8 +114,6 @@ export default function Home() {
             userEmail = session.user.email || null;
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
             setIsPremium(storedUser.purchased === true);
-            const role = session.user.user_metadata?.role || storedUser.role;
-            if (role) setUserRole(role);
           }
         }
         
@@ -114,72 +140,13 @@ export default function Home() {
     };
     checkAuth();
   }, []);
-
-  // Show role modal for logged-in users without role (after auth loads)
-  useEffect(() => {
-    if (isLoggedIn && !userRole) {
-      // Small delay so the page renders first
-      const t = setTimeout(() => setShowRoleModal(true), 500);
-      return () => clearTimeout(t);
-    }
-  }, [isLoggedIn, userRole]);
   
-  const [showPromoPopup, setShowPromoPopup] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [popupLottie, setPopupLottie] = useState<any>(null);
-
-  // Load Lottie animation for popup
-  useEffect(() => {
-    fetch('/lottie-home-popup.json')
-      .then(r => r.json())
-      .then(setPopupLottie)
-      .catch(() => {});
-  }, []);
-  
-  // Exit intent popup (desktop: mouse leaves viewport, mobile: scroll up after 30s)
-  useEffect(() => {
-    const dismissed = localStorage.getItem('promo_dismissed');
-    if (dismissed) return;
-    
-    // Don't show to logged-in or premium users
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user.purchased || user.id) return;
-      } catch {}
-    }
-    
-    let shown = false;
-    let scrollTimeout: ReturnType<typeof setTimeout>;
-    
-    // Desktop: mouse leaves top of viewport
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !shown) {
-        shown = true;
-        setShowPromoPopup(true);
-      }
-    };
-    
-    // Mobile fallback: show after 30s of engagement
-    scrollTimeout = setTimeout(() => {
-      if (!shown) {
-        shown = true;
-        setShowPromoPopup(true);
-      }
-    }, 30000);
-    
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => {
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      clearTimeout(scrollTimeout);
-    };
-  }, []);
 
   // handleSubscribe removed
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${showGuestTrial ? "pb-20 md:pb-0" : ""}`}>
       {/* Skip to content */}
       <a href="#features" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 focus:z-[60] focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg">
         דלג לתוכן
@@ -263,57 +230,78 @@ export default function Home() {
         </div>
       )}
 
-      {/* Hero */}
-      <section className="pt-20 pb-8 px-6">
+      <BeforeAfterGallery showGuestTrial={showGuestTrial} />
+
+      <section className="relative overflow-hidden border-y border-gray-100 bg-[#f8f7f4] pb-8 pt-0" dir="ltr" aria-label="מקורות מידע">
+        <p className="mb-5 text-center text-sm text-gray-500" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
+        <BrandsMarquee />
+      </section>
+
+      {/* Intent Navigation */}
+      <section className="px-6 pb-14 pt-10 md:pb-16 md:pt-12">
         <div className="max-w-6xl mx-auto w-full">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-            {/* Text Content */}
-            <div className="flex-1 text-center lg:text-right">
-              <p className="text-sm text-gray-500 mb-4">AI לעיצוב הבית</p>
-              <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-4 text-gray-900">
-                עצבו את הבית. בלחיצה.
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mb-8 leading-relaxed mx-auto lg:mx-0">
-                העלו תמונה של חדר - קבלו הדמיית עיצוב, רשימת קניות, וסרטון סיור. הכל ב-AI.
-              </p>
-              <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
-                {isLoggedIn ? (
-                  <Link
-                    href="/dashboard"
-                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 transition-colors bg-[#101010]"
-                  >
-                    לאזור האישי
-                  </Link>
-                ) : (
-                  <Link
-                    href="/signup"
-                    className="text-white px-8 py-4 rounded-full text-base hover:opacity-90 hover-bounce hover-shine bg-[#101010]"
-                  >
-                    התחילו בחינם
-                  </Link>
-                )}
-                <Link
-                  href="/ai-vision"
-                  className="text-gray-900 px-8 py-4 rounded-full text-base border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all"
-                >
-                  גלו את הכלים
-                </Link>
-              </div>
-              {!isLoggedIn && (
-                <p className="text-sm text-gray-500 mt-6">ללא כרטיס אשראי · התחל תוך דקה</p>
-              )}
+          <div className="mb-10">
+            {/* Stats with counting animation */}
+            <StatsCounter />
+          </div>
+          <div id="features" className="mb-12 border-t border-gray-100 pt-12 md:mb-14 md:pt-14">
+            <div className="text-center mb-10 md:mb-12">
+              <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">AI Vision</p>
+              <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל החלטה מקבלת כלי.</h2>
+              <p className="text-gray-500 max-w-lg mx-auto">הדמיה, תוכנית קומה, כתב כמויות וניתוח הצעה מתחברים לתהליך אחד.</p>
             </div>
-            
-            {/* Phone Animation */}
-            <div className="flex-1 hidden lg:block">
-              <HeroAnimation />
-            </div>
+            <FeaturesShowcase />
+          </div>
+          <div className="mb-6 text-center">
+            <p className="text-sm text-gray-400 tracking-widest uppercase mb-2">מה צריך עכשיו?</p>
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">בחרו לפי השאלה שמעסיקה אתכם.</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            {intentCards.map((card) => (
+              <Link
+                key={card.title}
+                href={showGuestTrial && card.href === "/visualize" ? "/visualize?trial=home_intent" : card.href}
+                onClick={() => {
+                  const targetUrl = showGuestTrial && card.href === "/visualize" ? "/visualize?trial=home_intent" : card.href;
+                  trackAcquisitionEvent("cta_click", {
+                    eventName: card.href === "/visualize" && showGuestTrial ? "home_intent_trial" : "home_intent_tool",
+                    targetUrl,
+                  });
+                }}
+                className={`group rounded-2xl border p-5 text-right transition-all hover:-translate-y-1 hover:shadow-lg ${card.surface}`}
+              >
+                <h3 className="text-lg font-semibold leading-snug text-gray-950">{card.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-gray-500">{card.description}</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-950">
+                  {card.cta}
+                  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
-        
-        {/* Stats with counting animation */}
-        <StatsCounter />
       </section>
+
+      {showGuestTrial && (
+        <div data-home-sticky-trial className="fixed inset-x-0 bottom-0 z-50 border-t border-black/10 bg-white/95 px-4 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.12)] backdrop-blur md:hidden" dir="rtl">
+          <Link
+            href="/visualize?trial=home_sticky"
+            onClick={() =>
+              trackAcquisitionEvent("cta_click", {
+                eventName: "home_mobile_sticky_trial",
+                targetUrl: "/visualize?trial=home_sticky",
+              })
+            }
+            className="mx-auto flex h-12 max-w-sm items-center justify-center gap-2 rounded-full bg-gray-950 px-5 text-sm font-semibold text-white"
+          >
+            נסו הדמיה ראשונה בחינם
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <p className="mt-1 text-center text-[11px] font-medium text-gray-500">
+            בלי כרטיס אשראי · 10 קרדיטים בהרשמה
+          </p>
+        </div>
+      )}
 
       {/* Trust Bar */}
       <section className="py-4 px-6 border-b border-gray-100" aria-label="תכונות עיקריות">
@@ -325,129 +313,15 @@ export default function Home() {
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50 animate-pulse"></span>
-              ללא עלות לנסות
+              טווחי מחיר ישראליים
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-500/50 animate-pulse"></span>
-              מבוסס AI
+              שומר על מבנה החדר
             </span>
           </div>
         </div>
       </section>
-
-      {/* Trusted Sources Bar - Infinite Carousel */}
-      <section className="py-8 bg-gray-50 border-y border-gray-100 overflow-hidden" dir="ltr" aria-label="מקורות מידע">
-        <p className="text-center text-sm text-gray-500 mb-5" dir="rtl">מחירונים מבוססים על נתונים מ:</p>
-        <BrandsMarquee />
-      </section>
-
-      {/* AI Vision - Features Showcase */}
-      <section id="features" className="py-24 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-gray-400 text-sm tracking-widest uppercase mb-4">AI Vision</p>
-            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">כל הכלים. מקום אחד.</h2>
-            <p className="text-gray-500 max-w-lg mx-auto">שבעה כלי AI שעוזרים לכם לתכנן, לדמיין, ולחסוך</p>
-          </div>
-          <FeaturesShowcase userRole={viewMode === 'all' ? null : userRole} />
-        </div>
-      </section>
-
-      {/* Social Proof / Testimonials */}
-      <section className="py-20 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-center text-sm text-gray-400 tracking-widest uppercase mb-12">מה אומרים המשתמשים</p>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;העליתי תמונה של הסלון וקיבלתי הדמיה תוך 30 שניות. הלקוחה שלי התלהבה ואישרה את הפרויקט באותו יום.&quot;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">ר</div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">רונית א.</p>
-                  <p className="text-xs text-gray-500">מעצבת פנים, תל אביב</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;השתמשתי בניתוח הצעת מחיר וגיליתי שהקבלן חייב אותי ₪8,000 יותר מהמחיר הנכון. שווה כל שקל.&quot;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">י</div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">יוסי כ.</p>
-                  <p className="text-xs text-gray-500">בעל דירה, רמת גן</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="flex gap-1 mb-3 text-amber-400">{'★'.repeat(5)}</div>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">&quot;הכלי Style Match זיהה בדיוק את הסגנון שחיפשתי ונתן לי רשימת מוצרים עם לינקים. חסך לי שעות של חיפושים.&quot;</p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">מ</div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">מיכל ל.</p>
-                  <p className="text-xs text-gray-500">מעצבת פנים, הרצליה</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-
-      {/* Pricing Popup */}
-      {showPromoPopup && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl animate-in zoom-in-95 duration-300" dir="rtl">
-            <button
-              onClick={() => {
-                setShowPromoPopup(false);
-                localStorage.setItem('promo_dismissed', 'true');
-              }}
-              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              ✕
-            </button>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-4">
-                {popupLottie ? (
-                  <Lottie animationData={popupLottie} loop={true} />
-                ) : (
-                  <div className="text-5xl">🏠</div>
-                )}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">רוצים לראות איך הבית ייראה?</h2>
-              <p className="text-gray-500 mb-5">העלו תמונה וקבלו הדמיית עיצוב תוך 30 שניות</p>
-              
-              <div className="bg-gray-50 rounded-2xl p-5 mb-5">
-                <div className="flex items-center justify-center gap-3 mb-1">
-                  <span className="text-3xl font-bold text-gray-900">10 קרדיטים חינם</span>
-                </div>
-                <p className="text-sm text-gray-500">בהרשמה - בלי כרטיס אשראי</p>
-              </div>
-              
-              <ul className="text-right space-y-2 mb-6 text-sm text-gray-700">
-                <li className="flex items-center gap-2"><span>✓</span>הדמיות עיצוב AI</li>
-                <li className="flex items-center gap-2"><span>✓</span>זיהוי סגנון + רשימת קניות</li>
-                <li className="flex items-center gap-2"><span>✓</span>ניתוח הצעות מחיר</li>
-                <li className="flex items-center gap-2"><span>✓</span>Shop the Look + צ׳אט תמיכה</li>
-              </ul>
-
-              <a
-                href="/visualize"
-                className="block w-full text-white px-8 py-4 rounded-full text-base font-medium hover:opacity-90 transition-colors text-center bg-[#101010]"
-              >
-                נסו הדמיה עכשיו
-              </a>
-              <p className="text-xs text-gray-400 mt-3">חבילות מ-₪29 · או הירשמו בחינם</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Pricing - hide for users with subscription */}
       {!isPremium && (
@@ -456,7 +330,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-gray-900">תוכניות ומחירים</h2>
           <p className="text-gray-500 mb-12">התחילו בחינם - שדרגו כשתרצו</p>
           
-          <PricingComparison />
+          <PricingComparison isLoggedIn={isLoggedIn} />
         </div>
       </section>
       )}
@@ -536,7 +410,7 @@ export default function Home() {
           <div className="space-y-6">
             <FaqItem 
               question="מה זה קרדיט ולמה צריך אותו?"
-              answer="קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."
+              answer={creditFaqText}
             />
             <FaqItem 
               question="אפשר לנסות בלי להירשם?"
@@ -556,7 +430,7 @@ export default function Home() {
             />
             <FaqItem 
               question="כמה עולה הדמיית שיפוץ?"
-              answer="הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."
+              answer={visualizationCostText}
             />
             <FaqItem 
               question="מה ההבדל בין ShiputzAI לInteriorAI?"
@@ -579,9 +453,8 @@ export default function Home() {
       </section>
 
       {/* Referral */}
-      <section className="py-16 px-6 bg-gradient-to-l from-emerald-50 to-teal-50">
+      <section className="py-16 px-6 bg-[#eef8f4]">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="text-4xl mb-4 block">🎁</span>
           <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-3">הזמינו חבר - שניכם מרוויחים</h2>
           <p className="text-gray-600 mb-6">שתפו את הלינק שלכם עם חברים ועמיתים. על כל חבר שנרשם - <strong>שניכם מקבלים 20 קרדיטים חינם</strong>.</p>
           <Link
@@ -615,12 +488,12 @@ export default function Home() {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": "קרדיט = שימוש אחד בכלי AI. הדמיית חדר עולה 5 קרדיטים, סרטון סיור 25, ניתוח הצעת מחיר 3. בהרשמה מקבלים 10 קרדיטים בחינם - מספיק לשני ניסיונות. אפשר לקנות חבילות מ-₪29."}},
+          {"@type": "Question", "name": "מה זה קרדיט ולמה צריך אותו?", "acceptedAnswer": {"@type": "Answer", "text": creditFaqText}},
           {"@type": "Question", "name": "אפשר לנסות בלי להירשם?", "acceptedAnswer": {"@type": "Answer", "text": "כן! לחצו 'נסו הדמיה עכשיו' ותעלו תמונה. תקבלו תוצאה מלאה כאורח. בשביל לשמור תוצאות ולקבל יותר קרדיטים - תירשמו בחינם."}},
           {"@type": "Question", "name": "מה קורה עם התמונות שאני מעלה?", "acceptedAnswer": {"@type": "Answer", "text": "התמונות מעובדות ב-AI ונשמרות בחשבון שלכם בלבד. אנחנו לא משתמשים בהן לאימון מודלים, לא משתפים עם צדדים שלישיים, ולא מציגים אותן באתר. אתם הבעלים."}},
           {"@type": "Question", "name": "איך ההדמיה עובדת?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר + כותבים מה רוצים לשנות. ה-AI יוצר תמונה חדשה של אותו חדר בדיוק - אחרי השינוי. תוך 30 שניות."}},
           {"@type": "Question", "name": "מתאים גם למעצבי פנים?", "acceptedAnswer": {"@type": "Answer", "text": "בהחלט. מעצבים משתמשים בהדמיות כדי להציג ללקוחות לפני שמתחילים, ב-Style Match כדי לזהות סגנונות, וב-Shop the Look למציאת מוצרים. חוסך שעות עבודה."}},
-          {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": "הדמיית שיפוץ בShiputzAI עולה 5 קרדיטים, שזה בערך ₪3-15 בהתאם לחבילה. חבילת 10 קרדיטים עולה ₪29, חבילת 30 ₪69, וחבילת 100 ₪149. בהרשמה מקבלים 10 קרדיטים חינם."}},
+          {"@type": "Question", "name": "כמה עולה הדמיית שיפוץ?", "acceptedAnswer": {"@type": "Answer", "text": visualizationCostText}},
           {"@type": "Question", "name": "מה ההבדל בין ShiputzAI לInteriorAI?", "acceptedAnswer": {"@type": "Answer", "text": "ShiputzAI מתמקד בשוק הישראלי עם ממשק בעברית, תמיכה בעברית, ו-7 כלי AI כולל כתב כמויות, סרטון סיור, וניתוח הצעות מחיר. InteriorAI מציע רק הדמיות בסיסיות באנגלית."}},
           {"@type": "Question", "name": "האם ShiputzAI מתאים לקבלנים?", "acceptedAnswer": {"@type": "Answer", "text": "כן. קבלני שיפוצים משתמשים בShiputzAI כדי להציג ללקוחות הדמיות לפני תחילת עבודה, ליצור כתבי כמויות אוטומטיים, ולנתח הצעות מחיר של ספקים."}},
           {"@type": "Question", "name": "איך עובד סרטון הסיור?", "acceptedAnswer": {"@type": "Answer", "text": "מעלים תמונה של חדר, בוחרים סגנון עיצוב, והAI יוצר סרטון סיור קצר שמדמה הליכה בחדר המעוצב. מושלם להצגה ללקוחות או לשיתוף ברשתות חברתיות."}},
@@ -645,39 +518,6 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqSchema)}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(howToSchema)}} />
 
-      {/* Role Selection Modal */}
-      {showRoleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <RoleSelector onSelect={async (role: Role) => {
-              try {
-                const { getSupabaseClient } = await import('@/lib/supabase');
-                const supabase = getSupabaseClient();
-                await supabase.auth.updateUser({ data: { role: role.key } });
-                
-                const userData = localStorage.getItem('user');
-                if (userData) {
-                  const u = JSON.parse(userData);
-                  u.role = role.key;
-                  localStorage.setItem('user', JSON.stringify(u));
-                }
-                
-                setUserRole(role.key);
-                setShowRoleModal(false);
-              } catch (err) {
-                console.error('Failed to save role:', err);
-                setShowRoleModal(false);
-              }
-            }} />
-            <button
-              onClick={() => setShowRoleModal(false)}
-              className="w-full mt-4 text-sm text-gray-400 hover:text-gray-600 py-2"
-            >
-              אולי אח״כ
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

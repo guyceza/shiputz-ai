@@ -53,13 +53,39 @@ function inferSource(referrer: string | null, params: URLSearchParams): { source
   }
 }
 
+function hasPaidOrCampaignSignal(attribution: AttributionPayload | null | undefined) {
+  return Boolean(
+    attribution?.gclid ||
+      attribution?.fbclid ||
+      attribution?.msclkid ||
+      attribution?.utm_source ||
+      attribution?.utm_campaign
+  );
+}
+
+function hasPaidOrCampaignParams(params: URLSearchParams) {
+  return Boolean(
+    params.get('gclid') ||
+      params.get('fbclid') ||
+      params.get('msclkid') ||
+      params.get('utm_source') ||
+      params.get('utm_campaign')
+  );
+}
+
 export function captureAttribution(): AttributionPayload | null {
   if (typeof window === 'undefined') return null;
 
-  const existing = getStoredAttribution();
-  if (existing?.captured_at) return existing;
-
   const url = new URL(window.location.href);
+  const existing = getStoredAttribution();
+  const currentHasCampaign = hasPaidOrCampaignParams(url.searchParams);
+
+  if (existing?.captured_at) {
+    // Preserve first touch, except when the old value is direct/referral noise
+    // and the current visit carries an explicit paid/campaign signal.
+    if (!currentHasCampaign || hasPaidOrCampaignSignal(existing)) return existing;
+  }
+
   const referrer = safeValue(document.referrer, 1000);
   const { source, medium } = inferSource(referrer, url.searchParams);
 

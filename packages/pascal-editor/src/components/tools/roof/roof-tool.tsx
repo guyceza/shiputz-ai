@@ -4,6 +4,7 @@ import {
   type GridEvent,
   type LevelNode,
   RoofNode,
+  RoofSegmentNode,
   useScene,
 } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
@@ -27,7 +28,7 @@ const commitRoofPlacement = (
   corner1: [number, number, number],
   corner2: [number, number, number],
 ): RoofNode['id'] => {
-  const { createNode, nodes } = useScene.getState()
+  const { createNodes, nodes } = useScene.getState()
 
   // Calculate center position and dimensions from corners
   const centerX = (corner1[0] + corner2[0]) / 2
@@ -36,9 +37,6 @@ const commitRoofPlacement = (
   const length = Math.abs(corner2[0] - corner1[0])
   const width = Math.abs(corner2[2] - corner1[2])
 
-  // Split width evenly between left and right slopes
-  const slopeWidth = Math.max(width / 2, 0.5)
-
   // Count existing roofs for naming
   const roofCount = Object.values(nodes).filter((n) => n.type === 'roof').length
   const name = `Roof ${roofCount + 1}`
@@ -46,13 +44,21 @@ const commitRoofPlacement = (
   const roof = RoofNode.parse({
     name,
     position: [centerX, 0, centerZ], // Y is always 0
-    length: Math.max(length, 0.5),
-    height: DEFAULT_HEIGHT,
-    leftWidth: slopeWidth,
-    rightWidth: slopeWidth,
+  })
+  const roofSegment = RoofSegmentNode.parse({
+    parentId: roof.id,
+    position: [0, 0, 0],
+    roofType: 'gable',
+    width: Math.max(length, 0.5),
+    depth: Math.max(width, 0.5),
+    wallHeight: 0,
+    roofHeight: DEFAULT_HEIGHT,
   })
 
-  createNode(roof, levelId)
+  createNodes([
+    { node: roof, parentId: levelId },
+    { node: roofSegment, parentId: roof.id },
+  ])
   sfxEmitter.emit('sfx:structure-build')
   return roof.id
 }
@@ -210,8 +216,7 @@ export const RoofTool: React.FC = () => {
       <CursorSphere ref={cursorRef} />
 
       {/* Outline showing rectangle being drawn (Ground) */}
-      {/* @ts-ignore */}
-      <line
+      <threeLine
         frustumCulled={false}
         layers={EDITOR_LAYER}
         ref={outlineRef}
@@ -227,7 +232,7 @@ export const RoofTool: React.FC = () => {
           opacity={0.3}
           transparent
         />
-      </line>
+      </threeLine>
 
       {/* First corner marker */}
       {corner1 && (

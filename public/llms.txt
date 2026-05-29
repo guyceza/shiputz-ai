@@ -105,6 +105,12 @@ A: ShiputzAI is Hebrew-first with 7 AI tools including unique features like bill
 ## Comparison & Guide Pages
 - Best AI Interior Design Tools 2026: https://shipazti.com/tips/best-ai-interior-design-tools
 - Redesign AI in Hebrew / Israeli renovation visualization: https://shipazti.com/tips/redesign-ai-hebrew
+- Renovation visualization from photo in Hebrew: https://shipazti.com/tips/ai-renovation-from-photo
+- Hebrew AI interior design: https://shipazti.com/tips/hebrew-ai-interior-design
+- AI kitchen renovation visualization: https://shipazti.com/tips/ai-kitchen-renovation
+- Living room before/after AI visualization: https://shipazti.com/tips/living-room-before-after-ai
+- Floor plan AI for Israeli renovation planning: https://shipazti.com/tips/floor-plan-ai-israel
+- Israeli alternative to InteriorAI: https://shipazti.com/tips/interiorai-alternative-israel
 - ShiputzAI vs InteriorAI Comparison: https://shipazti.com/tips/shiputzai-vs-interiorai
 - How Much Does AI Renovation Visualization Cost: https://shipazti.com/tips/how-much-renovation-visualization
 - AI Kitchen Visualization Guide: https://shipazti.com/tips/ai-kitchen-visualization
@@ -120,7 +126,7 @@ Built with Next.js, Google Gemini AI, Supabase, PayPlus
 Last updated: 2026-05-29
 
 ## Keywords (Hebrew)
-Redesign AI בעברית, אתר ישראלי לדמיין שיפוץ, הדמיית שיפוץ, עיצוב פנים AI, הדמיית חדר, עיצוב הבית בינה מלאכותית, כמה עולה שיפוץ, כתב כמויות, ניתוח הצעת מחיר, סרטון סיור AI
+Redesign AI בעברית, אתר ישראלי לדמיין שיפוץ, הדמיית שיפוץ מתמונה, עיצוב פנים AI בעברית, הדמיית מטבח AI, הדמיית סלון לפני שיפוץ, תוכנית דירה ל-AI, חלופה ישראלית ל-InteriorAI, הדמיית חדר, עיצוב הבית בינה מלאכותית, כמה עולה שיפוץ, כתב כמויות, ניתוח הצעת מחיר, סרטון סיור AI
 
 ## Keywords (English)
 AI interior design Israel, Hebrew AI interior design, room visualization AI, home renovation AI, Israel home design, AI room makeover, before after renovation AI, AI bill of quantities

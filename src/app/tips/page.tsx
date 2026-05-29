@@ -5,6 +5,7 @@ import Link from "next/link";
 import { articles } from "./articles";
 
 const categoryColors: Record<string, string> = {
+  "AI": "bg-gray-900 text-white",
   "תקציב": "bg-gray-900 text-white",
   "טיפים": "bg-gray-900 text-white",
   "קבלנים": "bg-gray-900 text-white",
@@ -173,22 +174,31 @@ export default function TipsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">מדריכים פופולריים</h2>
           <div className="flex flex-wrap gap-3">
             <Link href="/tips/renovation-costs-2026" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              💰 עלויות שיפוץ 2026
+              עלויות שיפוץ 2026
+            </Link>
+            <Link href="/tips/ai-renovation-from-photo" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              הדמיית שיפוץ מתמונה
+            </Link>
+            <Link href="/tips/hebrew-ai-interior-design" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              עיצוב פנים AI בעברית
+            </Link>
+            <Link href="/tips/interiorai-alternative-israel" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              חלופה ישראלית ל-InteriorAI
             </Link>
             <Link href="/tips/choosing-contractor" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              👷 בחירת קבלן
+              בחירת קבלן
             </Link>
-            <Link href="/tips/kitchen-renovation" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              🍳 שיפוץ מטבח
+            <Link href="/tips/ai-kitchen-renovation" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              הדמיית מטבח AI
             </Link>
-            <Link href="/tips/bathroom-renovation" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              🚿 שיפוץ אמבטיה
+            <Link href="/tips/living-room-before-after-ai" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              סלון לפני ואחרי
             </Link>
-            <Link href="/tips/budget-checklist" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              ✅ צ&apos;קליסט לשיפוץ
+            <Link href="/tips/floor-plan-ai-israel" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
+              תוכנית דירה ל-AI
             </Link>
             <Link href="/tips/common-mistakes" className="text-sm text-gray-600 hover:text-gray-900 bg-white px-4 py-2 rounded-full border border-gray-200 hover:border-gray-400 transition-all">
-              ⚠️ טעויות נפוצות
+              טעויות נפוצות
             </Link>
           </div>
         </div>

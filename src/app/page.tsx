@@ -53,6 +53,15 @@ const intentCards = [
   },
 ];
 
+const seoTopicLinks = [
+  { href: "/tips/ai-renovation-from-photo", label: "הדמיית שיפוץ מתמונה" },
+  { href: "/tips/hebrew-ai-interior-design", label: "עיצוב פנים AI בעברית" },
+  { href: "/tips/ai-kitchen-renovation", label: "הדמיית מטבח AI" },
+  { href: "/tips/living-room-before-after-ai", label: "הדמיית סלון לפני שיפוץ" },
+  { href: "/tips/floor-plan-ai-israel", label: "תוכנית דירה ל-AI" },
+  { href: "/tips/interiorai-alternative-israel", label: "חלופה ישראלית ל-InteriorAI" },
+];
+
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -289,6 +298,28 @@ export default function Home() {
                   {card.cta}
                   <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-gray-100 bg-white px-6 py-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-6 text-center">
+            <p className="mb-2 text-sm font-semibold text-gray-400">מדריכים לפי חיפוש</p>
+            <h2 className="text-2xl font-semibold text-gray-900 md:text-3xl">
+              שאלות שאנשים מחפשים לפני שיפוץ
+            </h2>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {seoTopicLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-white hover:text-gray-950"
+              >
+                {item.label}
               </Link>
             ))}
           </div>

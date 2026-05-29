@@ -17,6 +17,12 @@ export interface Article {
 // New standalone pages (have their own page.tsx, not using [slug] route)
 // Listed here so they appear in the tips index
 const standalonePages: {slug: string; title: string; excerpt: string; category: string; readingTime: number}[] = [
+  { slug: "ai-renovation-from-photo", title: "הדמיית שיפוץ מתמונה - לראות לפני שמתחילים", excerpt: "איך מעלים תמונת חדר ומקבלים הדמיית לפני/אחרי בעברית עם המשך למוצרים ועלויות", category: "AI", readingTime: 5 },
+  { slug: "hebrew-ai-interior-design", title: "עיצוב פנים AI בעברית - כלי ישראלי לתכנון הבית", excerpt: "מדריך לעיצוב פנים עם AI בעברית: הדמיות, סגנון, מוצרים ותהליך שיפוץ מקומי", category: "AI", readingTime: 5 },
+  { slug: "ai-kitchen-renovation", title: "הדמיית מטבח AI - לבדוק לפני שמזמינים", excerpt: "חזיתות, שיש, תאורה וריצוף: איך לבדוק שיפוץ מטבח על תמונה אמיתית", category: "חדרים", readingTime: 5 },
+  { slug: "living-room-before-after-ai", title: "הדמיית סלון לפני שיפוץ - לפני ואחרי עם AI", excerpt: "איך לבדוק צבעים, ריצוף, ספה ותאורה בסלון לפני קנייה או עבודה", category: "חדרים", readingTime: 5 },
+  { slug: "floor-plan-ai-israel", title: "תוכנית דירה ל-AI - מתוכנית קומה להדמיה", excerpt: "איך להשתמש בתוכנית דירה כדי לזהות חדרים, ליצור הדמיות ולהמשיך לכתב כמויות", category: "תכנון", readingTime: 5 },
+  { slug: "interiorai-alternative-israel", title: "חלופה ישראלית ל-InteriorAI", excerpt: "למה כלי ישראלי בעברית מתאים יותר לשיפוץ ועיצוב פנים בישראל", category: "AI", readingTime: 5 },
   { slug: "best-ai-interior-design-tools", title: "5 כלי AI לעיצוב פנים - השוואה מלאה 2026", excerpt: "השוואה מלאה בין 5 כלי AI לעיצוב פנים: ShiputzAI, InteriorAI, RoomGPT, Spacely AI ו-ReRoom", category: "AI", readingTime: 8 },
   { slug: "shiputzai-vs-interiorai", title: "ShiputzAI לעומת InteriorAI - השוואה מפורטת", excerpt: "השוואה מפורטת: מחירים, תכונות, עברית, ומי מתאים יותר לשוק הישראלי", category: "AI", readingTime: 7 },
   { slug: "how-much-renovation-visualization", title: "כמה עולה הדמיית עיצוב פנים? מחירון 2026", excerpt: "מחירון מלא: מעצב 3D לעומת AI, מחירים, יתרונות וחסרונות", category: "תקציב", readingTime: 6 },

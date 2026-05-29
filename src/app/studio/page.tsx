@@ -87,13 +87,13 @@ const directions = [
 
 const getStrengthClass = (isSelected: boolean) =>
   isSelected
-    ? "border-emerald-400 bg-emerald-50 shadow-sm shadow-emerald-100"
-    : "border-stone-100 bg-white/80 hover:border-stone-300 hover:bg-white";
+    ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-100"
+    : "border-stone-300 bg-white shadow-sm hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70";
 
 const getDirectionClass = (isSelected: boolean) =>
   isSelected
-    ? "border-amber-300 bg-amber-50 shadow-sm shadow-amber-100"
-    : "border-stone-100 bg-white/80 hover:border-stone-300 hover:bg-white";
+    ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-100"
+    : "border-stone-300 bg-white shadow-sm hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70";
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -319,7 +319,7 @@ export default function StudioPage() {
                   setStrengthId(null);
                   setDirectionId(null);
                 }}
-                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50"
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
               >
                 1. {selectedGoal.title}
               </button>
@@ -331,7 +331,7 @@ export default function StudioPage() {
                   setStrengthId(null);
                   setDirectionId(null);
                 }}
-                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50"
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
               >
                 2. {selectedStrength.title}
               </button>
@@ -340,7 +340,7 @@ export default function StudioPage() {
               <button
                 type="button"
                 onClick={() => setDirectionId(null)}
-                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50"
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
               >
                 3. {selectedDirection.title}
               </button>
@@ -359,12 +359,22 @@ export default function StudioPage() {
                     key={goal.id}
                     type="button"
                     onClick={() => setGoalId(goal.id)}
-                    className="rounded-2xl border border-stone-100 bg-white p-4 text-right transition-all hover:-translate-y-0.5 hover:border-stone-950 hover:shadow-lg hover:shadow-stone-900/10"
+                    className="group rounded-2xl border-2 border-stone-300 bg-white p-4 text-right shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70 active:scale-[0.99]"
                   >
-                    <div className="font-bold text-stone-950">{goal.title}</div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-bold text-stone-950">
+                        {goal.title}
+                      </span>
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                        <ArrowLeft className="h-4 w-4" />
+                      </span>
+                    </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {goal.description}
                     </p>
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
+                      בחרו
+                    </div>
                   </button>
                 ))}
               </div>
@@ -383,14 +393,22 @@ export default function StudioPage() {
                     key={strength.id}
                     type="button"
                     onClick={() => setStrengthId(strength.id)}
-                    className={`rounded-2xl border p-4 text-right transition-all hover:-translate-y-0.5 ${getStrengthClass(strengthId === strength.id)}`}
+                    className={`group rounded-2xl border-2 p-4 text-right transition-all hover:-translate-y-0.5 active:scale-[0.99] ${getStrengthClass(strengthId === strength.id)}`}
                   >
-                    <div className="font-bold text-stone-950">
-                      {strength.title}
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-bold text-stone-950">
+                        {strength.title}
+                      </span>
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                        <ArrowLeft className="h-4 w-4" />
+                      </span>
                     </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {strength.description}
                     </p>
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
+                      בחרו
+                    </div>
                   </button>
                 ))}
               </div>
@@ -411,14 +429,22 @@ export default function StudioPage() {
                     key={direction.id}
                     type="button"
                     onClick={() => setDirectionId(direction.id)}
-                    className={`rounded-2xl border p-4 text-right transition-all hover:-translate-y-0.5 ${getDirectionClass(directionId === direction.id)}`}
+                    className={`group rounded-2xl border-2 p-4 text-right transition-all hover:-translate-y-0.5 active:scale-[0.99] ${getDirectionClass(directionId === direction.id)}`}
                   >
-                    <div className="font-bold text-stone-950">
-                      {direction.title}
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-bold text-stone-950">
+                        {direction.title}
+                      </span>
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                        <ArrowLeft className="h-4 w-4" />
+                      </span>
                     </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {direction.description}
                     </p>
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
+                      בחרו
+                    </div>
                   </button>
                 ))}
               </div>

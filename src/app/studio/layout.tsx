@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "סטודיו AI לשיפוץ ועיצוב פנים | ShiputzAI",
+  title: "Redesign AI בעברית - סטודיו AI לשיפוץ ועיצוב פנים | ShiputzAI",
   description:
-    "סטודיו ShiputzAI מחבר הדמיית חדר, בחירת עוצמת שינוי, כיווני עיצוב, מוצרים ועלויות למסלול אחד פשוט.",
+    "סטודיו ShiputzAI הוא דרך ישראלית בעברית לדמיין שיפוץ מתמונה: מעלים חדר, בוחרים עוצמת שינוי וכיוון עיצובי, וממשיכים להדמיה, מוצרים ועלויות.",
+  keywords: [
+    "Redesign AI בעברית",
+    "אתר ישראלי לדמיין שיפוץ",
+    "סטודיו AI לשיפוץ",
+    "הדמיית שיפוץ מתמונה",
+    "עיצוב פנים AI בעברית",
+  ],
   alternates: {
     canonical: "https://shipazti.com/studio",
   },
   openGraph: {
-    title: "סטודיו AI לשיפוץ ועיצוב פנים | ShiputzAI",
+    title: "Redesign AI בעברית - סטודיו ShiputzAI",
     description: "העלו תמונה, בחרו מטרה ועוצמת שינוי, והמשיכו להדמיה, מוצרים ועלויות.",
     url: "https://shipazti.com/studio",
   },

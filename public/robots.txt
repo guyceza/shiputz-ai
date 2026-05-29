@@ -9,7 +9,6 @@ Disallow: /project/
 Disallow: /onboarding/
 Disallow: /checkout/
 Disallow: /checkout-vision/
-Disallow: /lp/
 
 # Explicitly allow AI crawlers
 User-agent: ChatGPT-User
@@ -31,6 +30,18 @@ User-agent: Google-Extended
 Allow: /
 
 User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: FacebookBot
 Allow: /
 
 # Sitemap

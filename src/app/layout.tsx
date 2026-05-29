@@ -23,8 +23,8 @@ export const metadata: Metadata = {
     default: "ShiputzAI - עיצוב הבית ב-AI",
     template: "%s | ShiputzAI",
   },
-  description: "ShiputzAI הוא הכלי המוביל בישראל להדמיית עיצוב פנים ושיפוצים באמצעות AI. 7 כלים בפלטפורמה אחת: הדמיות חדרים, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון, רשימת קניות ותוכנית קומה. ממשק בעברית, תוצאות תוך שניות.",
-  keywords: ["עיצוב פנים AI", "הדמיית שיפוץ", "הדמיות AI", "עיצוב הבית", "הדמיית חדר", "כתב כמויות", "ניתוח הצעת מחיר", "סרטון סיור", "ShiputzAI", "שיפוצי AI", "עיצוב פנים בינה מלאכותית", "Style Match", "Shop the Look", "AI interior design Israel", "best AI interior design tool", "renovation visualization"],
+  description: "ShiputzAI הוא הכלי הישראלי המוביל להדמיית עיצוב פנים ושיפוצים באמצעות AI. מעלים תמונת חדר ומקבלים הדמיית לפני/אחרי, זיהוי סגנון, מוצרים, תוכנית קומה, כתב כמויות וניתוח הצעות מחיר. ממשק בעברית, מחירים בשקלים ותוצאות תוך שניות.",
+  keywords: ["Redesign AI בעברית", "אתר ישראלי לדמיין שיפוץ", "עיצוב פנים AI", "הדמיית שיפוץ", "הדמיות AI", "עיצוב הבית", "הדמיית חדר", "כתב כמויות", "ניתוח הצעת מחיר", "סרטון סיור", "ShiputzAI", "שיפוצי AI", "עיצוב פנים בינה מלאכותית", "Style Match", "Shop the Look", "AI interior design Israel", "best AI interior design tool", "renovation visualization"],
   authors: [{ name: "ShiputzAI" }],
   creator: "ShiputzAI",
   metadataBase: new URL("https://shipazti.com"),
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     url: "https://shipazti.com",
     siteName: "ShiputzAI",
     title: "ShiputzAI - עיצוב הבית ב-AI",
-    description: "ShiputzAI - הכלי המוביל בישראל להדמיית עיצוב פנים ב-AI. 7 כלים: הדמיות, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
+    description: "ShiputzAI - הכלי הישראלי להדמיית עיצוב פנים ב-AI. הדמיות חדרים, סטודיו מודרך, סרטון סיור, כתב כמויות, ניתוח הצעות מחיר, זיהוי סגנון ורשימת קניות. ממשק בעברית מלא.",
     images: [
       {
         url: "/og/shiputzai-og-ai-renovation-1200x630.png",
@@ -82,15 +82,34 @@ const jsonLd = {
       "@id": "https://shipazti.com/#website",
       "url": "https://shipazti.com",
       "name": "ShiputzAI",
-      "description": "AI לעיצוב הבית - הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור",
+      "description": "AI ישראלי לעיצוב הבית - סטודיו מודרך, הדמיות, זיהוי סגנון, רשימת קניות וסרטון סיור",
       "inLanguage": "he-IL",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://shipazti.com/tips?query={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
     },
     {
       "@type": "SoftwareApplication",
       "@id": "https://shipazti.com/#app",
       "name": "ShiputzAI",
+      "alternateName": ["Redesign AI בעברית", "אתר ישראלי לדמיין שיפוץ", "AI interior design Israel"],
       "applicationCategory": "DesignApplication",
       "operatingSystem": "Web",
+      "url": "https://shipazti.com",
+      "inLanguage": ["he-IL", "en"],
+      "areaServed": {"@type": "Country", "name": "Israel"},
+      "featureList": [
+        "AI room redesign from photo",
+        "Hebrew guided studio flow",
+        "Style Match",
+        "Shop the Look",
+        "Floor plan visualization",
+        "Bill of quantities",
+        "Contractor quote analysis",
+        "Video room tour"
+      ],
       "offers": {
         "@type": "Offer",
         "price": "29",
@@ -107,7 +126,7 @@ const jsonLd = {
       "@id": "https://shipazti.com/#organization",
       "name": "WED4ME",
       "legalName": "WED4ME",
-      "alternateName": ["ShiputzAI", "שיפוצי.אי"],
+      "alternateName": ["ShiputzAI", "שיפוצי.אי", "Redesign AI בעברית", "אתר ישראלי לדמיין שיפוץ"],
       "url": "https://shipazti.com",
       "logo": {"@type": "ImageObject", "url": "https://shipazti.com/icon-512.png", "width": 512, "height": 512},
       "description": "ShiputzAI היא פלטפורמת AI ישראלית לעיצוב הבית - הדמיות חדרים, זיהוי סגנון, רשימת קניות, סרטון סיור, כתב כמויות וניתוח הצעות מחיר. הכל באמצעות בינה מלאכותית.",
@@ -116,7 +135,7 @@ const jsonLd = {
       "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": "help@shipazti.com", "availableLanguage": ["Hebrew", "English"]},
       "areaServed": {"@type": "Country", "name": "Israel"},
       "sameAs": [],
-      "knowsAbout": ["AI interior design", "home renovation visualization", "עיצוב פנים בינה מלאכותית", "הדמיית שיפוצים"],
+      "knowsAbout": ["AI interior design", "home renovation visualization", "Hebrew AI interior design", "Redesign AI בעברית", "אתר ישראלי לדמיין שיפוץ", "עיצוב פנים בינה מלאכותית", "הדמיית שיפוצים"],
       "slogan": "תראו את השיפוץ לפני שמתחילים"
     },
   ],

@@ -245,28 +245,15 @@ export default function StudioPage() {
                   <img
                     src={imageSrc}
                     alt="תמונה שהועלתה לסטודיו"
-                    className="h-[24rem] w-full object-cover"
+                    className="h-[20rem] w-full object-cover md:h-[24rem]"
                   />
                 ) : (
-                  <div className="relative h-[24rem] overflow-hidden">
+                  <div className="relative h-[20rem] overflow-hidden md:h-[24rem]">
                     <img
                       src="/images/ai-vision/style-match-showcase.jpg"
                       alt=""
-                      className="h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/75 via-stone-950/20 to-white/10" />
-                    <div className="absolute inset-x-5 bottom-5 rounded-3xl border border-white/25 bg-white/90 p-5 text-center shadow-xl backdrop-blur">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-stone-950 text-white">
-                        <ImagePlus className="h-6 w-6" />
-                      </div>
-                      <div className="text-lg font-black text-stone-950">
-                        העלו תמונה או השראה
-                      </div>
-                      <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-stone-500">
-                        חדר קיים, תמונת השראה או תוכנית. אפשר גם להמשיך בלי
-                        תמונה ולהתחיל מהכיוון.
-                      </p>
-                    </div>
                   </div>
                 )}
                 {imageName && (
@@ -274,6 +261,23 @@ export default function StudioPage() {
                     {imageName}
                   </span>
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-right transition-colors hover:border-stone-500 hover:bg-stone-50"
+              >
+                <span>
+                  <span className="block text-base font-black text-stone-950">
+                    העלו תמונה או השראה
+                  </span>
+                  <span className="mt-1 block text-sm leading-6 text-stone-500">
+                    חדר קיים, תמונת השראה או תוכנית. אפשר גם להמשיך בלי תמונה.
+                  </span>
+                </span>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white">
+                  <ImagePlus className="h-5 w-5" />
+                </span>
               </button>
               <input
                 ref={fileInputRef}

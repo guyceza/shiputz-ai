@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
@@ -9,6 +11,12 @@ const WORKSPACE_ROOT = path.resolve(PROJECT_ROOT, '../..');
 const MONITOR_DIR = path.join(WORKSPACE_ROOT, 'monitor');
 const ARTIFACT_DIR = path.join(WORKSPACE_ROOT, 'artifacts', 'shiputzai-ai-search-monitor');
 const LOG_PATH = path.join(MONITOR_DIR, 'shiputzai-ai-search-monitor.jsonl');
+const SEARCH_CONSOLE_CREDENTIALS = path.join(
+  WORKSPACE_ROOT,
+  'config',
+  'search-console-credentials.json'
+);
+const SEARCH_CONSOLE_SITE = 'sc-domain:shipazti.com';
 
 const TARGET_HOSTS = ['shipazti.com', 'www.shipazti.com'];
 const AI_SOURCES = [
@@ -238,6 +246,91 @@ async function fetchAiReferrals(days = 30) {
   };
 }
 
+async function fetchSearchConsole(days = 28) {
+  if (!fs.existsSync(SEARCH_CONSOLE_CREDENTIALS)) {
+    return { ok: false, error: 'Missing Search Console credentials' };
+  }
+
+  const credentials = JSON.parse(fs.readFileSync(SEARCH_CONSOLE_CREDENTIALS, 'utf8'));
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: credentials.client_id,
+      client_secret: credentials.client_secret,
+      refresh_token: credentials.refresh_token,
+      grant_type: 'refresh_token',
+    }),
+  });
+  const token = await tokenResponse.json();
+  if (!tokenResponse.ok || !token.access_token) {
+    return { ok: false, error: token.error_description || token.error || 'Token refresh failed' };
+  }
+
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() - 2);
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - days);
+
+  const payload = {
+    startDate: startDate.toISOString().slice(0, 10),
+    endDate: endDate.toISOString().slice(0, 10),
+    dimensions: ['query', 'page'],
+    rowLimit: 50,
+  };
+  const endpoint = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(
+    SEARCH_CONSOLE_SITE
+  )}/searchAnalytics/query`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    return { ok: false, error: data.error?.message || 'Search Console query failed' };
+  }
+
+  const rows = data.rows || [];
+  const totals = rows.reduce(
+    (acc, row) => {
+      acc.clicks += row.clicks || 0;
+      acc.impressions += row.impressions || 0;
+      return acc;
+    },
+    { clicks: 0, impressions: 0 }
+  );
+  const weightedPosition =
+    totals.impressions > 0
+      ? rows.reduce((sum, row) => sum + (row.position || 0) * (row.impressions || 0), 0) /
+        totals.impressions
+      : null;
+
+  return {
+    ok: true,
+    site: SEARCH_CONSOLE_SITE,
+    startDate: payload.startDate,
+    endDate: payload.endDate,
+    rowCount: rows.length,
+    totals: {
+      ...totals,
+      ctr: totals.impressions > 0 ? totals.clicks / totals.impressions : 0,
+      avgPosition: weightedPosition,
+    },
+    topRows: rows.slice(0, 20).map((row) => ({
+      query: row.keys?.[0] || '',
+      page: row.keys?.[1] || '',
+      clicks: row.clicks || 0,
+      impressions: row.impressions || 0,
+      ctr: row.ctr || 0,
+      position: row.position || null,
+    })),
+  };
+}
+
 function renderMarkdown(report) {
   const lines = [];
   lines.push(`# ShiputzAI AI Search Monitor`);
@@ -275,9 +368,25 @@ function renderMarkdown(report) {
   }
 
   lines.push('');
+  lines.push('## Google Search Console');
+  if (!report.searchConsole.ok) {
+    lines.push(`- Could not query Search Console: ${report.searchConsole.error}`);
+  } else {
+    const totals = report.searchConsole.totals;
+    lines.push(
+      `- ${report.searchConsole.site}: ${totals.impressions} impressions, ${totals.clicks} clicks, avg position ${totals.avgPosition ? totals.avgPosition.toFixed(1) : 'n/a'} (${report.searchConsole.startDate} to ${report.searchConsole.endDate})`
+    );
+    for (const row of report.searchConsole.topRows.slice(0, 10)) {
+      lines.push(
+        `- ${row.query} -> ${row.page}: ${row.impressions} impressions, ${row.clicks} clicks, position ${row.position ? row.position.toFixed(1) : 'n/a'}`
+      );
+    }
+  }
+
+  lines.push('');
   lines.push('## Notes');
   lines.push('- ChatGPT search volume is not public; this monitors proxy signals: Bing visibility, AI referrals, and site readiness for AI crawlers.');
-  lines.push('- Google/Search Console impressions still need Search Console export or manual GA/Search Console review.');
+  lines.push('- Search Console now provides direct Google query, impression, click, CTR, and position data for shipazti.com.');
 
   return `${lines.join('\n')}\n`;
 }
@@ -288,13 +397,14 @@ async function run() {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
 
   const generatedAt = new Date().toISOString();
-  const [health, search, aiReferrals] = await Promise.all([
+  const [health, search, aiReferrals, searchConsole] = await Promise.all([
     Promise.all(HEALTH_URLS.map((url) => checkHealthUrl(url))),
     Promise.all(QUERIES.map((query) => checkBing(query))),
     fetchAiReferrals(30),
+    fetchSearchConsole(28),
   ]);
 
-  const report = { generatedAt, health, search, aiReferrals };
+  const report = { generatedAt, health, search, aiReferrals, searchConsole };
 
   if (!process.argv.includes('--no-write')) {
     fs.appendFileSync(LOG_PATH, `${JSON.stringify(report)}\n`);

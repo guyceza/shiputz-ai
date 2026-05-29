@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Check,
   ClipboardList,
   ImagePlus,
   Layers3,
@@ -87,13 +88,13 @@ const directions = [
 
 const getStrengthClass = (isSelected: boolean) =>
   isSelected
-    ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-100"
-    : "border-stone-300 bg-white shadow-sm hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70";
+    ? "border-stone-950 bg-stone-50 shadow-sm"
+    : "border-stone-200 bg-white hover:border-stone-500 hover:bg-stone-50";
 
 const getDirectionClass = (isSelected: boolean) =>
   isSelected
-    ? "border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-100"
-    : "border-stone-300 bg-white shadow-sm hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70";
+    ? "border-stone-950 bg-stone-50 shadow-sm"
+    : "border-stone-200 bg-white hover:border-stone-500 hover:bg-stone-50";
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -224,7 +225,7 @@ export default function StudioPage() {
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-8 lg:grid-cols-[0.92fr_1.08fr] lg:py-14">
         <div className="space-y-7">
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-xs font-bold text-stone-600 shadow-sm">
               <Layers3 className="h-4 w-4" />
               סטודיו אחד לכל המסע
             </div>
@@ -300,16 +301,14 @@ export default function StudioPage() {
       <section className="mx-auto max-w-6xl px-5 pb-8">
         <div className="mb-5">
           <div>
-            <p className="text-sm font-bold text-emerald-700">
-              בונים את הכיוון
-            </p>
+            <p className="text-sm font-bold text-stone-500">בונים את הכיוון</p>
             <h2 className="mt-1 text-2xl font-black text-stone-950">
               בוחרים דבר אחד בכל פעם.
             </h2>
           </div>
         </div>
 
-        <div className="rounded-[1.7rem] border border-white/80 bg-white/85 p-5 shadow-sm backdrop-blur md:p-6">
+        <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:p-6">
           <div className="mb-5 flex flex-wrap gap-2">
             {selectedGoal && (
               <button
@@ -319,8 +318,9 @@ export default function StudioPage() {
                   setStrengthId(null);
                   setDirectionId(null);
                 }}
-                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm font-bold text-stone-700 hover:border-stone-500 hover:bg-white"
               >
+                <Check className="h-3.5 w-3.5" />
                 1. {selectedGoal.title}
               </button>
             )}
@@ -331,8 +331,9 @@ export default function StudioPage() {
                   setStrengthId(null);
                   setDirectionId(null);
                 }}
-                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm font-bold text-stone-700 hover:border-stone-500 hover:bg-white"
               >
+                <Check className="h-3.5 w-3.5" />
                 2. {selectedStrength.title}
               </button>
             )}
@@ -340,8 +341,9 @@ export default function StudioPage() {
               <button
                 type="button"
                 onClick={() => setDirectionId(null)}
-                className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-900 shadow-sm hover:border-emerald-500 hover:bg-emerald-100"
+                className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm font-bold text-stone-700 hover:border-stone-500 hover:bg-white"
               >
+                <Check className="h-3.5 w-3.5" />
                 3. {selectedDirection.title}
               </button>
             )}
@@ -359,21 +361,21 @@ export default function StudioPage() {
                     key={goal.id}
                     type="button"
                     onClick={() => setGoalId(goal.id)}
-                    className="group rounded-2xl border-2 border-stone-300 bg-white p-4 text-right shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/70 active:scale-[0.99]"
+                    className="group rounded-xl border border-stone-200 bg-white p-4 text-right transition-colors hover:border-stone-500 hover:bg-stone-50 active:bg-stone-100"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-bold text-stone-950">
                         {goal.title}
                       </span>
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition-colors group-hover:border-stone-950 group-hover:bg-stone-950 group-hover:text-white">
                         <ArrowLeft className="h-4 w-4" />
                       </span>
                     </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {goal.description}
                     </p>
-                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
-                      בחרו
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white">
+                      בחירה
                     </div>
                   </button>
                 ))}
@@ -393,21 +395,21 @@ export default function StudioPage() {
                     key={strength.id}
                     type="button"
                     onClick={() => setStrengthId(strength.id)}
-                    className={`group rounded-2xl border-2 p-4 text-right transition-all hover:-translate-y-0.5 active:scale-[0.99] ${getStrengthClass(strengthId === strength.id)}`}
+                    className={`group rounded-xl border p-4 text-right transition-colors active:bg-stone-100 ${getStrengthClass(strengthId === strength.id)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-bold text-stone-950">
                         {strength.title}
                       </span>
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition-colors group-hover:border-stone-950 group-hover:bg-stone-950 group-hover:text-white">
                         <ArrowLeft className="h-4 w-4" />
                       </span>
                     </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {strength.description}
                     </p>
-                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
-                      בחרו
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white">
+                      בחירה
                     </div>
                   </button>
                 ))}
@@ -429,21 +431,21 @@ export default function StudioPage() {
                     key={direction.id}
                     type="button"
                     onClick={() => setDirectionId(direction.id)}
-                    className={`group rounded-2xl border-2 p-4 text-right transition-all hover:-translate-y-0.5 active:scale-[0.99] ${getDirectionClass(directionId === direction.id)}`}
+                    className={`group rounded-xl border p-4 text-right transition-colors active:bg-stone-100 ${getDirectionClass(directionId === direction.id)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-bold text-stone-950">
                         {direction.title}
                       </span>
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-950 text-white transition-colors group-hover:bg-emerald-600">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition-colors group-hover:border-stone-950 group-hover:bg-stone-950 group-hover:text-white">
                         <ArrowLeft className="h-4 w-4" />
                       </span>
                     </div>
                     <p className="mt-1 text-sm leading-5 text-stone-500">
                       {direction.description}
                     </p>
-                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white transition-colors group-hover:bg-emerald-600">
-                      בחרו
+                    <div className="mt-4 inline-flex rounded-full bg-stone-950 px-3 py-1 text-xs font-bold text-white">
+                      בחירה
                     </div>
                   </button>
                 ))}
@@ -452,13 +454,13 @@ export default function StudioPage() {
           )}
 
           {activeStep === "ready" && (
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 border-t border-stone-100 pt-5 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="flex items-center gap-2 text-sm font-bold text-emerald-700">
-                  <Sparkles className="h-5 w-5" />
+                <div className="flex items-center gap-2 text-sm font-bold text-stone-500">
+                  <Sparkles className="h-4 w-4" />
                   הכיוון מוכן
                 </div>
-                <h2 className="mt-1 text-2xl font-black text-stone-950">
+                <h2 className="mt-1 text-xl font-black text-stone-950 md:text-2xl">
                   אפשר להוסיף בקשה קצרה ולהמשיך.
                 </h2>
               </div>
@@ -480,34 +482,34 @@ export default function StudioPage() {
 
       {isReady && selectedGoal && (
         <section className="mx-auto max-w-6xl px-5 pb-16">
-          <div className="grid gap-5 rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-sm backdrop-blur lg:grid-cols-[1fr_0.9fr]">
-            <div>
-              <label className="mb-2 block text-sm font-bold text-stone-700">
+          <div className="grid gap-5 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="space-y-4">
+              <label className="block text-sm font-bold text-stone-700">
                 בקשה חופשית
               </label>
               <textarea
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
-                className="h-28 w-full resize-none rounded-2xl border border-stone-200 bg-white/90 px-4 py-3 text-sm outline-none transition-colors focus:border-stone-900"
+                className="h-32 w-full resize-none rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-stone-900"
                 placeholder="למשל: לשמור על הספה, להחליף ריצוף, להוסיף אי מטבח, להשתמש בצבעים בהירים..."
               />
             </div>
-            <div className="rounded-[1.5rem] bg-stone-950 p-5 text-white shadow-xl shadow-stone-900/10">
-              <div className="text-sm font-bold text-emerald-300">
+            <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
+              <div className="text-sm font-bold text-stone-800">
                 הבריף שיעבור לכלי
               </div>
-              <p className="mt-3 max-h-32 overflow-auto text-sm leading-6 text-stone-200">
+              <p className="mt-3 max-h-28 overflow-auto text-sm leading-6 text-stone-600">
                 {studioPrompt}
               </p>
               <Link
                 href={selectedGoal.href}
                 onClick={saveDraft}
-                className="mt-5 flex h-12 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-stone-950 transition-colors hover:bg-emerald-100"
+                className="mt-5 flex h-11 items-center justify-center gap-2 rounded-full bg-stone-950 px-5 text-sm font-bold text-white transition-colors hover:bg-stone-800"
               >
                 המשיכו לתוצאה
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <p className="mt-3 text-center text-xs text-stone-400">
+              <p className="mt-3 text-center text-xs leading-5 text-stone-500">
                 בהדמיה, התמונה והבריף יעברו כטיוטה מקומית בדפדפן. בשאר הכלים
                 תמשיכו עם הכיוון שבחרתם.
               </p>

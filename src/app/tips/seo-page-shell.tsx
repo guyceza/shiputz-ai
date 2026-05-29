@@ -11,6 +11,13 @@ export type SeoSection = {
   bullets?: string[];
 };
 
+export type SeoProofExample = {
+  title: string;
+  before: string;
+  after: string;
+  note: string;
+};
+
 type SeoPageShellProps = {
   eyebrow: string;
   title: string;
@@ -23,6 +30,7 @@ type SeoPageShellProps = {
   sections: SeoSection[];
   faqs: SeoFaq[];
   related: { href: string; label: string }[];
+  proofExamples?: SeoProofExample[];
 };
 
 export function buildArticleJsonLd({
@@ -110,6 +118,7 @@ export default function SeoPageShell({
   sections,
   faqs,
   related,
+  proofExamples,
 }: SeoPageShellProps) {
   return (
     <main dir="rtl" className="min-h-screen bg-white text-stone-950">
@@ -173,6 +182,49 @@ export default function SeoPageShell({
             ) : null}
           </section>
         ))}
+
+        {proofExamples?.length ? (
+          <section className="mt-10">
+            <h2 className="text-2xl font-black">דוגמאות לפני ואחרי</h2>
+            <p className="mt-4 leading-7 text-stone-700">
+              המטרה היא לא רק תמונה יפה, אלא החלטה ברורה יותר לפני שמתחילים לשפץ, לקנות או לדבר עם בעל מקצוע.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {proofExamples.map((item) => (
+                <article key={item.title} className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+                  <div className="grid grid-cols-2 gap-px bg-stone-100">
+                    <div className="relative aspect-[4/3] bg-stone-100">
+                      <img
+                        src={item.before}
+                        alt={`${item.title} לפני הדמיית AI`}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[11px] font-bold text-stone-700">
+                        לפני
+                      </span>
+                    </div>
+                    <div className="relative aspect-[4/3] bg-stone-100">
+                      <img
+                        src={item.after}
+                        alt={`${item.title} אחרי הדמיית AI`}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      <span className="absolute left-2 top-2 rounded-full bg-stone-950 px-2 py-1 text-[11px] font-bold text-white">
+                        אחרי
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-black">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">{item.note}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-10 rounded-2xl border border-stone-200 p-5">
           <h2 className="text-xl font-black">שאלות נפוצות</h2>

@@ -31,6 +31,27 @@ const seoIntentLinks = [
   { href: "/studio", label: "סטודיו מודרך" },
 ];
 
+const proofExamples = [
+  {
+    title: "סלון",
+    before: "/examples/before-after-gallery/room-01-before.jpg",
+    after: "/examples/before-after-gallery/room-01-after.jpg",
+    note: "כיוון חם וברור לפני בחירת ריהוט וצבעים.",
+  },
+  {
+    title: "מטבח",
+    before: "/examples/kitchen-before.jpg",
+    after: "/examples/kitchen-after.jpg",
+    note: "בדיקה מהירה של חזיתות, שיש ותאורה לפני הזמנה.",
+  },
+  {
+    title: "חדר שינה",
+    before: "/examples/bedroom-before.jpg",
+    after: "/examples/bedroom-after.jpg",
+    note: "מעטפת חדשה לחדר קיים בלי לשנות את המבנה.",
+  },
+];
+
 type ShopLookProduct = {
   id: string;
   name: string;
@@ -1454,6 +1475,71 @@ export default function VisualizePage() {
               className="rounded-full border border-gray-300 px-5 py-3 text-sm font-bold text-gray-800 transition-colors hover:border-gray-500"
             >
               מדריך הדמיית חדרים
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Visual proof - focused examples without changing the core flow */}
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-7 max-w-2xl">
+            <p className="mb-3 text-sm font-bold text-gray-500">הוכחה ויזואלית</p>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-950 md:text-3xl">
+              תמונת חדר אמיתית, כיוון עיצובי ברור
+            </h2>
+            <p className="mt-3 leading-7 text-gray-600">
+              אלה דוגמאות לפני ואחרי שמראות את סוג ההחלטה ש-ShiputzAI עוזר לקבל:
+              האם הסגנון מתאים לחדר, האם הצבעים עובדים, ומה כדאי לבדוק לפני שיפוץ או קנייה.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {proofExamples.map((item) => (
+              <article key={item.title} className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                <div className="grid grid-cols-2 gap-px bg-gray-100">
+                  <div className="relative aspect-[4/3] bg-gray-100">
+                    <img
+                      src={item.before}
+                      alt={`${item.title} לפני הדמיית AI`}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                    <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-gray-700">
+                      לפני
+                    </span>
+                  </div>
+                  <div className="relative aspect-[4/3] bg-gray-100">
+                    <img
+                      src={item.after}
+                      alt={`${item.title} אחרי הדמיית AI`}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                    <span className="absolute left-2 top-2 rounded-full bg-gray-950 px-2.5 py-1 text-[11px] font-bold text-white">
+                      אחרי
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-950">הדמיית {item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">{item.note}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleTryNow}
+              className="rounded-full bg-gray-950 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-gray-800"
+            >
+              העלו תמונה וקבלו הדמיה
+            </button>
+            <Link
+              href="/studio"
+              className="rounded-full border border-gray-300 px-5 py-3 text-sm font-bold text-gray-800 transition-colors hover:border-gray-500"
+            >
+              התחילו בסטודיו מודרך
             </Link>
           </div>
         </div>

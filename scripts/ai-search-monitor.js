@@ -56,6 +56,7 @@ const QUERIES = [
 const HEALTH_URLS = [
   'https://shipazti.com/',
   'https://shipazti.com/studio',
+  'https://shipazti.com/visualize',
   'https://shipazti.com/tips/redesign-ai-hebrew',
   'https://shipazti.com/tips/room-visualization-ai',
   'https://shipazti.com/tips/ai-renovation-from-photo',
@@ -68,6 +69,17 @@ const HEALTH_URLS = [
   'https://shipazti.com/llms-full.txt',
   'https://shipazti.com/robots.txt',
   'https://shipazti.com/sitemap.xml',
+];
+
+const PRIORITY_INDEX_URLS = [
+  'https://shipazti.com/',
+  'https://shipazti.com/studio',
+  'https://shipazti.com/visualize',
+  'https://shipazti.com/tips/room-visualization-ai',
+  'https://shipazti.com/tips/ai-renovation-from-photo',
+  'https://shipazti.com/tips/hebrew-ai-interior-design',
+  'https://shipazti.com/tips/ai-kitchen-renovation',
+  'https://shipazti.com/tips/living-room-before-after-ai',
 ];
 
 function loadEnvFile(filePath) {
@@ -335,6 +347,84 @@ async function fetchSearchConsole(days = 28) {
   };
 }
 
+async function getSearchConsoleAccessToken() {
+  if (!fs.existsSync(SEARCH_CONSOLE_CREDENTIALS)) {
+    return { ok: false, error: 'Missing Search Console credentials' };
+  }
+
+  const credentials = JSON.parse(fs.readFileSync(SEARCH_CONSOLE_CREDENTIALS, 'utf8'));
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: credentials.client_id,
+      client_secret: credentials.client_secret,
+      refresh_token: credentials.refresh_token,
+      grant_type: 'refresh_token',
+    }),
+  });
+  const token = await tokenResponse.json();
+  if (!tokenResponse.ok || !token.access_token) {
+    return { ok: false, error: token.error_description || token.error || 'Token refresh failed' };
+  }
+
+  return { ok: true, accessToken: token.access_token };
+}
+
+async function inspectSearchConsoleUrl(accessToken, inspectionUrl) {
+  const response = await fetch('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      inspectionUrl,
+      siteUrl: SEARCH_CONSOLE_SITE,
+      languageCode: 'he-IL',
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    return {
+      url: inspectionUrl,
+      ok: false,
+      error: data.error?.message || 'URL inspection failed',
+    };
+  }
+
+  const indexStatus = data.inspectionResult?.indexStatusResult || {};
+  const mobileUsability = data.inspectionResult?.mobileUsabilityResult || {};
+  return {
+    url: inspectionUrl,
+    ok: true,
+    verdict: indexStatus.verdict || null,
+    coverageState: indexStatus.coverageState || null,
+    indexingState: indexStatus.indexingState || null,
+    robotsTxtState: indexStatus.robotsTxtState || null,
+    pageFetchState: indexStatus.pageFetchState || null,
+    googleCanonical: indexStatus.googleCanonical || null,
+    userCanonical: indexStatus.userCanonical || null,
+    lastCrawlTime: indexStatus.lastCrawlTime || null,
+    mobileVerdict: mobileUsability.verdict || null,
+  };
+}
+
+async function fetchUrlInspection() {
+  const token = await getSearchConsoleAccessToken();
+  if (!token.ok) return token;
+
+  const inspected = [];
+  for (const url of PRIORITY_INDEX_URLS) {
+    inspected.push(await inspectSearchConsoleUrl(token.accessToken, url));
+  }
+  return {
+    ok: true,
+    site: SEARCH_CONSOLE_SITE,
+    urls: inspected,
+  };
+}
+
 function renderMarkdown(report) {
   const lines = [];
   lines.push(`# ShiputzAI AI Search Monitor`);
@@ -388,9 +478,31 @@ function renderMarkdown(report) {
   }
 
   lines.push('');
+  lines.push('## Priority URL Index Inspection');
+  if (!report.urlInspection.ok) {
+    lines.push(`- Could not inspect priority URLs: ${report.urlInspection.error}`);
+  } else {
+    for (const item of report.urlInspection.urls) {
+      if (!item.ok) {
+        lines.push(`- FAIL ${item.url}: ${item.error}`);
+        continue;
+      }
+      const statusBits = [
+        item.verdict,
+        item.coverageState,
+        item.pageFetchState,
+        item.robotsTxtState,
+        item.lastCrawlTime ? `last crawl ${item.lastCrawlTime}` : null,
+      ].filter(Boolean);
+      lines.push(`- ${item.url}: ${statusBits.join(' | ') || 'no status'}`);
+    }
+  }
+
+  lines.push('');
   lines.push('## Notes');
   lines.push('- ChatGPT search volume is not public; this monitors proxy signals: Bing visibility, AI referrals, and site readiness for AI crawlers.');
   lines.push('- Search Console now provides direct Google query, impression, click, CTR, and position data for shipazti.com.');
+  lines.push('- Search Console URL Inspection can report index status, but Google does not expose a general API to request indexing for ordinary pages.');
 
   return `${lines.join('\n')}\n`;
 }
@@ -401,14 +513,15 @@ async function run() {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
 
   const generatedAt = new Date().toISOString();
-  const [health, search, aiReferrals, searchConsole] = await Promise.all([
+  const [health, search, aiReferrals, searchConsole, urlInspection] = await Promise.all([
     Promise.all(HEALTH_URLS.map((url) => checkHealthUrl(url))),
     Promise.all(QUERIES.map((query) => checkBing(query))),
     fetchAiReferrals(30),
     fetchSearchConsole(28),
+    fetchUrlInspection(),
   ]);
 
-  const report = { generatedAt, health, search, aiReferrals, searchConsole };
+  const report = { generatedAt, health, search, aiReferrals, searchConsole, urlInspection };
 
   if (!process.argv.includes('--no-write')) {
     fs.appendFileSync(LOG_PATH, `${JSON.stringify(report)}\n`);

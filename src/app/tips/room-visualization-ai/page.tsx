@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import SeoPageShell, { buildArticleJsonLd, type SeoFaq, type SeoSection } from "../seo-page-shell";
+import SeoPageShell, {
+  buildArticleJsonLd,
+  type SeoFaq,
+  type SeoProofExample,
+  type SeoSection,
+} from "../seo-page-shell";
 
 const slug = "room-visualization-ai";
 const title = "הדמיית חדרים ב-AI: לראות חדר לפני שיפוץ";
@@ -52,6 +57,27 @@ const sections: SeoSection[] = [
   },
 ];
 
+const proofExamples: SeoProofExample[] = [
+  {
+    title: "סלון לפני החלטת ריהוט",
+    before: "/examples/before-after-gallery/room-01-before.jpg",
+    after: "/examples/before-after-gallery/room-01-after.jpg",
+    note: "בודקים האם כיוון חם, ספה בהירה וטקסטורות עץ עובדים בחדר האמיתי.",
+  },
+  {
+    title: "מטבח לפני הזמנה",
+    before: "/examples/kitchen-before.jpg",
+    after: "/examples/kitchen-after.jpg",
+    note: "רואים חזיתות, שיש ותאורה לפני שמתחייבים לספק או קבלן.",
+  },
+  {
+    title: "חדר שינה לפני שיפוץ",
+    before: "/examples/bedroom-before.jpg",
+    after: "/examples/bedroom-after.jpg",
+    note: "בודקים מעטפת, צבעים וריהוט בלי לשנות את מבנה החדר.",
+  },
+];
+
 export const metadata: Metadata = {
   title,
   description,
@@ -85,6 +111,7 @@ export default function Page() {
         secondaryHref="/studio"
         secondaryLabel="פתחו סטודיו מודרך"
         sections={sections}
+        proofExamples={proofExamples}
         faqs={faqs}
         related={[
           { href: "/visualize", label: "כלי הדמיית חדרים" },

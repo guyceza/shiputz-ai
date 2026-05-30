@@ -165,6 +165,46 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function brandedEmail(title: string, body: string): string {
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Arial, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 600; color: #1d1d1f; vertical-align: middle;">ShiputzAI</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #8bd86f 48%, #f0c75d 100%);"></div>
+              <div style="padding: 48px 42px 44px; text-align: right;" dir="rtl">
+                <h1 style="font-size: 34px; font-weight: 800; color: #142018; margin: 0 0 28px; text-align: center; direction: rtl;">${title}</h1>
+                ${body}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 34px 20px; text-align: center;">
+              <p style="font-size: 12px; color: #86868b; margin: 0;">ShiputzAI · ניהול שיפוצים חכם</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function sendRenewalEmail(email: string, name: string | null, credits: number, total: number) {
   try {
     const RESEND_KEY = process.env.RESEND_API_KEY;
@@ -178,19 +218,18 @@ async function sendRenewalEmail(email: string, name: string | null, credits: num
         from: 'ShiputzAI <help@shipazti.com>',
         to: email,
         subject: `${credits} קרדיטים חדשים נוספו לחשבון שלך`,
-        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #111; text-align: center;">הקרדיטים החודשיים שלך חודשו!</h1>
-          <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
-          <p style="font-size: 16px; color: #333;">קרדיטי המנוי שלך התאפסו והתחדשו ל-<strong>${credits} קרדיטים</strong>.</p>
-          <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        html: brandedEmail('הקרדיטים החודשיים שלך חודשו!', `
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${displayName},</p>
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">קרדיטי המנוי שלך התאפסו והתחדשו ל-<strong>${credits} קרדיטים</strong>.</p>
+          <div style="background: #ffffff; border-radius: 18px; padding: 20px; margin: 24px 0; text-align: center; border: 1px solid #eee5d7;">
             <div style="font-size: 48px; font-weight: bold; color: #10b981;">${total}</div>
             <div style="color: #666;">סה"כ קרדיטים זמינים</div>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
+            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">התחל להדמות</a>
           </div>
-          <p style="color: #888; font-size: 14px;">קרדיטים שנרכשו בנפרד לא מתאפסים ונשארים בחשבון. בהצלחה!<br>צוות ShiputzAI</p>
-        </div>`,
+          <p style="color: #888; font-size: 14px; line-height: 1.7; margin: 0; text-align: right;">קרדיטים שנרכשו בנפרד לא מתאפסים ונשארים בחשבון. בהצלחה!</p>
+        `),
       }),
     });
   } catch (e) { console.error('Renewal email failed:', e); }
@@ -209,15 +248,13 @@ async function sendLowCreditEmail(email: string, name: string | null, remaining:
         from: 'ShiputzAI <help@shipazti.com>',
         to: email,
         subject: 'נשארו לך מעט קרדיטים',
-        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #111; text-align: center;">נשארו לך ${remaining} קרדיטים</h1>
-          <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
-          <p style="font-size: 16px; color: #333;">שמנו לב שנשארו לך מעט קרדיטים. כדי להמשיך להשתמש בכלי ה-AI, אפשר לרכוש קרדיטים נוספים.</p>
+        html: brandedEmail(`נשארו לך ${remaining} קרדיטים`, `
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${displayName},</p>
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">שמנו לב שנשארו לך מעט קרדיטים. כדי להמשיך להשתמש בכלי ה-AI, אפשר לרכוש קרדיטים נוספים.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://shipazti.com/pricing" style="display: inline-block; background: #10b981; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">רכישת קרדיטים ←</a>
+            <a href="https://shipazti.com/pricing" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">רכישת קרדיטים</a>
           </div>
-          <p style="color: #888; font-size: 14px;">צוות ShiputzAI</p>
-        </div>`,
+        `),
       }),
     });
   } catch (e) { console.error('Low credit email failed:', e); }

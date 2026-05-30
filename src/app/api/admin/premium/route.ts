@@ -8,41 +8,48 @@ import { verifyUserEmail } from '@/lib/api-auth';
 // Send welcome premium email
 async function sendWelcomePremiumEmail(email: string, name?: string) {
   const html = `
-    <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Premium!</h1>
-      </div>
-      
-      <p style="font-size: 16px; color: #333;">היי ${name || 'משפץ יקר'},</p>
-      
-      <p style="font-size: 16px; color: #333;">
-        תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.
-      </p>
-      
-      <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0;">
-        <h3 style="color: #111; margin-top: 0;">✅ מה מחכה לך:</h3>
-        <ul style="color: #555; line-height: 1.8;">
-          <li>מעקב תקציב חכם בזמן אמת</li>
-          <li>סריקת קבלות אוטומטית עם AI</li>
-          <li>ניתוח הצעות מחיר</li>
-          <li>עוזר AI אישי לכל שאלה</li>
-          <li>התראות חכמות לפני חריגות</li>
-        </ul>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://shipazti.com/dashboard" 
-           style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">
-          כניסה לדשבורד ←
-        </a>
-      </div>
-      
-      <p style="font-size: 16px; color: #333;">
-        בהצלחה עם השיפוץ! 🏠<br>
-        <strong>צוות ShiputzAI</strong>
-      </p>
-      <p style="margin-top: 30px; text-align: center;"><a href="https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
-    </div>
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Arial, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
+          <tr>
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #8bd86f 48%, #f0c75d 100%);"></div>
+              <div style="padding: 48px 42px 44px; text-align: right;" dir="rtl">
+                <h1 style="font-size: 34px; font-weight: 800; color: #142018; margin: 0 0 28px; text-align: center; direction: rtl;">ברוך הבא ל-ShiputzAI Premium!</h1>
+                <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${name || 'משפץ יקר'},</p>
+                <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.</p>
+                <div style="background: #ffffff; border-radius: 18px; padding: 20px; margin: 24px 0; border: 1px solid #eee5d7;">
+                  <h3 style="color: #111; margin-top: 0;">✅ מה מחכה לך:</h3>
+                  <ul style="color: #555; line-height: 1.8;">
+                    <li>מעקב תקציב חכם בזמן אמת</li>
+                    <li>סריקת קבלות אוטומטית עם AI</li>
+                    <li>ניתוח הצעות מחיר</li>
+                    <li>עוזר AI אישי לכל שאלה</li>
+                    <li>התראות חכמות לפני חריגות</li>
+                  </ul>
+                </div>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">כניסה לדשבורד</a>
+                </div>
+                <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0;">בהצלחה עם השיפוץ!</p>
+                <p style="margin-top: 30px; text-align: center;"><a href="https://shipazti.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; font-size: 12px;">להסרה מרשימת התפוצה</a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
 
   try {

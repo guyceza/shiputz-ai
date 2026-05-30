@@ -22,6 +22,46 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function brandedEmail(title: string, body: string): string {
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Arial, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <img src="https://shipazti.com/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 600; color: #1d1d1f; vertical-align: middle;">ShiputzAI</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #8bd86f 48%, #f0c75d 100%);"></div>
+              <div style="padding: 48px 42px 44px; text-align: right;" dir="rtl">
+                <h1 style="font-size: 34px; font-weight: 800; color: #142018; margin: 0 0 28px; text-align: center; direction: rtl;">${title}</h1>
+                ${body}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 34px 20px; text-align: center;">
+              <p style="font-size: 12px; color: #86868b; margin: 0;">ShiputzAI · ניהול שיפוצים חכם</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 type CreditBucketRow = {
   viz_credits?: number | null;
   subscription_credits?: number | null;
@@ -720,13 +760,10 @@ export async function POST(request: NextRequest) {
               from: 'ShiputzAI <help@shipazti.com>',
               to: email,
               subject: '🎉 ברוך הבא ל-ShiputzAI Pro!',
-              html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="color: #111; margin: 0;">🎉 ברוך הבא ל-ShiputzAI Pro!</h1>
-                </div>
-                <p style="font-size: 16px; color: #333;">היי ${displayName},</p>
-                <p style="font-size: 16px; color: #333;">תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.</p>
-                <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0;">
+              html: brandedEmail('ברוך הבא ל-ShiputzAI Pro!', `
+                <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${displayName},</p>
+                <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">תודה רבה! אנחנו שמחים שבחרת ב-ShiputzAI לניהול השיפוץ שלך.</p>
+                <div style="background: #ffffff; border-radius: 18px; padding: 20px; margin: 24px 0; border: 1px solid #eee5d7;">
                   <h3 style="color: #111; margin-top: 0;">✅ מה מחכה לך:</h3>
                   <ul style="color: #555; line-height: 1.8;">
                     <li>מעקב תקציב חכם בזמן אמת</li>
@@ -738,10 +775,10 @@ export async function POST(request: NextRequest) {
                   </ul>
                 </div>
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">כניסה לדשבורד ←</a>
+                  <a href="https://shipazti.com/dashboard" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">כניסה לדשבורד</a>
                 </div>
-                <p style="color: #888; font-size: 14px;">בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
-              </div>`,
+                <p style="color: #888; font-size: 14px; line-height: 1.7; margin: 0; text-align: right;">בהצלחה עם השיפוץ!</p>
+              `),
             }),
           });
 
@@ -798,19 +835,18 @@ async function sendPlanEmail(email: string, planId: string, credits: number, sup
         from: 'ShiputzAI <help@shipazti.com>',
         to: email,
         subject: `ברוך הבא לתוכנית ${planNames[planId] || planId}!`,
-        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #111; text-align: center;">ברוך הבא לתוכנית ${planNames[planId]}!</h1>
-          <p style="font-size: 16px; color: #333;">היי ${name},</p>
-          <p style="font-size: 16px; color: #333;">התוכנית הופעלה בהצלחה. קיבלת <strong>${credits} קרדיטים</strong> לחשבון שלך.</p>
-          <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        html: brandedEmail(`ברוך הבא לתוכנית ${planNames[planId]}!`, `
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${name},</p>
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">התוכנית הופעלה בהצלחה. קיבלת <strong>${credits} קרדיטים</strong> לחשבון שלך.</p>
+          <div style="background: #ffffff; border-radius: 18px; padding: 20px; margin: 24px 0; text-align: center; border: 1px solid #eee5d7;">
             <div style="font-size: 48px; font-weight: bold; color: #10b981;">${credits}</div>
             <div style="color: #666;">קרדיטים זמינים</div>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
+            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">התחל להדמות</a>
           </div>
-          <p style="color: #888; font-size: 14px;">קרדיטי המנוי מתאפסים ומתחדשים כל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים. בהצלחה!<br>צוות ShiputzAI</p>
-        </div>`,
+          <p style="color: #888; font-size: 14px; line-height: 1.7; margin: 0; text-align: right;">קרדיטי המנוי מתאפסים ומתחדשים כל חודש. קרדיטים שנרכשו בנפרד לא מתאפסים. בהצלחה!</p>
+        `),
       }),
     });
     const result = await response.json();
@@ -846,19 +882,18 @@ async function sendCreditsEmail(email: string, purchased: number, total: number,
         from: 'ShiputzAI <help@shipazti.com>',
         to: email,
         subject: `${purchased} קרדיטים נוספו לחשבון שלך`,
-        html: `<div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #111; text-align: center;">הקרדיטים נוספו בהצלחה!</h1>
-          <p style="font-size: 16px; color: #333;">היי ${name},</p>
-          <p style="font-size: 16px; color: #333;">רכשת <strong>${purchased} קרדיטים</strong>. הם זמינים לשימוש מיידי.</p>
-          <div style="background: #f5f5f5; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        html: brandedEmail('הקרדיטים נוספו בהצלחה!', `
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">היי ${name},</p>
+          <p style="font-size: 16px; color: #333; line-height: 1.7; margin: 0 0 18px; text-align: right;">רכשת <strong>${purchased} קרדיטים</strong>. הם זמינים לשימוש מיידי.</p>
+          <div style="background: #ffffff; border-radius: 18px; padding: 20px; margin: 24px 0; text-align: center; border: 1px solid #eee5d7;">
             <div style="font-size: 48px; font-weight: bold; color: #10b981;">${total}</div>
             <div style="color: #666;">סה"כ קרדיטים בחשבון</div>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #111; color: white; padding: 14px 32px; border-radius: 30px; text-decoration: none; font-weight: bold;">התחל להדמות ←</a>
+            <a href="https://shipazti.com/visualize" style="display: inline-block; background: #16a765; color: white; padding: 14px 32px; border-radius: 999px; text-decoration: none; font-weight: bold; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">התחל להדמות</a>
           </div>
-          <p style="color: #888; font-size: 14px;">הקרדיטים לא פגים. בהצלחה עם השיפוץ!<br>צוות ShiputzAI</p>
-        </div>`,
+          <p style="color: #888; font-size: 14px; line-height: 1.7; margin: 0; text-align: right;">הקרדיטים לא פגים. בהצלחה עם השיפוץ!</p>
+        `),
       }),
     });
   } catch (e) { console.error('Failed to send credits email:', e); }

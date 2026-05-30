@@ -63,6 +63,8 @@ function getUnsubscribeUrl(email: string): string {
   return `${BASE_URL}/unsubscribe?email=${encodeURIComponent(email.toLowerCase())}${token ? `&token=${token}` : ''}`;
 }
 
+const EMAIL_HEADER_GRADIENT = 'linear-gradient(90deg, #14b875 0%, #8bd86f 48%, #f0c75d 100%)';
+
 // Apple-style email wrapper - clean, RTL, Hebrew
 function wrapEmail(title: string, subtitle: string, content: string, ctaText: string, ctaUrl: string, userEmail: string): string {
   const unsubscribeUrl = getUnsubscribeUrl(userEmail);
@@ -73,8 +75,8 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 60px 20px;" dir="rtl">
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
@@ -88,17 +90,18 @@ function wrapEmail(title: string, subtitle: string, content: string, ctaText: st
           
           <!-- Main Card -->
           <tr>
-            <td style="background: #ffffff; border-radius: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);" dir="rtl">
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: ${EMAIL_HEADER_GRADIENT};"></div>
               <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
                 <tr>
-                  <td style="padding: 60px 50px; text-align: right;" dir="rtl">
-                    <h1 style="font-size: 34px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px; letter-spacing: -0.5px; text-align: center;">${title}</h1>
+                  <td style="padding: 48px 42px 44px; text-align: right;" dir="rtl">
+                    <h1 style="font-size: 34px; font-weight: 800; color: #142018; margin: 0 0 12px; letter-spacing: 0; text-align: center; direction: rtl;">${title}</h1>
                     ${subtitle ? `<p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">${subtitle}</p>` : '<div style="margin-bottom: 50px;"></div>'}
                     ${content}
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 40px;">
                       <tr>
                         <td align="center">
-                          <a href="${ctaUrl}" style="display: inline-block; background: #1d1d1f; color: #ffffff; padding: 18px 48px; border-radius: 980px; text-decoration: none; font-size: 17px; font-weight: 500;">${ctaText}</a>
+                          <a href="${ctaUrl}" style="display: inline-block; background: #16a765; color: #ffffff; padding: 18px 48px; border-radius: 980px; text-decoration: none; font-size: 17px; font-weight: 700; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">${ctaText}</a>
                         </td>
                       </tr>
                     </table>
@@ -272,12 +275,12 @@ function coloredActivationEmail(params: {
           </tr>
           <tr>
             <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
-              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #d8b85f 52%, #f08a5d 100%);"></div>
+              <div style="height: 12px; background: ${EMAIL_HEADER_GRADIENT};"></div>
               <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
                 <tr>
                   <td style="padding: 44px 42px 42px; text-align: right;" dir="rtl">
                     <div style="text-align: center; margin-bottom: 22px;">
-                      <span style="display: inline-block; background: #e8f7ed; color: #147a4a; border: 1px solid #bde6cb; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700;">${params.badge}</span>
+                      <span style="display: inline-block; background: #e8f7ed; color: #147a4a; border: 1px solid #bde6cb; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; text-align: center; direction: rtl; line-height: 1.35;">${params.badge}</span>
                     </div>
                     <h1 style="font-size: 33px; line-height: 1.15; font-weight: 800; color: #142018; margin: 0 0 12px; text-align: center;">${params.title}</h1>
                     <p style="font-size: 17px; color: #6b6254; margin: 0 0 30px; text-align: center; line-height: 1.55;">${params.subtitle}</p>

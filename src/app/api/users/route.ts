@@ -143,8 +143,8 @@ async function sendWelcomeEmail(email: string, name: string): Promise<{ id?: str
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 60px 20px;" dir="rtl">
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
@@ -155,11 +155,12 @@ async function sendWelcomeEmail(email: string, name: string): Promise<{ id?: str
             </td>
           </tr>
           <tr>
-            <td style="background: #ffffff; border-radius: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);" dir="rtl">
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #8bd86f 48%, #f0c75d 100%);"></div>
               <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
                 <tr>
-                  <td style="padding: 60px 50px; text-align: right;" dir="rtl">
-                    <h1 style="font-size: 34px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px; text-align: center;">ברוכים הבאים</h1>
+                  <td style="padding: 48px 42px 44px; text-align: right;" dir="rtl">
+                    <h1 style="font-size: 34px; font-weight: 800; color: #142018; margin: 0 0 12px; text-align: center; direction: rtl;">ברוכים הבאים</h1>
                     <p style="font-size: 17px; color: #86868b; margin: 0 0 50px; text-align: center;">יש לכם ניסיון ראשון חינם ו-${SIGNUP_BONUS_CREDITS} קרדיטים לניסיון</p>
                     <p style="font-size: 17px; color: #1d1d1f; line-height: 1.5; margin: 0 0 30px; text-align: right;">היי <strong>${displayName}</strong>,</p>
                     <p style="font-size: 17px; color: #1d1d1f; line-height: 1.7; margin: 0 0 25px; text-align: right;">תודה שהצטרפתם. עם ShiputzAI תוכלו לראות איך הבית ייראה אחרי עיצוב מחדש לפני שמוציאים שקל.</p>
@@ -175,7 +176,7 @@ async function sendWelcomeEmail(email: string, name: string): Promise<{ id?: str
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 40px;">
                       <tr>
                         <td align="center">
-                          <a href="https://shipazti.com/visualize" style="display: inline-block; background: #1d1d1f; color: #ffffff; padding: 18px 48px; border-radius: 980px; text-decoration: none; font-size: 17px; font-weight: 500;">צור הדמיה ראשונה</a>
+                          <a href="https://shipazti.com/visualize" style="display: inline-block; background: #16a765; color: #ffffff; padding: 18px 48px; border-radius: 980px; text-decoration: none; font-size: 17px; font-weight: 700; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">צור הדמיה ראשונה</a>
                         </td>
                       </tr>
                     </table>

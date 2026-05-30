@@ -17,40 +17,25 @@ import {
 
 const characterDirections = [
   {
-    name: "שיפוצניק חכם",
-    role: "מדריך פרקטי",
-    tone: "ישיר, שימושי, נותן תחושת ביטחון לפני החלטות.",
-    accent: "from-emerald-300 to-lime-200",
-    face: "bg-emerald-900",
-    shirt: "bg-emerald-600",
-    chip: "הכי מותגי",
+    name: "פופאפ זוג + שיפוץ",
+    role: "כיוון 1",
+    tone: "הכי קרוב לעולם של שירותים ביתיים: חם, ברור, לא ריאלי מדי.",
+    image: "/brand-playground/shiputzai-3d-popup-style-v1.png",
+    chip: "יותר שירותי",
   },
   {
-    name: "מעצבת רגועה",
-    role: "מלווה אסתטית",
-    tone: "רכה יותר, מתאימה להדמיות ולבחירת סגנון.",
-    accent: "from-rose-200 to-amber-200",
-    face: "bg-stone-800",
-    shirt: "bg-rose-500",
-    chip: "יותר ביתי",
+    name: "מומחה שיפוצים חכם",
+    role: "כיוון 2",
+    tone: "יותר מותגי ל-ShiputzAI: איש מקצוע ידידותי עם שכבת AI.",
+    image: "/brand-playground/shiputzai-3d-popup-style-v2.png",
+    chip: "יותר מותגי",
   },
   {
-    name: "מודד תוכניות",
-    role: "איש מקצוע מדויק",
-    tone: "מתאים לתוכניות קומה, כתבי כמויות ועלויות.",
-    accent: "from-sky-200 to-cyan-100",
-    face: "bg-slate-800",
-    shirt: "bg-sky-600",
-    chip: "יותר מקצועי",
-  },
-  {
-    name: "עוזרת AI",
-    role: "דמות מוצרית",
-    tone: "משחקית יותר, אבל עדיין נקייה ולא ילדותית.",
-    accent: "from-violet-200 to-emerald-100",
-    face: "bg-violet-900",
-    shirt: "bg-violet-600",
-    chip: "יותר משחקי",
+    name: "הכי קרוב לרפרנס",
+    role: "כיוון 3",
+    tone: "דמויות תלת־ממד רכות, פופאפ, בית ושיפוץ בלי ריאליזם כבד.",
+    image: "/brand-playground/shiputzai-3d-popup-style-v3.png",
+    chip: "הכי נכון",
   },
 ];
 
@@ -93,26 +78,18 @@ function CharacterCard({
   direction: (typeof characterDirections)[number];
 }) {
   return (
-    <article className="rounded-[8px] border border-stone-200 bg-white p-4 shadow-sm">
-      <div
-        className={`relative mb-4 flex aspect-[4/3] items-end justify-center overflow-hidden rounded-[8px] bg-gradient-to-br ${direction.accent}`}
-      >
+    <article className="rounded-[8px] border border-stone-200 bg-white p-3 shadow-sm">
+      <div className="relative mb-4 overflow-hidden rounded-[8px] bg-[#fff8f3]">
         <div className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-stone-700 backdrop-blur">
           {direction.chip}
         </div>
-        <div className="relative mb-5 h-28 w-24">
-          <div
-            className={`absolute bottom-0 left-1/2 h-16 w-24 -translate-x-1/2 rounded-t-[34px] ${direction.shirt}`}
-          />
-          <div className="absolute bottom-11 left-1/2 h-20 w-20 -translate-x-1/2 rounded-full bg-[#f1c49d] shadow-lg">
-            <div className="absolute left-4 top-8 h-2 w-2 rounded-full bg-stone-900" />
-            <div className="absolute right-4 top-8 h-2 w-2 rounded-full bg-stone-900" />
-            <div className="absolute bottom-5 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full bg-white/80" />
-          </div>
-          <div
-            className={`absolute bottom-[94px] left-1/2 h-9 w-16 -translate-x-1/2 rounded-t-full ${direction.face}`}
-          />
-        </div>
+        <Image
+          src={direction.image}
+          alt={direction.name}
+          width={720}
+          height={720}
+          className="aspect-[4/3] w-full object-cover object-top"
+        />
       </div>
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-normal text-emerald-700">
@@ -183,23 +160,23 @@ export default function BrandPlaygroundPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[8px] border border-stone-200 bg-white shadow-sm">
+        <div className="relative rounded-[8px] border border-stone-200 bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.14)]">
           <Image
-            src="/examples/living-after.webp"
-            alt="סלון אחרי הדמיה"
+            src="/brand-playground/shiputzai-3d-popup-style-v3.png"
+            alt="דמויות תלת ממד לפופאפ ShiputzAI"
             width={900}
-            height={720}
+            height={900}
             priority
-            className="h-[460px] w-full object-cover"
+            className="h-[420px] w-full rounded-[8px] bg-[#fff8f3] object-cover object-top sm:h-[500px]"
           />
-          <div className="absolute bottom-4 right-4 max-w-[82%] rounded-[8px] bg-white/92 p-4 shadow-xl backdrop-blur">
+          <div className="absolute bottom-8 right-8 max-w-[78%] rounded-[8px] bg-white/92 p-4 shadow-xl backdrop-blur">
             <div className="mb-3 flex items-center gap-2 text-sm font-bold text-stone-950">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               כך זה יכול להרגיש באתר
             </div>
             <p className="text-sm leading-6 text-stone-700">
-              יותר משחקי ברגע הבחירה, אבל התוצאה עדיין נשארת נקייה, פרקטית
-              ומחוברת לשיפוץ אמיתי.
+              פופאפ רך ומזמין, עם דמויות תלת־ממד שמרגישות כמו מוצר ולא כמו
+              צילום מלאכותי.
             </p>
           </div>
         </div>
@@ -213,7 +190,7 @@ export default function BrandPlaygroundPage() {
                 כיווני דמויות
               </p>
               <h2 className="mt-2 text-3xl font-black text-stone-950">
-                ארבעה טעמים, לא החלטה סופית
+                שלושה כיוונים בסגנון הפופאפ
               </h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-stone-600">
@@ -221,7 +198,7 @@ export default function BrandPlaygroundPage() {
               רחוק מדי.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {characterDirections.map((direction) => (
               <CharacterCard key={direction.name} direction={direction} />
             ))}

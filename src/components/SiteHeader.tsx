@@ -49,12 +49,12 @@ export default function SiteHeader({
           <Image
             src="/brand/shiputzai-modern-logo-mark-transparent.png"
             alt=""
-            width={24}
-            height={24}
-            className="h-6 w-6 object-contain"
+            width={28}
+            height={28}
+            className="h-7 w-7 object-contain"
             priority
           />
-          <span className="text-[21px] font-semibold leading-none">ShiputzAI</span>
+          <span className="text-[24px] font-semibold leading-none md:text-[25px]">ShiputzAI</span>
         </Link>
 
         <nav

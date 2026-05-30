@@ -7,6 +7,7 @@ import Image from "next/image";
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
+import HomeScrollRevealEnhancer from "@/components/HomeScrollRevealEnhancer";
 import SiteHeader from "@/components/SiteHeader";
 import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
@@ -61,7 +62,6 @@ const seoTopicLinks = [
   { href: "/tips/ai-kitchen-renovation", label: "הדמיית מטבח AI" },
   { href: "/tips/living-room-before-after-ai", label: "הדמיית סלון לפני שיפוץ" },
   { href: "/tips/floor-plan-ai-israel", label: "תוכנית דירה ל-AI" },
-  { href: "/tips/interiorai-alternative-israel", label: "חלופה ישראלית ל-InteriorAI" },
 ];
 
 export default function Home() {
@@ -162,7 +162,11 @@ export default function Home() {
   // handleSubscribe removed
 
   return (
-    <div className={`min-h-screen ${showGuestTrial ? "pb-20 md:pb-0" : ""}`}>
+    <div
+      data-home-scroll-reveal-page
+      className={`min-h-screen ${showGuestTrial ? "pb-20 md:pb-0" : ""}`}
+    >
+      <HomeScrollRevealEnhancer />
       {/* Skip to content */}
       <a href="#features" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 focus:z-[60] focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg">
         דלג לתוכן

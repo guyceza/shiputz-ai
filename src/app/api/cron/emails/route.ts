@@ -486,12 +486,11 @@ function evaluateUsageOffer(ctx: FlowContext): EmailAction | null {
     .reduce((sum, t) => sum + t.amount, 0);
   if (totalSpent <= refunded) return null;
 
-  const firstUse = new Date(deductions[0].created_at);
   const latestUse = new Date(deductions[deductions.length - 1].created_at);
   const minutesSinceLatestUse = (Date.now() - latestUse.getTime()) / (1000 * 60);
-  const hoursSinceFirstUse = (Date.now() - firstUse.getTime()) / (1000 * 60 * 60);
+  const hoursSinceLatestUse = (Date.now() - latestUse.getTime()) / (1000 * 60 * 60);
   if (minutesSinceLatestUse < 5) return null;
-  if (hoursSinceFirstUse > 24) return null;
+  if (hoursSinceLatestUse > 24) return null;
 
   const latestAction = deductions[deductions.length - 1].action as keyof typeof CREDIT_FEATURE_LABELS;
   const latestToolName = CREDIT_FEATURE_LABELS[latestAction] || 'אחד הכלים';

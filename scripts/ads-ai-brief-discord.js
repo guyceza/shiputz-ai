@@ -23,7 +23,9 @@ function loadEnvFile(filePath) {
     if (!match) continue;
 
     const [, key, rawValue] = match;
-    if (process.env[key] !== undefined) continue;
+    const shouldOverrideStaleGoogleAdsEnv =
+      key.startsWith('GOOGLE_ADS_') && filePath === path.join(process.env.HOME || '/home/ubuntu', '.env');
+    if (process.env[key] !== undefined && !shouldOverrideStaleGoogleAdsEnv) continue;
 
     let value = rawValue.trim();
     if (

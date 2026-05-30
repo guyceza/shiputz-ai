@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import CreditBadge from "@/components/CreditBadge";
+import SiteHeader from "@/components/SiteHeader";
 import { trackAction, clearAction } from "@/lib/track-action";
 import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
@@ -1007,16 +1007,7 @@ export default function FloorplanPage() {
     <div className="min-h-screen bg-white" dir="rtl">
       {!videoLoading && <ProgressBar active={isAnyLoading} label={loadingLabel} />}
 
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
-          <div className="flex items-center gap-3">
-            <CreditBadge />
-            <span className="text-xs text-gray-900 bg-gray-100 px-3 py-1.5 rounded-full">Floor Plan Studio</span>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader isLoggedIn={isLoggedIn} authHref="/login?redirect=/floorplan" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12 space-y-8">
         <StepBar />

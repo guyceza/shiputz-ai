@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import SiteHeader from "@/components/SiteHeader";
 import { CREDIT_COSTS } from "@/lib/credit-costs";
 
 const features = [
@@ -123,17 +124,7 @@ export default function AIVisionPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
-          <Link href="/" className="text-xs text-gray-500 hover:text-gray-900">
-            חזרה לדף הבית
-          </Link>
-        </div>
-      </nav>
+      <SiteHeader />
 
       <div className="pt-20 pb-16 px-6">
         <div className="max-w-4xl mx-auto">

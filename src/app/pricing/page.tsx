@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import SiteHeader from "@/components/SiteHeader";
 import { authFetch } from "@/lib/auth-fetch";
 import { CREDIT_COSTS, CREDIT_PACK_STEPS, SIGNUP_BONUS_CREDITS, getCreditPackPrice } from "@/lib/credit-costs";
 import {
@@ -132,7 +133,6 @@ export default function PricingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [planReady, setPlanReady] = useState(false);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [userBillingCycle, setUserBillingCycle] = useState<BillingCycle | null>(null);
   const [userEmail, setUserEmail] = useState("");
@@ -175,7 +175,6 @@ export default function PricingPage() {
 
       setUserPlan(data.plan || planId);
       setUserBillingCycle(data.billingCycle || targetBillingCycle);
-      setUserCredits(data.credits ?? userCredits);
       try {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         if (storedUser.id) {
@@ -227,7 +226,6 @@ export default function PricingPage() {
             authFetch(`/api/credits?email=${encodeURIComponent(user.email)}`)
               .then(r => r.json())
               .then(d => {
-                setUserCredits(d.credits);
                 setUserPlan(d.plan || "free");
                 setUserBillingCycle(d.billingCycle || null);
                 try {
@@ -271,28 +269,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">ShiputzAI</Link>
-          <div className="flex items-center gap-3">
-            {isLoggedIn && userCredits !== null && (
-              <span className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full font-medium">
-                {userCredits} קרדיטים
-              </span>
-            )}
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                התחברות
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader isLoggedIn={isLoggedIn} authHref="/login?redirect=/pricing" />
 
       {/* Hero */}
       <section className="pt-24 pb-8 px-4">

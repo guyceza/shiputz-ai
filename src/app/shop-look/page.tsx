@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, ImagePlus, Loader2, LockKeyhole, UploadCloud } from "lucide-react";
-import CreditBadge from "@/components/CreditBadge";
+import SiteHeader from "@/components/SiteHeader";
 import { ShoppableImage, ShoppableItem } from "@/components/ShoppableImage";
 import FlappyBirdGame from "@/components/FlappyBirdGame";
 import { authFetch } from "@/lib/auth-fetch";
@@ -319,29 +319,7 @@ export default function ShopLookPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-30 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
-          <div className="flex items-center gap-4">
-            <CreditBadge />
-            <Link href="/tips" className="text-xs text-gray-500 hover:text-gray-900">
-              מאמרים וטיפים
-            </Link>
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-gray-900 hover:text-gray-600">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-gray-900 hover:text-gray-600">
-                התחברות
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader isLoggedIn={isLoggedIn} authHref="/login?redirect=/shop-look" />
 
       {/* Hero */}
       <section className="pt-20 pb-10 px-6">

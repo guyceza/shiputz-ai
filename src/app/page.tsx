@@ -7,6 +7,7 @@ import Image from "next/image";
 import PricingComparison from "@/components/PricingComparison";
 import FeaturesShowcase from "@/components/FeaturesShowcase";
 import Footer from "@/components/Footer";
+import SiteHeader from "@/components/SiteHeader";
 import { isAdminEmail } from "@/lib/admin";
 import StatsCounter from "@/components/StatsCounter";
 import { authFetch } from "@/lib/auth-fetch";
@@ -158,8 +159,6 @@ export default function Home() {
     checkAuth();
   }, []);
   
-  const [mobileMenu, setMobileMenu] = useState(false);
-
   // handleSubscribe removed
 
   return (
@@ -168,90 +167,7 @@ export default function Home() {
       <a href="#features" className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:right-0 focus:z-[60] focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg">
         דלג לתוכן
       </a>
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50" aria-label="ניווט ראשי">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/studio" className="text-xs text-gray-900 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 px-3 py-1.5 rounded-full transition-all">
-              סטודיו
-            </Link>
-            <Link href="/ai-vision" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
-              🎨 AI Vision
-            </Link>
-            <Link href="/tips" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
-              מאמרים וטיפים
-            </Link>
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                התחברות
-              </Link>
-            )}
-          </div>
-          {/* Mobile hamburger */}
-          <div className="md:hidden flex items-center gap-2">
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-white bg-gray-900 px-3 py-1.5 rounded-full">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-white bg-gray-900 px-3 py-1.5 rounded-full">
-                התחברות
-              </Link>
-            )}
-            <button
-              onClick={() => setMobileMenu(!mobileMenu)}
-              className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-900"
-              aria-label="תפריט"
-              aria-expanded={mobileMenu}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenu ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile menu dropdown */}
-      {mobileMenu && (
-        <div className="fixed top-11 left-0 right-0 bg-white border-b border-gray-200 z-40 md:hidden shadow-lg" dir="rtl">
-          <div className="px-6 py-4 space-y-3">
-            <Link href="/studio" className="block text-sm font-semibold text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              סטודיו מאוחד
-            </Link>
-            <Link href="/ai-vision" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              🎨 AI Vision - כלי העיצוב
-            </Link>
-            <Link href="/visualize" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              הדמיית עיצוב
-            </Link>
-            <Link href="/style-match" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              זיהוי סגנון
-            </Link>
-            <Link href="/pricing" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              תוכניות ומחירים
-            </Link>
-            <Link href="/tips" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              מאמרים וטיפים
-            </Link>
-            <Link href="/contact" className="block text-sm text-gray-700 hover:text-gray-900 py-2" onClick={() => setMobileMenu(false)}>
-              צור קשר
-            </Link>
-          </div>
-        </div>
-      )}
+      <SiteHeader isLoggedIn={isLoggedIn} />
 
       <BeforeAfterGallery showGuestTrial={showGuestTrial} />
 

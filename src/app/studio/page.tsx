@@ -7,6 +7,7 @@ import {
   Check,
   ImagePlus,
 } from "lucide-react";
+import SiteHeader from "@/components/SiteHeader";
 import { trackAcquisitionEvent } from "@/lib/acquisition-tracking";
 
 const goals = [
@@ -189,33 +190,7 @@ export default function StudioPage() {
       className="min-h-screen overflow-hidden bg-[#f8f5ef] text-stone-950"
       dir="rtl"
     >
-      <header className="border-b border-black/5 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Link href="/" className="text-base font-bold">
-            ShiputzAI
-          </Link>
-          <nav className="hidden items-center gap-2 md:flex">
-            <Link
-              href="/visualize"
-              className="rounded-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
-            >
-              הדמיה
-            </Link>
-            <Link
-              href="/floorplan"
-              className="rounded-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
-            >
-              תוכנית קומה
-            </Link>
-            <Link
-              href="/pricing"
-              className="rounded-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
-            >
-              מחירים
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader position="static" authHref="/login?redirect=/studio" />
 
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-8 lg:grid-cols-[0.92fr_1.08fr] lg:py-14">
         <div className="space-y-7">

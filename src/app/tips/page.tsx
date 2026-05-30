@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import SiteHeader from "@/components/SiteHeader";
 import { articles } from "./articles";
 
 const categoryColors: Record<string, string> = {
@@ -46,28 +47,7 @@ export default function TipsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="h-11 border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/tips" className="text-xs text-gray-900 font-medium">
-              מאמרים וטיפים
-            </Link>
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-gray-500 hover:text-gray-900">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-gray-500 hover:text-gray-900">
-                כניסה
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader isLoggedIn={isLoggedIn} position="sticky" authHref="/login?redirect=/tips" />
 
       {/* Hero */}
       <section className="py-16 px-6 border-b border-gray-100">

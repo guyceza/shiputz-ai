@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft, Check, FileSearch, Loader2, LockKeyhole, Search, ShoppingBag, Trophy, Wand2 } from "lucide-react";
 import { saveVisualization, loadVisualizations, deleteVisualization, Visualization } from "@/lib/visualizations";
 import PricingComparison from "@/components/PricingComparison";
-import CreditBadge from "@/components/CreditBadge";
+import SiteHeader from "@/components/SiteHeader";
 import { trackAction, clearAction } from "@/lib/track-action";
 import { authFetch } from "@/lib/auth-fetch";
 import { CREDIT_COSTS, getCreditPackPrice, getCreditPackUnitPrice } from "@/lib/credit-costs";
@@ -1156,29 +1156,7 @@ export default function VisualizePage() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 h-11 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-200/50">
-        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold text-gray-900">
-            ShiputzAI
-          </Link>
-          <div className="flex items-center gap-3">
-            <CreditBadge />
-            <Link href="/tips" className="text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-all">
-              מאמרים וטיפים
-            </Link>
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                לאזור האישי
-              </Link>
-            ) : (
-              <Link href="/login" className="text-xs text-white bg-gray-900 hover:bg-gray-800 px-4 py-1.5 rounded-full transition-all">
-                התחברות
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      <SiteHeader isLoggedIn={isLoggedIn} authHref="/login?redirect=/visualize" />
 
       {/* Hero Section - optimized for mobile ad traffic */}
       <section className="pt-20 pb-12 px-4 md:px-6">

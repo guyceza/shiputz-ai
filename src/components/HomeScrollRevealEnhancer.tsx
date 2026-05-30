@@ -18,7 +18,7 @@ function markElement(
   target.dataset.scrollRevealKind = kind;
   target.style.setProperty(
     "--scroll-reveal-delay",
-    `${Math.min(delayIndex * 80, 520)}ms`
+    `${Math.min(delayIndex * 120, 900)}ms`
   );
 }
 
@@ -153,7 +153,7 @@ export default function HomeScrollRevealEnhancer() {
         window.setTimeout(() => {
           target.dataset.scrollReveal = "complete";
           target.style.removeProperty("--scroll-reveal-delay");
-        }, delay + 780)
+        }, delay + 1180)
       );
     };
 
@@ -165,14 +165,14 @@ export default function HomeScrollRevealEnhancer() {
           revealTarget(entry.target as HTMLElement);
         });
       },
-      { rootMargin: "0px 0px -14% 0px", threshold: 0.14 }
+      { rootMargin: "0px 0px -28% 0px", threshold: 0.16 }
     );
 
     targets.forEach((target) => observer.observe(target));
 
     const revealPassedTargets = () => {
       frame = 0;
-      const revealLine = window.innerHeight * 0.88;
+      const revealLine = window.innerHeight * 0.72;
       targets.forEach((target) => {
         if (target.dataset.scrollReveal !== "pending") return;
         if (target.getBoundingClientRect().top < revealLine) {
@@ -201,27 +201,35 @@ export default function HomeScrollRevealEnhancer() {
 
   return (
     <style>{`
+      [data-home-scroll-reveal-page] [data-scroll-reveal] {
+        transition:
+          opacity 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--scroll-reveal-delay, 0ms),
+          transform 980ms cubic-bezier(0.16, 1, 0.3, 1) var(--scroll-reveal-delay, 0ms),
+          filter 980ms cubic-bezier(0.16, 1, 0.3, 1) var(--scroll-reveal-delay, 0ms);
+        will-change: opacity, transform, filter;
+      }
+
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"] {
         opacity: 0;
-        transform: translate3d(0, 28px, 0);
-        filter: blur(7px);
-        transition:
-          opacity 620ms cubic-bezier(0.22, 1, 0.36, 1) var(--scroll-reveal-delay, 0ms),
-          transform 720ms cubic-bezier(0.22, 1, 0.36, 1) var(--scroll-reveal-delay, 0ms),
-          filter 720ms cubic-bezier(0.22, 1, 0.36, 1) var(--scroll-reveal-delay, 0ms);
-        will-change: opacity, transform, filter;
+        transform: translate3d(0, 58px, 0) scale(0.985);
+        filter: blur(12px);
       }
 
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="metric-card"],
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="intent-card"],
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="pricing-card"],
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="faq-item"] {
-        transform: translate3d(0, 22px, 0) scale(0.985);
+        transform: translate3d(0, 46px, 0) scale(0.955);
       }
 
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="feature-block"],
       [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="panel"] {
-        transform: translate3d(0, 36px, 0);
+        transform: translate3d(0, 74px, 0) scale(0.975);
+      }
+
+      [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="pill"],
+      [data-home-scroll-reveal-page] [data-scroll-reveal="pending"][data-scroll-reveal-kind="trust-pill"] {
+        transform: translate3d(0, 26px, 0) scale(0.92);
       }
 
       [data-home-scroll-reveal-page] [data-scroll-reveal="visible"] {

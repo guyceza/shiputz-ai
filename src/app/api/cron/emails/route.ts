@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { CREDIT_COSTS } from '@/lib/credit-costs';
+import { CREDIT_COSTS, CREDIT_FEATURE_LABELS } from '@/lib/credit-costs';
 import crypto from 'crypto';
 
 // Vercel: use Node.js runtime with 60s timeout (NOT Edge)
@@ -28,9 +28,10 @@ const EXCLUDED_EMAILS = new Set([
 const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
 
 // Flow priority (lower = higher priority, checked first)
-// activation_1h runs before other lifecycle nudges because it is the first
-// post-signup activation push and intentionally bypasses the global email gap.
+// usage_offer and activation_1h intentionally bypass the global email gap
+// because signup already sends a welcome email and these are hot-intent nudges.
 const FLOW_PRIORITY: string[] = [
+  'usage_offer',
   'activation_1h',
   'zero_credits',
   'low_credits',
@@ -446,6 +447,7 @@ function evaluateOneHourActivation(ctx: FlowContext): EmailAction | null {
   const sent = sentEmails.get('activation_1h') || new Set();
 
   if (user.purchased) return null;
+  if (sentEmails.get('usage_offer')?.has(0)) return null;
   if (sent.has(0)) return null;
   if (hoursSinceSignup < 1) return null;
   if (hoursSinceSignup > 72) return null;
@@ -460,6 +462,57 @@ function evaluateOneHourActivation(ctx: FlowContext): EmailAction | null {
     reason: `activation_1h_${intent.key}`,
     html: coloredActivationEmail({
       ...intent,
+      ctaUrl,
+      userEmail: user.email,
+    }),
+  };
+}
+
+function evaluateUsageOffer(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, creditTransactions } = ctx;
+  const sent = sentEmails.get('usage_offer') || new Set();
+
+  if (user.purchased) return null;
+  if ((user.plan || 'free') !== 'free') return null;
+  if (String(user.vision_subscription || '').toLowerCase() === 'active') return null;
+  if (sent.has(0)) return null;
+
+  const deductions = creditTransactions.filter(t => t.amount < 0);
+  if (deductions.length === 0) return null;
+
+  const totalSpent = deductions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const refunded = creditTransactions
+    .filter(t => t.amount > 0 && t.action.startsWith('refund_'))
+    .reduce((sum, t) => sum + t.amount, 0);
+  if (totalSpent <= refunded) return null;
+
+  const firstUse = new Date(deductions[0].created_at);
+  const latestUse = new Date(deductions[deductions.length - 1].created_at);
+  const minutesSinceLatestUse = (Date.now() - latestUse.getTime()) / (1000 * 60);
+  const hoursSinceFirstUse = (Date.now() - firstUse.getTime()) / (1000 * 60 * 60);
+  if (minutesSinceLatestUse < 5) return null;
+  if (hoursSinceFirstUse > 24) return null;
+
+  const latestAction = deductions[deductions.length - 1].action as keyof typeof CREDIT_FEATURE_LABELS;
+  const latestToolName = CREDIT_FEATURE_LABELS[latestAction] || 'אחד הכלים';
+  const ctaUrl = `${BASE_URL}/checkout?plan=pro&billing=monthly&utm_source=lifecycle&utm_medium=email&utm_campaign=usage_offer`;
+  const remainingCredits = user.viz_credits || 0;
+  const balanceLine = remainingCredits <= 0
+    ? 'הקרדיטים הראשונים נגמרו בדיוק כשהתחלתם לראות מה אפשר לעשות.'
+    : `נשארו לכם ${remainingCredits} קרדיטים, וזה הזמן להמשיך לפני שהרצף נקטע.`;
+
+  return {
+    flowName: 'usage_offer',
+    dayNumber: 0,
+    subject: 'אפשר להמשיך בלי לעצור באמצע',
+    reason: 'usage_offer_after_credit_use',
+    html: coloredActivationEmail({
+      title: 'כבר ראיתם מה אפשר לעשות',
+      subtitle: 'עכשיו כדאי להמשיך עם מספיק קרדיטים לפרויקט אמיתי.',
+      badge: 'הצעה אחרי שימוש ראשון',
+      body: `השתמשתם ב־${latestToolName} וניצלתם ${totalSpent} קרדיטים. ${balanceLine}`,
+      proof: 'המסלול הפופולרי נותן 200 קרדיטים בחודש, כולל הדמיות, תוכניות קומה, מוצרים וכלים לבדיקת החלטות לפני שמוציאים כסף על השיפוץ.',
+      ctaText: 'להמשיך עם 200 קרדיטים',
       ctaUrl,
       userEmail: user.email,
     }),
@@ -599,6 +652,7 @@ function evaluateAbandoned(ctx: FlowContext): EmailAction | null {
 function evaluateActivation(ctx: FlowContext): EmailAction | null {
   const { user, sentEmails, creditTransactions } = ctx;
   const sent = sentEmails.get('activation') || new Set();
+  const usageOfferSent = sentEmails.get('usage_offer')?.has(0);
 
   // Need at least one deduction (negative amount = usage)
   const deductions = creditTransactions.filter(t => t.amount < 0);
@@ -608,7 +662,7 @@ function evaluateActivation(ctx: FlowContext): EmailAction | null {
   const hoursSinceFirstUse = (Date.now() - firstUse.getTime()) / (1000 * 60 * 60);
 
   // #1 IMMEDIATE after first deduction
-  if (!sent.has(0)) {
+  if (!sent.has(0) && !usageOfferSent) {
     return {
       flowName: 'activation',
       dayNumber: 0,
@@ -1215,6 +1269,9 @@ export async function GET(request: NextRequest) {
           case 'activation_1h':
             action = evaluateOneHourActivation(ctx);
             break;
+          case 'usage_offer':
+            action = evaluateUsageOffer(ctx);
+            break;
           case 'low_credits':
             action = evaluateLowCredits(ctx);
             break;
@@ -1247,10 +1304,10 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // 48h minimum gap check. The 1-hour activation email is the only
-      // intentional exception because signup already sends a welcome email.
+      // 48h minimum gap check. Hot-intent emails are intentional exceptions
+      // because signup already sends a welcome email.
       if (
-        action.flowName !== 'activation_1h' &&
+        !['activation_1h', 'usage_offer'].includes(action.flowName) &&
         lastEmailAt &&
         (now.getTime() - lastEmailAt.getTime()) < MIN_EMAIL_GAP_MS
       ) {

@@ -40,7 +40,7 @@ export function trackGoogleAdsConversion(
 }
 
 export function trackSignupConversion(method: string) {
-  const key = `gads_signup_conversion_${method}`;
+  const key = "shiputzai_signup_conversion_tracked";
   if (sessionStorage.getItem(key)) return;
 
   let attempts = 0;
@@ -53,6 +53,9 @@ export function trackSignupConversion(method: string) {
         method,
       })
     ) {
+      trackAnalyticsEvent("sign_up", {
+        method,
+      });
       sessionStorage.setItem(key, "1");
       return;
     }
@@ -63,8 +66,4 @@ export function trackSignupConversion(method: string) {
   };
 
   fire();
-
-  trackAnalyticsEvent("sign_up", {
-    method,
-  });
 }

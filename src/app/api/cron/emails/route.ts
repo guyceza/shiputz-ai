@@ -28,8 +28,10 @@ const EXCLUDED_EMAILS = new Set([
 const MIN_EMAIL_GAP_MS = 48 * 60 * 60 * 1000;
 
 // Flow priority (lower = higher priority, checked first)
-// credits flows > activation > welcome > post_purchase > inactive > referral
+// activation_1h runs before other lifecycle nudges because it is the first
+// post-signup activation push and intentionally bypasses the global email gap.
 const FLOW_PRIORITY: string[] = [
+  'activation_1h',
   'zero_credits',
   'low_credits',
   'abandoned',
@@ -240,6 +242,78 @@ function bigNumber(number: string, caption: string): string {
   </div>`;
 }
 
+function coloredActivationEmail(params: {
+  title: string;
+  subtitle: string;
+  badge: string;
+  body: string;
+  proof: string;
+  ctaText: string;
+  ctaUrl: string;
+  userEmail: string;
+}): string {
+  const unsubscribeUrl = getUnsubscribeUrl(params.userEmail);
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #fbf7ef; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 52px 18px;" dir="rtl">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;" dir="rtl">
+          <tr>
+            <td align="center" style="padding-bottom: 28px;">
+              <img src="${BASE_URL}/logo-email.png" alt="ShiputzAI" style="width: 40px; height: 40px; vertical-align: middle; margin-left: 10px;" /><span style="font-size: 28px; font-weight: 650; color: #1d1d1f; vertical-align: middle;">ShiputzAI</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #fffaf0; border-radius: 24px; overflow: hidden; box-shadow: 0 18px 42px rgba(30, 56, 38, 0.14); border: 1px solid #efe2c6;" dir="rtl">
+              <div style="height: 12px; background: linear-gradient(90deg, #14b875 0%, #d8b85f 52%, #f08a5d 100%);"></div>
+              <table width="100%" cellpadding="0" cellspacing="0" dir="rtl">
+                <tr>
+                  <td style="padding: 44px 42px 42px; text-align: right;" dir="rtl">
+                    <div style="text-align: center; margin-bottom: 22px;">
+                      <span style="display: inline-block; background: #e8f7ed; color: #147a4a; border: 1px solid #bde6cb; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700;">${params.badge}</span>
+                    </div>
+                    <h1 style="font-size: 33px; line-height: 1.15; font-weight: 800; color: #142018; margin: 0 0 12px; text-align: center;">${params.title}</h1>
+                    <p style="font-size: 17px; color: #6b6254; margin: 0 0 30px; text-align: center; line-height: 1.55;">${params.subtitle}</p>
+                    <p style="font-size: 18px; color: #1d1d1f; line-height: 1.75; margin: 0 0 24px; text-align: right;">${params.body}</p>
+                    <div style="background: #ffffff; border-radius: 18px; padding: 22px 24px; margin: 0 0 30px; border: 1px solid #eee5d7; box-shadow: 0 8px 20px rgba(48, 66, 52, 0.06);">
+                      <p style="font-size: 16px; color: #2e3a31; line-height: 1.75; margin: 0; text-align: right;">${params.proof}</p>
+                    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center">
+                          <a href="${params.ctaUrl}" style="display: inline-block; background: #16a765; color: #ffffff; padding: 18px 42px; border-radius: 999px; text-decoration: none; font-size: 17px; font-weight: 750; box-shadow: 0 10px 20px rgba(22, 167, 101, 0.26);">${params.ctaText}</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 34px 20px; text-align: center;">
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 8px;">בהצלחה עם השיפוץ!</p>
+              <p style="font-size: 12px; color: #86868b; margin: 0 0 16px;">ShiputzAI · ניהול שיפוצים חכם</p>
+              <p style="font-size: 11px; color: #aeaeb2; margin: 0;">
+                <a href="${unsubscribeUrl}" style="color: #aeaeb2; text-decoration: underline;">להסרה מרשימת התפוצה</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 // Generate unique discount code
 function generateDiscountCode(prefix: string, email: string): string {
   const emailPart = email.split('@')[0].slice(0, 4).toUpperCase();
@@ -267,6 +341,20 @@ interface UserData {
   last_started_action_page: string | null;
 }
 
+interface AttributionData {
+  email: string;
+  first_source: string | null;
+  first_medium: string | null;
+  first_landing_path: string | null;
+  first_landing_page: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  gclid: string | null;
+  fbclid: string | null;
+  msclkid: string | null;
+}
+
 interface EmailAction {
   flowName: string;
   dayNumber: number;
@@ -281,15 +369,99 @@ interface FlowContext {
   lastEmailAt: Date | null;
   creditTransactions: Array<{ action: string; amount: number; created_at: string }>;
   totalUsageCount: number;
+  hoursSinceSignup: number;
   daysSinceSignup: number;
   daysSinceLastActivity: number;
   daysSincePurchase: number;
+  attribution: AttributionData | null;
 }
 
 // ============================================================
 // FLOW EVALUATORS
 // Each returns an EmailAction or null
 // ============================================================
+
+function getActivationIntent(attribution: AttributionData | null) {
+  const landing = `${attribution?.first_landing_path || attribution?.first_landing_page || ''}`.toLowerCase();
+  const campaign = `${attribution?.utm_campaign || ''}`.toLowerCase();
+  const term = `${attribution?.utm_term || attribution?.utm_content || ''}`.toLowerCase();
+  const signal = `${landing} ${campaign} ${term}`;
+
+  if (signal.includes('floorplan') || signal.includes('תוכנית') || signal.includes('שרטוט')) {
+    return {
+      key: 'floorplan',
+      title: 'השרטוט יכול להפוך לבית שמרגישים',
+      subtitle: 'מתחילים מחדר אחד ורואים את הכיוון תוך רגע.',
+      badge: 'תוכנית קומה לעיצוב חי',
+      body: 'תעלו את התוכנית, בחרו חדר, ותנו ל־ShiputzAI להפוך קווים יבשים לתמונה שאפשר לדמיין בה חיים.',
+      proof: 'עשרות אנשים כבר השתמשו ב־ShiputzAI כדי להפוך רעיון, תמונה או תוכנית לכיוון עיצובי ברור יותר.',
+      ctaText: 'להתחיל מהחדר הראשון',
+      ctaPath: '/floorplan',
+    };
+  }
+
+  if (signal.includes('quote') || signal.includes('pricing-guide') || signal.includes('מחיר') || signal.includes('הצעת')) {
+    return {
+      key: 'quote',
+      title: 'לפני שמחליטים, רואים כיוון ברור',
+      subtitle: 'אפשר להתחיל מהדמיה או מבדיקת הצעת מחיר.',
+      badge: 'שיפוץ חכם יותר',
+      body: 'במקום לנחש לפי מספרים יבשים, אפשר לראות איך הבית יכול להיראות ולבדוק אם ההחלטות באמת מסתדרות.',
+      proof: 'עשרות אנשים כבר השתמשו ב־ShiputzAI כדי לקבל יותר ביטחון לפני שיפוץ, עיצוב או רכישה.',
+      ctaText: 'לראות את האפשרויות',
+      ctaPath: '/visualize',
+    };
+  }
+
+  if (signal.includes('visualize') || signal.includes('studio') || signal.includes('design') || signal.includes('עיצוב')) {
+    return {
+      key: 'visualize',
+      title: 'התמונה הראשונה יכולה להפוך לכיוון עיצובי',
+      subtitle: 'מעלים חדר, בוחרים סגנון, ורואים אפשרות חדשה.',
+      badge: 'הדמיית חדר ראשונה',
+      body: 'מספיק להעלות תמונה אחת של החדר כדי לקבל כיוון עיצובי ברור יותר, בלי להתחייב ובלי להתחיל שיפוץ בפועל.',
+      proof: 'עשרות אנשים כבר השתמשו ב־ShiputzAI כדי לראות את הבית אחרת לפני שמוציאים כסף.',
+      ctaText: 'ליצור הדמיה ראשונה',
+      ctaPath: '/visualize',
+    };
+  }
+
+  return {
+    key: 'general',
+    title: 'הצעד הבא לבית החלומות שלכם',
+    subtitle: 'מתחילים מתמונה, תוכנית או רעיון קטן.',
+    badge: 'קרדיטים מחכים בחשבון',
+    body: 'החשבון שלכם כבר מוכן. בחרו חדר או רעיון ראשון, ו־ShiputzAI יעזור להפוך אותו לכיוון שאפשר לראות.',
+    proof: 'עשרות אנשים כבר השתמשו ב־ShiputzAI כדי לקבל תמונה ברורה יותר לפני שיפוץ או עיצוב.',
+    ctaText: 'להתחיל עכשיו',
+    ctaPath: '/visualize',
+  };
+}
+
+function evaluateOneHourActivation(ctx: FlowContext): EmailAction | null {
+  const { user, sentEmails, hoursSinceSignup } = ctx;
+  const sent = sentEmails.get('activation_1h') || new Set();
+
+  if (user.purchased) return null;
+  if (sent.has(0)) return null;
+  if (hoursSinceSignup < 1) return null;
+  if (hoursSinceSignup > 72) return null;
+
+  const intent = getActivationIntent(ctx.attribution);
+  const ctaUrl = `${BASE_URL}${intent.ctaPath}?utm_source=lifecycle&utm_medium=email&utm_campaign=activation_1h_${intent.key}`;
+
+  return {
+    flowName: 'activation_1h',
+    dayNumber: 0,
+    subject: 'השלב הבא לבית החלומות שלכם',
+    reason: `activation_1h_${intent.key}`,
+    html: coloredActivationEmail({
+      ...intent,
+      ctaUrl,
+      userEmail: user.email,
+    }),
+  };
+}
 
 // Flow 1: Welcome (trigger: signup)
 function evaluateWelcome(ctx: FlowContext): EmailAction | null {
@@ -971,12 +1143,23 @@ export async function GET(request: NextRequest) {
       .select('user_email, action, amount, created_at')
       .order('created_at', { ascending: true });
 
+    const { data: allAttribution } = await supabase
+      .from('user_attribution')
+      .select('email, first_source, first_medium, first_landing_path, first_landing_page, utm_campaign, utm_term, utm_content, gclid, fbclid, msclkid');
+
     // Build per-user transaction map
     const userTransactions = new Map<string, Array<{ action: string; amount: number; created_at: string }>>();
     for (const tx of allTransactions || []) {
       const email = tx.user_email.toLowerCase();
       if (!userTransactions.has(email)) userTransactions.set(email, []);
       userTransactions.get(email)!.push(tx);
+    }
+
+    const userAttribution = new Map<string, AttributionData>();
+    for (const attribution of (allAttribution || []) as AttributionData[]) {
+      if (attribution.email) {
+        userAttribution.set(attribution.email.toLowerCase(), attribution);
+      }
     }
 
     // Process each user - collect actions first, then send in parallel batches
@@ -992,17 +1175,7 @@ export async function GET(request: NextRequest) {
       if (user.marketing_unsubscribed_at) continue;
       if (unsubscribedEmails.has(email)) continue;
 
-      // 48h minimum gap check
       const lastEmailAt = userLastEmailMap.get(email) || null;
-      if (lastEmailAt && (now.getTime() - lastEmailAt.getTime()) < MIN_EMAIL_GAP_MS) {
-        // Exception: welcome email day 0 can be sent immediately for new users
-        const sentFlows = userSentMap.get(email);
-        const welcomeSent = sentFlows?.get('welcome')?.has(0);
-        if (welcomeSent) {
-          skipped++;
-          continue;
-        }
-      }
 
       // Build context
       const transactions = userTransactions.get(email) || [];
@@ -1017,6 +1190,7 @@ export async function GET(request: NextRequest) {
         lastEmailAt,
         creditTransactions: transactions,
         totalUsageCount: deductions.length,
+        hoursSinceSignup: (now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60),
         daysSinceSignup: Math.floor((now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)),
         daysSinceLastActivity: lastActivity
           ? Math.floor((now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
@@ -1024,6 +1198,7 @@ export async function GET(request: NextRequest) {
         daysSincePurchase: user.purchased_at
           ? Math.floor((now.getTime() - new Date(user.purchased_at).getTime()) / (1000 * 60 * 60 * 24))
           : 999,
+        attribution: userAttribution.get(email) || null,
       };
 
       // Evaluate flows in priority order - first match wins
@@ -1033,6 +1208,9 @@ export async function GET(request: NextRequest) {
         switch (flowName) {
           case 'zero_credits':
             action = await evaluateZeroCredits(ctx, supabase);
+            break;
+          case 'activation_1h':
+            action = evaluateOneHourActivation(ctx);
             break;
           case 'low_credits':
             action = evaluateLowCredits(ctx);
@@ -1062,6 +1240,17 @@ export async function GET(request: NextRequest) {
       }
 
       if (!action) {
+        skipped++;
+        continue;
+      }
+
+      // 48h minimum gap check. The 1-hour activation email is the only
+      // intentional exception because signup already sends a welcome email.
+      if (
+        action.flowName !== 'activation_1h' &&
+        lastEmailAt &&
+        (now.getTime() - lastEmailAt.getTime()) < MIN_EMAIL_GAP_MS
+      ) {
         skipped++;
         continue;
       }

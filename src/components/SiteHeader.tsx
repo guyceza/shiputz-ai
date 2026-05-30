@@ -43,7 +43,7 @@ export default function SiteHeader({
       <div className="mx-auto grid h-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 sm:px-8 lg:px-10">
         <Link
           href="/"
-          className="justify-self-start inline-flex items-center gap-2.5 text-slate-950"
+          className="col-start-1 row-start-1 inline-flex items-center gap-2.5 justify-self-start text-slate-950"
           aria-label="ShiputzAI דף הבית"
         >
           <Image
@@ -58,7 +58,7 @@ export default function SiteHeader({
         </Link>
 
         <nav
-          className="hidden items-center justify-center gap-8 lg:flex xl:gap-10"
+          className="col-start-2 row-start-1 hidden items-center justify-center gap-8 lg:flex xl:gap-10"
           aria-label="ניווט ראשי"
           dir="rtl"
         >
@@ -73,7 +73,7 @@ export default function SiteHeader({
           ))}
         </nav>
 
-        <div className="justify-self-end">
+        <div className="col-start-3 row-start-1 justify-self-end">
           <Link
             href={accountHref}
             className="hidden whitespace-nowrap text-sm font-semibold text-slate-900 transition-colors hover:text-emerald-700 lg:inline-flex"
